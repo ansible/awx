@@ -11,20 +11,30 @@
     Jobs
 </a>
 <a href="/#/users/{{currentUser.id}}" class="MenuItem MenuItem--right MenuItem--fixed MenuItem-username">
-  <img src="/static/img/User.svg" class="MenuItem-icon MenuItem-icon--labelled">
+  <i class="MenuItem-icon MenuItem-icon--labelled">
+    <aw-icon name="User"></aw-icon>
+  </i>
   <span class="u-truncatedText">
     {{currentUser.username}}
   </span>
 </a>
 <a href="#/setup" class="MenuItem MenuItem--fixed">
-    <img title="Setup" data-placement="bottom" src="/static/img/Setup.svg" class="MenuItem-icon">
-    <span class="MenuItem-helpTitle">Setup</span>
+  <i class="MenuItem-icon" title="Setup" data-placement="bottom">
+    <aw-icon name="Setup"></aw-icon>
+  </i>
+  <span class="MenuItem-helpTitle">Setup</span>
 </a>
 <a portal-mode-link class="MenuItem MenuItem--fixed">
-    <img src="/static/img/PortalMode.svg" title="Portal Mode" data-placement="bottom" class="MenuItem-icon">
+  <i class="MenuItem-icon" title="Portal Mode" data-placement="bottom">
+    <aw-icon name="PortalMode"></aw-icon>
+    <!-- <img src="/static/img/PortalMode.svg" title="Portal Mode" data-placement="bottom" class="MenuItem-icon"> -->
+  </i>
     <span class="MenuItem-helpTitle">Portal Mode</span>
 </a>
-<a href="#/logout"class="MenuItem MenuItem--fixed MenuItem-signout">
-  <img src="/static/img/Signout.svg"  title="Sign out" data-placement="bottom" class="MenuItem-icon">
-  <span class="MenuItem-helpTitle">Sign Out</span>
+<a href="#/logout"class="MenuItem MenuItem--fixed">
+  <i class="MenuItem-icon" title="Sign Out" data-placement="bottom">
+    <aw-icon name="Signout"></aw-icon>
+    <!-- <img src="/static/img/Signout.svg"  title="Sign out" data-placement="bottom" class="MenuItem-icon"> -->
+  </i>
+  <span class="MenuItem-helpTitle" data-placement="bottom">Sign Out</span>
 </a>

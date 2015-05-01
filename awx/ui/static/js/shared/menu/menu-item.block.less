@@ -39,7 +39,10 @@
   &--fixed {
       flex: none;
       min-width: 0;
-      margin-right: 0 !important;
+      margin-right: 0;
+      @media screen and (min-width: 571px) {
+          padding: 0 0.75rem;
+      }
   }
 
   &-helpTitle {
@@ -97,9 +100,11 @@
   }
 
   &-icon {
-      height: 13px;
+      height: 17px;
       width: auto;
+      max-width: 18px;
       flex: none;
+      box-sizing: initial;
       &--labelled {
           margin-right: 0.25rem;
       }
@@ -116,12 +121,6 @@
       }
       @media screen and (min-width: 571px) {
           max-width: 110px;
-      }
-  }
-
-  &-signout {
-      @media screen and (min-width: 571px) {
-          padding-left: 0.25rem;
       }
   }
 
