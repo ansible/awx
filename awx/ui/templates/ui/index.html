@@ -26,14 +26,22 @@
   <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
 
 </head>
-<body>
+<body data-user-agent="{{userAgent}}">
 
     <include-svg href="{{ STATIC_URL }}img/icons.svg"></include-svg>
 
   <main-menu
-          menu-style="portalMode ? 'minimal' : 'default'">
+          menu-style="portalMode ? 'minimal' : 'default'"
+          current-user="current_user">
   </main-menu>
 
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-11"></div>
+      <div class="col-lg-1">
+        <web-socket-status></web-socket-status>
+      </div>
+    </div>
     <div class="container-fluid" id="#content-container">
       <div class="row">
           <div class="col-lg-12">

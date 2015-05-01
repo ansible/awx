@@ -1,45 +1,30 @@
-<a menu-item href="#/projects" title="Projects" class="MenuItem MenuItem--hoverable HoverIcon HoverIcon--onlyLarge">
-    <i class="MenuItem-hoverIcon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height">
-        <aw-icon name="Projects"></aw-icon>
-    </i>
+<a menu-item href="#/projects" title="Projects" class="MenuItem">
     Projects
 </a>
-<a menu-item href="#/inventories" title="Inventories" class="MenuItem MenuItem--hoverable HoverIcon HoverIcon--onlyLarge">
-    <i class="MenuItem-hoverIcon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height">
-        <aw-icon name="CloudSync"></aw-icon>
-    </i>
-    <!-- <img src="/static/img/CloudSync.svg" class="MenuItem-hoverIcon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height"> -->
+<a menu-item href="#/inventories" title="Inventories" class="MenuItem">
     Inventories
 </a>
-<a menu-item href="#/job_templates" title="Job Templates" class="MenuItem MenuItem--hoverable HoverIcon HoverIcon--onlyLarge">
-    <i class="MenuItem-hoverIcon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height">
-        <aw-icon name="JobTemplates"></aw-icon>
-    </i>
-    <!-- <img src="/static/img/JobTemplates.svg" class="MenuItem-hover-icon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height"> -->
+<a menu-item href="#/job_templates" title="Job Templates" class="MenuItem">
     Job Templates
 </a>
-<a menu-item href="#/jobs" title="Jobs" class="MenuItem MenuItem--hoverable HoverIcon HoverIcon--onlyLarge">
-    <i class="MenuItem-hoverIcon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height">
-        <aw-icon name="Jobs"></aw-icon>
-    </i>
-    <!-- <img src="/static/img/Jobs.svg" class="MenuItem-hover-icon HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--height"> -->
+<a menu-item href="#/jobs" title="Jobs" class="MenuItem">
     Jobs
 </a>
-<a href="#/setup" class="MenuItem MenuItem--right MenuItem--fixed" title="Setup">
-    <img src="/static/img/Setup.svg" class="MenuItem-icon">
+<a href="/#/users/{{currentUser.id}}" class="MenuItem MenuItem--right MenuItem--fixed MenuItem-username">
+  <img src="/static/img/User.svg" class="MenuItem-icon MenuItem-icon--labelled">
+  <span class="u-truncatedText">
+    {{currentUser.username}}
+  </span>
+</a>
+<a href="#/setup" class="MenuItem MenuItem--fixed">
+    <img title="Setup" data-placement="bottom" src="/static/img/Setup.svg" class="MenuItem-icon">
     <span class="MenuItem-helpTitle">Setup</span>
 </a>
-<a portal-mode-link class="MenuItem MenuItem--fixed" title="Portal Mode">
-    <img src="/static/img/PortalMode.svg" class="MenuItem-icon">
+<a portal-mode-link class="MenuItem MenuItem--fixed">
+    <img src="/static/img/PortalMode.svg" title="Portal Mode" data-placement="bottom" class="MenuItem-icon">
     <span class="MenuItem-helpTitle">Portal Mode</span>
 </a>
-<a href="#/logout" title="Sign out" class="MenuItem MenuItem--fixed">
-  <img src="/static/img/Signout.svg" class="MenuItem-icon">
-    <span class="MenuItem-helpTitle">Sign Out</span>
-</a>
-<a href="#setup" class="MenuItem MenuItem--setup" title="Setup">
-  Setup
-</a>
-<a href="#logout" title="Sign out" class="MenuItem MenuItem--fixed">
-  <img src="/static/img/Signout.svg" class="MenuItem-icon">
+<a href="#/logout"class="MenuItem MenuItem--fixed MenuItem-signout">
+  <img src="/static/img/Signout.svg"  title="Sign out" data-placement="bottom" class="MenuItem-icon">
+  <span class="MenuItem-helpTitle">Sign Out</span>
 </a>

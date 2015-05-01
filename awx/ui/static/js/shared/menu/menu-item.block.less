@@ -5,15 +5,38 @@
 .MenuItem {
   display: flex;
   flex: none;
-  padding: 2.8rem 0;
+  padding: 0 1rem;
   min-height: 5.8rem;
   min-width: 9.2rem;
+  color: black;
+  margin-right: 2rem;
+  align-items: center;
+
+  &:hover {
+      color: black;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  @media screen and (max-width: 570px) {
+    flex: 1 1 0;
+    padding: 0 1rem;
+    margin-right: 0;
+    border-bottom: solid thin rgb(202, 202, 202);
+
+    .tooltip, &+.tooltip {
+        display: none !important;
+    }
+
+    &--logo {
+        position: relative;
+        border: none;
+    }
+  }
 
   &--fixed {
-    @media screen and (max-width: 570px) {
-      flex: 1 0 100% !important;
-      justify-content: center;
-    }
       flex: none;
       min-width: 0;
       margin-right: 0 !important;
@@ -22,12 +45,6 @@
   &-helpTitle {
     @media screen and (min-width: 571px) {
       display: none;
-    }
-  }
-
-  &--logo {
-    @media screen and (max-width: 570px) {
-      justify-content: center;
     }
   }
 
@@ -43,24 +60,6 @@
         display: flex;
         opacity: 1 !important;
         height: 22px !important;
-    }
-  }
-
-  &--hoverable {
-    flex-direction: column;
-    justify-content: center;
-    transition: background-color 0.3s;
-  }
-  &--context {
-    // Push this and all following elements to the right
-    margin-left: auto;
-    flex-direction: column;
-    justify-content: center;
-
-    .MenuItem {
-      // Make sure items in this container are aligned to
-      // the right-hand side (on rtl platforms)
-      align-self: flex-end;
     }
   }
 
@@ -95,16 +94,34 @@
   &-logo {
     height: 34px;
     width: auto;
-    @media screen and (max-width: 570px) {
-        height: 25px;
-    }
   }
 
   &-icon {
       height: 13px;
       width: auto;
+      flex: none;
+      &--labelled {
+          margin-right: 0.25rem;
+      }
       @media screen and (max-width: 570px) {
+          display: none;
         margin-right: 1.4rem;
+      }
+  }
+
+  &-username {
+      padding-right: 0.25rem;
+      @media screen and (max-width: 570px) {
+          order: 1; // moves this to the bottom
+      }
+      @media screen and (min-width: 571px) {
+          max-width: 110px;
+      }
+  }
+
+  &-signout {
+      @media screen and (min-width: 571px) {
+          padding-left: 0.25rem;
       }
   }
 

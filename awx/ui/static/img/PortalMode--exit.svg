@@ -5,17 +5,12 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Random" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-<<<<<<< HEAD
         <g id="PortalMode--exit" sketch:type="MSArtboardGroup" fill="#FFFFFF">
             <g id="PortalMode--exit-arrow" sketch:type="MSLayerGroup" transform="translate(2.000000, 8.000000)">
                 <path d="M11,8.25000041 L32.5589445,8.25 L32.5589445,13.451166 L11,13.4511664 L11,8.25000041 Z" id="Signout-arrow-line" sketch:type="MSShapeGroup"></path>
                 <path d="M0.66,10.56 L11.22,0.66 L11.22,20.46 L0.66,10.56 L0.66,10.56 Z" id="Signout-arrowhead" sketch:type="MSShapeGroup"></path>
             </g>
             <path d="M7,8 L38,8 L38,31 L7,31 L7,8 Z M59,36 L59,0 L7,0 L7,36 L32,36 L32,44 L25,44 L25,46 L41,46 L41,44 L34,44 L34,36 L59,36" sketch:type="MSShapeGroup"></path>
-=======
-        <g id="PortalMode" sketch:type="MSArtboardGroup" fill="#000000">
-            <path d="M51,32.8695652 L51,0 L3,0 L3,32.8695652 L26.0769231,32.8695652 L26.0769231,40.173913 L19.6153846,40.173913 L19.6153846,42 L34.3846154,42 L34.3846154,40.173913 L27.9230769,40.173913 L27.9230769,32.8695652 L51,32.8695652" sketch:type="MSShapeGroup"></path>
->>>>>>> 470dc9b... Update icons on setup menu
         </g>
     </g>
 </svg>

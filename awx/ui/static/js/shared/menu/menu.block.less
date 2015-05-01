@@ -7,40 +7,25 @@
 
   &--main {
       background-color: white;
-      padding: 0 1rem;
       margin: 0;
-      .MenuItem {
-          color: black;
-          margin-right: 2rem;
-          padding: 0 1rem;
-          align-items: center;
-          &:last-child {
-            margin-right: 0;
-          }
-      }
 
       @media screen and (max-width: 570px) {
         position: relative;
-        transition: height 1s;
+        transition: height 0.5s ease-out;
         justify-content: flex-start;
-        flex-wrap: wrap;
+        flex-direction: column;
         height: 56px;
         overflow: hidden;
 
         &.Menu--open {
-          height: 348px !important;
-        border-bottom: solid thin black;
+            height: 523px !important;
+            // border-bottom: solid thin black;
         }
 
-        .MenuItem {
-          flex: 1 0 50%;
-          padding: 0;
-          margin-right: 0;
+      }
 
-          &--logo {
-            flex: 2 0 100%;
-          }
-        }
+      @media screen and (min-width: 571px) {
+          padding: 0 1rem;
       }
   }
 
@@ -67,6 +52,7 @@
     @media screen and (min-width: 571px) {
       display: none;
     }
+    margin-left: auto;
   }
 
   &--fixed-top {

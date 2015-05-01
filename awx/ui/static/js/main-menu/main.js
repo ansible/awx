@@ -5,9 +5,13 @@ import portalModeLink from './portal-mode-link.directive';
 import webSocketStatus from './web-socket-status.directive';
 
 import includePartial from 'tower/shared/include-partial/main';
+import shared from 'tower/shared/main';
 
 export default
-    angular.module('mainMenu', [includePartial.name])
+    angular.module('mainMenu',
+                   [    includePartial.name,
+                        shared.name
+                   ])
         .directive('portalModeLink', portalModeLink)
         .directive('menuItem', menuItem)
         .directive('menuToggleButton', menuToggle)

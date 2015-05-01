@@ -22,7 +22,8 @@ export default function() {
         restrict: 'E',
         templateUrl: '/static/js/main-menu/main-menu.partial.html',
         scope: {
-            style: '&menuStyle'
+            style: '&menuStyle',
+            currentUser: '='
         },
         link: link
     };
