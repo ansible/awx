@@ -452,7 +452,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     .directive('awPopOver', ['$compile', function($compile) {
         return function(scope, element, attrs) {
             var placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left',
-                title = (attrs.title) ? attrs.title : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
+                title = (attrs.overTitle) ? attrs.overTitle : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
                 container = (attrs.container !== undefined) ? attrs.container : false,
                 trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual',
                 template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',

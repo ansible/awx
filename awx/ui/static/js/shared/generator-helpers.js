@@ -46,7 +46,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "\' ";
                 result += (obj.dataPlacement) ? "data-placement=\"" + obj.dataPlacement + "\" " : "";
                 result += (obj.dataContainer) ? "data-container=\"" + obj.dataContainer + "\" " : "";
-                result += (obj.dataTitle) ? "data-title=\"" + obj.dataTitle + "\" " : "";
+                result += (obj.dataTitle) ? "over-title=\"" + obj.dataTitle + "\" " : "";
                 result += (obj.dataTrigger) ? "data-trigger=\"" + obj.dataTrigger + "\" " : "";
                 result += (obj.awPopOverWatch) ? "aw-pop-over-watch=\"" + obj.awPopOverWatch + "\" " : "";
                 result += "class=\"help-link\" ";
