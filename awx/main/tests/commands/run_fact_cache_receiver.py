@@ -182,7 +182,7 @@ class RunFactCacheReceiverUnitTest(BaseTest, MongoDBRequired):
 
     def test_process_facts_message_ansible_overwrite(self):
         data = copy_only_module(TEST_MSG, 'ansible')
-        key = 'ansible_overwrite'
+        key = 'ansible.overwrite'
         value = 'hello world'
 
         receiver = FactCacheReceiver()
@@ -197,3 +197,4 @@ class RunFactCacheReceiverUnitTest(BaseTest, MongoDBRequired):
         fact = Fact.objects.get(id=fact.id)
         self.assertIn(key, fact.fact)
         self.assertEqual(fact.fact[key], value)
+        self.assertEqual(fact.fact, data['facts'])
