@@ -1,7 +1,24 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from mongoengine import Document, DynamicDocument, DateTimeField, ReferenceField, StringField
+from mongoengine.base import BaseField
+from mongoengine import Document, DateTimeField, ReferenceField, StringField
+from awx.fact.utils.dbtransform import KeyTransform
+
+key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
+
+class TransformField(BaseField):
+    def to_python(self, value):
+        return key_transform.transform_outgoing(value, None)
+
+    def prepare_query_value(self, op, value):
+        if op == 'set':
+            value = key_transform.transform_incoming(value, None)
+        return super(TransformField, self).prepare_query_value(op, value)
+
+    def to_mongo(self, value):
+        value = key_transform.transform_incoming(value, None)
+        return value
 
 class FactHost(Document):
     hostname = StringField(max_length=100, required=True, unique=True)
@@ -21,11 +38,11 @@ class FactHost(Document):
             return host.id
         return None
 
-class Fact(DynamicDocument):
+class Fact(Document):
     timestamp = DateTimeField(required=True)
     host = ReferenceField(FactHost, required=True)
     module = StringField(max_length=50, required=True)
-    # fact = <anything>
+    fact = TransformField(required=True)
 
     # TODO: Consider using hashed index on host. django-mongo may not support this but
     # executing raw js will

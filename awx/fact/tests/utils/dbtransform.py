@@ -1,77 +1,112 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-# Python
-from datetime import datetime
-from mongoengine import connect
-
-# Django
-from django.conf import settings
-
 # AWX
-from awx.main.tests.base import BaseTest, MongoDBRequired
+from awx.main.tests.base import BaseTest
 from awx.fact.models.fact import * # noqa
+from awx.fact.utils.dbtransform import KeyTransform
 
-__all__ = ['DBTransformTest']
+#__all__ = ['DBTransformTest', 'KeyTransformUnitTest']
+__all__ = ['KeyTransformUnitTest']
 
-class DBTransformTest(BaseTest, MongoDBRequired):
+class KeyTransformUnitTest(BaseTest):
     def setUp(self):
-        super(DBTransformTest, self).setUp()
+        super(KeyTransformUnitTest, self).setUp()
+        self.key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
 
-        # Create a db connection that doesn't have the transformation registered
-        # Note: this goes through pymongo not mongoengine
-        self.client = connect(settings.MONGO_DB)
-        self.db = self.client[settings.MONGO_DB]
+    def test_no_replace(self):
+        value = {
+            "a_key_with_a_dict" : {
+                "key" : "value",
+                "nested_key_with_dict": {
+                    "nested_key_with_value" : "deep_value"
+                }
+            }
+        }
 
-    def _create_fact(self):
-        fact = {}
-        fact[self.k] = self.v
-        h = FactHost(hostname='blah')
-        h.save()
-        f = Fact(host=h,module='blah',timestamp=datetime.now(),fact=fact)
-        f.save()
-        return f
+        data = self.key_transform.transform_incoming(value, None)
+        self.assertEqual(data, value)
 
-    def create_dot_fact(self):
-        self.k = 'this.is.a.key'
-        self.v = 'this.is.a.value'
+        data = self.key_transform.transform_outgoing(value, None)
+        self.assertEqual(data, value)
 
-        self.k_uni = 'this\uff0Eis\uff0Ea\uff0Ekey'
+    def test_complex(self):
+        value = {
+            "a.key.with.a.dict" : {
+                "key" : "value",
+                "nested.key.with.dict": {
+                    "nested.key.with.value" : "deep_value"
+                }
+            }
+        }
+        value_transformed = {
+            "a\uff0Ekey\uff0Ewith\uff0Ea\uff0Edict" : {
+                "key" : "value",
+                "nested\uff0Ekey\uff0Ewith\uff0Edict": {
+                    "nested\uff0Ekey\uff0Ewith\uff0Evalue" : "deep_value"
+                }
+            }
+        }
 
-        return self._create_fact()
+        data = self.key_transform.transform_incoming(value, None)
+        self.assertEqual(data, value_transformed)
 
-    def create_dollar_fact(self):
-        self.k = 'this$is$a$key'
-        self.v = 'this$is$a$value'
+        data = self.key_transform.transform_outgoing(value_transformed, None)
+        self.assertEqual(data, value)
 
-        self.k_uni = 'this\uff04is\uff04a\uff04key'
+    def test_simple(self):
+        value = {
+            "a.key" : "value"
+        }
+        value_transformed = {
+            "a\uff0Ekey" : "value"
+        }
 
-        return self._create_fact()
+        data = self.key_transform.transform_incoming(value, None)
+        self.assertEqual(data, value_transformed)
 
-    def check_unicode(self, f):
-        f_raw = self.db.fact.find_one(id=f.id)
-        self.assertIn(self.k_uni, f_raw['fact'])
-        self.assertEqual(f_raw['fact'][self.k_uni], self.v)
+        data = self.key_transform.transform_outgoing(value_transformed, None)
+        self.assertEqual(data, value)
 
-    # Ensure key . are being transformed to the equivalent unicode into the database
-    def test_key_transform_dot_unicode_in_storage(self):
-        f = self.create_dot_fact()
-        self.check_unicode(f)
+    def test_nested_dict(self):
+        value = {
+            "a.key.with.a.dict" : {
+                "nested.key." : "value"
+            }
+        }
+        value_transformed = {
+            "a\uff0Ekey\uff0Ewith\uff0Ea\uff0Edict" : {
+                "nested\uff0Ekey\uff0E" : "value"
+            }
+        }
 
-    # Ensure key $ are being transformed to the equivalent unicode into the database
-    def test_key_transform_dollar_unicode_in_storage(self):
-        f = self.create_dollar_fact()
-        self.check_unicode(f)
+        data = self.key_transform.transform_incoming(value, None)
+        self.assertEqual(data, value_transformed)
+        
+        data = self.key_transform.transform_outgoing(value_transformed, None)
+        self.assertEqual(data, value)
 
-    def check_transform(self):
-        f = Fact.objects.all()[0]
-        self.assertIn(self.k, f.fact)
-        self.assertEqual(f.fact[self.k], self.v)
+    def test_array(self):
+        value = {
+            "a.key.with.an.array" : [
+                {
+                    "key.with.dot" : "value"
+                }
+            ]
+        }
+        value_transformed = {
+            "a\uff0Ekey\uff0Ewith\uff0Ean\uff0Earray" : [
+                {
+                    "key\uff0Ewith\uff0Edot" : "value"
+                }
+            ]
+        }
+        data = self.key_transform.transform_incoming(value, None)
+        self.assertEqual(data, value_transformed)
+        
+        data = self.key_transform.transform_outgoing(value_transformed, None)
+        self.assertEqual(data, value)
 
-    def test_key_transform_dot_on_retreive(self):
-        self.create_dot_fact()
-        self.check_transform()
-
-    def test_key_transform_dollar_on_retreive(self):
-        self.create_dollar_fact()
-        self.check_transform()
+'''
+class DBTransformTest(BaseTest, MongoDBRequired):
+'''
