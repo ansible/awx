@@ -20,6 +20,8 @@ The response will include the following fields:
 
 Make a POST request to this resource to launch the job_template.  If any
 passwords or variables are required, they must be passed via POST data.
+If `credential_needed_to_start` is `True` then the `credential` field is 
+required as well.
 
 If successful, the response status code will be 202.  If any required passwords
 are not provided, a 400 status code will be returned.  If the job cannot be
