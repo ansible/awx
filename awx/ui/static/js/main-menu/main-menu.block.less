@@ -1,0 +1,45 @@
+/** @define MainMenu */
+
+.MainMenu {
+  display: flex;
+
+  background-color: white;
+  margin: 0;
+
+  @media screen and (max-width: 570px) {
+    position: relative;
+    transition: height 0.5s ease-out;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 56px;
+    overflow: hidden;
+
+    &.Menu--open {
+        height: 523px !important;
+        // border-bottom: solid thin black;
+    }
+
+  }
+
+  @media screen and (min-width: 571px) {
+      padding: 0 1rem;
+  }
+
+  &-toggle {
+    @media screen and (min-width: 571px) {
+      display: none;
+    }
+    margin-left: auto;
+  }
+
+  &--fixedTop {
+      width: 100%;
+      z-index: 1040;
+      position: fixed;
+      right: 0;
+      left: 0;
+      top: 0;
+  }
+
+}
+
