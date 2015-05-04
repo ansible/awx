@@ -17,4 +17,4 @@ try:
     connect(settings.MONGO_DB)
     register_key_transform(get_db())
 except ConnectionError:
-    logger.warn('Failed to establish connect to MongDB "%s"' % (settings.MONGO_DB))
+    logger.warn('Failed to establish connect to MongoDB "%s"' % (settings.MONGO_DB))
