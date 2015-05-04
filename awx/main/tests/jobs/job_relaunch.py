@@ -38,24 +38,24 @@ class JobRelaunchTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_relaunch_job(self):
         with self.current_user(self.user_sue):
-            response = self.post(self.relaunch_url, {}, expect=201)
+            self.post(self.relaunch_url, {}, expect=201)
 
     def test_relaunch_inactive_project(self):
         self.proj_dev.mark_inactive()
         with self.current_user(self.user_sue):
-            response = self.post(self.relaunch_url, {}, expect=400)
+            self.post(self.relaunch_url, {}, expect=400)
 
     def test_relaunch_inactive_inventory(self): 
         self.inv_eng.mark_inactive()
         with self.current_user(self.user_sue):
-            response = self.post(self.relaunch_url, {}, expect=400)
+            self.post(self.relaunch_url, {}, expect=400)
 
     def test_relaunch_deleted_inventory(self): 
         self.inv_eng.delete()
         with self.current_user(self.user_sue):
-            response = self.post(self.relaunch_url, {}, expect=400)
+            self.post(self.relaunch_url, {}, expect=400)
 
     def test_relaunch_deleted_project(self): 
         self.proj_dev.delete()
         with self.current_user(self.user_sue):
-            response = self.post(self.relaunch_url, {}, expect=400)
+            self.post(self.relaunch_url, {}, expect=400)

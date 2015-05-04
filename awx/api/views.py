@@ -1448,7 +1448,6 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if 'credential' not in request.DATA and 'credential_id' in request.DATA:
             request.DATA['credential'] = request.DATA['credential_id']
 
-        passwords = {}
         serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
