@@ -8,6 +8,7 @@ import json
 import os
 import re
 import tempfile
+import time
 
 # Django
 from django.conf import settings
@@ -1898,6 +1899,29 @@ class InventoryUpdatesTest(BaseTransactionTest):
         other_inv_src_opts = {'source': 'custom', 'source_script': script_data['id']}
         with self.current_user(self.super_django_user):
             self.put(other_inv_src, other_inv_src_opts, expect=400)
+
+    def test_update_expired_license(self):
+        self.create_test_license_file(license_date=int(time.time() - 3600))
+        inventory_scripts = reverse('api:inventory_script_list')
+        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organization.id)
+        script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
+
+        custom_inv = self.organization.inventories.create(name='Custom Script Inventory')
+        custom_group = custom_inv.groups.create(name="Custom Script Group")
+        custom_inv_src = reverse('api:inventory_source_detail',
+                                 args=(custom_group.inventory_source.pk,))
+        reverse('api:inventory_source_update_view',
+                args=(custom_group.inventory_source.pk,))
+        inv_src_opts = {'source': 'custom',
+                        'source_script': script_data["id"],
+                        'source_vars': json.dumps({'HOME': 'no-place-like', 'USER': 'notme', '_': 'nope', 'INVENTORY_SOURCE_ID': -1})
+                        }
+        with self.current_user(self.super_django_user):
+            response = self.put(custom_inv_src, inv_src_opts, expect=200)
+
+        inventory_source = InventorySource.objects.get(pk=response['id'])
+        inventory_update = inventory_source.update(inventory_source=inventory_source)
+        self.assertFalse(inventory_update.license_error)
 
     def test_update_from_openstack(self):
         api_url = getattr(settings, 'TEST_OPENSTACK_HOST', '')
