@@ -4,6 +4,7 @@
     scan_use_recursive: false
   tasks:
     - scan_packages:
+    - scan_services:
     - scan_files:
         path: '{{ scan_file_path }}'
         get_checksum: '{{ scan_use_checksum }}'
