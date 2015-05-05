@@ -100,7 +100,7 @@ class Fact(Document):
         return FactVersion.objects.filter(**kv).values_list('timestamp')
 
     @staticmethod
-    def get_single_facts(hostnames, fact_key, timestamp, module):
+    def get_single_facts(hostnames, fact_key, fact_value, timestamp, module):
         host_ids = FactHost.objects.filter(hostname__in=hostnames).values_list('id')
         if not host_ids or len(host_ids) == 0:
             return None
@@ -118,14 +118,23 @@ class Fact(Document):
         # This is not a logic problem, but a performance problem.
         fact_ids = [fact.id for fact in facts]
 
-        project = {
-            '$project': {
-                'host': 1,
-                'fact.%s' % fact_key: 1,
+        kv = {
+            'fact.%s' % fact_key : fact_value,
+            '_id': {
+                '$in': fact_ids
             }
         }
-        facts = Fact.objects.filter(id__in=fact_ids).aggregate(project)
-        return facts
+        fields = {
+            'fact.%s.$' % fact_key : 1,
+        }
+        facts = Fact._get_collection().find(kv, fields)
+        #fact_objs = [Fact(**f) for f in facts]
+        # Translate pymongo python structure to mongoengine Fact object
+        fact_objs = []
+        for f in facts:
+            f['id'] = f.pop('_id')
+            fact_objs.append(Fact(**f))
+        return fact_objs
 
 
 class FactVersion(Document):
