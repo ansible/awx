@@ -84,6 +84,7 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
             // this sets the default options for the selects as specified by the controller.
             $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
             $("#forks-number").spinner("value", $scope.forks_field.default);
+            $scope.forks = $scope.forks_field.default;
             Wait('stop'); // END: form population
         }
     });
@@ -219,6 +220,7 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         KindChange({ scope: $scope, form: form, reset: false });
         $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
         $("#forks-number").spinner("value", $scope.forks_field.default);
+        $scope.forks = $scope.forks_field.default;
     };
 }
 
