@@ -27,7 +27,16 @@ fi
 [ -e "${TOWER_CONFIG}" ] && . "${TOWER_CONFIG}"
 
 service_action() {
-    for svc in ${TOWER_SERVICES}; do
+    SERVICES=$TOWER_SERVICES
+
+    # Should MongoDB be managed by this script?
+    # We only manage MongoDB if the license uses it.
+    tower-manage uses_mongo > /dev/null 2> /dev/null
+    if [ $? == 0 ]; then
+        SERVICES="$SERVICES mongod"
+    fi
+
+    for svc in ${SERVICES}; do
         service ${svc} $1
         this_return=$?
         if [ $this_return -gt $worst_return ]; then

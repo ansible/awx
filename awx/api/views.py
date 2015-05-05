@@ -8,6 +8,7 @@ import datetime
 import dateutil
 import time
 import socket
+import subprocess
 import sys
 
 # Django
@@ -228,10 +229,21 @@ class ApiV1ConfigView(APIView):
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # If the license is valid, write it to disk.
         if license_data['valid_key']:
             fh = open(TASK_FILE, "w")
             fh.write(data_actual)
             fh.close()
+
+            # Spawn a task to ensure that MongoDB is started (or stopped)
+            # as appropriate, based on whether the license uses it.
+            if license_data['features']['system_tracking']:
+                subprocess.call('sudo service mongod start', shell=True)
+            else:
+                subprocess.call('sudo service mongod stop', shell=True)
+
+            # Done; return the response.
             return Response(license_data)
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
