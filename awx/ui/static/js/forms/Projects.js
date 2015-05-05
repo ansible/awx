@@ -41,6 +41,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
+                awFeature: 'activity_streams',
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'edit',

@@ -48,7 +48,8 @@ export default
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
                 mode: 'edit',
-                ngHide: 'portalMode===true'
+                ngHide: 'portalMode===true',
+                awFeature: 'activity_streams'
             }
         },
 

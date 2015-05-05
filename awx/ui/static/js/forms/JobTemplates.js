@@ -40,6 +40,7 @@ export default
                     'class': "btn-primary btn-xs activity-btn",
                     ngClick: "showActivity()",
                     awToolTip: "View Activity Stream",
+                    awFeature: 'activity_streams',
                     dataPlacement: "top",
                     icon: "icon-comments-alt",
                     mode: 'edit',
@@ -258,27 +259,12 @@ export default
                     dataTitle: 'Prompt for Extra Variables',
                     dataContainer: "body"
                 },
-                // survey_enabled: {
-                //     type: 'custom',
-                //     column: 2,
-                //     control: '<div class="form-group">'+
-                //         '<div class="checkbox">'+
-                //         '<label><input type="checkbox" ng-model="survey_enabled" name="survey_enabled" id="job_templates_survey_enabled_chbox" class="ng-valid ng-valid-api-error ng-dirty" ng-true-value="true" ng-false-value="false">'+
-                //         '<span class="label-text">Enable Survey</span><a id="awp-survey_enabled" href="" aw-pop-over="<p>If checked, user will be prompted at job launch with a survey of questions related to the job.</p>'+
-                //         '<div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" data-placement="right" data-container="body" data-title="Enable Survey" class="help-link" data-original-title="" title="" tabindex="-1">'+
-                //         '<i class="fa fa-question-circle"></i></a> </label>'+
-                //         '<div class="error api-error ng-binding" id="job_templates-survey_enabled-api-error" ng-bind="survey_enabled_api_error"></div>'+
-                //         '<button type="button" class="btn btn-sm btn-default" id="job_templates_edit_survey_btn" ng-click="navigateToSurvey()"><i class="fa fa-pencil"></i>  Create Survey</button>'+
-                //         '</div>'+
-                //         '</div>'
-                // },
                 survey_enabled: {
                     label: 'Enable Survey',
                     type: 'checkbox',
                     addRequired: false,
                     editRequird: false,
-                    // trueValue: true,
-                    // falseValue: false,
+                    awFeature: 'surveys',
                     ngChange: "surveyEnabled()",
                     column: 2,
                     awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",

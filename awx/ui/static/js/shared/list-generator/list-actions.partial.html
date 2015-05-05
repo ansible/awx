@@ -16,8 +16,10 @@
         ng-hide="isHiddenByOptions(options) ||
                     hiddenOnCurrentPage(options.basePaths) ||
                     hiddenInCurrentMode(options.mode)"
-        toolbar="true">
+        toolbar="true"
+        aw-feature="{{options.awFeature}}">
     </button>
+
 </span>
 <button
     toolbar-button
