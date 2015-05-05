@@ -78,7 +78,7 @@ class Fact(Document):
         }
 
         try:
-            facts = Fact.objects.filter(**kv)
+            facts = Fact.objects.filter(**kv).order_by("-timestamp")
             if not facts:
                 return None
             return facts[0]
@@ -97,7 +97,7 @@ class Fact(Document):
             'module': module,
         }
 
-        return FactVersion.objects.filter(**kv).values_list('timestamp')
+        return FactVersion.objects.filter(**kv).order_by("-timestamp").values_list('timestamp')
 
     @staticmethod
     def get_single_facts(hostnames, fact_key, fact_value, timestamp, module):
@@ -126,6 +126,9 @@ class Fact(Document):
         }
         fields = {
             'fact.%s.$' % fact_key : 1,
+            'host': 1,
+            'timestamp': 1,
+            'module': 1,
         }
         facts = Fact._get_collection().find(kv, fields)
         #fact_objs = [Fact(**f) for f in facts]
@@ -136,11 +139,10 @@ class Fact(Document):
             fact_objs.append(Fact(**f))
         return fact_objs
 
-
 class FactVersion(Document):
     timestamp = DateTimeField(required=True)
     host = ReferenceField(FactHost, required=True)
-    module = StringField(max_length=50, required=True)  
+    module = StringField(max_length=50, required=True)
     fact = ReferenceField(Fact, required=True)
     # TODO: Consider using hashed index on module. django-mongo may not support this but
     # executing raw js will
@@ -150,4 +152,3 @@ class FactVersion(Document):
             'module'
         ]
     }
-    

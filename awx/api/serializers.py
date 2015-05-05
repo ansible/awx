@@ -8,6 +8,9 @@ import logging
 from dateutil import rrule
 from ast import literal_eval
 
+import mongoengine
+from rest_framework_mongoengine.serializers import MongoEngineModelSerializer
+
 # PyYAML
 import yaml
 
@@ -35,6 +38,8 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.utils import get_type_for_model, get_model_for_type
 from awx.main.redact import REPLACE_STR
+
+from awx.fact.models import * # noqa
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -1537,12 +1542,10 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         if not obj.credential or obj.credential.active is False:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
-
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
         if obj.inventory is None or not obj.inventory.active:
             raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
-
         return attrs
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
@@ -2010,3 +2013,17 @@ class AuthTokenSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Unable to login with provided credentials.')
         else:
             raise serializers.ValidationError('Must include "username" and "password"')
+
+
+class FactVersionSerializer(MongoEngineModelSerializer):
+
+    class Meta:
+        model = FactVersion
+        fields = ('module', 'timestamp',)
+
+class FactSerializer(MongoEngineModelSerializer):
+
+    class Meta:
+        model = Fact
+        depth = 2
+        fields = ('timestamp', 'host', 'module', 'fact')

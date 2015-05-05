@@ -46,6 +46,7 @@ from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication
 from awx.api.utils.decorators import paginated
+from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.main.models import * # noqa
@@ -53,6 +54,7 @@ from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
+from awx.fact.models import * # noqa
 
 def api_exception_handler(exc):
     '''
@@ -922,6 +924,27 @@ class InventoryScanJobTemplateList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(job_type=PERM_INVENTORY_SCAN, inventory=parent)
 
+class InventorySingleFactView(MongoAPIView):
+
+    model = Fact
+    parent_model = Inventory
+    new_in_220 = True
+    serializer_class = FactSerializer
+    filter_backends = (MongoFilterBackend,)
+
+    def get(self, request, *args, **kwargs):
+        fact_key = request.QUERY_PARAMS.get("fact_key", None)
+        fact_value = request.QUERY_PARAMS.get("fact_value", None)
+        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
+        module_spec = request.QUERY_PARAMS.get("module", None)
+
+        if fact_key is None or fact_value is None or module_spec is None:
+            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
+        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
+        inventory_obj = self.get_parent_object()
+        fact_data = Fact.get_single_facts([h.name for h in inventory_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
+        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
+
 
 class HostList(ListCreateAPIView):
 
@@ -985,6 +1008,79 @@ class HostActivityStreamList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
+
+class HostFactVersionsList(MongoListAPIView):
+
+    serializer_class = FactVersionSerializer
+    parent_model = Host
+    new_in_220 = True
+    filter_backends = (MongoFilterBackend,)
+
+    def get_queryset(self):
+        from_spec = self.request.QUERY_PARAMS.get('from', None)
+        to_spec = self.request.QUERY_PARAMS.get('to', None)
+        module_spec = self.request.QUERY_PARAMS.get('module', None)
+
+        host = self.get_parent_object()
+        self.check_parent_access(host)
+
+        try:
+            fact_host = FactHost.objects.get(hostname=host.name)
+        except FactHost.DoesNotExist:
+            return None
+
+        kv = {
+            'host': fact_host.id,
+        }
+        if module_spec is not None:
+            kv['module'] = module_spec
+        if from_spec is not None:
+            from_actual = dateutil.parser.parse(from_spec)
+            kv['timestamp__gt'] = from_actual
+        if from_spec is not None and to_spec is not None:
+            to_actual = dateutil.parser.parse(to_spec)
+            kv['timestamp__lte'] = to_actual
+
+        return FactVersion.objects.filter(**kv).order_by("-timestamp")
+
+class HostSingleFactView(MongoAPIView):
+
+    model = Fact
+    parent_model = Host
+    new_in_220 = True
+    serializer_class = FactSerializer
+    filter_backends = (MongoFilterBackend,)
+
+    def get(self, request, *args, **kwargs):
+        fact_key = request.QUERY_PARAMS.get("fact_key", None)
+        fact_value = request.QUERY_PARAMS.get("fact_value", None)
+        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
+        module_spec = request.QUERY_PARAMS.get("module", None)
+
+        if fact_key is None or fact_value is None or module_spec is None:
+            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
+        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
+        host_obj = self.get_parent_object()
+        fact_data = Fact.get_single_facts([host_obj.name], fact_key, fact_value, datetime_actual, module_spec)
+        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
+
+class HostFactCompareView(MongoAPIView):
+
+    new_in_220 = True
+    parent_model = Host
+    serializer_class = FactSerializer
+    filter_backends = (MongoFilterBackend,)
+
+    def get(self, request, *args, **kwargs):
+        datetime_spec = request.QUERY_PARAMS.get('datetime', None)
+        module_spec = request.QUERY_PARAMS.get('module', "ansible")
+        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
+
+        host_obj = self.get_parent_object()
+        fact_entry = Fact.get_host_version(host_obj.name, datetime_actual, module_spec)
+        host_data = FactSerializer(fact_entry).data if fact_entry is not None else {}
+
+        return Response(host_data)
 
 
 class GroupList(ListCreateAPIView):
@@ -1124,6 +1220,28 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         if hasattr(obj, 'mark_inactive'):
             obj.mark_inactive_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupSingleFactView(MongoAPIView):
+
+    model = Fact
+    parent_model = Group
+    new_in_220 = True
+    serializer_class = FactSerializer
+    filter_backends = (MongoFilterBackend,)
+
+    def get(self, request, *args, **kwargs):
+        fact_key = request.QUERY_PARAMS.get("fact_key", None)
+        fact_value = request.QUERY_PARAMS.get("fact_value", None)
+        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
+        module_spec = request.QUERY_PARAMS.get("module", None)
+
+        if fact_key is None or fact_value is None or module_spec is None:
+            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
+        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
+        group_obj = self.get_parent_object()
+        fact_data = Fact.get_single_facts([h.name for h in group_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
+        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 

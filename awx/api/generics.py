@@ -31,7 +31,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
            'SubListCreateAttachDetachAPIView', 'RetrieveAPIView',
            'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
-           'RetrieveUpdateDestroyAPIView', 'DestroyAPIView']
+           'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
+           'MongoAPIView', 'MongoListAPIView']
 
 logger = logging.getLogger('awx.api.generics')
 
@@ -164,7 +165,6 @@ class APIView(views.APIView):
         ret['added_in_version'] = added_in_version
         return ret
 
-
 class GenericAPIView(generics.GenericAPIView, APIView):
     # Base class for all model-based views.
 
@@ -195,11 +195,13 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         if not hasattr(self, 'format_kwarg'):
             self.format_kwarg = 'format'
         d = super(GenericAPIView, self).get_description_context()
-        d.update({
-            'model_verbose_name': unicode(self.model._meta.verbose_name),
-            'model_verbose_name_plural': unicode(self.model._meta.verbose_name_plural),
-            'serializer_fields': self.get_serializer().metadata(),
-        })
+        if hasattr(self.model, "_meta"):
+            if hasattr(self.model._meta, "verbose_name"):
+                d.update({
+                    'model_verbose_name': unicode(self.model._meta.verbose_name),
+                    'model_verbose_name_plural': unicode(self.model._meta.verbose_name_plural),
+                })
+            d.update({'serializer_fields': self.get_serializer().metadata()})
         return d
 
     def metadata(self, request):
@@ -251,6 +253,27 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         if getattr(self, 'search_fields', None):
             ret['search_fields'] = self.search_fields
         return ret
+
+class MongoAPIView(GenericAPIView):
+
+    def get_parent_object(self):
+        parent_filter = {
+            self.lookup_field: self.kwargs.get(self.lookup_field, None),
+        }
+        return get_object_or_404(self.parent_model, **parent_filter)
+
+    def check_parent_access(self, parent=None):
+        parent = parent or self.get_parent_object()
+        parent_access = getattr(self, 'parent_access', 'read')
+        if parent_access in ('read', 'delete'):
+            args = (self.parent_model, parent_access, parent)
+        else:
+            args = (self.parent_model, parent_access, parent, None)
+        if not self.request.user.can_access(*args):
+            raise PermissionDenied()
+
+class MongoListAPIView(generics.ListAPIView, MongoAPIView):
+    pass
 
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
 
