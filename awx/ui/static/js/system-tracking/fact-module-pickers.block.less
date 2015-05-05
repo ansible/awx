@@ -1,0 +1,69 @@
+/** @define FactModulePickers */
+
+.FactModulePickers {
+    width: 100%;
+    display: flex;
+    margin-bottom: 15px;
+
+    &-dateSpacer {
+        flex: initial;
+        width: 0px;
+    }
+
+    &-dateContainer {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    &-date {
+        flex: 1;
+        // flex-wrap: wrap;
+        display: flex;
+    }
+
+    &-date--right,
+    &-label--right {
+        margin-left: 7px;
+    }
+
+    &-date--left {
+        margin-right: 7px;
+    }
+
+    &-label {
+        flex: initial;
+        width: 100%;
+        font-weight: 700;
+        padding-bottom: 5px;
+    }
+
+    &-dateIcon {
+        flex: initial;
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 4px 0 0 4px;
+        border: 1px solid #ccc;
+        border-right: 0;
+        background-color: #fff;
+    }
+
+    &-dateIcon:hover,
+    &-dateIcon:focus,
+    &-dateIcon:active {
+        background-color: #ccc;
+    }
+
+    &-dateInput {
+        flex: 1;
+        border-radius: 0 4px 4px 0;
+        border: 1px solid #ccc;
+        padding: 6px 12px;
+    }
+
+    &-dateInput:focus,
+    &-dateInput:active {
+        outline-offset: 0;
+        outline: 0;
+    }
+}

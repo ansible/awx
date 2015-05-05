@@ -1,0 +1,51 @@
+<div class="FactModulePickers">
+    <div class="FactModulePickers-dateSpacer">
+    </div>
+    <div class="FactModulePickers-dateContainer">
+        <span class="FactModulePickers-label">{{ factModulePickersLabelLeft }}</span>
+        <div class="input-prepend date FactModulePickers-date FactModulePickers-date--left">
+            <button class="add-on FactModulePickers-dateIcon"><i class="fa fa-calendar"></i></button>
+            <input class="FactModulePickers-dateInput" type="text" value="12-02-2012">
+        </div>
+    </div>
+    <div class="FactModulePickers-dateContainer">
+        <span class="FactModulePickers-label FactModulePickers-label--right">
+            {{ factModulePickersLabelRight }}
+        </span>
+        <div class="input-prepend date FactModulePickers-date FactModulePickers-date--right">
+            <button class="add-on FactModulePickers-dateIcon"><i class="fa fa-calendar"></i></button>
+            <input class="FactModulePickers-dateInput" type="text" value="12-02-2012">
+        </div>
+    </div>
+</div>
+
+<nav class="btn-group FactModuleFilter">
+    <button
+        ng-class="{  'btn': true,
+                     'btn-default': true,
+                     'Button--pseudo': true,
+                     'FactModuleFilter-module': true,
+                     'FactModuleFilter-module--isActive': module.isActive,
+                  }"
+        ng-click="setActiveModule(module.name)"
+        ng-repeat="module in modules">
+        {{module.displayName}}
+    </button>
+</nav>
+
+<table class="table table-condensed">
+    <thead>
+    <tr>
+        <th></th>
+        <th>{{factData.leftFilterValue|stringOrDate:'L'}}</th>
+        <th>{{factData.rightFilterValue|stringOrDate:'L'}}</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="fact in factData.factComparisonData">
+            <td>{{fact.keyName}}</td>
+            <td>{{fact.value1}}</td>
+            <td>{{fact.value2}}</td>
+        </tr>
+    </tbody>
+</table>

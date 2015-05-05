@@ -4,7 +4,7 @@ function assertUrlDeferred(url, obj) {
             angular.isUndefined(obj[url].promise.then)) {
         var urls = [];
 
-    for (key in obj) {
+    for (var key in obj) {
         if (/\//.test(key)) {
             urls.push(key);
         }

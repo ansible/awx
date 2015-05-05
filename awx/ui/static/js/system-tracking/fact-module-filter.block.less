@@ -1,0 +1,16 @@
+/** @define FactModuleFilter */
+
+.FactModuleFilter {
+    width: 100%;
+    display: flex;
+    margin-bottom: 2.8rem;
+    &-module {
+        flex: 1;
+        &--isActive {
+            // copied from bootstrap's .btn:focus
+            background-color: #ebebeb;
+            border-color: #adadad;
+            z-index: 2;
+        }
+    }
+}
