@@ -69,11 +69,11 @@ export default
                 // this logic makes sure that the form is being added, and that the lookup to be autopopulated is required
                 function fieldIsAutopopulatable() {
                     if (parent_scope.mode === "add") {
-                        if (parent_scope[form.fields[field].sourceModel + "_field"].awRequiredWhen &&
-                            parent_scope[form.fields[field].sourceModel + "_field"].awRequiredWhen.variable &&
-                            parent_scope[parent_scope[form.fields[field].sourceModel + "_field"].awRequiredWhen.variable]) {
+                        if (parent_scope[sourceModel + "_field"].awRequiredWhen &&
+                            parent_scope[sourceModel + "_field"].awRequiredWhen.variable &&
+                            parent_scope[parent_scope[sourceModel + "_field"].awRequiredWhen.variable]) {
                             return true;
-                        } else if (parent_scope[form.fields[field].sourceModel + "_field"].addRequired === true) {
+                        } else if (parent_scope[sourceModel + "_field"].addRequired === true) {
                             return true;
                         } else {
                             return false;
