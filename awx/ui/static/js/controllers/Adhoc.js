@@ -66,6 +66,7 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
     delete $rootScope.hostPatterns;
 
     LookUpInit({
+        url: GetBasePath('credentials') + '?kind=ssh',
         scope: $scope,
         form: form,
         current_item: (!Empty($scope.credential_id)) ? $scope.credential_id : null,
