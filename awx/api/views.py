@@ -1448,7 +1448,8 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if 'credential' not in request.DATA and 'credential_id' in request.DATA:
             request.DATA['credential'] = request.DATA['credential_id']
 
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
+        passwords = {}
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA, 'passwords': passwords})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1457,7 +1458,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         }
         if 'extra_vars' in request.DATA:
             kv['extra_vars'] = request.DATA['extra_vars']
-        kv.update(serializer.context['passwords'])
+        kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
         result = new_job.signal_start(**kv)

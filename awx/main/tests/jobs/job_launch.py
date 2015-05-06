@@ -148,18 +148,6 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             self.post(self.launch_url, {}, expect=400)
 
-    # pass in a credential NOT viewable by the current logged in user
-    def test_explicit_credential_permission_denied(self):
-        #self.cred_sue.mark_inactive()
-        with self.current_user(self.user_doug):
-            self.post(self.launch_url, {'credential': self.cred_sue.pk}, expect=403)
-
-    def test_explicit_deleted_credential(self):
-        self.cred_sue.mark_inactive()
-        with self.current_user(self.user_alex):
-            self.post(self.launch_url, {'credential': self.cred_sue.pk}, expect=400)
-
-
 class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TestCase):
     def setUp(self):
         super(JobTemplateLaunchPasswordsTest, self).setUp()
