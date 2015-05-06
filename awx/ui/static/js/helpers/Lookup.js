@@ -63,30 +63,52 @@ export default
                 $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url', watchUrl);
                 $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source', field);
 
-                // Auto populate the field if there is only one result
-                Rest.setUrl(defaultUrl);
-                Rest.get()
-                    .success(function (data) {
-                         if (data.count === 1) {
-                             parent_scope[field] = data.results[0].id;
-                             if (parent_scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
-                                 parent_scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
-                                    data.results[0][form.fields[field].sourceField];
-                                 if (parent_scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
-                                     parent_scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]
-                                         .$setValidity('awlookup', true);
+                var sourceModel = form.fields[field].sourceModel,
+                    sourceField = form.fields[field].sourceField;
+
+                // this logic makes sure that the form is being added, and that the lookup to be autopopulated is required
+                function fieldIsAutopopulatable() {
+                    if (parent_scope.mode === "add") {
+                        if (parent_scope[sourceModel + "_field"].awRequiredWhen &&
+                            parent_scope[sourceModel + "_field"].awRequiredWhen.variable &&
+                            parent_scope[parent_scope[sourceModel + "_field"].awRequiredWhen.variable]) {
+                            return true;
+                        } else if (parent_scope[sourceModel + "_field"].addRequired === true) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+
+                if (fieldIsAutopopulatable()) {
+                    // Auto populate the field if there is only one result
+                    Rest.setUrl(defaultUrl);
+                    Rest.get()
+                        .success(function (data) {
+                             if (data.count === 1) {
+                                 parent_scope[field] = data.results[0].id;
+                                 if (parent_scope[form.name + '_form'] && form.fields[field] && sourceModel) {
+                                     parent_scope[sourceModel + '_' + sourceField] =
+                                        data.results[0][sourceField];
+                                     if (parent_scope[form.name + '_form'][sourceModel + '_' + sourceField]) {
+                                         parent_scope[form.name + '_form'][sourceModel + '_' + sourceField]
+                                             .$setValidity('awlookup', true);
+                                     }
+                                 }
+                                 if (parent_scope[form.name + '_form']) {
+                                     parent_scope[form.name + '_form'].$setDirty();
                                  }
                              }
-                             if (parent_scope[form.name + '_form']) {
-                                 parent_scope[form.name + '_form'].$setDirty();
-                             }
-                         }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors(parent_scope, data, status, form, { hdr: 'Error!',
-                            msg: 'Failed to launch adhoc command. POST returned status: ' +
-                                status });
-                    });
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(parent_scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to launch adhoc command. POST returned status: ' +
+                                    status });
+                        });
+                }
 
 
                 parent_scope['lookUp' + name] = function () {
