@@ -34,7 +34,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('vmware', _('VMware vCenter')),
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
-        ('openstack', _('Openstack')),
+        ('openstack', _('OpenStack')),
     ]
 
     BECOME_METHOD_CHOICES = [

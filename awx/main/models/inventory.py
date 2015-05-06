@@ -740,7 +740,7 @@ class InventorySourceOptions(BaseModel):
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
-        ('openstack', _('Openstack')),
+        ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
     ]
 

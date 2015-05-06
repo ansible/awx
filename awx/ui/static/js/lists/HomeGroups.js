@@ -79,7 +79,7 @@ export default
                     name: "Microsoft Azure",
                     value: "azure"
                 },{
-                    name: "Openstack",
+                    name: "OpenStack",
                     value: "openstack"
                 }],
                 sourceModel: 'inventory_source',
