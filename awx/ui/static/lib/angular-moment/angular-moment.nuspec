@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>angular-moment</id>
+        <version>0.10.1</version>
+        <title>Angular Moment</title>
+        <authors>urish</authors>
+        <projectUrl>https://github.com/urish/angular-moment</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Moment.JS directives for AngularJS (timeago and more)</description>
+        <summary>Moment.JS directives for AngularJS (timeago and more).</summary>
+        <releaseNotes />
+        <copyright />
+        <dependencies>
+            <dependency id="Moment.js" version="2.10.2" />
+        </dependencies>
+        <tags>AngularJS MomentJS Moment</tags>
+    </metadata>
+    <files>
+        <file src="angular-moment.js" target="content\Scripts\angular-moment.js" />
+        <file src="angular-moment.min.js" target="content\Scripts\angular-moment.min.js" />
+        <file src="angular-moment.min.js.map" target="content\Scripts\angular-moment.min.js.map" />
+    </files>
+</package>
