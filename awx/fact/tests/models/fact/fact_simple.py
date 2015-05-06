@@ -51,18 +51,6 @@ TEST_FACT_DATA = {
 # Strip off microseconds because mongo has less precision
 BaseFactTest.normalize_timestamp(TEST_FACT_DATA)
 
-def create_fact_scans(count=1):
-    timestamps = []
-    for i in range(0, count):
-        data = deepcopy(TEST_FACT_DATA)
-        t = datetime.now().replace(year=2015 - i, microsecond=0)
-        data['add_fact_data']['timestamp'] = t
-        (f, v) = Fact.add_fact(**data['add_fact_data'])
-        timestamps.append(t)
-
-    return timestamps
-
-
 class FactHostTest(BaseFactTest):
     def test_create_host(self):
         host = FactHost(hostname=TEST_FACT_DATA['hostname'])
@@ -138,13 +126,13 @@ class FactGetHostVersionTest(BaseFactTest):
 class FactGetHostTimelineTest(BaseFactTest):
     def setUp(self):
         super(FactGetHostTimelineTest, self).setUp()
-        self.create_host_document(TEST_FACT_DATA)
+        #self.create_host_document(TEST_FACT_DATA)
 
         self.scans = 20
-        self.timestamps = create_fact_scans(self.scans)
+        self.timestamps = self.create_fact_scans(TEST_FACT_DATA, host_count=1, scan_count=self.scans)
 
     def test_get_host_timeline_ok(self):
-        timestamps = Fact.get_host_timeline(hostname=TEST_FACT_DATA['hostname'], module=TEST_FACT_DATA['add_fact_data']['module'])
+        timestamps = Fact.get_host_timeline(hostname=self.hostnames[0].hostname, module=TEST_FACT_DATA['add_fact_data']['module'])
         self.assertIsNotNone(timestamps)
         self.assertEqual(len(timestamps), len(self.timestamps))
         for i in range(0, self.scans):

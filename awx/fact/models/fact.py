@@ -101,22 +101,55 @@ class Fact(Document):
 
     @staticmethod
     def get_single_facts(hostnames, fact_key, fact_value, timestamp, module):
-        host_ids = FactHost.objects.filter(hostname__in=hostnames).values_list('id')
-        if not host_ids or len(host_ids) == 0:
-            return None
-
         kv = {
-            'host__in': host_ids,
-            'timestamp__lte': timestamp,
-            'module': module,
+            'hostname': {
+                '$in': hostnames,
+            }
         }
-        facts = FactVersion.objects.filter(**kv).values_list('fact')
-        if not facts or len(facts) == 0:
+        fields = {
+            '_id': 1
+        }
+        host_ids = FactHost._get_collection().find(kv, fields)
+        if not host_ids or host_ids.count() == 0:
             return None
-        # TODO: Make sure the below doesn't trigger a query to get the fact record
-        # It's unclear as to if mongoengine will query the full fact when the id is referenced.
-        # This is not a logic problem, but a performance problem.
-        fact_ids = [fact.id for fact in facts]
+        # TODO: use mongo to transform [{_id: <>}, {_id: <>},...] into [_id, _id,...]
+        host_ids = [e['_id'] for e in host_ids]
+
+        pipeline = []
+        match = {
+            'host': {
+                '$in': host_ids
+            },
+            'timestamp': {
+                '$lte': timestamp
+            },
+            'module': module
+        }
+        sort = {
+            'timestamp': -1
+        }
+        group = {
+            '_id': '$host',
+            'timestamp': {
+                '$first': '$timestamp'
+            },
+            'fact': {
+                '$first': '$fact'
+            }
+        }
+        project = {
+            '_id': 0,
+            'fact': 1,
+        }
+        pipeline.append({'$match': match}) # noqa
+        pipeline.append({'$sort': sort}) # noqa
+        pipeline.append({'$group': group}) # noqa
+        pipeline.append({'$project': project}) # noqa
+        q = FactVersion._get_collection().aggregate(pipeline)
+        if not q or 'result' not in q or len(q['result']) == 0:
+            return None
+        # TODO: use mongo to transform [{fact: <>}, {fact: <>},...] into [fact, fact,...]
+        fact_ids = [fact['fact'] for fact in q['result']]
 
         kv = {
             'fact.%s' % fact_key : fact_value,
