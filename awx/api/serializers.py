@@ -1326,7 +1326,7 @@ class JobOptionsSerializer(BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task',)
+                  'skip_tags', 'start_at_task')
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -1379,7 +1379,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled',)
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -1418,11 +1418,12 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
+    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
     ask_variables_on_launch = serializers.Field(source='ask_variables_on_launch')
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'ask_variables_on_launch')
+        fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -1493,41 +1494,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     pass
         return ret
 
-'''
-This Serializer requires that model be set to something with a 'passwords_needed_to_start'
-variable.
-Inheriting classes should add 'passwords_needed_to_start' to their list of fields
-to take advantage of the validate functionality.
-'''
-class PasswordsNeededToStartMixin(BaseSerializer):
-
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
-
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        passwords = {}
-
-        credential = attrs.get('credential', None) or obj.credential
-        # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = self.init_data[p]
-            except KeyError:
-                raise serializers.ValidationError(credential.passwords_needed)
-
-        # Use the context dict to allow the view to access the passwords
-        self.context['passwords'] = passwords
-        return attrs
-
-
-class JobTemplateSerializerWithPasswordsNeededToStart(JobTemplateSerializer, PasswordsNeededToStartMixin):
-    pass
-
-
-class JobSerializerWithPasswordsNeededToStart(JobSerializer, PasswordsNeededToStartMixin):
-    pass
-
 
 class JobCancelSerializer(JobSerializer):
 
@@ -1537,80 +1503,8 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
-class JobLaunchSerializer(JobTemplateSerializerWithPasswordsNeededToStart):
-
-    can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
-    variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
-    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
-    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
-
-    class Meta:
-        fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
-                  'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
-                  'credential', 'credential_needed_to_start',)
-        write_only_fields = ('credential','extra_vars',)
-
-    def to_native(self, obj):
-        res = super(JobLaunchSerializer, self).to_native(obj)
-        view = self.context.get('view', None)
-        if obj and hasattr(view, '_raw_data_form_marker'):
-            if obj.passwords_needed_to_start:
-                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
-                res.update(password_keys)
-            if self.get_credential_needed_to_start(obj) is True:
-                res.update(dict(credential=''))
-        return res
-
-    def get_credential_needed_to_start(self, obj):
-        return not (obj and obj.credential and obj.credential.active)
-
-    def get_survey_enabled(self, obj):
-        if obj:
-            return obj.survey_enabled and 'spec' in obj.survey_spec
-        return False
-
-    def validate_credential(self, attrs, source):
-        obj = self.context.get('obj')
-        credential = attrs.get(source, None) or (obj and obj.credential)
-        if not credential or not credential.active:
-            raise serializers.ValidationError('Credential not provided')
-        attrs[source] = credential
-        return attrs
-
-    def validate(self, attrs):
-        obj = self.context.get('obj')
-        extra_vars = attrs.get('extra_vars', {})
-        try:
-            extra_vars = literal_eval(extra_vars)
-            extra_vars = json.dumps(extra_vars)
-        except Exception:
-            pass
-
-        try:
-            extra_vars = json.loads(extra_vars)
-        except (ValueError, TypeError):
-            try:
-                extra_vars = yaml.safe_load(extra_vars)
-            except (yaml.YAMLError, TypeError, AttributeError):
-                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
-
-        if not isinstance(extra_vars, dict):
-            extra_vars = {}
-
-        if self.get_survey_enabled(obj):
-            validation_errors = obj.survey_variable_validation(extra_vars)
-            if validation_errors:
-                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
-
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
-        if obj.inventory is None or not obj.inventory.active:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
-
-        return attrs
-
-
-class JobRelaunchSerializer(JobSerializerWithPasswordsNeededToStart):
+class JobRelaunchSerializer(JobSerializer):
+    passwords_needed_to_start = serializers.SerializerMethodField('get_passwords_needed_to_start')
 
     class Meta:
         fields = ('passwords_needed_to_start',)
@@ -1619,9 +1513,25 @@ class JobRelaunchSerializer(JobSerializerWithPasswordsNeededToStart):
         res = super(JobRelaunchSerializer, self).to_native(obj)
         view = self.context.get('view', None)
         if hasattr(view, '_raw_data_form_marker'):
-            password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
+            password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
             res.update(password_keys)
         return res
+
+    def get_passwords_needed_to_start(self, obj):
+        if obj:
+            return obj.passwords_needed_to_start
+        return ''
+
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        data = self.context.get('data')
+
+        # Check for passwords needed 
+        needed = self.get_passwords_needed_to_start(obj)
+        provided = dict([(field, data.get(field, '')) for field in needed])
+        if not all(provided.values()):
+            raise serializers.ValidationError(needed)
+        return attrs
 
     def validate(self, attrs):
         obj = self.context.get('obj')
@@ -1824,6 +1734,95 @@ class AdHocCommandEventSerializer(BaseSerializer):
         if obj.host:
             res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         return res
+
+class JobLaunchSerializer(BaseSerializer):
+    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+    can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
+    variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
+    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
+    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
+
+    class Meta:
+        model = JobTemplate
+        fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
+                  'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
+                  'credential', 'credential_needed_to_start',)
+        read_only_fields = ('ask_variables_on_launch',)
+        write_only_fields = ('credential','extra_vars',)
+
+    def to_native(self, obj):
+        res = super(JobLaunchSerializer, self).to_native(obj)
+        view = self.context.get('view', None)
+        if obj and hasattr(view, '_raw_data_form_marker'):
+            if obj.passwords_needed_to_start:
+                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
+                res.update(password_keys)
+            if self.get_credential_needed_to_start(obj) is True:
+                res.update(dict(credential=''))
+        return res
+
+    def get_credential_needed_to_start(self, obj):
+        return not (obj and obj.credential and obj.credential.active)
+
+    def get_survey_enabled(self, obj):
+        if obj:
+            return obj.survey_enabled and 'spec' in obj.survey_spec
+        return False
+
+    def validate_credential(self, attrs, source):
+        obj = self.context.get('obj')
+        credential = attrs.get(source, None) or (obj and obj.credential)
+        if not credential or not credential.active:
+            raise serializers.ValidationError('Credential not provided')
+        attrs[source] = credential
+        return attrs
+
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        passwords = self.context.get('passwords')
+        data = self.context.get('data')
+
+        credential = attrs.get('credential', None) or obj.credential
+        # fill passwords dict with request data passwords
+        if credential and credential.passwords_needed:
+            try:
+                for p in credential.passwords_needed:
+                    passwords[p] = data[p]
+            except KeyError:
+                raise serializers.ValidationError(credential.passwords_needed)
+        return attrs
+
+    def validate(self, attrs):
+        obj = self.context.get('obj')
+        extra_vars = attrs.get('extra_vars', {})
+        try:
+            extra_vars = literal_eval(extra_vars)
+            extra_vars = json.dumps(extra_vars)
+        except Exception:
+            pass
+
+        try:
+            extra_vars = json.loads(extra_vars)
+        except (ValueError, TypeError):
+            try:
+                extra_vars = yaml.safe_load(extra_vars)
+            except (yaml.YAMLError, TypeError, AttributeError):
+                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
+
+        if not isinstance(extra_vars, dict):
+            extra_vars = {}
+
+        if self.get_survey_enabled(obj):
+            validation_errors = obj.survey_variable_validation(extra_vars)
+            if validation_errors:
+                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
+
+        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+        if obj.inventory is None or not obj.inventory.active:
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+
+        return attrs
 
 class ScheduleSerializer(BaseSerializer):
 
