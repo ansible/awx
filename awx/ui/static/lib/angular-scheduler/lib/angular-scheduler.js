@@ -216,7 +216,7 @@ angular.module('AngularScheduler', ['underscore'])
                     var options = {};
                     options.startDate = this.scope.schedulerUTCTime;
                     options.frequency = this.scope.schedulerFrequency.value;
-                    options.interval = this.scope.schedulerInterval;
+                    options.interval = parseInt(this.scope.schedulerInterval);
                     if (this.scope.schedulerEnd.value === 'after') {
                         options.occurrenceCount = this.scope.schedulerOccurrenceCount;
                     }
