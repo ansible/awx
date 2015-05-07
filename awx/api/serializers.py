@@ -831,6 +831,7 @@ class HostSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
             ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
+            fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
