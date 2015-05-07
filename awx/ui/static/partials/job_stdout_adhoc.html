@@ -25,21 +25,136 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div id="job-status">
-                    <label>Job Status</label>
+        <div class="form-horizontal StandardOutDetails"
+            role="form" id="job-status-form">
+            <div class="form-group StandardOutDetails-detailRow">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Status</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">
                     <i class="fa icon-job-{{ job.status }}"></i> {{ job.status }}
                 </div>
-            <div class="scroll-spinner" id="stdoutMoreRowsTop">
-                <i class="fa fa-cog fa-spin"></i>
             </div>
-            <div id="pre-container" class="body_background
-                body_foreground pre mono-space"
-                lr-infinite-scroll="stdOutScrollToTop"
-                scroll-threshold="300" data-direction="up" time-threshold="500">
-                <div id="pre-container-content"></div>
+
+            <div <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="job.started">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Timing</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">
+                    <div ng-show="job.started" id="started-time">
+                        Started &nbsp;{{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                    </div>
+                    <div ng-show="job.finished" id="finished-time">
+                        Finished &nbsp;{{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                    </div>
+                    <div ng-show="job.finished" id="elapsed-time">
+                        Elapsed &nbsp;{{ job.elapsed }} seconds
+                    </div>
+                </div>
             </div>
+
+            <div <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="job.module_name">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Module Name</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">{{ job.module_name }}
+                </div>
+            </div>
+
+            <div <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="job.module_args">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Module Args</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent mono-space">{{ job.module_args }}
+                </div>
+            </div>
+
+            <div <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="inventory_name">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Inventory</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                StandardOutDetails-detailContent">
+                    <a href="{{ inventory_url }}"
+                        aw-tool-tip="Edit the inventory"
+                        data-placement="top">{{ inventory_name }}</a>
+                </div>
+            </div>
+
+            <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="credential_name">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Credential</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">
+                    <a href="{{ credential_url }}"
+                        aw-tool-tip="Edit the inventory"
+                        data-placement="top">{{ credential_name }}</a>
+                </div>
+            </div>
+
+            <!-- since zero is a falsy value, you need ng-show such that
+            the number is >= 0 -->
+            <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="forks >= 0">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Forks</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">{{ forks }}</div>
+            </div>
+
+            <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="limit">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Limit</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">{{ limit }}</div>
+            </div>
+
+            <!-- since zero is a falsy value, you need ng-show such that
+            the number is >= 0 -->
+            <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="verbosity >= 0">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailLabel">Verbosity</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
+                    StandardOutDetails-detailContent">{{ verbosity }}</div>
+            </div>
+
+            <div class="form-group StandardOutDetails-closedToggle">
+                <a class="col-sm-12 StandardOutDetails-closedToggleLink"
+                    ng-show="isClosed" href="javascript:;"
+                    ng-click="toggleClosedStatus()"> more details <i class="fa fa-angle-down"></i>
+                </a>
+                <a class="col-sm-12 StandardOutDetails-closedToggleLink"
+                    ng-show="!isClosed" href="javascript:;"
+                    ng-click="toggleClosedStatus()"> less details <i class="fa fa-angle-up"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="scroll-spinner" id="stdoutMoreRowsTop">
+                    <i class="fa fa-cog fa-spin"></i>
+                </div>
+                <div id="pre-container" class="body_background
+                    body_foreground pre mono-space"
+                    lr-infinite-scroll="stdOutScrollToTop"
+                    scroll-threshold="300" data-direction="up" time-threshold="500">
+                    <div id="pre-container-content"></div>
+                </div>
             </div>
             <div class="scroll-spinner" id="stdoutMoreRowsBottom">
                 <i class="fa fa-cog fa-spin"></i>

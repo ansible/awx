@@ -31,7 +31,7 @@ export default
                 }
                 scope.removeShowNextEvent = scope.$on('ShowNextEvent', function(e, data, show_event) {
                     scope.events = data;
-                    $('#event-next-spinner').hide(400);
+                    $('#event-next-spinner').slideUp(200);
                     if (show_event === 'prev') {
                         showEvent(scope.events.length - 1);
                     }
