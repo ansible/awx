@@ -88,7 +88,7 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
-
+ansible_version = get_ansible_version()
 class BaseTestMixin(QueueTestMixin):
     '''
     Mixin with shared code for use by all test cases.
@@ -96,6 +96,7 @@ class BaseTestMixin(QueueTestMixin):
 
     def setUp(self):
         super(BaseTestMixin, self).setUp()
+        global ansible_version
 
         self.object_ctr = 0
         # Save sys.path before tests.
@@ -108,7 +109,7 @@ class BaseTestMixin(QueueTestMixin):
         self._temp_paths = []
         self._current_auth = None
         self._user_passwords = {}
-        self.ansible_version = get_ansible_version()
+        self.ansible_version = ansible_version
         self.assertNotEqual(self.ansible_version, 'unknown')
         # Wrap settings so we can redefine them within each test.
         self._wrapped = settings._wrapped
