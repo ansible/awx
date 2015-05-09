@@ -3,6 +3,4 @@
 
 from __future__ import absolute_import
 
-from .models import * # noqa
-from .utils import * # noqa
-from .base import * # noqa
+from .fact_api import * # noqa

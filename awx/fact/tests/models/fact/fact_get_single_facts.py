@@ -9,61 +9,17 @@ from datetime import datetime
 
 # AWX
 from awx.fact.models.fact import * # noqa
-from .base import BaseFactTest
+from awx.fact.tests.base import BaseFactTest, FactScanBuilder, TEST_FACT_PACKAGES
 
 __all__ = ['FactGetSingleFactsTest', 'FactGetSingleFactsMultipleScansTest',]
-
-TEST_FACT_PACKAGES = [
-    {
-        "name": "accountsservice",
-        "architecture": "amd64",
-        "source": "apt",
-        "version": "0.6.35-0ubuntu7.1"
-    },
-    {
-        "name": "acpid",
-        "architecture": "amd64",
-        "source": "apt",
-        "version": "1:2.0.21-1ubuntu2"
-    },
-    {
-        "name": "adduser",
-        "architecture": "all",
-        "source": "apt",
-        "version": "3.113+nmu3ubuntu3"
-    },
-]
-
-TEST_FACT_DATA = {
-    'hostname': 'hostname_%d',
-    'add_fact_data': {
-        'timestamp': datetime.now(),
-        'host': None,
-        'module': 'packages',
-        'fact': TEST_FACT_PACKAGES,
-    }
-}
-
-TEST_FACT_NESTED_DATA = {
-    'hostname': 'hostname_%d',
-    'add_fact_data': {
-        'timestamp': datetime.now(),
-        'host': None,
-        'module': 'packages',
-        'fact': {
-            'nested': TEST_FACT_PACKAGES
-        },
-    }
-}
-
 
 class FactGetSingleFactsTest(BaseFactTest):
     def setUp(self):
         super(FactGetSingleFactsTest, self).setUp()
-        self.host_count = 20
-        self.timestamp = datetime.now().replace(year=2016)
-        self.create_fact_scans(TEST_FACT_DATA, self.host_count, scan_count=1)
-        self.hosts = [self.hostnames[i].hostname for i in range(0, self.host_count)]
+        self.builder = FactScanBuilder()
+        self.builder.add_fact('packages', TEST_FACT_PACKAGES)
+        self.builder.add_fact('nested', TEST_FACT_PACKAGES)
+        self.builder.build(scan_count=1, host_count=20)
 
     def check_query_results(self, facts_known, facts):
         self.assertIsNotNone(facts)
@@ -95,50 +51,47 @@ class FactGetSingleFactsTest(BaseFactTest):
             self.assertEqual(fact.fact['nested'][0]['name'], 'acpid')
 
     def test_single_host(self):
-        self.hosts = [self.hostnames[i].hostname for i in range(0, 1)]
-        facts = Fact.get_single_facts(self.hosts, 'name', 'acpid', self.timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(0, 1), 'name', 'acpid', self.builder.get_timestamp(0), 'packages')
 
-        self.check_query_results(self.fact_objs[0][:1], facts)
+        self.check_query_results(self.builder.get_scan(0, 'packages')[:1], facts)
 
     def test_all(self):
-        facts = Fact.get_single_facts(self.hosts, 'name', 'acpid', self.timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(), 'name', 'acpid', self.builder.get_timestamp(0), 'packages')
 
-        self.check_query_results(self.fact_objs[0], facts)
+        self.check_query_results(self.builder.get_scan(0, 'packages'), facts)
 
     def test_subset_hosts(self):
-        self.hosts = [self.hostnames[i].hostname for i in range(0, (self.host_count / 2))]
-        facts = Fact.get_single_facts(self.hosts, 'name', 'acpid', self.timestamp, 'packages')
+        host_count = (self.builder.get_host_count() / 2)
+        facts = Fact.get_single_facts(self.builder.get_hostnames(0, host_count), 'name', 'acpid', self.builder.get_timestamp(0), 'packages')
 
-        self.check_query_results(self.fact_objs[0][:(self.host_count / 2)], facts)
+        self.check_query_results(self.builder.get_scan(0, 'packages')[:host_count], facts)
         
     def test_get_single_facts_nested(self):
-        facts = Fact.get_single_facts(self.hosts, 'nested.name', 'acpid',  self.timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(), 'nested.name', 'acpid',  self.builder.get_timestamp(0), 'packages')
 
         self.check_query_results_nested(facts)
 
 class FactGetSingleFactsMultipleScansTest(BaseFactTest):
     def setUp(self):
         super(FactGetSingleFactsMultipleScansTest, self).setUp()
-        self.create_fact_scans(TEST_FACT_DATA, host_count=10, scan_count=10)
+        self.builder = FactScanBuilder()
+        self.builder.add_fact('packages', TEST_FACT_PACKAGES)
+        self.builder.build(scan_count=10, host_count=10)
 
     def test_1_host(self):
-        timestamp = datetime.now().replace(year=2016)
-        facts = Fact.get_single_facts([self.hostnames[0].hostname], 'name', 'acpid',  timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(0, 1), 'name', 'acpid',  self.builder.get_timestamp(0), 'packages')
         self.assertEqual(len(facts), 1)
-        self.assertEqual(facts[0], self.fact_objs[0][0])
+        self.assertEqual(facts[0], self.builder.get_scan(0, 'packages')[0])
 
     def test_multiple_hosts(self):
-        timestamp = datetime.now().replace(year=2016)
-        hosts = [self.hostnames[i].hostname for i in range(0, 3)]
-        facts = Fact.get_single_facts(hosts, 'name', 'acpid',  timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(0, 3), 'name', 'acpid',  self.builder.get_timestamp(0), 'packages')
         self.assertEqual(len(facts), 3)
         for i, fact in enumerate(facts):
-            self.assertEqual(fact, self.fact_objs[0][i])
+            self.assertEqual(fact, self.builder.get_scan(0, 'packages')[i])
 
     def test_middle_of_timeline(self):
-        timestamp = datetime.now().replace(year=2013)
-        hosts = [self.hostnames[i].hostname for i in range(0, 3)]
-        facts = Fact.get_single_facts(hosts, 'name', 'acpid',  timestamp, 'packages')
+        facts = Fact.get_single_facts(self.builder.get_hostnames(0, 3), 'name', 'acpid', self.builder.get_timestamp(4), 'packages')
         self.assertEqual(len(facts), 3)
         for i, fact in enumerate(facts):
-            self.assertEqual(fact, self.fact_objs[2][i])
+            self.assertEqual(fact, self.builder.get_scan(4, 'packages')[i])
+

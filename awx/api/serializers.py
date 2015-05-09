@@ -36,7 +36,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
-from awx.main.utils import get_type_for_model, get_model_for_type
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
 
 from awx.fact.models import * # noqa
@@ -2017,10 +2017,23 @@ class AuthTokenSerializer(serializers.Serializer):
 
 
 class FactVersionSerializer(MongoEngineModelSerializer):
+    related = serializers.SerializerMethodField('get_related')
 
     class Meta:
         model = FactVersion
-        fields = ('module', 'timestamp',)
+        fields = ('related', 'module', 'timestamp',)
+
+    def get_related(self, obj):
+        host_obj = self.context.get('host_obj')
+        res = {}
+        params = {
+            'datetime': timestamp_apiformat(obj.timestamp),
+            'module': obj.module,
+        }
+        res.update(dict(
+            fact_view = build_url('api:host_fact_compare_view', args=(host_obj.pk,), get=params),
+        ))
+        return res
 
 class FactSerializer(MongoEngineModelSerializer):
 

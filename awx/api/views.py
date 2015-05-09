@@ -1037,11 +1037,16 @@ class HostFactVersionsList(MongoListAPIView):
         if from_spec is not None:
             from_actual = dateutil.parser.parse(from_spec)
             kv['timestamp__gt'] = from_actual
-        if from_spec is not None and to_spec is not None:
+        if to_spec is not None:
             to_actual = dateutil.parser.parse(to_spec)
             kv['timestamp__lte'] = to_actual
 
         return FactVersion.objects.filter(**kv).order_by("-timestamp")
+
+    def list(self, *args, **kwargs):
+        queryset = self.get_queryset() or []
+        serializer = FactVersionSerializer(queryset, many=True, context=dict(host_obj=self.get_parent_object()))
+        return Response(dict(results=serializer.data))
 
 class HostSingleFactView(MongoAPIView):
 
@@ -1062,7 +1067,7 @@ class HostSingleFactView(MongoAPIView):
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
         host_obj = self.get_parent_object()
         fact_data = Fact.get_single_facts([host_obj.name], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
+        return Response(FactSerializer(fact_data, context=dict(host_obj=host_obj)).data if fact_data is not None else {})
 
 class HostFactCompareView(MongoAPIView):
 
@@ -1081,7 +1086,6 @@ class HostFactCompareView(MongoAPIView):
         host_data = FactSerializer(fact_entry).data if fact_entry is not None else {}
 
         return Response(host_data)
-
 
 class GroupList(ListCreateAPIView):
 

@@ -15,11 +15,12 @@ import urlparse
 import threading
 import contextlib
 import tempfile
+import urllib
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
-
+from django.core.urlresolvers import reverse
 
 # PyCrypto
 from Crypto.Cipher import AES
@@ -487,3 +488,16 @@ def get_pk_from_dict(_dict, key):
         return int(_dict[key])
     except (TypeError, KeyError, ValueError):
         return None
+
+def build_url(*args, **kwargs):
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
+
+def timestamp_apiformat(timestamp):
+    timestamp = timestamp.isoformat()
+    if timestamp.endswith('+00:00'):
+        timestamp = timestamp[:-6] + 'Z'
+    return timestamp
