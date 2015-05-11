@@ -8,6 +8,8 @@ import logging
 from dateutil import rrule
 from ast import literal_eval
 
+from rest_framework_mongoengine.serializers import MongoEngineModelSerializer
+
 # PyYAML
 import yaml
 
@@ -33,8 +35,10 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
-from awx.main.utils import get_type_for_model, get_model_for_type
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
+
+from awx.fact.models import * # noqa
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -774,6 +778,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
+            single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
@@ -826,6 +831,8 @@ class HostSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
             ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
+            fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
+            single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -927,6 +934,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
+            single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1537,12 +1545,10 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         if not obj.credential or obj.credential.active is False:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
-
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
         if obj.inventory is None or not obj.inventory.active:
             raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
-
         return attrs
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
@@ -2010,3 +2016,30 @@ class AuthTokenSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Unable to login with provided credentials.')
         else:
             raise serializers.ValidationError('Must include "username" and "password"')
+
+
+class FactVersionSerializer(MongoEngineModelSerializer):
+    related = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = FactVersion
+        fields = ('related', 'module', 'timestamp',)
+
+    def get_related(self, obj):
+        host_obj = self.context.get('host_obj')
+        res = {}
+        params = {
+            'datetime': timestamp_apiformat(obj.timestamp),
+            'module': obj.module,
+        }
+        res.update(dict(
+            fact_view = build_url('api:host_fact_compare_view', args=(host_obj.pk,), get=params),
+        ))
+        return res
+
+class FactSerializer(MongoEngineModelSerializer):
+
+    class Meta:
+        model = Fact
+        depth = 2
+        fields = ('timestamp', 'host', 'module', 'fact')

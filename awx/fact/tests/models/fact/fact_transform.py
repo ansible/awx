@@ -13,38 +13,45 @@ import pymongo
 
 # AWX
 from awx.fact.models.fact import * # noqa
-from .base import BaseFactTest
+from awx.fact.tests.base import BaseFactTest
 
 __all__ = ['FactTransformTest', 'FactTransformUpdateTest',]
 
-TEST_FACT_DATA = {
-    'hostname': 'hostname1',
-    'add_fact_data': {
-        'timestamp': datetime.now(),
-        'host': None,
-        'module': 'packages',
-        'fact': {
-            "acpid3.4": [
-                {
-                    "version": "1:2.0.21-1ubuntu2",
-                    "deeper.key": "some_value"
-                }
-            ],
-            "adduser.2": [
-                {
-                    "source": "apt",
-                    "version": "3.113+nmu3ubuntu3"
-                }
-            ],
-            "what.ever." : {
-                "shallowish.key": "some_shallow_value"
-            }
-        },
+TEST_FACT_PACKAGES_WITH_DOTS = [
+    {
+        "name": "acpid3.4",
+        "version": "1:2.0.21-1ubuntu2",
+        "deeper.key": "some_value"
+    },
+    {
+        "name": "adduser.2",
+        "source": "apt",
+        "version": "3.113+nmu3ubuntu3"
+    },
+    {
+        "what.ever." : {
+            "shallowish.key": "some_shallow_value"
+        }
     }
-}
-# Strip off microseconds because mongo has less precision
-BaseFactTest.normalize_timestamp(TEST_FACT_DATA)
+]
 
+TEST_FACT_PACKAGES_WITH_DOLLARS = [
+    {
+        "name": "acpid3$4",
+        "version": "1:2.0.21-1ubuntu2",
+        "deeper.key": "some_value"
+    },
+    {
+        "name": "adduser$2",
+        "source": "apt",
+        "version": "3.113+nmu3ubuntu3"
+    },
+    {
+        "what.ever." : {
+            "shallowish.key": "some_shallow_value"
+        }
+    }
+]
 class FactTransformTest(BaseFactTest):
     def setUp(self):
         super(FactTransformTest, self).setUp()
@@ -52,16 +59,16 @@ class FactTransformTest(BaseFactTest):
         self.client = pymongo.MongoClient('localhost', 27017)
         self.db2 = self.client[settings.MONGO_DB]
 
-        self.create_host_document(TEST_FACT_DATA)
+        self.timestamp = datetime.now().replace(microsecond=0)
 
     def setup_create_fact_dot(self):
-        self.data = TEST_FACT_DATA
-        self.f = Fact(**TEST_FACT_DATA['add_fact_data'])
+        self.host = FactHost(hostname='hosty').save()
+        self.f = Fact(timestamp=self.timestamp, module='packages', fact=TEST_FACT_PACKAGES_WITH_DOTS, host=self.host)
         self.f.save()
 
     def setup_create_fact_dollar(self):
-        self.data = TEST_FACT_DATA
-        self.f = Fact(**TEST_FACT_DATA['add_fact_data'])
+        self.host = FactHost(hostname='hosty').save()
+        self.f = Fact(timestamp=self.timestamp, module='packages', fact=TEST_FACT_PACKAGES_WITH_DOLLARS, host=self.host)
         self.f.save()
 
     def test_fact_with_dot_serialized(self):
@@ -73,17 +80,18 @@ class FactTransformTest(BaseFactTest):
 
         # Bypass mongoengine and pymongo transform to get record
         f_dict = self.db2['fact'].find_one(q)
-        self.assertIn('acpid3\uff0E4', f_dict['fact'])
+        self.assertIn('what\uff0Eever\uff0E', f_dict['fact'][2])
 
     def test_fact_with_dot_serialized_pymongo(self):
         #self.setup_create_fact_dot()
 
+        host = FactHost(hostname='hosty').save()
         f = self.db['fact'].insert({ 
-            'hostname': TEST_FACT_DATA['hostname'],
-            'fact': TEST_FACT_DATA['add_fact_data']['fact'],
-            'timestamp': TEST_FACT_DATA['add_fact_data']['timestamp'],
-            'host': TEST_FACT_DATA['add_fact_data']['host'].id,
-            'module': TEST_FACT_DATA['add_fact_data']['module']
+            'hostname': 'hosty',
+            'fact': TEST_FACT_PACKAGES_WITH_DOTS,
+            'timestamp': self.timestamp,
+            'host': host.id,
+            'module': 'packages',
         })
 
         q = {
@@ -91,7 +99,7 @@ class FactTransformTest(BaseFactTest):
         }
         # Bypass mongoengine and pymongo transform to get record
         f_dict = self.db2['fact'].find_one(q)
-        self.assertIn('acpid3\uff0E4', f_dict['fact'])
+        self.assertIn('what\uff0Eever\uff0E', f_dict['fact'][2])
 
     def test_fact_with_dot_deserialized_pymongo(self):
         self.setup_create_fact_dot()
@@ -100,13 +108,13 @@ class FactTransformTest(BaseFactTest):
             '_id': self.f.id
         }
         f_dict = self.db['fact'].find_one(q)
-        self.assertIn('acpid3.4', f_dict['fact'])
+        self.assertIn('what.ever.', f_dict['fact'][2])
 
     def test_fact_with_dot_deserialized(self):
         self.setup_create_fact_dot()
 
         f = Fact.objects.get(id=self.f.id)
-        self.assertIn('acpid3.4', f.fact)
+        self.assertIn('what.ever.', f.fact[2])
 
 class FactTransformUpdateTest(BaseFactTest):
     pass

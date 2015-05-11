@@ -78,7 +78,7 @@ class Fact(Document):
         }
 
         try:
-            facts = Fact.objects.filter(**kv)
+            facts = Fact.objects.filter(**kv).order_by("-timestamp")
             if not facts:
                 return None
             return facts[0]
@@ -97,41 +97,85 @@ class Fact(Document):
             'module': module,
         }
 
-        return FactVersion.objects.filter(**kv).values_list('timestamp')
+        return FactVersion.objects.filter(**kv).order_by("-timestamp").values_list('timestamp')
 
     @staticmethod
-    def get_single_facts(hostnames, fact_key, timestamp, module):
-        host_ids = FactHost.objects.filter(hostname__in=hostnames).values_list('id')
-        if not host_ids or len(host_ids) == 0:
-            return None
-
+    def get_single_facts(hostnames, fact_key, fact_value, timestamp, module):
         kv = {
-            'host__in': host_ids,
-            'timestamp__lte': timestamp,
-            'module': module,
-        }
-        facts = FactVersion.objects.filter(**kv).values_list('fact')
-        if not facts or len(facts) == 0:
-            return None
-        # TODO: Make sure the below doesn't trigger a query to get the fact record
-        # It's unclear as to if mongoengine will query the full fact when the id is referenced.
-        # This is not a logic problem, but a performance problem.
-        fact_ids = [fact.id for fact in facts]
-
-        project = {
-            '$project': {
-                'host': 1,
-                'fact.%s' % fact_key: 1,
+            'hostname': {
+                '$in': hostnames,
             }
         }
-        facts = Fact.objects.filter(id__in=fact_ids).aggregate(project)
-        return facts
+        fields = {
+            '_id': 1
+        }
+        host_ids = FactHost._get_collection().find(kv, fields)
+        if not host_ids or host_ids.count() == 0:
+            return None
+        # TODO: use mongo to transform [{_id: <>}, {_id: <>},...] into [_id, _id,...]
+        host_ids = [e['_id'] for e in host_ids]
 
+        pipeline = []
+        match = {
+            'host': {
+                '$in': host_ids
+            },
+            'timestamp': {
+                '$lte': timestamp
+            },
+            'module': module
+        }
+        sort = {
+            'timestamp': -1
+        }
+        group = {
+            '_id': '$host',
+            'timestamp': {
+                '$first': '$timestamp'
+            },
+            'fact': {
+                '$first': '$fact'
+            }
+        }
+        project = {
+            '_id': 0,
+            'fact': 1,
+        }
+        pipeline.append({'$match': match}) # noqa
+        pipeline.append({'$sort': sort}) # noqa
+        pipeline.append({'$group': group}) # noqa
+        pipeline.append({'$project': project}) # noqa
+        q = FactVersion._get_collection().aggregate(pipeline)
+        if not q or 'result' not in q or len(q['result']) == 0:
+            return None
+        # TODO: use mongo to transform [{fact: <>}, {fact: <>},...] into [fact, fact,...]
+        fact_ids = [fact['fact'] for fact in q['result']]
+
+        kv = {
+            'fact.%s' % fact_key : fact_value,
+            '_id': {
+                '$in': fact_ids
+            }
+        }
+        fields = {
+            'fact.%s.$' % fact_key : 1,
+            'host': 1,
+            'timestamp': 1,
+            'module': 1,
+        }
+        facts = Fact._get_collection().find(kv, fields)
+        #fact_objs = [Fact(**f) for f in facts]
+        # Translate pymongo python structure to mongoengine Fact object
+        fact_objs = []
+        for f in facts:
+            f['id'] = f.pop('_id')
+            fact_objs.append(Fact(**f))
+        return fact_objs
 
 class FactVersion(Document):
     timestamp = DateTimeField(required=True)
     host = ReferenceField(FactHost, required=True)
-    module = StringField(max_length=50, required=True)  
+    module = StringField(max_length=50, required=True)
     fact = ReferenceField(Fact, required=True)
     # TODO: Consider using hashed index on module. django-mongo may not support this but
     # executing raw js will
@@ -141,4 +185,3 @@ class FactVersion(Document):
             'module'
         ]
     }
-    

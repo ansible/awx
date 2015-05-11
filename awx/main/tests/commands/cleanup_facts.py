@@ -10,7 +10,8 @@ import mock
 from django.core.management.base import CommandError
 
 # AWX
-from awx.main.tests.base import BaseTest, MongoDBRequired
+from awx.main.tests.base import BaseTest
+from awx.fact.tests.base import MongoDBRequired
 from awx.main.tests.commands.base import BaseCommandMixin
 from awx.main.management.commands.cleanup_facts import Command, CleanupFacts
 from awx.fact.models.fact import * # noqa

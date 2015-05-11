@@ -19,6 +19,11 @@ from rest_framework.filters import BaseFilterBackend
 # Ansible Tower
 from awx.main.utils import get_type_for_model, to_python_boolean
 
+class MongoFilterBackend(BaseFilterBackend):
+
+    def filter_queryset(self, request, queryset, view):
+        return queryset
+
 class ActiveOnlyBackend(BaseFilterBackend):
     '''
     Filter to show only objects where is_active/active is True.
@@ -61,7 +66,7 @@ class TypeFilterBackend(BaseFilterBackend):
                     queryset = queryset.filter(polymorphic_ctype_id__in=types_pks)
                 elif model_type in types:
                     queryset = queryset
-                else:                    
+                else:
                     queryset = queryset.none()
             return queryset
         except FieldError, e:

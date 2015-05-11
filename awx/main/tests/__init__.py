@@ -16,3 +16,4 @@ from awx.main.tests.schedules import * # noqa
 from awx.main.tests.redact import * # noqa
 from awx.main.tests.views import * # noqa
 from awx.main.tests.commands import * # noqa
+from awx.main.tests.fact import * # noqa
