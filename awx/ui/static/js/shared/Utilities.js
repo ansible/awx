@@ -590,23 +590,22 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 .factory('Wait', ['$rootScope',
     function ($rootScope) {
         return function (directive) {
-            var docw, doch, spinnyw, spinnyh, x, y;
+            var docw, doch, spinnyw, spinnyh;
             if (directive === 'start' && !$rootScope.waiting) {
                 $rootScope.waiting = true;
                 docw = $(window).width();
                 doch = $(window).height();
                 spinnyw = $('.spinny').width();
                 spinnyh = $('.spinny').height();
-                x = (docw - spinnyw) / 2;
-                y = (doch - spinnyh) / 2;
                 $('.overlay').css({
                     width: $(document).width(),
                     height: $(document).height()
                 }).fadeIn();
                 $('.spinny').css({
-                    top: y,
-                    left: x
+                    bottom: 15,
+                    right: 15
                 }).fadeIn(400);
+                console.log("got here");
             } else if (directive === 'stop' && $rootScope.waiting) {
                 $('.spinny, .overlay').fadeOut(400, function () {
                     $rootScope.waiting = false;
