@@ -44,8 +44,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          for (i = 0; i < choices.length; i++) {
                              if (choices[i][0] !== 'file') {
                                  scope[variable].push({
-                                     label: ((choices[i][0] === '') ? 'Manual' : choices[i][1]),
-                                     value: (choices[i][0] === '') ? 'manual' : choices[i][0]
+                                     label: choices[i][1],
+                                     value: choices[i][0]
                                  });
                              }
                          }
