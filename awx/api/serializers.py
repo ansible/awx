@@ -778,6 +778,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
+            single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
@@ -831,6 +832,7 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
             ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
             fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
+            single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -932,6 +934,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
+            single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))

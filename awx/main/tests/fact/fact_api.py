@@ -14,7 +14,7 @@ from awx.fact.models import * # noqa
 from awx.fact.tests.base import BaseFactTestMixin, FactScanBuilder, TEST_FACT_ANSIBLE, TEST_FACT_PACKAGES, TEST_FACT_SERVICES
 from awx.main.utils import build_url
 
-__all__ = ['FactVersionApiTest', 'FactViewApiTest']
+__all__ = ['FactVersionApiTest', 'FactViewApiTest', 'SingleFactApiTest',]
 
 class FactApiBaseTest(BaseLiveServerTest, BaseFactTestMixin):
     def setUp(self):
@@ -94,7 +94,6 @@ class FactVersionApiTest(FactApiBaseTest):
             for entry in response['results']:
                 self.assertIn('fact_view', entry['related'])
                 r = self.get(entry['related']['fact_view'], expect=200)
-                print(r)
 
     def test_list(self):
         self.setup_facts(2)
@@ -180,3 +179,58 @@ class FactViewApiTest(FactApiBaseTest):
         ts = self.builder.get_timestamp(3)
         self.get_fact(Fact.objects.filter(host=self.fact_host, module='ansible', timestamp__lte=ts).order_by('-timestamp')[0], 
                       dict(datetime=ts))
+
+class SingleFactApiTest(FactApiBaseTest):
+    def setUp(self):
+        super(SingleFactApiTest, self).setUp()
+
+        self.group = self.inventory.groups.create(name='test-group')
+        self.group.hosts.add(self.host, self.host2, self.host3)
+
+    def test_permission_list(self):
+        url = reverse('api:host_fact_versions_list', args=(self.host.pk,))
+        with self.current_user('admin'):
+            self.get(url, expect=200)
+        with self.current_user('normal'):
+            self.get(url, expect=200)
+        with self.current_user('other'):
+            self.get(url, expect=403)
+        with self.current_user('nobody'):
+            self.get(url, expect=403)
+        with self.current_user(None):
+            self.get(url, expect=401)
+
+    def _test_related(self, url):
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+            self.assertTrue(len(response['results']) > 0)
+            for entry in response['results']:
+                self.assertIn('single_fact', entry['related'])
+                # Requires fields
+                r = self.get(entry['related']['single_fact'], expect=400)
+
+    def test_related_host_list(self):
+        self.setup_facts(2)
+        self._test_related(reverse('api:host_list'))
+
+    def test_related_group_list(self):
+        self.setup_facts(2)
+        self._test_related(reverse('api:group_list'))
+
+    def test_related_inventory_list(self):
+        self.setup_facts(2)
+        self._test_related(reverse('api:inventory_list'))
+
+    def test_params(self):
+        self.setup_facts(2)
+        params = {
+            'module': 'packages',
+            'fact_key': 'name',
+            'fact_value': 'acpid',
+        }
+        url = build_url('api:inventory_single_fact_view', args=(self.inventory.pk,), get=params)
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+            self.assertEqual(len(response['results']), 3)
+            for entry in response['results']:
+                self.assertEqual(entry['fact'][0]['name'], 'acpid')

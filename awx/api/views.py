@@ -943,7 +943,7 @@ class InventorySingleFactView(MongoAPIView):
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
         inventory_obj = self.get_parent_object()
         fact_data = Fact.get_single_facts([h.name for h in inventory_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
+        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
 
 
 class HostList(ListCreateAPIView):
@@ -1067,7 +1067,7 @@ class HostSingleFactView(MongoAPIView):
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
         host_obj = self.get_parent_object()
         fact_data = Fact.get_single_facts([host_obj.name], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(FactSerializer(fact_data, context=dict(host_obj=host_obj)).data if fact_data is not None else {})
+        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
 
 class HostFactCompareView(MongoAPIView):
 
@@ -1245,7 +1245,7 @@ class GroupSingleFactView(MongoAPIView):
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
         group_obj = self.get_parent_object()
         fact_data = Fact.get_single_facts([h.name for h in group_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(FactSerializer(fact_data).data if fact_data is not None else {})
+        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
