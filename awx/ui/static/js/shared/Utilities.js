@@ -605,7 +605,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     bottom: 15,
                     right: 15
                 }).fadeIn(400);
-                console.log("got here");
             } else if (directive === 'stop' && $rootScope.waiting) {
                 $('.spinny, .overlay').fadeOut(400, function () {
                     $rootScope.waiting = false;
