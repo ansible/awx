@@ -53,6 +53,12 @@ if 'django_jenkins' in INSTALLED_APPS:
     JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
                             os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
+# Much faster than the default
+# https://docs.djangoproject.com/en/1.6/topics/auth/passwords/#how-django-stores-passwords
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
