@@ -346,6 +346,25 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
             // this sets the default options for the selects as specified by the controller.
             $scope.verbosity = $scope.verbosity_options[$scope.verbosity_field.default];
             $scope.job_type = $scope.job_type_options[$scope.job_type_field.default];
+
+            // if you're getting to the form from the scan job section on inventories,
+            // set the job type select to be scan
+            if ($routeParams.inventory_id) {
+                // This means that the job template form was accessed via inventory prop's
+                // This also means the job is a scan job.
+                $scope.job_type.value = 'scan';
+                $scope.jobTypeChange();
+                $scope.inventory = $routeParams.inventory_id;
+                Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+                Rest.get()
+                    .success(function (data) {
+                        $scope.inventory_name = data.name;
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                            msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
+                    });
+            }
             $scope.$emit('lookUpInitialize');
         }
     });
@@ -423,23 +442,6 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
           $scope.project = null;
         }
     };
-
-    if ($routeParams.inventory_id) {
-        // This means that the job template form was accessed via inventory prop's
-        // This also means the job is a scan job.
-        $scope.job_type.value = 'scan';
-        $scope.jobTypeChange();
-        $scope.inventory = $routeParams.inventory_id;
-        Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
-        Rest.get()
-            .success(function (data) {
-                $scope.inventory_name = data.name;
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
-            });
-    }
 
     // Detect and alert user to potential SCM status issues
     checkSCMStatus = function (oldValue, newValue) {
