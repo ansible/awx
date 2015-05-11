@@ -75,6 +75,7 @@ inventory_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'inventory_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/scan_job_templates/$',        'inventory_scan_job_template_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'inventory_ad_hoc_commands_list'),
+    url(r'^(?P<pk>[0-9]+)/single_fact/$',                'inventory_single_fact_view'),
 )
 
 host_urls = patterns('awx.api.views',
@@ -89,6 +90,9 @@ host_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'host_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'host_ad_hoc_commands_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_command_events/$',     'host_ad_hoc_command_events_list'),
+    url(r'^(?P<pk>[0-9]+)/single_fact/$',                'host_single_fact_view'),
+    url(r'^(?P<pk>[0-9]+)/fact_versions/$',               'host_fact_versions_list'),
+    url(r'^(?P<pk>[0-9]+)/fact_view/$',               'host_fact_compare_view'),
 )
 
 group_urls = patterns('awx.api.views',
@@ -104,6 +108,7 @@ group_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'group_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'group_ad_hoc_commands_list'),
+    url(r'^(?P<pk>[0-9]+)/single_fact/$',                'group_single_fact_view'),
 )
 
 inventory_source_urls = patterns('awx.api.views',

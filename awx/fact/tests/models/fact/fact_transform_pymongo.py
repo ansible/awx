@@ -13,7 +13,7 @@ import pymongo
 
 # AWX
 from awx.fact.models.fact import * # noqa
-from .base import BaseFactTest
+from awx.fact.tests.base import BaseFactTest
 
 __all__ = ['FactSerializePymongoTest', 'FactDeserializePymongoTest',]
 

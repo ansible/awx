@@ -14,7 +14,7 @@ logger = logging.getLogger('awx.fact')
 
 # Connect to Mongo
 try:
-    connect(settings.MONGO_DB)
+    connect(settings.MONGO_DB, tz_aware=settings.USE_TZ)
     register_key_transform(get_db())
 except ConnectionError:
     logger.warn('Failed to establish connect to MongoDB "%s"' % (settings.MONGO_DB))
