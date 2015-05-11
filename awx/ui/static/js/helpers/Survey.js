@@ -253,8 +253,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
      * })
      *
      */
-    .factory('FinalizeQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty', '$filter', 'sanitizeFilter',
-    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty, $filter, sanitizeFilter) {
+    .factory('FinalizeQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty', '$filter',
+    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty, $filter) {
         return function(params) {
 
             var scope = params.scope,
@@ -272,10 +272,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 html = "";
 
             question.index = index;
-            question.question_name = question.question_name.replace(/</g, "&lt;");
-            question.question_name = question.question_name.replace(/>/g, "&gt;");
-            question.question_description = (question.question_description) ? question.question_description.replace(/</g, "&lt;") : undefined;
-            question.question_description = (question.question_description) ? question.question_description.replace(/>/g, "&gt;") : undefined;
+            question.question_name = $filter('sanitize')(question.question_name);
+            question.question_description = (question.question_description) ? $filter('sanitize')(question.question_description) : undefined;
 
 
             if(!$('#question_'+question.index+':eq(0)').is('div')){
@@ -291,8 +289,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             if(question.type === 'text' ){
                 defaultValue = (question.default) ? question.default : "";
-                defaultValue = defaultValue.replace(/</g, "&lt;");
-                defaultValue = defaultValue.replace(/>/g, "&gt;");
+                defaultValue = $filter('sanitize')(defaultValue);
                 defaultValue = scope.serialize(defaultValue);
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
@@ -301,8 +298,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
             if(question.type === "textarea"){
                 defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
-                defaultValue = defaultValue.replace(/</g, "&lt;");
-                defaultValue = defaultValue.replace(/>/g, "&gt;");
+                defaultValue =  $filter('sanitize')(defaultValue);
                 defaultValue = scope.serialize(defaultValue);
                 html+='<div class="row">'+
                     '<div class="col-xs-8 input_area">'+

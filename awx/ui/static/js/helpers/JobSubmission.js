@@ -497,9 +497,9 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
       };
     }])
 
-    .factory('PromptForSurvey', ['$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
+    .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
     'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
-    function($compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
+    function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
       GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
         return function(params) {
           var html = params.html || "",
@@ -519,10 +519,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
 
           function buildHtml(question, index){
             question.index = index;
-            question.question_name = question.question_name.replace(/</g, "&lt;");
-            question.question_name = question.question_name.replace(/>/g, "&gt;");
-            question.question_description = (question.question_description) ? question.question_description.replace(/</g, "&lt;") : undefined;
-            question.question_description = (question.question_description) ? question.question_description.replace(/>/g, "&gt;") : undefined;
+            question.question_name = $filter('sanitize')(question.question_name);
+            question.question_description = (question.question_description) ? $filter('sanitize')(question.question_description) : undefined;
 
 
             requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
@@ -603,8 +601,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               html+='<div class="survey_taker_input" > ';
               for( j = 0; j<choices.length; j++){
                 checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                choices[j]  = choices[j].replace(/</g, "&lt;");
-                choices[j]  = choices[j].replace(/>/g, "&gt;");
+                choices[j]  = $filter('sanitize')(choices[j]);
                 html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="'+question.required+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                 '<span>'+choices[j] +'</span><br>' ;
               }
