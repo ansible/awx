@@ -41,6 +41,7 @@ class JobOptions(BaseModel):
     job_type = models.CharField(
         max_length=64,
         choices=JOB_TYPE_CHOICES,
+        default='run',
     )
     inventory = models.ForeignKey(
         'Inventory',

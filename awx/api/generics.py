@@ -217,7 +217,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             for field, meta in fields.items():
                 if not isinstance(meta, dict):
                     continue
-                if meta.get('read_only', False):
+                if meta.pop('read_only', False):
                     fields.pop(field)
         if 'GET' in self.allowed_methods:
             cloned_request = clone_request(request, 'GET')
@@ -242,12 +242,19 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 serializer = self.get_serializer()
                 actions['GET'] = serializer.metadata()
                 if hasattr(serializer, 'get_types'):
-                    # Inject the type field choices into GET options as well as on
-                    # the metadata itself.
-                    if 'type' in actions['GET']:
-                        actions['GET']['type']['type'] = 'multiple choice'
-                        actions['GET']['type']['choices'] = serializer.get_type_choices()
                     ret['types'] = serializer.get_types()
+                # Remove fields labeled as write_only, remove field attributes
+                # that aren't relevant for retrieving data.
+                for field, meta in actions['GET'].items():
+                    if not isinstance(meta, dict):
+                        continue
+                    meta.pop('required', None)
+                    meta.pop('read_only', None)
+                    meta.pop('default', None)
+                    meta.pop('min_length', None)
+                    meta.pop('max_length', None)
+                    if meta.pop('write_only', False):
+                        actions['GET'].pop(field)
         if actions:
             ret['actions'] = actions
         if getattr(self, 'search_fields', None):

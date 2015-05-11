@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import functools
 import json
 import re
 import logging
@@ -86,6 +87,25 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
 }
 
+# Monkeypatch REST framework to include default value and write_only flag in
+# field metadata.
+def add_metadata_default(f):
+    @functools.wraps(f)
+    def _add_metadata_default(self, *args, **kwargs):
+        metadata = f(self, *args, **kwargs)
+        if hasattr(self, 'get_default_value'):
+            default = self.get_default_value()
+            if default is None and metadata.get('type', '') != 'field':
+                default = getattr(self, 'empty', None)
+            if default or not getattr(self, 'required', False):
+                metadata['default'] = default
+        if getattr(self, 'write_only', False):
+            metadata['write_only'] = True
+        return metadata
+    return _add_metadata_default
+
+fields.Field.metadata = add_metadata_default(fields.Field.metadata)
+
 class ChoiceField(fields.ChoiceField):
 
     def __init__(self, *args, **kwargs):
@@ -93,7 +113,7 @@ class ChoiceField(fields.ChoiceField):
         if not self.required:
             # Remove extra blank option if one is already present (for writable
             # field) or if present at all for read-only fields.
-            if ([x[0] for x in self.choices].count(u'') > 1 or self.read_only) \
+            if ([x[0] for x in self.choices].count(u'') > 1 or self.get_default_value() != u'' or self.read_only) \
                and BLANK_CHOICE_DASH[0] in self.choices:
                 self.choices = [x for x in self.choices
                                 if x != BLANK_CHOICE_DASH[0]]
@@ -205,7 +225,7 @@ class BaseSerializer(serializers.ModelSerializer):
                 field.help_text = 'Database ID for this %s.' % unicode(opts.verbose_name)
             elif key == 'type':
                 field.help_text = 'Data type for this %s.' % unicode(opts.verbose_name)
-                field.type_label = 'string'
+                field.type_label = 'multiple choice'
             elif key == 'url':
                 field.help_text = 'URL for this %s.' % unicode(opts.verbose_name)
                 field.type_label = 'string'
@@ -371,6 +391,17 @@ class BaseSerializer(serializers.ModelSerializer):
             ret.pop(parent_key, None)
         return ret
 
+    def metadata(self):
+        fields = super(BaseSerializer, self).metadata()
+        for field, meta in fields.items():
+            if not isinstance(meta, dict):
+                continue
+            if field == 'type':
+                meta['choices'] = self.get_type_choices()
+            #if meta.get('type', '') == 'field':
+            #    meta['type'] = 'id'
+        return fields
+
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 
@@ -413,8 +444,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
 class UnifiedJobSerializer(BaseSerializer):
 
-    result_stdout = serializers.Field(source='result_stdout')
-    unified_job_template = serializers.Field(source='unified_job_template_id')
+    result_stdout = serializers.CharField(source='result_stdout', label='result stdout', read_only=True)
+    unified_job_template = serializers.Field(source='unified_job_template_id', label='unified job template')
+    job_env = serializers.CharField(source='job_env', label='job env', read_only=True)
 
     class Meta:
         model = UnifiedJob
@@ -521,9 +553,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 class UserSerializer(BaseSerializer):
 
-    password = serializers.WritableField(required=False, default='',
-                                         help_text='Write-only field used to change the password.')
-    ldap_dn = serializers.Field(source='profile.ldap_dn')
+    password = serializers.CharField(required=False, default='', write_only=True,
+                                     help_text='Write-only field used to change the password.')
+    ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
 
     class Meta:
         model = User
@@ -664,10 +696,10 @@ class ProjectOptionsSerializer(BaseSerializer):
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
-    scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
+    scm_delete_on_next_update = serializers.BooleanField(source='scm_delete_on_next_update', read_only=True)
     status = ChoiceField(source='status', choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
-    last_update_failed = serializers.Field(source='last_update_failed')
-    last_updated = serializers.Field(source='last_updated')
+    last_update_failed = serializers.BooleanField(source='last_update_failed', read_only=True)
+    last_updated = serializers.DateTimeField(source='last_updated', read_only=True)
 
     class Meta:
         model = Project
@@ -1114,8 +1146,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
 
     status = ChoiceField(source='status', choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True, required=False)
-    last_update_failed = serializers.Field(source='last_update_failed')
-    last_updated = serializers.Field(source='last_updated')
+    last_update_failed = serializers.BooleanField(source='last_update_failed', read_only=True)
+    last_updated = serializers.DateTimeField(source='last_updated', read_only=True)
 
     class Meta:
         model = InventorySource
@@ -1273,11 +1305,11 @@ class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some of these filtered based on user accessing
 
-    password = serializers.WritableField(required=False, default='')
-    ssh_key_data = serializers.WritableField(required=False, default='')
-    ssh_key_unlock = serializers.WritableField(required=False, default='')
-    become_password = serializers.WritableField(required=False, default='')
-    vault_password = serializers.WritableField(required=False, default='')
+    password = serializers.CharField(required=False, default='')
+    ssh_key_data = serializers.CharField(required=False, default='')
+    ssh_key_unlock = serializers.CharField(required=False, default='')
+    become_password = serializers.CharField(required=False, default='')
+    vault_password = serializers.CharField(required=False, default='')
 
     class Meta:
         model = Credential
@@ -1512,6 +1544,7 @@ class JobCancelSerializer(JobSerializer):
 
 
 class JobRelaunchSerializer(JobSerializer):
+
     passwords_needed_to_start = serializers.SerializerMethodField('get_passwords_needed_to_start')
 
     class Meta:
@@ -1687,8 +1720,8 @@ class JobHostSummarySerializer(BaseSerializer):
 
 class JobEventSerializer(BaseSerializer):
 
-    event_display = serializers.Field(source='get_event_display2')
-    event_level = serializers.Field(source='event_level')
+    event_display = serializers.CharField(source='get_event_display2', read_only=True)
+    event_level = serializers.IntegerField(source='event_level', read_only=True)
 
     class Meta:
         model = JobEvent
@@ -1724,7 +1757,7 @@ class JobEventSerializer(BaseSerializer):
 
 class AdHocCommandEventSerializer(BaseSerializer):
 
-    event_display = serializers.Field(source='get_event_display')
+    event_display = serializers.CharField(source='get_event_display', read_only=True)
 
     class Meta:
         model = AdHocCommandEvent
@@ -1742,8 +1775,9 @@ class AdHocCommandEventSerializer(BaseSerializer):
         return res
 
 class JobLaunchSerializer(BaseSerializer):
+
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
-    can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
+    can_start_without_user_input = serializers.BooleanField(source='can_start_without_user_input', read_only=True)
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
     survey_enabled = serializers.SerializerMethodField('get_survey_enabled')

@@ -203,6 +203,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
+        blank=True,
     )
 
     @classmethod
