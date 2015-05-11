@@ -464,7 +464,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 if( question.type === 'text'){
                     scope.text_min = question.min;
                     scope.text_max = question.max;
-                    // scope.default_text = question.default;
+                    scope.default_text = question.default;
                 }
                 if( question.type === 'textarea'){
                     scope.textarea_min = question.min;
@@ -758,7 +758,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.default_float = "";
                 scope.default_int = "";
                 scope.default_textarea = "";
-                scope.default_password = "" ; 
+                scope.default_password = "" ;
                 scope.choices = "";
                 scope.text_min = "";
                 scope.text_max = "" ;
@@ -924,7 +924,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     }
 
                     //set the data.default depending on which type
-                    if (scope.type.type === 'default') {
+                    if (scope.type.type === 'text') {
                         data.default = scope.default;
                     } else if (scope.type.type === 'textarea') {
                         data.default = scope.default_textarea;
