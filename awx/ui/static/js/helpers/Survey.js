@@ -15,7 +15,7 @@ import listGenerator from 'tower/shared/list-generator/main';
 
 export default
 angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog' ,
-    'GeneratorHelpers'])
+    'GeneratorHelpers', 'sanitizeFilter'])
 
     .factory('ShowSurveyModal', ['Wait', 'CreateDialog', 'Empty', '$compile' ,
         function(Wait, CreateDialog, Empty, $compile) {
@@ -253,8 +253,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
      * })
      *
      */
-    .factory('FinalizeQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty',
-    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty) {
+    .factory('FinalizeQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty', '$filter', 'sanitizeFilter',
+    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty, $filter, sanitizeFilter) {
         return function(params) {
 
             var scope = params.scope,
@@ -317,8 +317,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 html += '<div class="input_area">';
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && $.inArray(choices[i], answers) !== -1) ? "checked" : "";
-                    choices[i] = choices[i] .replace(/</g, "&lt;");
-                    choices[i]  = choices[i] .replace(/>/g, "&gt;");
+                    choices[i] = $filter('sanitize')(choices[i]);
                     choices[i] = scope.serialize(choices[i]);
                     html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' disabled>' +
                         '<span>'+choices[i] +'</span><br>' ;
@@ -328,8 +327,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             if(question.type === 'password'){
               defaultValue = (question.default) ? question.default : "";
-              defaultValue = defaultValue.replace(/</g, "&lt;");
-              defaultValue = defaultValue.replace(/>/g, "&gt;");
+              defaultValue = $filter('defaultValue')(choices[i]);
               defaultValue = scope.serialize(defaultValue);
               html+='<div class="row">'+
                   '<div class="col-xs-8">'+
