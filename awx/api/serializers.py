@@ -8,7 +8,6 @@ import logging
 from dateutil import rrule
 from ast import literal_eval
 
-import mongoengine
 from rest_framework_mongoengine.serializers import MongoEngineModelSerializer
 
 # PyYAML

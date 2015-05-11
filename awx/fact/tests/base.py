@@ -3,8 +3,6 @@
 
 # Python
 from __future__ import absolute_import
-from copy import deepcopy
-from datetime import datetime
 from django.utils.timezone import now
 
 # Django

@@ -4,7 +4,6 @@
 # Python
 from __future__ import absolute_import
 from django.utils.timezone import now
-from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 
 # Django

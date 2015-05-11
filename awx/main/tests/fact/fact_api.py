@@ -4,9 +4,7 @@
 # Python
 
 # Django
-import django
 from django.core.urlresolvers import reverse
-from django.utils.timezone import now
 
 # AWX
 from awx.main.utils import timestamp_apiformat

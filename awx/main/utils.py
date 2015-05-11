@@ -15,7 +15,6 @@ import urlparse
 import threading
 import contextlib
 import tempfile
-import urllib
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
