@@ -1,4 +1,4 @@
-import linkTo from './link-to.filter';
+import linkTo from './link-to.directive';
 import transitionTo from './transition-to.factory';
 import modelListener from './model-listener.config';
 
