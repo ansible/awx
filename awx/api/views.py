@@ -2405,6 +2405,21 @@ class AdHocCommandRelaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
+        # Re-validate ad hoc command against serializer to check if module is
+        # still allowed.
+        data = {}
+        for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
+                      'module_name', 'module_args', 'forks', 'verbosity',
+                      'become_enabled'):
+            if field.endswith('_id'):
+                data[field[:-3]] = getattr(obj, field)
+            else:
+                data[field] = getattr(obj, field)
+        serializer = self.get_serializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # Check for passwords needed before copying ad hoc command.
         needed = obj.passwords_needed_to_start
         provided = dict([(field, request.DATA.get(field, '')) for field in needed])
