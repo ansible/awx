@@ -1,0 +1,40 @@
+{
+  "name": "bootstrap-datepicker",
+  "description": "A datepicker for twitter bootstrap forked from Stefan Petre's (of eyecon.ro), improvements by eternicode",
+  "version": "1.4.0",
+  "license": "Apache-2.0",
+  "keywords": [
+    "datepicker",
+    "twitter-bootstrap"
+  ],
+  "homepage": "https://github.com/eternicode/bootstrap-datepicker",
+  "author": "Andrew Rowls <eternicode@gmail.com>",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eternicode/bootstrap-datepicker.git"
+  },
+  "dependencies": {
+    "jquery" : ">=1.7.1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "load-grunt-tasks": "~1.0.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-jscs": ">=1.1.0, <2.0",
+    "grunt-contrib-qunit": "~0.5.2",
+    "grunt-contrib-less": "~0.12.0",
+    "grunt-contrib-compress": "~0.13.0",
+    "grunt-contrib-uglify": "~0.6.0",
+    "grunt-contrib-csslint": "~0.3.1",
+    "grunt-contrib-cssmin": "~0.10.0",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-string-replace": "~1.0.0",
+    "grunt-banner": "~0.2.3",
+    "time-grunt": "~1.0.0",
+    "phantomjs": "~1.9.0"
+  }
+}
