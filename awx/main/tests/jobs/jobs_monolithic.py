@@ -280,7 +280,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # Test that all required fields are really required.
         data['name'] = 'another new job template'
-        for field in ('name', 'job_type', 'inventory', 'project', 'playbook'):
+        for field in ('name', 'inventory', 'project', 'playbook'):
             with self.current_user(self.user_sue):
                 d = dict(data.items())
                 d.pop(field)
