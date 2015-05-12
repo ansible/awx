@@ -2358,7 +2358,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     relationship = 'ad_hoc_commands'
 
 
-class AdHocCommandDetail(RetrieveAPIView):
+class AdHocCommandDetail(RetrieveDestroyAPIView):
 
     model = AdHocCommand
     serializer_class = AdHocCommandSerializer

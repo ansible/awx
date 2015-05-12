@@ -1226,7 +1226,7 @@ class AdHocCommandAccess(BaseAccess):
         return False
 
     def can_delete(self, obj):
-        return False
+        return self.can_read(obj)
 
     def can_start(self, obj):
         return self.can_add({
