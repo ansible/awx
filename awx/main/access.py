@@ -1208,7 +1208,7 @@ class AdHocCommandAccess(BaseAccess):
         # If a credential is provided, the user should have read access to it.
         credential_pk = get_pk_from_dict(data, 'credential')
         if credential_pk:
-            credential = get_object_or_400(Credential, pk=credential_pk)
+            credential = get_object_or_400(Credential, pk=credential_pk, active=True)
             if not self.user.can_access(Credential, 'read', credential):
                 return False
 
@@ -1216,7 +1216,7 @@ class AdHocCommandAccess(BaseAccess):
         # given inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if inventory_pk:
-            inventory = get_object_or_400(Inventory, pk=inventory_pk)
+            inventory = get_object_or_400(Inventory, pk=inventory_pk, active=True)
             if not self.user.can_access(Inventory, 'run_ad_hoc_commands', inventory):
                 return False
 

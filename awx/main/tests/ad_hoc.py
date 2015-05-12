@@ -719,6 +719,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
+        # Try to relaunch after the inventory has been marked inactive.
+        self.inventory.mark_inactive()
+        with self.current_user('admin'):
+            response = self.get(url, expect=200)
+            self.assertEqual(response['passwords_needed_to_start'], [])
+            response = self.post(url, {}, expect=400)
+
     def test_ad_hoc_command_events_list(self):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
