@@ -45,8 +45,8 @@
                         <div class="form-group" ng-show="job_status.started">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Timing</label>
                             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                                <div ng-show="job_status.started" id="started-time">Started &nbsp;{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
-                                <div ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</div>
+                                <div ng-show="job_status.started" id="started-time">Started &nbsp;{{ job_status.started | longDate }}</div>
+                                <div ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | longDate   }}</div>
                                 <div ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</div>
                             </div>
                         </div>

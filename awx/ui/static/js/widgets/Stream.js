@@ -300,7 +300,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
                 scope.changes = activity.changes_stringified;
                 scope.user = ((activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system') +
-                    ' on ' + $filter('date')(activity.timestamp, "MM/dd/yy HH:mm:ss");
+                    ' on ' + $filter('longDate')(activity.timestamp);
                 scope.operation = activity.description_nolink;
 
                 scope.formModalAction = function () {

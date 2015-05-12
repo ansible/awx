@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
+    angular.module('CompletedJobsDefinition', ['sanitizeFilter', 'longDateFilter'])
     .value( 'CompletedJobsList', {
 
         name: 'completed_jobs',
@@ -51,7 +51,7 @@ export default
                 label: 'Finished',
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd HH:mm:ss'",
+                filter: "longDate",
                 columnClass: "col-lg-2 col-md-2 hidden-xs",
                 key: true,
                 desc: true
