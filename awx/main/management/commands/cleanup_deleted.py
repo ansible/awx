@@ -40,6 +40,29 @@ class Command(BaseCommand):
                 yield submodel
 
     def cleanup_model(self, model):
+
+        n_deleted_items = 0
+        pks_to_delete = set()
+        for asobj in ActivityStream.objects.iterator():
+            asobj_disp = '"%s" id: %s' % (unicode(asobj), asobj.id)
+            if asobj.timestamp >= self.cutoff:
+                if self.dry_run:
+                    self.logger.info("would skip %s" % asobj_disp)
+            else:
+                if self.dry_run:
+                    self.logger.info("would delete %s" % asobj_disp)
+                else:
+                    pks_to_delete.add(asobj.pk)
+            # Cleanup objects in batches instead of deleting each one individually.
+            if len(pks_to_delete) >= 500:
+                ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
+                n_deleted_items += len(pks_to_delete)
+                pks_to_delete.clear()
+        if len(pks_to_delete):
+            ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
+            n_deleted_items += len(pks_to_delete)
+        print("Removed %s items" % str(n_deleted_items))
+
         name_field = None
         active_field = None
         n_deleted_items = 0
@@ -63,7 +86,8 @@ class Command(BaseCommand):
             '%s__startswith' % name_field: name_prefix,
         })
         self.logger.debug('cleaning up model %s', model)
-        for instance in qs:
+        pks_to_delete = set()
+        for instance in qs.iterator():
             dt = parse_datetime(getattr(instance, name_field).split('_')[2])
             if not is_aware(dt):
                 dt = make_aware(dt, self.cutoff.tzinfo)
@@ -76,10 +100,17 @@ class Command(BaseCommand):
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, instance)
-                n_deleted_items += 1
                 if not self.dry_run:
-                    instance.delete()
+                    pks_to_delete.add(instance.pk)
 
+            # Cleanup objects in batches instead of deleting each one individually.
+            if len(pks_to_delete) >= 500:
+                model.objects.filter(pk__in=pks_to_delete).delete()
+                n_deleted_items += len(pks_to_delete)
+                pks_to_delete.clear()
+        if len(pks_to_delete):
+            model.objects.filter(pk__in=pks_to_delete).delete()
+            n_deleted_items += len(pks_to_delete)
         return n_deleted_items
 
     def init_logging(self):

@@ -252,6 +252,28 @@ class CleanupDeletedTest(BaseCommandMixin, BaseTest):
         self.assertNotEqual(counts_before, counts_after)
         self.assertFalse(sum(x[1] for x in counts_after.values()))
 
+        # Create lots of hosts already marked as deleted.
+        t = time.time()
+        dtnow = now()
+        for x in xrange(1000):
+            hostname = "_deleted_%s_host-%d" % (dtnow.isoformat(), x)
+            host = self.inventories[0].hosts.create(name=hostname, active=False)
+        create_elapsed = time.time() - t
+
+        # Time how long it takes to cleanup deleted items, should be no more
+        # then the time taken to create them.
+        counts_before = self.get_model_counts()
+        self.assertTrue(sum(x[1] for x in counts_before.values()))
+        t = time.time()
+        result, stdout, stderr = self.run_command('cleanup_deleted', days=0)
+        cleanup_elapsed = time.time() - t
+        self.assertEqual(result, None)
+        counts_after = self.get_model_counts()
+        self.assertNotEqual(counts_before, counts_after)
+        self.assertFalse(sum(x[1] for x in counts_after.values()))
+        self.assertTrue(cleanup_elapsed < create_elapsed,
+                        'create took %0.3fs, cleanup took %0.3fs, expected < %0.3fs' % (create_elapsed, cleanup_elapsed, create_elapsed))
+
     def get_user_counts(self):
         active = User.objects.filter(is_active=True).count()
         inactive = User.objects.filter(is_active=False).count()
