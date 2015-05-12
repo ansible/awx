@@ -197,6 +197,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     this.scope = element.scope();
                 }
 
+                if (options.mode) {
+                    this.scope.mode = options.mode;
+                }
+
                 for (fld in form.fields) {
                     this.scope[fld + '_field'] = form.fields[fld];
                     this.scope[fld + '_field'].name = fld;
@@ -752,7 +756,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
-                    html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : ""; 
+                    html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
 
                     //text fields

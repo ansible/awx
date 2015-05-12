@@ -282,10 +282,16 @@ class DashboardView(APIView):
 
         user_hosts = get_user_queryset(request.user, Host)
         user_hosts_failed = user_hosts.filter(has_active_failures=True)
+        try:
+            user_hosts_count = user_hosts.distinct('name').count()
+            user_hosts_failed_count = user_hosts_failed.distinct('name').count()
+        except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
+            user_hosts_count = len(set(user_hosts.values_list('name', flat=True)))
+            user_hosts_failed_count = len(set(user_hosts_failed.values_list('name', flat=True)))
         data['hosts'] = {'url': reverse('api:host_list'),
                          'failures_url': reverse('api:host_list') + "?has_active_failures=True",
-                         'total': user_hosts.count(),
-                         'failed': user_hosts_failed.count()}
+                         'total': user_hosts_count,
+                         'failed': user_hosts_failed_count}
 
         user_projects = get_user_queryset(request.user, Project)
         user_projects_failed = user_projects.filter(last_job_failed=True)
@@ -2352,7 +2358,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     relationship = 'ad_hoc_commands'
 
 
-class AdHocCommandDetail(RetrieveAPIView):
+class AdHocCommandDetail(RetrieveDestroyAPIView):
 
     model = AdHocCommand
     serializer_class = AdHocCommandSerializer
@@ -2398,6 +2404,21 @@ class AdHocCommandRelaunch(GenericAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
+
+        # Re-validate ad hoc command against serializer to check if module is
+        # still allowed.
+        data = {}
+        for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
+                      'module_name', 'module_args', 'forks', 'verbosity',
+                      'become_enabled'):
+            if field.endswith('_id'):
+                data[field[:-3]] = getattr(obj, field)
+            else:
+                data[field] = getattr(obj, field)
+        serializer = self.get_serializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Check for passwords needed before copying ad hoc command.
         needed = obj.passwords_needed_to_start

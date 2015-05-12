@@ -341,7 +341,7 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error( function() {
+                        .error( function(data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to update schedule ' + id + ' PUT returned: ' + status });
                         });

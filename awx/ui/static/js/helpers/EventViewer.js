@@ -437,8 +437,7 @@ export default
                         else {
                             if( typeof itm === "string"){
                                 if(itm.indexOf('<') > -1 || itm.indexOf('>') > -1){
-                                    itm = itm.replace(/</g, "&lt;");
-                                    itm = itm.replace(/>/g, "&gt;");
+                                    itm = $filter('sanitize')(itm);
                                 }
                             }
                             html += "<span ng-non-bindable>" + itm + "</span>";
@@ -547,15 +546,14 @@ export default
             };
         }])
 
-        .factory('EventAddPreFormattedText', [function() {
+        .factory('EventAddPreFormattedText', ['$filter', function($filter) {
             return function(params) {
                 var id = params.id,
                     val = params.val,
                     html;
                 if( typeof val === "string"){
                     if(val.indexOf('<') > -1 || val.indexOf('>') > -1){
-                        val = val.replace(/</g, "&lt;");
-                        val = val.replace(/>/g, "&gt;");
+                        val = $filter('sanitize')(val);
                     }
                 }
                 html = "<pre ng-non-bindable>" + val + "</pre>\n";

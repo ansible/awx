@@ -560,12 +560,14 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
 
     def test_ad_hoc_command_detail(self):
         with self.current_user('admin'):
-            response = self.run_test_ad_hoc_command()
+            response1 = self.run_test_ad_hoc_command()
+            response2 = self.run_test_ad_hoc_command()
+            response3 = self.run_test_ad_hoc_command()
 
         # Retrieve detail for ad hoc command.  Only GET is supported.
-        url = reverse('api:ad_hoc_command_detail', args=(response['id'],))
-        self.assertEqual(url, response['url'])
         with self.current_user('admin'):
+            url = reverse('api:ad_hoc_command_detail', args=(response1['id'],))
+            self.assertEqual(url, response1['url'])
             response = self.get(url, expect=200)
             self.assertEqual(response['credential'], self.credential.pk)
             self.assertEqual(response['related']['credential'],
@@ -580,22 +582,28 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertTrue(response['related']['activity_stream'])
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
-            self.delete(url, expect=405)
+            self.delete(url, expect=204)
+            self.delete(url, expect=404)
         with self.current_user('normal'):
+            url = reverse('api:ad_hoc_command_detail', args=(response2['id'],))
+            self.assertEqual(url, response2['url'])
             response = self.get(url, expect=200)
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
-            self.delete(url, expect=405)
+            self.delete(url, expect=204)
+            self.delete(url, expect=404)
+        url = reverse('api:ad_hoc_command_detail', args=(response3['id'],))
+        self.assertEqual(url, response3['url'])
         with self.current_user('other'):
             response = self.get(url, expect=403)
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
-            self.delete(url, expect=405)
+            self.delete(url, expect=403)
         with self.current_user('nobody'):
             response = self.get(url, expect=403)
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
-            self.delete(url, expect=405)
+            self.delete(url, expect=403)
         with self.current_user(None):
             response = self.get(url, expect=401)
             self.put(url, {}, expect=401)
@@ -603,13 +611,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=401)
 
         # Verify that the credential and inventory are null when they have
-        # been deleted.
+        # been deleted, can delete an ad hoc command without inventory or
+        # credential.
         self.credential.mark_inactive()
         self.inventory.mark_inactive()
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['credential'], None)
             self.assertEqual(response['inventory'], None)
+            self.delete(url, expect=204)
+            self.delete(url, expect=404)
 
     def test_ad_hoc_command_cancel(self):
         # Override setting so that ad hoc command isn't actually started.
@@ -707,6 +718,21 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=401)
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
+
+        # Try to relaunch ad hoc command when module has been removed from
+        # allowed list of modules.
+        with self.settings(AD_HOC_COMMANDS=[]):
+            with self.current_user('admin'):
+                response = self.get(url, expect=200)
+                self.assertEqual(response['passwords_needed_to_start'], [])
+                response = self.post(url, {}, expect=400)
+
+        # Try to relaunch after the inventory has been marked inactive.
+        self.inventory.mark_inactive()
+        with self.current_user('admin'):
+            response = self.get(url, expect=200)
+            self.assertEqual(response['passwords_needed_to_start'], [])
+            response = self.post(url, {}, expect=400)
 
     def test_ad_hoc_command_events_list(self):
         with self.current_user('admin'):

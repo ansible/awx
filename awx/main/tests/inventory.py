@@ -1089,6 +1089,45 @@ class InventoryTest(BaseTest):
         self.assertEqual(set(h_e.all_groups.values_list('pk', flat=True)),
                          set([g_e.pk]))
 
+    def test_dashboard_hosts_count(self):
+        url = reverse('api:dashboard_view')
+
+        # Test with zero hosts.
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertEqual(response['hosts']['total'], 0)
+        self.assertEqual(response['hosts']['failed'], 0)
+
+        # Create hosts with the same name in different inventories.
+        for x in xrange(4):
+            hostname = 'host-%d' % x
+            self.inventory_a.hosts.create(name=hostname)
+            self.inventory_b.hosts.create(name=hostname)
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertEqual(response['hosts']['total'], 4)
+        self.assertEqual(response['hosts']['failed'], 0)
+
+        # Mark all hosts in one inventory as failed.  Failed count should
+        # reflect unique hostnames.
+        for host in self.inventory_a.hosts.all():
+            host.has_active_failures = True
+            host.save()
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertEqual(response['hosts']['total'], 4)
+        self.assertEqual(response['hosts']['failed'], 4)
+
+        # Mark all hosts in the other inventory as failed.  Failed count
+        # should reflect unique hostnames and never be greater than total.
+        for host in self.inventory_b.hosts.all():
+            host.has_active_failures = True
+            host.save()
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertEqual(response['hosts']['total'], 4)
+        self.assertEqual(response['hosts']['failed'], 4)
+
     def test_dashboard_inventory_graph_view(self):
         url = reverse('api:dashboard_inventory_graph_view')
         # Test with zero hosts.

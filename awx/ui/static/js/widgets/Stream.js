@@ -176,8 +176,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('BuildDescription', ['FixUrl', 'BuildUrl','$sce',
-    function (FixUrl, BuildUrl, $sce) {
+.factory('BuildDescription', ['$filter', 'FixUrl', 'BuildUrl','$sce',
+    function ($filter, FixUrl, BuildUrl, $sce) {
         return function (activity) {
 
             function stripDeleted(s) {
@@ -210,9 +210,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // The block until line 221 is for associative/disassociative operations, such as adding/removing a user to a team or vise versa
             if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
                 obj2_obj.base = obj2;
-                obj2_obj.name = obj2_obj.name.replace(/</g, "&lt;");
-                obj2_obj.name = obj2_obj.name.replace(/>/g, "&gt;");
-                obj2_obj.name = $sce.getTrustedHtml(obj2_obj.name);
+                obj2_obj.name = $filter('sanitize')(obj2_obj.name);
                 descr += obj2 + " <a href=\"" + BuildUrl(obj2_obj) + "\">" + obj2_obj.name + '</a>' + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
                 descr_nolink += obj2 + ' ' + obj2_obj.name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
             } else if (obj2) {
@@ -227,8 +225,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 obj1_obj.base = obj1;
                 // Need to character escape the link names, as a malicious url or piece of html could be inserted here that could take the
                 // user to a unknown location.
-                obj1_obj.name = obj1_obj.name.replace(/</g, "&lt;");
-                obj1_obj.name = obj1_obj.name.replace(/>/g, "&gt;");
+                obj1_obj.name = $filter('sanitize')(obj1_obj.name);
                 obj1_obj.name = $sce.getTrustedHtml(obj1_obj.name);
                 descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj) + "\" >" + obj1_obj.name + '</a>';
                 descr_nolink += obj1 + ' ' + obj1_obj.name;

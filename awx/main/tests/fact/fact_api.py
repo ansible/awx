@@ -93,7 +93,7 @@ class FactVersionApiTest(FactApiBaseTest):
             response = self.get(url, expect=200)
             for entry in response['results']:
                 self.assertIn('fact_view', entry['related'])
-                r = self.get(entry['related']['fact_view'], expect=200)
+                self.get(entry['related']['fact_view'], expect=200)
 
     def test_list(self):
         self.setup_facts(2)
@@ -207,7 +207,7 @@ class SingleFactApiTest(FactApiBaseTest):
             for entry in response['results']:
                 self.assertIn('single_fact', entry['related'])
                 # Requires fields
-                r = self.get(entry['related']['single_fact'], expect=400)
+                self.get(entry['related']['single_fact'], expect=400)
 
     def test_related_host_list(self):
         self.setup_facts(2)
