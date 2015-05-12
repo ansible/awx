@@ -215,6 +215,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             raise ValidationError('Password required for VMware credential.')
         return password
 
+    def clean_project(self):
+        project = self.project or ''
+        if self.kind == 'openstack' and not project:
+            raise ValidationError('Project name required for OpenStack credential.')
+        return project
+
     def _validate_ssh_private_key(self, data):
         """Validate that the given SSH private key or certificate is,
         in fact, valid.
