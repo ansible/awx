@@ -9,17 +9,15 @@ from django.core.management.base import NoArgsCommand
 from awx.fact.models.fact import * # noqa
 from awx.main.socket import Socket
 
-_MODULES = ['packages', 'services', 'files']
-
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
 class FactCacheReceiver(object):
     def __init__(self):
         self.timestamp = None
 
     def _determine_module(self, facts):
-        for x in _MODULES:
-            if x in facts:
-                return x
+        # Symantically determine the module type
+        if len(facts) == 1:
+            return facts.iterkeys().next()
         return 'ansible'
 
     def _extract_module_facts(self, module, facts):
