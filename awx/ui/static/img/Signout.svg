@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="32px" height="27px" viewBox="0 0 32 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+<svg width="55px" height="42px" viewBox="0 0 55 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
     <!-- Generator: Sketch 3.2.1 (9971) - http://www.bohemiancoding.com/sketch -->
     <title>Signout</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Random" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <g id="Signout" sketch:type="MSArtboardGroup" fill="#000000">
+        <g id="Signout" sketch:type="MSArtboardGroup" fill="#242424">
             <g sketch:type="MSLayerGroup">
-                <path d="M11.5049411,0.451390117 L11.5049411,3.18809297 L28.288752,3.18809297 L28.288752,23.6988855 L11.5000003,23.6988855 L11.5000003,26.4481905 L31.008,26.4481905 L31.008,0.448190476 L11.5049411,0.451390117 Z" id="Signout-entrance" sketch:type="MSShapeGroup"></path>
-                <g id="Signout-arrow" transform="translate(0.000000, 5.000000)" sketch:type="MSShapeGroup">
-                    <path d="M8,6.0000003 L23.6792324,6 L23.6792324,9.78266615 L8,9.78266645 L8,6.0000003 Z" id="Signout-arrow-line"></path>
-                    <polygon id="Signout-arrowhead" transform="translate(4.500000, 8.000000) rotate(-90.000000) translate(-4.500000, -8.000000) " points="4.5 4 12 12 -3 12 "></polygon>
+                <path d="M18.3359999,0.00518356419 L18.3359999,4.43876768 L45.0851985,4.43876768 L45.0851985,37.6671922 L18.3281255,37.6671922 L18.3281255,42.1211922 L49.419,42.1211922 L49.419,0 L18.3359999,0.00518356419 Z" id="Signout-entrance" sketch:type="MSShapeGroup"></path>
+                <g id="Signout-arrow" transform="translate(0.000000, 7.962963)" sketch:type="MSShapeGroup">
+                    <path d="M11.75,9.55555603 L36.7387766,9.55555556 L36.7387766,15.5798016 L11.75,15.5798021 L11.75,9.55555603 Z" id="Signout-arrow-line"></path>
+                    <path d="M0.728571429,12.7407407 L12.3857143,0.796296296 L12.3857143,24.6851852 L0.728571429,12.7407407 L0.728571429,12.7407407 Z" id="Signout-arrowhead"></path>
                 </g>
             </g>
         </g>
