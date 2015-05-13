@@ -1,17 +1,20 @@
-export default ['$location', function($location) {
+/* jshint unused: vars */
+
+export default ['$route', '$rootScope', function($route, $rootScope) {
     return {
         link: function(scope, element, attrs) {
-            var itemPath = attrs.href.replace(/^#/, '');
+            var routeName = attrs.linkTo;
 
             scope.$watch(function() {
-                return $location.path();
-            }, function(currentPath) {
-                if (currentPath === itemPath) {
+                return $route.current.name;
+            }, function(nextRoute) {
+                if (nextRoute === routeName) {
                     element.addClass('MenuItem--active');
                 } else {
                     element.removeClass('MenuItem--active');
                 }
             });
+
         }
     };
 }];

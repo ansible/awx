@@ -1,6 +1,6 @@
 <section id="htmlTemplate" class="Container">
   <nav class="SetupMenu Container-main">
-      <a href="#/credentials" class="SetupItem HoverIcon Media">
+      <a link-to="credentials" class="SetupItem HoverIcon Media">
         <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
           <aw-icon name="Credentials"></aw-icon>
         </i>
@@ -9,7 +9,7 @@
           <p class="SetupItem-description">Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or syncing inventories or projects.</p>
         </div>
       </a>
-      <a href="#/users" class="SetupItem HoverIcon Media">
+      <a link-to="users" class="SetupItem HoverIcon Media">
         <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
           <aw-icon name="Users"></aw-icon>
         </i>
@@ -20,7 +20,7 @@
           </p>
         </div>
       </a>
-      <a href="#/teams" class="SetupItem HoverIcon Media">
+      <a link-to="teams" class="SetupItem HoverIcon Media">
         <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
           <aw-icon name="Teams"></aw-icon>
         </i>
@@ -34,7 +34,7 @@
   </nav>
   <aside class="Container-aside">
       <nav class="SetupMenu Menu Menu--vertical">
-        <a href="#/organizations" class="SetupItem SetupItem--aside HoverIcon Media">
+        <a link-to="organizations" class="SetupItem SetupItem--aside HoverIcon Media">
           <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
             <aw-icon name="Organizations"></aw-icon>
           </i>
@@ -67,7 +67,7 @@
             </p>
             </div>
         </button>
-        <button href="#/license" ng-click="showLicenseModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
+        <button ng-click="showLicenseModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
           <h4 class="SetupItem-title SetupItem-title--aside">View your License</h4>
         </button>
         <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">

@@ -1,16 +1,16 @@
-<a menu-item href="#/projects" title="Projects" class="MenuItem">
+<a menu-item link-to="projects" title="Projects" class="MenuItem">
     Projects
 </a>
-<a menu-item href="#/inventories" title="Inventories" class="MenuItem">
+<a menu-item link-to="inventories" title="Inventories" class="MenuItem">
     Inventories
 </a>
-<a menu-item href="#/job_templates" title="Job Templates" class="MenuItem">
+<a menu-item link-to="jobTemplates" title="Job Templates" class="MenuItem">
     Job Templates
 </a>
-<a menu-item href="#/jobs" title="Jobs" class="MenuItem">
+<a menu-item link-to="jobs" title="Jobs" class="MenuItem">
     Jobs
 </a>
-<a href="/#/users/{{currentUser.id}}" class="MenuItem MenuItem--right MenuItem--fixed MenuItem-username">
+<a link-to="userEdit" model="{ user_id: currentUser }" class="MenuItem MenuItem--right MenuItem--fixed MenuItem-username">
   <i class="MenuItem-icon MenuItem-icon--labelled">
     <aw-icon name="User"></aw-icon>
   </i>
@@ -18,20 +18,20 @@
     {{currentUser.username}}
   </span>
 </a>
-<a href="#/setup" class="MenuItem MenuItem--fixed">
+<a link-to="setup" class="MenuItem MenuItem--fixed">
   <i class="MenuItem-icon" title="Setup" data-placement="bottom">
     <aw-icon name="Setup"></aw-icon>
   </i>
   <span class="MenuItem-helpTitle">Setup</span>
 </a>
-<a portal-mode-link class="MenuItem MenuItem--fixed">
+<a link-to="portal" portal-mode-link class="MenuItem MenuItem--fixed">
   <i class="MenuItem-icon" title="Portal Mode" data-placement="bottom">
     <aw-icon name="PortalMode"></aw-icon>
     <!-- <img src="/static/img/PortalMode.svg" title="Portal Mode" data-placement="bottom" class="MenuItem-icon"> -->
   </i>
     <span class="MenuItem-helpTitle">Portal Mode</span>
 </a>
-<a href="#/logout"class="MenuItem MenuItem--fixed">
+<a link-to="signOut" class="MenuItem MenuItem--fixed">
   <i class="MenuItem-icon" title="Sign Out" data-placement="bottom">
     <aw-icon name="Signout"></aw-icon>
     <!-- <img src="/static/img/Signout.svg"  title="Sign out" data-placement="bottom" class="MenuItem-icon"> -->
