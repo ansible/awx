@@ -113,7 +113,7 @@ export default
                     });
 
                 var offRouteChangeError =
-                    $rootScope.$on('$routeChangeError', function(e, newRoute, prevRoute, rejection) {
+                    $rootScope.$on('$routeChangeError', function(e, newRoute, previousRoute, rejection) {
                         if (newRoute.$$route.name === routeName) {
                             deferred.reject(newRoute, previousRoute, rejection);
                         }
@@ -126,6 +126,6 @@ export default
                 }, $rootScope);
 
                 return deferred;
-            }
+            };
         }
-    ]
+    ];

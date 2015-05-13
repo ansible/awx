@@ -25,7 +25,7 @@ export function lookupRouteUrl(name, routes, models) {
                         value = _.pluck(model, 'id');
                     }
 
-                    value = value.join(',')
+                    value = value.join(',');
                 } else if (angular.isObject(model)) {
                     value = model[key];
 

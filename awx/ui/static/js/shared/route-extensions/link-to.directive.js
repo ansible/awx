@@ -57,7 +57,7 @@ export default
                     routeName: '@route',
                     model: '&'
                 },
-                link: function(scope, element, attrs) {
+                link: function(scope, element) {
 
                     var model = scope.$eval(scope.model);
                     scope.url = lookupRouteUrl(scope.routeName, $routeProvider.routes, model);
@@ -71,4 +71,4 @@ export default
                 }
             };
         }
-    ]
+    ];
