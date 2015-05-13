@@ -1,3 +1,5 @@
+/* jshint unused: vars */
+
 import {lookupRouteUrl} from './lookup-route-url';
 
 /**
@@ -37,9 +39,9 @@ import {lookupRouteUrl} from './lookup-route-url';
                                         title: 'Featured',
                                         body: 'This post is featured because it is awesome'
                                     };">
-                   <link-to route="post" model="{ id: featuredPost }">
+                   <a link-to="post" model="{ id: featuredPost }">
                        {{featuredPost.title}}
-                   </link-to>
+                   </a>
                 </section>
            </file>
         </example>
@@ -47,20 +49,19 @@ import {lookupRouteUrl} from './lookup-route-url';
  */
 export default
     [   '$route',
+        '$location',
         'transitionTo',
-        function($routeProvider, transitionTo) {
+        function($routeProvider, $location, transitionTo) {
+
             return {
-                restrict: 'E',
-                transclude: true,
-                template: '<a href="{{url}}" data-transition-to title="{{routeName}}" ng-transclude></a>',
+                restrict: 'A',
                 scope: {
-                    routeName: '@route',
+                    routeName: '@linkTo',
                     model: '&'
                 },
-                link: function(scope, element) {
-
+                link: function (scope, element, attrs) {
                     var model = scope.$eval(scope.model);
-                    scope.url = lookupRouteUrl(scope.routeName, $routeProvider.routes, model);
+                    scope.url = lookupRouteUrl(scope.routeName, $routeProvider.routes, model, $location.$$html5);
 
                     element.find('[data-transition-to]').on('click', function(e) {
                         e.stopPropagation();
@@ -68,6 +69,7 @@ export default
                         transitionTo(scope.routeName, model);
                     });
 
+                    element.attr('href', scope.url);
                 }
             };
         }
