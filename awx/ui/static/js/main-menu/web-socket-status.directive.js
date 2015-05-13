@@ -1,3 +1,5 @@
+/* jshint unused: vars */
+
 export default ['$rootScope', function($rootScope) {
     return {
         restrict: 'E',
@@ -13,4 +15,4 @@ export default ['$rootScope', function($rootScope) {
             });
         }
     };
-}]
+}];

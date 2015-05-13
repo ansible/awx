@@ -1,3 +1,5 @@
+/* jshint unused: vars */
+
 export default function() {
     return {
         templateUrl: '/static/js/main-menu/menu-toggle.partial.html',

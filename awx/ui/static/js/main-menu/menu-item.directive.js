@@ -6,7 +6,6 @@ export default ['$location', function($location) {
             scope.$watch(function() {
                 return $location.path();
             }, function(currentPath) {
-                console.log(itemPath, currentPath);
                 if (currentPath === itemPath) {
                     element.addClass('MenuItem--active');
                 } else {

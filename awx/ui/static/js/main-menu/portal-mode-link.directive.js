@@ -1,3 +1,5 @@
+/* jshint unused: vars */
+
 function wrapper(rootScope) {
     return function compile(element, attrs) {
         var href, title, icon;
@@ -16,11 +18,11 @@ function wrapper(rootScope) {
             .attr('title', title)
             .find('>img')
                 .attr('src', '/static/img/' + icon);
-    }
+    };
 }
 
 export default ['$rootScope', function($rootScope) {
     return {
         compile: wrapper($rootScope)
     };
-}]
+}];
