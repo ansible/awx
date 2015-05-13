@@ -33,6 +33,8 @@ import {PortalController} from 'tower/controllers/Portal';
 import dataServices from 'tower/services/_data-services';
 import dashboardGraphs from 'tower/directives/_dashboard-graphs';
 
+import routeExtensions from 'tower/shared/route-extensions/main';
+
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/controllers/JobTemplates';
@@ -71,6 +73,7 @@ var tower = angular.module('Tower', [
     'RestServices',
     dataServices.name,
     dashboardGraphs.name,
+    routeExtensions.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -184,6 +187,7 @@ var tower = angular.module('Tower', [
             $routeProvider.
 
             when('/jobs', {
+                name: 'jobs',
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: JobsListController,
                 resolve: {
@@ -204,6 +208,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/jobs/:id', {
+                name: 'jobDetail',
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: JobDetailController,
                 resolve: {
