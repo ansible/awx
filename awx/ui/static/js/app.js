@@ -198,6 +198,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/portal', {
+                name: 'portal',
                 templateUrl: urlPrefix + 'partials/portal.html',
                 controller: PortalController,
                 resolve: {
@@ -219,6 +220,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/jobs/:id/stdout', {
+                name: 'jobsStdout',
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
                 controller: JobStdoutController,
                 resolve: {
@@ -229,6 +231,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/ad_hoc_commands/:id', {
+                name: 'adHocJobStdout',
                 templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
                 controller: JobStdoutController,
                 resolve: {
@@ -239,6 +242,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/job_templates', {
+                name: 'jobTemplates',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesList,
                 resolve: {
@@ -249,6 +253,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/job_templates/add', {
+                name: 'jobTemplateAdd',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd,
                 resolve: {
@@ -259,6 +264,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/job_templates/:template_id', {
+                name: 'jobTemplateEdit',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
                 resolve: {
@@ -269,6 +275,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/job_templates/:id/schedules', {
+                name: 'jobTemplateSchedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
                 resolve: {
@@ -279,6 +286,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects', {
+                name: 'projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
                 resolve: {
@@ -289,6 +297,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects/add', {
+                name: 'projectAdd',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsAdd,
                 resolve: {
@@ -299,6 +308,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects/:id', {
+                name: 'projectEdit',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsEdit,
                 resolve: {
@@ -309,6 +319,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects/:id/schedules', {
+                name: 'projectSchedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
                 resolve: {
@@ -319,6 +330,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects/:project_id/organizations', {
+                name: 'projectOrganizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsList,
                 resolve: {
@@ -329,6 +341,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/projects/:project_id/organizations/add', {
+                name: 'projectOrganizationAdd',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd,
                 resolve: {
@@ -339,6 +352,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories', {
+                name: 'inventories',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesList,
                 resolve: {
@@ -349,6 +363,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/add', {
+                name: 'inventoryAdd',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesAdd,
                 resolve: {
@@ -359,6 +374,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id', {
+                name: 'inventoryEdit',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit,
                 resolve: {
@@ -369,6 +385,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id/job_templates/add', {
+                name: 'inventoryJobTemplateAdd',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd,
                 resolve: {
@@ -379,6 +396,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id/job_templates/:template_id', {
+                name: 'inventoryJobTemplateEdit',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
                 resolve: {
@@ -389,6 +407,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id/manage', {
+                name: 'inventoryManage',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage,
                 resolve: {
@@ -399,6 +418,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id/adhoc', {
+                name: 'inventoryAdhoc',
                 templateUrl: urlPrefix + 'partials/adhoc.html',
                 controller: AdhocCtrl,
                 resolve: {
@@ -409,6 +429,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations', {
+                name: 'organizations',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
                 resolve: {
@@ -419,6 +440,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/add', {
+                name: 'organizationAdd',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsAdd,
                 resolve: {
@@ -429,6 +451,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/:organization_id', {
+                name: 'organizationEdit',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsEdit,
                 resolve: {
@@ -439,6 +462,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/:organization_id/admins', {
+                name: 'organizationAdmins',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: AdminsList,
                 resolve: {
@@ -449,6 +473,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/:organization_id/users', {
+                name: 'organizationUsers',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
                 resolve: {
@@ -459,6 +484,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/:organization_id/users/add', {
+                name: 'organizationUserAdd',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersAdd,
                 resolve: {
@@ -469,6 +495,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/organizations/:organization_id/users/:user_id', {
+                name: 'organizationUserEdit',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
                 resolve: {
@@ -479,6 +506,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams', {
+                name: 'teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsList,
                 resolve: {
@@ -489,6 +517,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/add', {
+                name: 'teamsAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsAdd,
                 resolve: {
@@ -499,6 +528,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id', {
+                name: 'teamEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsEdit,
                 resolve: {
@@ -509,6 +539,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/permissions/add', {
+                name: 'teamPermissionAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: PermissionsAdd,
                 resolve: {
@@ -519,6 +550,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/permissions', {
+                name: 'teamPermissions',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: PermissionsList,
                 resolve: {
@@ -529,6 +561,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/permissions/:permission_id', {
+                name: 'teamPermissionEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: PermissionsEdit,
                 resolve: {
@@ -539,6 +572,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/users', {
+                name: 'teamUsers',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: UsersList,
                 resolve: {
@@ -549,6 +583,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/users/:user_id', {
+                name: 'teamUserEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: UsersEdit,
                 resolve: {
@@ -559,6 +594,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/projects', {
+                name: 'teamProjects',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsList,
                 resolve: {
@@ -569,6 +605,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/projects/add', {
+                name: 'teamProjectAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsAdd,
                 resolve: {
@@ -579,6 +616,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/projects/:project_id', {
+                name: 'teamProjectEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsEdit,
                 resolve: {
@@ -589,6 +627,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/credentials', {
+                name: 'teamCredentials',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsList,
                 resolve: {
@@ -599,6 +638,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/credentials/add', {
+                name: 'teamCredentialAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsAdd,
                 resolve: {
@@ -609,6 +649,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:team_id/credentials/:credential_id', {
+                name: 'teamCredentialEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -619,6 +660,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/credentials', {
+                name: 'credentials',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsList,
                 resolve: {
@@ -629,6 +671,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/credentials/add', {
+                name: 'credentialAdd',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsAdd,
                 resolve: {
@@ -639,6 +682,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/credentials/:credential_id', {
+                name: 'credentialEdit',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -649,6 +693,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users', {
+                name: 'users',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
                 resolve: {
@@ -659,6 +704,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/add', {
+                name: 'userAdd',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersAdd,
                 resolve: {
@@ -669,6 +715,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id', {
+                name: 'userEdit',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
                 resolve: {
@@ -679,6 +726,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id/credentials', {
+                name: 'userCredentials',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: CredentialsList,
                 resolve: {
@@ -689,6 +737,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id/permissions/add', {
+                name: 'userPermissionAdd',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: PermissionsAdd,
                 resolve: {
@@ -699,6 +748,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id/permissions', {
+                name: 'userPermissions',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: PermissionsList,
                 resolve: {
@@ -709,6 +759,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id/permissions/:permission_id', {
+                name: 'userPermissionEdit',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: PermissionsEdit,
                 resolve: {
@@ -719,6 +770,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/users/:user_id/credentials/add', {
+                name: 'userCredentialAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsAdd,
                 resolve: {
@@ -729,6 +781,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/teams/:user_id/credentials/:credential_id', {
+                name: 'teamUserCredentialEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -739,11 +792,13 @@ var tower = angular.module('Tower', [
             }).
 
             when('/login', {
+                name: 'signIn',
                 templateUrl: urlPrefix + 'partials/blank.html',
                 controller: Authenticate
             }).
 
             when('/logout', {
+                name: 'signOut',
                 templateUrl: urlPrefix + 'partials/blank.html',
                 controller: Authenticate,
                 resolve: {
@@ -754,6 +809,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/home', {
+                name: 'dashboard',
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
                 resolve: {
@@ -768,6 +824,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/home/groups', {
+                name: 'dashboardGroups',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeGroups,
                 resolve: {
@@ -778,6 +835,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/home/hosts', {
+                name: 'dashboardHosts',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeHosts,
                 resolve: {
@@ -788,6 +846,7 @@ var tower = angular.module('Tower', [
             }).
 
             when('/sockets', {
+                name: 'sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
                 controller: SocketsController
             }).

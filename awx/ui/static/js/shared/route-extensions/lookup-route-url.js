@@ -1,4 +1,4 @@
-export function lookupRouteUrl(name, routes, models) {
+export function lookupRouteUrl(name, routes, models, html5Mode) {
     var route = _.find(routes, {name: name});
 
     if (angular.isUndefined(route)) {
@@ -37,6 +37,10 @@ export function lookupRouteUrl(name, routes, models) {
                 return url.replace(keyMatcher, value);
             }, routeUrl);
 
+    }
+
+    if (!html5Mode) {
+        routeUrl = '#' + routeUrl;
     }
 
     return routeUrl;
