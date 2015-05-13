@@ -49,16 +49,16 @@
 export default function() {
     return {
         restrict: 'E',
-            link: function(scope, linkElement) {
-                var contents = Array.prototype.slice.apply(linkElement.parent().contents());
-                var commentNode = contents.filter(function(node) {
-                    // This selects a comment node
-                    return node.nodeType === 8;
-                });
+        link: function(scope, linkElement) {
+            var contents = Array.prototype.slice.apply(linkElement.parent().contents());
+            var commentNode = contents.filter(function(node) {
+                // This selects a comment node
+                return node.nodeType === 8;
+            });
 
-                var children = linkElement.children();
-                $(commentNode[0]).nextAll().remove();
-                $(commentNode[0]).after(children);
-            }
+            var children = linkElement.children();
+            $(commentNode[0]).nextAll().remove();
+            $(commentNode[0]).after(children);
+        }
     };
 }
