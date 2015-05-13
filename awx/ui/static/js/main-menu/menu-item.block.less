@@ -1,19 +1,26 @@
 /** @define MenuItem */
 
 @import (reference) "shared/utilities/icons.less";
+@import "shared/branding/colors.less";
 
 .MenuItem {
   display: flex;
   flex: none;
+
+  transition: color 60ms;
+
   padding: 0 1rem;
   min-height: 5.8rem;
   min-width: 9.2rem;
-  color: black;
   margin-right: 2rem;
   align-items: center;
 
-  &:hover {
+  &, &:active, &:focus {
       color: black;
+  }
+
+  &:hover {
+      color: @blue;
   }
 
   &:last-child {
@@ -55,14 +62,7 @@
   }
 
   &--active {
-    flex-direction: column !important;
-    justify-content: center !important;
-    background-color: rgba(255,255,255,0.35);
-    .MenuItem-hoverIcon {
-        display: flex;
-        opacity: 1 !important;
-        height: 22px !important;
-    }
+      font-weight: bold;
   }
 
   &--right {
