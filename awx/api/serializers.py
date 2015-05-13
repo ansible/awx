@@ -9,7 +9,7 @@ import logging
 from dateutil import rrule
 from ast import literal_eval
 
-from rest_framework_mongoengine.serializers import MongoEngineModelSerializer
+from rest_framework_mongoengine.serializers import MongoEngineModelSerializer, MongoEngineModelSerializerOptions
 
 # PyYAML
 import yaml
@@ -401,6 +401,23 @@ class BaseSerializer(serializers.ModelSerializer):
             #if meta.get('type', '') == 'field':
             #    meta['type'] = 'id'
         return fields
+
+
+class BaseFactSerializerOptions(MongoEngineModelSerializerOptions):
+    def __init__(self, meta):
+        super(BaseFactSerializerOptions, self).__init__(meta)
+
+
+class BaseFactSerializer(MongoEngineModelSerializer):
+    _options_class = BaseFactSerializerOptions
+    __metaclass__ = BaseSerializerMetaclass
+
+    def get_fields(self):
+        ret = super(BaseFactSerializer, self).get_fields()
+        if 'module' in ret:
+            choices = [(o, o) for o in FactVersion.objects.all().only('module').distinct('module')]
+            ret['module'] = ChoiceField(source='module', choices=choices, read_only=True, required=False)
+        return ret
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
@@ -2052,7 +2069,7 @@ class AuthTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError('Must include "username" and "password"')
 
 
-class FactVersionSerializer(MongoEngineModelSerializer):
+class FactVersionSerializer(BaseFactSerializer):
     related = serializers.SerializerMethodField('get_related')
 
     class Meta:
@@ -2071,7 +2088,8 @@ class FactVersionSerializer(MongoEngineModelSerializer):
         ))
         return res
 
-class FactSerializer(MongoEngineModelSerializer):
+
+class FactSerializer(BaseFactSerializer):
 
     class Meta:
         model = Fact
