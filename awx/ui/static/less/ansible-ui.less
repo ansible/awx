@@ -7,32 +7,6 @@
  *
  */
 
-@active-color: #EDF2F2;   // #c6e5e5;
-@black:        #171717;
-@blue:         #1778c3;   /* logo blue */
-@blue-link:    #1778c3;
-@blue-dark:    #2a6496;   /* link hover */
-@grey:         #A9A9A9;
-@grey-txt:     #707070;
-@info:         #d9edf7;   /* alert info background color */
-@info-border:  #bce8f1;   /* alert info border color */
-@info-color:   #3a87ad;
-@unreachable:  #FF0000;
-@changed:      #FF9900;   // Ansible Changed
-@skipped:      #00aaaa;   // Ansible Skipped
-@warning:      #FF9900;
-@well:         #f5f5f5;   /* well background color */
-@well-border:  #e3e3e3;
-@white:        #FFF;
-
-@tip-background: #0088CC;
-@tip-color: #fff;
-@green: #60D66F;
-@red: #ff5850;
-@red-hover: #FA8C87;
-@red-focus: #FF1105;
-
-
 @font-face {
     font-family: 'Open Sans';
     font-style: normal;
@@ -47,6 +21,7 @@
     src: url(/static/fonts/OpenSans-Bold.ttf);
 }
 
+@import "../js/shared/branding/colors.less";
 @import "main-layout.less";
 @import "animations.less";
 @import "jquery-ui-overrides.less";
@@ -111,7 +86,7 @@ blockquote {
 }
 
 a {
-  color: @blue;
+  color: @blue-link;
   text-decoration: none;
 }
 
@@ -165,7 +140,7 @@ a:focus {
 
 /* Bring primary (blue) buttons in line with link colors */
 .btn-primary {
-   background-color: @blue;
+   background-color: @blue-link;
 }
 
 .btn-primary:hover {
@@ -184,7 +159,7 @@ a:focus {
     cursor: pointer;
   }
   .dropdown .caret {
-    border-top-color: @blue;
+    border-top-color: @blue-link;
   }
 }
 
@@ -1843,7 +1818,7 @@ tr td button i {
 #sockets {
     .section-title {
         font-weight: bold;
-        color: @blue;
+        color: @blue-link;
         margin-top: 30px;
     }
     #test-container .section-title {
