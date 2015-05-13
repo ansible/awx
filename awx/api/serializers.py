@@ -120,8 +120,7 @@ class ChoiceField(fields.ChoiceField):
 
     def metadata(self):
         metadata = super(ChoiceField, self).metadata()
-        if self.choices:
-            metadata['choices'] = self.choices
+        metadata['choices'] = self.choices or []
         return metadata
 
 # Monkeypatch REST framework to replace default ChoiceField used by
