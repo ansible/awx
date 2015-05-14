@@ -762,14 +762,16 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 .success(function (data) {
                     var choices;
                     choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
-                    // including 'name' property so list can be used by search
-                    choices.forEach(function(choice) {
-                        scope[variable].push({
-                            label: choice[1],
-                            value: choice[0],
-                            name: choice[1]
+                    if (choices) {
+                        // including 'name' property so list can be used by search
+                        choices.forEach(function(choice) {
+                            scope[variable].push({
+                                label: choice[1],
+                                value: choice[0],
+                                name: choice[1]
+                            });
                         });
-                    });
+                    }
                     if (callback) {
                         scope.$emit(callback);
                     }
