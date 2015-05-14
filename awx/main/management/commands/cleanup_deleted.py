@@ -40,29 +40,6 @@ class Command(BaseCommand):
                 yield submodel
 
     def cleanup_model(self, model):
-
-        n_deleted_items = 0
-        pks_to_delete = set()
-        for asobj in ActivityStream.objects.iterator():
-            asobj_disp = '"%s" id: %s' % (unicode(asobj), asobj.id)
-            if asobj.timestamp >= self.cutoff:
-                if self.dry_run:
-                    self.logger.info("would skip %s" % asobj_disp)
-            else:
-                if self.dry_run:
-                    self.logger.info("would delete %s" % asobj_disp)
-                else:
-                    pks_to_delete.add(asobj.pk)
-            # Cleanup objects in batches instead of deleting each one individually.
-            if len(pks_to_delete) >= 500:
-                ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
-                n_deleted_items += len(pks_to_delete)
-                pks_to_delete.clear()
-        if len(pks_to_delete):
-            ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
-            n_deleted_items += len(pks_to_delete)
-        print("Removed %s items" % str(n_deleted_items))
-
         name_field = None
         active_field = None
         n_deleted_items = 0
@@ -138,6 +115,6 @@ class Command(BaseCommand):
             n_deleted_items += self.cleanup_model(model)
 
         if not self.dry_run:
-            print("Removed %s items" % str(n_deleted_items))
+            self.logger.log(99, "Removed %d items", n_deleted_items)
         else:
-            print("Would have removed %s items" % str(n_deleted_items))
+            self.logger.log(99, "Would have removed %d items", n_deleted_items)

@@ -58,7 +58,7 @@ class Command(NoArgsCommand):
         if len(pks_to_delete):
             ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
             n_deleted_items += len(pks_to_delete)
-        print("Removed %s items" % str(n_deleted_items))
+        self.logger.log(99, "Removed %d items", n_deleted_items)
 
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
