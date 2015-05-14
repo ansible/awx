@@ -186,7 +186,10 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
             // ad hoc commands parameter
             if (data.category === "Deploy") {
                 data.run_ad_hoc_commands = false;
+            } else {
+                delete data.project;
             }
+
             url = (base === 'teams') ? GetBasePath('teams') + id + '/permissions/' : GetBasePath('users') + id + '/permissions/';
             Rest.setUrl(url);
             Rest.post(data)
@@ -355,7 +358,10 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
         // ad hoc commands parameter
         if (data.category === "Deploy") {
             data.run_ad_hoc_commands = false;
+        } else {
+            delete data.project;
         }
+
         Rest.setUrl(defaultUrl);
         if($scope.category === "Inventory"){
             delete data.project;
