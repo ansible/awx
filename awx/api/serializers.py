@@ -121,6 +121,8 @@ class ChoiceField(fields.ChoiceField):
     def metadata(self):
         metadata = super(ChoiceField, self).metadata()
         metadata['choices'] = self.choices or []
+        if not self.choices:
+            metadata.pop('default', None)
         return metadata
 
 # Monkeypatch REST framework to replace default ChoiceField used by
@@ -1603,6 +1605,7 @@ class JobRelaunchSerializer(JobSerializer):
 class AdHocCommandSerializer(UnifiedJobSerializer):
 
     name = serializers.CharField(source='name', read_only=True)
+    module_name = ChoiceField(source='module_name', label='module name', required=bool(not AdHocCommand.MODULE_NAME_DEFAULT), choices=AdHocCommand.MODULE_NAME_CHOICES, default=AdHocCommand.MODULE_NAME_DEFAULT)
 
     class Meta:
         model = AdHocCommand

@@ -30,6 +30,7 @@ __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 class AdHocCommand(UnifiedJob):
 
     MODULE_NAME_CHOICES = [(x,x) for x in settings.AD_HOC_COMMANDS]
+    MODULE_NAME_DEFAULT = 'command' if 'command' in settings.AD_HOC_COMMANDS else None
 
     class Meta(object):
         app_label = 'main'
@@ -59,9 +60,9 @@ class AdHocCommand(UnifiedJob):
     )
     module_name = models.CharField(
         max_length=1024,
-        default='command',
+        default=MODULE_NAME_DEFAULT,
         choices=MODULE_NAME_CHOICES,
-        blank=True, # If blank, defaults to 'command'.
+        blank=bool(MODULE_NAME_DEFAULT),
     )
     module_args = models.TextField(
         blank=True,
