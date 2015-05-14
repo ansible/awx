@@ -1,3 +1,5 @@
+/* jshint unused: vars */
+
 export default ['browserData', function(browserData) {
     return {
         link: function(scope, element, attrs) {
@@ -6,4 +8,4 @@ export default ['browserData', function(browserData) {
                 .attr('data-platform', browserData.platform);
         }
     };
-}]
+}];
