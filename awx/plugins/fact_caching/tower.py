@@ -65,20 +65,22 @@ class CacheModule(BaseCacheModule):
                                                                         str(e)))
             sys.exit(1)
 
-    def identify_ansible_facts(self, facts):
-        ansible_keys = {}
-        for k in facts.keys():
-            if k.startswith('ansible_'):
-                ansible_keys[k] = 1
-        return ansible_keys
+    def filter_ansible_facts(self, facts):
+        return dict((k, facts[k]) for k in facts.keys() if k.startswith('ansible_'))
 
     def identify_new_module(self, key, value):
+        # Return the first key found that doesn't exist in the
+        # previous set of facts
         if key in self._cache_prev:
             value_old = self._cache_prev[key]
             for k,v in value.iteritems():
                 if k not in value_old:
                     if not k.startswith('ansible_'):
                         return k
+        # First time we have seen facts from this host
+        # it's either ansible facts or a module facts (including module_setup)
+        elif len(value) == 1:
+            return value.iterkeys().next()
         return None
 
     def get(self, key):
@@ -105,13 +107,7 @@ class CacheModule(BaseCacheModule):
     def set(self, key, value):
         module = self.identify_new_module(key, value)
         # Assume ansible fact triggered the set if no new module found
-        facts = {}
-        if not module:
-            keys = self.identify_ansible_facts(value)
-            for k in keys:
-                facts[k] = value[k]
-        else:
-            facts[module] = value[module] 
+        facts = self.filter_ansible_facts(value) if not module else dict({ module : value[module]})
 
         self._cache_prev = deepcopy(self._cache)
         self._cache[key] = value
