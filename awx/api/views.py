@@ -282,16 +282,10 @@ class DashboardView(APIView):
 
         user_hosts = get_user_queryset(request.user, Host)
         user_hosts_failed = user_hosts.filter(has_active_failures=True)
-        try:
-            user_hosts_count = user_hosts.distinct('name').count()
-            user_hosts_failed_count = user_hosts_failed.distinct('name').count()
-        except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
-            user_hosts_count = len(set(user_hosts.values_list('name', flat=True)))
-            user_hosts_failed_count = len(set(user_hosts_failed.values_list('name', flat=True)))
         data['hosts'] = {'url': reverse('api:host_list'),
                          'failures_url': reverse('api:host_list') + "?has_active_failures=True",
-                         'total': user_hosts_count,
-                         'failed': user_hosts_failed_count}
+                         'total': user_hosts.count(),
+                         'failed': user_hosts_failed.count()}
 
         user_projects = get_user_queryset(request.user, Project)
         user_projects_failed = user_projects.filter(last_job_failed=True)

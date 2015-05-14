@@ -1098,35 +1098,36 @@ class InventoryTest(BaseTest):
         self.assertEqual(response['hosts']['total'], 0)
         self.assertEqual(response['hosts']['failed'], 0)
 
-        # Create hosts with the same name in different inventories.
+        # Create hosts with the same name in different inventories.  This host
+        # count should include total hosts, not unique names.
         for x in xrange(4):
             hostname = 'host-%d' % x
             self.inventory_a.hosts.create(name=hostname)
             self.inventory_b.hosts.create(name=hostname)
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
-        self.assertEqual(response['hosts']['total'], 4)
+        self.assertEqual(response['hosts']['total'], 8)
         self.assertEqual(response['hosts']['failed'], 0)
 
         # Mark all hosts in one inventory as failed.  Failed count should
-        # reflect unique hostnames.
+        # reflect all hosts, not unique hostnames.
         for host in self.inventory_a.hosts.all():
             host.has_active_failures = True
             host.save()
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
-        self.assertEqual(response['hosts']['total'], 4)
+        self.assertEqual(response['hosts']['total'], 8)
         self.assertEqual(response['hosts']['failed'], 4)
 
         # Mark all hosts in the other inventory as failed.  Failed count
-        # should reflect unique hostnames and never be greater than total.
+        # should reflect all hosts and never be greater than total.
         for host in self.inventory_b.hosts.all():
             host.has_active_failures = True
             host.save()
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
-        self.assertEqual(response['hosts']['total'], 4)
-        self.assertEqual(response['hosts']['failed'], 4)
+        self.assertEqual(response['hosts']['total'], 8)
+        self.assertEqual(response['hosts']['failed'], 8)
 
     def test_dashboard_inventory_graph_view(self):
         url = reverse('api:dashboard_inventory_graph_view')
