@@ -15,30 +15,21 @@
 export default
     angular.module('SocketHelper', ['Utilities', 'FFSocketHelpDefinition', 'SafariSocketHelpDefinition' , 'ChromeSocketHelpDefinition'])
 
-    .factory('ShowSocketHelp', ['$location', '$rootScope', 'FFSocketHelp', 'SafariSocketHelp', 'ChromeSocketHelp', 'HelpDialog',
-    function($location, $rootScope, FFSocketHelp, SafariSocketHelp, ChromeSocketHelp, HelpDialog) {
+    .factory('ShowSocketHelp', ['$location', '$rootScope', 'FFSocketHelp', 'SafariSocketHelp', 'ChromeSocketHelp', 'HelpDialog', 'browserData',
+    function($location, $rootScope, FFSocketHelp, SafariSocketHelp, ChromeSocketHelp, HelpDialog, browserData) {
         return function() {
             var scope = $rootScope.$new();
             scope.socketPort = $AnsibleConfig.websocket_port;
             scope.socketURL = 'https://' + $location.host() + ':' + scope.socketPort + '/';
-            if ($rootScope.browser === "FF") {
-                scope.browserName = "Firefox";
+            scope.browserName = browserData.name;
+
+            if (browserData.name === 'Firefox') {
                 HelpDialog({ defn: FFSocketHelp, scope: scope });
             }
-            else if ($rootScope.browser === "SAFARI") {
-                scope.browserName = "Safari";
+            else if (browserData.name === 'Safari') {
                 HelpDialog({ defn: SafariSocketHelp, scope: scope });
             }
             else {
-                if ($rootScope.browser === "MSIE") {
-                    scope.browserName = "Internet Explorer";
-                }
-                else if ($rootScope.browser === "CHROME") {
-                    scope.browserName = "Chrome";
-                }
-                else if ($rootScope.browser === "OPERA") {
-                    scope.browserName = "Opera";
-                }
                 HelpDialog({ defn: ChromeSocketHelp, scope: scope });
             }
         };
