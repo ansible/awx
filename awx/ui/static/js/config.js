@@ -21,12 +21,12 @@
 
         debug_mode: false,                       // Enable console logging messages
 
-        password_strength: 45,                   // User password strength. Integer between 0 and 100, 100 being impossibly strong.
-                                                 // This value controls progress bar colors:
-                                                 //   0 to password_strength - 15 = red;
-                                                 //   password_strength - 15 to password_strength = yellow
-                                                 //   > password_strength = green
-                                                 // It also controls password validation. Passwords are rejected if the score is not > password_strength.
+        password_length: 8,                      // Minimum user password length.  Set to 0 to not set a limit
+        password_hasLowercase: true,             // require a lowercase letter in the password
+        password_hasUppercase: true,             // require an uppercase letter in the password
+        password_hasNumber: true,                // require a number in the password
+        password_hasSymbol: true,                // require one of these symbols to be
+                                                 // in the password: -!$%^&*()_+|~=`{}[]:";'<>?,./
 
         session_timeout: 1800,                   // Number of seconds before an inactive session is automatically timed out and forced to log in again.
                                                  // Separate from time out value set in API.

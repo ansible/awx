@@ -60,6 +60,64 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
+    // chkPass
+    //
+    // Enables use of js/shared/pwdmeter.js to check strengh of passwords.
+    // See controllers/Users.js for example.
+    //
+    .directive('chkPass', [ function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                $(elm).keyup(function() {
+                    var validity = true;
+                    if (elm.val()) {
+                        if ($AnsibleConfig.password_length) {
+                            validity = (ctrl.$modelValue.length >= $AnsibleConfig.password_length);
+                            ctrl.$setValidity('password_length', validity);
+                        }
+                        if ($AnsibleConfig.password_hasLowercase) {
+                            validity = (/[a-z]/.test(ctrl.$modelValue));
+                            ctrl.$setValidity('hasLowercase', validity);
+                        }
+                        if ($AnsibleConfig.password_hasUppercase) {
+                            validity = (/[A-Z]/.test(ctrl.$modelValue));
+                            ctrl.$setValidity('hasUppercase', validity);
+                        }
+                        if ($AnsibleConfig.password_hasNumber) {
+                            validity = (/[0-9]/.test(ctrl.$modelValue));
+                            ctrl.$setValidity('hasNumber', validity);
+                        }
+                        if ($AnsibleConfig.password_hasSymbol) {
+                            validity = (/[$-/:-?{-~!"^_`\[\]]/.test(ctrl.$modelValue));
+                            ctrl.$setValidity('hasSymbol', validity);
+                        }
+                    } else {
+                        validity = true;
+                        if ($AnsibleConfig.password_length) {
+                            ctrl.$setValidity('password_length', validity);
+                        }
+                        if ($AnsibleConfig.password_hasLowercase) {
+                            ctrl.$setValidity('hasLowercase', validity);
+                        }
+                        if ($AnsibleConfig.password_hasUppercase) {
+                            ctrl.$setValidity('hasUppercase', validity);
+                        }
+                        if ($AnsibleConfig.password_hasNumber) {
+                            ctrl.$setValidity('hasNumber', validity);
+                        }
+                        if ($AnsibleConfig.password_hasSymbol) {
+                            ctrl.$setValidity('hasSymbol', validity);
+                        }
+                    }
+                    if (!scope.$$phase) {
+                        scope.$digest();
+                    }
+                });
+            }
+        };
+    }])
+
 
 .directive('surveyCheckboxes', function(){
     return {
