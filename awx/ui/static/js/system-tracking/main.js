@@ -5,5 +5,5 @@ export default
         .config(['$routeProvider', function($routeProvider) {
             var url = route.route;
             delete route.route;
-            $routeProvider.when(url, route);
+            $routeProvider.when(url, route)
         }]);
