@@ -423,10 +423,10 @@ export default
                         else if (key === "start" || key === "end" || key === "created") {
                             if (!/Z$/.test(itm)) {
                                 itm = itm.replace(/\ /,'T') + 'Z';
-                                html += $filter('longDate')(itm);
+                                html += $filter('date')(itm, 'MM/dd/yy HH:mm:ss.sss');
                             }
                             else {
-                                html += $filter('longDate')(itm);
+                                html += $filter('date')(itm, 'MM/dd/yy HH:mm:ss');
                             }
                         }
                         else if (key === "host_name" && event.host_id) {

@@ -38,13 +38,13 @@ export default
                 "started": {
                     label: "Started",
                     type: "date",
-                    "filter": "longDate",
+                    "filter": "date:'MM/dd/yy HH:mm:ss'",
                     readonly: true
                 },
                 "finished": {
                     label: "Finished",
                     type: "date",
-                    "filter": "longDate",
+                    "filter": "date:'MM/dd/yy HH:mm:ss'",
                     readonly: true
                 },
                 "elapsed": {

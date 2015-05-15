@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('ScheduledJobsDefinition', ['sanitizeFilter', 'longDateFilter'])
+    angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
     .value( 'ScheduledJobsList', {
 
         name: 'schedules',
@@ -36,7 +36,7 @@ export default
                 noLink: true,
                 searchable: false,
                 columnClass: "col-lg-2 col-md-2 hidden-xs",
-                filter: "longDate",
+                filter: "date:'MM/dd HH:mm:ss'",
                 key: true
             },
             type: {
