@@ -52,7 +52,7 @@ export default
                 label: 'Finished',
                 noLink: true,
                 searchable: false,
-                filter: "longDate",
+                filter: "date:'MM/dd HH:mm:ss'",
                 columnClass: "col-lg-2 col-md-2 hidden-xs",
                 key: true,
                 desc: true

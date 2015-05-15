@@ -23,8 +23,7 @@
       "it": false,
       "expect": false,
       "context": false,
-      "describe": false,
-      "moment": false
+      "describe": false
     },
     "strict": false,
     "quotmark": false,
