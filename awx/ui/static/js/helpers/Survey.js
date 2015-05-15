@@ -419,7 +419,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             var scope = params.scope,
                 index = params.index,
                 element,
-                //fld,
+                tmpVar,
                 i,
                 question = params.question, //scope.survey_questions[index],
                 form = SurveyQuestionForm;
@@ -490,7 +490,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.removeGenerateForm();
             }
             scope.removeGenerateForm = scope.$on('GenerateForm', function() {
+                tmpVar = scope.mode;
                 GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
+                scope.mode = tmpVar; 
                 scope.$emit('FillQuestionForm');
             });
 
@@ -565,7 +567,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             };
 
             scope.addQuestion = function(){
-                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
+                var tmpMode = scope.mode;
+                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope: scope, related: false, breadCrumbs: false});
+                scope.mode = tmpMode;
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
                 scope.text_min = null;
                 scope.text_max = null;
@@ -992,7 +996,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             scope.saveSurvey = function() {
                 Wait('start');
-                if(scope.mode==="add"){
+                if(scope.mode ==="add"){
                     $('#survey-modal-dialog').dialog('close');
                     if(questions.length>0){
                         scope.survey_questions = questions;
@@ -1014,7 +1018,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                             scope.$emit('SurveySaved');
                         })
                         .error(function (data, status) {
-                            ProcessErrors(scope, data, status, { hdr: 'Error!',
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to add new survey. POST returned status: ' + status });
                         });
                 }
