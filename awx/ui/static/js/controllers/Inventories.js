@@ -895,28 +895,17 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         // you need this so that the event doesn't bubble to the watcher above
         // for the host list
         e.stopPropagation();
-        if (selection.length === 0) {
-            $scope.hostsSelected = false;
-        } else if (selection.length === 1) {
-            $scope.systemTrackingTooltip = "Compare host over time";
+        if (selection.length > 0) {
             $scope.hostsSelected = true;
-            $scope.systemTrackingDisabled = false;
-        } else if (selection.length === 2) {
-            $scope.systemTrackingTooltip = "Compare hosts against each other";
-            $scope.hostsSelected = true;
-            $scope.systemTrackingDisabled = false;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "selected groups and hosts.";
         } else {
-            $scope.hostsSelected = true;
-            $scope.systemTrackingDisabled = true;
+            $scope.hostsSelected = false;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "inventory.";
         }
         $scope.hostsSelectedItems = selection.selectedItems;
     });
-
-    $scope.systemTracking = function() {
-        $location.path('/inventories/' + $scope.inventory.id +
-            '/system-tracking/' +
-            _.pluck($scope.hostsSelectedItems, "id").join(","));
-    };
 
     // populates host patterns based on selected hosts/groups
     $scope.populateAdhocForm = function() {

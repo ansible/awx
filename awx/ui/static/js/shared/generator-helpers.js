@@ -103,9 +103,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 action = params.action,
                 size = params.size;
             switch (action) {
-            case 'system_tracking':
-                icon = "fa-crosshairs";
-                break;
             case 'help':
                 icon = "fa-question-circle";
                 break;
