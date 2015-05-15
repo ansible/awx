@@ -44,10 +44,10 @@
                 <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12
                     StandardOutDetails-detailContent">
                     <div ng-show="job.started" id="started-time">
-                        Started &nbsp;{{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                        Started &nbsp;{{ job.started | longDate }}
                     </div>
                     <div ng-show="job.finished" id="finished-time">
-                        Finished &nbsp;{{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                        Finished &nbsp;{{ job.finished | longDate }}
                     </div>
                     <div ng-show="job.finished" id="elapsed-time">
                         Elapsed &nbsp;{{ job.elapsed }} seconds

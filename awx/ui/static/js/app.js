@@ -180,7 +180,8 @@ var tower = angular.module('Tower', [
     'CreateCustomInventoryHelper',
     'CustomInventoryListDefinition',
     'AdhocHelper',
-    'features'
+    'features',
+    'longDateFilter'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

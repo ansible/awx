@@ -12,7 +12,7 @@
 
 
 export default
-    angular.module('PortalJobsListDefinition', [])
+    angular.module('PortalJobsListDefinition', ['longDateFilter'])
     .value( 'PortalJobsList', {
 
         name: 'portal_jobs',
@@ -58,7 +58,7 @@ export default
                 label: 'Started',
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd HH:mm:ss'",
+                filter: "longDate",
                 columnClass: "col-lg-3 col-md-3 hidden-xs"
             },
             name: {
