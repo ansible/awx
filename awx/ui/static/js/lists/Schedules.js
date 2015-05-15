@@ -29,19 +29,19 @@ export default
             },
             dtstart: {
                 label: 'First Run',
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "longDate",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 hidden-xs"
             },
             next_run: {
                 label: 'Next Run',
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "longDate",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 col-xs-3"
             },
             dtend: {
                 label: 'Final Run',
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "longDate",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 hidden-xs"
             }

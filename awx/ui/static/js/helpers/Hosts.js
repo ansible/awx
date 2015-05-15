@@ -121,7 +121,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                             ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";
 
-                        html += "<td>" + ($filter('date')(job.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>\n";
+                        html += "<td>" + ($filter('longDate')(job.finished)).replace(/ /,'<br />') + "</td>\n";
 
                         html += "<td class=\"break\"><a href=\"#/jobs/" + job.id + "\" " +
                             "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +

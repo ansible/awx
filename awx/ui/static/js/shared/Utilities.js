@@ -572,7 +572,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 .factory('FormatDate', ['$filter',
     function ($filter) {
         return function (dt) {
-            return $filter('date')(dt, 'MM/dd/yy HH:mm:ss');
+            return $filter('longDate')(dt);
         };
     }
 ])

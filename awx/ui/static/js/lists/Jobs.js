@@ -57,7 +57,7 @@ export default
                 label: 'Started',
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd HH:mm:ss'",
+                filter: "longDate",
                 columnClass: "col-lg-2 col-md-2 hidden-xs"
             },
             type: {

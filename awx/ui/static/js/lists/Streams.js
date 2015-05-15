@@ -29,7 +29,7 @@ export default
                 desc: true,
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'"
+                filter: "longDate"
             },
             user: {
                 label: 'Initiated by',
