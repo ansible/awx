@@ -29,7 +29,7 @@ class Command(BaseCommand):
         # rules here will grow more complicated over time.
         # FIXME: Most likely this should be False if HA is active
         #        (not just enabled by license, but actually in use).
-        uses_mongo = system_tracking
+        uses_mongo = system_tracking  # noqa
 
         # If we do not need Mongo, return a non-zero exit status.
         print('MongoDB NOT required')
