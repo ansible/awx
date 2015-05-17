@@ -14,6 +14,8 @@ import time
 from multiprocessing import Process
 from subprocess import Popen
 import re
+from copy import copy
+import mock
 
 # PyYAML
 import yaml
@@ -76,8 +78,15 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
+class MockCommonlySlowTestMixin(object):
+    def __init__(self, *args, **kwargs):
+    #def setUp(self):
+        from awx.api import generics
+        mock.patch.object(generics, 'get_view_description', return_value=None).start()
+        super(MockCommonlySlowTestMixin, self).__init__(*args, **kwargs)
+
 ansible_version = get_ansible_version()
-class BaseTestMixin(QueueTestMixin):
+class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
     '''
     Mixin with shared code for use by all test cases.
     '''
@@ -686,6 +695,71 @@ class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
     '''
     Base class for celery task tests.
     '''
+
+#class SetupTeardownOnceTestMixin(django.test.TestCase):
+flag_setup_ran = False
+self_backup = {}
+class SetupTeardownOnceTestMixin(BaseTest):
+
+    def __init__(self, *args, **kwargs):
+        global flag_setup_ran
+        self.setup_ran = flag_setup_ran
+        super(SetupTeardownOnceTestMixin, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def setUpClass(cls):
+        super(SetupTeardownOnceTestMixin, cls).setUpClass()
+
+    '''
+    def setUp(self):
+        global flag_setup_ran
+        super(SetupTeardownOnceTestMixin, self).setUp()
+        self.setup_ran = flag_setup_ran
+    '''
+
+    '''
+    def _pre_setup(self):
+        if not self.setup_ran:
+            super(SetupTeardownOnceTestMixin, self)._pre_setup()
+    '''
+    def _fixture_setup(self):
+        return
+    def _real_fixture_setup(self):
+        super(SetupTeardownOnceTestMixin, self)._fixture_setup()
+
+    '''
+    def _fixture_teardown(self):
+        return
+    def _post_teardown(self):
+        return
+    '''
+
+    def setup(self):
+        global flag_setup_ran
+        global self_backup
+
+        if not self.setup_ran:
+            self._real_fixture_setup()
+
+        if not flag_setup_ran:
+            self_backup = copy(self)
+            flag_setup_ran = True
+        else:
+            for k, v in self_backup.__dict__.iteritems():
+                if k not in self_backup._keys_before:
+                    setattr(self, k, v)
+
+
+    def should_setup(self):
+        self._keys_before = None
+        self._keys_before = self.__dict__.keys()
+        global flag_setup_ran
+        return not flag_setup_ran
+
+    @classmethod
+    def tearDownClass(cls):
+        #super(SetupTeardownOnceTestMixin, cls._self)._fixture_teardown()
+        super(SetupTeardownOnceTestMixin, cls).tearDownClass()
 
 # Helps with test cases.
 # Save all components of a uri (i.e. scheme, username, password, etc.) so that
