@@ -89,7 +89,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                             ctrl.$setValidity('hasNumber', validity);
                         }
                         if ($AnsibleConfig.password_hasSymbol) {
-                            validity = (/[$-/:-?{-~!"^_`\[\]]/.test(ctrl.$modelValue));
+                            validity = (/[\\#@$-/:-?{-~!"^_`\[\]]/.test(ctrl.$modelValue));
                             ctrl.$setValidity('hasSymbol', validity);
                         }
                     } else {
