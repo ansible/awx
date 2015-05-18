@@ -104,6 +104,11 @@ class FactScanBuilder(object):
         self.version_objs = []
         self.timestamps = []
 
+        self.epoch = now().replace(year=2015, microsecond=0)
+
+    def set_epoch(self, epoch):
+        self.epoch = epoch
+
     def add_fact(self, module, facts):
         self.facts_data[module] = facts
 
@@ -124,7 +129,7 @@ class FactScanBuilder(object):
         for i in range(0, scan_count):
             scan = {}
             scan_version = {}
-            timestamp = now().replace(year=2015 - i, microsecond=0)
+            timestamp = self.epoch.replace(year=self.epoch.year - i, microsecond=0)
             for module in self.facts_data:
                 fact_objs = []
                 version_objs = []
@@ -181,6 +186,16 @@ class FactScanBuilder(object):
 
         return [self.host_objs[i].hostname for i in range(index_start, index_end)]
 
+    def get_host(self, index):
+        return self.host_objs[index]
+
+    def get_hosts(self, index_start=None, index_end=None):
+        if index_start is None:
+            index_start = 0
+        if index_end is None:
+            index_end = len(self.host_objs)
+
+        return self.host_objs[index_start:index_end]
 
     def get_scan_count(self):
         return len(self.fact_objs)
