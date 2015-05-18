@@ -36,7 +36,7 @@ export default
                 noLink: true,
                 searchable: false,
                 columnClass: "col-lg-2 col-md-2 hidden-xs",
-                filter: "date:'MM/dd HH:mm:ss'",
+                filter: "longDate",
                 key: true
             },
             type: {

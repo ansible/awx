@@ -45,7 +45,7 @@ export default
             },
             last_updated: {
                 label: 'Last Updated',
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "longDate",
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 excludeModal: true,
                 searchable: false,

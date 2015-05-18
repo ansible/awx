@@ -175,7 +175,7 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
             }
             //cDate = new Date(set[i].created);
             //set[i].created = FormatDate(cDate);
-            set[i].created = $filter('date')(set[i].created, 'MM/dd HH:mm:ss');
+            set[i].created = $filter('longDate')(set[i].created);
         }
 
         // Need below lookup to get inventory_id, which is not on event record. Plus, good idea to get status and name

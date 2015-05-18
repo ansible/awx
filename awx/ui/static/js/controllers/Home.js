@@ -422,7 +422,7 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
                     row.status + "\"></i></a></td>\n";
-                html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td>" + ($filter('longDate')(row.finished)).replace(/ /,'<br />') + "</td>";
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\">" + ellipsis(row.name) + "</a></td>";
                 html += "</tr>\n";
@@ -457,7 +457,7 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
         data.results.forEach( function(row) {
             html += "<tr>";
             html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
-            html += "<td>" + ($filter('date')(row.last_updated,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+            html += "<td>" + ($filter('longDate')(row.last_updated)).replace(/ /,'<br />') + "</td>";
             html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
             html += "</tr>\n";
         });
