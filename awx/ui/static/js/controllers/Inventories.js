@@ -848,8 +848,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
-    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize,
-    GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
+    InventoryGroupsHelp, HelpDialog, ViewJob,
     GroupsCopy, HostsCopy, Socket) {
 
     var PreviousSearchParams,
@@ -1000,14 +999,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
             scope: $scope
         });
 
-        if ($(window).width() > 1210) {
-            $scope.initial_height = GetGroupContainerHeight();
-            $('#groups-container .list-table-container').height($scope.initial_height);
-            rows = GetGroupContainerRows();
-        }
-        else {
-            rows = 20;
-        }
+        rows = 20;
         hostScope.host_page_size = rows;
         $scope.group_page_size = rows;
 
@@ -1022,8 +1014,20 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         });
 
         // Load data
-        SearchInit({ scope: $scope, set: 'groups', list: InventoryGroups, url: $scope.inventory.related.root_groups });
-        PaginateInit({ scope: $scope, list: InventoryGroups , url: $scope.inventory.related.root_groups, pageSize: rows });
+        SearchInit({
+            scope: $scope,
+            set: 'groups',
+            list: InventoryGroups,
+            url: $scope.inventory.related.root_groups
+        });
+
+        PaginateInit({
+            scope: $scope,
+            list: InventoryGroups ,
+            url: $scope.inventory.related.root_groups,
+            pageSize: rows
+        });
+
         $scope.search(InventoryGroups.iterator, null, true);
 
         $scope.$emit('WatchUpdateStatus');  // init socket io conneciton and start watching for status updates
@@ -1071,12 +1075,6 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
             else {
                 Wait('stop');
             }
-
-            WatchInventoryWindowResize({
-                group_scope: $scope,
-                host_scope: hostScope
-            });
-
         }
     });
 
@@ -1454,8 +1452,6 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
-    'InventoryGroupsHelp', 'HelpDialog', 'ViewJob',
-    'WatchInventoryWindowResize', 'GetHostContainerRows',
-    'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy',
+    'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
     'HostsCopy', 'Socket'
 ];

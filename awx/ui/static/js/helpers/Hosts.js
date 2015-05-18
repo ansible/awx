@@ -173,9 +173,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
 }])
 
 .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
-         'SetHostStatus', 'SetStatus', 'ApplyEllipsis', 'SetContainerHeights', 'GetHostContainerRows',
+         'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
          function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
-                  ApplyEllipsis, SetContainerHeights) {
+                  ApplyEllipsis) {
                       return function(params) {
 
                           var scope = params.scope,
@@ -207,9 +207,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                   }
                               }
                           });
-
-                          // Size containers based on viewport
-                          SetContainerHeights({ scope: scope, reloadHosts: false });
 
                           SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
                           PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
@@ -408,7 +405,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                 inventory_id: parent_scope.inventory_id
                             });
 
-                            //WatchInventoryWindowResize();
                         });
 
                         // Save
@@ -446,7 +442,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                         };
 
                         scope.cancelModal = function() {
-                            // WatchInventoryWindowResize();
+
                         };
 
                     };
