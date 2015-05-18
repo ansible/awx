@@ -393,11 +393,12 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                os.kill(child.pid, signal.SIGINT)
-                time.sleep(3)
-                # The following line causes orphaned ansible processes
-                # child.terminate(canceled)
-                canceled = True
+                try:
+                    os.kill(child.pid, signal.SIGINT)
+                    time.sleep(3)
+                    canceled = True
+                except OSError:
+                    logger.warn("Attempted to cancel already finished job, ignoring")
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
