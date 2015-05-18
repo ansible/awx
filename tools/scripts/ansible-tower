@@ -35,8 +35,24 @@ service_action() {
         fi
         # Allow supervisor time to cleanup child pids (ubuntu only)
         if [[ ${svc} == supervisor* && ${1} == stop && -e /etc/debian_version ]]; then
-            echo "Waiting to allow supervisor time to cleanup ..."
-            sleep 5
+	        S_PID=$(pidof -x supervisord)
+            echo "Waiting to allow supervisor time to cleanup ... pid ${S_PID}"
+            if [ "${S_PID}" ]; then
+                i=0
+                while kill -0 "${S_PID}" 2> /dev/null; do
+                    if [ $i = '60' ]; then
+                        break;
+                    else
+                        if [ $i == '0' ]; then
+                            echo -n " ... waiting"
+                        else
+                            echo -n "."
+                        fi
+                        i=$(($i+1))
+                        sleep 1
+                    fi
+                done
+            fi
         fi
     done
 }
