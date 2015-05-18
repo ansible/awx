@@ -2,7 +2,7 @@ import systemTracking from 'tower/system-tracking/main';
 import {describeModule} from '../describe-module';
 
 describeModule(systemTracking.name)
-    .testService('singleHostDataService', function(test, restStub) {
+    .testService('factScanDataService', function(test, restStub) {
 
         var service;
 

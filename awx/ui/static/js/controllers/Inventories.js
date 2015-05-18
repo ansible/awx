@@ -802,7 +802,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob,
-    GroupsCopy, HostsCopy) {
+    GroupsCopy, HostsCopy, transitionTo) {
 
     var PreviousSearchParams,
         url,
@@ -864,9 +864,10 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     });
 
     $scope.systemTracking = function() {
-        $location.path('/inventories/' + $scope.inventory.id +
-            '/system-tracking/' +
-            _.pluck($scope.hostsSelectedItems, "id").join(","));
+        transitionTo('systemTracking',
+                     {  inventory: $scope.inventory,
+                        hosts: $scope.hostsSelectedItems
+                     });
     };
 
     // populates host patterns based on selected hosts/groups
@@ -1411,5 +1412,5 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
     'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
-    'HostsCopy'
+    'HostsCopy', 'transitionTo'
 ];

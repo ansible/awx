@@ -91,7 +91,7 @@ export default
         function($location, $rootScope, $route, $q) {
             return function(routeName, model) {
                 var deferred = $q.defer();
-                var url = lookupRouteUrl(routeName, $route.routes, model);
+                var url = lookupRouteUrl(routeName, $route.routes, model, true);
 
                 var offRouteChangeStart =
                     $rootScope.$on('$routeChangeStart', function(e, newRoute) {

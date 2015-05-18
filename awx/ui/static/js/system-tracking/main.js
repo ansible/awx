@@ -1,21 +1,21 @@
 import route from './system-tracking.route';
-import singleHostDataService from './single-host-data.service';
-import factDataServiceFactory from './fact-data-service.factory';
+import factScanDataService from './data-services/fact-scan-data.service';
+import getDataForComparison from './data-services/get-data-for-comparison.factory';
 import controller from './system-tracking.controller';
 import stringOrDateFilter from './string-or-date.filter';
-import xorObjects from './xor-objects.factory';
-import formatResults from './format-results.factory';
-import compareHosts from './compare-hosts.factory';
+import shared from 'tower/shared/main';
+import utilities from 'tower/shared/Utilities';
+import datePicker from './date-picker/main';
 
 export default
     angular.module('systemTracking',
-                   [    'angularMoment'
+                   [   'angularMoment',
+                       utilities.name,
+                       shared.name,
+                       datePicker.name
                    ])
-        .factory('factDataServiceFactory', factDataServiceFactory)
-        .service('singleHostDataService', singleHostDataService)
-        .factory('xorObjects', xorObjects)
-        .factory('formatResults', formatResults)
-        .factory('compareHosts', compareHosts)
+        .service('factScanDataService', factScanDataService)
+        .factory('getDataForComparison', getDataForComparison)
         .filter('stringOrDate', stringOrDateFilter)
         .controller('systemTracking', controller)
         .config(['$routeProvider', function($routeProvider) {
@@ -23,6 +23,3 @@ export default
             delete route.route;
             $routeProvider.when(url, route);
         }]);
-
-
-

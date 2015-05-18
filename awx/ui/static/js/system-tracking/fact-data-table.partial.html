@@ -1,0 +1,38 @@
+<table class="table table-condensed">
+    <thead>
+    <tr>
+        <th></th>
+        <th>{{comparisonLeftHeader|stringOrDate:'L'}}</th>
+        <th>{{comparisonRightHeader|stringOrDate:'L'}}</th>
+    </tr>
+    </thead>
+    <tbody ng-repeat="group in factData">
+    <tr ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">
+        <td colspan="3" ng-switch-when="0">
+            <h2>{{group.displayKeyPath}}</h2>
+        </td>
+        <td colspan="3" ng-switch-when="1">
+            <h3>{{group.displayKeyPath}}</h3>
+        </td>
+        <td colspan="3" ng-switch-when="2">
+            <h4>{{group.displayKeyPath}}</h4>
+        </td>
+        <td colspan="3" ng-switch-when="3">
+            <h5>{{group.displayKeyPath}}</h5>
+        </td>
+    </tr>
+    <tr ng-repeat="fact in group.facts" data-fact-array-position="{{fact.arrayPosition}}">
+        <td>{{fact.keyName}}</td>
+        <td>
+            <p style="word-break: break-all;">
+            {{fact.value1}}
+            </p>
+        </td>
+        <td>
+            <p style="word-break: break-all;">
+            {{fact.value2}}
+            </p>
+        </td>
+    </tr>
+    </tbody>
+</table>
