@@ -1247,6 +1247,19 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def task_impact(self):
         return 50
 
+    # InventoryUpdate credential required
+    # Custom InventoryUpdate credential not required
+    @property
+    def can_start(self):
+        if not super(InventoryUpdate, self).can_start:
+            return False
+
+        if self.source != 'custom' \
+            and not (self.credential and self.credential.active):
+            return False
+        return True
+
+
 class CustomInventoryScript(CommonModelNameNotUnique):
 
     class Meta:
