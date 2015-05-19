@@ -18,6 +18,7 @@ from django.utils.timezone import now
 from crum import impersonate
 
 # AWX
+from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseJobExecutionTest
 
@@ -345,22 +346,23 @@ class RunJobTest(BaseJobExecutionTest):
     '''
 
     def setUp(self):
-        super(RunJobTest, self).setUp()
-        self.test_project_path = None
-        self.setup_instances()
-        self.setup_users()
-        self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.inventory = self.organization.inventories.create(name='test-inventory',
-                                                              description='description for test-inventory')
-        self.host = self.inventory.hosts.create(name='host.example.com')
-        self.group = self.inventory.groups.create(name='test-group')
-        self.group2 = self.inventory.groups.create(name='test-group2')
-        self.group.hosts.add(self.host)
-        self.group2.hosts.add(self.host)
-        self.project = None
-        self.credential = None
-        self.cloud_credential = None
-        settings.INTERNAL_API_URL = self.live_server_url
+        with ignore_inventory_computed_fields():
+          super(RunJobTest, self).setUp()
+          self.test_project_path = None
+          self.setup_instances()
+          self.setup_users()
+          self.organization = self.make_organizations(self.super_django_user, 1)[0]
+          self.inventory = self.organization.inventories.create(name='test-inventory',
+                                                                description='description for test-inventory')
+          self.host = self.inventory.hosts.create(name='host.example.com')
+          self.group = self.inventory.groups.create(name='test-group')
+          self.group2 = self.inventory.groups.create(name='test-group2')
+          self.group.hosts.add(self.host)
+          self.group2.hosts.add(self.host)
+          self.project = None
+          self.credential = None
+          self.cloud_credential = None
+          settings.INTERNAL_API_URL = self.live_server_url
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
@@ -562,6 +564,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertEqual(qs.count(), 0)
 
     def test_run_job(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -590,6 +593,7 @@ class RunJobTest(BaseJobExecutionTest):
         return job
 
     def test_check_job(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template, job_type='check')
@@ -617,6 +621,7 @@ class RunJobTest(BaseJobExecutionTest):
         return job
 
     def test_run_job_that_fails(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK2)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -644,6 +649,7 @@ class RunJobTest(BaseJobExecutionTest):
         return job
 
     def test_run_job_with_ignore_errors(self):
+        self.create_test_credential()
         self.create_test_project(TEST_IGNORE_ERRORS_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -766,6 +772,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertEqual(self.host.last_job_host_summary, None)
 
     def test_check_job_where_task_would_fail(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK2)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template, job_type='check')
@@ -799,6 +806,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertTrue(job.cancel())  # No change from calling again.
 
     def test_cancel_job(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         # Pass save=False just for the sake of test coverage.
@@ -824,6 +832,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertFalse(job.signal_start())
 
     def test_extra_job_options(self):
+        self.create_test_credential()
         self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
         # Test with extra_vars containing misc whitespace.
         job_template = self.create_test_job_template(force_handlers=True,
@@ -856,6 +865,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.check_job_result(job3, 'successful')
 
     def test_lots_of_extra_vars(self):
+        self.create_test_credential()
         self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
         extra_vars = json.dumps(dict(('var_%d' % x, x) for x in xrange(200)))
         job_template = self.create_test_job_template(extra_vars=extra_vars)
@@ -869,6 +879,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertTrue('"-e"' in job.job_args)
 
     def test_limit_option(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template(limit='bad.example.com')
         job = self.create_test_job(job_template=job_template)
@@ -893,6 +904,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertTrue('ssh-agent' in job.job_args)
 
     def test_tag_and_task_options(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK_WITH_TAGS)
         job_template = self.create_test_job_template(job_tags='runme',
                                                      skip_tags='skipme',
@@ -972,6 +984,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertFalse('"--become-method"' in job.job_args)
 
     def test_job_template_become_enabled(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template(become_enabled=True)
         job = self.create_test_job(job_template=job_template)
@@ -1127,6 +1140,7 @@ class RunJobTest(BaseJobExecutionTest):
                                           ssh_key_data=TEST_SSH_CERT_KEY)
         playbook = TEST_ENV_PLAYBOOK % {'env_var1': env_var1,
                                         'env_var2': env_var2}
+        self.create_test_credential()
         self.create_test_project(playbook)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1154,6 +1168,7 @@ class RunJobTest(BaseJobExecutionTest):
         self._test_cloud_credential_environment_variables('vmware')
 
     def test_run_async_job(self):
+        self.create_test_credential()
         self.create_test_project(TEST_ASYNC_OK_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1184,6 +1199,7 @@ class RunJobTest(BaseJobExecutionTest):
         # FIXME: We are not sure why proot needs to be disabled on this test
         # Maybe they are simply susceptable to timing and proot adds time
         settings.AWX_PROOT_ENABLED = False
+        self.create_test_credential()
         self.create_test_project(TEST_ASYNC_FAIL_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1214,6 +1230,7 @@ class RunJobTest(BaseJobExecutionTest):
         # FIXME: We are not sure why proot needs to be disabled on this test
         # Maybe they are simply susceptable to timing and proot adds time
         settings.AWX_PROOT_ENABLED = False
+        self.create_test_credential()
         self.create_test_project(TEST_ASYNC_TIMEOUT_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1242,6 +1259,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_run_async_job_fire_and_forget(self):
+        self.create_test_credential()
         self.create_test_project(TEST_ASYNC_NOWAIT_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1269,6 +1287,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_run_job_with_roles(self):
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK_WITH_ROLES, TEST_ROLE_PLAYBOOKS)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -1299,6 +1318,7 @@ class RunJobTest(BaseJobExecutionTest):
         settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
         # Create another project alongside the one we're using to verify it
         # is hidden. 
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         other_project_path = self.project.local_path
         # Create a temp directory that should not be visible to the playbook.
@@ -1334,6 +1354,7 @@ class RunJobTest(BaseJobExecutionTest):
         # Enable proot for this test, specify invalid proot cmd.
         settings.AWX_PROOT_ENABLED = True
         settings.AWX_PROOT_CMD = 'PR00T'
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
