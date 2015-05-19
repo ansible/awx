@@ -483,6 +483,24 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def create(self, request, *args, **kwargs):
+        """Create a new organzation.
+
+        If there is already an organization and the license of the Tower
+        instance does not permit multiple organizations, then raise
+        LicenseForbids.
+        """
+        # Sanity check: If the multiple organizations feature is disallowed
+        # by the license, then we are only willing to create this organization
+        # if no organizations exist in the system.
+        if (not feature_enabled('multiple_organizations') and
+                    self.model.objects.filter(active=True).count() > 0):
+            raise LicenseForbids('This Tower license only permits a single '
+                                 'organization to exist.')
+
+        # Okay, create the organization as usual.
+        return super(OrganizationList, self).create(request, *args, **kwargs)
+
 class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 
     model = Organization
@@ -1274,7 +1292,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
     is_variable_data = True # Special flag for permissions check.
-    
+
 class InventoryVariableData(BaseVariableData):
 
     model = Inventory
@@ -1335,7 +1353,7 @@ class InventoryScriptView(RetrieveAPIView):
             for group_id, host_id, host_name in group_hosts_qs:
                 group_hostnames = group_hosts_map.setdefault(group_id, [])
                 group_hostnames.append(host_name)
-        
+
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
                 from_group__inventory_id=self.object.id, from_group__active=True,
@@ -1856,7 +1874,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
-            
+
         new_job = obj.create_unified_job(**request.DATA)
         new_job.signal_start(**request.DATA)
         data = dict(system_job=new_job.id)
@@ -2190,7 +2208,7 @@ class JobJobTasksList(BaseJobEventsList):
         # This is super tricky, because this table has a one-to-many
         # relationship with itself (parent-child), and we're getting
         # information for an arbitrary number of children. This means we
-        # need stats on grandchildren, sorted by child. 
+        # need stats on grandchildren, sorted by child.
         queryset = (JobEvent.objects.filter(parent__parent=parent_task,
                                             parent__event__in=STARTING_EVENTS)
                                     .values('parent__id', 'event', 'changed')
@@ -2531,7 +2549,7 @@ class UnifiedJobList(ListAPIView):
     new_in_148 = True
 
 class UnifiedJobStdout(RetrieveAPIView):
-    
+
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,
@@ -2554,7 +2572,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             context = {
                 'title': get_view_name(self.__class__),
                 'body': mark_safe(body),
-                'dark': dark_bg, 
+                'dark': dark_bg,
                 'content_only': content_only,
             }
             data = render_to_string('api/stdout.html', context).strip()
