@@ -201,17 +201,6 @@ class AdHocCommand(UnifiedJob):
                 update_fields.append('name')
         super(AdHocCommand, self).save(*args, **kwargs)
 
-    # AdHocCommand Credential required
-    @property
-    def can_start(self):
-        if not super(AdHocCommand, self).can_start:
-            return False
-
-        if not (self.credential and self.credential.active):
-            return False
-
-        return True
-
 
 class AdHocCommandEvent(CreatedModifiedModel):
     '''
