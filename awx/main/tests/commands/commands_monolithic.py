@@ -341,7 +341,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
             shutil.rmtree(self.test_project_path, True)
 
     def create_test_credential(self, **kwargs):
-        self.credential = self.make_credential(kwargs)
+        self.credential = self.make_credential(**kwargs)
         return self.credential
 
     def create_test_project(self, playbook_content):
@@ -409,6 +409,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(ad_hoc_commands_before, ad_hoc_commands_after)
 
         # Create and run job.
+        self.create_test_credential()
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
