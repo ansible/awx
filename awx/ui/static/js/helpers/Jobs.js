@@ -181,8 +181,7 @@ export default
     ])
 
     .factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
-        'WatchInventoryWindowResize',
-        function (Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary, WatchInventoryWindowResize) {
+        function (Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary) {
             return function (params) {
                 // Display status info in a modal dialog- called from inventory edit page
 
@@ -261,7 +260,6 @@ export default
                         });
                         $('#status-modal-dialog').dialog('destroy');
                         $('#inventory-modal-container').empty();
-                        WatchInventoryWindowResize();
                     },
                     open: function () {
                         Wait('stop');
