@@ -707,11 +707,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  */
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-         'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
+         'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
          'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
          function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
-                   GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
+                   GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
                    SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
                        return function (params) {
 
@@ -1230,7 +1230,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
                                // Clean up
                                Wait('stop');
-                               WatchInventoryWindowResize();
+
                                if (modal_scope.searchCleanUp) {
                                    modal_scope.searchCleanup();
                                }
@@ -2124,7 +2124,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                        });
                                        $('#status-modal-dialog').dialog('destroy');
                                        $('#inventory-modal-container').empty();
-                                       //WatchInventoryWindowResize();
                                    },
                                    open: function () {
                                        Wait('stop');
