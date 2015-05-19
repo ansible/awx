@@ -11,7 +11,7 @@ from django.core.management.base import CommandError
 
 # AWX
 from awx.main.tests.base import BaseTest
-from awx.fact.tests.base import MongoDBRequired
+from awx.fact.tests.base import MongoDBRequired, FactScanBuilder, TEST_FACT_PACKAGES, TEST_FACT_ANSIBLE, TEST_FACT_SERVICES
 from awx.main.tests.commands.base import BaseCommandMixin
 from awx.main.management.commands.cleanup_facts import Command, CleanupFacts
 from awx.fact.models.fact import * # noqa
@@ -19,8 +19,14 @@ from awx.fact.models.fact import * # noqa
 __all__ = ['CommandTest','CleanupFactsUnitTest', 'CleanupFactsCommandFunctionalTest']
 
 class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequired):
+    def setUp(self):
+        super(CleanupFactsCommandFunctionalTest, self).setUp()
+        self.builder = FactScanBuilder()
+        self.builder.add_fact('ansible', TEST_FACT_ANSIBLE)
+
     def test_invoke_zero_ok(self):
-        self.create_hosts_and_facts(datetime(year=2015, day=2, month=1, microsecond=0), 10, 20)
+        self.builder.set_epoch(datetime(year=2015, day=2, month=1, microsecond=0))
+        self.builder.build(scan_count=20, host_count=10)
 
         result, stdout, stderr = self.run_command('cleanup_facts', granularity='2y', older_than='1d')
         self.assertEqual(stdout, 'Deleted %s facts.\n' % ((200 / 2)))
@@ -30,7 +36,7 @@ class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequi
         self.assertEqual(stdout, 'Deleted 0 facts.\n')
 
     def test_invoke_all_deleted(self):
-        self.create_hosts_and_facts(datetime(year=2015, day=2, month=1, microsecond=0), 10, 20)
+        self.builder.build(scan_count=20, host_count=10)
 
         result, stdout, stderr = self.run_command('cleanup_facts', granularity='0d', older_than='0d')
         self.assertEqual(stdout, 'Deleted 200 facts.\n')
@@ -40,6 +46,14 @@ class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequi
         self.assertIsInstance(result, CommandError)
         self.assertEqual(str(result), 'Both --granularity and --older_than are required.') 
 
+    def test_module(self):
+        self.builder.add_fact('packages', TEST_FACT_PACKAGES)
+        self.builder.add_fact('services', TEST_FACT_SERVICES)
+        self.builder.build(scan_count=5, host_count=5)
+
+        result, stdout, stderr = self.run_command('cleanup_facts', granularity='0d', older_than='0d', module='packages')
+        self.assertEqual(stdout, 'Deleted 25 facts.\n')
+
 class CommandTest(BaseTest):
     @mock.patch('awx.main.management.commands.cleanup_facts.CleanupFacts.run')
     def test_parameters_ok(self, run):
@@ -47,10 +61,11 @@ class CommandTest(BaseTest):
         kv = {
             'older_than': '1d',
             'granularity': '1d',
+            'module': None,
         }
         cmd = Command()
         cmd.handle(None, **kv)
-        run.assert_called_once_with(relativedelta(days=1), relativedelta(days=1))
+        run.assert_called_once_with(relativedelta(days=1), relativedelta(days=1), module=None)
 
     def test_string_time_to_timestamp_ok(self):
         kvs = [
@@ -132,11 +147,9 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
     def setUp(self):
         super(CleanupFactsUnitTest, self).setUp()
 
-        self.datetime_base = datetime(year=2015, day=2, month=1, microsecond=0)
-        self.HOSTS = 10
-        self.FACTS_PER_HOST = 20
-
-        self.create_hosts_and_facts(self.datetime_base, self.HOSTS, self.FACTS_PER_HOST)
+        self.builder = FactScanBuilder()
+        self.builder.add_fact('ansible', TEST_FACT_ANSIBLE)
+        self.builder.build(scan_count=20, host_count=10)
 
     '''
     Create 10 hosts with 20 facts each. A single fact a year for 20 years.
@@ -148,20 +161,20 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         granularity = relativedelta(years=2)
 
-        deleted_count = cleanup_facts.cleanup(self.datetime_base, granularity)
-        self.assertEqual(deleted_count, (self.FACTS_PER_HOST * self.HOSTS) / 2)
+        deleted_count = cleanup_facts.cleanup(self.builder.get_timestamp(0), granularity)
+        self.assertEqual(deleted_count, (self.builder.get_scan_count() * self.builder.get_host_count()) / 2)
 
         # Check the number of facts per host
-        for host in self.hosts:
+        for host in self.builder.get_hosts():
             count = FactVersion.objects.filter(host=host).count()
-            self.assertEqual(count, self.FACTS_PER_HOST / 2, "should have half the number of FactVersion per host for host %s")
+            self.assertEqual(count, self.builder.get_scan_count() / 2, "should have half the number of FactVersion per host for host %s")
 
             count = Fact.objects.filter(host=host).count()
-            self.assertEqual(count, self.FACTS_PER_HOST / 2, "should have half the number of Fact per host")
+            self.assertEqual(count, self.builder.get_scan_count() / 2, "should have half the number of Fact per host")
 
         # Ensure that only 1 fact exists per granularity time
-        date_pivot = self.datetime_base
-        for host in self.hosts:
+        date_pivot = self.builder.get_timestamp(0)
+        for host in self.builder.get_hosts():
             while date_pivot > fact_oldest.timestamp:
                 date_pivot_next = date_pivot - granularity
                 kv = {
@@ -174,6 +187,7 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
                 count = Fact.objects.filter(**kv).count()
                 self.assertEqual(count, 1, "should only be 1 Fact per the 2 year granularity")
                 date_pivot = date_pivot_next
+
 
 
 

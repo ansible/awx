@@ -5,7 +5,6 @@
 import StringIO
 import sys
 import json
-from dateutil.relativedelta import relativedelta
 
 # Django
 from django.core.management import call_command
@@ -13,30 +12,8 @@ from django.core.management import call_command
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTestMixin
-from awx.fact.models import * # noqa
 
 class BaseCommandMixin(BaseTestMixin):
-    '''
-    Base class for tests that run management commands.
-    '''
-    def create_hosts_and_facts(self, epoch, host_count, facts_per_host):
-        self.hosts = []
-        for i in range(0, host_count):
-            host = FactHost.objects.create(hostname='host_%d' % i)
-            self.hosts.append(host)
-
-        self.fact = {
-            'hello': 'world'
-        }
-        self.facts = []
-        self.versions = []
-        for host in self.hosts:
-            for i in range(0, facts_per_host):
-                t = epoch - relativedelta(years=i)
-                (fact_obj, version_obj) = Fact.add_fact(t, self.fact, host, 'packages')
-                self.facts.append(fact_obj)
-                self.versions.append(version_obj)
-
     def create_test_inventories(self):
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)

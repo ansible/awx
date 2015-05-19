@@ -29,7 +29,7 @@ class CleanupFacts(object):
     #   
     #   pivot -= granularity
     # group by host 
-    def cleanup(self, older_than_abs, granularity):
+    def cleanup(self, older_than_abs, granularity, module=None):
         flag_delete_all = False
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         if not fact_oldest:
@@ -49,6 +49,8 @@ class CleanupFacts(object):
             }
             if not flag_delete_all:
                 kv['timestamp__gt'] = date_pivot_next
+            if module:
+                kv['module'] = module
 
             version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp')
 
@@ -84,9 +86,9 @@ class CleanupFacts(object):
     '''
     older_than and granularity are of type relativedelta
     '''
-    def run(self, older_than, granularity):
+    def run(self, older_than, granularity, module=None):
         t = now()
-        deleted_count = self.cleanup(t - older_than, granularity)
+        deleted_count = self.cleanup(t - older_than, granularity, module=module)
         print("Deleted %d facts." % deleted_count)
 
 class Command(BaseCommand):
@@ -99,7 +101,11 @@ class Command(BaseCommand):
         make_option('--granularity',
                     dest='granularity',
                     default=None,
-                    help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y).'),)
+                    help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y).'),
+        make_option('--module',
+                    dest='module',
+                    default=None,
+                    help='Limit cleanup to a particular module.'),)
 
     def __init__(self):
         super(Command, self).__init__()
@@ -135,5 +141,5 @@ class Command(BaseCommand):
         if granularity is None:
             raise CommandError('--granularity invalid value "%s"' % options[GRANULARITY])
 
-        cleanup_facts.run(older_than, granularity)
+        cleanup_facts.run(older_than, granularity, module=options['module'])
 
