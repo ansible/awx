@@ -20,6 +20,11 @@ class Command(BaseCommand):
         license_reader = TaskSerializer()
         license_data = license_reader.from_file()
 
+        # Does the license have features, at all?
+        # If there is no license yet, then all features are clearly off.
+        if 'features' not in license_data:
+            return False
+
         # Does the license contain the system tracking feature?
         # If and only if it does, MongoDB should run.
         system_tracking = license_data['features']['system_tracking']
