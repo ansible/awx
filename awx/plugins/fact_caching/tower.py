@@ -32,7 +32,6 @@
 import sys
 import time
 import datetime
-import json
 from copy import deepcopy
 from ansible import constants as C
 from ansible.cache.base import BaseCacheModule

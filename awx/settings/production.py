@@ -12,7 +12,7 @@ import traceback
 from split_settings.tools import optional, include
 
 # Load default settings.
-from defaults import *
+from defaults import *  # NOQA
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -49,7 +49,7 @@ LOGGING['handlers']['tower_warnings'] = {
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
     'filename': '/var/log/tower/tower.log',
-    'maxBytes': 1024*1024*5, # 5 MB
+    'maxBytes': 1024 * 1024 * 5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
 }
@@ -60,7 +60,7 @@ LOGGING['handlers']['callback_receiver'] = {
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
     'filename': '/var/log/tower/callback_receiver.log',
-    'maxBytes': 1024*1024*5, # 5 MB
+    'maxBytes': 1024 * 1024 * 5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
 }
@@ -70,7 +70,7 @@ LOGGING['handlers']['socketio_service'] = {
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
     'filename': '/var/log/tower/socketio_service.log',
-    'maxBytes': 1024*1024*5, # 5 MB
+    'maxBytes': 1024 * 1024 * 5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
 }
@@ -80,7 +80,7 @@ LOGGING['handlers']['task_system'] = {
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
     'filename': '/var/log/tower/task_system.log',
-    'maxBytes': 1024*1024*5, # 5 MB
+    'maxBytes': 1024 * 1024 * 5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
 }

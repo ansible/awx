@@ -4,10 +4,10 @@
 # Development settings for AWX project, but with DEBUG disabled
 
 # Load development settings.
-from defaults  import *
+from defaults import *  # NOQA
 
 # Load development settings.
-from development import *
+from development import *  # NOQA
 
 # Disable capturing DEBUG
 DEBUG = False

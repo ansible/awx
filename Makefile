@@ -244,14 +244,22 @@ socketservice:
 factcacher:
 	$(PYTHON) manage.py run_fact_cache_receiver
 
-pep8:
-	pep8 -r awx/
+reports:
+	mkdir -p $@
 
-pyflakes:
-	pyflakes awx/
+pep8: reports
+	@(set -o pipefail && $@ | tee reports/$@.report)
 
-check:
-	flake8
+flake8: reports
+	@$@ --output-file=reports/$@.report
+
+pyflakes: reports
+	@(set -o pipefail && $@ | tee reports/$@.report)
+
+pylint: reports
+	@(set -o pipefail && $@ | reports/$@.report)
+
+check: flake8 pep8 # pyflakes pylint
 
 # Run all API unit tests.
 test:
