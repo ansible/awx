@@ -252,7 +252,11 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
-                $('#pre-container-content').append(data.content);
+                if ($('#pre-container-content').html() === "stdout capture pending") {
+                    $('#pre-container-content').html(data.content);
+                } else {
+                    $('#pre-container-content').append(data.content);
+                }
                 loaded_sections.push({
                     start: (data.range.start < 0) ? 0 : data.range.start,
                     end: data.range.end
