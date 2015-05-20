@@ -992,6 +992,10 @@ var tower = angular.module('Tower', [
                             // accessing.
                             if ($location.$$url === '/jobs') {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
+                            } else if (/\/jobs\/(\d)+\/stdout/.test($location.$$url) ||
+                                /\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+                                $log.debug("sending status to standard out");
+                                $rootScope.$emit('JobStatusChange-jobStdout', data);
                             } else if (/\/jobs\/(\d)+/.test($location.$$url)) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
                             } else if ($location.$$url === '/home') {
@@ -1000,9 +1004,6 @@ var tower = angular.module('Tower', [
                                 $rootScope.$emit('JobStatusChange-portal', data);
                             } else if ($location.$$url === '/projects') {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/jobs\/(\d)+\/stdout/.test($location.$$url) ||
-                                /\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
-                                $rootScope.$emit('JobStatusChange-jobStdout', data);
                             } else if (/\/inventory\/(\d)+\/manage/.test($location.$$url)) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
