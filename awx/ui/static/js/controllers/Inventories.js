@@ -424,44 +424,19 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
 
             data = {};
             for (fld in form.fields) {
-                if (fld !== 'variables') {
-                    if (form.fields[fld].realName) {
-                        data[form.fields[fld].realName] =  $scope[fld];
-                    } else {
-                        data[fld] =  $scope[fld];
-                    }
+                if (form.fields[fld].realName) {
+                    data[form.fields[fld].realName] =  $scope[fld];
+                } else {
+                    data[fld] =  $scope[fld];
                 }
             }
-
-            if ($scope.removeUpdateInventoryVariables) {
-                $scope.removeUpdateInventoryVariables();
-            }
-            $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
-                var inventory_id = data.id;
-                var vars_to_send = {"variables": json_data};
-                Rest.setUrl(data.related.variable_data);
-                Rest.put(vars_to_send)
-                    .success(function () {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/manage');
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                        });
-                    });
-            });
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
                 .success(function (data) {
                     var inventory_id = data.id;
-                    if ($scope.variables) {
-                        $scope.$emit('UpdateInventoryVariables', data);
-                    } else {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/');
-                    }
+                    Wait('stop');
+                    $location.path('/inventories/' + inventory_id + '/');
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, form, { hdr: 'Error!',
@@ -597,40 +572,18 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
       data = {};
       for (fld in form.fields) {
-          if (fld !== 'variables') {
-              if (form.fields[fld].realName) {
-                  data[form.fields[fld].realName] = $scope[fld];
-              } else {
-                  data[fld] = $scope[fld];
-              }
+          if (form.fields[fld].realName) {
+              data[form.fields[fld].realName] = $scope[fld];
+          } else {
+              data[fld] = $scope[fld];
           }
       }
 
-      if ($scope.removeUpdateInventoryVariables) {
-        $scope.removeUpdateInventoryVariables();
-      }
-      $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
-          Rest.setUrl(data.related.variable_data);
-          Rest.put(json_data)
-              .success(function () {
-                  Wait('stop');
-                  $location.path('/inventories/');
-              })
-              .error(function (data, status) {
-                  ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                      msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                  });
-              });
-      });
-
       Rest.setUrl(defaultUrl + inventory_id + '/');
       Rest.put(data)
-          .success(function (data) {
-              if ($scope.variables) {
-                $scope.$emit('UpdateInventoryVariables', data);
-              } else {
-                $location.path('/inventories/');
-              }
+          .success(function () {
+              Wait('stop');
+              $location.path('/inventories/');
           })
           .error(function (data, status) {
               ProcessErrors($scope, data, status, form, { hdr: 'Error!',
