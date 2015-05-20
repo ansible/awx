@@ -20,7 +20,7 @@ from django.utils.timezone import now
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest, BaseTransactionTest
 
-__all__ = ['InventoryTest', 'InventoryUpdatesTest']
+__all__ = ['InventoryTest', 'InventoryUpdatesTest', 'InventoryCredentialTest']
 
 TEST_SIMPLE_INVENTORY_SCRIPT = "#!/usr/bin/env python\nimport json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
 TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG = "import json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
@@ -1978,3 +1978,35 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                project=api_project)
         inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
         self.check_inventory_source(inventory_source)
+
+
+class InventoryCredentialTest(BaseTest):
+    def setUp(self):
+        super(InventoryCredentialTest, self).setUp()
+        #self.start_redis()
+        self.setup_instances()
+        self.setup_users()
+
+        self.url = reverse('api:credential_list')
+
+    def test_openstack_create_ok(self):
+        data = {
+            'kind': 'openstack',
+            'name': 'Best credential ever',
+            'username': 'some_user',
+            'password': 'some_password',
+            'project': 'some_project',
+            'host': 'some_host',
+        }
+        self.post(self.url, data=data, expect=201, auth=self.get_super_credentials())
+
+    def test_openstack_create_fail_required_fields(self):
+        data = {
+            'kind': 'openstack',
+            'name': 'Best credential ever',
+        }
+        response = self.post(self.url, data=data, expect=400, auth=self.get_super_credentials())
+        self.assertIn('username', response)
+        self.assertIn('password', response)
+        self.assertIn('host', response)
+        self.assertIn('project', response)
