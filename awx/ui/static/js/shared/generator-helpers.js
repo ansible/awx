@@ -799,7 +799,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
 
-            html += "<li ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " +
+            html += "<li><a href " +
                 "id=\"previous-page\" ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-left\"></i></a></li>\n";
 
