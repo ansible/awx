@@ -347,22 +347,22 @@ class RunJobTest(BaseJobExecutionTest):
 
     def setUp(self):
         with ignore_inventory_computed_fields():
-          super(RunJobTest, self).setUp()
-          self.test_project_path = None
-          self.setup_instances()
-          self.setup_users()
-          self.organization = self.make_organizations(self.super_django_user, 1)[0]
-          self.inventory = self.organization.inventories.create(name='test-inventory',
-                                                                description='description for test-inventory')
-          self.host = self.inventory.hosts.create(name='host.example.com')
-          self.group = self.inventory.groups.create(name='test-group')
-          self.group2 = self.inventory.groups.create(name='test-group2')
-          self.group.hosts.add(self.host)
-          self.group2.hosts.add(self.host)
-          self.project = None
-          self.credential = None
-          self.cloud_credential = None
-          settings.INTERNAL_API_URL = self.live_server_url
+            super(RunJobTest, self).setUp()
+            self.test_project_path = None
+            self.setup_instances()
+            self.setup_users()
+            self.organization = self.make_organizations(self.super_django_user, 1)[0]
+            self.inventory = self.organization.inventories.create(name='test-inventory',
+                                                                  description='description for test-inventory')
+            self.host = self.inventory.hosts.create(name='host.example.com')
+            self.group = self.inventory.groups.create(name='test-group')
+            self.group2 = self.inventory.groups.create(name='test-group2')
+            self.group.hosts.add(self.host)
+            self.group2.hosts.add(self.host)
+            self.project = None
+            self.credential = None
+            self.cloud_credential = None
+            settings.INTERNAL_API_URL = self.live_server_url
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
