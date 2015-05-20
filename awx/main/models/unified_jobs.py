@@ -610,11 +610,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         """Return a file-like object containing the standard out of the
         job's result.
         """
+        msg = {
+            'pending': 'stdout capture pending',
+            'missing': 'stdout capture is missing',
+        }
         if self.result_stdout_text:
             return StringIO(self.result_stdout_text)
         else:
             if not os.path.exists(self.result_stdout_file):
-                return StringIO("stdout capture is missing")
+                return StringIO(msg['missing' if self.finished else 'pending'])
 
             # There is a potential timing issue here, because another
             # process may be deleting the stdout file after it is written
@@ -631,7 +635,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     self.result_stdout_text = type(self).objects.get(id=self.id).result_stdout_text
                     return self.result_stdout_raw_handle(attempt=attempt + 1)
                 else:
-                    return StringIO("stdout capture is missing")
+                    return StringIO(msg['missing' if self.finished else 'pending'])
 
     def _escape_ascii(self, content):
         ansi_escape = re.compile(r'\x1b[^m]*m')
