@@ -8,11 +8,15 @@ job template.
 
 For example, using curl:
 
-    curl --data-urlencode host_config_key=HOST_CONFIG_KEY http://server/api/v1/job_templates/N/callback/
+    curl -H "Content-Type: application/json" -d '{"host_config_key": "HOST_CONFIG_KEY"}'  http://server/api/v1/job_templates/N/callback/
 
 Or using wget:
 
-    wget -O /dev/null --post-data="host_config_key=HOST_CONFIG_KEY" http://server/api/v1/job_templates/N/callback/
+    wget -O /dev/null --post-data='{"host_config_key": "HOST_CONFIG_KEY"}' --header=Content-Type:application/json http://server/api/v1/job_templates/N/callback/
+
+You may also pass `extra_vars` to the callback:
+
+    curl -H "Content-Type: application/json" -d '{"host_config_key": "HOST_CONFIG_KEY", "extra_vars": {"key": "value"}}'  http://server/api/v1/job_templates/N/callback/
     
 The response will return status 202 if the request is valid, 403 for an
 invalid host config key, or 400 if the host cannot be determined from the
