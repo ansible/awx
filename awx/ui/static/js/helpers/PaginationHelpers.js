@@ -28,7 +28,7 @@ export default
                 scope[iterator + '_num_pages'] = Math.ceil((count / scope[iterator + '_page_size']));
                 scope[iterator + '_num_pages'] = (scope[iterator + '_num_pages'] <= 0) ? 1 : scope[iterator + '_num_pages'];
                 scope[iterator + '_total_rows'] = count;
-
+                $('#pagination-links li:eq(1)').removeAttr('class');
                 // Which page are we on?
                 if (Empty(next) && previous) {
                     // no next page, but there is a previous page
@@ -36,6 +36,7 @@ export default
                 } else if (next && Empty(previous)) {
                     // next page available, but no previous page
                     scope[iterator + '_page'] = 1;
+                    $('#pagination-links li:eq(1)').attr('class', 'disabled');
                 } else if (next && previous) {
                     // we're in between next and previous
                     scope[iterator + '_page'] = parseInt(previous.match(/page=\d+/)[0].replace(/page=/, '')) + 1;
@@ -75,6 +76,9 @@ export default
                 scope.getPage = function (page, set, iterator) {
                     var new_url = scope[iterator + '_url'].replace(/.page\=\d+/, ''),
                         connect = (/\/$/.test(new_url)) ? '?' : '&';
+                    if(scope[iterator + '_page'] === 1 && page === 0){
+                        return;
+                    }
                     new_url += connect + 'page=' + page;
                     new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
                         '&page_size=' + scope[iterator + '_page_size'] : 'page_size=' + scope[iterator + 'PageSize'];
@@ -136,6 +140,9 @@ export default
                 scope.getPage = function (page, set, iterator) {
                     var new_url = scope[iterator + '_url'].replace(/.page\=\d+/, ''),
                         connect = (/\/$/.test(new_url)) ? '?' : '&';
+                    if(scope[iterator + '_page'] === 1 && page === 0){
+                        return;
+                    }
                     new_url += connect + 'page=' + page;
                     new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
                         '&page_size=' + scope[iterator + '_page_size'] : '&page_size=' + scope[iterator + 'PageSize'];
