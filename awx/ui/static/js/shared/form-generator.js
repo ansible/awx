@@ -1003,7 +1003,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             }
                             if ($AnsibleConfig.password_hasSymbol) {
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasSymbol\">Your password must contain one of the following characters: `~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,\n";
+                                    ".$error.hasSymbol\">Your password must contain one of the following characters: `~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,</div>\n";
                             }
                         }
 
