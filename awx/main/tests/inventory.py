@@ -1762,6 +1762,22 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue(self.group.children.get(name='images').children.filter(active=True).count())
         self.assertTrue('instances' in child_names)
         self.assertTrue(self.group.children.get(name='instances').children.filter(active=True).count())
+        # Sync again with overwrite set to False after renaming a group that
+        # was created by the sync.  With overwrite false, the renamed group and
+        # the original group (created again by the sync) will both exist.
+        region_group = self.group.children.get(name='regions').children.all()[0]
+        region_group_original_name = region_group.name
+        region_group.name = region_group.name + '-renamed'
+        region_group.save(update_fields=['name'])
+        cache_path3 = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path3)
+        inventory_source.source_vars = '---\n\ncache_path: %s\n' % cache_path3
+        inventory_source.overwrite = False
+        inventory_source.save()
+        self.check_inventory_source(inventory_source, initial=False, instance_id_group_ok=True)
+        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        self.assertTrue(region_group_original_name in self.group.children.get(name='regions').children.values_list('name', flat=True))
+        self.assertTrue(region_group.name in self.group.children.get(name='regions').children.values_list('name', flat=True))
         return
         # Print out group/host tree for debugging.
         print
