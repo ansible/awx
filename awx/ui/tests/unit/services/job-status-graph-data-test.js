@@ -58,7 +58,7 @@ describeModule('DashboardGraphs')
                 $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
                     result.resolve(data);
                 });
-                $rootScope.$emit('JobStatusChange');
+                $rootScope.$emit('JobStatusChange-home');
                 restStub.succeed({ data: expected });
                 restStub.flush();
             }]);

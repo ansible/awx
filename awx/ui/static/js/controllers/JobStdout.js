@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
 
     ClearScope();
 
@@ -19,8 +19,6 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         api_complete = false,
         stdout_url,
         current_range,
-        event_socket,
-        status_socket,
         loaded_sections = [],
         event_queue = 0,
         auto_scroll_down=true,  // programmatic scroll to bottom
@@ -35,43 +33,37 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 
     function openSockets() {
-        status_socket = Socket({
-            scope: $scope,
-            endpoint: "jobs"
-        });
-        status_socket.init();
-        status_socket.on("status_changed", function(data) {
-            if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
-                $scope.job.status = data.status;
-                if (data.status === 'failed' || data.status === 'canceled' ||
-                        data.status === 'error' || data.status === 'successful') {
-                    if ($rootScope.jobStdOutInterval) {
-                        window.clearInterval($rootScope.jobStdOutInterval);
-                    }
-                    if (live_event_processing) {
-                        if (loaded_sections.length === 0) {
-                            $scope.$emit('LoadStdout');
-                        }
-                        else {
-                            getNextSection();
-                        }
-                    }
-                    live_event_processing = false;
-                }
-            }
-        });
-        event_socket = Socket({
-            scope: $scope,
-            endpoint: "job_events"
-        });
-        event_socket.init();
-        event_socket.on("job_events-" + job_id, function() {
+        $rootScope.event_socket.on("job_events-" + job_id, function() {
             if (api_complete) {
                 event_queue++;
             }
         });
     }
     openSockets();
+
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobStdout', function(e, data) {
+        if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
+            $scope.job.status = data.status;
+            if (data.status === 'failed' || data.status === 'canceled' ||
+                    data.status === 'error' || data.status === 'successful') {
+                if ($rootScope.jobStdOutInterval) {
+                    window.clearInterval($rootScope.jobStdOutInterval);
+                }
+                if (live_event_processing) {
+                    if (loaded_sections.length === 0) {
+                        $scope.$emit('LoadStdout');
+                    }
+                    else {
+                        getNextSection();
+                    }
+                }
+                live_event_processing = false;
+            }
+        }
+    });
 
     $rootScope.jobStdOutInterval = setInterval( function() {
         if (event_queue > 0) {
@@ -283,5 +275,4 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 }
 
-JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
-    'Socket' ];
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];

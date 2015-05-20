@@ -86,7 +86,7 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
         if ($rootScope.removeJobStatusChange) {
             $rootScope.removeJobStatusChange();
         }
-        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
+        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-portal', function() {
             jobs_scope.search('portal_job'); //processEvent(event);
         });
 

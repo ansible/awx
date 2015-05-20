@@ -86,7 +86,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-projects', function(e, data) {
         var project;
         $log.debug(data);
         if ($scope.projects) {
@@ -720,30 +720,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
         field: 'scm_type',
         variable: 'scm_type_options',
         callback: 'choicesReady'
-    });
-
-    // Handle project update status changes
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
-        if ($scope.project_obj && data.project_id === $scope.project_obj.id) {
-            // This is the affected project
-            $log.debug('Received event for project: ' + $scope.project_obj.name);
-            $log.debug('Status changed to: ' + data.status);
-            // Set the status and re-evaluate the update button tooltip and class
-            $scope.project_obj.status = data.status;
-            $scope.scm_update_tooltip = "Start an SCM update";
-            $scope.scm_type_class = "";
-            if (data.status === 'running' || data.status === 'updating') {
-                $scope.scm_update_tooltip = "SCM update currently running";
-                $scope.scm_type_class = "btn-disabled";
-            }
-            if (Empty($scope.project_obj.scm_type)) {
-                $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
-                $scope.scm_type_class = "btn-disabled";
-            }
-        }
     });
 
     // Save changes to the parent

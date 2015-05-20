@@ -16,7 +16,7 @@
 
 export function JobsListController ($rootScope, $log, $scope, $compile, $routeParams,
     ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
-    LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
+    LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait) {
 
     ClearScope();
 
@@ -24,34 +24,25 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         choicesCount = 0,
         listCount = 0,
         api_complete = false,
-        schedule_socket,
-        job_socket,
         max_rows;
 
-    function openSockets() {
-        job_socket = Socket({
-            scope: $scope,
-            endpoint: "jobs"
-        });
-        job_socket.init();
-        job_socket.on("status_changed", function() {
-            // if (api_complete) {
-                jobs_scope.refreshJobs();
-            // }
-        });
-        schedule_socket = Socket({
-            scope: $scope,
-            endpoint: "schedules"
-        });
-        schedule_socket.init();
-        schedule_socket.on("schedule_changed", function() {
-            if (api_complete) {
-                scheduled_scope.search('schedule');
-            }
-        });
-    }
-
     LoadBreadCrumbs();
+
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
+        jobs_scope.refreshJobs();
+    });
+
+    if ($rootScope.removeScheduleStatusChange) {
+        $rootScope.removeScheduleStatusChange();
+    }
+    $rootScope.removeScheduleStatusChange = $rootScope.$on('ScheduleStatusChange', function() {
+        if (api_complete) {
+            scheduled_scope.search('schedule');
+        }
+    });
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
@@ -60,7 +51,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         listCount++;
         if (listCount === 2) {
             api_complete = true;
-            openSockets();
         }
     });
 
@@ -193,4 +183,4 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
 
 JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$routeParams',
 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope',
-'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket'];
+'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait'];
