@@ -3,7 +3,13 @@
     <!-- Generator: Sketch 3.2.1 (9971) - http://www.bohemiancoding.com/sketch -->
     <title>TowerLogo</title>
     <desc>Created with Sketch.</desc>
-    <defs></defs>
+    <defs>
+      <style>
+        #AnsibleLogo-letter-a {
+          transform: translateY(-2px); // TODO: Update the path to reflect this change in Sketch
+        }
+      </style>
+    </defs>
     <g id="Random" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
         <g id="TowerLogo" sketch:type="MSArtboardGroup">
             <g id="TowerLogo-ansible" sketch:type="MSLayerGroup" transform="translate(1.000000, 1.000000)">
