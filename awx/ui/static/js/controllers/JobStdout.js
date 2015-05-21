@@ -33,13 +33,23 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 
     function openSockets() {
-        $log.debug("socket watching on job_events-" + job_id);
-        $rootScope.event_socket.on("job_events-" + job_id, function() {
-            $log.debug("socket fired on job_events-" + job_id);
-            if (api_complete) {
-                event_queue++;
-            }
-        });
+        if (/\/jobs\/(\d)+\/stdout/.test($location.$$url)) {
+            $log.debug("socket watching on job_events-" + job_id);
+            $rootScope.event_socket.on("job_events-" + job_id, function() {
+                $log.debug("socket fired on job_events-" + job_id);
+                if (api_complete) {
+                    event_queue++;
+                }
+            });
+        } else if (/\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+            $log.debug("socket watching on ad_hoc_command_events-" + job_id);
+            $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
+                $log.debug("socket fired on ad_hoc_command_events-" + job_id);
+                if (api_complete) {
+                    event_queue++;
+                }
+            });
+        }
     }
     openSockets();
 

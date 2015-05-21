@@ -267,13 +267,13 @@ var tower = angular.module('Tower', [
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
                     }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
+                    adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.adhoc_event_socket) {
+                            $rootScope.adhoc_event_socket = Socket({
                                 scope: $rootScope,
-                                endpoint: "job_events"
+                                endpoint: "ad_hoc_command_events"
                             });
-                            $rootScope.event_socket.init();
+                            $rootScope.adhoc_event_socket.init();
                             return true;
                         } else {
                             return true;
