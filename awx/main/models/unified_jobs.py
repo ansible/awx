@@ -611,7 +611,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         job's result.
         """
         msg = {
-            'pending': 'stdout capture pending',
+            'pending': 'Waiting for results...',
             'missing': 'stdout capture is missing',
         }
         if self.result_stdout_text:

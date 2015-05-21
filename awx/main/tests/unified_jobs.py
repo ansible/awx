@@ -49,5 +49,5 @@ class UnifiedJobsUnitTest(SimpleTestCase):
         result = unified_job.result_stdout_raw_handle()
 
         self.assertIsInstance(result, StringIO)
-        self.assertEqual(result.read(), 'stdout capture pending')
+        self.assertEqual(result.read(), 'Waiting for results...')
 
