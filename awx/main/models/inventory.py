@@ -1110,12 +1110,14 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             self.inventory = self.group.inventory
             if 'inventory' not in update_fields:
                 update_fields.append('inventory')
-        # Set name automatically.
+        # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
         old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
         if not self.name or old_name_re.match(self.name):
-            if self.inventory and self.group:
-                self.name = '%s (%s)' % (self.group.name, self.inventory.name)
+            if self.inventory and self.group and self.pk:
+                self.name = '%s (%s - %s)' % (self.group.name, self.inventory.name, self.pk)
+            elif self.inventory and self.group:
+                self.name = '%s (%s - %s)' % (self.group.name, self.inventory.name, replace_text)
             elif self.inventory and self.pk:
                 self.name = '%s (%s)' % (self.inventory.name, self.pk)
             elif self.inventory:
