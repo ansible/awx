@@ -6,6 +6,7 @@ import glob
 import os
 import subprocess
 import tempfile
+import mock
 
 # Django
 from django.conf import settings
@@ -20,7 +21,6 @@ from awx.main.tests.base import BaseJobExecutionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
-
 
 class BaseAdHocCommandTest(BaseJobExecutionTest):
     '''
@@ -360,6 +360,9 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_job_result(ad_hoc_command, 'error', expect_traceback=True)
 
 
+def run_pexpect_mock(self, *args, **kwargs):
+    return 'successful', 0
+
 class AdHocCommandApiTest(BaseAdHocCommandTest):
     '''
     Test API list/detail views for ad hoc commands.
@@ -385,7 +388,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
                 del data[k]
         return self.post(url, data, expect=expect)
 
-    def test_ad_hoc_command_list(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_list(self, ignore):
         url = reverse('api:ad_hoc_command_list')
 
         # Retrieve the empty list of ad hoc commands.
@@ -558,7 +562,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             response = self.run_test_ad_hoc_command(become_enabled=True)
             self.assertEqual(response['become_enabled'], True)
 
-    def test_ad_hoc_command_detail(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_detail(self, ignore):
         with self.current_user('admin'):
             response1 = self.run_test_ad_hoc_command()
             response2 = self.run_test_ad_hoc_command()
@@ -622,7 +627,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=204)
             self.delete(url, expect=404)
 
-    def test_ad_hoc_command_cancel(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_cancel(self, ignore):
         # Override setting so that ad hoc command isn't actually started.
         with self.settings(CELERY_UNIT_TEST=False):
             with self.current_user('admin'):
@@ -674,7 +680,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertEqual(response['can_cancel'], False)
             self.post(url, {}, expect=405)
 
-    def test_ad_hoc_command_relaunch(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_relaunch(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -735,6 +742,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             response = self.post(url, {}, expect=400)
 
     def test_ad_hoc_command_events_list(self):
+        # TODO: Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command()
@@ -823,6 +832,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=401)
 
     def test_ad_hoc_command_event_detail(self):
+        # TODO: Mock pexpect. Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -877,7 +888,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
                 self.patch(url, {}, expect=401)
                 self.delete(url, expect=401)
 
-    def test_ad_hoc_command_activity_stream(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_activity_stream(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -927,7 +939,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
-    def test_inventory_ad_hoc_commands_list(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_inventory_ad_hoc_commands_list(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command(inventory=self.inventory2.pk)
@@ -1030,6 +1043,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertTrue(response['can_run_ad_hoc_commands'])
 
     def test_host_ad_hoc_commands_list(self):
+        # TODO: Figure out why this test needs pexpect
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command(limit=self.host2.name)
@@ -1079,6 +1094,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=401)
 
     def test_group_ad_hoc_commands_list(self):
+        # TODO: Figure out why this test needs pexpect
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command() # self.host + self.host2
             response = self.run_test_ad_hoc_command(limit=self.group.name) # self.host
@@ -1133,6 +1150,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=401)
 
     def test_host_ad_hoc_command_events_list(self):
+        # TODO: Mock run_pexpect. Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 

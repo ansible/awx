@@ -135,6 +135,13 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
 )
 
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
+
 ROOT_URLCONF = 'awx.urls'
 
 WSGI_APPLICATION = 'awx.wsgi.application'

@@ -14,6 +14,7 @@ import time
 from multiprocessing import Process
 from subprocess import Popen
 import re
+import mock
 
 # PyYAML
 import yaml
@@ -76,8 +77,14 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
+class MockCommonlySlowTestMixin(object):
+    def __init__(self, *args, **kwargs):
+        from awx.api import generics
+        mock.patch.object(generics, 'get_view_description', return_value=None).start()
+        super(MockCommonlySlowTestMixin, self).__init__(*args, **kwargs)
+
 ansible_version = get_ansible_version()
-class BaseTestMixin(QueueTestMixin):
+class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
     '''
     Mixin with shared code for use by all test cases.
     '''
