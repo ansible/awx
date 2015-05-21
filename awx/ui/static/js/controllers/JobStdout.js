@@ -33,7 +33,9 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 
     function openSockets() {
+        $log.debug("socket watching on job_events-" + job_id);
         $rootScope.event_socket.on("job_events-" + job_id, function() {
+            $log.debug("socket fired on job_events-" + job_id);
             if (api_complete) {
                 event_queue++;
             }
