@@ -491,6 +491,17 @@ class Job(UnifiedJob, JobOptions):
             presets[kw] = getattr(self, kw)
         return self.job_template.create_unified_job(**presets)
 
+    # Job Credential required
+    @property
+    def can_start(self):
+        if not super(Job, self).can_start:
+            return False
+
+        if not (self.credential and self.credential.active):
+            return False
+
+        return True
+
 class JobHostSummary(CreatedModifiedModel):
     '''
     Per-host statistics for each job.
