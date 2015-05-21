@@ -4,10 +4,10 @@
 # This file is a utility script that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
 #
@@ -61,7 +61,7 @@ class TokenAuth(requests.auth.AuthBase):
         return request
 
 class InventoryScript(object):
-    
+
     def __init__(self, **options):
         self.options = options
 
@@ -95,11 +95,11 @@ class InventoryScript(object):
     def run(self):
         try:
             self.base_url = self.options.get('base_url', '') or \
-                            os.getenv('REST_API_URL', '')
+                os.getenv('REST_API_URL', '')
             if not self.base_url:
                 raise ValueError('No REST API URL specified')
             self.auth_token = self.options.get('authtoken', '') or \
-                              os.getenv('REST_API_TOKEN', '')
+                os.getenv('REST_API_TOKEN', '')
             parts = urlparse.urlsplit(self.base_url)
             if not (parts.username and parts.password) and not self.auth_token:
                 raise ValueError('No username/password specified in REST API '
@@ -107,7 +107,7 @@ class InventoryScript(object):
             try:
                 # Command line argument takes precedence over environment
                 # variable.
-                self.inventory_id = int(self.options.get('inventory_id', 0) or \
+                self.inventory_id = int(self.options.get('inventory_id', 0) or
                                         os.getenv('INVENTORY_ID', 0))
             except ValueError:
                 raise ValueError('Inventory ID must be an integer')
