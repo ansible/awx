@@ -96,12 +96,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'alertblock',
                 "class": 'alert-info',
                 ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
-                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no unassigned playbook directories in the base ' +
-                    'project path {{ base_dir }}. Either the projects directory is empty, or all of the contents are already assigned to ' +
-                    'other projects. New projects can be checked out from source control by ' +
-                    'changing the SCM type option rather than specifying checkout paths manually. To continue with manual setup, log into ' +
-                    'the Tower host and ensure content is present in a subdirectory under {{ base_dir }}. Run "chown -R awx" on the content ' +
-                    'directory to ensure Tower can read the playbooks.</p>',
+                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.' +
+                    'Either that directory is empty, or all of the contents are already assigned to other projects.' +
+                    'Create a new directory there and make sure the playbook files can be read by the "awx" system user, ' +
+                    'or have Tower directly retrieve your playbooks from source control using the SCM Type option above.</p>',
                 closeable: false
             },
             base_dir: {
