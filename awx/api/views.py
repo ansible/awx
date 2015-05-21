@@ -50,6 +50,7 @@ from awx.api.utils.decorators import paginated
 from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
+from awx.api.license import feature_enabled, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
@@ -562,6 +563,16 @@ class OrganizationActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_stream'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -620,6 +631,16 @@ class TeamActivityStreamList(SubListAPIView):
     parent_model = Team
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_stream'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -963,6 +984,11 @@ class InventorySingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1087,6 +1113,11 @@ class HostSingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1107,6 +1138,11 @@ class HostFactCompareView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         datetime_spec = request.QUERY_PARAMS.get('datetime', None)
         module_spec = request.QUERY_PARAMS.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
@@ -1265,6 +1301,11 @@ class GroupSingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1647,6 +1688,13 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+
+        # Sanity check: Are surveys available on this license?
+        # If not, do not allow them to be used.
+        if not feature_enabled('surveys'):
+            raise LicenseForbids('Your license does not allow '
+                                 'adding surveys.')
+
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
