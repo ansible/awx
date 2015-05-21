@@ -6,7 +6,6 @@ import glob
 import os
 import subprocess
 import tempfile
-import time
 import mock
 
 # Django
