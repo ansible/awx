@@ -186,6 +186,13 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
 
+    def create_expired_license_file(self, instance_count=1000, grace_period=False):
+        license_date = time.time() - 1
+        if not grace_period:
+            license_date -= 2592000
+        self.create_test_license_file(instance_count, license_date)
+        os.environ['SKIP_LICENSE_FIXUP_FOR_TEST'] = '1'
+
     def assertElapsedLessThan(self, seconds):
         elapsed = time.time() - self._start_time
         self.assertTrue(elapsed < seconds, 'elapsed time of %0.3fs is greater than %0.3fs' % (elapsed, seconds))

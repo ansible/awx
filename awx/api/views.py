@@ -2309,6 +2309,7 @@ class AdHocCommandList(ListCreateAPIView):
     model = AdHocCommand
     serializer_class = AdHocCommandListSerializer
     new_in_220 = True
+    always_allow_superuser = False
 
     @csrf_exempt
     @transaction.non_atomic_requests

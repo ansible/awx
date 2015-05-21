@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import os
 import sys
 import logging
 
@@ -147,7 +148,7 @@ class BaseAccess(object):
     def check_license(self, add_host=False):
         reader = TaskSerializer()
         validation_info = reader.from_file()
-        if 'test' in sys.argv or 'jenkins' in sys.argv:
+        if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999

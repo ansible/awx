@@ -6,6 +6,7 @@ import glob
 import os
 import subprocess
 import tempfile
+import time
 import mock
 
 # Django
@@ -568,6 +569,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command(become_enabled=True)
             self.assertEqual(response['become_enabled'], True)
+        
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(expect=403)
 
     @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
     def test_ad_hoc_command_detail(self, ignore):
@@ -747,6 +755,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             response = self.get(url, expect=200)
             self.assertEqual(response['passwords_needed_to_start'], [])
             response = self.post(url, {}, expect=400)
+
+        # Try to relaunch with expired license.
+        with self.current_user('admin'):
+            response = self.run_test_ad_hoc_command(inventory=self.inventory2.pk)
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.post(response['related']['relaunch'], {}, expect=403)
 
     def test_ad_hoc_command_events_list(self):
         # TODO: Create test events instead of relying on playbooks execution
@@ -1049,6 +1064,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             response = self.get(inventory_url, expect=200)
             self.assertTrue(response['can_run_ad_hoc_commands'])
 
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+
     def test_host_ad_hoc_commands_list(self):
         # TODO: Figure out why this test needs pexpect
 
@@ -1099,6 +1121,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=401)
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
+
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
 
     def test_group_ad_hoc_commands_list(self):
         # TODO: Figure out why this test needs pexpect
@@ -1155,6 +1184,13 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=401)
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
+
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
 
     def test_host_ad_hoc_command_events_list(self):
         # TODO: Mock run_pexpect. Create test events instead of relying on playbooks execution
