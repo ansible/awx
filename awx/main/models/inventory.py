@@ -1101,6 +1101,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
+        print("Inventory source save called <%s, %s>" % (self.pk, self.status))
         new_instance = bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
@@ -1143,10 +1144,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 return self.current_job.status
             elif not self.last_job:
                 return 'never updated'
-            elif self.last_job_failed:
-                return 'failed'
+            # inherit the child job status
             else:
-                return 'successful'
+                return self.last_job.status 
         else:
             return 'none'
 
@@ -1231,6 +1231,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
+
+        if 'status' in update_fields:
+            print("Calling inherited parent save for InventoryUpdate <%s, %s>" % (self.pk, self.status))
         super(InventoryUpdate, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
