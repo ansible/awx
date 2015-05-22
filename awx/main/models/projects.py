@@ -357,7 +357,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         return reverse('api:project_update_detail', args=(self.pk,))
 
     def _update_parent_instance(self):
-        print("This should not print")
         parent_instance = self._get_parent_instance()
         if parent_instance:
             update_fields = self._update_parent_instance_no_save(parent_instance)

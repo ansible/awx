@@ -1101,7 +1101,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
-        print("Inventory source save called <%s, %s>" % (self.pk, self.status))
         new_instance = bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
