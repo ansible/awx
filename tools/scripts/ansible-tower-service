@@ -1,20 +1,4 @@
 #!/bin/bash
-#
-# ansible-tower
-#
-# chkconfig: - 20 80
-# description: support init to manage tower and its related services
-
-### BEGIN INIT INFO
-# Required-Start: $local_fs $remote_fs $network $named
-# Required-Stop: $local_fs $remote_fs $network
-# Should-Start: distcache
-# Should-Stop:
-# Default-Start:
-# Default-Stop:
-# Short-Description: support init to manage tower and its related services
-# Description: Ansible Tower provides an easy-to-use UI and dashboard, role-based access control and more for your Ansible initiative
-### END INIT INFO
 
 # Default configured services
 if [ -e /etc/debian_version ]; then
@@ -66,26 +50,35 @@ service_action() {
     done
 }
 
+usage() {
+    echo "Ansible Tower service helper utility"
+    echo "Usage: $0 {start|stop|restart|status}"
+}
+
 worst_return=0
 case "$1" in
+    help | -help | --help | -h)
+        usage
+        ;;
     start)
-	echo "Starting Tower"
-	service_action start
-	;;
+	      echo "Starting Tower"
+	      service_action start
+	      ;;
     stop)
-	echo "Stopping Tower"
-	service_action stop
-	;;
+	    echo "Stopping Tower"
+	    service_action stop
+	    ;;
     restart)
-	echo "Restarting Tower"
-	service_action stop
-	service_action start
-	;;
+	    echo "Restarting Tower"
+	    service_action stop
+	    service_action start
+	    ;;
     status)
-	echo "Showing Tower Status"
-	service_action status
-	;;
+	    echo "Showing Tower Status"
+	    service_action status
+	    ;;
     *)
-	echo "Usage: $0 {start|stop|restart|status}"
+        usage
+        worst_return=1
 esac
 exit $worst_return
