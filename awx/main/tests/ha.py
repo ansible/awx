@@ -5,14 +5,24 @@ import mock
 
 # Django
 from django.test import SimpleTestCase
-from django.conf import settings
 
 # AWX
 from awx.main.models import * # noqa
 from awx.main.ha import * # noqa
-from awx.main.tests.base import BaseTest
 
 __all__ = ['HAUnitTest',]
+
+TEST_LOCALHOST = {
+    'HOST': 'localhost'
+}
+
+TEST_127_0_0_1 = {
+    'HOST': '127.0.0.1'
+} 
+
+TEST_FILE = {
+    'HOST': '/i/might/be/a/file',
+}
 
 class HAUnitTest(SimpleTestCase):
 
@@ -21,16 +31,16 @@ class HAUnitTest(SimpleTestCase):
         self.assertTrue(is_ha_environment())
 
     @mock.patch('awx.main.models.Instance.objects.count', return_value=1)
-    @mock.patch.dict('django.conf.settings.DATABASES', { 'HOST': 'localhost' })
+    @mock.patch.dict('django.conf.settings.DATABASES', TEST_LOCALHOST)
     def test_db_localhost(self, ignore):
         self.assertFalse(is_ha_environment())
 
     @mock.patch('awx.main.models.Instance.objects.count', return_value=1)
-    @mock.patch.dict('django.conf.settings.DATABASES', { 'HOST': '127.0.0.1' })
+    @mock.patch.dict('django.conf.settings.DATABASES', TEST_127_0_0_1)
     def test_db_127_0_0_1(self, ignore):
         self.assertFalse(is_ha_environment())
 
     @mock.patch('awx.main.models.Instance.objects.count', return_value=1)
-    @mock.patch.dict('django.conf.settings.DATABASES', { 'HOST': '/i/might/be/a/file' })
+    @mock.patch.dict('django.conf.settings.DATABASES', TEST_FILE)
     def test_db_file_socket(self, ignore):
         self.assertFalse(is_ha_environment())
