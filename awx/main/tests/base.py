@@ -179,7 +179,8 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
-            instance_count=instance_count)
+            instance_count=instance_count,
+            license_type='enterprise')
         handle, license_path = tempfile.mkstemp(suffix='.json')
         os.close(handle)
         writer.write_file(license_path)
