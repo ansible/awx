@@ -13,6 +13,8 @@ class OrganizationsTest(BaseTest):
     def setUp(self):
         super(OrganizationsTest, self).setUp()
         self.setup_instances()
+        # TODO: Test non-enterprise license
+        self.create_test_license_file()
         self.setup_users()
  
         self.organizations = self.make_organizations(self.super_django_user, 10)

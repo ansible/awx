@@ -911,6 +911,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
 
     @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
     def test_ad_hoc_command_activity_stream(self, ignore):
+        # TODO: Test non-enterprise license
+        self.create_test_license_file()
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
