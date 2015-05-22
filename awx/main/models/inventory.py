@@ -1230,9 +1230,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
-
-        if 'status' in update_fields:
-            print("Calling inherited parent save for InventoryUpdate <%s, %s>" % (self.pk, self.status))
         super(InventoryUpdate, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
