@@ -21,6 +21,7 @@ else:
 etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
+bindir = "/usr/bin"
 munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
@@ -129,7 +130,7 @@ setup(
                                     "tools/munin_monitors/socketio_alive",
                                     "tools/munin_monitors/taskmanager_alive"]),
         ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
-        ("%s" % sysinit, ["tools/scripts/ansible-tower"]),
+        ("%s" % bindir, ["tools/scripts/ansible-tower-service"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'egg_info': {
