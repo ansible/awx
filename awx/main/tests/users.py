@@ -123,7 +123,7 @@ class UsersTest(BaseTest):
     def test_user_creation_fails_without_password(self):
         url = reverse('api:user_list')
         new_user = dict(username='blippy')
-        response = self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
  
     def test_only_super_user_or_org_admin_can_add_users(self):
         url = reverse('api:user_list')

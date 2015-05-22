@@ -659,9 +659,6 @@ class UserSerializer(BaseSerializer):
     def validate_is_superuser(self, attrs, source):
         return self._validate_ldap_managed_field(attrs, source)
 
-    def validate_password(self, attrs, source):
-        return attrs
-
 
 class OrganizationSerializer(BaseSerializer):
 
