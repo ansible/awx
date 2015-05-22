@@ -594,6 +594,10 @@ class UserSerializer(BaseSerializer):
 
     def restore_object(self, attrs, instance=None):
         new_password = attrs.pop('password', None)
+        # first time creating, password required
+        if instance is None and new_password in (None, ''):
+            self._errors = {'password': ['Password required for new User']}
+            return
         instance = super(UserSerializer, self).restore_object(attrs, instance)
         instance._new_password = new_password
         return instance
@@ -654,6 +658,9 @@ class UserSerializer(BaseSerializer):
 
     def validate_is_superuser(self, attrs, source):
         return self._validate_ldap_managed_field(attrs, source)
+
+    def validate_password(self, attrs, source):
+        return attrs
 
 
 class OrganizationSerializer(BaseSerializer):
