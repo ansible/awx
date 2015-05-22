@@ -52,19 +52,22 @@ export default
                         scope.removeBuildAboutDialog();
                     }
                     scope.removeBuildAboutDialog = scope.$on('BuildAboutDialog', function(e, data) {
-                        var spaces, i, j,
-                        paddedStr  = "",
-                        version = data.version.replace(/-.*$/,'');
+                        var spaces, i,
+                        paddedStr  = "", l,
+                        version = data.version.replace(/-.*$/,''),
+                        license_type = data.license_info.license_type;
 
-                        spaces = Math.floor((16-version.length)/2);
+                        // get the length of the license type and the word license (7) plus the extra spaces (4)
+                        l = license_type.length + 11;
+
+                        spaces = Math.floor(l-(version.length + 10)); // 8 comes from "  Tower "
                         for( i=0; i<=spaces; i++){
                             paddedStr = paddedStr +" ";
                         }
-                        paddedStr = paddedStr+version;
-                        for( j = paddedStr.length; j<16; j++){
-                            paddedStr = paddedStr + " ";
-                        }
+                        paddedStr = version+paddedStr;
                         $('#about-modal-version').html(paddedStr);
+                        $('#about-modal-license-type').html(license_type);
+
                         scope.modalOK = function(){
                             $('#about-modal-dialog').dialog('close');
                         };
