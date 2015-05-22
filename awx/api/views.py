@@ -507,7 +507,7 @@ class OrganizationList(ListCreateAPIView):
         # by the license, then we are only willing to create this organization
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
-                    self.model.objects.filter(active=True).count() > 0):
+                self.model.objects.filter(active=True).count() > 0):
             raise LicenseForbids('Your Tower license only permits a single '
                                  'organization to exist.')
 
