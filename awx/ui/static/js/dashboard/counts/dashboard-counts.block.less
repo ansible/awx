@@ -1,0 +1,70 @@
+/** @define DashboardCounts */
+
+.DashboardCounts {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.DashboardCounts-buttonStyle {
+    text-align: center;
+    padding: 8px;
+    padding-bottom: 11px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 3px;
+}
+
+@media only screen and (max-width: 710px) {
+    .DashboardCounts {
+        margin-bottom: -15px;
+    }
+
+    .DashboardCounts-buttonStyle {
+        border: 1px solid #aaa;
+        margin-bottom: 15px;
+        width: 33%;
+        flex-basis: ~"calc(33% - 7px)";
+    }
+}
+
+.DashboardCounts-buttonStyle:hover {
+    background-color: #1778c3;
+    border-color: #1778c3;
+
+    .DashboardCounts-number,
+    .DashboardCounts-label {
+        color: #fff;
+    }
+}
+
+.DashboardCounts-buttonStyle.is-failure:hover {
+    background-color: #ff5850;
+    border-color: #ff5850;
+
+    .DashboardCounts-number,
+    .DashboardCounts-label {
+        color: #fff;
+    }
+}
+
+.DashboardCounts-number {
+    font-size: 30px;
+    line-height: 26px;
+    flex: 1;
+}
+
+.DashboardCounts-number.is-failure {
+    color: #ff5850;
+}
+
+.DashboardCounts-label {
+    flex: 1;
+    margin-bottom: 0px;
+    color: #000;
+}

@@ -1,0 +1,49 @@
+<div class="DashboardGraphs-graphToolbar">
+    <div class="DashboardGraphs-filterDropdown">
+        Period:
+        <a id="period-dropdown" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+            Past Month<span class="caret"></span>
+        </a>
+
+        <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+            DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="period-dropdown">
+            <li>
+                <a class="n" id="day" >Past 24 Hours </a>
+            </li>
+            <li>
+                <a class="n" id="week">Past Week</a>
+            </li>
+            <li>
+                <a class="n" id="month">Past Month</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="DashboardGraphs-filterDropdown">
+        Job Type:
+            <a id="type-dropdown" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+                All<span class="caret"></span>
+            </a>
+
+        <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+            DashboardGraphs-filterDropdownItems--jobType" role="menu" aria-labelledby="type-dropdown">
+            <li>
+                <a class="m" id="all">All</a>
+            </li>
+            <li>
+                <a class="m" id="inv_sync">Inventory Sync</a>
+            </li>
+            <li>
+                <a class="m" id="scm_update">SCM Update</a>
+            </li>
+            <li>
+                <a class="m" id="playbook_run">Playbook Run</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="graph">
+    <svg width="100%" height="100%"></svg>
+</div>

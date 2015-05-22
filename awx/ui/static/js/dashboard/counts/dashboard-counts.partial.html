@@ -1,0 +1,10 @@
+<div class="DashboardCounts">
+    <a class="DashboardCounts-buttonStyle" ng-repeat="count in counts" ng-href="{{ count.url }}"
+        ng-class="{'is-failure': {{ count.isFailure }} }">
+        <div class="DashboardCounts-number"
+            ng-class="{'is-failure': {{ count.isFailure }} }">
+            {{ count.number }}
+        </div>
+        <h6 class="DashboardCounts-label" >{{ count.label }}</h6>
+    </a>
+</div>

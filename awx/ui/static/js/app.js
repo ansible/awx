@@ -29,11 +29,7 @@ import {Authenticate} from 'tower/controllers/Authentication';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from 'tower/controllers/Credentials';
 import {JobsListController} from 'tower/controllers/Jobs';
 import {PortalController} from 'tower/controllers/Portal';
-
-import dataServices from 'tower/services/_data-services';
-import dashboardGraphs from 'tower/directives/_dashboard-graphs';
 import systemTracking from 'tower/system-tracking/main';
-
 import routeExtensions from 'tower/shared/route-extensions/main';
 import breadcrumbs from 'tower/shared/breadcrumbs/main';
 
@@ -41,6 +37,7 @@ import breadcrumbs from 'tower/shared/breadcrumbs/main';
 import setupMenu from 'tower/setup-menu/main';
 import mainMenu from 'tower/main-menu/main';
 import browserData from 'tower/browser-data/main';
+import dashboard from 'tower/dashboard/main';
 
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
@@ -79,14 +76,13 @@ var tower = angular.module('Tower', [
     'ngSanitize',
     'ngCookies',
     'RestServices',
-    dataServices.name,
-    dashboardGraphs.name,
     routeExtensions.name,
     browserData.name,
     breadcrumbs.name,
     systemTracking.name,
     setupMenu.name,
     mainMenu.name,
+    dashboard.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -149,8 +145,6 @@ var tower = angular.module('Tower', [
     'AccessHelper',
     'SelectionHelper',
     'HostGroupsFormDefinition',
-    'DashboardCountsWidget',
-    'DashboardJobsWidget',
     'PortalJobsWidget',
     'StreamWidget',
     'JobsHelper',
@@ -863,10 +857,9 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
                 resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'hostCountGraphData', 'FeaturesService', function($q, jobStatusGraphData, hostCountGraphData, FeaturesService) {
+                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
                         return $q.all({
                             jobStatus: jobStatusGraphData.get("month", "all"),
-                            hostCounts: hostCountGraphData.get(),
                             features: FeaturesService.get()
                         });
                     }]

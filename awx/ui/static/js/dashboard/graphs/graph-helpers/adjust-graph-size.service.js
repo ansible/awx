@@ -53,37 +53,35 @@ export default function() {
     // Calling chartModel.update() at the end instructs nv to process our changes.
     //
     return function adjustGraphSize(chartModel, element) {
-        var parentHeight = element.parent().parent().height();
-        var toolbarHeight = element.find('.toolbar').height();
-        var container = element.find('svg').parent();
-        var margins = chartModel.margin();
+        if (chartModel) {
+            var margins = chartModel.margin();
+            var graph = d3.select(element.find('svg')[0]);
+            var width = parseInt(graph.style('width')) - margins.left - margins.right;
+            // var height = parseInt(graph.style('height')) - margins.top - margins.bottom;
+            // console.log(height);
+            var height = 200;
 
-        var newHeight = parentHeight - toolbarHeight - margins.bottom;
+            chartModel.xRange([0, width]);
+            chartModel.yRange([height, 0]);
 
-        $(container).height(newHeight);
+            chartModel.xAxis.ticks(Math.max(width / 75, 2));
+            chartModel.yAxis.ticks(Math.max(height / 50, 2));
 
-        var graph = d3.select(element.find('svg')[0]);
-        var width = parseInt(graph.style('width')) - margins.left - margins.right;
-        var height = parseInt(graph.style('height')) - margins.top - margins.bottom;
+            if (height < 160) {
+                graph.select('.y.nv-axis').select('.domain').style('display', 'none');
+                graph.select('.y.nv-axis').select('.domain').style('display', 'initial');
+            }
 
-        chartModel.xRange([0, width]);
-        chartModel.yRange([height, 0]);
+            graph.select('.x.nv-axis')
+            .attr('transform', 'translate(0, ' + height + ')')
+            .call(chartModel.xAxis);
 
-        chartModel.xAxis.ticks(Math.max(width / 75, 2));
-        chartModel.yAxis.ticks(Math.max(height / 50, 2));
+            graph.selectAll('.line')
+            .attr('d', chartModel.lines);
 
-        if (height < 160) {
-            graph.select('.y.nv-axis').select('.domain').style('display', 'none');
-            graph.select('.y.nv-axis').select('.domain').style('display', 'initial');
+            if (chartModel.update) {
+                chartModel.update();
+            }
         }
-
-        graph.select('.x.nv-axis')
-        .attr('transform', 'translate(0, ' + height + ')')
-        .call(chartModel.xAxis);
-
-        graph.selectAll('.line')
-        .attr('d', chartModel.lines);
-
-        chartModel.update();
     };
 }

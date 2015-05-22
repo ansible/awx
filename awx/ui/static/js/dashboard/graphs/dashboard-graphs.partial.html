@@ -1,0 +1,32 @@
+<div class="DashboardGraphs">
+    <div class="DashboardGraphs-tabSection">
+        <div class="DashboardGraphs-tab DashboardGraphs-tab--firstTab"
+            ng-click="toggleGraphStatus('jobStatus')"
+            ng-class="{'is-selected': jobStatusSelected }">
+            Job Status
+        </div>
+        <div class="DashboardGraphs-tab DashboardGraphs-tab--lastTab"
+            ng-click="toggleGraphStatus('hostStatus')"
+            ng-class="{'is-selected': hostStatusSelected }">
+            Host Status
+        </div>
+    </div>
+    <div class="DashboardGraphs-graphSection">
+        <div class="DashboardGraphs-graphContainer" auto-size-module
+            graph-type="jobsStatus"
+            ng-class="{'is-selected': jobStatusSelected }">
+            <job-status-graph class="DashboardGraphs-graph
+                DashboardGraphs-graph--jobStatusGraph"
+                data="graphData.jobStatus" period="month" job-type="all">
+            </job-status-graph>
+        </div>
+        <div class="DashboardGraphs-graphContainer" auto-size-module
+            graph-type="hostStatus"
+            ng-class="{'is-selected': hostStatusSelected }">
+            <host-status-graph class="DashboardGraphs-graph
+                DashboardGraphs-graph--hostStatusGraph"
+                data="dashboardData">
+            </host-status-graph>
+        </div>
+    </div>
+</div>

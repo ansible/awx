@@ -1,0 +1,35 @@
+<div class="DashboardJobs" ng-hide="noJobs">
+    <h3 class="DashboardJobs-header">
+        Recent Job Runs
+    </h3>
+    <div class="DashboardJobs-container">
+        <div class="DashboardJobs-item"
+            ng-class="{'DashboardJobs-item--snapRows': {{ snapRows }}}"
+            ng-repeat="job in jobs">
+            <a ng-href="{{ job.detailsUrl }}"
+                class="DashboardJobs-itemLink">
+                <i class="fa
+                    DashboardJobs-status"
+                    ng-class="{'DashboardJobs-status--success icon-job-successful': isSuccessful(job.status),
+                        'DashboardJobs-status--failed icon-job-failed': !isSuccessful(job.status)}">
+                </i>
+                <span class="DashboardJobs-nameContainer">
+                    {{job.name}}
+                </span>
+                <div class="DashboardJobs-time">
+                    {{ job.time }}
+                </div>
+            </a>
+        </div>
+    </div>
+    <a href="/#/jobs" class="DashboardJobs-seeMore">
+        See all job runs
+    </a>
+</div>
+
+<div class="DashboardJobs DashboardJobs--noJobs" ng-show="noJobs">
+    <h3 class="DashboardJobs-header">
+        Recent Job Runs
+    </h3>
+    <p>It doesn't seem like you have any recent job runs.</p>
+</div>

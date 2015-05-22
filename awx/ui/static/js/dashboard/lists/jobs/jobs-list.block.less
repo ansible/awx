@@ -1,0 +1,113 @@
+/** @define DashboardJobs */
+
+.DashboardJobs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.DashboardJobs--noJobs {
+    color: #8d8d8d;
+}
+
+.DashboardJobs-header {
+    flex: initial;
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.DashboardJobs-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-bottom: 15px;
+}
+
+.DashboardJobs-item {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 0;
+    padding-top: 0;
+    border-bottom: 1px solid #a9a9a9;
+    align-items: center;
+}
+
+
+.DashboardJobs-item--snapRows {
+    flex: initial;
+}
+
+.DashboardJobs-itemLink {
+    flex: 2;
+    display: flex;
+    padding-bottom: 9px;
+    padding-top: 7px;
+    align-items: center;
+}
+
+.DashboardJobs-status {
+    flex: initial;
+    height: 18px;
+    width: 23px;
+    font-size: 18px;
+    margin-bottom: -3px;
+}
+
+.DashboardJobs-nameContainer {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.DashboardJobs-time {
+    flex: initial;
+    text-align: right;
+    margin-bottom: 0px;
+    margin-left: 10px;
+    color: #000;
+}
+
+.DashboardJobs-itemLink:hover {
+    .DashboardJobs-nameContainer,
+    .DashboardJobs-time {
+        font-weight: 600;
+    }
+
+    .DashboardJobs-status--success {
+        color: #5DF370;
+    }
+
+    .DashboardJobs-status--failed {
+        color: #FF1105;
+    }
+}
+
+.DashboardJobs-item:last-of-type {
+    border-bottom: 0px;
+}
+
+.DashboardJobs-seeMore {
+    padding-top: 11px;
+    padding-bottom: 11px;
+    width: ~"calc(100% + 32px)";
+    margin-left: -16px;
+    margin-bottom: -16px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #fff;
+    font-size: 17px;
+    text-align: center;
+    background-color: #1778c3;
+}
+
+.DashboardJobs-seeMore:hover {
+    font-weight: 600;
+    color: #fff;
+}
+
+@media only screen and (max-width: 710px) {
+    .DashboardJobs-nameContainer {
+        font-size: 19px;
+    }
+}

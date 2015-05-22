@@ -1,0 +1,28 @@
+<div class="DashboardJobTemplates" ng-hide="noJobTemplates">
+    <h3 class="DashboardJobTemplates-header">
+        Recently Used Job Templates
+    </h3>
+    <div class="DashboardJobTemplates-container">
+        <div class="DashboardJobTemplates-item"
+            ng-class="{'DashboardJobTemplates-item--snapRows': {{ snapRows }}}"
+            ng-repeat="job_template in job_templates">
+            <i class="fa fa-rocket
+                DashboardJobTemplates-launch"
+                ng-click="launchJobTemplate(job_template.id)"></i>
+            <a href="#/job_templates/{{ job_template.id }}" class="DashboardJobTemplates-name">
+                {{ job_template.name }}
+            </a>
+            <aw-smart-status jobs="job_template.recent_jobs" class="DashboardJobTemplates-smartStatus"></aw-smart-status>
+        </div>
+    </div>
+    <a href="/#/job_templates" class="DashboardJobTemplates-seeMore">
+        See all job templates
+    </a>
+</div>
+<div class="DashboardJobTemplates DashboardJobTemplates--noJobTemplates" ng-show="noJobTemplates">
+    <h3 class="DashboardJobTemplates-header">
+        Recent Job Runs
+    </h3>
+    <p>It doesn't seem like you have used any job templates.<br />
+    You can create a job template <a href="#/job_templates/add">here</a>.</p>
+</div>

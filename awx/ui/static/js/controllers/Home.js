@@ -26,41 +26,31 @@
  *
 */
 
-export function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
+export function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, $window, graphData){
 
     ClearScope('home');
 
-    var borderStyles;
+    var dataCount = 0;
 
-    if (!$routeParams.login) {
-        // If we're not logging in, start the Wait widget. Otherwise, it's already running.
-        //Wait('start');
+    if ($scope.removeDashboardDataLoadComplete) {
+        $scope.removeDashboardDataLoadComplete();
     }
+    $scope.removeDashboardDataLoadComplete = $scope.$on('dashboardDataLoadComplete', function () {
+        dataCount++;
+        if (dataCount === 3) {
+            Wait("stop");
+            dataCount = 0;
+        }
+    });
 
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
     }
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
-
-        nv.dev=false;
-
-
-        borderStyles = {"border": "1px solid #A9A9A9",
-            "border-radius": "4px",
-            "padding": "5px",
-            "margin-bottom": "15px"};
-        $('.graph-container').css(borderStyles);
-
-        DashboardCounts({
-            scope: $scope,
-            target: 'dash-counts',
-            dashboard: data
-        });
-
-        // // chart.update();
-
+        $scope.dashboardCountsData = data;
         $scope.graphData = graphData;
+        $scope.$emit('dashboardDataLoadComplete');
 
         var cleanupJobListener =
             $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
@@ -70,15 +60,24 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
         $scope.$on('$destroy', function() {
             cleanupJobListener();
         });
-
-
-        DashboardJobs({
-            scope: $scope,
-            target: 'dash-jobs-list',
-            dashboard: data
-        });
-
     });
+
+    if ($scope.removeDashboardJobsListReady) {
+        $scope.removeDashboardJobsListReady();
+    }
+    $scope.removeDashboardJobsListReady = $scope.$on('dashboardJobsListReady', function (e, data) {
+        $scope.dashboardJobsListData = data;
+        $scope.$emit('dashboardDataLoadComplete');
+    });
+
+    if ($scope.removeDashboardJobTemplatesListReady) {
+        $scope.removeDashboardJobTemplatesListReady();
+    }
+    $scope.removeDashboardJobTemplatesListReady = $scope.$on('dashboardJobTemplatesListReady', function (e, data) {
+        $scope.dashboardJobTemplatesListData = data;
+        $scope.$emit('dashboardDataLoadComplete');
+    });
+
 
     $scope.showActivity = function () {
         Stream({
@@ -97,13 +96,30 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
         });
+        Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
+        Rest.get()
+        .success(function (data) {
+            data = data.results;
+            $scope.$emit('dashboardJobsListReady', data);
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
+        });
+        Rest.setUrl(GetBasePath("job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false");
+        Rest.get()
+        .success(function (data) {
+            data = data.results;
+            $scope.$emit('dashboardJobTemplatesListReady', data);
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard job templates list: ' + status });
+        });
     };
 
     $scope.refresh();
-
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData'
 ];
 

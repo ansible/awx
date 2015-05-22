@@ -1,14 +1,15 @@
 export default
     [   '$compile',
         '$window',
-        HostStatusGraph
+        'adjustGraphSize',
+        HostStatusGraph,
     ];
 
-function HostStatusGraph($compile, $window) {
+function HostStatusGraph($compile, $window, adjustGraphSize) {
         return {
             restrict: 'E',
             link: link,
-            templateUrl: '/static/partials/host_status_graph.html'
+            templateUrl: '/static/js/dashboard/graphs/host-status/host_status_graph.partial.html'
         };
 
         function link(scope, element, attr) {
@@ -20,12 +21,10 @@ function HostStatusGraph($compile, $window) {
                 }
             });
 
-            function adjustGraphSize() {
-
+            function adjustHostGraphSize() {
                 if (angular.isUndefined(host_pie_chart)) {
                     return;
                 }
-
                 var parentHeight = element.parent().parent().height();
                 var toolbarHeight = element.find('.toolbar').height();
                 var container = element.find('svg').parent();
@@ -38,10 +37,12 @@ function HostStatusGraph($compile, $window) {
                 host_pie_chart.update();
             }
 
-            angular.element($window).on('resize', adjustGraphSize);
+            angular.element($window).on('resize', adjustHostGraphSize);
+            $(".DashboardGraphs-graph--hostStatusGraph").resize(adjustHostGraphSize);
 
             element.on('$destroy', function() {
-                angular.element($window).off('resize', adjustGraphSize);
+                angular.element($window).off('resize', adjustHostGraphSize);
+                $(".DashboardGraphs-graph--hostStatusGraph").removeResize(adjustHostGraphSize);
             });
 
             function createGraph(data) {
@@ -58,7 +59,7 @@ function HostStatusGraph($compile, $window) {
                     ];
 
                     host_pie_chart = nv.models.pieChart()
-                        .margin({top: 5, right: 75, bottom: 25, left: 85})
+                        .margin({bottom: 15})
                         .x(function(d) { return d.label; })
                         .y(function(d) { return d.value; })
                         .showLabels(true)
@@ -100,6 +101,7 @@ function HostStatusGraph($compile, $window) {
 
                     element.find('svg').replaceWith(notFoundContainer);
                 }
+
 
             }
         }
