@@ -1914,6 +1914,9 @@ class JobTemplateCallback(GenericAPIView):
         return Response(data)
 
     def post(self, request, *args, **kwargs):
+        extra_vars = None
+        if request.content_type == "application/json":
+            extra_vars = request.DATA.get("extra_vars", None)
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
@@ -1968,8 +1971,10 @@ class JobTemplateCallback(GenericAPIView):
             job = job_template.create_job(limit=limit, launch_type='callback')
 
         # Send a signal to celery that the job should be started.
-        isau = inventory_sources_already_updated
-        result = job.signal_start(inventory_sources_already_updated=isau)
+        kv = {"inventory_sources_already_updated": inventory_sources_already_updated}
+        if extra_vars is not None:
+            kv['extra_vars'] = extra_vars
+        result = job.signal_start(**kv)
         if not result:
             data = dict(msg='Error starting job!')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2460,6 +2465,7 @@ class AdHocCommandList(ListCreateAPIView):
     model = AdHocCommand
     serializer_class = AdHocCommandListSerializer
     new_in_220 = True
+    always_allow_superuser = False
 
     @csrf_exempt
     @transaction.non_atomic_requests

@@ -6,6 +6,7 @@ import glob
 import os
 import subprocess
 import tempfile
+import mock
 
 # Django
 from django.conf import settings
@@ -15,12 +16,12 @@ from django.core.urlresolvers import reverse
 from crum import impersonate
 
 # AWX
+from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseJobExecutionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
-
 
 class BaseAdHocCommandTest(BaseJobExecutionTest):
     '''
@@ -28,23 +29,24 @@ class BaseAdHocCommandTest(BaseJobExecutionTest):
     '''
 
     def setUp(self):
-        super(BaseAdHocCommandTest, self).setUp()
-        self.setup_instances()
-        self.setup_users()
-        self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.organization.admins.add(self.normal_django_user)
-        self.inventory = self.organization.inventories.create(name='test-inventory', description='description for test-inventory')
-        self.host = self.inventory.hosts.create(name='host.example.com')
-        self.host2 = self.inventory.hosts.create(name='host2.example.com')
-        self.group = self.inventory.groups.create(name='test-group')
-        self.group2 = self.inventory.groups.create(name='test-group2')
-        self.group.hosts.add(self.host)
-        self.group2.hosts.add(self.host, self.host2)
-        self.inventory2 = self.organization.inventories.create(name='test-inventory2')
-        self.host3 = self.inventory2.hosts.create(name='host3.example.com')
-        self.credential = None
-        settings.INTERNAL_API_URL = self.live_server_url
-        settings.CALLBACK_CONSUMER_PORT = ''
+        with ignore_inventory_computed_fields():
+            super(BaseAdHocCommandTest, self).setUp()
+            self.setup_instances()
+            self.setup_users()
+            self.organization = self.make_organizations(self.super_django_user, 1)[0]
+            self.organization.admins.add(self.normal_django_user)
+            self.inventory = self.organization.inventories.create(name='test-inventory', description='description for test-inventory')
+            self.host = self.inventory.hosts.create(name='host.example.com')
+            self.host2 = self.inventory.hosts.create(name='host2.example.com')
+            self.group = self.inventory.groups.create(name='test-group')
+            self.group2 = self.inventory.groups.create(name='test-group2')
+            self.group.hosts.add(self.host)
+            self.group2.hosts.add(self.host, self.host2)
+            self.inventory2 = self.organization.inventories.create(name='test-inventory2')
+            self.host3 = self.inventory2.hosts.create(name='host3.example.com')
+            self.credential = None
+            settings.INTERNAL_API_URL = self.live_server_url
+            settings.CALLBACK_CONSUMER_PORT = ''
 
     def create_test_credential(self, **kwargs):
         self.credential = self.make_credential(**kwargs)
@@ -124,7 +126,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_job_result(ad_hoc_command, 'failed')
         self.check_ad_hoc_command_events(ad_hoc_command, 'unreachable')
 
-    def test_cancel_ad_hoc_command(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('canceled', 0))
+    def test_cancel_ad_hoc_command(self, ignore):
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
         self.assertFalse(ad_hoc_command.cancel_flag)
@@ -145,7 +148,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         # Unable to start ad hoc command again.
         self.assertFalse(ad_hoc_command.signal_start())
 
-    def test_ad_hoc_command_options(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_ad_hoc_command_options(self, ignore):
         ad_hoc_command = self.create_test_ad_hoc_command(forks=2, verbosity=2)
         self.assertEqual(ad_hoc_command.status, 'new')
         self.assertFalse(ad_hoc_command.passwords_needed_to_start)
@@ -191,7 +195,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_ad_hoc_command_events(ad_hoc_command3, 'ok', hosts=[])
         self.assertEqual(ad_hoc_command3.ad_hoc_command_events.count(), 0)
 
-    def test_ssh_username_and_password(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_ssh_username_and_password(self, ignore):
         self.create_test_credential(username='sshuser', password='sshpass')
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
@@ -199,10 +204,11 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'successful')
-        self.assertTrue('"-u"' in ad_hoc_command.job_args)
-        self.assertTrue('"--ask-pass"' in ad_hoc_command.job_args)
+        self.assertIn('"-u"', ad_hoc_command.job_args)
+        self.assertIn('"--ask-pass"', ad_hoc_command.job_args)
 
-    def test_ssh_ask_password(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_ssh_ask_password(self, ignore):
         self.create_test_credential(password='ASK')
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
@@ -212,9 +218,10 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start(ssh_password='sshpass'))
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'successful')
-        self.assertTrue('"--ask-pass"' in ad_hoc_command.job_args)
+        self.assertIn('"--ask-pass"', ad_hoc_command.job_args)
 
-    def test_sudo_username_and_password(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_sudo_username_and_password(self, ignore):
         self.create_test_credential(become_method="sudo",
                                     become_username='sudouser',
                                     become_password='sudopass')
@@ -223,15 +230,14 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertFalse(ad_hoc_command.passwords_needed_to_start)
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        # Job may fail if current user doesn't have password-less sudo
-        # privileges, but we're mainly checking the command line arguments.
         self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"--become-method"' in ad_hoc_command.job_args)
-        self.assertTrue('"--become-user"' in ad_hoc_command.job_args)
-        self.assertTrue('"--ask-become-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--become"' in ad_hoc_command.job_args)
+        self.assertIn('"--become-method"', ad_hoc_command.job_args)
+        self.assertIn('"--become-user"', ad_hoc_command.job_args)
+        self.assertIn('"--ask-become-pass"', ad_hoc_command.job_args)
+        self.assertNotIn('"--become"', ad_hoc_command.job_args)
 
-    def test_sudo_ask_password(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_sudo_ask_password(self, ignore):
         self.create_test_credential(become_password='ASK')
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
@@ -240,13 +246,13 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertFalse(ad_hoc_command.signal_start())
         self.assertTrue(ad_hoc_command.signal_start(become_password='sudopass'))
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        # Job may fail, but we're mainly checking the command line arguments.
         self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"--ask-become-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--become-user"' in ad_hoc_command.job_args)
-        self.assertFalse('"--become"' in ad_hoc_command.job_args)
+        self.assertIn('"--ask-become-pass"', ad_hoc_command.job_args)
+        self.assertNotIn('"--become-user"', ad_hoc_command.job_args)
+        self.assertNotIn('"--become"', ad_hoc_command.job_args)
 
-    def test_unlocked_ssh_key(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('successful', 0))
+    def test_unlocked_ssh_key(self, ignore):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
@@ -254,8 +260,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'successful')
-        self.assertFalse('"--private-key=' in ad_hoc_command.job_args)
-        self.assertTrue('ssh-agent' in ad_hoc_command.job_args)
+        self.assertNotIn('"--private-key=', ad_hoc_command.job_args)
+        self.assertIn('ssh-agent', ad_hoc_command.job_args)
 
     def test_locked_ssh_key_with_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -266,8 +272,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'successful')
-        self.assertTrue('ssh-agent' in ad_hoc_command.job_args)
-        self.assertTrue('Bad passphrase' not in ad_hoc_command.result_stdout)
+        self.assertIn('ssh-agent', ad_hoc_command.job_args)
+        self.assertNotIn('Bad passphrase', ad_hoc_command.result_stdout)
 
     def test_locked_ssh_key_with_bad_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -278,8 +284,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'failed')
-        self.assertTrue('ssh-agent' in ad_hoc_command.job_args)
-        self.assertTrue('Bad passphrase' in ad_hoc_command.result_stdout)
+        self.assertIn('ssh-agent', ad_hoc_command.job_args)
+        self.assertIn('Bad passphrase', ad_hoc_command.result_stdout)
 
     def test_locked_ssh_key_ask_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -303,8 +309,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue(ad_hoc_command.signal_start(ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK))
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'successful')
-        self.assertTrue('ssh-agent' in ad_hoc_command.job_args)
-        self.assertTrue('Bad passphrase' not in ad_hoc_command.result_stdout)
+        self.assertIn('ssh-agent', ad_hoc_command.job_args)
+        self.assertNotIn('Bad passphrase', ad_hoc_command.result_stdout)
 
     def test_run_with_proot(self):
         # Only run test if proot is installed
@@ -348,7 +354,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_job_result(ad_hoc_command, 'successful')
         self.check_ad_hoc_command_events(ad_hoc_command, 'ok')
 
-    def test_run_with_proot_not_installed(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('failed', 0))
+    def test_run_with_proot_not_installed(self, ignore):
         # Enable proot for this test, specify invalid proot cmd.
         settings.AWX_PROOT_ENABLED = True
         settings.AWX_PROOT_CMD = 'PR00T'
@@ -359,6 +366,9 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.check_job_result(ad_hoc_command, 'error', expect_traceback=True)
 
+
+def run_pexpect_mock(self, *args, **kwargs):
+    return 'successful', 0
 
 class AdHocCommandApiTest(BaseAdHocCommandTest):
     '''
@@ -385,7 +395,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
                 del data[k]
         return self.post(url, data, expect=expect)
 
-    def test_ad_hoc_command_list(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_list(self, ignore):
         url = reverse('api:ad_hoc_command_list')
 
         # Retrieve the empty list of ad hoc commands.
@@ -557,8 +568,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command(become_enabled=True)
             self.assertEqual(response['become_enabled'], True)
+        
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(expect=403)
 
-    def test_ad_hoc_command_detail(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_detail(self, ignore):
         with self.current_user('admin'):
             response1 = self.run_test_ad_hoc_command()
             response2 = self.run_test_ad_hoc_command()
@@ -622,7 +641,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=204)
             self.delete(url, expect=404)
 
-    def test_ad_hoc_command_cancel(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_cancel(self, ignore):
         # Override setting so that ad hoc command isn't actually started.
         with self.settings(CELERY_UNIT_TEST=False):
             with self.current_user('admin'):
@@ -674,7 +694,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertEqual(response['can_cancel'], False)
             self.post(url, {}, expect=405)
 
-    def test_ad_hoc_command_relaunch(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_relaunch(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -734,7 +755,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertEqual(response['passwords_needed_to_start'], [])
             response = self.post(url, {}, expect=400)
 
+        # Try to relaunch with expired license.
+        with self.current_user('admin'):
+            response = self.run_test_ad_hoc_command(inventory=self.inventory2.pk)
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.post(response['related']['relaunch'], {}, expect=403)
+
     def test_ad_hoc_command_events_list(self):
+        # TODO: Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command()
@@ -823,6 +853,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=401)
 
     def test_ad_hoc_command_event_detail(self):
+        # TODO: Mock pexpect. Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -877,7 +909,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
                 self.patch(url, {}, expect=401)
                 self.delete(url, expect=401)
 
-    def test_ad_hoc_command_activity_stream(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_ad_hoc_command_activity_stream(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
@@ -927,7 +960,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
-    def test_inventory_ad_hoc_commands_list(self):
+    @mock.patch('awx.main.tasks.BaseTask.run_pexpect', side_effect=run_pexpect_mock)
+    def test_inventory_ad_hoc_commands_list(self, ignore):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command(inventory=self.inventory2.pk)
@@ -1029,7 +1063,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             response = self.get(inventory_url, expect=200)
             self.assertTrue(response['can_run_ad_hoc_commands'])
 
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+
     def test_host_ad_hoc_commands_list(self):
+        # TODO: Figure out why this test needs pexpect
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
             response = self.run_test_ad_hoc_command(limit=self.host2.name)
@@ -1078,7 +1121,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+
     def test_group_ad_hoc_commands_list(self):
+        # TODO: Figure out why this test needs pexpect
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command() # self.host + self.host2
             response = self.run_test_ad_hoc_command(limit=self.group.name) # self.host
@@ -1132,7 +1184,16 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
+        # Try to run with expired license.
+        self.create_expired_license_file()
+        with self.current_user('admin'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+        with self.current_user('normal'):
+            self.run_test_ad_hoc_command(url=url, expect=403)
+
     def test_host_ad_hoc_command_events_list(self):
+        # TODO: Mock run_pexpect. Create test events instead of relying on playbooks execution
+
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 

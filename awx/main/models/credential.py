@@ -192,6 +192,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         host = self.host or ''
         if not host and self.kind == 'vmware':
             raise ValidationError('Host required for VMware credential.')
+        if not host and self.kind == 'openstack':
+            raise ValidationError('Host required for OpenStack credential.')
         return host
 
     def clean_username(self):
@@ -203,6 +205,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
                                   'credential.')
         if not username and self.kind == 'vmware':
             raise ValidationError('Username required for VMware credential.')
+        if not username and self.kind == 'openstack':
+            raise ValidationError('Username required for OpenStack credential.')
         return username
 
     def clean_password(self):
@@ -213,6 +217,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             raise ValidationError('API key required for Rackspace credential.')
         if not password and self.kind == 'vmware':
             raise ValidationError('Password required for VMware credential.')
+        if not password and self.kind == 'openstack':
+            raise ValidationError('Password or API key required for OpenStack credential.')
         return password
 
     def clean_project(self):

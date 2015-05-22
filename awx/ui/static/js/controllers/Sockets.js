@@ -80,11 +80,6 @@ export function SocketsController ($scope, $compile, ClearScope, Socket) {
     e.append(html);
     $compile(e)(job_events_scope);
 
-    schedules_socket.init();
-    test_socket.init();
-    jobs_socket.init();
-    job_events_socket.init();
-
     schedules_scope.url = schedules_socket.getUrl();
     test_scope.url = test_socket.getUrl();
     jobs_scope.url = jobs_socket.getUrl();

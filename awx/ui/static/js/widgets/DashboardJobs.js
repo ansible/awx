@@ -48,7 +48,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         e.html(html);
         $compile(e)(scope);
 
-        $rootScope.$on('JobStatusChange', function() {
+        $rootScope.$on('JobStatusChange-home', function() {
             jobs_scope.refreshJobs();
         });
 

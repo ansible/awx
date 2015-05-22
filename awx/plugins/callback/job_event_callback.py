@@ -36,11 +36,8 @@ import json
 import logging
 import os
 import pwd
-import sys
-import urllib
 import urlparse
 import time
-from contextlib import closing
 
 # Requests
 import requests

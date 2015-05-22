@@ -1,1 +1,1 @@
-from awx.wsgi import application
+from awx.wsgi import application  # NOQA

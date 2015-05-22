@@ -220,6 +220,18 @@ var tower = angular.module('Tower', [
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
+                    }],
+                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.event_socket) {
+                            $rootScope.event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "job_events"
+                            });
+                            $rootScope.event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
                     }]
                 }
             }).
@@ -231,6 +243,18 @@ var tower = angular.module('Tower', [
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
+                    }],
+                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.event_socket) {
+                            $rootScope.event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "job_events"
+                            });
+                            $rootScope.event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
                     }]
                 }
             }).
@@ -242,6 +266,18 @@ var tower = angular.module('Tower', [
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
+                    }],
+                    adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.adhoc_event_socket) {
+                            $rootScope.adhoc_event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "ad_hoc_command_events"
+                            });
+                            $rootScope.adhoc_event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
                     }]
                 }
             }).
@@ -942,15 +978,49 @@ var tower = angular.module('Tower', [
                     // Listen for job changes and issue callbacks to initiate
                     // DOM updates
                     function openSocket() {
+                        var schedule_socket;
+
                         sock = Socket({ scope: $rootScope, endpoint: "jobs" });
                         sock.init();
                         sock.on("status_changed", function(data) {
-                            $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
-                            $rootScope.$emit('JobStatusChange', data);
+                            $log.debug('Job ' + data.unified_job_id +
+                                ' status changed to ' + data.status +
+                                ' send to ' + $location.$$url);
+
+                            // this acts as a router...it emits the proper
+                            // value based on what URL the user is currently
+                            // accessing.
+                            if ($location.$$url === '/jobs') {
+                                $rootScope.$emit('JobStatusChange-jobs', data);
+                            } else if (/\/jobs\/(\d)+\/stdout/.test($location.$$url) ||
+                                /\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+                                $log.debug("sending status to standard out");
+                                $rootScope.$emit('JobStatusChange-jobStdout', data);
+                            } else if (/\/jobs\/(\d)+/.test($location.$$url)) {
+                                $rootScope.$emit('JobStatusChange-jobDetails', data);
+                            } else if ($location.$$url === '/home') {
+                                $rootScope.$emit('JobStatusChange-home', data);
+                            } else if ($location.$$url === '/portal') {
+                                $rootScope.$emit('JobStatusChange-portal', data);
+                            } else if ($location.$$url === '/projects') {
+                                $rootScope.$emit('JobStatusChange-projects', data);
+                            } else if (/\/inventory\/(\d)+\/manage/.test($location.$$url)) {
+                                $rootScope.$emit('JobStatusChange-inventory', data);
+                            }
                         });
                         sock.on("summary_complete", function(data) {
                             $log.debug('Job summary_complete ' + data.unified_job_id);
                             $rootScope.$emit('JobSummaryComplete', data);
+                        });
+
+                        schedule_socket = Socket({
+                            scope: $rootScope,
+                            endpoint: "schedules"
+                        });
+                        schedule_socket.init();
+                        schedule_socket.on("schedule_changed", function(data) {
+                            $log.debug('Schedule  ' + data.unified_job_id + ' status changed to ' + data.status);
+                            $rootScope.$emit('ScheduleStatusChange', data);
                         });
                     }
                     openSocket();

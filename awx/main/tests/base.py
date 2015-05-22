@@ -14,6 +14,7 @@ import time
 from multiprocessing import Process
 from subprocess import Popen
 import re
+import mock
 
 # PyYAML
 import yaml
@@ -76,8 +77,14 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
+class MockCommonlySlowTestMixin(object):
+    def __init__(self, *args, **kwargs):
+        from awx.api import generics
+        mock.patch.object(generics, 'get_view_description', return_value=None).start()
+        super(MockCommonlySlowTestMixin, self).__init__(*args, **kwargs)
+
 ansible_version = get_ansible_version()
-class BaseTestMixin(QueueTestMixin):
+class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
     '''
     Mixin with shared code for use by all test cases.
     '''
@@ -178,6 +185,13 @@ class BaseTestMixin(QueueTestMixin):
         writer.write_file(license_path)
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
+
+    def create_expired_license_file(self, instance_count=1000, grace_period=False):
+        license_date = time.time() - 1
+        if not grace_period:
+            license_date -= 2592000
+        self.create_test_license_file(instance_count, license_date)
+        os.environ['SKIP_LICENSE_FIXUP_FOR_TEST'] = '1'
 
     def assertElapsedLessThan(self, seconds):
         elapsed = time.time() - self._start_time

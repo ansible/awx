@@ -108,7 +108,7 @@ class ModelAccessPermission(permissions.BasePermission):
             raise PermissionDenied('your account is inactive')
 
         # Always allow superusers (as long as they are active).
-        if request.user.is_superuser:
+        if getattr(view, 'always_allow_superuser', True) and request.user.is_superuser:
             return True
 
         # Check if view supports the request method before checking permission

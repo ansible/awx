@@ -882,9 +882,8 @@ class Command(NoArgsCommand):
                 continue
             mem_group = self.all_group.all_groups[group_name]
             group = self.inventory.groups.create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
-            # Access auto one-to-one attribute to create related object.
-            #group.inventory_source
-            InventorySource.objects.create(group=group, inventory=self.inventory, name=('%s (%s)' % (group_name, self.inventory.name)))
+            # Create related inventory source (name will be set by save() method on InventorySource).
+            InventorySource.objects.create(group=group, inventory=self.inventory)
             self.logger.info('Group "%s" added', group.name)
             if inv_src_group and group_name in root_group_names:
                 self._batch_add_m2m(inv_src_group.children, group)

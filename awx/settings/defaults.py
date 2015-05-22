@@ -3,9 +3,7 @@
 
 import os
 import sys
-import glob
 from datetime import timedelta
-import tempfile
 
 MONGO_DB = 'system_tracking'
 
@@ -119,13 +117,13 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-TEMPLATE_CONTEXT_PROCESSORS += (
+TEMPLATE_CONTEXT_PROCESSORS += (  # NOQA
     'django.core.context_processors.request',
     'awx.ui.context_processors.settings',
     'awx.ui.context_processors.version',
 )
 
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE_CLASSES += (  # NOQA
     'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'crum.CurrentRequestUserMiddleware',
@@ -133,6 +131,13 @@ MIDDLEWARE_CLASSES += (
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
+)
+
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
 )
 
 ROOT_URLCONF = 'awx.urls'
@@ -247,7 +252,7 @@ EMAIL_USE_TLS = False
 # Use Django-Debug-Toolbar if installed.
 try:
     import debug_toolbar
-    INSTALLED_APPS += ('debug_toolbar',)
+    INSTALLED_APPS += (debug_toolbar.__name__,)
 except ImportError:
     pass
 
@@ -259,7 +264,7 @@ DEBUG_TOOLBAR_CONFIG = {
 # Use Django-devserver if installed.
 try:
     import devserver
-    INSTALLED_APPS += ('devserver',)
+    INSTALLED_APPS += (devserver.__name__,)
 except ImportError:
     pass
 
@@ -444,7 +449,7 @@ VMWARE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
-VMWARE_ENABLED_VAR = 'vmware_powerState' 
+VMWARE_ENABLED_VAR = 'vmware_powerState'
 VMWARE_ENABLED_VALUE = 'poweredOn'
 
 # Inventory variable name containing the unique instance ID.
@@ -609,7 +614,7 @@ LOGGING = {
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'tower_warnings.log'),
-            'maxBytes': 1024*1024*5, # 5 MB
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
@@ -618,7 +623,7 @@ LOGGING = {
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
-            'maxBytes': 1024*1024*5, # 5 MB
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
@@ -627,7 +632,7 @@ LOGGING = {
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'socketio_service.log'),
-            'maxBytes': 1024*1024*5, # 5 MB
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },
@@ -636,7 +641,7 @@ LOGGING = {
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'maxBytes': 1024*1024*5, # 5 MB
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
         },

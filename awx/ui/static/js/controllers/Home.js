@@ -115,9 +115,9 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
  * @description This controls the 'home/groups' page that is loaded from the dashboard
  *
 */
-export function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
-    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store, Socket) {
+    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -127,8 +127,7 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
         defaultUrl = GetBasePath('groups'),
         scope = $scope,
         modal_scope = $scope.$new(),
-        opt, PreviousSearchParams,
-        io;
+        opt, PreviousSearchParams;
 
     generator.inject(list, { mode: 'edit', scope: scope, breadCrumbs: true });
 
@@ -296,10 +295,10 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
 
     LoadBreadCrumbs();
 
-    io = Socket({ scope: $scope, endpoint: "jobs" });
-    io.init();
-    $log.debug('Watching for job updates: ');
-    io.on("status_changed", function(data) {
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-home', function(e, data) {
         var stat, group;
         if (data.group_id) {
             group = Find({ list: scope[list.name], key: 'id', val: data.group_id });
@@ -539,7 +538,7 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
 
 }
 
-HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];

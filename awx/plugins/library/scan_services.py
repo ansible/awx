@@ -84,7 +84,7 @@ class ServiceScanService(BaseService):
                     else:
                         pid = None
                 else:
-                    pid = None
+                    pid = None  # NOQA
                 payload = {"name": service_name, "state": service_state, "goal": service_goal, "source": "upstart"}
                 services.append(payload)
 
@@ -104,7 +104,7 @@ class ServiceScanService(BaseService):
                     service_state = "dead"
                 elif len(line_data) == 3:
                     service_name = line_data[0]
-                    service_pid = None
+                    service_pid = None  # NOQA
                     service_state = "stopped"
                 else:
                     continue

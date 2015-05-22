@@ -6,13 +6,12 @@
 # Python
 import sys
 import traceback
-import glob
 
 # Django Split Settings
 from split_settings.tools import optional, include
 
 # Load default settings.
-from defaults import *
+from defaults import *  # NOQA
 
 MONGO_DB = 'system_tracking_dev'
 
@@ -31,27 +30,24 @@ AWX_PROOT_ENABLED = True
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins
-    INSTALLED_APPS += ('django_jenkins',)
+    INSTALLED_APPS += (django_jenkins.__name__,)
     PROJECT_APPS = ('awx.main.tests', 'awx.api.tests', 'awx.fact.tests',)
 except ImportError:
     pass
 
 if 'django_jenkins' in INSTALLED_APPS:
     JENKINS_TASKS = (
-        'django_jenkins.tasks.run_pylint',
-        'django_jenkins.tasks.run_flake8',
+        # 'django_jenkins.tasks.run_pylint',
+        # 'django_jenkins.tasks.run_flake8',
         # The following are not needed when including run_flake8
         # 'django_jenkins.tasks.run_pep8',
         # 'django_jenkins.tasks.run_pyflakes',
         # The following are handled by various grunt tasks and no longer required
         # 'django_jenkins.tasks.run_jshint',
         # 'django_jenkins.tasks.run_csslint',
-        )
+    )
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
-    CSSLINT_CHECKED_FILES = glob.glob(os.path.join(BASE_DIR, 'ui/static/less/*.less'))
-    JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
-                            os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
 # Much faster than the default
 # https://docs.djangoproject.com/en/1.6/topics/auth/passwords/#how-django-stores-passwords

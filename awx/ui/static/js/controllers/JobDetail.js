@@ -18,7 +18,6 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
     ClearScope();
 
     var job_id = $routeParams.id,
-        event_socket,
         scope = $scope,
         api_complete = false,
         refresh_count = 0,
@@ -99,12 +98,7 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
         "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
     function openSocket() {
-        event_socket =  Socket({
-            scope: scope,
-            endpoint: "job_events"
-        });
-        event_socket.init();
-        event_socket.on("job_events-" + job_id, function(data) {
+        $rootScope.event_socket.on("job_events-" + job_id, function(data) {
             if (api_complete && data.id > lastEventId) {
                 scope.waiting = false;
                 data.event = data.event_name;
@@ -117,12 +111,12 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
         // if we receive a status change event for the current job indicating the job
         // is finished, stop event queue processing and reload
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
             if (data.status === 'failed' || data.status === 'canceled' ||
-                    data.status === 'error' || data.status === 'successful') {
+                    data.status === 'error' || data.status === 'successful' || data.status === 'running') {
                 $scope.liveEventProcessing = false;
                 if ($rootScope.jobDetailInterval) {
                     window.clearInterval($rootScope.jobDetailInterval);

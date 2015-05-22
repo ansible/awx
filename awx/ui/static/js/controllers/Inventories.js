@@ -424,44 +424,19 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
 
             data = {};
             for (fld in form.fields) {
-                if (fld !== 'variables') {
-                    if (form.fields[fld].realName) {
-                        data[form.fields[fld].realName] =  $scope[fld];
-                    } else {
-                        data[fld] =  $scope[fld];
-                    }
+                if (form.fields[fld].realName) {
+                    data[form.fields[fld].realName] =  $scope[fld];
+                } else {
+                    data[fld] =  $scope[fld];
                 }
             }
-
-            if ($scope.removeUpdateInventoryVariables) {
-                $scope.removeUpdateInventoryVariables();
-            }
-            $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
-                var inventory_id = data.id;
-                var vars_to_send = {"variables": json_data};
-                Rest.setUrl(data.related.variable_data);
-                Rest.put(vars_to_send)
-                    .success(function () {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/manage');
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                        });
-                    });
-            });
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
                 .success(function (data) {
                     var inventory_id = data.id;
-                    if ($scope.variables) {
-                        $scope.$emit('UpdateInventoryVariables', data);
-                    } else {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/');
-                    }
+                    Wait('stop');
+                    $location.path('/inventories/' + inventory_id + '/');
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, form, { hdr: 'Error!',
@@ -597,40 +572,18 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
       data = {};
       for (fld in form.fields) {
-          if (fld !== 'variables') {
-              if (form.fields[fld].realName) {
-                  data[form.fields[fld].realName] = $scope[fld];
-              } else {
-                  data[fld] = $scope[fld];
-              }
+          if (form.fields[fld].realName) {
+              data[form.fields[fld].realName] = $scope[fld];
+          } else {
+              data[fld] = $scope[fld];
           }
       }
 
-      if ($scope.removeUpdateInventoryVariables) {
-        $scope.removeUpdateInventoryVariables();
-      }
-      $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
-          Rest.setUrl(data.related.variable_data);
-          Rest.put(json_data)
-              .success(function () {
-                  Wait('stop');
-                  $location.path('/inventories/');
-              })
-              .error(function (data, status) {
-                  ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                      msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                  });
-              });
-      });
-
       Rest.setUrl(defaultUrl + inventory_id + '/');
       Rest.put(data)
-          .success(function (data) {
-              if ($scope.variables) {
-                $scope.$emit('UpdateInventoryVariables', data);
-              } else {
-                $location.path('/inventories/');
-              }
+          .success(function () {
+              Wait('stop');
+              $location.path('/inventories/');
           })
           .error(function (data, status) {
               ProcessErrors($scope, data, status, form, { hdr: 'Error!',
@@ -849,12 +802,11 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob,
-    GroupsCopy, HostsCopy, Socket) {
+    GroupsCopy, HostsCopy) {
 
     var PreviousSearchParams,
         url,
-        hostScope = $scope.$new(),
-        io;
+        hostScope = $scope.$new();
 
     ClearScope();
 
@@ -1095,38 +1047,33 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     if ($scope.removeWatchUpdateStatus) {
         $scope.removeWatchUpdateStatus();
     }
-    $scope.removeWatchUpdateStatus = $scope.$on('WatchUpdateStatus', function() {
-        io = Socket({ scope: $scope, endpoint: "jobs" });
-        io.init();
-        $log.debug('Watching for job updates: ');
-        io.on("status_changed", function(data) {
-            var stat, group;
-            if (data.group_id) {
-                group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
-                if (data.status === "failed" || data.status === "successful") {
-                    if (data.group_id === $scope.selected_group_id || group) {
-                        // job completed, fefresh all groups
-                        $log.debug('Update completed. Refreshing the tree.');
-                        $scope.refreshGroups();
-                    }
-                }
-                else if (group) {
-                    // incremental update, just update
-                    $log.debug('Status of group: ' + data.group_id + ' changed to: ' + data.status);
-                    stat = GetSyncStatusMsg({
-                        status: data.status,
-                        has_inventory_sources: group.has_inventory_sources,
-                        source: group.source
-                    });
-                    $log.debug('changing tooltip to: ' + stat.tooltip);
-                    group.status = data.status;
-                    group.status_class = stat['class'];
-                    group.status_tooltip = stat.tooltip;
-                    group.launch_tooltip = stat.launch_tip;
-                    group.launch_class = stat.launch_class;
+    $scope.removeWatchUpdateStatus = $scope.$on('JobStatusChange-inventory', function(data) {
+        var stat, group;
+        if (data.group_id) {
+            group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
+            if (data.status === "failed" || data.status === "successful") {
+                if (data.group_id === $scope.selected_group_id || group) {
+                    // job completed, fefresh all groups
+                    $log.debug('Update completed. Refreshing the tree.');
+                    $scope.refreshGroups();
                 }
             }
-        });
+            else if (group) {
+                // incremental update, just update
+                $log.debug('Status of group: ' + data.group_id + ' changed to: ' + data.status);
+                stat = GetSyncStatusMsg({
+                    status: data.status,
+                    has_inventory_sources: group.has_inventory_sources,
+                    source: group.source
+                });
+                $log.debug('changing tooltip to: ' + stat.tooltip);
+                group.status = data.status;
+                group.status_class = stat['class'];
+                group.status_tooltip = stat.tooltip;
+                group.launch_tooltip = stat.launch_tip;
+                group.launch_class = stat.launch_class;
+            }
+        }
     });
 
     // Load group on selection
@@ -1453,5 +1400,5 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
     'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
-    'HostsCopy', 'Socket'
+    'HostsCopy'
 ];
