@@ -594,6 +594,10 @@ class UserSerializer(BaseSerializer):
 
     def restore_object(self, attrs, instance=None):
         new_password = attrs.pop('password', None)
+        # first time creating, password required
+        if instance is None and new_password in (None, ''):
+            self._errors = {'password': ['Password required for new User']}
+            return
         instance = super(UserSerializer, self).restore_object(attrs, instance)
         instance._new_password = new_password
         return instance

@@ -288,7 +288,7 @@ class OrganizationsTest(BaseTest):
         self.assertEqual(users['count'], 2)
 
         # post a completely new user to verify we can add users to the subcollection directly
-        new_user = dict(username='NewUser9000')
+        new_user = dict(username='NewUser9000', password='NewPassword9000')
         which_org = self.normal_django_user.admin_of_organizations.all()[0]
         url = reverse('api:organization_users_list', args=(which_org.pk,))
         self.post(url, new_user, expect=201, auth=self.get_normal_credentials())

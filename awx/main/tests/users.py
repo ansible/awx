@@ -119,11 +119,16 @@ class UsersTest(BaseTest):
         self.organizations[0].users.add(self.other_django_user)
         self.organizations[0].users.add(self.normal_django_user)
         self.organizations[1].users.add(self.other_django_user)
+
+    def test_user_creation_fails_without_password(self):
+        url = reverse('api:user_list')
+        new_user = dict(username='blippy')
+        self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
  
     def test_only_super_user_or_org_admin_can_add_users(self):
         url = reverse('api:user_list')
-        new_user = dict(username='blippy')
-        new_user2 = dict(username='blippy2')
+        new_user = dict(username='blippy', password='hippy')
+        new_user2 = dict(username='blippy2', password='hippy2')
         self.post(url, expect=401, data=new_user, auth=None)
         self.post(url, expect=401, data=new_user, auth=self.get_invalid_credentials())
         self.post(url, expect=403, data=new_user, auth=self.get_other_credentials())
@@ -138,7 +143,7 @@ class UsersTest(BaseTest):
 
     def test_only_super_user_can_use_superuser_flag(self):
         url = reverse('api:user_list')
-        new_super_user = dict(username='nommy', is_superuser=True)
+        new_super_user = dict(username='nommy', password='cookie', is_superuser=True)
         self.post(url, expect=401, data=new_super_user, auth=self.get_invalid_credentials())
         self.post(url, expect=403, data=new_super_user, auth=self.get_other_credentials())
         self.post(url, expect=403, data=new_super_user, auth=self.get_normal_credentials())
