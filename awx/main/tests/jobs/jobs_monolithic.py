@@ -1020,6 +1020,8 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
     def setUp(self):
         super(JobTemplateSurveyTest, self).setUp()
+        # TODO: Test non-enterprise license
+        self.create_test_license_file()
 
     def tearDown(self):
         super(JobTemplateSurveyTest, self).tearDown()

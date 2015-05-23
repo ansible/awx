@@ -50,6 +50,7 @@ from awx.api.utils.decorators import paginated
 from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
+from awx.api.license import feature_enabled, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
@@ -495,6 +496,24 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def create(self, request, *args, **kwargs):
+        """Create a new organzation.
+
+        If there is already an organization and the license of the Tower
+        instance does not permit multiple organizations, then raise
+        LicenseForbids.
+        """
+        # Sanity check: If the multiple organizations feature is disallowed
+        # by the license, then we are only willing to create this organization
+        # if no organizations exist in the system.
+        if (not feature_enabled('multiple_organizations') and
+                self.model.objects.filter(active=True).count() > 0):
+            raise LicenseForbids('Your Tower license only permits a single '
+                                 'organization to exist.')
+
+        # Okay, create the organization as usual.
+        return super(OrganizationList, self).create(request, *args, **kwargs)
+
 class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 
     model = Organization
@@ -543,6 +562,16 @@ class OrganizationActivityStreamList(SubListAPIView):
     parent_model = Organization
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
 class TeamList(ListCreateAPIView):
 
@@ -602,6 +631,16 @@ class TeamActivityStreamList(SubListAPIView):
     parent_model = Team
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -678,6 +717,16 @@ class ProjectActivityStreamList(SubListAPIView):
     parent_model = Project
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -812,6 +861,16 @@ class UserActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
@@ -868,6 +927,16 @@ class CredentialActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
 class PermissionDetail(RetrieveUpdateDestroyAPIView):
 
     model = Permission
@@ -916,6 +985,16 @@ class InventoryActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
@@ -945,6 +1024,11 @@ class InventorySingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1015,6 +1099,16 @@ class HostActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
@@ -1069,6 +1163,11 @@ class HostSingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1089,6 +1188,11 @@ class HostFactCompareView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         datetime_spec = request.QUERY_PARAMS.get('datetime', None)
         module_spec = request.QUERY_PARAMS.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
@@ -1213,6 +1317,16 @@ class GroupActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
@@ -1247,6 +1361,11 @@ class GroupSingleFactView(MongoAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get(self, request, *args, **kwargs):
+        # Sanity check: Does the license allow system tracking?
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids('Your license does not permit use '
+                                 'of system tracking.')
+
         fact_key = request.QUERY_PARAMS.get("fact_key", None)
         fact_value = request.QUERY_PARAMS.get("fact_value", None)
         datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
@@ -1286,7 +1405,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
     is_variable_data = True # Special flag for permissions check.
-    
+
 class InventoryVariableData(BaseVariableData):
 
     model = Inventory
@@ -1347,7 +1466,7 @@ class InventoryScriptView(RetrieveAPIView):
             for group_id, host_id, host_name in group_hosts_qs:
                 group_hostnames = group_hosts_map.setdefault(group_id, [])
                 group_hostnames.append(host_name)
-        
+
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
                 from_group__inventory_id=self.object.id, from_group__active=True,
@@ -1483,6 +1602,16 @@ class InventorySourceActivityStreamList(SubListAPIView):
     parent_model = InventorySource
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
 class InventorySourceHostsList(SubListAPIView):
 
@@ -1629,6 +1758,13 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+
+        # Sanity check: Are surveys available on this license?
+        # If not, do not allow them to be used.
+        if not feature_enabled('surveys'):
+            raise LicenseForbids('Your license does not allow '
+                                 'adding surveys.')
+
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
@@ -1677,6 +1813,16 @@ class JobTemplateActivityStreamList(SubListAPIView):
     parent_model = JobTemplate
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -1873,7 +2019,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
-            
+
         new_job = obj.create_unified_job(**request.DATA)
         new_job.signal_start(**request.DATA)
         data = dict(system_job=new_job.id)
@@ -1927,6 +2073,16 @@ class JobActivityStreamList(SubListAPIView):
     parent_model = Job
     relationship = 'activitystream_set'
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
 
 class JobStart(GenericAPIView):
 
@@ -2207,7 +2363,7 @@ class JobJobTasksList(BaseJobEventsList):
         # This is super tricky, because this table has a one-to-many
         # relationship with itself (parent-child), and we're getting
         # information for an arbitrary number of children. This means we
-        # need stats on grandchildren, sorted by child. 
+        # need stats on grandchildren, sorted by child.
         queryset = (JobEvent.objects.filter(parent__parent=parent_task,
                                             parent__event__in=STARTING_EVENTS)
                                     .values('parent__id', 'event', 'changed')
@@ -2519,6 +2675,16 @@ class AdHocCommandActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_220 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
 
 class SystemJobList(ListCreateAPIView):
 
@@ -2549,7 +2715,7 @@ class UnifiedJobList(ListAPIView):
     new_in_148 = True
 
 class UnifiedJobStdout(RetrieveAPIView):
-    
+
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,
@@ -2572,7 +2738,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             context = {
                 'title': get_view_name(self.__class__),
                 'body': mark_safe(body),
-                'dark': dark_bg, 
+                'dark': dark_bg,
                 'content_only': content_only,
             }
             data = render_to_string('api/stdout.html', context).strip()
@@ -2610,11 +2776,33 @@ class ActivityStreamList(SimpleListAPIView):
     serializer_class = ActivityStreamSerializer
     new_in_145 = True
 
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
+
 class ActivityStreamDetail(RetrieveAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     new_in_145 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids('Your license does not allow use of '
+                                 'the activity stream.')
+
+        # Okay, let it through.
+        return super(type(self), self).get(request, *args, **kwargs)
+
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

@@ -19,6 +19,8 @@ class ActivityStreamTest(BaseTest):
     def setUp(self):
         super(ActivityStreamTest, self).setUp()
         self.setup_instances()
+        self.create_test_license_file()
+        # TODO: Test non-enterprise license
         self.setup_users()
         self.org_created = self.post(reverse('api:organization_list'), dict(name='test org', description='test descr'), expect=201, auth=self.get_super_credentials())
 

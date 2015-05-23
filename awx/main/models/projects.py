@@ -253,12 +253,16 @@ class Project(UnifiedJobTemplate, ProjectOptions):
                 return self.current_job.status
             elif not self.last_job:
                 return 'never updated'
+            # inherit the child job status on failure
             elif self.last_job_failed:
-                return 'failed'
+                return self.last_job.status
+            # Even on a successful child run, a missing project path overides
+            # the successful status
             elif not self.get_project_path():
                 return 'missing'
+            # Return the successful status
             else:
-                return 'successful'
+                return self.last_job.status
         elif not self.get_project_path():
             return 'missing'
         else:

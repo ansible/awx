@@ -14,7 +14,7 @@ recursive-exclude awx/api/tests *
 recursive-exclude awx/main/tests *
 recursive-exclude awx/settings local_settings.py*
 include tools/scripts/request_tower_configuration.sh
-include tools/scripts/ansible-tower
+include tools/scripts/ansible-tower-service
 include tools/munin_monitors/*
 include tools/sosreport/*
 include COPYING

@@ -1143,10 +1143,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 return self.current_job.status
             elif not self.last_job:
                 return 'never updated'
-            elif self.last_job_failed:
-                return 'failed'
+            # inherit the child job status
             else:
-                return 'successful'
+                return self.last_job.status 
         else:
             return 'none'
 
