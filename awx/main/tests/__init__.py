@@ -18,3 +18,4 @@ from awx.main.tests.views import * # noqa
 from awx.main.tests.commands import * # noqa
 from awx.main.tests.fact import * # noqa
 from awx.main.tests.unified_jobs import * # noqa
+from awx.main.tests.ha import * # noqa
