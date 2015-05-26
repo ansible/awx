@@ -90,8 +90,6 @@ export function CredentialsList($scope, $rootScope, $location, $log, $routeParam
     });
 
 
-    LoadBreadCrumbs();
-
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
@@ -148,7 +146,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
-    LoadBreadCrumbs();
 
     // Load the list of options for Kind
     GetChoices({
@@ -372,12 +369,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         Rest.get({ params: { id: id } })
             .success(function (data) {
 
+                $scope.credential_name = data.name;
+
                 var i, fld;
 
-                LoadBreadCrumbs({
-                    path: '/credentials/' + id,
-                    title: data.name
-                });
 
                 for (fld in form.fields) {
                     if (data[fld] !== null && data[fld] !== undefined) {

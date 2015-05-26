@@ -1441,7 +1441,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 var btn, button, fld, field, html = '', i, section, group,
                     tab, sectionShow, offset, width,ngDisabled;
 
-                if (!this.modal && (options.breadCrumbs === undefined || options.breadCrumbs === true)) {
+                if (!this.modal && (options.breadcrumbs === true)) {
                     if (this.form.navigationLinks) {
                         html += this.breadCrumbs(options, this.form.navigationLinks);
                     } else {

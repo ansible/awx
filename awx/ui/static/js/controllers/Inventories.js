@@ -391,7 +391,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
     form.formLabelSize = null;
     form.formFieldSize = null;
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
 
     generator.reset();
     LoadBreadCrumbs();
@@ -480,7 +480,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     form.formLabelSize = null;
     form.formFieldSize = null;
     $scope.inventory_id = inventory_id;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope, breadcrumbs: true });
 
     generator.reset();
 

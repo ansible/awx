@@ -346,8 +346,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             // Generate breadcrumbs using the list-generator.js method.
 
-            var list = params.list,
+            var list = params.list || {},
                 mode = params.mode,
+                title = params.title,
                 html = '', itm, navigation;
 
             html += "<ul class=\"ansible-breadcrumb\" id=\"breadcrumb-list\">\n";
@@ -393,7 +394,10 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += "</div><!-- dropdown -->\n";
             } else {
                 html += "<li class=\"active\"><a href=\"\">";
-                if (mode === 'select') {
+                // Support usage without a mode by just passing a title option
+                if (title) {
+                    html += title;
+                } else if (mode === 'select') {
                     html += list.selectTitle;
                 } else {
                     html += list.editTitle;

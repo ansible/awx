@@ -251,7 +251,8 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         Rest.setUrl(defaultUrl + ':id/');
         Rest.get({ params: { id: id } })
             .success(function (data) {
-                LoadBreadCrumbs({ path: '/users/' + id, title: data.username });
+                $scope.user_id = id;
+                $scope.username_title = data.username;
                 var fld, related, set;
                 for (fld in form.fields) {
                     if (data[fld]) {
@@ -325,6 +326,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 Rest.put(data)
                     .success(function () {
                         Wait('stop');
+                        $scope.username_title = $scope.username;
                         var base = $location.path().replace(/^\//, '').split('/')[0];
                         if (base === 'users') {
                             ReturnToCaller();
