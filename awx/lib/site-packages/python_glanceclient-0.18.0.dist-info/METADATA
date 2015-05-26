@@ -1,0 +1,45 @@
+Metadata-Version: 2.0
+Name: python-glanceclient
+Version: 0.18.0
+Summary: OpenStack Image API Client Library
+Home-page: http://www.openstack.org/
+Author: OpenStack
+Author-email: openstack-dev@lists.openstack.org
+License: Apache License, Version 2.0
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Environment :: OpenStack
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Requires-Dist: pbr (>=0.6,!=0.7,<1.0)
+Requires-Dist: Babel (>=1.3)
+Requires-Dist: argparse
+Requires-Dist: PrettyTable (>=0.7,<0.8)
+Requires-Dist: python-keystoneclient (>=1.1.0)
+Requires-Dist: pyOpenSSL (>=0.11)
+Requires-Dist: requests (>=2.2.0,!=2.4.0)
+Requires-Dist: warlock (>=1.0.1,<2)
+Requires-Dist: six (>=1.9.0)
+Requires-Dist: oslo.utils (>=1.4.0)
+Requires-Dist: oslo.i18n (>=1.5.0)
+
+Python bindings to the OpenStack Images API
+=============================================
+
+This is a client library for Glance built on the OpenStack Images API. It provides a Python API (the ``glanceclient`` module) and a command-line tool (``glance``). This library fully supports the v1 Images API, while support for the v2 API is in progress.
+
+Development takes place via the usual OpenStack processes as outlined in the `developer guide <http://docs.openstack.org/infra/manual/developers.html>`_.  The master repository is in `Git <https://git.openstack.org/cgit/openstack/python-glanceclient>`_.
+
+See release notes and more at `<http://docs.openstack.org/developer/python-glanceclient/>`_.
+
+
+

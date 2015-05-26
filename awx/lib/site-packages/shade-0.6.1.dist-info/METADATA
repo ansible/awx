@@ -1,0 +1,86 @@
+Metadata-Version: 2.0
+Name: shade
+Version: 0.6.1
+Summary: Client library for operating OpenStack clouds
+Home-page: http://ci.openstack.org/
+Author: OpenStack Infrastructure Team
+Author-email: openstack-infra@lists.openstack.org
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Environment :: OpenStack
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Requires-Dist: pbr (>=0.5.21,<1.0)
+Requires-Dist: bunch
+Requires-Dist: jsonpatch
+Requires-Dist: os-client-config (>=0.8.1)
+Requires-Dist: six
+Requires-Dist: python-novaclient (>=2.21.0)
+Requires-Dist: python-keystoneclient (>=0.11.0)
+Requires-Dist: python-glanceclient
+Requires-Dist: python-cinderclient
+Requires-Dist: python-neutronclient (>=2.3.10)
+Requires-Dist: python-troveclient
+Requires-Dist: python-ironicclient (>=0.5.1)
+Requires-Dist: python-swiftclient
+Requires-Dist: dogpile.cache (>=0.5.3)
+
+shade
+=====
+
+shade is a simple client library for operating OpenStack clouds. The
+key word here is *simple*. Clouds can do many many many things - but there are
+probably only about 10 of them that most people care about with any
+regularity. If you want to do complicated things, you should probably use
+the lower level client libraries - or even the REST API directly. However,
+if what you want is to be able to write an application that talks to clouds
+no matter what crazy choices the deployer has made in an attempt to be
+more hipster than their self-entitled narcissist peers, then shade is for you.
+
+shade started its life as some code inside of ansible. ansible has a bunch
+of different OpenStack related modules, and there was a ton of duplicated
+code. Eventually, between refactoring that duplication into an internal
+library, and adding logic and features that the OpenStack Infra team had
+developed to run client applications at scale, it turned out that we'd written
+nine-tenths of what we'd need to have a standalone library.
+
+example
+-------
+
+Sometimes an example is nice.
+::
+
+  from shade import *
+  import time
+
+  # Initialize cloud
+  # Cloud configs are read with os-client-config
+  cloud = openstack_cloud('mordred')
+
+  # OpenStackCloud object has an interface exposing OpenStack services methods
+  print cloud.list_servers()
+  s = cloud.list_servers()[0]
+
+  # But you can also access the underlying python-*client objects
+  cinder = cloud.cinder_client
+  volumes = cinder.volumes.list()
+  volume_id = [v for v in volumes if v['status'] == 'available'][0]['id']
+  nova = cloud.nova_client
+  print nova.volumes.create_server_volume(s['id'], volume_id, None)
+  attachments = []
+  print volume_id
+  while not attachments:
+      print "Waiting for attach to finish"
+      time.sleep(1)
+      attachments = cinder.volumes.get(volume_id).attachments
+  print attachments
+
+
+

@@ -1,0 +1,3 @@
+[console_scripts]
+ironic = ironicclient.shell:main
+

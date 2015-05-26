@@ -1,0 +1,3 @@
+[console_scripts]
+nova = novaclient.shell:main
+
