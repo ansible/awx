@@ -14,6 +14,13 @@
 
 import hashlib
 import logging
+import logging
+import sys
+if sys.version_info < (2, 7):
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+    logging.NullHandler = NullHandler
 import operator
 import os
 import time
@@ -126,8 +133,8 @@ def _ssl_args(verify, cacert, cert, key):
 
 
 def _get_service_values(kwargs, service_key):
-    return {k[:-(len(service_key) + 1)]: kwargs[k]
-            for k in kwargs.keys() if k.endswith(service_key)}
+    return dict((k[:-(len(service_key) + 1)], kwargs[k])
+            for k in kwargs.keys() if k.endswith(service_key))
 
 
 def _iterate_timeout(timeout, message):
@@ -375,8 +382,8 @@ class OpenStackCloud(object):
     def project_cache(self):
         @self._cache.cache_on_arguments()
         def _project_cache():
-            return {project.id: project for project in
-                    self._project_manager.list()}
+            return ((project.id, project) for project in
+                    self._project_manager.list())
         return _project_cache()
 
     @property
@@ -444,7 +451,7 @@ class OpenStackCloud(object):
         @self._cache.cache_on_arguments()
         def _user_cache():
             user_list = self.manager.submitTask(_tasks.UserListTask())
-            return {user.id: user for user in user_list}
+            return dict((user.id, user) for user in user_list)
         return _user_cache()
 
     def _get_user(self, name_or_id):
@@ -629,8 +636,8 @@ class OpenStackCloud(object):
     def flavor_cache(self):
         @self._cache.cache_on_arguments()
         def _flavor_cache(cloud):
-            return {flavor.id: flavor for flavor in
-                    self.manager.submitTask(_tasks.FlavorList())}
+            return dict((flavor.id, flavor) for flavor in
+                    self.manager.submitTask(_tasks.FlavorList()))
         return _flavor_cache(self.name)
 
     def get_flavor_name(self, flavor_id):
