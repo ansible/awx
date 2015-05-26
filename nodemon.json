@@ -7,7 +7,8 @@
   ],
   "watch": [
     "awx/ui/static",
-    "awx/ui/tests"
+    "awx/ui/tests",
+    "awx/ui/templates/ui/index.html"
   ],
   "ext": "js json less html"
 }

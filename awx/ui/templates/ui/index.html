@@ -267,13 +267,58 @@
     </div>
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
-            How many days of data would you like to <b>keep</b>? <br>
+            How many days of recent data do you need to access? <br>
             <input type="number" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer></input>
             <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">Please enter the number of days you would like to keep this data.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >Please enter a valid number.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMin">Please enter a non-negative number.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMax">Please enter a number smaller than 9999.</div>
             </form>
+    </div>
+    <div id="prompt-for-days-facts" style="display:none">
+      <form name="prompt_for_days_facts_form" id="prompt_for_days_facts_form">
+            <div style="padding-bottom:15px;">For each host older than the value specified, keep one fact scan for each time window (granularity). For example,
+                facts older than 30 days will be removed, while one fact gathering per week will remain. <br></div>
+                <div class="form-group ">
+                    <label for="description">
+    		                  <span class="label-text">
+                                 Facts older than specified shall be deleted
+                             </span>
+                    </label>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer></input>
+                        </div>
+                        <div class="col-xs-4">
+                            <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control"  style="margin-top:10px;"></select>
+                        </div>
+                    </div>
+                    <div class="error" ng-show="prompt_for_days_facts_form.keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.number || prompt_for_days_facts_form.keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                </div>
+                <div class="form-group ">
+                    <label for="description">
+    		                  <span class="label-text">
+                                  Granularity of facts to keep
+                             </span>
+                    </label>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <input type="number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer></input>
+                        </div>
+                        <div class="col-xs-4">
+                            <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control" style="margin-top:10px;"></select>
+                        </div>
+                    </div>
+                    <div class="error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$dirty && prompt_for_days_facts_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.number || prompt_for_days_facts_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                </div>
+            </div>
+        </form>
     </div>
 
 
