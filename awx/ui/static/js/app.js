@@ -43,6 +43,7 @@ import browserData from 'tower/browser-data/main';
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/controllers/JobTemplates';
+import {LicenseController} from 'tower/controllers/License';
 import {ScheduleEditController} from 'tower/controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from 'tower/controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from 'tower/controllers/Organizations';
@@ -890,6 +891,17 @@ var tower = angular.module('Tower', [
                 }
             }).
 
+            when('/license', {
+                name: 'license',
+                templateUrl: urlPrefix + 'partials/license.html',
+                controller: LicenseController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
             when('/sockets', {
                 name: 'sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
@@ -916,9 +928,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
 
             var e, html, sock;
@@ -1109,7 +1121,7 @@ var tower = angular.module('Tower', [
                 };
 
                 $rootScope.viewLicense = function () {
-                    LicenseViewer.showViewer();
+                    $location.path('/license');
                 };
                 $rootScope.toggleTab = function(e, tab, tabs) {
                     e.preventDefault();

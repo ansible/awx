@@ -40,6 +40,12 @@ export default
                     readonly: true,
                     tab: 'license'
                 },
+                license_type: {
+                    label: 'License Type',
+                    type: 'text',
+                    readonly: true,
+                    tab: 'license'
+                },
                 license_key: {
                     label: 'License Key',
                     type: 'textarea',
