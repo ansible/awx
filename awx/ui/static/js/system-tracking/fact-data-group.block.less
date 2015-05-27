@@ -1,0 +1,16 @@
+/** @define FactDataGroup */
+
+@import 'shared/text-label.less';
+
+.FactDataGroup {
+    &-header {
+        display: flex;
+        &--new {
+            &:after {
+                .include-text-label(#676767; white; "new");
+                align-self: center;
+                font-size: 1rem;
+            }
+        }
+    }
+}

@@ -32,6 +32,7 @@ import {PortalController} from 'tower/controllers/Portal';
 
 import dataServices from 'tower/services/_data-services';
 import dashboardGraphs from 'tower/directives/_dashboard-graphs';
+import systemTracking from 'tower/system-tracking/main';
 
 import routeExtensions from 'tower/shared/route-extensions/main';
 import breadcrumbs from 'tower/shared/breadcrumbs/main';
@@ -80,6 +81,7 @@ var tower = angular.module('Tower', [
     routeExtensions.name,
     browserData.name,
     breadcrumbs.name,
+    systemTracking.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',

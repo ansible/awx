@@ -87,6 +87,16 @@ export default
         },
 
         actions: {
+            system_tracking: {
+                label: 'System Tracking',
+                ngClick: 'systemTracking()', //'editInventoryProperties(inventory.id)',
+                awToolTip: "{{ systemTrackingTooltip }}",
+                dataTipWatch: "systemTrackingTooltip",
+                dataPlacement: 'top',
+                awFeature: 'system_tracking',
+                ngDisabled: 'systemTrackingDisabled',
+                ngShow: 'hostsSelected'
+            },
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
@@ -103,7 +113,7 @@ export default
                 awToolTip: "View Activity Stream",
                 mode: 'all',
                 awFeature: 'activity_streams'
-            }
+            },
         }
 
     });

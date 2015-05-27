@@ -1,0 +1,79 @@
+<div class="FactModulePickers">
+    <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--left">
+        <span class="FactModulePickers-label">{{ factModulePickersLabelLeft }}</span>
+        <date-picker date="leftDate"></date-picker>
+    </div>
+    <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right">
+        <span class="FactModulePickers-label">{{ factModulePickersLabelRight }}</span>
+        <date-picker date="rightDate"></date-picker>
+    </div>
+</div>
+
+<nav class="btn-group FactModuleFilter">
+    <button
+        ng-class="{  'btn': true,
+                     'btn-default': true,
+                     'Button--pseudo': true,
+                     'FactModuleFilter-module': true,
+                     'FactModuleFilter-module--isActive': module.isActive,
+                  }"
+        ng-click="setActiveModule(module.name)"
+        ng-repeat="module in modules">
+        {{module.displayName}}
+    </button>
+</nav>
+
+<section class="FactDataError" ng-if="error" ng-switch="error">
+    <p class="FactDataError-message" ng-switch-when="NoFactsForModule">
+        There were no facts collected for that module in the selected date range. Please pick a different range or module and try again.
+    </p>
+</section>
+<section class="FactDataTable" ng-unless="error">
+    <div class="FactDataTable-row">
+        <h3 class="FactDataTable-column FactDataTable-column--offsetLeft">{{comparisonLeftHeader|stringOrDate:'L'}}</h3>
+        <h3 class="FactDataTable-column">{{comparisonRightHeader|stringOrDate:'L'}}</h3>
+    </div>
+    <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
+        <div class="FactDataTable-row FactDataGroup-headings" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">
+            <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header" ng-class="{ 'FactDataGroup-header--new': group.isNew }" ng-switch-when="0">
+                {{group.displayKeyPath}}
+            </h2>
+            <h3 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="1">
+                {{group.displayKeyPath}}
+            </h3>
+            <h4 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="2">
+                {{group.displayKeyPath}}
+            </h4>
+            <h5 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="3">
+                {{group.displayKeyPath}}
+            </h5>
+        </div>
+        <div class="FactDataGroup-facts" data-facts="{{group.facts}}">
+            <div class="FactDataTable-arrayGroup" ng-if="group.isFactArray" ng-repeat="arrayGroup in group.facts" data-array-group="{{arrayGroup}}">
+                <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in arrayGroup" data-fact="{{fact}}">
+                    <p class="FactDatum-keyName FactDataTable-column">
+                        {{fact.keyName}}
+                    </p>
+                    <p class="FactDatum-value FactDataTable-column" style="word-break: break-all">
+                        {{fact.value1}}
+                    </p>
+                    <p class="FactDatum-value FactDataTable-column" style="word-break: break-all">
+                        {{fact.value2}}
+                    </p>
+                </div>
+            </div>
+            <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in group.facts" ng-unless="group.isFactArray" data-fact="{{fact}}">
+                <p class="FactDataTable-column FactDatum-keyName">
+                    {{fact.keyName}}
+                </p>
+                <p class="FactDataTable-column FactDatum-value" style="word-break: break-all">
+                    {{fact.value1}}
+                </p>
+                <p class="FactDataTable-column FactDatum-value" style="word-break: break-all">
+                    {{fact.value2}}
+                </p>
+            </div>
+        </div>
+    </div>
+
+</section>

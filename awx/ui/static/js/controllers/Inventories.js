@@ -802,7 +802,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob,
-    GroupsCopy, HostsCopy) {
+    GroupsCopy, HostsCopy, transitionTo) {
 
     var PreviousSearchParams,
         url,
@@ -846,17 +846,29 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         // you need this so that the event doesn't bubble to the watcher above
         // for the host list
         e.stopPropagation();
-        if (selection.length > 0) {
-            $scope.hostsSelected = true;
-            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
-            //     + "selected groups and hosts.";
-        } else {
+        if (selection.length === 0) {
             $scope.hostsSelected = false;
-            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
-            //     + "inventory.";
+        } else if (selection.length === 1) {
+            $scope.systemTrackingTooltip = "Compare host over time";
+            $scope.hostsSelected = true;
+            $scope.systemTrackingDisabled = false;
+        } else if (selection.length === 2) {
+            $scope.systemTrackingTooltip = "Compare hosts against each other";
+            $scope.hostsSelected = true;
+            $scope.systemTrackingDisabled = false;
+        } else {
+            $scope.hostsSelected = true;
+            $scope.systemTrackingDisabled = true;
         }
         $scope.hostsSelectedItems = selection.selectedItems;
     });
+
+    $scope.systemTracking = function() {
+        transitionTo('systemTracking',
+                     {  inventory: $scope.inventory,
+                        hosts: $scope.hostsSelectedItems
+                     });
+    };
 
     // populates host patterns based on selected hosts/groups
     $scope.populateAdhocForm = function() {
@@ -1400,5 +1412,5 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
     'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
-    'HostsCopy'
+    'HostsCopy', 'transitionTo'
 ];

@@ -1,0 +1,38 @@
+/** @define DatePicker */
+
+.DatePicker {
+    flex: 1;
+    display: flex;
+
+    &-icon {
+        flex: initial;
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 4px 0 0 4px;
+        border: 1px solid #ccc;
+        border-right: 0;
+        background-color: #fff;
+    }
+
+    &-icon:hover {
+        background-color: #e8e8e8;
+    }
+
+    &-icon:focus,
+    &-icon:active {
+        background-color: #ccc;
+    }
+
+    &-input {
+        flex: 1;
+        border-radius: 0 4px 4px 0;
+        border: 1px solid #ccc;
+        padding: 6px 12px;
+    }
+
+    &-input:focus,
+    &-input:active {
+        outline-offset: 0;
+        outline: 0;
+    }
+}

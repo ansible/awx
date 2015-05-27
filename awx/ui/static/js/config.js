@@ -15,6 +15,12 @@
 /*jshint unused:false */
 
 (function() {
+    // this allows you to use the custom boostrap-datepicker for
+    // system tracking, without affecting the use of the datepicker() function
+    // in other parts of the application.
+    var datepicker = $.fn.datepicker.noConflict();
+    $.fn.systemTrackingDP = datepicker;
+
     return {
 
         tooltip_delay: {show: 500, hide: 100},   // Default number of milliseconds to delay displaying/hiding tooltips

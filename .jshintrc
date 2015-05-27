@@ -11,6 +11,9 @@
     "maxerr": 10000,
     "notypeof": true,
     "globals": {
+      "beforeEach": false,
+      "inject": false,
+      "module": false,
       "angular":false,
       "alert":false,
       "$AnsibleConfig":true,
@@ -21,6 +24,7 @@
       "Donut3D":false,
       "nv":false,
       "it": false,
+      "xit": false,
       "expect": false,
       "context": false,
       "describe": false,

@@ -1,19 +1,4 @@
-.include-text-label(@background-color; @color; @content) {
-  display: inline-block;
-  content: @content;
-
-  border-radius: 3px;
-  background-color: @background-color;
-  color: @color;
-  text-transform: uppercase;
-  font-size: .7em;
-  font-weight: bold;
-  font-style: normal;
-  margin-left: 0.5em;
-  padding: 0.35em;
-  padding-bottom: 0.2em;
-  line-height: 1.1;
-}
+@import "../js/shared/text-label.less";
 
 .host-disabled-label {
   &:after {
