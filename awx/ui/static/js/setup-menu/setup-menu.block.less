@@ -1,0 +1,43 @@
+/** @define SetupMenu */
+
+@import "shared/branding/colors.less";
+
+.SetupMenu {
+    display: flex;
+    justify-content: flex-start;
+    background-color: #EDEDED;
+    flex-wrap: wrap;
+    margin-top: -2.8rem;
+
+    &-block {
+        display: flex;
+        flex-direction: column;
+        color: white;
+        flex: 1 0 30%;
+        margin: 2.8rem;
+        max-width: 24rem;
+        transition: background-color 0.25s ease-in-out;
+        background-color: white;
+        &:hover, &:focus, &:active {
+            color: black;
+        }
+    }
+
+    .SetupItem-description {
+        font-family: merriweather;
+        font-weight: lighter;
+        color: black;
+        padding: 1.4rem;
+        padding-top: 0;
+    }
+
+    @media screen and (max-width: 930px) {
+        flex-flow: nowrap column;
+        align-items: center;
+        &-block {
+            width: 100%;
+            max-width: inherit;
+        }
+    }
+
+}

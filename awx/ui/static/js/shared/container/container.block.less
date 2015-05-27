@@ -1,0 +1,19 @@
+/** @define Container */
+
+.Container {
+    display: flex;
+    flex-wrap: wrap;
+    &-main {
+        flex: 9;
+        margin-right: 2.28rem;
+    }
+    &-aside {
+        flex: 3;
+    }
+}
+
+@media screen and (max-width: 710px) {
+    .Container {
+        flex-direction: column;
+    }
+}

@@ -38,6 +38,8 @@ import routeExtensions from 'tower/shared/route-extensions/main';
 import breadcrumbs from 'tower/shared/breadcrumbs/main';
 
 // modules
+import setupMenu from 'tower/setup-menu/main';
+import mainMenu from 'tower/main-menu/main';
 import browserData from 'tower/browser-data/main';
 
 import {JobDetailController} from 'tower/controllers/JobDetail';
@@ -83,6 +85,8 @@ var tower = angular.module('Tower', [
     browserData.name,
     breadcrumbs.name,
     systemTracking.name,
+    setupMenu.name,
+    mainMenu.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',

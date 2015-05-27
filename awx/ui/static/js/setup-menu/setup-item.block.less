@@ -1,0 +1,53 @@
+/** @define SetupItem */
+
+@import 'shared/branding/colors.less';
+
+.SetupItem {
+    @vertical-basis: 3rem;
+
+    padding: 0;
+    padding-bottom: @vertical-basis;
+
+    &:nth-child(2n) {
+        .SetupItem-icon {
+            background-color: @blue;
+        }
+    }
+
+    @media screen and (min-width: 931px) and (max-width: 1251px) {
+        &:nth-child(2n) {
+            .SetupItem-icon {
+                background-color: @ansible-red;
+            }
+        }
+        &:nth-child(4n+3), &:nth-child(4n+4) {
+            .SetupItem-icon {
+                background-color: @blue;
+            }
+        }
+    }
+
+    .SetupItem-icon {
+        display: flex;
+        padding: 1.5rem;
+        background-color: @ansible-red;
+        justify-content: center;
+        align-items: center;
+        img {
+            height: 26px;
+        }
+    }
+
+    &--button {
+        .SetupItem-icon {
+            width: 100%;
+        }
+    }
+
+    .SetupItem-title {
+        font-size: 3rem;
+        text-align: center;
+        padding: @vertical-basis;
+        margin: 0;
+    }
+}
