@@ -2,7 +2,7 @@
 
 function getMenuStylePartialUrl(style) {
 
-    if (style !== 'default' && style !== 'minimal') {
+    if (style !== 'default' && style !== 'portal') {
         /* jshint ignore:start */
         console.warn('main-menu: "', style, 'is not a valid menu style. Please use "default" or "minimal".');
         /* jshint ignore:end */

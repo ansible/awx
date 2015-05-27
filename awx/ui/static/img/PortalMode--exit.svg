@@ -5,7 +5,7 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Random" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <g id="PortalMode--exit" sketch:type="MSArtboardGroup" fill="#FFFFFF">
+        <g id="PortalMode--exit" sketch:type="MSArtboardGroup" fill="#000000">
             <g id="PortalMode--exit-arrow" sketch:type="MSLayerGroup" transform="translate(2.000000, 8.000000)">
                 <path d="M11,8.25000041 L32.5589445,8.25 L32.5589445,13.451166 L11,13.4511664 L11,8.25000041 Z" id="Signout-arrow-line" sketch:type="MSShapeGroup"></path>
                 <path d="M0.66,10.56 L11.22,0.66 L11.22,20.46 L0.66,10.56 L0.66,10.56 Z" id="Signout-arrowhead" sketch:type="MSShapeGroup"></path>
