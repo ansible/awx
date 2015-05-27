@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 export default ['$scope', function ($scope) {
 
     var recentJobs = $scope.jobs;

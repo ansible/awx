@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import compareNestedFacts from './compare-facts/nested';
 import compareFlatFacts from './compare-facts/flat';
 

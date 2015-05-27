@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  *  @ngdoc overview
  *  @name features
@@ -11,7 +17,7 @@
  *  DOM if it is a feature not supported by the user's license.
  *  For example, adding `aw-feature="system-tracking"` will enable or disable
  *  the system tracking button based on the license configuration on the
- *  /config endpoint. 
+ *  /config endpoint.
  *
  *
 */

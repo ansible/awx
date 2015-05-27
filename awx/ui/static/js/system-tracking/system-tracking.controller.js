@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import {searchDateRange} from './search-date-range';
 import {compareFacts} from './compare-facts';
 

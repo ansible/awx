@@ -1,12 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Inventories.js
- *  List view object for Inventories data model.
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('InventoriesListDefinition', [])

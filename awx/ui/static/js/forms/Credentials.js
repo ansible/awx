@@ -1,10 +1,9 @@
-/*********************************************
- *  Copyright (c) 2015 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Credentials.js
- *  Form definition for Credential model
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
  /**
  * @ngdoc function
  * @name forms.function:Credentials

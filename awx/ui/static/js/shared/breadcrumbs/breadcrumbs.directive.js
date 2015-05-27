@@ -1,4 +1,10 @@
-/* jshint unused: vars */
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+ /* jshint unused: vars */
 
 import controller from './breadcrumbs.controller';
 import 'tower/shared/generator-helpers';

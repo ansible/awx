@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import linkTo from './link-to.directive';
 import transitionTo from './transition-to.factory';
 import modelListener from './model-listener.config';

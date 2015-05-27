@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import Admins from "tower/lists/Admins";
 import CloudCredentials from "tower/lists/CloudCredentials";
 import CompletedJobs from "tower/lists/CompletedJobs";

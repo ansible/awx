@@ -1,6 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
- */
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+ 
     /**
  * @ngdoc function
  * @name helpers.function:Survey
@@ -492,7 +495,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.removeGenerateForm = scope.$on('GenerateForm', function() {
                 tmpVar = scope.mode;
                 GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
-                scope.mode = tmpVar; 
+                scope.mode = tmpVar;
                 scope.$emit('FillQuestionForm');
             });
 

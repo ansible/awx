@@ -1,12 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  JobTemplates.js
- *  Form definition for Job Template model
- *
- *  To get the JobTemplateForm object: JobTemplateForm();
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name forms.function:JobTemplate

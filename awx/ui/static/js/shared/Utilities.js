@@ -1,7 +1,10 @@
-/************************************
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Copyright (c) 2014 AnsibleWorks, Inc.
- */
+ * All Rights Reserved
+ *************************************************/
+
+
   /**
  *  @ngdoc function
  *  @name shared.function:Utilities

@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import ActivityDetail from "tower/forms/ActivityDetail";
 import Credentials from "tower/forms/Credentials";
 import Adhoc from "tower/forms/Adhoc";

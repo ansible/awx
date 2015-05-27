@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  ProjectStatus.js
- *  Form definition for Project Status -JSON view
- *
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
   /**
  * @ngdoc function
  * @name forms.function:ProjectStatus

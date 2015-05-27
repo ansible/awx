@@ -1,12 +1,9 @@
-/************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *
- *  Permissions.js
- *
- *  Controller functions for Permissions model.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name controllers.function:Permissions

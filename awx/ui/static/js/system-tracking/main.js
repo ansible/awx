@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import route from './system-tracking.route';
 import factScanDataService from './data-services/fact-scan-data.service';
 import getDataForComparison from './data-services/get-data-for-comparison.factory';

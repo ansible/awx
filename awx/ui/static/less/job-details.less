@@ -475,40 +475,69 @@
         }
     }
 
-    .legend-row {
-        margin-bottom: 15px;
-    }
+    // .legend-row {
+    //     margin-bottom: 15px;
+    // }
 
-    .legend {
-        display: inline-block;
-        font-size: 12px;
-        text-align: center;
-        i {
-            font-size: 10px;
-            margin-left: 5px;
-        }
-        i:first-child {
-            margin-left: 0;
-        }
-    }
+    // .legend {
+    //     display: inline-block;
+    //     font-size: 12px;
+    //     text-align: center;
+    //     i {
+    //         font-size: 10px;
+    //         margin-left: 5px;
+    //     }
+    //     i:first-child {
+    //         margin-left: 0;
+    //     }
+    // }
 
     #graph-section {
         position: relative;
-        width: 100%;
         .legend {
-            margin-top: 15px;
+            font-size: 12px;
+            font-family: 'Open Sans';
         }
-        .header {
-            margin-top: 20px;
-            .legend {
-                i {
-                    margin-left: 10px
-                }
-                i:first-child {
-                    margin-left: 0;
-                }
-            }
+        rect {
+            stroke-width: 2;
         }
+        .tooltip {
+            background: #eee;
+            box-shadow: 0 0 5px #999999;
+            color: 'black';
+            display: none;
+            font-size: 12px;
+            font-family: 'Open Sans';
+            left: 280px;
+            padding: 10px;
+            position: absolute;
+            text-align: center;
+            top: 85px;
+            width: 80px;
+            z-index: 10;
+        }
+        // position: relative;
+        // width: 100%;
+        // .legend {
+        //     margin-top: 15px;
+        // }
+        // .header {
+        //     margin-top: 20px;
+        //     .legend {
+        //         i {
+        //             margin-left: 10px
+        //         }
+        //         i:first-child {
+        //             margin-left: 0;
+        //         }
+        //     }
+        // }
+    }
+
+
+
+    #graph-section svg{
+        margin-top: 15px;
     }
 
     path.slice{

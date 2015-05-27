@@ -1,15 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  PortalJobs.js
- *  List view object for portal job data model.
- *
- *  Used on dashboard to provide a list of all jobs, regardless of
- *  status.
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('PortalJobsListDefinition', [])

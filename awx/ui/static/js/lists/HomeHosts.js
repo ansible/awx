@@ -1,14 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  HomeHosts.js
- *
- *  List view object for Hosts data model. Used
- *  on the home tab.
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('HomeHostListDefinition', [])

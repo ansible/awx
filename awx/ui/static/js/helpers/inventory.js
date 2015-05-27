@@ -1,7 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
    /**
  * @ngdoc function
  * @name helpers.function:Inventory
@@ -17,7 +19,7 @@ export default
     angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name, 'AuthService',
         'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
     ])
-    
+
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
         'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON',
         function (InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait,

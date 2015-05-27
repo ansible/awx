@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import generateList from './list-generator.factory';
 import toolbarButton from './toolbar-button.directive';
 import generatorHelpers from 'tower/shared/generator-helpers';

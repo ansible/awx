@@ -1,11 +1,9 @@
 /*************************************************
- * Copyright (c) 2015 AnsibleWorks, Inc.
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Adhoc.js
- *
- *  Controller functions for the Adhoc model.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+
 /**
  * @ngdoc function
  * @name controllers.function:Adhoc

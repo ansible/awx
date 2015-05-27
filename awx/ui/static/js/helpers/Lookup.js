@@ -1,9 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  LookupHelper
- *  Build a lookup dialog
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 
    /**
  * @ngdoc function

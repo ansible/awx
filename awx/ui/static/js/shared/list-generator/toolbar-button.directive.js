@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 export default ['$compile', 'Attr', 'SelectIcon', function($compile, Attr, SelectIcon) {
     return {
         restrict: 'A',

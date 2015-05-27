@@ -1,10 +1,9 @@
-/************************************
-* Copyright (c) 2014 AnsibleWorks, Inc.
-*
-*  Sockets.js
-*  SocketsController- simple test of socket connection
-*
-*/
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name controllers.function:Sockets

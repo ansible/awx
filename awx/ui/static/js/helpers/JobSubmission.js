@@ -1,9 +1,9 @@
-/*********************************************
-*  Copyright (c) 2014 AnsibleWorks, Inc.
-*
-*  JobSubmission.js
-*
-*/
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
 * @ngdoc function
 * @name helpers.function:JobSubmission

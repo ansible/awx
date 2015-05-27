@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2015 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  GroupsHelper
- *
- *  Routines that handle group add/edit/delete on the Inventory tree widget.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 'use strict';
 
 /**

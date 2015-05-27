@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Groups.js
- *  Form definition for Group model
- *
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
   /**
  * @ngdoc function
  * @name forms.function:Source
@@ -117,7 +115,7 @@ export default
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'source_script',
                     sourceField: 'name',
-                    ngClick: 'lookUpSource_script()' , 
+                    ngClick: 'lookUpSource_script()' ,
                     addRequired: false,
                     editRequired: false,
                     ngRequired: "source && source.value === 'custom'",

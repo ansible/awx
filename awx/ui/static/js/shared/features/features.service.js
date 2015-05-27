@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$http', '$q',
 function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
     return {

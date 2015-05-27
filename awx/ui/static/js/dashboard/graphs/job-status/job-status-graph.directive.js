@@ -1,4 +1,10 @@
-export default
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+ export default
     [   '$rootScope',
         '$compile',
         '$location' ,

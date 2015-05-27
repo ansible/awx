@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 angular.module('longDateFilter', []).filter('longDate', function() {
   return function(input) {
 

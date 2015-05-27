@@ -1,13 +1,8 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Admins.js
- *  List view object for Admins data model.
- *
- *  @dict
- */
-
-
+ * All Rights Reserved
+ *************************************************/
 
 export default
     angular.module('AdminListDefinition', [])

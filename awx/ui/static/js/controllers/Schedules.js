@@ -1,12 +1,9 @@
-
-/************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Schedules.js
- *
- *  Controller functions for the Schedule model.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name controllers.function:Schedules
