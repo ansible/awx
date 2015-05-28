@@ -947,6 +947,8 @@ class HostSerializer(BaseSerializerWithVariables):
             except (ValueError, TypeError):
                 try:
                     vars_dict = yaml.safe_load(variables)
+                    if vars_dict is None:
+                        vars_dict = {}
                     vars_dict['ansible_ssh_port'] = port
                     attrs['variables'] = yaml.dump(vars_dict)
                 except (yaml.YAMLError, TypeError):
