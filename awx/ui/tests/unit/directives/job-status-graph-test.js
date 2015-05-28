@@ -1,9 +1,10 @@
 import Tower from 'tower/app';
 import {describeModule} from 'tests/unit/describe-module';
+import JobStatusGraph from 'tower/dashboard/graphs/job-status/main'
 
 var resizeHandler = sinon.spy();
 
-describeModule('DashboardGraphs')
+describeModule(JobStatusGraph.name)
     .mockProvider('adjustGraphSize', resizeHandler)
     .testDirective('jobStatusGraph', function(directive) {
 

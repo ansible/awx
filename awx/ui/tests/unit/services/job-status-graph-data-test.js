@@ -1,8 +1,9 @@
 import {describeModule} from 'tests/unit/describe-module';
+import JobStatusGraph from 'tower/dashboard/graphs/job-status/main'
 
 var processErrors = sinon.spy();
 
-describeModule('DashboardGraphs')
+describeModule(JobStatusGraph.name)
     .mockProvider('ProcessErrors', processErrors)
     .testService('jobStatusGraphData', function(test, restStub) {
         var q;
