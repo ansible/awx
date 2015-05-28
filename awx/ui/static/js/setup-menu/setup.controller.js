@@ -2,19 +2,16 @@ export default
     [   '$scope',
         '$rootScope',
         'AboutAnsibleHelp',
-        'LicenseViewer',
         'ConfigureTower',
         'CreateCustomInventory',
         function(
             $scope,
             $rootScope,
             showAboutModal,
-            licenseViewer,
             configureTower,
             showInventoryScriptsModal
         ) {
             $scope.showAboutModal = showAboutModal;
-            $scope.showLicenseModal = licenseViewer.showViewer.bind(licenseViewer);
 
             $scope.showManagementJobsModal =
                 configureTower.bind(null,

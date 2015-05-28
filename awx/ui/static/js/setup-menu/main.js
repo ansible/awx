@@ -4,7 +4,6 @@ import icon from 'tower/shared/icon/main';
 export default
     angular.module('setupMenu',
                    [    'AboutAnsibleHelpModal',
-                        'LicenseHelper',
                         'ConfigureTowerHelper',
                         'CreateCustomInventoryHelper',
                         icon.name
