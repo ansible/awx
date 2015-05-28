@@ -13,7 +13,7 @@ export default function() {
             element.on("click", function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                $(".Menu--main").toggleClass("Menu--open");
+                $(".MainMenu").toggleClass("Menu--open");
                 element.toggleClass("MenuToggle--open");
             });
         }
