@@ -39,6 +39,8 @@ from awx.main.models import * # noqa
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
 
+from awx.api.license import feature_enabled
+
 from awx.fact.models import * # noqa
 
 logger = logging.getLogger('awx.api.serializers')
@@ -415,7 +417,7 @@ class BaseFactSerializer(MongoEngineModelSerializer):
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
-        if 'module' in ret:
+        if 'module' in ret and feature_enabled('system_tracking'):
             choices = [(o, o) for o in FactVersion.objects.all().only('module').distinct('module')]
             ret['module'] = ChoiceField(source='module', choices=choices, read_only=True, required=False)
         return ret
