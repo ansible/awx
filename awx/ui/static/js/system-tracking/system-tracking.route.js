@@ -48,8 +48,8 @@ export default {
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.inventory) {
-                        return $q.when(true);
+                    if ($route.current.params.hasModelKey('inventory')) {
+                        return $q.when($route.current.params.model.inventory);
                     }
 
                     var inventoryId = $route.current.params.inventory;
@@ -62,17 +62,17 @@ export default {
                             });
                 }
             ],
-            filters:
+            hosts:
             [   '$route',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.hosts) {
-                        return $q.when(true);
+                    if ($route.current.params.hasModelKey('hosts')) {
+                        return $q.when($route.current.params.model.hosts);
                     }
 
-                    var hostIds = $route.current.params.filters.split(',');
+                    var hostIds = $route.current.params.hosts.split(',');
 
                     var hosts =
                         hostIds.map(function(hostId) {

@@ -19,6 +19,10 @@ function controller($rootScope,
                     _) {
     // var inventoryId = $routeParams.id;
     var hostIds = $routeParams.hosts.split(',');
+    var hosts = $routeParams.model.hosts;
+
+    $scope.hostIds = $routeParams.hosts;
+    $scope.inventory = $routeParams.model.inventory;
 
     $scope.factModulePickersLabelLeft = "Compare facts collected on";
     $scope.factModulePickersLabelRight = "To facts collected on";
@@ -68,8 +72,8 @@ function controller($rootScope,
             $scope.comparisonLeftHeader = $scope.leftDate;
             $scope.comparisonRightHeader = $scope.rightDate;
         } else {
-            $scope.comparisonLeftHeader = hostIds[0];
-            $scope.comparisonRightHeader = hostIds[1];
+            $scope.comparisonLeftHeader = hosts[0].name;
+            $scope.comparisonRightHeader = hosts[1].name;
         }
     }
 
