@@ -25,13 +25,10 @@ function makeModule(option) {
     var config = moduleConfig.hasOwnProperty(name) ?
                     moduleConfig[name] : moduleConfig.custom;
 
-    return {
-        name: name,
-        displayName: displayName,
-        compareKey: config.compareKey,
-        nameKey: config.nameKey,
-        displayType: config.displayType
-    };
+    config.name = name;
+    config.displayName = displayName;
+
+    return config;
 }
 
 function factory(hostId, rest, getBasePath, _) {

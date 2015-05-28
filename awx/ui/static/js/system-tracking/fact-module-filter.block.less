@@ -3,9 +3,13 @@
 .FactModuleFilter {
     width: 100%;
     display: flex;
+    flex-flow: row wrap;
     margin-bottom: 2.8rem;
     &-module {
-        flex: 1;
+        flex: 1 1 20%;
+        @media screen and (max-width: 750px) {
+            flex-basis: 50%;
+        }
         &--isActive {
             // copied from bootstrap's .btn:focus
             background-color: #ebebeb;
