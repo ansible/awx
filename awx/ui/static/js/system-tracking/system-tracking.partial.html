@@ -24,7 +24,7 @@
                      'FactModuleFilter-module--isActive': module.isActive,
                   }"
         ng-click="setActiveModule(module.name)"
-        ng-repeat="module in modules">
+        ng-repeat="module in modules | orderBy: 'sortKey'">
         {{module.displayName}}
     </button>
 </nav>
