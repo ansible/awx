@@ -81,7 +81,7 @@ class Command(BaseCommand):
                     pks_to_delete.add(instance.pk)
 
             # Cleanup objects in batches instead of deleting each one individually.
-            if len(pks_to_delete) >= 500:
+            if len(pks_to_delete) >= 50:
                 model.objects.filter(pk__in=pks_to_delete).delete()
                 n_deleted_items += len(pks_to_delete)
                 pks_to_delete.clear()
