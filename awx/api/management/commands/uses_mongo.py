@@ -23,7 +23,8 @@ class Command(BaseCommand):
         # Does the license have features, at all?
         # If there is no license yet, then all features are clearly off.
         if 'features' not in license_data:
-            return False
+            print('No license available.')
+            sys.exit(2)
 
         # Does the license contain the system tracking feature?
         # If and only if it does, MongoDB should run.
