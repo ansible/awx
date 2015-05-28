@@ -1,5 +1,5 @@
-<nav class="MainMenu MainMenu--fixedTop" ng-switch="$eval(menuStyle)">
-    <a link-to="dashboard" class="MenuItem MenuItem--logo">
+<nav class="MainMenu MainMenu--fixedTop" ng-class="menuStyleClassName" ng-switch="$eval(menuStyle)">
+    <a link-to="dashboard" menu-item class="MenuItem MenuItem--logo">
         <img id="ansible-brand-logo" alt="Ansible Tower" class="MenuItem-logo" src="/static/img/TowerLogo.svg">
         <menu-toggle-button width="15" height="15" bar-height="2" class="MainMenu-toggle"></menu-toggle-button>
     </a>
