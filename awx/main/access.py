@@ -17,6 +17,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
 
 __all__ = ['get_user_queryset', 'check_user_access']
@@ -145,7 +146,7 @@ class BaseAccess(object):
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)
 
-    def check_license(self, add_host=False):
+    def check_license(self, add_host=False, feature=None):
         reader = TaskSerializer()
         validation_info = reader.from_file()
         if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
@@ -166,6 +167,12 @@ class BaseAccess(object):
             raise PermissionDenied("license count of %s instances has been exceeded" % available_instances)
         elif not add_host and free_instances < 0:
             raise PermissionDenied("host count exceeds available instances")
+
+        if feature is not None:
+            if "features" in validation_info and not validation_info["features"].get(feature, False):
+                raise LicenseForbids("Feature %s is not enabled in the active license" % feature)
+            elif "features" not in validation_info:
+                raise LicenseForbids("Features not found in active license")
 
 
 class UserAccess(BaseAccess):
@@ -914,6 +921,10 @@ class JobTemplateAccess(BaseAccess):
         '''
         if not data or '_method' in data:  # So the browseable API will work?
             return True
+
+        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
+            self.check_license(feature='system_tracking')
+
         if self.user.is_superuser:
             return True
 

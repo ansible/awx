@@ -173,14 +173,15 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         rnd_str = '____' + str(random.randint(1, 9999999))
         return __name__ + '-generated-' + string + rnd_str
 
-    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600)):
+    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features=None):
         writer = LicenseWriter( 
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
-            license_type='enterprise')
+            license_type='enterprise',
+            features=features)
         handle, license_path = tempfile.mkstemp(suffix='.json')
         os.close(handle)
         writer.write_file(license_path)

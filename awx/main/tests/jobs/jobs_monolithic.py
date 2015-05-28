@@ -429,6 +429,11 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             job_type = PERM_INVENTORY_SCAN,
             inventory = self.inv_eng.pk,
         )
+        # Without the system tracking license feature even super users can't create scan jobs
+        with self.current_user(self.user_sue):
+            data['credential'] = self.cred_sue.pk
+            response = self.post(url, data, expect=402)
+        self.create_test_license_file(features=dict(system_tracking=True))
         # Regular users, even those who have access to the inv and cred can't create scan jobs templates
         with self.current_user(self.user_doug):
             data['credential'] = self.cred_doug.pk

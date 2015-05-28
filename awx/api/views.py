@@ -1681,6 +1681,7 @@ class JobTemplateList(ListCreateAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
+    always_allow_superuser = False
 
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
