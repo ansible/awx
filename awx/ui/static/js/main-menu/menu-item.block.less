@@ -4,6 +4,8 @@
 @import "shared/branding/colors.less";
 
 .MenuItem {
+  @menu-breakpoint: 870px;
+
   display: flex;
   flex: none;
 
@@ -27,7 +29,7 @@
     margin-right: 0;
   }
 
-  @media screen and (max-width: 570px) {
+  @media screen and (max-width: @menu-breakpoint) {
     flex: 1 1 0;
     padding: 0 1rem;
     margin-right: 0;
@@ -48,13 +50,13 @@
       flex: none;
       min-width: 0;
       margin-right: 0;
-      @media screen and (min-width: 571px) {
+      @media screen and (min-width: (@menu-breakpoint + 1px)) {
           padding: 0 0.75rem;
       }
   }
 
   &-helpTitle {
-    @media screen and (min-width: 571px) {
+    @media screen and (min-width: (@menu-breakpoint + 1px)) {
       display: none;
     }
   }
@@ -70,7 +72,7 @@
   &--right {
     // Push this and all following elements to the right
     margin-left: auto;
-    @media screen and (max-width: 570px) {
+    @media screen and (max-width: @menu-breakpoint) {
       margin-left: 0;
     }
   }
@@ -110,7 +112,7 @@
       &--labelled {
           margin-right: 0.25rem;
       }
-      @media screen and (max-width: 570px) {
+      @media screen and (max-width: @menu-breakpoint) {
           display: none;
         margin-right: 1.4rem;
       }
@@ -118,10 +120,10 @@
 
   &-username {
       padding-right: 0.25rem;
-      @media screen and (max-width: 570px) {
+      @media screen and (max-width: @menu-breakpoint) {
           order: 1; // moves this to the bottom
       }
-      @media screen and (min-width: 571px) {
+      @media screen and (min-width: (@menu-breakpoint + 1px)) {
           max-width: 110px;
       }
   }

@@ -1,12 +1,14 @@
 /** @define MainMenu */
 
 .MainMenu {
+  @menu-breakpoint: 871px;
+
   display: flex;
 
   background-color: white;
   margin: 0;
 
-  @media screen and (max-width: 570px) {
+  @media screen and (max-width: @menu-breakpoint) {
     position: relative;
     transition: height 0.5s ease-out;
     justify-content: flex-start;
@@ -25,7 +27,7 @@
 
   }
 
-  @media screen and (min-width: 571px) {
+  @media screen and (min-width: @menu-breakpoint + 1px) {
       padding: 0 1rem;
   }
 
@@ -34,7 +36,7 @@
   }
 
   &-toggle {
-    @media screen and (min-width: 571px) {
+    @media screen and (min-width: @menu-breakpoint + 1px) {
       display: none;
     }
     display: flex;
