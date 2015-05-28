@@ -13,7 +13,7 @@
 
     @vertical-basis: 1.4rem;
 
-    padding: (@vertical-basis / 2) 0;
+    padding: @vertical-basis 0;
 
     color: black;
     flex: 1 0 100%;
@@ -34,6 +34,16 @@
       // height: 28px;
       &--aside {
         align-self: flex-start;
+      }
+
+      // For some reason, credentials
+      // icon is taking up more space
+      // than it should; need to adjust
+      // it manually to line it up with
+      // others
+      &--credentials {
+        width: 4.3rem;
+        margin-left: -0.8rem;
       }
 
       flex: none; // do not let the flex container adjust this width!
