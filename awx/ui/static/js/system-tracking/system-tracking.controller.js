@@ -27,34 +27,7 @@ function controller($rootScope,
     $scope.factModulePickersLabelLeft = "Compare facts collected on";
     $scope.factModulePickersLabelRight = "To facts collected on";
 
-    $scope.modules =
-        [{  name: 'packages',
-            displayName: 'Packages',
-            compareKey: ['release', 'version'],
-            nameKey: 'name',
-            isActive: true,
-            displayType: 'flat'
-         },
-         {  name: 'services',
-            compareKey: ['state', 'source'],
-            nameKey: 'name',
-            displayName: 'Services',
-            isActive: false,
-            displayType: 'flat'
-         },
-         {  name: 'files',
-            displayName: 'Files',
-            nameKey: 'path',
-            compareKey: ['size', 'mode', 'md5', 'mtime', 'gid', 'uid'],
-            isActive: false,
-            displayType: 'flat'
-         },
-         {  name: 'ansible',
-            displayName: 'Ansible',
-            isActive: false,
-            displayType: 'nested'
-         }
-        ];
+    $scope.modules = initialFactData.moduleOptions;
 
     // Use this to determine how to orchestrate the services
     var viewType = hostIds.length > 1 ? 'multiHost' : 'singleHost';

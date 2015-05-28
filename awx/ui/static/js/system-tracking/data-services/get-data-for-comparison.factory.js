@@ -6,17 +6,24 @@
 
 export default
     [   'factScanDataService',
+        'getModuleOptions',
         'lodashAsPromised',
-        function(factScanDataService, _) {
+        function(factScanDataService, getModuleOptions, _) {
             return function(hostIds, moduleName, leftDate, rightDate) {
+
+                var moduleOptions;
 
                 if (hostIds.length === 1) {
                     hostIds = hostIds.concat(hostIds[0]);
                 }
 
-                return _(hostIds)
-                    .promise()
-                    .thenMap(function(hostId, index) {
+                return getModuleOptions(hostIds[0])
+                    .then(function(modules) {
+                        moduleOptions = modules;
+                        return modules;
+                    }).then(function() {
+                        return hostIds;
+                    }).thenMap(function(hostId, index) {
                         var date = leftDate;
                         var fetchScanNumber;
 
@@ -42,6 +49,9 @@ export default
                                 .bind(factScanDataService);
 
                         return getHostFacts(params);
+                    }).then(function(hostFacts) {
+                        hostFacts.moduleOptions = moduleOptions;
+                        return hostFacts;
                     });
             };
         }
