@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Ansible, Inc.
+# Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
 from awx.main.management.commands._base_instance import BaseCommandInstance

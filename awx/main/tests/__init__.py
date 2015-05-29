@@ -1,4 +1,4 @@
-# Copyright (c) 2014 AnsibleWorks, Inc.
+# Copyright (c) 2015 Ansible, Inc. (formerly AnsibleWorks, Inc.)
 # All Rights Reserved.
 
 from awx.main.tests.organizations import OrganizationsTest # noqa
