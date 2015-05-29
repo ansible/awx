@@ -7,38 +7,8 @@
 export default
     function flatCompare(facts, nameKey, compareKeys) {
 
-        // Make sure we always start comparison against
-        // a non-empty array
-        //
-        // Partition with _.isEmpty will give me an array
-        // with empty arrays in index 0, and non-empty
-        // arrays in index 1
-        //
-
-        // Save the position of the data so we
-        // don't lose it later
-
-        facts[0].position = 'left';
-        facts[1].position = 'right';
-
-        var splitFacts = _.partition(facts, _.isEmpty);
-        var emptyScans = splitFacts[0];
-        var nonEmptyScans = splitFacts[1];
-        var basisFacts, comparatorFacts;
-
-        if (_.isEmpty(nonEmptyScans)) {
-            // we have NO data, so don't bother!
-            return [];
-        } else if (_.isEmpty(emptyScans)) {
-            // both scans have facts, rejoice!
-            comparatorFacts = nonEmptyScans[0];
-            basisFacts = nonEmptyScans[1];
-        } else {
-            // only one scan has facts, so we use that
-            // as the basis for our comparison
-            basisFacts = nonEmptyScans[0];
-            comparatorFacts = [];
-        }
+        var comparatorFacts = facts[0];
+        var basisFacts = facts[1];
 
         return basisFacts.reduce(function(arr, basisFact) {
             var searcher = {};

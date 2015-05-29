@@ -51,12 +51,15 @@ function controller($rootScope,
     }
 
     function reloadData(params, initialData) {
+
         searchConfig = _.merge({}, searchConfig, params);
 
         var factData = initialData;
         var leftRange = searchConfig.leftRange;
         var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
+        var leftScanDate, rightScanDate;
+
 
         if (!factData) {
             factData =
@@ -69,8 +72,8 @@ function controller($rootScope,
                         var responses = factDataAndModules[1];
                         var data = _.pluck(responses, 'fact');
 
-                        $scope.leftScanDate = moment(responses[0].timestamp);
-                        $scope.rightScanDate = moment(responses[1].timestamp);
+                        leftScanDate = moment(responses[0].timestamp);
+                        rightScanDate = moment(responses[1].timestamp);
 
                         return data;
                     }, true);
@@ -78,18 +81,62 @@ function controller($rootScope,
 
         waitIndicator('start');
 
-        _(factData)
-            .thenAll(_.partial(compareFacts, activeModule))
+        return _(factData)
+            .thenAll(function(facts) {
+                // Make sure we always start comparison against
+                // a non-empty array
+                //
+                // Partition with _.isEmpty will give me an array
+                // with empty arrays in index 0, and non-empty
+                // arrays in index 1
+                //
+
+                // Save the position of the data so we
+                // don't lose it later
+
+                facts[0].position = 'left';
+                facts[1].position = 'right';
+
+                var splitFacts = _.partition(facts, _.isEmpty);
+                var emptyScans = splitFacts[0];
+                var nonEmptyScans = splitFacts[1];
+
+                if (_.isEmpty(nonEmptyScans)) {
+                    // we have NO data, throw an error
+                    throw {
+                        name: 'NoScanData',
+                        message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
+                        dateValues:
+                            {   leftDate: $scope.leftDate.clone(),
+                                rightDate: $scope.rightDate.clone()
+                            }
+                    };
+                } else if (nonEmptyScans.length === 1) {
+                    // one of them is not empty, throw an error
+                    throw {
+                        name: 'InsufficientScanData',
+                        message: 'No scans ran on one of the selected dates. Please try selecting a different date.',
+                        dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
+                    };
+                }
+
+                // all scans have data, rejoice!
+                return facts;
+
+            })
+            .then(_.partial(compareFacts, activeModule))
             .then(function(info) {
+
+                // Clear out any errors from the previous run...
+                $scope.error = null;
 
                 $scope.factData =  info;
 
-                setHeaderValues(viewType);
+                setHeaderValues(viewType, leftScanDate, rightScanDate);
 
             }).finally(function() {
                 waitIndicator('stop');
-            })
-            .value();
+            });
     }
 
     $scope.setActiveModule = function(newModuleName, initialData) {
@@ -107,9 +154,12 @@ function controller($rootScope,
         $location.replace();
         $location.search('module', newModuleName);
 
-        reloadData(
-            {   module: newModule
-            }, initialData);
+        reloadData({   module: newModule
+                   }, initialData)
+
+            .catch(function(error) {
+                $scope.error = error;
+            }).value();
     };
 
     function dateWatcher(dateProperty) {
@@ -128,7 +178,10 @@ function controller($rootScope,
                 var params = {};
                 params[dateProperty] = newDate;
 
-                reloadData(params);
+                reloadData(params)
+                    .catch(function(error) {
+                        $scope.error = error;
+                    }).value();
             };
     }
 
