@@ -30,13 +30,23 @@ export default {
 
                     var data =
                         getDataForComparison(hostIds, moduleParam, leftDate, rightDate).
-                        thenThru(function(factData) {
-                                factData.leftDate = leftDate;
-                                factData.rightDate = rightDate;
-                                factData.moduleName = moduleParam;
-                                return factData;
-                            })
-                            .value();
+                        thenAll(function(factDataAndModules) {
+                            var moduleOptions = factDataAndModules[0];
+                            var factResponses = factDataAndModules[1];
+                            var factData = _.pluck(factResponses, 'fact');
+
+                            factData.leftSearchRange = leftDate;
+                            factData.rightSearchRange = rightDate;
+
+                            factData.leftScanDate = moment(factResponses[0].timestamp);
+                            factData.rightScanDate = moment(factResponses[0].timestamp);
+
+                            factData.moduleName = moduleParam;
+                            factData.moduleOptions = moduleOptions;
+
+                            return factData;
+                        }, true)
+                        .value();
 
                     return data;
 

@@ -33,17 +33,17 @@ function controller($rootScope,
     var viewType = hostIds.length > 1 ? 'multiHost' : 'singleHost';
 
     var searchConfig =
-        {   leftDate: initialFactData.leftDate,
-            rightDate: initialFactData.rightDate
+        {   leftRange: initialFactData.leftSearchRange,
+            rightRange: initialFactData.rightSearchRange
         };
 
-    $scope.leftDate = initialFactData.leftDate.from;
-    $scope.rightDate = initialFactData.rightDate.from;
+    $scope.leftDate = initialFactData.leftSearchRange.from;
+    $scope.rightDate = initialFactData.rightSearchRange.from;
 
     function setHeaderValues(viewType) {
         if (viewType === 'singleHost') {
-            $scope.comparisonLeftHeader = $scope.leftDate;
-            $scope.comparisonRightHeader = $scope.rightDate;
+            $scope.comparisonLeftHeader = $scope.leftScanDate;
+            $scope.comparisonRightHeader = $scope.rightScanDate;
         } else {
             $scope.comparisonLeftHeader = hosts[0].name;
             $scope.comparisonRightHeader = hosts[1].name;
@@ -54,16 +54,26 @@ function controller($rootScope,
         searchConfig = _.merge({}, searchConfig, params);
 
         var factData = initialData;
-        var leftDate = searchConfig.leftDate;
-        var rightDate = searchConfig.rightDate;
+        var leftRange = searchConfig.leftRange;
+        var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
 
         if (!factData) {
-            factData = getDataForComparison(
-                hostIds,
-                activeModule.name,
-                leftDate,
-                rightDate);
+            factData =
+                getDataForComparison(
+                            hostIds,
+                            activeModule.name,
+                            leftRange,
+                            rightRange)
+                    .thenAll(function(factDataAndModules) {
+                        var responses = factDataAndModules[1];
+                        var data = _.pluck(responses, 'fact');
+
+                        $scope.leftScanDate = moment(responses[0].timestamp);
+                        $scope.rightScanDate = moment(responses[1].timestamp);
+
+                        return data;
+                    }, true);
         }
 
         waitIndicator('start');
@@ -122,9 +132,9 @@ function controller($rootScope,
             };
     }
 
-    $scope.$watch('leftDate', dateWatcher('leftDate'), true);
+    $scope.$watch('leftDate', dateWatcher('leftRange'), true);
 
-    $scope.$watch('rightDate', dateWatcher('rightDate'), true);
+    $scope.$watch('rightDate', dateWatcher('rightRange'), true);
 
     $scope.setActiveModule(initialFactData.moduleName, initialFactData);
 }

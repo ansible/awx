@@ -35,8 +35,8 @@
 </section>
 <section class="FactDataTable" ng-unless="error">
     <div class="FactDataTable-row">
-        <h3 class="FactDataTable-column FactDataTable-column--offsetLeft">{{comparisonLeftHeader|stringOrDate:'L'}}</h3>
-        <h3 class="FactDataTable-column">{{comparisonRightHeader|stringOrDate:'L'}}</h3>
+        <h3 class="FactDataTable-column FactDataTable-column--offsetLeft">{{comparisonLeftHeader|stringOrDate:'L LT'}}</h3>
+        <h3 class="FactDataTable-column">{{comparisonRightHeader|stringOrDate:'L LT'}}</h3>
     </div>
     <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
         <div class="FactDataTable-row FactDataGroup-headings" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">

@@ -15,7 +15,7 @@ function (Rest, GetBasePath, ProcessErrors, _) {
             return version
                     .then(function(versionData) {
                         if (_.isEmpty(versionData)) {
-                            return [];
+                            return { fact: [] };
                         } else {
                             return getFacts(versionData);
                         }
@@ -26,8 +26,8 @@ function (Rest, GetBasePath, ProcessErrors, _) {
             var promise;
             Rest.setUrl(version.related.fact_view);
             promise = Rest.get();
-            return promise.then(function (data) {
-                return data.data.fact;
+            return promise.then(function (response) {
+                return response.data;
             }).catch(function (response) {
                 ProcessErrors(null, response.data, response.status, null, {
                     hdr: 'Error!',

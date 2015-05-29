@@ -50,8 +50,7 @@ export default
 
                         return getHostFacts(params);
                     }).then(function(hostFacts) {
-                        hostFacts.moduleOptions = moduleOptions;
-                        return hostFacts;
+                        return [moduleOptions, hostFacts];
                     });
             };
         }
