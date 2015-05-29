@@ -1,0 +1,13 @@
+<button
+    ng-click="socketHelp()"
+    aw-pop-over="{{socketTip}}"
+    aw-pop-over-watch="socketTip"
+    data-popover-title="Live Events"
+    data-placement="left"
+    data-trigger="hover"
+    data-container="body"
+    class="Button--pseudo"
+    ng-if="socketStatus !== 'ok'">
+    <i class="fa icon-socket-{{socketStatus}}"></i>
+</button>
+

@@ -38,6 +38,8 @@ import routeExtensions from 'tower/shared/route-extensions/main';
 import breadcrumbs from 'tower/shared/breadcrumbs/main';
 
 // modules
+import setupMenu from 'tower/setup-menu/main';
+import mainMenu from 'tower/main-menu/main';
 import browserData from 'tower/browser-data/main';
 
 import {JobDetailController} from 'tower/controllers/JobDetail';
@@ -83,6 +85,8 @@ var tower = angular.module('Tower', [
     browserData.name,
     breadcrumbs.name,
     systemTracking.name,
+    setupMenu.name,
+    mainMenu.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -933,7 +937,7 @@ var tower = angular.module('Tower', [
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
 
-            var e, html, sock;
+            var sock;
 
             function activateTab() {
                 // Make the correct tab active
@@ -981,16 +985,6 @@ var tower = angular.module('Tower', [
                     $rootScope.removeOpenSocket();
                 }
                 $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
-                    html = "<a href=\"\" ng-hide=\"socketStatus === 'ok'\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
-                    "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
-                    e = angular.element(document.getElementById('socket-beacon-div'));
-                    e.empty().append(html);
-                    $compile(e)($rootScope);
-
-                    e = angular.element(document.getElementById('socket-beacon-li'));
-                    e.empty().append(html);
-                    $compile(e)($rootScope);
-
                     // Listen for job changes and issue callbacks to initiate
                     // DOM updates
                     function openSocket() {

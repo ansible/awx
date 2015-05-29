@@ -1,0 +1,80 @@
+<section id="htmlTemplate" class="Container">
+  <nav class="SetupMenu Container-main">
+      <a link-to="credentials" class="SetupItem HoverIcon Media">
+        <i class="SetupItem-icon SetupItem-icon--credentials HoverIcon-icon HoverIcon-icon--color Media-figure">
+          <aw-icon name="Credentials"></aw-icon>
+        </i>
+        <div class="Media-body">
+          <h4 class="SetupItem-title">Credentials</h4>
+          <p class="SetupItem-description">
+            Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or when syncing inventories or projects.
+          </p>
+        </div>
+      </a>
+      <a link-to="users" class="SetupItem HoverIcon Media">
+        <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
+          <aw-icon name="Users"></aw-icon>
+        </i>
+        <div class="Media-body">
+          <h4 class="SetupItem-title">Users</h4>
+          <p class="SetupItem-description">
+            Allow others to sign into Tower and own the content they create.
+          </p>
+        </div>
+      </a>
+      <a link-to="teams" class="SetupItem HoverIcon Media">
+        <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
+          <aw-icon name="Teams"></aw-icon>
+        </i>
+        <div class="Media-block">
+          <h4 class="SetupItem-title">Teams</h4>
+          <p class="SetupItem-description">
+            Split up your organization to associate content and control permissions for groups.
+          </p>
+        </div>
+      </a>
+  </nav>
+  <aside class="Container-aside">
+      <nav class="SetupMenu Menu Menu--vertical">
+        <a link-to="organizations" class="SetupItem SetupItem--aside HoverIcon Media">
+          <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
+            <aw-icon name="Organizations"></aw-icon>
+          </i>
+          <div class="Media-block">
+            <h4 class="SetupItem-title SetupItem-title--aside">Organizations</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+            Group all of your content to manage permissions across departments in your company.
+            </p>
+          </div>
+        </a>
+        <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
+          <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
+            <aw-icon name="ManagementJobs"></aw-icon>
+          </i>
+          <div class="Media-block">
+            <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+              Schedule jobs to periodically cleanup job history.
+            </p>
+          </div>
+        </button>
+        <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
+          <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
+            <aw-icon name="InventoryScripts"></aw-icon>
+          </i>
+          <div class="Media-block">
+            <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+              Create and edit scripts to dynamically load hosts from any source.
+            </p>
+            </div>
+        </button>
+        <a link-to="license" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
+          <h4 class="SetupItem-title SetupItem-title--aside">View Your License</h4>
+        </a>
+        <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
+          <h4 class="SetupItem-title SetupItem-title--aside">About Tower</h4>
+        </button>
+      </nav>
+  </aside>
+</section>

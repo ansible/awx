@@ -1,0 +1,56 @@
+/** @define MainMenu */
+
+.MainMenu {
+  @menu-breakpoint: 871px;
+
+  display: flex;
+
+  background-color: white;
+  margin: 0;
+
+  @media screen and (max-width: @menu-breakpoint) {
+    position: relative;
+    transition: height 0.5s ease-out;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 58px;
+    overflow: hidden;
+
+    &.Menu--open {
+        height: 523px !important;
+        // border-bottom: solid thin black;
+    }
+
+    &--portal.Menu--open {
+        height: 290px !important;
+    }
+
+  }
+
+  @media screen and (min-width: (@menu-breakpoint + 1px)) {
+      padding: 0 1rem;
+  }
+
+  &-menuContainer {
+      display: flex;
+  }
+
+  &-toggle {
+    display: flex;
+    @media screen and (min-width: (@menu-breakpoint + 1px)) {
+      display: none;
+    }
+    margin-left: auto;
+  }
+
+  &--fixedTop {
+      width: 100%;
+      z-index: 1040;
+      position: fixed;
+      right: 0;
+      left: 0;
+      top: 0;
+  }
+
+}
+

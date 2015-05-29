@@ -26,101 +26,21 @@
   <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
 
 </head>
-<body>
+<body data-user-agent="{{userAgent}}">
 
-    <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="ansible-mobile-menu">
-        <h3>Hello, <span ng-bind="current_user.username"></span></h3>
-        <a href="#home" id="mobile_home_link" ng-hide="portalMode===true">Home</a></li>
-        <a href="#organizations" id="mobile_organizations_link" ng-hide="portalMode===true">Organizations</a></li>
-        <a href="#users" id="mobile_users_link"  ng-hide="portalMode===true">Users</a></li>
-        <a href="#teams" id="mobile_teams_link" ng-hide="portalMode===true">Teams</a></li>
-        <a href="#credentials" id="mobile_credentials_link" ng-hide="portalMode===true">Credentials</a></li>
-        <a href="#projects" id="mobile_projects_link" ng-hide="portalMode===true">Projects</a></li>
-        <a href="#inventories" id="mobile_inventories_link" ng-hide="portalMode===true">Inventories</a></li>
-        <a href="#job_templates" id="mobile_job_templates_link"  ng-hide="portalMode===true">Job Templates</a></li>
-        <a href="#jobs" id="mobile_jobs_link" ng-hide="portalMode===true">Jobs</a></li>
+    <include-svg href="{{ STATIC_URL }}img/icons.svg"></include-svg>
 
-        <a href="" id="mobile_about" ng-click ="viewAboutTower()" >About Tower</a> </li>
-        <a href="" id="mobile_view_user" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
-        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="mobile_contact_support" target="_blank" ng-hide="portalMode===true">Contact Support</a></li>
-        <a id="mobile_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
-        <a id="mobile_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
-        <a id="mobile_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
-        <a href="#portal" id="mobile_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
-        <a href="" id="mobile_view_license" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
-        <a href="" id="mobile_view_leave_portal" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
-        <a href="#/logout" id="mobile_logout">Logout</a>
-    </nav>
+  <main-menu
+          menu-style="portalMode ? 'portal' : 'default'"
+          current-user="current_user">
+  </main-menu>
 
-    <div id="main-menu-container">
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <div id="socket-beacon-div"></div>
-                    <button type="button" class="navbar-toggle toggle-menu menu-right" id="main-menu-toggle-button">
-                      <span class="sr-only">Toggle navigation</span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#home"><img id="ansible-brand-logo" src="{{ STATIC_URL }}img/ansible_tower_logo_minimalc.png" /></a>
-                    <div id="ansible-list-title"></div> <!-- title to show on list pages when menu collapses. value set in app.js -->
-                </div>
-                <div class="navbar-collapse collapse" id="main-navbar-collapse">
-                    <ul class="nav navbar-nav" id="ansible-main-menu">
-                        <!-- <li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li> -->
-                        <li id="organizations"><a href="#organizations" id="main_organizations_link" ng-hide="portalMode===true">Organizations</a></li>
-                        <li id="users"><a href="#users" id="main_users_link" ng-hide="portalMode===true">Users</a></li>
-                        <li id="teams"><a href="#teams" id="main_teams_link" ng-hide="portalMode===true">Teams</a></li>
-                        <li id="credentials"><a href="#credentials" id="main_credentials_link" ng-hide="portalMode===true">Credentials</a></li>
-                        <li id="projects"><a href="#projects" id="main_projects_link" ng-hide="portalMode===true">Projects</a></li>
-                        <li id="inventories"><a href="#inventories" id="main_inventories_link" ng-hide="portalMode===true">Inventories</a></li>
-                        <li id="job_templates"><a href="#job_templates" id="main_job_templates_link" ng-hide="portalMode===true">Job Templates</a></li>
-                        <li id="jobs"><a href="#jobs" id="main_jobs_link" ng-hide="portalMode===true">Jobs</a></li>
-                        <li id="portal"><a href="#portal" id="main_portal_link" ng-show="portalMode===true">Portal</a></li>
-                        <li class="collapsed-option"><a href="#/login" id="main_login_link" ng-show="!current_user.username">Login</a></li>
-                        <li ng-show="current_user.username" class="collapsed-option">
-                            <a href="" id="account-menu-link">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
-                            <ul class="nav navbar-nav" id="account-submenu">
-                               <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
-                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
-                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
-                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
-                                <li><a id="main_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
-                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
-                               <li><a href="#portal" id="main_view_portal_link" >Portal Mode</a></li>
-                               <li><a id="main_view_license" href="" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
-                               <li><a id="main_view_leave_portal" href="" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
-                               <li class="divider"></li>
-                               <li><a id="main_logout" href="#/logout">Logout</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right" id="account-menu">
-                        <li id="socket-beacon-li"></li>
-                        <li><a href="#/login" id="main_login_link" ng-show="!current_user.username">Login</a></li>
-                        <li class="dropdown" ng-show="current_user.username">
-                            <a href="" id="account-menu-link" class="dropdown-toggle" data-toggle="dropdown">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
-                            <ul class="dropdown-menu" id="account-submenu">
-                               <li><a href="" id="main_about" ng-click ="viewAboutTower()" >About Tower</a> </li>
-                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
-                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
-                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
-                               <li><a id="configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
-                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
-                               <li><a href="#portal" id="main_view_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
-                               <li><a id="main_view_license" href="" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
-                               <li><a id="main_view_leave_portal" href="" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
-
-
-                               <li class="divider"></li>
-                               <li><a id="main_logout" href="#/logout">Logout</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div><!--/.nav-collapse -->
-            </div>
-        </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-11"></div>
+      <div class="col-lg-1" style="display: flex;">
+        <web-socket-status style="margin-left: auto;"></web-socket-status>
+      </div>
     </div>
     <div class="container-fluid" id="#content-container">
       <div class="row">
@@ -273,7 +193,7 @@
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >Please enter a valid number.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMin">Please enter a non-negative number.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMax">Please enter a number smaller than 9999.</div>
-            </form>
+      </form>
     </div>
     <div id="prompt-for-days-facts" style="display:none">
       <form name="prompt_for_days_facts_form" id="prompt_for_days_facts_form">
@@ -323,11 +243,8 @@
 
 
 
-  </div><!-- container -->
-
   <div class="overlay"></div>
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
-</div>
 
 <!--
 <div class="navbar navbar-inverse site-footer fade-in">
@@ -358,7 +275,6 @@
         var $AnsibleConfig;
 
         require('tower/app');
-      $('#main-menu-toggle-button').jPushMenu();
   </script>
 
 </body>

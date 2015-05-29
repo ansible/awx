@@ -53,6 +53,11 @@ export default
         'transitionTo',
         function($routeProvider, $location, transitionTo) {
 
+            function transitionListener(routeName, model, e) {
+                e.stopPropagation();
+                e.preventDefault();
+                transitionTo(routeName, model);
+            }
             return {
                 restrict: 'A',
                 scope: {
@@ -60,16 +65,25 @@ export default
                     model: '&'
                 },
                 link: function (scope, element, attrs) {
-                    var model = scope.$eval(scope.model);
-                    scope.url = lookupRouteUrl(scope.routeName, $routeProvider.routes, model, $location.$$html5);
 
-                    element.find('[data-transition-to]').on('click', function(e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        transitionTo(scope.routeName, model);
-                    });
+                    var listener;
 
-                    element.attr('href', scope.url);
+                    scope.$watch(function() {
+                        var model = scope.$eval(scope.model);
+                        return model;
+                    }, function(newValue) {
+
+                        var model = scope.$eval(scope.model);
+                        scope.url = lookupRouteUrl(scope.routeName, $routeProvider.routes, model, $location.$$html5);
+                        element.off('click', listener);
+
+                        listener = _.partial(transitionListener, scope.routeName, model);
+
+                        element.on('click', listener);
+
+                        element.attr('href', scope.url);
+                    }, true);
+
                 }
             };
         }
