@@ -77,17 +77,17 @@ class Command(BaseCommand):
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, instance)
+                n_deleted_items += 1
                 if not self.dry_run:
-                    pks_to_delete.add(instance.pk)
+                    #pks_to_delete.add(instance.pk)
+                    instance.delete()
 
             # Cleanup objects in batches instead of deleting each one individually.
             if len(pks_to_delete) >= 50:
                 model.objects.filter(pk__in=pks_to_delete).delete()
-                n_deleted_items += len(pks_to_delete)
                 pks_to_delete.clear()
         if len(pks_to_delete):
             model.objects.filter(pk__in=pks_to_delete).delete()
-            n_deleted_items += len(pks_to_delete)
         return n_deleted_items
 
     def init_logging(self):
