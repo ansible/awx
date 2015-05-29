@@ -38,8 +38,9 @@ class Command(BaseCommand):
         uses_mongo = system_tracking  # noqa
 
         # If we do not need Mongo, return a non-zero exit status.
-        print('MongoDB NOT required')
-        sys.exit(1)
+        if not uses_mongo:
+            print('MongoDB NOT required')
+            sys.exit(1)
 
         # We do need Mongo, return zero.
         print('MongoDB required')
