@@ -27,7 +27,7 @@
 
   }
 
-  @media screen and (min-width: @menu-breakpoint + 1px) {
+  @media screen and (min-width: (@menu-breakpoint + 1px)) {
       padding: 0 1rem;
   }
 
@@ -36,10 +36,10 @@
   }
 
   &-toggle {
-    @media screen and (min-width: @menu-breakpoint + 1px) {
+    display: flex;
+    @media screen and (min-width: (@menu-breakpoint + 1px)) {
       display: none;
     }
-    display: flex;
     margin-left: auto;
   }
 
