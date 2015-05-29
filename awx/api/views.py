@@ -1127,6 +1127,10 @@ class HostFactVersionsList(MongoListAPIView):
         to_spec = self.request.QUERY_PARAMS.get('to', None)
         module_spec = self.request.QUERY_PARAMS.get('module', None)
 
+        if not feature_enabled("system_tracking"):
+            raise LicenseForbids("Your license does not permit use "
+                                 "of system tracking.")
+
         host = self.get_parent_object()
         self.check_parent_access(host)
 
