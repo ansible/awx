@@ -418,7 +418,7 @@ class BaseFactSerializer(MongoEngineModelSerializer):
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
         if 'module' in ret and feature_enabled('system_tracking'):
-            choices = [(o, o) for o in FactVersion.objects.all().only('module').distinct('module')]
+            choices = [(o, o.title()) for o in FactVersion.objects.all().only('module').distinct('module')]
             ret['module'] = ChoiceField(source='module', choices=choices, read_only=True, required=False)
         return ret
 
