@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Ansible, Inc.
+# Copyright (c) 2015 Ansible, Inc. (formerly AnsibleWorks, Inc.)
 
 # Python
 import mock
