@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import "tower/widgets/InventorySyncStatus";
 import "tower/widgets/JobStatus";
 import "tower/widgets/ObjectCount";

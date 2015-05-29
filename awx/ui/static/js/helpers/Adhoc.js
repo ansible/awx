@@ -1,10 +1,9 @@
-/*********************************************
- *  Copyright (c) 2015 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  AdhocHelper
- *
- *  Routines shared by adhoc related controllers:
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name helpers.function:Adhoc

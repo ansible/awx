@@ -1,11 +1,9 @@
-/************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  JobDetail.js
- *
- *  Helper moduler for JobDetails controller
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
    /**
  * @ngdoc function
  * @name helpers.function:JobDetail
@@ -1135,11 +1133,12 @@ export default
         };
     }])
 
-    .factory('DrawGraph', [ function() {
+
+    .factory('DrawGraph', ['DonutChart', function(DonutChart) {
         return function(params) {
             var scope = params.scope,
                 resize = params.resize,
-                width, height, svg_height, svg_width, svg_radius, svg, graph_data = [];
+                width, height, svg_height, svg_width, svg_radius, graph_data = [];
 
             // Ready the data
             if (scope.host_summary.ok) {
@@ -1178,26 +1177,150 @@ export default
             scope.total_count_for_graph = total_count;
             // Adjust the size
             width = $('#job-summary-container .job_well').width();
-            height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 15;
+            height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 80;
             svg_radius = Math.min(width, height);
             svg_width = width;
             svg_height = height;
             if (svg_height > 0 && svg_width > 0) {
                 if (!resize && $('#graph-section svg').length > 0) {
-                    Donut3D.transition("completedHostsDonut", graph_data, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                    // Donut3D.transition("completedHostsDonut", graph_data, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                    DonutChart({
+                        target: '#graph-section',
+                        height: height,
+                        width: width,
+                        data: graph_data,
+                        radius: svg_radius
+                    });
                 }
                 else {
                     if ($('#graph-section svg').length > 0) {
                         $('#graph-section svg').remove();
                     }
-                    svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
-                    svg.append("g").attr("id","completedHostsDonut");
-                    Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2) - 35, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                    // svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
+                    // svg.append("g").attr("id","completedHostsDonut");
+                    // Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2) - 35, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                    DonutChart({
+                        target: '#graph-section',
+                        height: height,
+                        width: width,
+                        data: graph_data,
+                        radius: svg_radius
+                    });
                     $('#graph-section .header .legend').show();
                 }
             }
         };
     }])
+
+    .factory('DonutChart', [function() {
+        return function(params) {
+            var target = params.target,
+                height = params.height,
+                width = params.width,
+                dataset = params.data,
+                outerRadius = Math.min(width, height) / 2,
+                innerRadius = (outerRadius/3),
+                svg, arc, pie, legend, color,
+                tooltip, path,
+                legendRectSize = 18,
+                legendSpacing = 4;
+
+            color = d3.scale.ordinal()
+                .range(['#60D66F', '#FF9900', '#FF0000', '#ff5850']);
+            svg = d3.select(target)
+                .append('svg')
+                .data([dataset])
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', 'translate(' + (width / 2) +
+                ',' + (height / 2) + ')');
+
+            arc = d3.svg.arc()
+                .innerRadius(outerRadius - innerRadius)
+                .outerRadius(outerRadius);
+
+            pie = d3.layout.pie()
+                .value(function(d) { return d.value; })
+                .sort(function() {return null; });
+
+            // arcs = svg.selectAll("g.slice")
+            //     .data(pie)
+            //     .enter()
+            //     .append("g")
+            //     .attr("class", "slice");
+
+            tooltip = d3.select(target)
+                .append('div')
+                .attr('class', 'tooltip');
+
+            tooltip.append('div')
+                .attr('class', 'label');
+
+            tooltip.append('div')
+                .attr('class', 'count');
+
+            tooltip.append('div')
+                .attr('class', 'percent');
+
+            path = svg.selectAll('path')
+                .data(pie(dataset))
+                .enter()
+                .append('path')
+                .attr('d', arc)
+                .attr('fill', function(d) {
+                  return color(d.data.label);
+                });
+
+            path.on('mouseenter', function(d) {
+                var total = d3.sum(dataset.map(function(d) {
+                  return d.value;
+                }));
+                var percent = Math.round(1000 * d.data.value / total) / 10;
+                tooltip.select('.label').html(d.data.label)
+                .attr('style', 'color:black');
+                tooltip.select('.count').html(d.data.value);
+                tooltip.select('.percent').html(percent + '%');
+                tooltip.style('display', 'block');
+              });
+
+            path.on('mouseleave', function() {
+                tooltip.style('display', 'none');
+              });
+
+            // path.on('mousemove', function(d) {
+            //     tooltip.style('top', (d3.event.pageY + 10) + 'px')
+            //     .style('left', (d3.event.pageX + 10) + 'px');
+            // });
+
+          legend = svg.selectAll('.legend')
+              .data(color.domain())
+              .enter()
+              .append('g')
+              .attr('class', 'legend')
+              .attr('transform', function(d, i) {
+                  var height = legendRectSize + legendSpacing;
+                  var offset =  height * color.domain().length / 2;
+                  var horz = -2 * legendRectSize;
+                  var vert = i * height - offset;
+                  return 'translate(' + horz + ',' + vert + ')';
+              });
+
+            legend.append('rect')
+              .attr('width', legendRectSize)
+              .attr('height', legendRectSize)
+              .style('fill', color)
+              .style('stroke', color);
+
+            legend.append('text')
+              .attr('x', legendRectSize + legendSpacing)
+              .attr('y', legendRectSize - legendSpacing)
+              .text(function(d) {
+                  return d;
+              });
+        };
+    }])
+
 
     .factory('DrawPlays', [function() {
         return function(params) {

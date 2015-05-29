@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Jobs.js
- *  Form definition for Jobs model
- *
- *  @dict
- */
+ * All Rights Reserved
+ *************************************************/
+ 
  /**
  * @ngdoc function
  * @name forms.function:Jobs

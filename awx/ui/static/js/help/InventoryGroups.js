@@ -1,12 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  InventoryGroups.js
- *
- *  Help object for inventory groups/hosts page.
- *
- *  @dict
- */
+ * All Rights Reserved
+ *************************************************/
+ 
  /**
  * @ngdoc function
  * @name help.function:InventoryGroups

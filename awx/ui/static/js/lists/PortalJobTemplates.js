@@ -1,13 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  PoralJobTemplates.js
- *  List view object for Job Templates data model.
- *
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('PortalJobTemplatesListDefinition', [])

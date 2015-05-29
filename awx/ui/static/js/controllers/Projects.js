@@ -1,12 +1,9 @@
-/************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *
- *  Projects.js
- *
- *  Controller functions for the Projects model.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name controllers.function:Projects

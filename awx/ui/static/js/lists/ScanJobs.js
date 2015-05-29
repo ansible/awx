@@ -1,15 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Jobs.js
- *  List view object for job data model.
- *
- *  Used on dashboard to provide a list of all jobs, regardless of
- *  status.
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('ScanJobsListDefinition', [])

@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 export default ['Rest', 'GetBasePath', 'ProcessErrors', 'lodashAsPromised',
 function (Rest, GetBasePath, ProcessErrors, _) {
     return {

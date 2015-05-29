@@ -1,13 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Jobs.js
- *  List view object for Team data model.
- *
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('JobEventsListDefinition', [])

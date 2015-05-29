@@ -1,14 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  HomeGroups.js
- *
- *  List view object for Group data model. Used
- *  on the home tab.
- *
- */
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 
 export default
     angular.module('HomeGroupListDefinition', [])

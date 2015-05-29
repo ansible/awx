@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  InventoryStatus.js
- *
- *  Use to show inventory sync status
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
  /**
  * @ngdoc function
  * @name forms.function:InventoryStatus

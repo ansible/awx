@@ -1,14 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  InventoryHosts.js
- *
- *  Right side of /inventories/N page, showing hosts in the selected group.
- *
- */
-
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 export default
     angular.module('InventoryHostsDefinition', [])
     .value('InventoryHosts', {

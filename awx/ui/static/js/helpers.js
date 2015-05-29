@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import 'tower/forms';
 import 'tower/lists';
 

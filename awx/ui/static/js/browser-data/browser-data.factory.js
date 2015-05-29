@@ -1,4 +1,9 @@
-export default ['$window', function($window) {
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+ export default ['$window', function($window) {
     var ua = $window.navigator.userAgent,
         browserName;
 

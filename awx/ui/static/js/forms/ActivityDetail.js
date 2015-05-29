@@ -1,10 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  ActivityDetail.js
- *  Form definition for Activity Stream detail
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
  /**
  * @ngdoc overview
  * @name forms

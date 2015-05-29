@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 import {formatFacts, findFacts} from './nested-helpers';
 
 export default function nestedCompare(factsList) {

@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 export function lookupRouteUrl(name, routes, models, html5Mode) {
     var route = _.find(routes, {name: name});
 

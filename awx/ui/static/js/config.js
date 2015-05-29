@@ -1,7 +1,12 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+
+
 /**********************************************************************
- *
- *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
  *  config.js
  *
  *  Gobal configuration variables for controlling application behavior.

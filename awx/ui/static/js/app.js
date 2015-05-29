@@ -1,11 +1,10 @@
-/************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- * app.js
- *
- * Declare the Tower app, define routes and perform initialization chores.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+
+
 
 var urlPrefix;
 

@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 /**
  * @ngdoc directive
  * @name multiSelectList.directive:selectAll

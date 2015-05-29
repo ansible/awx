@@ -1,4 +1,10 @@
-var rest, getBasePath;
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+ var rest, getBasePath;
 
 export default
     [   'Rest',

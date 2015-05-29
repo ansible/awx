@@ -1,11 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  HostsHelper
- *
- *  Routines that handle host add/edit/delete on the Inventory detail page.
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 
 /* jshint loopfunc: true */
 /**

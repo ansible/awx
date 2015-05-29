@@ -1,14 +1,9 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Hosts.js
- *  List view object for Hosts data model.
- *
- *
- */
-
-
-
+ * All Rights Reserved
+ *************************************************/
+ 
 export default
     angular.module('HostListDefinition', [])
     .value('HostList', {

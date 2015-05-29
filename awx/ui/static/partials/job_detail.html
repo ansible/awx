@@ -449,15 +449,15 @@
 
                     <div class="row host_summary_row">
                         <div class="title">Host Summary</div>
-                        <div ng-repeat="graph_data_object in graph_data">
+                        <!-- <div ng-repeat="graph_data_object in graph_data">
                             <span>{{ (graph_data_object.value/total_count_for_graph) * 100 | number : 1 }}% of hosts <span style="color: {{ graph_data_object.color }}">{{ graph_data_object.label }}</span>.<br /></span>
-                        </div>
+                        </div> -->
                     </div>
-                    <div id="graph-section" class="section">
-                        <div class="header">
+                    <div id="graph-section" >
+                        <!-- <div class="header">
                             <div class="legend" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
                                     <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
-                        </div>
+                        </div> -->
                     </div><!-- graph section -->
                 </div>
             </div><!-- col-md-5 -->

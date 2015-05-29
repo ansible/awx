@@ -1,10 +1,9 @@
-/*********************************************
- *  Copyright (c) 2015 AnsibleWorks, Inc.
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
  *
- *  Credentials.js
- *
- *
- */
+ * All Rights Reserved
+ *************************************************/
+ 
 /**
  * @ngdoc function
  * @name helpers.function:Credentials

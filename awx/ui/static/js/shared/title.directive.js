@@ -1,3 +1,9 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
 /* jshint unused: vars */
 
 export default function() {
@@ -9,4 +15,3 @@ export default function() {
         element.tooltip();
     };
 }
-
