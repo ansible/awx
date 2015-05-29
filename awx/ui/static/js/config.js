@@ -25,7 +25,7 @@
 
         tooltip_delay: {show: 500, hide: 100},   // Default number of milliseconds to delay displaying/hiding tooltips
 
-        debug_mode: false,                       // Enable console logging messages
+        debug_mode: true,                       // Enable console logging messages
 
         password_length: 8,                      // Minimum user password length.  Set to 0 to not set a limit
         password_hasLowercase: true,             // require a lowercase letter in the password
