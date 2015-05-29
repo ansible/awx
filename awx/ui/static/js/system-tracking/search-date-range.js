@@ -4,9 +4,23 @@
  * All Rights Reserved
  *************************************************/
 
-export function searchDateRange(date) {
+export function searchDateRange(dateString) {
+    var date;
+
+    switch(dateString) {
+        case 'yesterday':
+            date = moment().subtract(1, 'day');
+            break;
+        case 'tomorrow':
+            date = moment().add(1, 'day');
+            break;
+        default:
+            date = moment(dateString);
+    }
+
+
     return {
-        from: moment(date).startOf('day'),
-        to: moment(date).endOf('day')
+        from: date.startOf('day'),
+        to: date.endOf('day')
     };
 }

@@ -21,8 +21,8 @@ export default {
                     var hostIds = $route.current.params.hosts.split(',');
                     var moduleParam = $location.search().module || 'packages';
 
-                    var leftDate = searchDateRange('2015-05-26');
-                    var rightDate = searchDateRange('2015-05-26');
+                    var leftDate = searchDateRange('yesterday');
+                    var rightDate = searchDateRange();
 
                     if (hostIds.length === 1) {
                         hostIds = hostIds.concat(hostIds[0]);
