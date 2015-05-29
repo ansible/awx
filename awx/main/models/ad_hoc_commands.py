@@ -101,12 +101,16 @@ class AdHocCommand(UnifiedJob):
         return self.limit
 
     def clean_module_name(self):
+        if type(self.module_name) not in (str, unicode):
+            raise ValidationError("Invalid type for ad hoc command")
         module_name = self.module_name.strip() or 'command'
         if module_name not in settings.AD_HOC_COMMANDS:
             raise ValidationError('Unsupported module for ad hoc commands.')
         return module_name
 
     def clean_module_args(self):
+        if type(self.module_args) not in (str, unicode):
+            raise ValidationError("Invalid type for ad hoc command")
         module_args = self.module_args
         if self.module_name in ('command', 'shell') and not module_args:
             raise ValidationError('No argument passed to %s module.' % self.module_name)
