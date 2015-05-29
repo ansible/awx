@@ -1,6 +1,7 @@
 /** @define SetupMenu */
 
 @import "shared/branding/colors.less";
+@menu-breakpoint: 710px;
 
 .SetupMenu {
     display: flex;
@@ -8,5 +9,9 @@
     flex-direction: row;
     justify-content: flex-start;
     flex-wrap: wrap;
-    margin-left: -1rem;
+    margin-left: 0;
+
+    @media screen and (max-width: @menu-breakpoint) {
+        margin-left: -1rem;
+    }
 }
