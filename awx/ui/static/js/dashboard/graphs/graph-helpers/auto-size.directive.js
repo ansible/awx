@@ -9,16 +9,18 @@ function AutoSizeModule($window) {
     // fit into a single a page; assumes there are 2 rows
     // of modules, with the available height being offset
     // by the navbar & the count summaries module
-    return function(scope, element) {
-
-        function adjustSizeInitially() {
-            adjustSize();
-        }
+    return function(scope, element, attrs) {
 
         function adjustSize() {
-            var winHeight = $($window).height(),
-            available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-            element.height(available_height/2);
+            if (attrs.graphType === "hostStatus") {
+                if (element.parent().width() > 596) {
+                    element.height(596);
+                } else {
+                    element.height(element.parent().width());
+                }
+            } else {
+                element.height(320);
+            }
         }
 
         $($window).resize(adjustSize);
@@ -30,8 +32,8 @@ function AutoSizeModule($window) {
         // This makes sure count-container div is loaded
         // by controllers/Home.js before we use it
         // to determine the available window height
-        scope.$on('dashboardReady', function() {
-            adjustSizeInitially();
+        scope.$on('resizeGraphs', function() {
+            adjustSize();
         });
 
     };

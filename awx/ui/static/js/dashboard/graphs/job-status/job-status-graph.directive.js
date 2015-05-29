@@ -15,7 +15,7 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                 scope: {
                     data: '='
                 },
-                templateUrl: '/static/partials/job_status_graph.html',
+                templateUrl: '/static/js/dashboard/graphs/job-status/job_status_graph.partial.html',
                 link: link
             };
 
@@ -38,10 +38,10 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                             scope.period = period;
                             scope.jobType = jobType;
                         });
+
                 }
 
                 function createGraph(period, jobtype, data){
-
                     scope.period = period;
                     scope.jobType = jobtype;
 
@@ -73,7 +73,6 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     });
 
                     job_status_chart
-                    .margin({top: 5, right: 75, bottom: 40, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
                     .x(function(d,i) { return i; })
                     .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                     .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
@@ -120,17 +119,23 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                         recreateGraph(period, job_type);
                     });
 
+                    job_status_chart.legend.margin({top: 1, right:0, left:24, bottom: 0});
+
                     adjustGraphSize(job_status_chart, element);
+
                 }
 
                 function onResize() {
                     adjustGraphSize(job_status_chart, element);
+
                 }
 
                 angular.element($window).on('resize', onResize);
+                $(".DashboardGraphs-graph--jobStatusGraph").resize(onResize);
 
                 element.on('$destroy', function() {
                     angular.element($window).off('resize', onResize);
+                    $(".DashboardGraphs-graph--jobStatusGraph").removeResize(onResize);
                 });
 
                 if (scope.removeGraphDataReady) {

@@ -744,7 +744,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             launch_url,
             html;
             scope.job_template_id = id;
-            if (base === 'job_templates' || base === 'portal' || base === 'inventories') {
+            if (base === 'job_templates' || base === 'portal' || base === 'inventories' || base === 'home') {
               url = GetBasePath('job_templates') + id + '/launch/';
             }
             else {
@@ -777,7 +777,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
               var job = data.job || data.system_job;
-              if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job)){
+              if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) ||
+                (base === 'home')){
                 $location.path('/jobs/' + job);
               }
 

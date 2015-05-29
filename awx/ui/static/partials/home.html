@@ -1,58 +1,35 @@
 
 <div class="tab-pane" id="home">
-   <div ng-cloak id="htmlTemplate" style="padding:10px">
-      <div id="refresh-row" class="row">
+    <div ng-cloak id="htmlTemplate" style="padding:10px">
+        <div id="refresh-row" class="row">
             <div class="col-lg-12">
-            <div id="home-list-actions" class="list-actions pull-right">
-              <button
-                toolbar-button
-                mode="all"
-                aw-tool-tip="Refresh the page"
-                ng-click="refresh()"
-                ng-show="socketStatus == 'error'"
-                icon-name="refresh"
-                toolbar="true">
-              </button>
-              <button
-                toolbar-button
-                mode="all"
-                ng-click="showActivity()"
-                aw-tool-tip="View Activity Stream"
-                icon-name="stream"
-                toolbar="true"
-                aw-feature="activity_streams">
-              </button>
-
-                <!-- <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refreshJobs()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'" data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i> </button></div> -->
-         </div>
-      </div>
-
-      <div class="row">
-         <div id="dash-counts" class="col-sm-12 col-xs-12"></div>
-      </div>
-      <div class="row">
-        <div class="left-side col-lg-6 col-md-12">
-          <div  id="dash-job-status-graph" auto-size-module class="graph-container">
-            <job-status-graph data="graphData.jobStatus" period="month" job-type="all"></job-status-graph>
-          </div>
+                <div id="home-list-actions" class="list-actions pull-right">
+                    <button
+                        toolbar-button
+                        mode="all"
+                        aw-tool-tip="Refresh the page"
+                        ng-click="refresh()"
+                        ng-show="socketStatus == 'error'"
+                        icon-name="refresh"
+                        toolbar="true">
+                    </button>
+                    <button
+                        toolbar-button
+                        mode="all"
+                        ng-click="showActivity()"
+                        aw-tool-tip="View Activity Stream"
+                        icon-name="stream"
+                        toolbar="true"
+                        aw-feature="activity_streams">
+                    </button>
+                </div>
+            </div>
         </div>
-         <div  class="right-side col-lg-6 col-md-12">
-           <div id="dash-host-status-graph" auto-size-module class="graph-container">
-             <host-status-graph data="dashboardData"></host-status-graph>
-           </div>
-         </div>
-      </div>
-      <div class="row">
-         <div id="dash-jobs-list" class="left-side col-lg-6 col-md-12"></div>
-         <div class="right-side col-lg-6 col-md-12">
-           <div id="dash-host-count-graph" auto-size-module class="graph-container">
-             <host-count-graph ng-if="user_is_superuser" data="graphData.hostCounts"></host-count-graph>
-           </div>
-         </div>
-      </div>
-   </div>
-</div>
 
-<div ng-include="'/static/partials/schedule_dialog.html'"></div>
+        <dashboard></dashboard>
+    </div>
+<div>
+
+<!-- <div ng-include="'/static/partials/schedule_dialog.html'"></div>
 <div ng-include="'/static/partials/logviewer.html'"></div>
-<div id="host-modal-dialog" style="display: none;" class="dialog-content"></div>
+<div id="host-modal-dialog" style="display: none;" class="dialog-content"></div> -->

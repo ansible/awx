@@ -1,0 +1,43 @@
+/** @define Dashboard */
+
+.Dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.Dashboard-counts {
+    flex: initial;
+    width: 100%;
+    border: 1px solid #a9a9a9;
+    border-radius: 4px;
+    padding: 9px;
+}
+
+.Dashboard-graphs {
+    flex: initial;
+    width: 100%;
+}
+
+.Dashboard-list {
+    display: flex;
+    border: 1px solid #a9a9a9;
+    border-radius: 4px;
+    margin-top: 15px;
+    width: 50%;
+    padding: 15px;
+    flex-basis: ~"calc(50% - 7px)";
+}
+
+@media only screen and (max-width: 710px) {
+    .Dashboard-counts {
+        border: 0;
+        padding: 0;
+    }
+
+    .Dashboard-list {
+        flex: initial;
+        width: 100%;
+    }
+}

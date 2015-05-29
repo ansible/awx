@@ -39,12 +39,12 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
         setupWatcher: function(period, jobType) {
             this.destroyWatcher =
                 $rootScope.$on('JobStatusChange-home', function() {
-                getData(period, jobType).then(function(result) {
-                    $rootScope.
-                        $broadcast('DataReceived:JobStatusGraph',
-                                   result);
-                    return result;
-                });
+                    getData(period, jobType).then(function(result) {
+                        $rootScope.
+                            $broadcast('DataReceived:JobStatusGraph',
+                                       result);
+                        return result;
+                    });
             });
         },
         get: function(period, jobType) {

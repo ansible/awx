@@ -6,14 +6,15 @@ export default [  function() {
         },
         restrict: 'E',
         link: function (scope, element){
-
             scope.formatter = function(sparklines, options, point){
                 var status = options.userOptions.tooltipValueLookups.status[point.offset];
                 //capitalize first letter
-                status = status.charAt(0).toUpperCase() + status.slice(1);
-                return "<div class=\"smart-status-tooltip\">Job ID: " +
-                  options.userOptions.tooltipValueLookups.jobs[point.offset] +
-                  "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
+                if (status) {
+                    status = status.charAt(0).toUpperCase() + status.slice(1);
+                    return "<div class=\"smart-status-tooltip\">Job ID: " +
+                      options.userOptions.tooltipValueLookups.jobs[point.offset] +
+                      "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
+                }
             };
 
             element.sparkline(scope.sparkArray, {
