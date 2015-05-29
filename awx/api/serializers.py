@@ -1482,6 +1482,13 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-started')[:10]]
         return d
 
+    def validate_survey_enabled(self, attrs, source):
+        survey_enabled = attrs[source] if source in attrs else False
+        job_type = attrs['job_type'] if 'job_type' in attrs else None
+        if survey_enabled and job_type == PERM_INVENTORY_SCAN:
+            raise serializers.ValidationError("Survey Enabled can not be used with scan jobs")
+        return attrs
+
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
