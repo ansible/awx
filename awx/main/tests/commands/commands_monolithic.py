@@ -29,8 +29,9 @@ from awx.main.tests.base import BaseTest, BaseLiveServerTest
 if not hasattr(unittest, 'skipIf'):
     import unittest2 as unittest
 
-__all__ = ['DumpDataTest', 'CleanupDeletedTest', 'CleanupJobsTest',
-           'CleanupActivityStreamTest', 'InventoryImportTest']
+__all__ = ['CreateDefaultOrgTest', 'DumpDataTest', 'CleanupDeletedTest',
+           'CleanupJobsTest', 'CleanupActivityStreamTest',
+           'InventoryImportTest']
 
 TEST_PLAYBOOK = '''- hosts: test-group
   gather_facts: False
@@ -174,6 +175,39 @@ class BaseCommandMixin(object):
             sys.stdout = original_stdout
             sys.stderr = original_stderr
         return result, captured_stdout, captured_stderr
+
+class CreateDefaultOrgTest(BaseCommandMixin, BaseTest):
+    '''
+    Test cases for create_default_org management command.
+    '''
+
+    def setUp(self):
+        super(CreateDefaultOrgTest, self).setUp()
+
+    def test_create_default_org(self):
+        self.setup_users()
+        self.assertEqual(Organization.objects.count(), 0)
+        result, stdout, stderr = self.run_command('create_default_org')
+        self.assertEqual(result, None)
+        self.assertTrue('Default organization added' in stdout)
+        self.assertEqual(Organization.objects.count(), 1)
+        org = Organization.objects.all()[0]
+        self.assertEqual(org.created_by, self.super_django_user)
+        self.assertEqual(org.modified_by, self.super_django_user)
+        result, stdout, stderr = self.run_command('create_default_org')
+        self.assertEqual(result, None)
+        self.assertFalse('Default organization added' in stdout)
+        self.assertEqual(Organization.objects.count(), 1)
+
+    def test_create_default_org_when_no_superuser_exists(self):
+        self.assertEqual(Organization.objects.count(), 0)
+        result, stdout, stderr = self.run_command('create_default_org')
+        self.assertEqual(result, None)
+        self.assertTrue('Default organization added' in stdout)
+        self.assertEqual(Organization.objects.count(), 1)
+        org = Organization.objects.all()[0]
+        self.assertEqual(org.created_by, None)
+        self.assertEqual(org.modified_by, None)
 
 class DumpDataTest(BaseCommandMixin, BaseTest):
     '''

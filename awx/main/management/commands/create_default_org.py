@@ -2,8 +2,8 @@
 # All Rights Reserved
 
 from django.core.management.base import BaseCommand
-
-from awx.main.models import Organization
+from crum import impersonate
+from awx.main.models import User, Organization
 
 
 class Command(BaseCommand):
@@ -17,7 +17,11 @@ class Command(BaseCommand):
         if Organization.objects.count():
             return
 
-        # Create a default organization.
-        org, new = Organization.objects.get_or_create(name='Default')
-        if new:
-            print('Default organization added.')
+        # Create a default organization as the first superuser found.
+        try:
+            superuser = User.objects.filter(is_superuser=True, is_active=True).order_by('pk')[0]
+        except IndexError:
+            superuser = None
+        with impersonate(superuser):
+            org = Organization.objects.create(name='Default')
+        print('Default organization added.')
