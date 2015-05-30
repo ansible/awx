@@ -860,6 +860,7 @@ class LdapTest(BaseTest):
 
     def setUp(self):
         super(LdapTest, self).setUp()
+        self.create_test_license_file(features={'ldap': True})
         # Skip tests if basic LDAP test settings aren't defined.
         if not getattr(settings, 'TEST_AUTH_LDAP_SERVER_URI', None):
             self.skipTest('no test LDAP auth server defined')
@@ -933,6 +934,15 @@ class LdapTest(BaseTest):
             user = self.check_login()
             for attr in settings.AUTH_LDAP_USER_FLAGS_BY_GROUP.keys():
                 self.assertTrue(getattr(user, attr))
+        # Check that LDAP login fails when not enabled by license, but using a
+        # local password will work in either case.
+        user.set_password('local pass')
+        user.save()
+        self.check_login()
+        self.check_login(password='local pass')
+        self.create_test_license_file(features={'ldap': False})
+        self.check_login(should_fail=True)
+        self.check_login(password='local pass')
 
     def test_ldap_organization_mapping(self):
         for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
@@ -1014,25 +1024,25 @@ class LdapTest(BaseTest):
             self.use_test_setting(name)
         user = self.check_login()
         self.setup_users()
-        url = reverse('api:api_v1_config_view')
+        config_url = reverse('api:api_v1_config_view')
         with self.current_user(self.super_django_user):
-            response = self.get(url, expect=200)
+            response = self.get(config_url, expect=200)
         user_ldap_fields = response.get('user_ldap_fields', [])
         self.assertTrue(user_ldap_fields)
-        url = reverse('api:user_detail', args=(user.pk,))
+        user_url = reverse('api:user_detail', args=(user.pk,))
         for user_field in user_ldap_fields:
             with self.current_user(self.super_django_user):
-                data = self.get(url, expect=200)
+                data = self.get(user_url, expect=200)
             if user_field == 'password':
                 data[user_field] = 'my new password'
                 with self.current_user(self.super_django_user):
-                    self.put(url, data, expect=200)
+                    self.put(user_url, data, expect=200)
                 user = User.objects.get(pk=user.pk)
                 self.assertFalse(user.has_usable_password())
-                #with self.current_user(self.super_django_user):
-                #    self.patch(url, {'password': 'try again'}, expect=200)
-                #user = User.objects.get(pk=user.pk)
-                #self.assertFalse(user.has_usable_password())
+                with self.current_user(self.super_django_user):
+                    self.patch(user_url, {'password': 'try again'}, expect=200)
+                user = User.objects.get(pk=user.pk)
+                self.assertFalse(user.has_usable_password())
             elif user_field in data:
                 value = data[user_field]
                 if isinstance(value, bool):
@@ -1041,7 +1051,40 @@ class LdapTest(BaseTest):
                     value = unicode(value).upper()
                 data[user_field] = value
                 with self.current_user(self.super_django_user):
-                    self.put(url, data, expect=400)
-                #patch_data = {user_field: data[user_field]}
-                #with self.current_user(self.super_django_user):
-                #    self.patch(url, patch_data, expect=400)
+                    self.put(user_url, data, expect=400)
+                patch_data = {user_field: data[user_field]}
+                with self.current_user(self.super_django_user):
+                    self.patch(user_url, patch_data, expect=400)
+        # Install a license with LDAP disabled; ldap fields should not be in
+        # config and all user fields should be changeable.
+        self.create_test_license_file(features={'ldap': False})
+        with self.current_user(self.super_django_user):
+            response = self.get(config_url, expect=200)
+        self.assertFalse('user_ldap_fields' in response)
+        for user_field in user_ldap_fields:
+            with self.current_user(self.super_django_user):
+                data = self.get(user_url, expect=200)
+            if user_field == 'password':
+                data[user_field] = 'my new password'
+                with self.current_user(self.super_django_user):
+                    self.put(user_url, data, expect=200)
+                user = User.objects.get(pk=user.pk)
+                self.assertTrue(user.has_usable_password())
+                self.assertTrue(user.check_password, 'my new password')
+                with self.current_user(self.super_django_user):
+                    self.patch(user_url, {'password': 'try again'}, expect=200)
+                user = User.objects.get(pk=user.pk)
+                self.assertTrue(user.has_usable_password())
+                self.assertTrue(user.check_password, 'try again')
+            elif user_field in data:
+                value = data[user_field]
+                if isinstance(value, bool):
+                    value = not value
+                else:
+                    value = unicode(value).upper()
+                data[user_field] = value
+                with self.current_user(self.super_django_user):
+                    self.put(user_url, data, expect=200)
+                patch_data = {user_field: data[user_field]}
+                with self.current_user(self.super_django_user):
+                    self.patch(user_url, patch_data, expect=200)

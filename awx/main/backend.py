@@ -9,6 +9,9 @@ from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
 from django_auth_ldap.backend import LDAPBackend as BaseLDAPBackend
 from django_auth_ldap.backend import populate_user
 
+# Ansible Tower
+from awx.api.license import feature_enabled
+
 class LDAPSettings(BaseLDAPSettings):
 
     defaults = dict(BaseLDAPSettings.defaults.items() + {
@@ -34,12 +37,12 @@ class LDAPBackend(BaseLDAPBackend):
     settings = property(_get_settings, _set_settings)
 
     def authenticate(self, username, password):
-        if not self.settings.SERVER_URI:
+        if not self.settings.SERVER_URI or not feature_enabled('ldap'):
             return None
         return super(LDAPBackend, self).authenticate(username, password)
 
     def get_user(self, user_id):
-        if not self.settings.SERVER_URI:
+        if not self.settings.SERVER_URI or not feature_enabled('ldap'):
             return None
         return super(LDAPBackend, self).get_user(user_id)
 

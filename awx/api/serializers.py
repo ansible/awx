@@ -608,11 +608,12 @@ class UserSerializer(BaseSerializer):
         new_password = getattr(obj, '_new_password', None)
         # For now we're not raising an error, just not saving password for
         # users managed by LDAP who already have an unusable password set.
-        try:
-            if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
-                new_password = None
-        except AttributeError:
-            pass
+        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+            try:
+                if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
+                    new_password = None
+            except AttributeError:
+                pass
         if new_password:
             obj.set_password(new_password)
         if not obj.password:
@@ -633,6 +634,8 @@ class UserSerializer(BaseSerializer):
         return res
 
     def _validate_ldap_managed_field(self, attrs, source):
+        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None) or not feature_enabled('ldap'):
+            return attrs
         try:
             is_ldap_user = bool(self.object.profile.ldap_dn)
         except AttributeError:
