@@ -78,6 +78,7 @@ class LicenseTests(BaseTest):
         assert vdata['time_remaining'] < 0
         assert vdata['valid_key'] is True
         assert vdata['compliant'] is False
+        assert vdata['subscription_name']
 
     def test_expired_licenses(self):
         reader = TaskSerializer()
