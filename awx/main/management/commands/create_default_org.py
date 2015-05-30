@@ -23,5 +23,5 @@ class Command(BaseCommand):
         except IndexError:
             superuser = None
         with impersonate(superuser):
-            org = Organization.objects.create(name='Default')
+            Organization.objects.create(name='Default')
         print('Default organization added.')
