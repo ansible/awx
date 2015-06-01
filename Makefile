@@ -23,15 +23,27 @@ endif
 # Allow AMI license customization
 AWS_INSTANCE_COUNT ?= 0
 
+# GPG signature parameters (BETA key not yet used)
+GPG_RELEASE = 442667A9
+GPG_BETA = D7B00447
+GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
+GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
+
+# Determine GPG key for RPM signing
+ifeq ($(OFFICIAL),yes)
+    GPG_KEY = $(GPG_RELEASE)
+    GPG_FILE = $(GPG_RELEASE_FILE)
+endif
+
 # TAR build parameters
-ifneq ($(OFFICIAL),yes)
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
-    PACKER_BUILD_OPTS=-var-file=vars-nightly.json
-else
+ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
     PACKER_BUILD_OPTS=-var-file=vars-release.json
+else
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
+    PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
@@ -69,7 +81,7 @@ MOCK_CFG ?=
 .PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
-	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
+	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	deb deb-src debian reprepro setup_tarball sync_ui \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
 
@@ -361,8 +373,10 @@ dist/$(SDIST_TAR_FILE):
 
 sdist: minjs dist/$(SDIST_TAR_FILE)
 
-rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
+rpm-build:
 	mkdir -p rpm-build
+
+rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/$(NAME).te rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
@@ -397,6 +411,12 @@ rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).noarch.rpm
+
+rpm-build/$(GPG_FILE): rpm-build
+	gpg --export -a "${GPG_KEY}" > "$@"
+
+rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).noarch.rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).noarch.rpm
 
 deb-build/$(SDIST_TAR_NAME):
 	mkdir -p deb-build

@@ -260,7 +260,7 @@ The `setup/` folder contains the Ansible Tower setup playbook tar.gz file.
 These nightly repositories can be used by the Ansible Tower setup playbook by
 running the `setup.sh` shell script with the following option:
 
-    ./setup.sh -e "aw_repo_url=http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU"
+    ./setup.sh -e "aw_repo_url=http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU gpgcheck=0"
 
 ### Official Releases ###
 
