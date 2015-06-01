@@ -16,8 +16,7 @@ import datePicker from './date-picker/main';
 
 export default
     angular.module('systemTracking',
-                   [   'angularMoment',
-                       utilities.name,
+                   [   utilities.name,
                        shared.name,
                        datePicker.name
                    ])

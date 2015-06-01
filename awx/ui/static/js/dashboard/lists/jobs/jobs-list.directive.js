@@ -1,6 +1,7 @@
 /* jshint unused: vars */
 export default
-    [function JobsList() {
+    ['moment',
+    function JobsList(moment) {
     return {
         restrict: 'E',
         link: link,

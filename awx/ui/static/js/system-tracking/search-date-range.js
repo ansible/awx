@@ -4,6 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
+import moment from 'tower/shared/moment/moment';
+
 export function searchDateRange(dateString) {
     var date;
 

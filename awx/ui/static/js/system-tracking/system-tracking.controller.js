@@ -15,7 +15,7 @@ function controller($rootScope,
                     initialFactData,
                     getDataForComparison,
                     waitIndicator,
-
+                    moment,
                     _) {
     // var inventoryId = $routeParams.id;
     var hostIds = $routeParams.hosts.split(',');
@@ -201,6 +201,7 @@ export default
         'factScanData',
         'getDataForComparison',
         'Wait',
+        'moment',
         'lodashAsPromised',
         controller
     ];
