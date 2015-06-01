@@ -1053,10 +1053,10 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         });
 
     // start watching for real-time updates
-    if ($scope.removeWatchUpdateStatus) {
-        $scope.removeWatchUpdateStatus();
+    if ($rootScope.removeWatchUpdateStatus) {
+        $rootScope.removeWatchUpdateStatus();
     }
-    $scope.removeWatchUpdateStatus = $scope.$on('JobStatusChange-inventory', function(data) {
+    $rootScope.removeWatchUpdateStatus = $rootScope.$on('JobStatusChange-inventory', function(e, data) {
         var stat, group;
         if (data.group_id) {
             group = Find({ list: $scope.groups, key: 'id', val: data.group_id });

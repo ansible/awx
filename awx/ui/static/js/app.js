@@ -1011,7 +1011,7 @@ var tower = angular.module('Tower', [
                                 $rootScope.$emit('JobStatusChange-portal', data);
                             } else if (urlToCheck === '/projects') {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/inventory\/(\d)+\/manage/.test(urlToCheck)) {
+                            } else if (/\/inventories\/(\d)+\/manage/.test(urlToCheck)) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         });
