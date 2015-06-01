@@ -837,7 +837,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
-            single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
+            #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
