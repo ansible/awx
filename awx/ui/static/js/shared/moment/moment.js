@@ -1,6 +1,6 @@
 var originalMoment = window.moment;
 
-export default function moment() {
+function moment() {
 
     // navigator.language is available in all modern browsers.
     // however navigator.languages is a new technology that
@@ -15,4 +15,6 @@ export default function moment() {
     return originalMoment.apply(this, arguments);
 }
 
+_.merge(moment, originalMoment);
 
+export default moment;
