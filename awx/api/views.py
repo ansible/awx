@@ -1708,6 +1708,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
     model = JobTemplate
     serializer_class = JobLaunchSerializer
     is_job_start = True
+    always_allow_superuser = False
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
