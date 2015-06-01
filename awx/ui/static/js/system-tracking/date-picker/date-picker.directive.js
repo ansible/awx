@@ -7,8 +7,8 @@
 /* jshint unused: vars */
 
 export default
-    [   '$rootScope',
-        function() {
+    [   'moment',
+        function(moment) {
             return {
                 restrict: 'E',
                 scope: {

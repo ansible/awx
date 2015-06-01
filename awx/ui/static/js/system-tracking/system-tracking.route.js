@@ -5,6 +5,7 @@
  *************************************************/
 
 import {searchDateRange} from './search-date-range';
+import moment from 'tower/shared/moment/moment';
 
 export default {
     name: 'systemTracking',

@@ -6,7 +6,8 @@
 
 export default
     [   'amDateFormatFilter',
-        function(dateFormat) {
+        'moment',
+        function(dateFormat, moment) {
             return function(string, format) {
                 if (moment.isMoment(string)) {
                     return dateFormat(string, format);
