@@ -412,11 +412,13 @@ rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).noarch.rpm
 
-rpm-build/$(GPG_FILE): rpm-build
-	gpg --export -a "${GPG_KEY}" > "$@"
+ifeq ($(OFFICIAL),yes)
+	rpm-build/$(GPG_FILE): rpm-build
+		gpg --export -a "${GPG_KEY}" > "$@"
 
-rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).noarch.rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).noarch.rpm
+	rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).noarch.rpm
+		rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).noarch.rpm
+endif
 
 deb-build/$(SDIST_TAR_NAME):
 	mkdir -p deb-build
