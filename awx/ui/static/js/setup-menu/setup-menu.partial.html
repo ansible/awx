@@ -48,26 +48,30 @@
           </div>
         </a>
         <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
-          <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
-            <aw-icon name="ManagementJobs"></aw-icon>
-          </i>
-          <div class="Media-block">
-            <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
-            <p class="SetupItem-description SetupItem-description--aside">
-              Schedule jobs to periodically cleanup job history.
-            </p>
+          <div class="SetupItem-firefoxFlexButtonFix">
+            <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
+              <aw-icon name="ManagementJobs"></aw-icon>
+            </i>
+            <div class="Media-block">
+              <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
+              <p class="SetupItem-description SetupItem-description--aside">
+                Schedule jobs to periodically cleanup job history.
+              </p>
+            </div>
           </div>
         </button>
         <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
-          <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
-            <aw-icon name="InventoryScripts"></aw-icon>
-          </i>
-          <div class="Media-block">
-            <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
-            <p class="SetupItem-description SetupItem-description--aside">
-              Create and edit scripts to dynamically load hosts from any source.
-            </p>
+          <div class="SetupItem-firefoxFlexButtonFix">
+            <i class="SetupItem-icon SetupItem-icon--aside HoverIcon-icon HoverIcon-icon--opacity Media-figure">
+              <aw-icon name="InventoryScripts"></aw-icon>
+            </i>
+            <div class="Media-block">
+              <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
+              <p class="SetupItem-description SetupItem-description--aside">
+                Create and edit scripts to dynamically load hosts from any source.
+              </p>
             </div>
+          </div>
         </button>
         <a link-to="license" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
           <h4 class="SetupItem-title SetupItem-title--aside">View Your License</h4>

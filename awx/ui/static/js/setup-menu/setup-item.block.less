@@ -64,6 +64,12 @@
         }
     }
 
+    // flexbox bug in firefox: you can't make a button display:flex
+    // https://github.com/philipwalton/flexbugs#9-button-elements-cant-be-flex-containers
+    &-firefoxFlexButtonFix {
+        display: flex;
+    }
+
     &-title {
         &--aside {
           font-size: 1.4rem;
