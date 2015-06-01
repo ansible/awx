@@ -35,6 +35,9 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
 
+# MongoEngine
+import mongoengine
+
 # QSStats
 import qsstats
 
@@ -1139,6 +1142,8 @@ class HostFactVersionsList(MongoListAPIView):
             fact_host = FactHost.objects.get(hostname=host.name)
         except FactHost.DoesNotExist:
             return None
+        except mongoengine.ConnectionError:
+            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
 
         kv = {
             'host': fact_host.id,
@@ -1156,7 +1161,10 @@ class HostFactVersionsList(MongoListAPIView):
 
     def list(self, *args, **kwargs):
         queryset = self.get_queryset() or []
-        serializer = FactVersionSerializer(queryset, many=True, context=dict(host_obj=self.get_parent_object()))
+        try:
+            serializer = FactVersionSerializer(queryset, many=True, context=dict(host_obj=self.get_parent_object()))
+        except mongoengine.ConnectionError:
+            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
         return Response(dict(results=serializer.data))
 
 class HostSingleFactView(MongoAPIView):
