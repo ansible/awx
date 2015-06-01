@@ -989,24 +989,29 @@ var tower = angular.module('Tower', [
                                 ' status changed to ' + data.status +
                                 ' send to ' + $location.$$url);
 
+                            var urlToCheck = $location.$$url;
+                            if (urlToCheck.indexOf("?") !== -1) {
+                                urlToCheck = urlToCheck.substr(0, urlToCheck.indexOf("?"));
+                            }
+
                             // this acts as a router...it emits the proper
                             // value based on what URL the user is currently
                             // accessing.
-                            if ($location.$$url === '/jobs') {
+                            if (urlToCheck === '/jobs') {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
-                            } else if (/\/jobs\/(\d)+\/stdout/.test($location.$$url) ||
-                                /\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+                            } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
+                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck)) {
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if (/\/jobs\/(\d)+/.test($location.$$url)) {
+                            } else if (/\/jobs\/(\d)+/.test(urlToCheck)) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
-                            } else if ($location.$$url === '/home') {
+                            } else if (urlToCheck === '/home') {
                                 $rootScope.$emit('JobStatusChange-home', data);
-                            } else if ($location.$$url === '/portal') {
+                            } else if (urlToCheck === '/portal') {
                                 $rootScope.$emit('JobStatusChange-portal', data);
-                            } else if ($location.$$url === '/projects') {
+                            } else if (urlToCheck === '/projects') {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/inventory\/(\d)+\/manage/.test($location.$$url)) {
+                            } else if (/\/inventory\/(\d)+\/manage/.test(urlToCheck)) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         });
