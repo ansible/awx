@@ -11,10 +11,11 @@ export default
 
     $scope.breadcrumbs = [];
 
-    this.addBreadcrumb = function(title, path) {
+    this.addBreadcrumb = function(title, path, isCurrent) {
         var breadcrumb =
             {   title: title,
-                path: path
+                path: path,
+                isCurrent: isCurrent
             };
 
         if ($rootScope.enteredPath === path) {

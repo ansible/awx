@@ -7,23 +7,23 @@
 export default
     function flatCompare(facts, nameKey, compareKeys) {
 
-        var leftFacts = facts[0];
-        var rightFacts = facts[1];
+        var comparatorFacts = facts[0];
+        var basisFacts = facts[1];
 
-        return rightFacts.reduce(function(arr, rightFact) {
+        return basisFacts.reduce(function(arr, basisFact) {
             var searcher = {};
-            searcher[nameKey] = rightFact[nameKey];
+            searcher[nameKey] = basisFact[nameKey];
 
             var isNewFactValue = false;
 
-            var matchingFact = _.where(leftFacts, searcher);
+            var matchingFact = _.where(comparatorFacts, searcher);
             var diffs;
 
             if (_.isEmpty(matchingFact)) {
                 isNewFactValue = true;
 
                 diffs =
-                    _.map(rightFact, function(value, key) {
+                    _.map(basisFact, function(value, key) {
                         return {   keyName: key,
                                     value1: value,
                                     value2: ''
@@ -34,8 +34,18 @@ export default
 
                 diffs = _(compareKeys)
                     .map(function(key) {
-                        var leftValue = rightFact[key];
-                        var rightValue = matchingFact[key];
+                        var basisValue = basisFact[key];
+                        var comparatorValue = matchingFact[key];
+                        var leftValue, rightValue;
+
+                        if (basisFacts.position === 'left') {
+                            leftValue = basisValue;
+                            rightValue = comparatorValue;
+                        } else {
+                            rightValue = basisValue;
+                            leftValue = comparatorValue;
+                        }
+
                         if (leftValue !== rightValue) {
                             return {
                                 keyName: key,
@@ -49,7 +59,7 @@ export default
             }
 
             var descriptor =
-                {   displayKeyPath: rightFact[nameKey],
+                {   displayKeyPath: basisFact[nameKey],
                     isNew: isNewFactValue,
                     nestingLevel: 0,
                     facts: diffs

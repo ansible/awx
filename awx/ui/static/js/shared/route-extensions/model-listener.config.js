@@ -4,10 +4,16 @@
  * All Rights Reserved
  *************************************************/
 
+import {wrapDelegate} from './route-params.decorator';
+
 export default
     [   '$rootScope',
         '$routeParams',
         function($rootScope, $routeParams) {
+            $rootScope.$on('$routeChangeStart', function(e, newRoute) {
+                wrapDelegate(newRoute.params);
+            });
+
             $rootScope.$on('$routeChangeSuccess', function(e, newRoute) {
                 if (angular.isUndefined(newRoute.model)) {
                     var keys = Object.keys(newRoute.params);

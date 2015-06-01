@@ -35,7 +35,13 @@ function lodashAsPromised($q) {
     }
 
     function _then(promise, fn) {
-        return promise.then(fn);
+        return promise.then(function(value) {
+            if (_.isFunction(value.then)) {
+                return _then(value, fn);
+            } else {
+                return fn(value);
+            }
+       });
     }
 
     function _catch(promise, fn) {

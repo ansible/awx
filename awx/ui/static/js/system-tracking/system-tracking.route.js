@@ -21,8 +21,8 @@ export default {
                     var hostIds = $route.current.params.hosts.split(',');
                     var moduleParam = $location.search().module || 'packages';
 
-                    var leftDate = searchDateRange('2015-05-26');
-                    var rightDate = searchDateRange('2015-05-26');
+                    var leftDate = searchDateRange('yesterday');
+                    var rightDate = searchDateRange();
 
                     if (hostIds.length === 1) {
                         hostIds = hostIds.concat(hostIds[0]);
@@ -30,13 +30,23 @@ export default {
 
                     var data =
                         getDataForComparison(hostIds, moduleParam, leftDate, rightDate).
-                        thenThru(function(factData) {
-                                factData.leftDate = leftDate;
-                                factData.rightDate = rightDate;
-                                factData.moduleName = moduleParam;
-                                return factData;
-                            })
-                            .value();
+                        thenAll(function(factDataAndModules) {
+                            var moduleOptions = factDataAndModules[0];
+                            var factResponses = factDataAndModules[1];
+                            var factData = _.pluck(factResponses, 'fact');
+
+                            factData.leftSearchRange = leftDate;
+                            factData.rightSearchRange = rightDate;
+
+                            factData.leftScanDate = moment(factResponses[0].timestamp);
+                            factData.rightScanDate = moment(factResponses[0].timestamp);
+
+                            factData.moduleName = moduleParam;
+                            factData.moduleOptions = moduleOptions;
+
+                            return factData;
+                        }, true)
+                        .value();
 
                     return data;
 
@@ -48,8 +58,8 @@ export default {
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.inventory) {
-                        return $q.when(true);
+                    if ($route.current.params.hasModelKey('inventory')) {
+                        return $q.when($route.current.params.model.inventory);
                     }
 
                     var inventoryId = $route.current.params.inventory;
@@ -62,17 +72,17 @@ export default {
                             });
                 }
             ],
-            filters:
+            hosts:
             [   '$route',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.hosts) {
-                        return $q.when(true);
+                    if ($route.current.params.hasModelKey('hosts')) {
+                        return $q.when($route.current.params.model.hosts);
                     }
 
-                    var hostIds = $route.current.params.filters.split(',');
+                    var hostIds = $route.current.params.hosts.split(',');
 
                     var hosts =
                         hostIds.map(function(hostId) {

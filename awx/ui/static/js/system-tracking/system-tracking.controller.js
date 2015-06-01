@@ -19,90 +19,124 @@ function controller($rootScope,
                     _) {
     // var inventoryId = $routeParams.id;
     var hostIds = $routeParams.hosts.split(',');
+    var hosts = $routeParams.model.hosts;
+
+    $scope.hostIds = $routeParams.hosts;
+    $scope.inventory = $routeParams.model.inventory;
 
     $scope.factModulePickersLabelLeft = "Compare facts collected on";
     $scope.factModulePickersLabelRight = "To facts collected on";
 
-    $scope.modules =
-        [{  name: 'packages',
-            displayName: 'Packages',
-            compareKey: ['release', 'version'],
-            nameKey: 'name',
-            isActive: true,
-            displayType: 'flat'
-         },
-         {  name: 'services',
-            compareKey: ['state', 'source'],
-            nameKey: 'name',
-            displayName: 'Services',
-            isActive: false,
-            displayType: 'flat'
-         },
-         {  name: 'files',
-            displayName: 'Files',
-            nameKey: 'path',
-            compareKey: ['size', 'mode', 'md5', 'mtime', 'gid', 'uid'],
-            isActive: false,
-            displayType: 'flat'
-         },
-         {  name: 'ansible',
-            displayName: 'Ansible',
-            isActive: false,
-            displayType: 'nested'
-         }
-        ];
+    $scope.modules = initialFactData.moduleOptions;
 
     // Use this to determine how to orchestrate the services
     var viewType = hostIds.length > 1 ? 'multiHost' : 'singleHost';
 
     var searchConfig =
-        {   leftDate: initialFactData.leftDate,
-            rightDate: initialFactData.rightDate
+        {   leftRange: initialFactData.leftSearchRange,
+            rightRange: initialFactData.rightSearchRange
         };
 
-    $scope.leftDate = initialFactData.leftDate.from;
-    $scope.rightDate = initialFactData.rightDate.from;
+    $scope.leftDate = initialFactData.leftSearchRange.from;
+    $scope.rightDate = initialFactData.rightSearchRange.from;
 
     function setHeaderValues(viewType) {
         if (viewType === 'singleHost') {
-            $scope.comparisonLeftHeader = $scope.leftDate;
-            $scope.comparisonRightHeader = $scope.rightDate;
+            $scope.comparisonLeftHeader = $scope.leftScanDate;
+            $scope.comparisonRightHeader = $scope.rightScanDate;
         } else {
-            $scope.comparisonLeftHeader = hostIds[0];
-            $scope.comparisonRightHeader = hostIds[1];
+            $scope.comparisonLeftHeader = hosts[0].name;
+            $scope.comparisonRightHeader = hosts[1].name;
         }
     }
 
     function reloadData(params, initialData) {
+
         searchConfig = _.merge({}, searchConfig, params);
 
         var factData = initialData;
-        var leftDate = searchConfig.leftDate;
-        var rightDate = searchConfig.rightDate;
+        var leftRange = searchConfig.leftRange;
+        var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
+        var leftScanDate, rightScanDate;
+
 
         if (!factData) {
-            factData = getDataForComparison(
-                hostIds,
-                activeModule.name,
-                leftDate,
-                rightDate);
+            factData =
+                getDataForComparison(
+                            hostIds,
+                            activeModule.name,
+                            leftRange,
+                            rightRange)
+                    .thenAll(function(factDataAndModules) {
+                        var responses = factDataAndModules[1];
+                        var data = _.pluck(responses, 'fact');
+
+                        leftScanDate = moment(responses[0].timestamp);
+                        rightScanDate = moment(responses[1].timestamp);
+
+                        return data;
+                    }, true);
         }
 
         waitIndicator('start');
 
-        _(factData)
-            .thenAll(_.partial(compareFacts, activeModule))
+        return _(factData)
+            .thenAll(function(facts) {
+                // Make sure we always start comparison against
+                // a non-empty array
+                //
+                // Partition with _.isEmpty will give me an array
+                // with empty arrays in index 0, and non-empty
+                // arrays in index 1
+                //
+
+                // Save the position of the data so we
+                // don't lose it later
+
+                facts[0].position = 'left';
+                facts[1].position = 'right';
+
+                var splitFacts = _.partition(facts, _.isEmpty);
+                var emptyScans = splitFacts[0];
+                var nonEmptyScans = splitFacts[1];
+
+                if (_.isEmpty(nonEmptyScans)) {
+                    // we have NO data, throw an error
+                    throw {
+                        name: 'NoScanData',
+                        message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
+                        dateValues:
+                            {   leftDate: $scope.leftDate.clone(),
+                                rightDate: $scope.rightDate.clone()
+                            }
+                    };
+                } else if (nonEmptyScans.length === 1) {
+                    // one of them is not empty, throw an error
+                    throw {
+                        name: 'InsufficientScanData',
+                        message: 'No scans ran on one of the selected dates. Please try selecting a different date.',
+                        dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
+                    };
+                }
+
+                // all scans have data, rejoice!
+                return facts;
+
+            })
+            .then(_.partial(compareFacts, activeModule))
             .then(function(info) {
+
+                // Clear out any errors from the previous run...
+                $scope.error = null;
 
                 $scope.factData =  info;
 
-                setHeaderValues(viewType);
+                setHeaderValues(viewType, leftScanDate, rightScanDate);
 
             }).finally(function() {
                 waitIndicator('stop');
-            })
-            .value();
+            });
     }
 
     $scope.setActiveModule = function(newModuleName, initialData) {
@@ -120,9 +154,12 @@ function controller($rootScope,
         $location.replace();
         $location.search('module', newModuleName);
 
-        reloadData(
-            {   module: newModule
-            }, initialData);
+        reloadData({   module: newModule
+                   }, initialData)
+
+            .catch(function(error) {
+                $scope.error = error;
+            }).value();
     };
 
     function dateWatcher(dateProperty) {
@@ -141,13 +178,16 @@ function controller($rootScope,
                 var params = {};
                 params[dateProperty] = newDate;
 
-                reloadData(params);
+                reloadData(params)
+                    .catch(function(error) {
+                        $scope.error = error;
+                    }).value();
             };
     }
 
-    $scope.$watch('leftDate', dateWatcher('leftDate'), true);
+    $scope.$watch('leftDate', dateWatcher('leftRange'), true);
 
-    $scope.$watch('rightDate', dateWatcher('rightDate'), true);
+    $scope.$watch('rightDate', dateWatcher('rightRange'), true);
 
     $scope.setActiveModule(initialFactData.moduleName, initialFactData);
 }
