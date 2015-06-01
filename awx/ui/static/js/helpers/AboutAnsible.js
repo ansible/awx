@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc overview
  * @name helpers
@@ -50,22 +50,24 @@ export default
                         scope.removeBuildAboutDialog();
                     }
                     scope.removeBuildAboutDialog = scope.$on('BuildAboutDialog', function(e, data) {
-                        var spaces, i,
-                        paddedStr  = "", l,
-                        version = data.version.replace(/-.*$/,''),
-                        license_type = data.license_info.license_type;
+                        var spaces, i, j,
+                        paddedStr  = "",
+                        str = data.version,
+                        subscription = data.license_info.subscription_name || "";
 
-                        // get the length of the license type and the word license (7) plus the extra spaces (4)
-                        l = license_type.length + 11;
-
-                        spaces = Math.floor(l-(version.length + 10)); // 8 comes from "  Tower "
+                        if(str.search('-')){
+                            str = str.substr(0,str.search('-'));
+                        }
+                        spaces = Math.floor((16-str.length)/2);
                         for( i=0; i<=spaces; i++){
                             paddedStr = paddedStr +" ";
                         }
-                        paddedStr = version+paddedStr;
+                        paddedStr = paddedStr+str;
+                        for( j = paddedStr.length; j<16; j++){
+                            paddedStr = paddedStr + " ";
+                        }
                         $('#about-modal-version').html(paddedStr);
-                        $('#about-modal-license-type').html(license_type);
-
+                        $('#about-modal-subscription').html(subscription);
                         scope.modalOK = function(){
                             $('#about-modal-dialog').dialog('close');
                         };
@@ -74,7 +76,7 @@ export default
                             scope: scope,
                             // buttons: [],
                             width: 710,
-                            height: 380,
+                            height: 400,
                             minWidth: 300,
                             resizable: false,
                             // title:  , //'<img src="static/img/tower_login_logo.png">' ,//'About Ansible',

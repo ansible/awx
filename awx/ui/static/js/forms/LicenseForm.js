@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name forms.function:LicenseForm
@@ -41,6 +41,12 @@ export default
                 },
                 license_type: {
                     label: 'License Type',
+                    type: 'text',
+                    readonly: true,
+                    tab: 'license'
+                },
+                subscription_name: {
+                    label: 'Subscription Name',
                     type: 'text',
                     readonly: true,
                     tab: 'license'
