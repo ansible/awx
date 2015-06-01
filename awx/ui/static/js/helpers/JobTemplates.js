@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name helpers.function:JobTemplatesHelper
@@ -187,7 +187,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       relatedSets: relatedSets
                                   });
 
-                                  scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master);
+                                  scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master, relatedSets);
                               })
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {

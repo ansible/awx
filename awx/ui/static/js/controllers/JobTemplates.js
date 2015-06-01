@@ -886,10 +886,14 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     if ($scope.jobTemplateLoadedRemove) {
         $scope.jobTemplateLoadedRemove();
     }
-    $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject) {
-        var dft;
+    $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject, relatedSets) {
+        var dft, set;
         master = masterObject;
         getPlaybooks($scope.project);
+
+        for (set in relatedSets) {
+            $scope.search(relatedSets[set].iterator);
+        }
 
         dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? 'false' : 'true';
         md5Setup({
