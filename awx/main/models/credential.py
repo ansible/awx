@@ -43,7 +43,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('su',     _('Su')),
         ('pbrun',  _('Pbrun')),
         ('pfexec', _('Pfexec')),
-        ('runas',  _('Runas')),
+        #('runas',  _('Runas')),
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
