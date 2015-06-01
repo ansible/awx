@@ -891,7 +891,7 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
             ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
             fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
-            single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
+            #single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -2091,7 +2091,7 @@ class AuthTokenSerializer(serializers.Serializer):
 
 class FactVersionSerializer(BaseFactSerializer):
     related = serializers.SerializerMethodField('get_related')
-
+    
     class Meta:
         model = FactVersion
         fields = ('related', 'module', 'timestamp',)

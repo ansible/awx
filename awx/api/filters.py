@@ -21,6 +21,7 @@ from awx.main.utils import get_type_for_model, to_python_boolean
 
 class MongoFilterBackend(BaseFilterBackend):
 
+    # FIX: Note that MongoEngine can't use the filter backends from DRF
     def filter_queryset(self, request, queryset, view):
         return queryset
 
