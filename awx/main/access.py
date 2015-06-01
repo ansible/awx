@@ -925,6 +925,9 @@ class JobTemplateAccess(BaseAccess):
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
             self.check_license(feature='system_tracking')
 
+        if 'survey_enabled' in data and data['survey_enabled']:
+            self.check_license(feature='surveys')
+
         if self.user.is_superuser:
             return True
 
@@ -997,11 +1000,11 @@ class JobTemplateAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         # Check license.
         if validate_license:
-            k = {}
+            self.check_license()
             if obj.job_type == PERM_INVENTORY_SCAN:
-                print("In perm inv scan test")
-                k = dict(feature='system_tracking')
-            self.check_license(**k)
+                self.check_license(feature='system_tracking')
+            if obj.survey_enabled:
+                self.check_license(feature='surveys')
 
         # Super users can start any job
         if self.user.is_superuser:

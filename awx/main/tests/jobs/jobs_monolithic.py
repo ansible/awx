@@ -1038,6 +1038,27 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
     def tearDown(self):
         super(JobTemplateSurveyTest, self).tearDown()
 
+    def test_post_patch_job_template_survey_wrong_license(self):
+        url = reverse('api:job_template_list')
+        data = dict(
+            name         = 'launched job template',
+            job_type     = PERM_INVENTORY_DEPLOY,
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
+            playbook     = self.proj_dev.playbooks[0],
+            credential   = self.cred_sue.pk,
+            survey_enabled = True,
+        )
+        self.create_test_license_file(features=dict(surveys=False))
+        with self.current_user(self.user_sue):
+            self.post(url, data, expect=402)
+        data['survey_enabled'] = False
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+        jt_url = reverse('api:job_template_detail', args=(response['id'],))
+        with self.current_user(self.user_sue):
+            self.patch(jt_url, dict(survey_enabled=True), expect=402)
+        
     def test_post_job_template_survey(self):
         url = reverse('api:job_template_list')
         data = dict(

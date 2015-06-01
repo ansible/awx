@@ -1700,6 +1700,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
+    always_allow_superuser = False
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
