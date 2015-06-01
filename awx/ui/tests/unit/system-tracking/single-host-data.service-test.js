@@ -37,7 +37,7 @@ describeModule(systemTracking.name)
                 "module" : "package",
                 "timestamp": '2015-05-07T14:57:37',
                 "related" : {
-                    "fact_view" : "/api/v1/hosts/1/fact_view/?module=packages&datetime=2015-05-07T14%3A57%3A37Z"
+                    "fact_view" : "/hosts/1/fact_versions/?module=packages&from=2015-05-05T00:00:00-04:00&to=2015-05-06T00:00:00-04:00"
                 }
             },
             result = {
@@ -46,7 +46,10 @@ describeModule(systemTracking.name)
                 }
             };
 
-            var actual = service.getFacts(version);
+            var actual = service.getFacts(version)
+                            .then(function(response) {
+                                return response.fact;
+                            });
 
             restStub.succeedAt(version.related.fact_view, result);
             restStub.flush();
