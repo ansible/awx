@@ -1,5 +1,6 @@
 import systemTracking from 'tower/system-tracking/main';
 import {describeModule} from '../describe-module';
+import moment from 'tower/shared/moment/moment';
 
 describeModule(systemTracking.name)
     .testService('factScanDataService', function(test, restStub) {
