@@ -54,7 +54,8 @@ class Command(BaseCommandInstance):
         instance.save()
 
         # If this is a primary instance, update projects.
-        self.update_projects_if_primary(instance)
+        if self.is_option_primary():
+            self.update_projects(instance)
 
         # Done!
         print('Successfully updated instance role %s' % instance_str(instance))
