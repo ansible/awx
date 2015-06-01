@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name forms.function:JobTemplate
@@ -114,17 +114,6 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                 },
-                // default_scan: {
-                //   label: "Use default scan job project and playbook",
-                //   type: 'checkbox',
-                //   ngChange: 'toggleScanInfo()',
-                //   ngShow: 'job_type.value === "scan" && project_name !== "Default"',
-                //   column: 1,
-                //   awPopOver: "<p>Scan jobs templates use a default project and default playbook. Uncheck this box to override these defaults.</p>",
-                //   dataTitle: 'Scan jobs',
-                //   dataPlacement: 'right',
-                //   dataContainer: "body"
-                // },
                 default_scan: {
                   type: 'custom',
                   column: 1,
@@ -263,6 +252,7 @@ export default
                     editRequird: false,
                     awFeature: 'surveys',
                     ngChange: "surveyEnabled()",
+                    ngHide: "job_type.value === 'scan'",
                     column: 2,
                     awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",
                     dataPlacement: 'right',
@@ -272,6 +262,7 @@ export default
                 create_survey: {
                     type: 'custom',
                     column: 2,
+                    ngHide: "job_type.value === 'scan'" ,
                     control: '<button type="button" class="btn btn-sm btn-primary" id="job_templates_create_survey_btn" ng-show="survey_enabled" ng-click="addSurvey()"><i class="fa fa-pencil"></i>   Create Survey</button>'+
                             '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
                             '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'+

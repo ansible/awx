@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobTemplate
@@ -417,8 +417,6 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     $scope.jobTypeChange = function(){
       if($scope.job_type){
         if($scope.job_type.value === 'scan'){
-            // $scope.project_name = 'Default';
-            // $scope.project = null;
             $scope.toggleScanInfo();
           }
           else if($scope.project_name === "Default"){
@@ -614,6 +612,10 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
             });
         });
 
+        // users can't save a survey with a scan job
+        if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
+            $scope.survey_enabled = false;
+        }
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             // $scope.$emit("PromptForSurvey");
 
@@ -732,8 +734,6 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.jobTypeChange = function(){
       if($scope.job_type){
         if($scope.job_type.value === 'scan'){
-            // $scope.project_name = 'Default';
-            // $scope.project = null;
             $scope.toggleScanInfo();
           }
           else if($scope.project_name === "Default"){
@@ -742,6 +742,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
             // $scope.playbook = 'null';
             $scope.job_templates_form.playbook.$setPristine();
           }
+
       }
     };
 
@@ -1109,6 +1110,10 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
             });
         });
 
+        // users can't save a survey with a scan job
+        if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
+            $scope.survey_enabled = false;
+        }
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             // $scope.$emit("PromptForSurvey");
 
