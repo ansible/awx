@@ -12,6 +12,7 @@ export default {
     route: '/inventories/:inventory/system-tracking/:hosts',
     controller: 'systemTracking',
     templateUrl: '/static/js/system-tracking/system-tracking.partial.html',
+    reloadOnSearch: false,
     resolve: {
             factScanData:
                 [   'getDataForComparison',
