@@ -10,6 +10,7 @@ from awx.fact.models.fact import * # noqa
 from awx.main.socket import Socket
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
+
 class FactCacheReceiver(object):
     def __init__(self):
         self.timestamp = None
@@ -48,7 +49,10 @@ class FactCacheReceiver(object):
             host.save()
         except FactHost.MultipleObjectsReturned:
             query = "db['fact_host'].find(hostname=%s)" % hostname
-            print('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
+            logger.warn('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
+            return
+        except Exception, e:
+            logger.error("Exception communicating with Mongo: %s" % str(e))
             return
 
         (module, facts) = self.process_facts(facts_data)
