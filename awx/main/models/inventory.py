@@ -1113,7 +1113,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
         old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
-        if not self.name or old_name_re.match(self.name):
+        if not self.name or old_name_re.match(self.name) or '__replace_' in self.name:
             if self.inventory and self.group and self.pk:
                 self.name = '%s (%s - %s)' % (self.group.name, self.inventory.name, self.pk)
             elif self.inventory and self.group:
@@ -1130,10 +1130,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 update_fields.append('name')
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
-        # Add the PK to the name if only attached to an inventory (no group).
-        if new_instance and self.inventory and replace_text in self.name:
+        # Add the PK to the name.
+        if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
-            self.save(update_fields=['name'])
+            super(InventorySource, self).save(update_fields=['name'])
         if not getattr(_inventory_updates, 'is_updating', False):
             self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
@@ -1230,6 +1230,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
+        inventory_source = self.inventory_source
+        if self.active and inventory_source.inventory and self.name == inventory_source.name:
+            if inventory_source.group:
+                self.name = '%s (%s)' % (inventory_source.group.name, inventory_source.inventory.name)
+            else:
+                self.name = inventory_source.inventory.name
+            if 'name' not in update_fields:
+                update_fields.append('name')
         super(InventoryUpdate, self).save(*args, **kwargs)
 
     def get_absolute_url(self):

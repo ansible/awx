@@ -1778,6 +1778,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         child_names = self.group.children.filter(active=True).values_list('name', flat=True)
         self.assertTrue(region_group_original_name in self.group.children.get(name='regions').children.values_list('name', flat=True))
         self.assertTrue(region_group.name in self.group.children.get(name='regions').children.values_list('name', flat=True))
+        # Replacement text should not be left in inventory source name.
+        self.assertFalse(InventorySource.objects.filter(name__icontains='__replace_').exists())
+        # Inventory update name should be based on inventory/group names and need not have the inventory source pk.
+        print InventoryUpdate.objects.values_list('name', 'inventory_source__name')
+        for inventory_update in InventoryUpdate.objects.all():
+            self.assertFalse(inventory_update.name.endswith(inventory_update.inventory_source.name), inventory_update.name)
         return
         # Print out group/host tree for debugging.
         print
