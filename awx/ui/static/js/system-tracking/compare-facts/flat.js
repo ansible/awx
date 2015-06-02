@@ -95,12 +95,16 @@ export default
 
                     slottedValues = slotFactValues(basisFacts.position, basisValue, comparatorValue);
 
-                    diffs =
-                        {   keyName: basisFact[nameKey],
-                            isNestedDisplay: false,
-                            value1: slottedValues.left,
-                            value2: slottedValues.right
-                        };
+                    if (basisValue !== comparatorValue) {
+
+                        diffs =
+                            {   keyName: basisFact[nameKey],
+                                isNestedDisplay: false,
+                                value1: slottedValues.left,
+                                value2: slottedValues.right
+                            };
+
+                    }
 
                 } else {
 
