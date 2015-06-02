@@ -5,8 +5,13 @@
  *************************************************/
 
 function longDateFilter(moment, input) {
-    var date = moment(input);
-    return date.format('l LTS');
+    var date;
+    if(input === null){
+        return "";
+    }else {
+        date = moment(input);
+        return date.format('l LTS');
+    }
 }
 
 angular.module('longDateFilter', [])
