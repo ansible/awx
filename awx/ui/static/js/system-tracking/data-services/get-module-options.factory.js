@@ -3,7 +3,14 @@ var moduleConfig =
             {   compareKey: ['release', 'version'],
                 nameKey: 'name',
                 displayType: 'flat',
-                sortKey: 1
+                sortKey: 1,
+                factTemplate: function(fact) {
+                    if (fact.source === 'deb') {
+                        return "{{version}}-{{architecture}}";
+                    } else if (fact.source === 'rpm') {
+                        return "{{epoch|append:':'}}{{version}}-{{release}}.{{arch}}";
+                    }
+                }
             },
         'services':
             {   compareKey: ['state', 'source'],

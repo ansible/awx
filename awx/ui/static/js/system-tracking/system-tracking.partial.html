@@ -46,8 +46,13 @@
             <h3 class="FactDataTable-column">{{comparisonRightHeader|stringOrDate:'L LT'}}</h3>
         </div>
         <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
-            <div class="FactDataTable-row FactDataGroup-headings" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">
-                <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header" ng-class="{ 'FactDataGroup-header--new': group.isNew }" ng-switch-when="0">
+            <div class="FactDataTable-row" ng-if="!group.isNestedDisplay">
+                <p class="FactDataTable-column">{{group.facts.keyName}}</p>
+                <p class="FactDataTable-column">{{group.facts.value1}}</p>
+                <p class="FactDataTable-column">{{group.facts.value2}}</p>
+            </div>
+            <div class="FactDataTable-row FactDataGroup-headings" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath && group.isNestedDisplay">
+                <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header" ng-switch-when="0">
                     {{group.displayKeyPath}}
                 </h2>
                 <h3 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="1">

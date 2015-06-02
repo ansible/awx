@@ -11,6 +11,6 @@ export function compareFacts(module, facts) {
     if (module.displayType === 'nested') {
         return compareNestedFacts(facts);
     } else {
-        return compareFlatFacts(facts, module.nameKey, module.compareKey);
+        return compareFlatFacts(facts, module.nameKey, module.compareKey, module.factTemplate);
     }
 }

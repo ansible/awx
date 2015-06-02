@@ -52,7 +52,7 @@ function controller($rootScope,
 
     function reloadData(params, initialData) {
 
-        searchConfig = _.merge({}, searchConfig, params);
+        searchConfig = _.assign({}, searchConfig, params);
 
         var factData = initialData;
         var leftRange = searchConfig.leftRange;
@@ -124,7 +124,7 @@ function controller($rootScope,
                 return facts;
 
             })
-            .then(_.partial(compareFacts, activeModule))
+            .then(_.partial(compareFacts, _.log('activeModule', activeModule)))
             .then(function(info) {
 
                 // Clear out any errors from the previous run...
