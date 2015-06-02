@@ -43,3 +43,16 @@ export function __deferLoadIfEnabled() {
     }
 
 }
+
+
+/* jshint ignore:start */
+export function time(fn, label) {
+    return function() {
+        console.timeline(label);
+        return _.tap(fn.apply(this, arguments), function() {
+            console.timelineEnd(label);
+        });
+    };
+}
+/* jshint ignore:end */
+
