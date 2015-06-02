@@ -111,6 +111,7 @@ export function formatFacts(diffedResults) {
                     var displayObj =
                         {   keyPath: key.split('.'),
                             displayKeyPath: key,
+                            isNestedDisplay: true,
                             facts: facts,
                             isFactArray: isArray,
                             nestingLevel: nestingLevel
