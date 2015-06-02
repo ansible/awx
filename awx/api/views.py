@@ -46,6 +46,7 @@ import ansiconv
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE
+from awx.main.tasks import mongodb_control
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication
@@ -243,9 +244,9 @@ class ApiV1ConfigView(APIView):
             # Spawn a task to ensure that MongoDB is started (or stopped)
             # as appropriate, based on whether the license uses it.
             if license_data['features']['system_tracking']:
-                subprocess.call('sudo service mongod start', shell=True)
+                mongodb_control.delay('start')
             else:
-                subprocess.call('sudo service mongod stop', shell=True)
+                mongodb_control.delay('stop')
 
             # Done; return the response.
             return Response(license_data)

@@ -13,6 +13,7 @@ import pipes
 import re
 import shutil
 import stat
+import subprocess
 import tempfile
 import time
 import traceback
@@ -118,6 +119,23 @@ def notify_task_runner(metadata_dict):
     """
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
+
+
+@task()
+def mongodb_control(cmd):
+    # Sanity check: Do not send arbitrary commands.
+    if cmd not in ('start', 'stop'):
+        raise ValueError('Only "start" and "stop" are allowed.')
+
+    # Either start or stop mongo, as requested.
+    p = subprocess.Popen('sudo service mongod %s' % cmd, shell=True,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+
+    # If there was an error, log it.
+    if err:
+        logger.error(err)
+
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
