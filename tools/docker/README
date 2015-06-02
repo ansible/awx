@@ -1,0 +1,2 @@
+sudo docker build --no-cache=true --rm=true -t ansible/tower_devel:latest .
+sudo docker run --name tower_test -it --memory="4g" --cpuset="0,1" -v /home/meyers/ansible/:/tower_devel -p 8013:8013 -p 8080:8080 -p 27017:27017 ansible/tower_devel /bin/bash
