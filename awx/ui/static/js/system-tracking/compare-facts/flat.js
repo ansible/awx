@@ -75,7 +75,9 @@ export default
 
                             return {   keyName: key,
                                         value1: slottedValues.left,
-                                        value2: slottedValues.right
+                                        value1IsAbsent: slottedValues.left === 'absent',
+                                        value2: slottedValues.right,
+                                        value2IsAbsent: slotFactValues.right === 'absent'
                                     };
                         });
                 }
