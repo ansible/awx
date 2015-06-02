@@ -38,10 +38,7 @@ function slotFactValues(basisPosition, basisValue, comparatorValue) {
 }
 
 export default
-    function flatCompare(facts, nameKey, compareKeys, factTemplate) {
-
-        var comparatorFacts = facts[0];
-        var basisFacts = facts[1];
+    function flatCompare(basisFacts, comparatorFacts, nameKey, compareKeys, factTemplate) {
 
         return basisFacts.reduce(function(arr, basisFact) {
             var searcher = {};
