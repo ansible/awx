@@ -181,7 +181,6 @@ class ApiV1ConfigView(APIView):
 
         license_reader = TaskSerializer()
         license_data   = license_reader.from_file(show_key=request.user.is_superuser)
-        license_data['license_type'] = license_data.get('license_type', 'legacy').title()
 
         data = dict(
             time_zone=settings.TIME_ZONE,
