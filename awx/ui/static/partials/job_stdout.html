@@ -13,17 +13,33 @@
                 <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refresh()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'" data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i> </button></div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-md-12">
                 <div id="job-status"><label>Job Status</label> <i class="fa icon-job-{{ job.status }}"></i> {{ job.status }}</div>
-                <div class="scroll-spinner" id="stdoutMoreRowsTop"><i class="fa fa-cog fa-spin"></i></div>
-                <div id="pre-container" class="body_background body_foreground pre mono-space" lr-infinite-scroll="stdOutScrollToTop"
-                    scroll-threshold="300" data-direction="up" time-threshold="500">
-                    <div id="pre-container-content"></div>
-                </div>
             </div>
-            <div class="scroll-spinner" id="stdoutMoreRowsBottom"><i class="fa fa-cog fa-spin"></i></div>
+            <div class="panel panel-default job-stdout-panel">
+              <div class="panel-heading">
+                <h3 class="panel-title">{{ job.name }} standard out</h3>
+              </div>
+              <div class="panel-body stdout-panel-body">
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div class="scroll-spinner" id="stdoutMoreRowsTop">
+                              <i class="fa fa-cog fa-spin"></i>
+                          </div>
+                          <div id="pre-container" class="body_background
+                              body_foreground pre mono-space"
+                              lr-infinite-scroll="stdOutScrollToTop"
+                              scroll-threshold="300" data-direction="up" time-threshold="500">
+                              <div id="pre-container-content"></div>
+                          </div>
+                      </div>
+                      <div class="scroll-spinner" id="stdoutMoreRowsBottom">
+                          <i class="fa fa-cog fa-spin"></i>
+                      </div>
+                  </div>
+              </div>
+            </div>
         </div>
     </div>
 </div>

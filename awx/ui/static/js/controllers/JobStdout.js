@@ -15,7 +15,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
     ClearScope();
 
-    var available_height, job_id = $routeParams.id,
+    var job_id = $routeParams.id,
         api_complete = false,
         stdout_url,
         current_range,
@@ -137,17 +137,6 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         return  direction;
     }
 
-    function resizeToFit() {
-        available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() -
-            $('#breadcrumb-container').outerHeight() - 60;
-        $('#pre-container').height(available_height);
-    }
-    resizeToFit();
-
-    $(window).resize(_.debounce(function() {
-        resizeToFit();
-    }, 500));
-
     $('#pre-container').bind('scroll', function() {
         if (detectDirection() === "up") {
             should_apply_live_events = false;
@@ -264,7 +253,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
-                if ($('#pre-container-content').html() === "stdout capture pending") {
+                if ($('#pre-container-content').html() === "Waiting for results...") {
                     $('#pre-container-content').html(data.content);
                 } else {
                     $('#pre-container-content').append(data.content);
