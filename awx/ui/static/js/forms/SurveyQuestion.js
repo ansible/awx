@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Questions
@@ -274,17 +274,35 @@ export default
             default_password: {
                 realName: 'default_answer' ,
                 type: 'custom' ,
-                control: '<div class="form-group" >'+
-                    '<label for="default"><span class="label-text">Default Password</span></label>'+
+                control: '<div class="form-group">'+
+                    '<label for="default_password"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
-                    '<input type="password" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-hide="pwcheckbox">'+
-                    '<input type="text" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-show="pwcheckbox">'+
-                    '<label style="font-weight:normal"><input type="checkbox" ng-model="pwcheckbox" name="pwcheckbox" id="survey_question_pwcheckbox" ng-checked="false"> <span>Show Password</span></label>'+
-                    '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
-                    '<div class="error ng-hide" id=survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
-                    '<div class="error api-error ng-binding" id="survey_question-default-password-api-error" ng-bind="default_api_error"></div>'+
+                    '<div class="input-group">'+
+                    '<span class="input-group-btn">'+
+                    '<button class="btn btn-default" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">ABC</button>'+
+                    '</span>'+
+                    '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control ng-pristine ng-valid-api-error ng-invalid ng-invalid-required" chk-pass="" required="" autocomplete="false">'+
+                    '</div>'+
+                    '<div class="error ng-hide" id="survey_question-default-duplicate-error&quot;" ng-show="invalidChoice">'+
+                    'Please enter an answer from the choices listed.</div><div class="error ng-hide" id="survey_question-default-duplicate-error&quot;" ng-show="minTextError">'+
+                    'The answer is shorter than the minimium length. Please make the answer longer.</div>'+
+                    '<div class="error ng-hide" id="survey_question-default-duplicate-error&quot;" ng-show="maxTextError">'+
+                    'The answer is longer than the maximum length. Please make the answer shorter.</div>'+
+                    '<div class="error api-error ng-binding" id="survey_question-default-api-error" ng-bind="default_api_error"></div>'+
                     '</div>'+
                     '</div>',
+
+                // control: '<div class="form-group" >'+
+                //     '<label for="default"><span class="label-text">Default Password</span></label>'+
+                //     '<div>'+
+                //     '<input type="password" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-hide="pwcheckbox">'+
+                //     '<input type="text" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-show="pwcheckbox">'+
+                //     '<label style="font-weight:normal"><input type="checkbox" ng-model="pwcheckbox" name="pwcheckbox" id="survey_question_pwcheckbox" ng-checked="false"> <span>Show Password</span></label>'+
+                //     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
+                //     '<div class="error ng-hide" id=survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
+                //     '<div class="error api-error ng-binding" id="survey_question-default-password-api-error" ng-bind="default_api_error"></div>'+
+                //     '</div>'+
+                //     '</div>',
                 column: 2,
                 ngShow: 'type.type === "password" '
             },

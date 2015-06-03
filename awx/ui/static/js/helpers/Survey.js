@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:Survey
@@ -1024,6 +1024,20 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to add new survey. POST returned status: ' + status });
                         });
+                }
+            };
+
+            //for toggling the input on password inputs
+            scope.toggleInput = function(id) {
+                var buttonId = id + "_show_input_button",
+                    inputId = id,
+                    buttonInnerHTML = $(buttonId).html();
+                if (buttonInnerHTML.indexOf("ABC") > -1) {
+                    $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                    $(inputId).attr("type", "text");
+                } else {
+                    $(buttonId).html("ABC");
+                    $(inputId).attr("type", "password");
                 }
             };
 
