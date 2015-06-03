@@ -44,7 +44,7 @@ function controller($rootScope,
     $scope.rightScanDate = initialFactData.rightScanDate;
 
     $scope.leftHostname = hosts[0].name;
-    $scope.rightHostname = hosts[1].name;
+    $scope.rightHostname = hosts.length > 1 ? hosts[1].name : hosts[0].name;
 
     function setHeaderValues(viewType) {
         if (viewType === 'singleHost') {
