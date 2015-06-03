@@ -23,12 +23,19 @@ describeModule(systemTracking.name)
                 }
             };
 
-            var actual = service.getVersion(host_id, module, start, end);
+            var actual = service.getVersion(
+                {   hostId: host_id,
+                    moduleName: module,
+                    dateRange:
+                        {   from: start,
+                            to: end
+                        }
+                });
 
             restStub.succeed(result);
             restStub.flush();
 
-            return expect(actual).to.eventually.equal(version[0]);
+            return expect(actual).to.eventually.equal(version);
 
         });
 
