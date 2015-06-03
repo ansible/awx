@@ -85,7 +85,9 @@ function lodashAsPromised($q) {
 
     function wrapCallback(method, callback, thisArg, collection) {
         return method(collection, function(value, index, collection) {
-            if (_.isFunction(value.then)) {
+            if (_.isUndefined(value)) {
+                return callback(value, index, collection);
+            } else if (_.isFunction(value.then)) {
                 return value.then(_.partialRight(callback, index, collection));
             } else {
                 return callback(value, index, collection);
