@@ -31,10 +31,10 @@
 
     <section class="FactDataError SystemTrackingContainer-main" ng-if="error" ng-switch="error.name">
         <p class="FactDataError-message" ng-switch-when="NoScanData">
-        There were no facts collected on the dates you selected ({{error.dateValues.leftDate|amDateFormat:'L'}} and {{error.dateValues.rightDate|amDateFormat:'L'}}). Please pick a different range or module and try again.
+        There were no facts collected on or before the dates you selected ({{error.dateValues.leftDate|amDateFormat:'L'}} and {{error.dateValues.rightDate|amDateFormat:'L'}}). Please pick a different range or module and try again.
         </p>
         <p class="FactDataError-message" ng-switch-when="InsufficientScanData">
-        There were no facts collected on one of the dates you selected ({{error.dateValue|amDateFormat:'L'}}). Please select a different date and try again.
+        There were no facts collected on or before one of the dates you selected ({{error.dateValue|amDateFormat:'L'}}). Please select a different date and try again.
         </p>
         <p class="FactDataError-note">
         To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates".

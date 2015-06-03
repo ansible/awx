@@ -7,8 +7,9 @@
 export default
     [   'factScanDataService',
         'getModuleOptions',
+        'resolveVersions',
         'lodashAsPromised',
-        function(factScanDataService, getModuleOptions, _) {
+        function(factScanDataService, getModuleOptions, resolveVersions) {
             return function(hostIds, moduleName, leftDate, rightDate) {
 
                 var moduleOptions;
@@ -17,39 +18,40 @@ export default
                     hostIds = hostIds.concat(hostIds[0]);
                 }
 
+                var hostVersionParams =
+                    [{  hostId: hostIds[0],
+                        dateRange: leftDate,
+                        moduleName: moduleName
+                     },
+                     {  hostId: hostIds[1],
+                         dateRange: rightDate,
+                         moduleName: moduleName
+                     }
+                    ];
+
                 return getModuleOptions(hostIds[0])
                     .then(function(modules) {
                         moduleOptions = modules;
-                        return modules;
-                    }).then(function() {
-                        return hostIds;
-                    }).thenMap(function(hostId, index) {
-                        var date = leftDate;
-                        var fetchScanNumber;
-
-                        if (index === 1) {
-                            date = rightDate;
-                        } else {
-                            if (rightDate.from.isSame(leftDate.from, 'day')) {
-                                fetchScanNumber = 1;
-                            }
-                        }
-
-                        var params =
-                            [   hostId,
-                                moduleName,
-                                date,
-                                fetchScanNumber
+                        return hostVersionParams;
+                    }).thenMap(function(versionParam) {
+                        var versionWithRequest =
+                            [   versionParam,
+                                factScanDataService.
+                                 getVersion(versionParam)
                             ];
 
-                        return params;
-                    }).thenMap(function(params) {
-                        var getHostFacts =
-                            _.spread(factScanDataService.getHostFacts)
-                                .bind(factScanDataService);
-
-                        return getHostFacts(params);
-                    }).then(function(hostFacts) {
+                        return versionWithRequest;
+                    }).thenAll(function(versions) {
+                        return resolveVersions(versions);
+                    }, true)
+                    .thenMap(function(versionData) {
+                        if (versionData) {
+                            return factScanDataService.getFacts(versionData);
+                        } else {
+                            return { fact: [] };
+                        }
+                    })
+                    .thenAll(function(hostFacts) {
                         return [moduleOptions, hostFacts];
                     });
             };

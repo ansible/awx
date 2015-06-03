@@ -32,22 +32,22 @@ export default {
 
                     var data =
                         getDataForComparison(hostIds, moduleParam, leftDate, rightDate).
-                        thenAll(function(factDataAndModules) {
-                            var moduleOptions = factDataAndModules[0];
-                            var factResponses = factDataAndModules[1];
-                            var factData = _.pluck(factResponses, 'fact');
+                            then(function(factDataAndModules) {
+                                var moduleOptions = factDataAndModules[0];
+                                var factResponses = factDataAndModules[1];
+                                var factData = _.pluck(factResponses, 'fact');
 
-                            factData.leftSearchRange = leftDate;
-                            factData.rightSearchRange = rightDate;
+                                factData.leftSearchRange = leftDate;
+                                factData.rightSearchRange = rightDate;
 
-                            factData.leftScanDate = moment(factResponses[0].timestamp);
-                            factData.rightScanDate = moment(factResponses[0].timestamp);
+                                factData.leftScanDate = moment(factResponses[0].timestamp);
+                                factData.rightScanDate = moment(factResponses[1].timestamp);
 
-                            factData.moduleName = moduleParam;
-                            factData.moduleOptions = moduleOptions;
+                                factData.moduleName = moduleParam;
+                                factData.moduleOptions = moduleOptions;
 
-                            return factData;
-                        }, true)
+                                return factData;
+                            }, true)
                         .value();
 
                     return data;

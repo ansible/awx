@@ -24,8 +24,8 @@ function controller($rootScope,
     $scope.hostIds = $routeParams.hosts;
     $scope.inventory = $routeParams.model.inventory;
 
-    $scope.factModulePickersLabelLeft = "Compare facts collected on";
-    $scope.factModulePickersLabelRight = "To facts collected on";
+    $scope.factModulePickersLabelLeft = "Compare facts collected on or before";
+    $scope.factModulePickersLabelRight = "To facts collected on or before";
 
     $scope.modules = initialFactData.moduleOptions;
 
@@ -39,6 +39,9 @@ function controller($rootScope,
 
     $scope.leftDate = initialFactData.leftSearchRange.from;
     $scope.rightDate = initialFactData.rightSearchRange.from;
+
+    $scope.leftScanDate = initialFactData.leftScanDate;
+    $scope.rightScanDate = initialFactData.rightScanDate;
 
     function setHeaderValues(viewType) {
         if (viewType === 'singleHost') {
@@ -58,7 +61,6 @@ function controller($rootScope,
         var leftRange = searchConfig.leftRange;
         var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
-        var leftScanDate, rightScanDate;
 
 
         if (!factData) {
@@ -68,12 +70,12 @@ function controller($rootScope,
                             activeModule.name,
                             leftRange,
                             rightRange)
-                    .thenAll(function(factDataAndModules) {
+                    .then(function(factDataAndModules) {
                         var responses = factDataAndModules[1];
                         var data = _.pluck(responses, 'fact');
 
-                        leftScanDate = moment(responses[0].timestamp);
-                        rightScanDate = moment(responses[1].timestamp);
+                        $scope.leftScanDate = moment(responses[0].timestamp);
+                        $scope.rightScanDate = moment(responses[1].timestamp);
 
                         return data;
                     }, true);
@@ -82,7 +84,8 @@ function controller($rootScope,
         waitIndicator('start');
 
         return _(factData)
-            .thenAll(function(facts) {
+            .promise()
+            .then(function(facts) {
                 // Make sure we always start comparison against
                 // a non-empty array
                 //
@@ -132,7 +135,9 @@ function controller($rootScope,
 
                 $scope.factData =  info;
 
-                setHeaderValues(viewType, leftScanDate, rightScanDate);
+                setHeaderValues(viewType);
+
+                return info;
 
             }).finally(function() {
                 waitIndicator('stop');
