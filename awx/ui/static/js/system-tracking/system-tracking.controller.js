@@ -43,6 +43,9 @@ function controller($rootScope,
     $scope.leftScanDate = initialFactData.leftScanDate;
     $scope.rightScanDate = initialFactData.rightScanDate;
 
+    $scope.leftHostname = hosts[0].name;
+    $scope.rightHostname = hosts[1].name;
+
     function setHeaderValues(viewType) {
         if (viewType === 'singleHost') {
             $scope.comparisonLeftHeader = $scope.leftScanDate;
