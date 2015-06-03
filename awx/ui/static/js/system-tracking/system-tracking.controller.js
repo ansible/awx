@@ -126,6 +126,9 @@ function controller($rootScope,
                     };
                 }
 
+                delete facts[0].position;
+                delete facts[1].position;
+
                 // all scans have data, rejoice!
                 return facts;
 
