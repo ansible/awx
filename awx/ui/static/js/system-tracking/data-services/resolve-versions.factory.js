@@ -31,6 +31,11 @@ function resolveVersions(service, _, results) {
             _.every(nonEmptyResults, { 'hostId': nonEmptyResults[0].hostId });
 
         if (allSameHost) {
+
+            if (_.any(nonEmptyResults, 'versions.length', 0)) {
+                return _.pluck(nonEmptyResults, 'versions[0]');
+            }
+
             var firstTimestamp = nonEmptyResults[0].versions[0].timestamp;
 
             var hostIdsWithDupes =
