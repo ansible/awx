@@ -10,14 +10,20 @@ function resolveVersions(service, _, results) {
     }
 
     function resolveEmpties(result) {
-        if (_.isEmpty(result.versions)) {
-            var originalStartDate = result.dateRange.from;
-            result.dateRange.from = originalStartDate.clone().subtract(1, 'year');
-            result.dateRange.to = originalStartDate;
-            return [result, service.getVersion(result)];
+
+        var newResult = _.merge({}, result);
+
+        if (_.isEmpty(newResult.versions)) {
+            var originalStartDate = result.dateRange.from.clone();
+
+            newResult.dateRange.from = originalStartDate.clone().subtract(1, 'year');
+            newResult.dateRange.to = originalStartDate;
+
+            return [newResult, service.getVersion(newResult)];
         }
 
-        return [result, _.promise(result.versions)];
+        return [newResult, _.promise(newResult.versions)];
+
     }
 
     function resolveDuplicates(nonEmptyResults) {
