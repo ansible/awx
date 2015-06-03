@@ -131,7 +131,11 @@ class Experiment(object):
         time_start = now()
         print("Started at: %s" % time_start)
         print("Generating workload ")
+
+        scan_time_backup = self.scan_time
         for host_i in range(0, self.host_count):
+            # Reset scan time
+            self.scan_time = scan_time_backup
             sys.stdout.write('.')
             sys.stdout.flush()
             host = FactHost(hostname='hostname_%s.doesnotexist.ansible.com' % host_i).save()
