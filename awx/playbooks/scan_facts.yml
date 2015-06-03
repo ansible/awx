@@ -6,7 +6,7 @@
     - scan_packages:
     - scan_services:
     - scan_files:
-        path: '{{ scan_file_path }}'
+        paths: '{{ scan_file_paths }}'
         get_checksum: '{{ scan_use_checksum }}'
         recursive: '{{ scan_use_recursive }}'
-      when: scan_file_path is defined
+      when: scan_file_paths is defined
