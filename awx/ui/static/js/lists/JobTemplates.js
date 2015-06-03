@@ -19,18 +19,18 @@ export default
         hover: true,
 
         fields: {
-          smart_status: {
+            name: {
+                key: true,
+                label: 'Name',
+                // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
+            },
+            smart_status: {
               label: 'Status',
               columnClass: 'col-md-2 col-sm-2 col-xs-2',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
-            },
-            name: {
-                key: true,
-                label: 'Name',
-                // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
             },
             description: {
                 label: 'Description',
