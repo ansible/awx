@@ -13,13 +13,15 @@ export default [  function() {
         restrict: 'E',
         link: function (scope, element){
             scope.formatter = function(sparklines, options, point){
-                var status = options.userOptions.tooltipValueLookups.status[point.offset];
+                var status = options.userOptions.tooltipValueLookups.status[point.offset],
+                finished = options.userOptions.tooltipValueLookups.finished[point.offset];
                 //capitalize first letter
                 if (status) {
                     status = status.charAt(0).toUpperCase() + status.slice(1);
                     return "<div class=\"smart-status-tooltip\">Job ID: " +
                       options.userOptions.tooltipValueLookups.jobs[point.offset] +
-                      "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
+                      "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+
+                      "<br>Finished: " + finished +"</div>" ;
                 }
             };
 
@@ -36,7 +38,8 @@ export default [  function() {
                 tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {
                     jobs: scope.jobIds,
-                    status: scope.smartStatus
+                    status: scope.smartStatus,
+                    finished: scope.finished
                 }
             });
 
