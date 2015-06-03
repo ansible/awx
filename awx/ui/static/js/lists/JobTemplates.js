@@ -24,17 +24,17 @@ export default
                 label: 'Name',
                 // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
             },
+            description: {
+                label: 'Description',
+                // columnClass: 'col-lg-4 col-md-3 hidden-sm hidden-xs'
+            },
             smart_status: {
               label: 'Status',
-              columnClass: 'col-md-2 col-sm-2 col-xs-2',
+              columnClass: 'col-md-1 col-sm-2 col-xs-3',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
-            },
-            description: {
-                label: 'Description',
-                // columnClass: 'col-lg-4 col-md-3 hidden-sm hidden-xs'
             }
         },
 
