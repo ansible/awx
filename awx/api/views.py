@@ -235,6 +235,19 @@ class ApiV1ConfigView(APIView):
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Sanity check: If this license includes system tracking, make
+        # sure that we have a valid MongoDB to point to, and complain if
+        # we do not.
+        if (license_data['features']['system_tracking'] and
+                                    settings.MONGO_HOST == NotImplemented):
+            return Response({
+                'error': 'This license supports system tracking, which '
+                         'requires MongoDB to be installed. Since you are '
+                         'running in an HA environment, you will need to '
+                         'provide a MongoDB instance. Please re-run the '
+                         'installer prior to installing this license.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
             fh = open(TASK_FILE, "w")

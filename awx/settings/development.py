@@ -13,6 +13,11 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
+
+MONGO_HOST = '127.0.0.1'
+MONGO_PORT = 27017
+MONGO_USERNAME = None
+MONGO_PASSWORD = None
 MONGO_DB = 'system_tracking_dev'
 
 # Disable capturing all SQL queries when running celeryd in development.
