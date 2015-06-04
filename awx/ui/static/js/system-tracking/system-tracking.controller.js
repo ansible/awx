@@ -29,9 +29,6 @@ function controller($rootScope,
 
     $scope.modules = initialFactData.moduleOptions;
 
-    // Use this to determine how to orchestrate the services
-    var viewType = hostIds.length > 1 ? 'multiHost' : 'singleHost';
-
     var searchConfig =
         {   leftRange: initialFactData.leftSearchRange,
             rightRange: initialFactData.rightSearchRange
@@ -45,16 +42,6 @@ function controller($rootScope,
 
     $scope.leftHostname = hosts[0].name;
     $scope.rightHostname = hosts.length > 1 ? hosts[1].name : hosts[0].name;
-
-    function setHeaderValues(viewType) {
-        if (viewType === 'singleHost') {
-            $scope.comparisonLeftHeader = $scope.leftScanDate;
-            $scope.comparisonRightHeader = $scope.rightScanDate;
-        } else {
-            $scope.comparisonLeftHeader = hosts[0].name;
-            $scope.comparisonRightHeader = hosts[1].name;
-        }
-    }
 
     function reloadData(params, initialData) {
 
@@ -140,8 +127,6 @@ function controller($rootScope,
                 $scope.error = null;
 
                 $scope.factData =  info;
-
-                setHeaderValues(viewType);
 
                 return info;
 

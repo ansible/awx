@@ -22,29 +22,6 @@ function (Rest, GetBasePath, ProcessErrors, _) {
     }
 
     return {
-        getHostFacts: function(host, moduleName, date, fetchScanNumber) {
-
-            var getVersion = _.partial(this.getVersion, host, moduleName);
-            var getFacts = this.getFacts;
-
-            return getVersion(date.from, date.to, fetchScanNumber)
-                    .then(function(versionData) {
-                        if (_.isEmpty(versionData)) {
-                            var retryStartDate = date.from.clone().subtract(1, 'year');
-                            return getVersion(retryStartDate, date.from, fetchScanNumber);
-                        } else {
-                            return versionData;
-                        }
-                    })
-                    .then(function(versionData) {
-                        if (_.isEmpty(versionData)) {
-                            return { fact: [] };
-                        } else {
-                            return getFacts(versionData);
-                        }
-                    });
-
-        },
         getFacts: function(version) {
             var promise;
             Rest.setUrl(version.related.fact_view);
