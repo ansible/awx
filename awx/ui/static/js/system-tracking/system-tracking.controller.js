@@ -93,34 +93,37 @@ function controller($rootScope,
                 var splitFacts = _.partition(facts, _.isEmpty);
                 var emptyScans = splitFacts[0];
                 var nonEmptyScans = splitFacts[1];
+                var result;
 
                 if (_.isEmpty(nonEmptyScans)) {
                     // we have NO data, throw an error
-                    throw {
+                    result = _.reject({
                         name: 'NoScanData',
                         message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
                         dateValues:
                             {   leftDate: $scope.leftDate.clone(),
                                 rightDate: $scope.rightDate.clone()
                             }
-                    };
+                    });
                 } else if (nonEmptyScans.length === 1) {
                     // one of them is not empty, throw an error
-                    throw {
+                    result = _.reject({
                         name: 'InsufficientScanData',
                         message: 'No scans ran on one of the selected dates. Please try selecting a different date.',
                         dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
-                    };
+                    });
+                } else {
+                    result = _.promise(facts);
                 }
 
                 delete facts[0].position;
                 delete facts[1].position;
 
                 // all scans have data, rejoice!
-                return facts;
+                return result;
 
             })
-            .then(_.partial(compareFacts, _.log('activeModule', activeModule)))
+            .then(_.partial(compareFacts, activeModule))
             .then(function(info) {
 
                 // Clear out any errors from the previous run...
@@ -130,6 +133,8 @@ function controller($rootScope,
 
                 return info;
 
+            }).catch(function(error) {
+                $scope.error = error;
             }).finally(function() {
                 waitIndicator('stop');
             });
@@ -151,11 +156,7 @@ function controller($rootScope,
         $location.search('module', newModuleName);
 
         reloadData({   module: newModule
-                   }, initialData)
-
-            .catch(function(error) {
-                $scope.error = error;
-            }).value();
+                   }, initialData).value();
     };
 
     function dateWatcher(dateProperty) {
@@ -174,10 +175,7 @@ function controller($rootScope,
                 var params = {};
                 params[dateProperty] = newDate;
 
-                reloadData(params)
-                    .catch(function(error) {
-                        $scope.error = error;
-                    }).value();
+                reloadData(params).value();
             };
     }
 

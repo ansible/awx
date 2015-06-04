@@ -26,7 +26,7 @@ function lodashAsPromised($q) {
         return obj;
     }
 
-    function _reject(value, reason) {
+    function _reject(reason) {
         return $q.reject(reason);
     }
 
