@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
 * @ngdoc function
 * @name helpers.function:JobSubmission
@@ -526,8 +526,10 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
             requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
 
-            html+='<div id="taker_'+question.index+'" class="form-group '+requiredAsterisk+' ">';
-            html += '<label for="'+question.variable+'">'+question.question_name+'</label>\n';
+            html+='<div id="taker_'+question.index+'" class="form-group">';
+            html += '<label for="'+question.variable+'"><span class="label-text '+requiredAsterisk+'"> '+question.question_name+'</span></label>';
+
+            // html += '<label for="'+question.variable+'"> '+ question.question_name+'</label>\n';
 
             if(!Empty(question.question_description)){
               html += '<div class="survey_taker_description"><i>'+question.question_description+'</i></div>\n';

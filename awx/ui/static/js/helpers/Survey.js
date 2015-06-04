@@ -285,7 +285,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
 
             required = (question.required===true) ? "prepend-asterisk" : "";
-            html = '<div class="question_title col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
+            html = '<div class="question_title col-xs-12">';
+            html += '<label for="'+question.variable+'"><span class="label-text '+required+'"> '+question.question_name+'</span></label>';
+            html += '</div>';
+
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
@@ -326,7 +329,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             if(question.type === 'password'){
               defaultValue = (question.default) ? question.default : "";
-              defaultValue = $filter('defaultValue')(choices[i]);
+              defaultValue = $filter('sanitize')(defaultValue);
               defaultValue = scope.serialize(defaultValue);
               html+='<div class="row">'+
                   '<div class="col-xs-8">'+
@@ -925,7 +928,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     }
 
                     //set the data.default depending on which type
-                    if (scope.type.type === 'text') {
+                    if (scope.type.type === 'text' || scope.type.type === 'multiplechoice') {
                         data.default = scope.default;
                     } else if (scope.type.type === 'textarea') {
                         data.default = scope.default_textarea;
@@ -985,7 +988,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.resetForm = function(){
                 html = '<div class="row">'+
                         '<div class="col-sm-12">'+
-                        '<label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
+                        '<label for="survey"><span class="label-text prepend-asterisk"> Questions</span></label>'+
                         '<div id="survey_maker_question_area"></div>'+
                         '<div id="finalized_questions"></div>'+
                         '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  New Question</button>'+
