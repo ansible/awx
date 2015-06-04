@@ -187,7 +187,7 @@
     </div>
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
-            How many days of recent data do you need to access? <br>
+            Set how many days of data should be retained. <br>
             <input type="number" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer>
             <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">Please enter the number of days you would like to keep this data.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >Please enter a valid number.</div>
@@ -197,12 +197,14 @@
     </div>
     <div id="prompt-for-days-facts" style="display:none">
       <form name="prompt_for_days_facts_form" id="prompt_for_days_facts_form">
-            <div style="padding-bottom:15px;">For each host older than the value specified, keep one fact scan for each time window (granularity). For example,
-                facts older than 30 days will be removed, while one fact gathering per week will remain. <br></div>
+            <div style="padding-bottom:15px;">For facts collected older than the time period specified,
+                    save one fact scan (snapshot) per time window (granularity).
+                    For example, facts older than 30 days are purged, while one
+                    weekly fact scan is kept.<br></div>
                 <div class="form-group ">
                     <label for="description">
     		                  <span class="label-text">
-                                 Facts older than specified shall be deleted
+                                  Select a time period after which to remove old facts
                              </span>
                     </label>
                     <div class="row">
@@ -221,7 +223,7 @@
                 <div class="form-group ">
                     <label for="description">
     		                  <span class="label-text">
-                                  Granularity of facts to keep
+                                  Select a frequency for snapshot retention
                              </span>
                     </label>
                     <div class="row">
