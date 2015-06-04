@@ -15,6 +15,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import thread
 import time
 import traceback
 import urlparse
@@ -272,11 +273,18 @@ class BaseTask(Task):
         private_data_files = {}
         if private_data is not None:
             for name, data in private_data.iteritems():
-                handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
-                f = os.fdopen(handle, 'w')
-                f.write(data)
-                f.close()
-                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+                # For credentials used with ssh-add, write to a named pipe which
+                # will be read then closed, instead of leaving the SSH key on disk.
+                if name in ('credential', 'scm_credential', 'ad_hoc_credential'):
+                    path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
+                    os.mkfifo(path, 0600)
+                    thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
+                else:
+                    handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+                    f = os.fdopen(handle, 'w')
+                    f.write(data)
+                    f.close()
+                    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
                 private_data_files[name] = path
         return private_data_files
 
@@ -343,6 +351,7 @@ class BaseTask(Task):
     def wrap_args_with_ssh_agent(self, args, ssh_key_path, ssh_auth_sock=None):
         if ssh_key_path:
             cmd = ' && '.join([self.args2cmdline('ssh-add', ssh_key_path),
+                               self.args2cmdline('rm', '-f', ssh_key_path),
                                self.args2cmdline(*args)])
             args = ['ssh-agent']
             if ssh_auth_sock:
