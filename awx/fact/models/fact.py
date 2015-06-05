@@ -182,6 +182,7 @@ class FactVersion(Document):
     meta = {
         'indexes': [
             '-timestamp',
-            'module'
+            'module',
+            'host',
         ]
     }
