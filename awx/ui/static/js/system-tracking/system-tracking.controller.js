@@ -83,10 +83,15 @@ function controller($rootScope,
                     // Save the position of the data so we
                     // don't lose it later
 
-                    facts[0].position = 'left';
-                    facts[1].position = 'right';
+                    var wrappedFacts =
+                        facts.map(function(facts, index) {
+                            return {    position: index === 0 ? 'left' : 'right',
+                                        isEmpty: _.isEmpty(facts),
+                                        facts: facts
+                                   };
+                        });
 
-                    var splitFacts = _.partition(facts, _.isEmpty);
+                    var splitFacts = _.partition(facts, 'isEmpty');
                     var emptyScans = splitFacts[0];
                     var nonEmptyScans = splitFacts[1];
                     var result;
@@ -109,11 +114,8 @@ function controller($rootScope,
                             dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
                         });
                     } else {
-                        result = _.promise(facts);
+                        result = _.promise(wrappedFacts);
                     }
-
-                    delete facts[0].position;
-                    delete facts[1].position;
 
                     // all scans have data, rejoice!
                     return result;

@@ -41,13 +41,13 @@ export default
     function flatCompare(basisFacts, comparatorFacts, nameKey, compareKeys, factTemplate) {
 
 
-        return basisFacts.reduce(function(arr, basisFact) {
+        return basisFacts.facts.reduce(function(arr, basisFact) {
             var searcher = {};
             searcher[nameKey] = basisFact[nameKey];
 
             var basisTemplate, comparatorTemplate, slottedValues, basisValue, comparatorValue;
 
-            var matchingFact = _.where(comparatorFacts, searcher);
+            var matchingFact = _.where(comparatorFacts.facts, searcher);
             var diffs;
 
             if (_.isEmpty(matchingFact)) {
