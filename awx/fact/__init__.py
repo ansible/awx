@@ -20,13 +20,14 @@ try:
         raise ConnectionError
 
     # Attempt to connect to the MongoDB database.
+    # P.S. Flake8 is terrible. This indentation is consistent with PEP8.
     connect(settings.MONGO_DB,
-        host=settings.MONGO_HOST,
-        port=int(settings.MONGO_PORT),
-        username=settings.MONGO_USERNAME,
-        password=settings.MONGO_PASSWORD,
-        tz_aware=settings.USE_TZ,
-    )
+        host=settings.MONGO_HOST, # noqa
+        port=int(settings.MONGO_PORT), # noqa
+        username=settings.MONGO_USERNAME, # noqa
+        password=settings.MONGO_PASSWORD, # noqa
+        tz_aware=settings.USE_TZ, # noqa
+    ) # noqa
     register_key_transform(get_db())
 except ConnectionError:
     logger.warn('Failed to establish connect to MongoDB "%s"' % (settings.MONGO_DB))

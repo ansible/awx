@@ -8,7 +8,6 @@ import datetime
 import dateutil
 import time
 import socket
-import subprocess
 import sys
 
 # Django
@@ -239,7 +238,7 @@ class ApiV1ConfigView(APIView):
         # sure that we have a valid MongoDB to point to, and complain if
         # we do not.
         if (license_data['features']['system_tracking'] and
-                                    settings.MONGO_HOST == NotImplemented):
+                                settings.MONGO_HOST == NotImplemented): # noqa
             return Response({
                 'error': 'This license supports system tracking, which '
                          'requires MongoDB to be installed. Since you are '
