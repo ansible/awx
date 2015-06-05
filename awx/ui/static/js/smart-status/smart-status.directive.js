@@ -18,10 +18,13 @@ export default [  function() {
                 //capitalize first letter
                 if (status) {
                     status = status.charAt(0).toUpperCase() + status.slice(1);
-                    return "<div class=\"smart-status-tooltip\">Job ID: " +
+                    var tooltip = "<div class=\"smart-status-tooltip\">Job ID: " +
                       options.userOptions.tooltipValueLookups.jobs[point.offset] +
-                      "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+
-                      "<br>Finished: " + finished +"</div>" ;
+                      "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status;
+                    if (finished !== "running") {
+                        tooltip += "<br>Finished: " + finished +"</div>" ;
+                    }
+                    return tooltip;
                 }
             };
 

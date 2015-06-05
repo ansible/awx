@@ -14,7 +14,7 @@ export default ['$scope', '$filter',
         }
 
         var sparkData =
-            recentJobs.map(function(job) {
+            _.sortBy(recentJobs.map(function(job) {
 
                 var data = {};
 
@@ -28,10 +28,10 @@ export default ['$scope', '$filter',
 
                 data.jobId = job.id;
                 data.smartStatus = job.status;
-                data.finished = $filter('longDate')(job.finished);
+                data.finished = $filter('longDate')(job.finished) || "running";
 
                 return data;
-            });
+            }), "finished").reverse();
 
         $scope.sparkArray = _.pluck(sparkData, 'value');
         $scope.jobIds = _.pluck(sparkData, 'jobId');
