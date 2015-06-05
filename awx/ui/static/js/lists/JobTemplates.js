@@ -30,7 +30,7 @@ export default
             },
             smart_status: {
               label: 'Status',
-              columnClass: 'col-md-1 col-sm-2 col-xs-3',
+              columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-4',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
