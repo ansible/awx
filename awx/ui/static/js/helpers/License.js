@@ -135,7 +135,7 @@ export default
                 }
 
                 if (IsAdmin()) {
-                    html += "<p>Copy and paste the contents of the new license file in the field below and click the Submit button.</p>";
+                    html += "<p>Copy and paste the contents of your license in the field below, agree to the End User License Agreement, and click Submit.</p>";
                 } else {
                     html += "<p>A system administrator can install the new license by choosing View License on the Account Menu and clicking on the Update License tab.</p>";
                 }

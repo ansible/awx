@@ -22,7 +22,7 @@ export default
                     label: 'License File',
                     type: 'textarea',
                     addRequired: true,
-                    editRequird: true,
+                    editRequired: true,
                     rows: 10,
                     'default': '---'
                 },
@@ -30,7 +30,7 @@ export default
                     label: 'End User License Agreement',
                     type: 'textarea',
                     addRequired: true,
-                    editRequird: true,
+                    editRequired: true,
                     rows: 5,
                     readonly: true
                 },
@@ -38,7 +38,7 @@ export default
                     label: 'I agree to the End User License Agreement',
                     type: 'checkbox',
                     addRequired: true,
-                    editRequird: true
+                    editRequired: true
                 }
             },
             buttons: {
