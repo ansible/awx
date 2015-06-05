@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Jobs
@@ -25,21 +25,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
 
     LoadBreadCrumbs();
 
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
-        jobs_scope.refreshJobs();
-    });
 
-    if ($rootScope.removeScheduleStatusChange) {
-        $rootScope.removeScheduleStatusChange();
-    }
-    $rootScope.removeScheduleStatusChange = $rootScope.$on('ScheduleStatusChange', function() {
-        if (api_complete) {
-            scheduled_scope.search('schedule');
-        }
-    });
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
@@ -102,6 +88,22 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             jobs_scope.search('completed_job');
             scheduled_scope.search('schedule');
         };
+
+        if ($rootScope.removeJobStatusChange) {
+            $rootScope.removeJobStatusChange();
+        }
+        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
+            jobs_scope.refreshJobs();
+        });
+
+        if ($rootScope.removeScheduleStatusChange) {
+            $rootScope.removeScheduleStatusChange();
+        }
+        $rootScope.removeScheduleStatusChange = $rootScope.$on('ScheduleStatusChange', function() {
+            if (api_complete) {
+                scheduled_scope.search('schedule');
+            }
+        });
 
         $(window).resize(_.debounce(function() {
             resizeContainers();
