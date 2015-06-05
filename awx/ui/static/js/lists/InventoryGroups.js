@@ -86,7 +86,7 @@ export default
                 mode: 'all',
                 ngShow: 'inventory.can_run_ad_hoc_commands',
                 ngClick: 'populateAdhocForm()',
-                awToolTip: "Run a command on this inventory"
+                awToolTip: "Run a command on the selected inventory"
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
