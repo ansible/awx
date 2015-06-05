@@ -3,6 +3,7 @@
 # All Rights Reserved.
 
 # Python
+import os
 import cgi
 import datetime
 import dateutil
@@ -262,6 +263,16 @@ class ApiV1ConfigView(APIView):
             # Done; return the response.
             return Response(license_data)
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        if not request.user.is_superuser:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+        try:
+            os.remove(TASK_FILE)
+            mongodb_control.delay('stop')
+        except OSError:
+            pass
+        return Response()
 
 class DashboardView(APIView):
 
