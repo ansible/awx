@@ -149,11 +149,11 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
 
         self.builder = FactScanBuilder()
         self.builder.add_fact('ansible', TEST_FACT_ANSIBLE)
+        self.builder.add_fact('packages', TEST_FACT_PACKAGES)
         self.builder.build(scan_count=20, host_count=10)
 
     '''
-    Create 10 hosts with 20 facts each. A single fact a year for 20 years.
-    After cleanup, there should be 10 facts for each host.
+    Create 10 hosts with 40 facts each. After cleanup, there should be 20 facts for each host.
     Then ensure the correct facts are deleted.
     '''
     def test_cleanup_logic(self):
@@ -162,17 +162,18 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
         granularity = relativedelta(years=2)
 
         deleted_count = cleanup_facts.cleanup(self.builder.get_timestamp(0), granularity)
-        self.assertEqual(deleted_count, (self.builder.get_scan_count() * self.builder.get_host_count()) / 2)
+        self.assertEqual(deleted_count, 2 * (self.builder.get_scan_count() * self.builder.get_host_count()) / 2)
 
         # Check the number of facts per host
         for host in self.builder.get_hosts():
             count = FactVersion.objects.filter(host=host).count()
-            self.assertEqual(count, self.builder.get_scan_count() / 2, "should have half the number of FactVersion per host for host %s")
+            scan_count = (2 * self.builder.get_scan_count()) / 2
+            self.assertEqual(count, scan_count)
 
             count = Fact.objects.filter(host=host).count()
-            self.assertEqual(count, self.builder.get_scan_count() / 2, "should have half the number of Fact per host")
+            self.assertEqual(count, scan_count)
 
-        # Ensure that only 1 fact exists per granularity time
+        # Ensure that only 2 facts (ansible and packages) exists per granularity time
         date_pivot = self.builder.get_timestamp(0)
         for host in self.builder.get_hosts():
             while date_pivot > fact_oldest.timestamp:
@@ -183,10 +184,49 @@ class CleanupFactsUnitTest(BaseCommandMixin, BaseTest, MongoDBRequired):
                     'host': host,
                 }
                 count = FactVersion.objects.filter(**kv).count()
-                self.assertEqual(count, 1, "should only be 1 FactVersion per the 2 year granularity")
+                self.assertEqual(count, 2, "should only be 2 FactVersion per the 2 year granularity")
                 count = Fact.objects.filter(**kv).count()
-                self.assertEqual(count, 1, "should only be 1 Fact per the 2 year granularity")
+                self.assertEqual(count, 2, "should only be 2 Fact per the 2 year granularity")
                 date_pivot = date_pivot_next
+
+    '''
+    Create 10 hosts with 40 facts each. After cleanup, there should be 30 facts for each host.
+    Then ensure the correct facts are deleted.
+    '''
+    def test_cleanup_module(self):
+        cleanup_facts = CleanupFacts()
+        fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
+        granularity = relativedelta(years=2)
+
+        deleted_count = cleanup_facts.cleanup(self.builder.get_timestamp(0), granularity, module='ansible')
+        self.assertEqual(deleted_count, (self.builder.get_scan_count() * self.builder.get_host_count()) / 2)
+
+        # Check the number of facts per host
+        for host in self.builder.get_hosts():
+            count = FactVersion.objects.filter(host=host).count()
+            self.assertEqual(count, 30)
+
+            count = Fact.objects.filter(host=host).count()
+            self.assertEqual(count, 30)
+
+        # Ensure that only 1 ansible fact exists per granularity time
+        date_pivot = self.builder.get_timestamp(0)
+        for host in self.builder.get_hosts():
+            while date_pivot > fact_oldest.timestamp:
+                date_pivot_next = date_pivot - granularity
+                kv = {
+                    'timestamp__lte': date_pivot,
+                    'timestamp__gt': date_pivot_next,
+                    'host': host,
+                    'module': 'ansible',
+                }
+                count = FactVersion.objects.filter(**kv).count()
+                self.assertEqual(count, 1)
+                count = Fact.objects.filter(**kv).count()
+                self.assertEqual(count, 1)
+                date_pivot = date_pivot_next
+
+
 
 
 
