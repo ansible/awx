@@ -767,7 +767,9 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 .success(function (data) {
                     var choices, defaultChoice;
                     choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
-                    defaultChoice = data.actions.POST[field].default;
+                    if (data && data.actions && data.actions.POST && data.actions.POST[field]) {
+                        defaultChoice = data.actions.POST[field].default;
+                    }
                     if (choices) {
                         // including 'name' property so list can be used by search
                         choices.forEach(function(choice) {
