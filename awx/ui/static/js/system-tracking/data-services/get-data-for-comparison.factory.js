@@ -9,7 +9,7 @@ export default
         'getModuleOptions',
         'resolveVersions',
         'lodashAsPromised',
-        function(factScanDataService, getModuleOptions, resolveVersions) {
+        function(factScanDataService, getModuleOptions, resolveVersions, _) {
             return function(hostIds, moduleName, leftDate, rightDate) {
 
                 var moduleOptions;
@@ -29,31 +29,28 @@ export default
                      }
                     ];
 
-                return getModuleOptions(hostIds[0])
-                    .then(function(modules) {
-                        moduleOptions = modules;
-                        return hostVersionParams;
-                    }).thenMap(function(versionParam) {
-                        var versionWithRequest =
-                            [   versionParam,
-                                factScanDataService.
-                                 getVersion(versionParam)
-                            ];
+                return _(hostVersionParams)
+                        .map(function(versionParam) {
+                            var versionWithRequest =
+                                [   versionParam,
+                                    factScanDataService.
+                                     getVersion(versionParam)
+                                ];
 
-                        return versionWithRequest;
-                    }).thenAll(function(versions) {
-                        return resolveVersions(versions);
-                    }, true)
-                    .thenMap(function(versionData) {
-                        if (versionData) {
-                            return factScanDataService.getFacts(versionData);
-                        } else {
-                            return { fact: [] };
-                        }
-                    })
-                    .thenAll(function(hostFacts) {
-                        return [moduleOptions, hostFacts];
-                    });
+                            return versionWithRequest;
+                        }).thenAll(function(versions) {
+                            return resolveVersions(versions);
+                        }, true)
+                        .thenMap(function(versionData) {
+                            if (versionData) {
+                                return factScanDataService.getFacts(versionData);
+                            } else {
+                                return { fact: [] };
+                            }
+                        })
+                        .thenAll(function(hostFacts) {
+                            return [moduleOptions, hostFacts];
+                        });
             };
         }
     ];

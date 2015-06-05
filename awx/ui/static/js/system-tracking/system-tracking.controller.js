@@ -12,14 +12,16 @@ function controller($rootScope,
                     $routeParams,
                     $location,
                     $q,
-                    initialFactData,
+                    moduleOptions,
                     getDataForComparison,
                     waitIndicator,
                     moment,
                     _) {
+
     // var inventoryId = $routeParams.id;
     var hostIds = $routeParams.hosts.split(',');
     var hosts = $routeParams.model.hosts;
+    var moduleParam = $routeParams.module || 'packages';
 
     $scope.hostIds = $routeParams.hosts;
     $scope.inventory = $routeParams.model.inventory;
@@ -27,18 +29,18 @@ function controller($rootScope,
     $scope.factModulePickersLabelLeft = "Compare facts collected on or before";
     $scope.factModulePickersLabelRight = "To facts collected on or before";
 
-    $scope.modules = initialFactData.moduleOptions;
+    $scope.modules = moduleOptions;
+
+    var leftSearchRange = searchDateRange('yesterday');
+    var rightSearchRange = searchDateRange();
 
     var searchConfig =
-        {   leftRange: initialFactData.leftSearchRange,
-            rightRange: initialFactData.rightSearchRange
+        {   leftRange: leftSearchRange,
+            rightRange: rightSearchRange
         };
 
-    $scope.leftDate = initialFactData.leftSearchRange.from;
-    $scope.rightDate = initialFactData.rightSearchRange.from;
-
-    $scope.leftScanDate = initialFactData.leftScanDate;
-    $scope.rightScanDate = initialFactData.rightScanDate;
+    $scope.leftDate = leftSearchRange.from;
+    $scope.rightDate = rightSearchRange.from;
 
     $scope.leftHostname = hosts[0].name;
     $scope.rightHostname = hosts.length > 1 ? hosts[1].name : hosts[0].name;
@@ -53,91 +55,86 @@ function controller($rootScope,
         var activeModule = searchConfig.module;
 
 
-        if (!factData) {
-            factData =
-                getDataForComparison(
+        waitIndicator('start');
+
+        return getDataForComparison(
                             hostIds,
                             activeModule.name,
                             leftRange,
                             rightRange)
-                    .then(function(factDataAndModules) {
-                        var responses = factDataAndModules[1];
-                        var data = _.pluck(responses, 'fact');
+                .then(function(factDataAndModules) {
+                    var responses = factDataAndModules[1];
+                    var data = _.pluck(responses, 'fact');
 
-                        $scope.leftScanDate = moment(responses[0].timestamp);
-                        $scope.rightScanDate = moment(responses[1].timestamp);
+                    $scope.leftScanDate = moment(responses[0].timestamp);
+                    $scope.rightScanDate = moment(responses[1].timestamp);
 
-                        return data;
-                    }, true);
-        }
+                    return data;
+                })
 
-        waitIndicator('start');
+                .then(function(facts) {
+                    // Make sure we always start comparison against
+                    // a non-empty array
+                    //
+                    // Partition with _.isEmpty will give me an array
+                    // with empty arrays in index 0, and non-empty
+                    // arrays in index 1
+                    //
 
-        return _(factData)
-            .promise()
-            .then(function(facts) {
-                // Make sure we always start comparison against
-                // a non-empty array
-                //
-                // Partition with _.isEmpty will give me an array
-                // with empty arrays in index 0, and non-empty
-                // arrays in index 1
-                //
+                    // Save the position of the data so we
+                    // don't lose it later
 
-                // Save the position of the data so we
-                // don't lose it later
+                    facts[0].position = 'left';
+                    facts[1].position = 'right';
 
-                facts[0].position = 'left';
-                facts[1].position = 'right';
+                    var splitFacts = _.partition(facts, _.isEmpty);
+                    var emptyScans = splitFacts[0];
+                    var nonEmptyScans = splitFacts[1];
+                    var result;
 
-                var splitFacts = _.partition(facts, _.isEmpty);
-                var emptyScans = splitFacts[0];
-                var nonEmptyScans = splitFacts[1];
-                var result;
+                    if (_.isEmpty(nonEmptyScans)) {
+                        // we have NO data, throw an error
+                        result = _.reject({
+                            name: 'NoScanData',
+                            message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
+                            dateValues:
+                                {   leftDate: $scope.leftDate.clone(),
+                                    rightDate: $scope.rightDate.clone()
+                                }
+                        });
+                    } else if (nonEmptyScans.length === 1) {
+                        // one of them is not empty, throw an error
+                        result = _.reject({
+                            name: 'InsufficientScanData',
+                            message: 'No scans ran on one of the selected dates. Please try selecting a different date.',
+                            dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
+                        });
+                    } else {
+                        result = _.promise(facts);
+                    }
 
-                if (_.isEmpty(nonEmptyScans)) {
-                    // we have NO data, throw an error
-                    result = _.reject({
-                        name: 'NoScanData',
-                        message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
-                        dateValues:
-                            {   leftDate: $scope.leftDate.clone(),
-                                rightDate: $scope.rightDate.clone()
-                            }
-                    });
-                } else if (nonEmptyScans.length === 1) {
-                    // one of them is not empty, throw an error
-                    result = _.reject({
-                        name: 'InsufficientScanData',
-                        message: 'No scans ran on one of the selected dates. Please try selecting a different date.',
-                        dateValue: emptyScans[0].position === 'left' ? $scope.leftDate.clone() : $scope.rightDate.clone()
-                    });
-                } else {
-                    result = _.promise(facts);
-                }
+                    delete facts[0].position;
+                    delete facts[1].position;
 
-                delete facts[0].position;
-                delete facts[1].position;
+                    // all scans have data, rejoice!
+                    return result;
 
-                // all scans have data, rejoice!
-                return result;
+                })
+                .then(_.partial(compareFacts, activeModule))
+                .then(function(info) {
 
-            })
-            .then(_.partial(compareFacts, activeModule))
-            .then(function(info) {
+                    // Clear out any errors from the previous run...
+                    $scope.error = null;
 
-                // Clear out any errors from the previous run...
-                $scope.error = null;
+                    $scope.factData =  info;
 
-                $scope.factData =  info;
+                    return info;
 
-                return info;
-
-            }).catch(function(error) {
-                $scope.error = error;
-            }).finally(function() {
-                waitIndicator('stop');
-            });
+                }).catch(function(error) {
+                    $scope.error = error;
+                }).finally(function() {
+                    waitIndicator('stop');
+                });
     }
 
     $scope.setActiveModule = function(newModuleName, initialData) {
@@ -183,7 +180,7 @@ function controller($rootScope,
 
     $scope.$watch('rightDate', dateWatcher('rightRange'), true);
 
-    $scope.setActiveModule(initialFactData.moduleName, initialFactData);
+    $scope.setActiveModule(moduleParam);
 }
 
 export default
@@ -192,7 +189,7 @@ export default
         '$routeParams',
         '$location',
         '$q',
-        'factScanData',
+        'moduleOptions',
         'getDataForComparison',
         'Wait',
         'moment',

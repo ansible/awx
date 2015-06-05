@@ -4,8 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import {searchDateRange} from './search-date-range';
-import moment from 'tower/shared/moment/moment';
 
 export default {
     name: 'systemTracking',
@@ -14,41 +12,16 @@ export default {
     templateUrl: '/static/js/system-tracking/system-tracking.partial.html',
     reloadOnSearch: false,
     resolve: {
-            factScanData:
-                [   'getDataForComparison',
+            moduleOptions:
+                [   'getModuleOptions',
                     'lodashAsPromised',
                     '$route',
-                    '$location',
-                    function(getDataForComparison, _, $route, $location) {
+                    function(getModuleOptions, _, $route) {
                     var hostIds = $route.current.params.hosts.split(',');
-                    var moduleParam = $location.search().module || 'packages';
-
-                    var leftDate = searchDateRange('yesterday');
-                    var rightDate = searchDateRange();
-
-                    if (hostIds.length === 1) {
-                        hostIds = hostIds.concat(hostIds[0]);
-                    }
 
                     var data =
-                        getDataForComparison(hostIds, moduleParam, leftDate, rightDate).
-                            then(function(factDataAndModules) {
-                                var moduleOptions = factDataAndModules[0];
-                                var factResponses = factDataAndModules[1];
-                                var factData = _.pluck(factResponses, 'fact');
-
-                                factData.leftSearchRange = leftDate;
-                                factData.rightSearchRange = rightDate;
-
-                                factData.leftScanDate = moment(factResponses[0].timestamp);
-                                factData.rightScanDate = moment(factResponses[1].timestamp);
-
-                                factData.moduleName = moduleParam;
-                                factData.moduleOptions = moduleOptions;
-
-                                return factData;
-                            }, true)
-                        .value();
+                        getModuleOptions(hostIds[0])
+                            .value();
 
                     return data;
 
