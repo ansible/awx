@@ -62,8 +62,7 @@ function controller($rootScope,
                             activeModule.name,
                             leftRange,
                             rightRange)
-                .then(function(factDataAndModules) {
-                    var responses = factDataAndModules[1];
+                .then(function(responses) {
                     var data = _.pluck(responses, 'fact');
 
                     $scope.leftScanDate = moment(responses[0].timestamp);
@@ -126,7 +125,8 @@ function controller($rootScope,
                     // Clear out any errors from the previous run...
                     $scope.error = null;
 
-                    $scope.factData =  info;
+                    $scope.factData =  info.factData;
+                    $scope.isNestedDisplay = info.isNestedDisplay;
 
                     return info;
 

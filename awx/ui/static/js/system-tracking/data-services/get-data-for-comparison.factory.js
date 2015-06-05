@@ -12,8 +12,6 @@ export default
         function(factScanDataService, getModuleOptions, resolveVersions, _) {
             return function(hostIds, moduleName, leftDate, rightDate) {
 
-                var moduleOptions;
-
                 if (hostIds.length === 1) {
                     hostIds = hostIds.concat(hostIds[0]);
                 }
@@ -49,7 +47,7 @@ export default
                             }
                         })
                         .thenAll(function(hostFacts) {
-                            return [moduleOptions, hostFacts];
+                            return hostFacts;
                         });
             };
         }

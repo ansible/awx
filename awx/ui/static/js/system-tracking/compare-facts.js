@@ -20,6 +20,11 @@ export function compareFacts(module, facts) {
         return _(leftToRight)
                     .concat(rightToLeft)
                     .unique('displayKeyPath')
+                    .thru(function(result) {
+                        return  {   factData: result,
+                                    isNestedDisplay: _.isUndefined(module.factTemplate)
+                                };
+                    })
                     .value();
     }
 }
