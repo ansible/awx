@@ -22,7 +22,21 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         form = AdhocForm,
         master = {},
         id = $routeParams.inventory_id,
-        choicesReadyCount = 0;
+        choicesReadyCount = 0,
+        data;
+
+    $scope.inv_id = id;
+
+    Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+    Rest.get(data)
+        .success(function (data) {
+             $scope.inv_name = data.name;
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                msg: 'Failed to get inventory name. POST returned ' +
+                    'status: ' + status });
+        });
 
     // inject the adhoc command form
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
