@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:License
@@ -209,119 +209,6 @@ export default
                 }
 
                 $location.path('/license');
-                // html = this.getHTML(license);
-                // $('#license-modal-dialog').html(html.body);
-                //
-                // scope.flashMessage = null;
-                // scope.parseType = 'json';
-                //
-                // scope.removeLicenseDialogReady = scope.$on('LicenseDialogReady', function() {
-                //     $('#license_license_json').attr('ng-required' , 'true' );
-                //     $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
-                //     $('#license-submit-button').attr('ng-disabled' , "license_form.$invalid" );
-                //     var e = angular.element(document.getElementById('license-modal-dialog'));
-                //     $compile(e)(scope);
-                //     e = angular.element(document.getElementById('license-submit-button'));
-                //     $compile(e)(scope);
-                //     $('#license-modal-dialog').dialog('open');
-                // });
-                //
-                // scope.submitLicenseKey = function() {
-                //     self.postLicense(scope.license_json);
-                // };
-                //
-                // if (IsAdmin()) {
-                //     buttons = [{
-                //         label: "Cancel",
-                //         onClick: function() {
-                //             $('#license-modal-dialog').dialog('close');
-                //         },
-                //         "class": "btn btn-default",
-                //         "id": "license-cancel-button"
-                //     }, {
-                //         label: "Submit",
-                //         onClick: function() {
-                //             scope.submitLicenseKey();
-                //         },
-                //         "class": "btn btn-primary",
-                //         "id": "license-submit-button"
-                //     }];
-                // } else {
-                //     buttons = [{
-                //         label: "OK",
-                //         onClick: function() {
-                //             $('#license-modal-dialog').dialog('close');
-                //         },
-                //         "class": "btn btn-primary",
-                //         "id": "license-ok-button"
-                //     }];
-                // }
-                //
-                // height = (IsAdmin()) ? 675 : 350;
-                //
-                // if (scope.removeLicenseReady) {
-                //     scope.removeLicenseReady();
-                // }
-                // scope.removeLicenseReady = scope.$on('LicenseReady', function(e, data) {
-                //
-                //     scope.license_json = "";
-                //     scope.eula = data.eula;
-                //     if (data.license_info && data.license_info.valid_key !== undefined) {
-                //         scope.license_json = JSON.stringify(data.license_info, null, ' ');
-                //     }
-                //
-                //     CreateDialog({
-                //         scope: scope,
-                //         buttons: buttons,
-                //         width: 675,
-                //         height: height,
-                //         minWidth: 400,
-                //         title: html.title,
-                //         id: 'license-modal-dialog',
-                //         clonseOnEscape: false,
-                //         onClose: function() {
-                //             if (scope.codeMirror) {
-                //                 scope.codeMirror.destroy();
-                //             }
-                //             $('#license-modal-dialog').empty();
-                //         },
-                //         onResizeStop: function() {
-                //             if (IsAdmin()) {
-                //                 TextareaResize({
-                //                     scope: scope,
-                //                     textareaId: 'license_license_json',
-                //                     modalId: 'license-modal-dialog',
-                //                     formId: 'license-notification-body',
-                //                     fld: 'license_json',
-                //                     parse: true,
-                //                     onChange: function() { scope.license_json_api_error = ''; }
-                //                 });
-                //             }
-                //         },
-                //         onOpen: function() {
-                //             if (IsAdmin()) {
-                //                 setTimeout(function() {
-                //                     TextareaResize({
-                //                         scope: scope,
-                //                         textareaId: 'license_license_json',
-                //                         modalId: 'license-modal-dialog',
-                //                         formId: 'license-notification-body',
-                //                         fld: 'license_json',
-                //                         parse: true,
-                //                         onChange: function() { scope.license_json_api_error = ''; }
-                //                     });
-                //                     $('#cm-license_json-container .CodeMirror textarea').focus();
-                //                 }, 300);
-                //             } else {
-                //                 $('#license-ok-button').focus();
-                //             }
-                //         },
-                //         callback: 'LicenseDialogReady'
-                //     });
-                // });
-                //
-                // self.GetLicense('LicenseReady');
-
             },
 
             GetLicense: function(callback, inScope) {
