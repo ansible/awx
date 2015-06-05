@@ -23,7 +23,8 @@ RUN mkdir -p /data/db
 ADD license /etc/awx/license
 ADD license /etc/tower/license
 RUN /etc/init.d/postgresql start; cd /tower ; make migrate ; make init ; /etc/init.d/postgresql stop
-ADD start_local.sh /start_local.sh
+ADD start_everything.sh /start_everything.sh
+ADD start_development.sh /start_development.sh
 
 EXPOSE 8013 8080 27017
-CMD ./start_local.sh
+CMD /start_development.sh
