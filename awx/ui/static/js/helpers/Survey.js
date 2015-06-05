@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:Survey
@@ -285,7 +285,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
 
             required = (question.required===true) ? "prepend-asterisk" : "";
-            html = '<div class="question_title col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
+            html = '<div class="question_title col-xs-12">';
+            html += '<label for="'+question.variable+'"><span class="label-text '+required+'"> '+question.question_name+'</span></label>';
+            html += '</div>';
+
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
@@ -326,12 +329,16 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             if(question.type === 'password'){
               defaultValue = (question.default) ? question.default : "";
-              defaultValue = $filter('defaultValue')(choices[i]);
+              defaultValue = $filter('sanitize')(defaultValue);
               defaultValue = scope.serialize(defaultValue);
               html+='<div class="row">'+
-                  '<div class="col-xs-8">'+
-                  '<input type="password" value="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
-                  '</div></div>';
+                  ' <div class="col-xs-8 input_area input-group">'+
+                  '<span class="input-group-btn">'+
+                  '<button class="btn btn-default survey-maker-password" id="'+question.variable+'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
+                  '</span>'+
+                  '<input id="'+ question.variable +'" type="password" ng-model="default_password" name="'+ question.variable +'" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false" readonly>'+
+                  '</div>'+
+                  '</div>';
             }
 
             if(question.type === 'integer'){
@@ -925,7 +932,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     }
 
                     //set the data.default depending on which type
-                    if (scope.type.type === 'text') {
+                    if (scope.type.type === 'text' || scope.type.type === 'multiplechoice') {
                         data.default = scope.default;
                     } else if (scope.type.type === 'textarea') {
                         data.default = scope.default_textarea;
@@ -985,7 +992,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.resetForm = function(){
                 html = '<div class="row">'+
                         '<div class="col-sm-12">'+
-                        '<label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
+                        '<label for="survey"><span class="label-text prepend-asterisk"> Questions</span></label>'+
                         '<div id="survey_maker_question_area"></div>'+
                         '<div id="finalized_questions"></div>'+
                         '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  New Question</button>'+
@@ -1024,6 +1031,20 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to add new survey. POST returned status: ' + status });
                         });
+                }
+            };
+
+            //for toggling the input on password inputs
+            scope.toggleInput = function(id) {
+                var buttonId = id + "_show_input_button",
+                    inputId = id,
+                    buttonInnerHTML = $(buttonId).html();
+                if (buttonInnerHTML.indexOf("ABC") > -1) {
+                    $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                    $(inputId).attr("type", "text");
+                } else {
+                    $(buttonId).html("ABC");
+                    $(inputId).attr("type", "password");
                 }
             };
 

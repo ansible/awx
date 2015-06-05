@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Questions
@@ -36,27 +36,14 @@ export default
                 realName: 'question_description',
                 label: 'Description',
                 type: 'text',
-                // rows: 2,
                 addRequired: false,
                 editRequired: false,
                 column: 1
             },
-            // variable: {
-            //     label: 'Answer Variable Name',
-            //     type: 'text',
-            //     addRequired: true,
-            //     editRequired: true,
-            //     column: 1,
-            //     awPopOver: '<p>The suggested format for variable names are lowercase, underscore-separated descriptive nouns.</p>'+
-            //                 '<p>For example: <br>foo_bar<br>\n user_id<br>\n host_name<br>' ,
-            //     dataTitle: 'Answer Variable Name',
-            //     dataPlacement: 'right',
-            //     dataContainer: "body"
-            // },
             variable: {
                 ealName: 'variable',
                 type: 'custom',
-                control:'<label for="variable"><span class="label-text prepend-asterisk">Answer Variable Name</span>'+
+                control:'<label for="variable"><span class="label-text prepend-asterisk"> Answer Variable Name</span>'+
                     '<a id="awp-variable" href="" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-separated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
                     'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
                     'data-placement="right" data-container="body" data-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
@@ -274,12 +261,15 @@ export default
             default_password: {
                 realName: 'default_answer' ,
                 type: 'custom' ,
-                control: '<div class="form-group" >'+
-                    '<label for="default"><span class="label-text">Default Password</span></label>'+
+                control: '<div class="form-group">'+
+                    '<label for="default_password"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
-                    '<input type="password" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-hide="pwcheckbox">'+
-                    '<input type="text" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-show="pwcheckbox">'+
-                    '<label style="font-weight:normal"><input type="checkbox" ng-model="pwcheckbox" name="pwcheckbox" id="survey_question_pwcheckbox" ng-checked="false"> <span>Show Password</span></label>'+
+                    '<div class="input-group">'+
+                    '<span class="input-group-btn">'+
+                    '<button class="btn btn-default" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">ABC</button>'+
+                    '</span>'+
+                    '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false">'+
+                    '</div>'+
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
                     '<div class="error ng-hide" id=survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                     '<div class="error api-error ng-binding" id="survey_question-default-password-api-error" ng-bind="default_api_error"></div>'+
@@ -305,7 +295,7 @@ export default
             },
             submit_question: {
                 ngClick: 'submitQuestion($event)',
-                ngDisabled: true, //'survey_question.$valid', //"!question_name || !variable || !type || ((type.type==='multiplechoice' || type.type === 'multiselect' ) && !choices)", //|| type.type===multiselect ',//'!question_name || !variable || !type' ,
+                ngDisabled: true,
                 'class': 'btn btn-sm btn-primary',
                 label: 'Add Question'
             }

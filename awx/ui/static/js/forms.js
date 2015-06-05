@@ -28,7 +28,6 @@ import Permissions from "tower/forms/Permissions";
 import ProjectStatus from "tower/forms/ProjectStatus";
 import Projects from "tower/forms/Projects";
 import Source from "tower/forms/Source";
-import SurveyMaker from "tower/forms/SurveyMaker";
 import SurveyQuestion from "tower/forms/SurveyQuestion";
 import Teams from "tower/forms/Teams";
 import Users from "tower/forms/Users";
@@ -59,7 +58,6 @@ export
         ProjectStatus,
         Projects,
         Source,
-        SurveyMaker,
         SurveyQuestion,
         Teams,
         Users
