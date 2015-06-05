@@ -9,8 +9,8 @@
             <i class="fa fa-rocket
                 DashboardJobTemplates-launch"
                 ng-click="launchJobTemplate(job_template.id)"></i>
-            <a href="#/job_templates/{{ job_template.id }}" class="DashboardJobTemplates-name">
-                {{ job_template.name }}
+            <a href="#/job_templates/{{ job_template.id }}" class="DashboardJobTemplates-nameContainer">
+                <span class="DashboardJobTemplates-name">{{ job_template.name }}</span>
             </a>
             <aw-smart-status jobs="job_template.recent_jobs" class="DashboardJobTemplates-smartStatus"></aw-smart-status>
         </div>

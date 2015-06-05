@@ -45,6 +45,7 @@
     padding-bottom: 9px;
     padding-top: 7px;
     align-items: center;
+    word-break: break-all;
 }
 
 .DashboardJobs-status {
@@ -65,13 +66,16 @@
     text-align: right;
     margin-bottom: 0px;
     margin-left: 10px;
-    color: #000;
+    color: #6f6f6f;
 }
 
 .DashboardJobs-itemLink:hover {
-    .DashboardJobs-nameContainer,
+    .DashboardJobs-nameContainer {
+        color: #2a6496;
+    }
+
     .DashboardJobs-time {
-        font-weight: 600;
+        color: #000;
     }
 
     .DashboardJobs-status--success {

@@ -30,7 +30,7 @@
     padding-bottom: 7px;
     padding-top: 5px;
     border-bottom: 1px solid #a9a9a9;
-    align-items: center;
+    align-items: stretch;
 }
 
 .DashboardJobTemplates-item--snapRows {
@@ -65,18 +65,22 @@
     flex: initial;
     width: 88px;
     margin-left: 10px;
+    align-self: center;
 }
 
 .DashboardJobTemplates-name {
+    max-width: 100%;
+    word-break: break-all;
+}
+
+.DashboardJobTemplates-nameContainer {
     flex: 1;
 }
 
 .DashboardJobTemplates-name:hover {
-    font-weight: 700;
     color: #2a6496;
     cursor: pointer;
 }
-
 
 .DashboardJobTemplates-launch {
     font-size: 25px;
@@ -86,6 +90,7 @@
     color: #1778c3;
     margin-right: 13px;
     flex: initial;
+    align-self: center;
 }
 
 .DashboardJobTemplates-launch:hover {
@@ -102,7 +107,7 @@
         padding-top: 7px;
     }
 
-    .DashboardJobTemplates-name {
+    .DashboardJobTemplates-nameContainer {
         font-size:19px;
         border-left: 1px solid #a9a9a9;
         padding-left: 14px;
