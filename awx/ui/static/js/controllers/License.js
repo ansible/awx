@@ -146,7 +146,7 @@ export function LicenseController(ClearScope, $location, $rootScope, $compile, $
             $('#license_license_json').attr('ng-required' , 'true' );
             $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
             $('#license_form_submit_btn').attr('ng-disabled' , "license_form.$invalid" );
-            var e = angular.element(document.getElementById('license-modal-dialog'));
+            e = angular.element(document.getElementById('license-modal-dialog'));
             $compile(e)($scope);
 
             if (IsAdmin()) {
