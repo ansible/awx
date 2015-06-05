@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:LicenseUpdate
@@ -21,6 +21,7 @@ export default
                 license_json: {
                     label: 'License File',
                     type: 'textarea',
+                    'class' : 'prepend-asterisk',
                     addRequired: true,
                     editRequired: true,
                     rows: 10,
@@ -31,6 +32,7 @@ export default
                     type: 'textarea',
                     addRequired: true,
                     editRequired: true,
+                    'class' : 'prepend-asterisk',
                     rows: 5,
                     readonly: true
                 },
