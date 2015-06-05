@@ -340,8 +340,13 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
         selectCount++;
         if (selectCount === 2) {
+            var verbosity;
             // this sets the default options for the selects as specified by the controller.
-            $scope.verbosity = $scope.verbosity_options[$scope.verbosity_field.default];
+            for (verbosity in $scope.verbosity_options) {
+                if ($scope.verbosity_options[verbosity].isDefault) {
+                    $scope.verbosity = $scope.verbosity_options[verbosity];
+                }
+            }
             $scope.job_type = $scope.job_type_options[$scope.job_type_field.default];
 
             // if you're getting to the form from the scan job section on inventories,

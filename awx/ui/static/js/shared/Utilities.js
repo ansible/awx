@@ -765,8 +765,9 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             Rest.setUrl(url);
             Rest.options()
                 .success(function (data) {
-                    var choices;
+                    var choices, defaultChoice;
                     choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
+                    defaultChoice = data.actions.POST[field].default;
                     if (choices) {
                         // including 'name' property so list can be used by search
                         choices.forEach(function(choice) {
@@ -776,6 +777,14 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                                 name: choice[1]
                             });
                         });
+                    }
+                    if (defaultChoice !== undefined) {
+                        var val;
+                        for (val in scope[variable]) {
+                            if (scope[variable][val].value === defaultChoice) {
+                                scope[variable][val].isDefault = true;
+                            }
+                        }
                     }
                     if (callback) {
                         scope.$emit(callback);

@@ -80,8 +80,13 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         choicesReadyCount++;
 
         if (choicesReadyCount === 2) {
+            var verbosity;
             // this sets the default options for the selects as specified by the controller.
-            $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
+            for (verbosity in $scope.adhoc_verbosity_options) {
+                if ($scope.adhoc_verbosity_options[verbosity].isDefault) {
+                    $scope.verbosity = $scope.adhoc_verbosity_options[verbosity];
+                }
+            }
             $("#forks-number").spinner("value", $scope.forks_field.default);
             $scope.forks = $scope.forks_field.default;
             Wait('stop'); // END: form population
