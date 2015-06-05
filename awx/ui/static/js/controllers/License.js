@@ -143,14 +143,11 @@ export function LicenseController(ClearScope, $location, $rootScope, $compile, $
                 $('#license_tabs li:eq(2) a').tab('show');
             }
 
-            setTimeout(function() {
-                $('#license_license_json').attr('ng-required' , 'true' );
-                $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
-                $('#license_form_submit_btn').attr('ng-disabled' , "license_form.$invalid" );
-                var e = angular.element(document.getElementById('license-modal-dialog'));
-                $compile(e)($scope);
-                // $('#license-modal-dialog').dialog('open');
-            }, 300);
+            $('#license_license_json').attr('ng-required' , 'true' );
+            $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
+            $('#license_form_submit_btn').attr('ng-disabled' , "license_form.$invalid" );
+            var e = angular.element(document.getElementById('license-modal-dialog'));
+            $compile(e)($scope);
 
             if (IsAdmin()) {
                 setTimeout(function() {
