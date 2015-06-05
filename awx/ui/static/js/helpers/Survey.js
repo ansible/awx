@@ -332,9 +332,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
               defaultValue = $filter('sanitize')(defaultValue);
               defaultValue = scope.serialize(defaultValue);
               html+='<div class="row">'+
-                  '<div class="col-xs-8">'+
-                  '<input type="password" value="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
-                  '</div></div>';
+                  ' <div class="col-xs-8 input_area input-group">'+
+                  '<span class="input-group-btn">'+
+                  '<button class="btn btn-default survey-maker-password" id="'+question.variable+'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
+                  '</span>'+
+                  '<input id="'+ question.variable +'" type="password" ng-model="default_password" name="'+ question.variable +'" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false" readonly>'+
+                  '</div>'+
+                  '</div>';
             }
 
             if(question.type === 'integer'){
