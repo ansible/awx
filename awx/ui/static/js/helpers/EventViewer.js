@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:EventViewer
