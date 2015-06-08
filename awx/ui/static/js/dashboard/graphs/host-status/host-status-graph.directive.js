@@ -56,7 +56,7 @@ function HostStatusGraph($compile, $window, adjustGraphSize) {
                     data = [
                         {   "label": "Successful",
                             "color": "#60D66F",
-                            "value" : data.hosts.total
+                            "value" : data.hosts.total - data.hosts.failed
                         } ,
                         {   "label": "Failed",
                             "color" : "#ff5850",
