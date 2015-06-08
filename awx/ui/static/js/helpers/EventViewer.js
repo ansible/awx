@@ -497,6 +497,9 @@ export default
                                     // only show cmd if it's a cmd that was run
                                     if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
                                         // include the label head Shell Command instead of CMD in the modal
+                                        if(typeof(obj[key]) === 'string'){
+                                            obj[key] = [obj[key]];
+                                        }
                                         string_cmd += obj[key].join(" ");
                                         h = parseItem(string_cmd, key, "Shell Command");
                                         if (h) {
@@ -506,6 +509,9 @@ export default
                                     }
                                 } else if (key === 'warnings') {
                                     if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
+                                        if(typeof(obj[key]) === 'string'){
+                                            obj[key] = [obj[key]];
+                                        }
                                         string_warnings += obj[key].join(" ");
                                         h = parseItem(string_warnings, key, "Warnings");
                                         if (h) {
