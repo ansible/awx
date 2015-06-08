@@ -697,15 +697,13 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
               "select2/dropdown",
               "select2/dropdown/attachContainer",
               "select2/dropdown/search",
-            ], function (Utils, DropdownAdapter, AttachContainer) {
-
-                AttachContainer.prototype.bind = function(decorated, container, $container) {
-                  // Just pass the call through to the decorated class
-                  decorated.call(this, container, $container);
-                };
+          ], function (Utils, DropdownAdapter, AttachContainer, DropdownSearch) {
 
                 var CustomAdapter = Utils.Decorate(
-                      DropdownAdapter,
+                    Utils.Decorate(
+                        DropdownAdapter,
+                        DropdownSearch
+                    ),
                       AttachContainer
                  );
 
