@@ -31,7 +31,6 @@ class CleanupFacts(object):
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity, module=None):
-        flag_delete_all = False
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         if not fact_oldest:
             return 0
