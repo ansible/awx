@@ -14,7 +14,7 @@ export default ['$route', '$rootScope', function($route, $rootScope) {
             });
 
             scope.$on('$routeChangeSuccess', function(e, nextRoute) {
-                if (nextRoute.$$route.name === routeName) {
+                if (nextRoute.$$route && nextRoute.$$route.name === routeName) {
                     element.addClass('MenuItem--active');
                 } else {
                     element.removeClass('MenuItem--active');

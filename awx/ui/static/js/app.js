@@ -440,6 +440,10 @@ var tower = angular.module('Tower', [
                 }
             }).
 
+            when('/inventories/:inventory_id/job_templates/', {
+                redirectTo: '/inventories/:inventory_id'
+            }).
+
             when('/inventories/:inventory_id/job_templates/:template_id', {
                 name: 'inventoryJobTemplateEdit',
                 templateUrl: urlPrefix + 'partials/job_templates.html',

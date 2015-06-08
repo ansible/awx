@@ -31,53 +31,48 @@ class CleanupFacts(object):
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity, module=None):
-        flag_delete_all = False
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         if not fact_oldest:
             return 0
 
+        kv = {
+            'timestamp__lte': older_than_abs
+        }
+        if module:
+            kv['module'] = module
+
         # Special case, granularity=0x where x is d, w, or y
         # The intent is to delete all facts < older_than_abs
         if granularity == relativedelta():
-            flag_delete_all = True
+            return FactVersion.objects.filter(**kv).order_by('-timestamp').delete()
 
         total = 0
+
         date_pivot = older_than_abs
         while date_pivot > fact_oldest.timestamp:
             date_pivot_next = date_pivot - granularity
+
+            # For the current time window.
+            # Delete all facts expect the fact that matches the largest timestamp.
             kv = {
                 'timestamp__lte': date_pivot
             }
-            if not flag_delete_all:
-                kv['timestamp__gt'] = date_pivot_next
             if module:
                 kv['module'] = module
 
-            version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp')
 
-            if flag_delete_all:
-                total = version_objs.delete()
-                break
-
-            # Transform array -> {host_id} = [<fact_version>, <fact_version>, ...]
-            # TODO: If this set gets large then we can use mongo to transform the data set for us.
-            host_ids = {}
-            for obj in version_objs:
-                k = obj.host.id
-                if k not in host_ids:
-                    host_ids[k] = []
-                host_ids[k].append(obj)
-
-            for k in host_ids:
-                ids = [fact.id for fact in host_ids[k]]
-                fact_ids = [fact.fact.id for fact in host_ids[k]]
-                # Remove 1 entry
-                ids.pop()
-                fact_ids.pop()
-                # delete the rest
-                count = FactVersion.objects.filter(id__in=ids).delete()
-                # FIXME: if this crashes here then we are inconsistent
-                count = Fact.objects.filter(id__in=fact_ids).delete()
+            fact_version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp').limit(1)
+            if fact_version_objs:
+                fact_version_obj = fact_version_objs[0]
+                kv = {
+                    'timestamp__lt': fact_version_obj.timestamp,
+                    'timestamp__gt': date_pivot_next
+                }
+                if module:
+                    kv['module'] = module
+                count = FactVersion.objects.filter(**kv).delete()
+                # FIXME: These two deletes should be a transaction
+                count = Fact.objects.filter(**kv).delete()
                 total += count
 
             date_pivot = date_pivot_next
