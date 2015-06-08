@@ -79,9 +79,6 @@ function controller($rootScope,
                     // arrays in index 1
                     //
 
-                    // Save the position of the data so we
-                    // don't lose it later
-
                     var wrappedFacts =
                         facts.map(function(facts, index) {
                             return {    position: index === 0 ? 'left' : 'right',

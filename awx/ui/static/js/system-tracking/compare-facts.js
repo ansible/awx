@@ -9,7 +9,9 @@ import compareFlatFacts from './compare-facts/flat';
 
 export function compareFacts(module, facts) {
     if (module.displayType === 'nested') {
-        return compareNestedFacts(facts);
+        return {    factData: compareNestedFacts(facts),
+                    isNestedDisplay: true
+               };
     } else {
         // For flat structures we compare left-to-right, then right-to-left to
         // make sure we get a good comparison between both hosts
