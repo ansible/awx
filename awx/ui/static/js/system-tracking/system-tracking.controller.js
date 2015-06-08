@@ -45,11 +45,10 @@ function controller($rootScope,
     $scope.leftHostname = hosts[0].name;
     $scope.rightHostname = hosts.length > 1 ? hosts[1].name : hosts[0].name;
 
-    function reloadData(params, initialData) {
+    function reloadData(params) {
 
         searchConfig = _.assign({}, searchConfig, params);
 
-        var factData = initialData;
         var leftRange = searchConfig.leftRange;
         var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
