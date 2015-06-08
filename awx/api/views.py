@@ -239,7 +239,7 @@ class ApiV1ConfigView(APIView):
         # sure that we have a valid MongoDB to point to, and complain if
         # we do not.
         if ('features' in license_data and 'system_tracking' in license_data['features'] and
-            license_data['features']['system_tracking'] and settings.MONGO_HOST == NotImplemented):
+           license_data['features']['system_tracking'] and settings.MONGO_HOST == NotImplemented):
             return Response({
                 'error': 'This license supports system tracking, which '
                          'requires MongoDB to be installed. Since you are '
