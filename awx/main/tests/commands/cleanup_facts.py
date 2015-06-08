@@ -21,6 +21,7 @@ __all__ = ['CommandTest','CleanupFactsUnitTest', 'CleanupFactsCommandFunctionalT
 class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequired):
     def setUp(self):
         super(CleanupFactsCommandFunctionalTest, self).setUp()
+        self.create_test_license_file()
         self.builder = FactScanBuilder()
         self.builder.add_fact('ansible', TEST_FACT_ANSIBLE)
 
@@ -55,6 +56,10 @@ class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequi
         self.assertEqual(stdout, 'Deleted 25 facts.\n')
 
 class CommandTest(BaseTest):
+    def setUp(self):
+        super(CommandTest, self).setUp()
+        self.create_test_license_file()
+
     @mock.patch('awx.main.management.commands.cleanup_facts.CleanupFacts.run')
     def test_parameters_ok(self, run):
 
