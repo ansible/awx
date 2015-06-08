@@ -1754,6 +1754,10 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # At this point, a credential is gauranteed to exist at serializer.object.credential
+        if not request.user.can_access(Credential, 'read', serializer.object.credential):
+            raise PermissionDenied()
+
         kv = {
             'credential': serializer.object.credential.pk,
         }

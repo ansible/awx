@@ -118,6 +118,13 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
             self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=400)
             self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=400)
 
+    def test_explicit_unowned_cred(self):
+        # Explicitly specify a credential that we don't have access to
+        with self.current_user(self.user_juan):
+            launch_url = reverse('api:job_template_launch',
+                                 args=(self.jt_eng_run.pk,))
+            self.post(launch_url, {'credential_id': self.cred_sue.pk}, expect=403)
+
     def test_no_project_fail(self):
         # Job Templates without projects can not be launched
         with self.current_user(self.user_sue):
