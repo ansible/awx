@@ -485,5 +485,8 @@ packaging/packer/output-virtualbox-iso/centos-7.ovf:
 
 virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
+docker-dev:
+	docker build --no-cache=true --rm=true -t ansible/tower_devel:latest tools/docker
+
 install:
 	$(PYTHON) setup.py install egg_info -b ""
