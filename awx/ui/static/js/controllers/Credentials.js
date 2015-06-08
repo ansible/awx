@@ -249,20 +249,20 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
             $("#" + form.name + "_" + fld + "_input").attr("type", "text");
-            $("#" + form.name + "_" + fld + "_show_input_button").html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+            $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "password");
-                $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
+                $("#" + form.name + "_" + fld + "_show_input_button").html("Show");
                 $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             }
         } else {
             $scope[fld] = '';
             $("#" + form.name + "_" + fld + "_input").attr("type", "password");
-            $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
+            $("#" + form.name + "_" + fld + "_show_input_button").html("Show");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "text");
-                $("#" + form.name + "_" + fld + "_show_input_button").html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
                 $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             }
@@ -308,7 +308,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             if (form.fields[fld].type === 'sensitive' && $scope[fld] === 'ASK') {
                 // turn on 'ask' checkbox for password fields with value of 'ASK'
                 $("#" + form.name + "_" + fld + "_input").attr("type", "text");
-                $("#" + form.name + "_" + fld + "_show_input_button").html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
                 $("#" + fld + "-clear-btn").attr("disabled", "disabled");
                 $scope[fld + '_ask'] = true;
             } else {
@@ -545,7 +545,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
             $("#" + form.name + "_" + fld + "_input").attr("type", "text");
-            $("#" + form.name + "_" + fld + "_show_input_button").html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+            $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "password");
                 $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
@@ -558,7 +558,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "text");
-                $("#" + form.name + "_" + fld + "_show_input_button").html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
                 $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             }

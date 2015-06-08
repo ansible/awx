@@ -870,7 +870,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //fields with sensitive data that needs to be obfuscated from view
                     if (field.type === 'sensitive') {
-                        field.showInputInnerHTML = "ABC";
+                        field.showInputInnerHTML = "Show";
                         field.inputType = "password";
 
                         html += "\t" + label();
@@ -879,11 +879,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 var buttonId = id + "_show_input_button",
                                     inputId = id + "_input",
                                     buttonInnerHTML = $(buttonId).html();
-                                if (buttonInnerHTML.indexOf("ABC") > -1) {
-                                    $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                                if (buttonInnerHTML.indexOf("Show") > -1) {
+                                    $(buttonId).html("Hide");
                                     $(inputId).attr("type", "text");
                                 } else {
-                                    $(buttonId).html("ABC");
+                                    $(buttonId).html("Show");
                                     $(inputId).attr("type", "password");
                                 }
                             };
@@ -892,7 +892,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button class='btn btn-default' ";
+                            html += "<button class='btn btn-default show_input_button' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";

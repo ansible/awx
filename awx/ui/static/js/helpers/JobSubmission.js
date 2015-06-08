@@ -522,11 +522,11 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               var buttonId = id + "_show_input_button",
                   inputId = id,
                   buttonInnerHTML = $(buttonId).html();
-              if (buttonInnerHTML.indexOf("ABC") > -1) {
-                  $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+              if (buttonInnerHTML.indexOf("Show") > -1) {
+                  $(buttonId).html("Hide");
                   $(inputId).attr("type", "text");
               } else {
-                  $(buttonId).html("ABC");
+                  $(buttonId).html("Show");
                   $(inputId).attr("type", "password");
               }
           };
@@ -589,7 +589,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
               html+= '<div class="input-group">'+
                 '<span class="input-group-btn">'+
-                '<button class="btn btn-default" id="'+question.variable +'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
+                '<button class="btn btn-default show_input_button" id="'+question.variable +'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
                 '</span>'+
                 '<input id="'+question.variable+'" type="password" ng-model="'+question.variable+'" name="'+question.variable+'" '+
                 'ng-required="'+question.required+'"'+

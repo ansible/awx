@@ -334,7 +334,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
               html+='<div class="row">'+
                   ' <div class="col-xs-8 input_area input-group">'+
                   '<span class="input-group-btn">'+
-                  '<button class="btn btn-default survey-maker-password" id="'+question.variable+'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
+                  '<button class="btn btn-default survey-maker-password show_input_button" id="'+question.variable+'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
                   '</span>'+
                   '<input id="'+ question.variable +'" type="password" ng-model="default_password" name="'+ question.variable +'" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false" readonly>'+
                   '</div>'+
@@ -1039,11 +1039,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 var buttonId = id + "_show_input_button",
                     inputId = id,
                     buttonInnerHTML = $(buttonId).html();
-                if (buttonInnerHTML.indexOf("ABC") > -1) {
-                    $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                if (buttonInnerHTML.indexOf("Show") > -1) {
+                    $(buttonId).html("Hide");
                     $(inputId).attr("type", "text");
                 } else {
-                    $(buttonId).html("ABC");
+                    $(buttonId).html("Show");
                     $(inputId).attr("type", "password");
                 }
             };

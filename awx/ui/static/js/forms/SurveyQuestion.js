@@ -266,7 +266,7 @@ export default
                     '<div>'+
                     '<div class="input-group">'+
                     '<span class="input-group-btn">'+
-                    '<button class="btn btn-default" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">ABC</button>'+
+                    '<button class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">ABC</button>'+
                     '</span>'+
                     '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false">'+
                     '</div>'+
