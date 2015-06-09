@@ -172,7 +172,7 @@ export default
                             catch(e) {
                                 // ignore
                             }
-                            Alert('License Accepted', 'The Ansible Tower license was updated. To view or update license information in the future choose View License from the Account menu.','alert-info');
+                            Alert('License Accepted', 'The Ansible Tower license was updated. To review or update the license, choose View License from the Setup menu.','alert-info');
                             $rootScope.features = undefined;
                             $location.path('/home');
                         })
