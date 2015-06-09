@@ -93,11 +93,13 @@ class BaseFactTestMixin(MongoDBRequired):
 class BaseFactTest(BaseFactTestMixin, MongoDBRequired):
     pass
 
+# TODO: for now, we relate all hosts to a single inventory
 class FactScanBuilder(object):
 
     def __init__(self):
         self.facts_data = {}
         self.hostname_data = []
+        self.inventory_id = 1
 
         self.host_objs = []
         self.fact_objs = []
@@ -124,7 +126,7 @@ class FactScanBuilder(object):
         if len(self.hostname_data) == 0:
             self.hostname_data = ['hostname_%s' % i for i in range(0, host_count)]
 
-        self.host_objs = [FactHost(hostname=hostname).save() for hostname in self.hostname_data]
+        self.host_objs = [FactHost(hostname=hostname, inventory_id=self.inventory_id).save() for hostname in self.hostname_data]
 
         for i in range(0, scan_count):
             scan = {}
@@ -185,6 +187,12 @@ class FactScanBuilder(object):
             index_end = len(self.host_objs)
 
         return [self.host_objs[i].hostname for i in range(index_start, index_end)]
+
+    def get_inventory_id(self):
+        return self.inventory_id
+
+    def set_inventory_id(self, inventory_id):
+        self.inventory_id = inventory_id
 
     def get_host(self, index):
         return self.host_objs[index]

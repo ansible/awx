@@ -62,12 +62,12 @@ class FactTransformTest(BaseFactTest):
         self.timestamp = datetime.now().replace(microsecond=0)
 
     def setup_create_fact_dot(self):
-        self.host = FactHost(hostname='hosty').save()
+        self.host = FactHost(hostname='hosty', inventory_id=1).save()
         self.f = Fact(timestamp=self.timestamp, module='packages', fact=TEST_FACT_PACKAGES_WITH_DOTS, host=self.host)
         self.f.save()
 
     def setup_create_fact_dollar(self):
-        self.host = FactHost(hostname='hosty').save()
+        self.host = FactHost(hostname='hosty', inventory_id=1).save()
         self.f = Fact(timestamp=self.timestamp, module='packages', fact=TEST_FACT_PACKAGES_WITH_DOLLARS, host=self.host)
         self.f.save()
 
@@ -85,7 +85,7 @@ class FactTransformTest(BaseFactTest):
     def test_fact_with_dot_serialized_pymongo(self):
         #self.setup_create_fact_dot()
 
-        host = FactHost(hostname='hosty').save()
+        host = FactHost(hostname='hosty', inventory_id=1).save()
         f = self.db['fact'].insert({ 
             'hostname': 'hosty',
             'fact': TEST_FACT_PACKAGES_WITH_DOTS,

@@ -34,6 +34,7 @@ class FactCacheReceiver(object):
 
     def process_fact_message(self, message):
         hostname = message['host']
+        inventory_id = message['inventory_id']
         facts_data = message['facts']
         date_key = message['date_key']
 
@@ -43,12 +44,12 @@ class FactCacheReceiver(object):
             return
 
         try:
-            host = FactHost.objects.get(hostname=hostname)
+            host = FactHost.objects.get(hostname=hostname, inventory_id=inventory_id)
         except FactHost.DoesNotExist:
-            host = FactHost(hostname=hostname)
+            host = FactHost(hostname=hostname, inventory_id=inventory_id)
             host.save()
         except FactHost.MultipleObjectsReturned:
-            query = "db['fact_host'].find(hostname=%s)" % hostname
+            query = "db['fact_host'].find(hostname=%s, inventory_id=%s)" % (hostname, inventory_id)
             logger.warn('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
             return
         except Exception, e:
