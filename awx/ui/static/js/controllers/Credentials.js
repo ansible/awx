@@ -548,14 +548,14 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "password");
-                $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
+                $("#" + form.name + "_" + fld + "_show_input_button").html("Show");
                 $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             }
         } else {
             $scope[fld] = '';
             $("#" + form.name + "_" + fld + "_input").attr("type", "password");
-            $("#" + form.name + "_" + fld + "_show_input_button").html("ABC");
+            $("#" + form.name + "_" + fld + "_show_input_button").html("Show");
             if (associated !== "undefined") {
                 $("#" + form.name + "_" + fld + "_input").attr("type", "text");
                 $("#" + form.name + "_" + fld + "_show_input_button").html("Hide");

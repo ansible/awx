@@ -589,7 +589,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
               html+= '<div class="input-group">'+
                 '<span class="input-group-btn">'+
-                '<button class="btn btn-default show_input_button" id="'+question.variable +'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">ABC</button>'+
+                '<button class="btn btn-default show_input_button" id="'+question.variable +'_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#'+question.variable+'&quot;)" data-original-title="" title="">Show</button>'+
                 '</span>'+
                 '<input id="'+question.variable+'" type="password" ng-model="'+question.variable+'" name="'+question.variable+'" '+
                 'ng-required="'+question.required+'"'+
