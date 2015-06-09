@@ -2,6 +2,7 @@
 # All Rights Reserved
 
 import logging
+import sys
 from datetime import datetime
 
 from django.core.management.base import NoArgsCommand
@@ -52,7 +53,7 @@ class FactCacheReceiver(object):
             logger.warn('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
             return
         except Exception, e:
-            logger.error("Exception communicating with Mongo: %s" % str(e))
+            logger.error("Exception communicating with Fact Cache Database: %s" % str(e))
             return
 
         (module, facts) = self.process_facts(facts_data)

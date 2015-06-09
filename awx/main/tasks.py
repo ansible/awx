@@ -43,6 +43,7 @@ from awx.main.queue import FifoQueue
 from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
@@ -436,6 +437,11 @@ class BaseTask(Task):
         else:
             return 'failed', child.exitstatus
 
+    def pre_run_hook(self, instance, **kwargs):
+        '''
+        Hook for any steps to run before the job/task starts
+        '''
+
     def post_run_hook(self, instance, **kwargs):
         '''
         Hook for any steps to run after job/task is complete.
@@ -451,6 +457,7 @@ class BaseTask(Task):
         status, rc, tb = 'error', None, ''
         output_replacements = []
         try:
+            self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
                 instance = self.update_model(instance.pk, status='canceled')
             if instance.status != 'running':
@@ -765,6 +772,14 @@ class RunJob(BaseTask):
         Return whether this task should use proot.
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+    def pre_run_hook(self, job, **kwargs):
+        print("In pre-run")
+        if job.job_type == PERM_INVENTORY_SCAN:
+            print("In scan")
+            if not test_mongo_connection():
+                print("Mongo isn't running")
+                raise RuntimeError("Fact Scan Database is offline")
 
     def post_run_hook(self, job, **kwargs):
         '''
