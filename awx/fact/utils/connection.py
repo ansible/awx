@@ -3,7 +3,7 @@
 
 from django.conf import settings
 from mongoengine import connect
-from mongoengine.connection import get_db, ConnectionError
+from mongoengine.connection import ConnectionError
 
 def test_mongo_connection():
     # Connect to Mongo
