@@ -1,10 +1,28 @@
 /** @define FactDataTable */
 
 .FactDataTable {
-    &-row {
+    &-row, &-headingRow {
         display: flex;
     }
+
+    &-row {
+      margin-bottom: 0.5em;
+      align-items: center;
+      transition: background-color 100ms, border-color 100ms;
+      border: solid 1px transparent;
+      &:hover {
+        background-color: #ebebeb;
+        border-color: #adadad;
+      }
+    }
+
+    &-headingRow {
+      border-bottom: 1px solid #adadad;
+      margin-bottom: 1.5em;
+    }
+
     &-column {
+        padding: 0.5em 0;
         flex: 1;
         &--offsetLeft {
             margin-left: 33%;

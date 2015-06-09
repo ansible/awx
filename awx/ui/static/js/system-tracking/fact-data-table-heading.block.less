@@ -3,19 +3,16 @@
 .FactDataTableHeading {
     display: flex;
     flex-wrap: wrap;
-    font-size: 1.25em;
-    align-items: center;
+    font-size: 1em;
+    align-items: flex-end;
+    font-weight: bold;
 
     &-host {
-        font-size: 0.8em;
         margin-bottom: 3px; // just some breathing room
 
         &:after {
-            font-style: italic;
             content: " scanned on";
-            font-family: merriweather;
             font-weight: 200;
-            font-size: 0.75em;
         }
     }
     &-date {

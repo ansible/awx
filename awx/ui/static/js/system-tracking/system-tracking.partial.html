@@ -41,9 +41,11 @@
         </p>
     </section>
     <section class="FactDataTable SystemTrackingContainer-main" ng-if="!error">
-        <div class="FactDataTable-row">
+        <div class="FactDataTable-headingRow">
             <h3 class="FactDataTable-column FactDataTableHeading">
-              Comparing facts collected from:
+              <span class="FactDataTableHeading-label">
+                Comparing facts collected from:
+              </span>
             </h3>
             <h3 class="FactDataTable-column FactDataTableHeading">
               <span class="FactDataTableHeading-host">{{leftHostname}}</span>
@@ -56,9 +58,9 @@
         </div>
         <div ng-if="!isNestedDisplay">
             <div class="FactDataTable-row" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
-                <p class="FactDataTable-column">{{group.facts.keyName}}</p>
-                <p class="FactDataTable-column">{{group.facts.value1}}</p>
-                <p class="FactDataTable-column">{{group.facts.value2}}</p>
+                <span class="FactDataTable-column">{{group.facts.keyName}}</span>
+                <span class="FactDataTable-column">{{group.facts.value1}}</span>
+                <span class="FactDataTable-column">{{group.facts.value2}}</span>
             </div>
         </div>
         <div ng-if="isNestedDisplay">
