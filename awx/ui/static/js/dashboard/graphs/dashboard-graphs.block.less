@@ -1,5 +1,7 @@
 /** @define DashboardGraphs */
 
+@import "shared/branding/colors.less";
+
 .DashboardGraphs {
     display: flex;
     flex-direction: column;
@@ -16,13 +18,12 @@
 .DashboardGraphs-tab {
     flex: 1;
     padding: 10px;
-    border-right: solid 1px #a9a9a9;
-    border-bottom: solid 1px #a9a9a9;
+    border-right: solid 1px @disabled-item-border;
+    border-bottom: solid 1px @disabled-item-border;
     text-align: center;
     font-size: 20px;
-    background-color: #ccc;
-    color: #545454;
-    background-color: #EAEAEA;
+    color: @disabled-item-text;
+    background-color: @disabled-item-background;
 }
 
 .DashboardGraphs-tab--firstTab {
@@ -40,8 +41,8 @@
 }
 
 .DashboardGraphs-tab.is-selected {
-    background-color: #fff;
-    color: #000;
+    background-color: @enabled-item-background;
+    color: @enabled-item-text;
     border-bottom: 0;
 }
 

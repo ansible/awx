@@ -1,19 +1,28 @@
 /** @define FactModuleFilter */
 
+@import "shared/branding/colors.less";
+
 .FactModuleFilter {
     width: 100%;
     display: flex;
     flex-flow: row wrap;
     margin-bottom: 2.8rem;
+
     &-module {
+
+        background-color: @disabled-item-background;
+        color: @disabled-item-text;
+        border-color: @disabled-item-border;
+
         flex: 1 1 20%;
         @media screen and (max-width: 750px) {
             flex-basis: 50%;
         }
         &--isActive {
             // copied from bootstrap's .btn:focus
-            background-color: #ebebeb;
-            border-color: #adadad;
+            background-color: @enabled-item-background;
+            border-color: @enabled-item-border;
+            color: @enabled-item-text;
             z-index: 2;
         }
     }
