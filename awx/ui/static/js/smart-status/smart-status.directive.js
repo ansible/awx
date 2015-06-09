@@ -51,7 +51,12 @@ export default [  function() {
                     job = sparkline.getCurrentRegionFields(),
                     id;
                 id = sparkline.options.userOptions.tooltipValueLookups.jobs[job.offset];
-                location.href = '/#/jobs/' + id;
+                if(id === undefined){
+                    return;
+                }
+                else {
+                    location.href = '/#/jobs/' + id;
+                }
             });
 
         },
