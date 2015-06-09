@@ -38,8 +38,15 @@ export default
                     instructions = params.instructions,
                     postAction = params.postAction,
                     callback = params.callback,
+                    autopopulateLookup,
                     input_type = (params.input_type) ? params.input_type: "checkbox",
                     defaultUrl, name, watchUrl;
+
+                if (params.autopopulateLookup !== undefined) {
+                    autopopulateLookup = params.autopopulateLookup;
+                } else {
+                    autopopulateLookup = true;
+                }
 
                 if (params.url) {
                     // pass in a url value to override the default
@@ -67,8 +74,11 @@ export default
                     sourceField = form.fields[field].sourceField;
 
                 // this logic makes sure that the form is being added, and that the lookup to be autopopulated is required
+                // we also look to see if the lookupinit autopopulateLookup parameter passed in by the controller is false
                 function fieldIsAutopopulatable() {
-                    if (parent_scope.mode === "add") {
+                    if (autopopulateLookup === false) {
+                        return false;
+                    } if (parent_scope.mode === "add") {
                         if (parent_scope[sourceModel + "_field"].awRequiredWhen &&
                             parent_scope[sourceModel + "_field"].awRequiredWhen.variable &&
                             parent_scope[parent_scope[sourceModel + "_field"].awRequiredWhen.variable]) {
