@@ -257,7 +257,9 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         master = {},
         CloudCredentialList = {},
         selectPlaybook, checkSCMStatus,
-        callback;
+        callback,
+        base = $location.path().replace(/^\//, '').split('/')[0],
+        context = (base === 'job_templates') ? 'job_template' : 'inv';
 
     CallbackHelpInit({ scope: $scope });
     $scope.can_edit = true;
@@ -491,7 +493,8 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         current_item: null,
         list: ProjectList,
         field: 'project',
-        input_type: "radio"
+        input_type: "radio",
+        autopopulateLookup: (context === 'inv') ? false : true 
     });
 
     if ($scope.removeSurveySaved) {
