@@ -1215,18 +1215,16 @@ export default
     .factory('DonutChart', [function() {
         return function(params) {
             var target = params.target,
-                height = params.height,
-                width = params.width,
+                height = Math.max(params.height, 250),
+                width = Math.max(params.width, 250),
                 dataset = params.data,
                 outerRadius = Math.min(width, height) / 2,
                 innerRadius = (outerRadius/3),
-                svg, arc, pie, legend, color,
+                svg, arc, pie, legend,
                 tooltip, path,
                 legendRectSize = 18,
                 legendSpacing = 4;
 
-            color = d3.scale.ordinal()
-                .range(['#60D66F', '#FF9900', '#FF0000', '#ff5850']);
             svg = d3.select(target)
                 .append('svg')
                 .data([dataset])
@@ -1244,24 +1242,18 @@ export default
                 .value(function(d) { return d.value; })
                 .sort(function() {return null; });
 
-            // arcs = svg.selectAll("g.slice")
-            //     .data(pie)
-            //     .enter()
-            //     .append("g")
-            //     .attr("class", "slice");
-
             tooltip = d3.select(target)
                 .append('div')
-                .attr('class', 'tooltip');
+                .attr('class', 'donut-tooltip');
 
             tooltip.append('div')
-                .attr('class', 'label');
+                .attr('class', 'donut-label');
 
             tooltip.append('div')
-                .attr('class', 'count');
+                .attr('class', 'donut-count');
 
             tooltip.append('div')
-                .attr('class', 'percent');
+                .attr('class', 'donut-percent');
 
             path = svg.selectAll('path')
                 .data(pie(dataset))
@@ -1269,7 +1261,7 @@ export default
                 .append('path')
                 .attr('d', arc)
                 .attr('fill', function(d) {
-                  return color(d.data.label);
+                  return d.data.color;
                 });
 
             path.on('mouseenter', function(d) {
@@ -1277,10 +1269,10 @@ export default
                   return d.value;
                 }));
                 var percent = Math.round(1000 * d.data.value / total) / 10;
-                tooltip.select('.label').html(d.data.label)
-                .attr('style', 'color:black');
-                tooltip.select('.count').html(d.data.value);
-                tooltip.select('.percent').html(percent + '%');
+                tooltip.select('.donut-label').html(d.data.label);
+                //.attr('style', 'color:white;font-family:');
+                tooltip.select('.donut-count').html(d.data.value);
+                tooltip.select('.donut-percent').html(percent + '%');
                 tooltip.style('display', 'block');
               });
 
@@ -1288,19 +1280,19 @@ export default
                 tooltip.style('display', 'none');
               });
 
-            // path.on('mousemove', function(d) {
-            //     tooltip.style('top', (d3.event.pageY + 10) + 'px')
-            //     .style('left', (d3.event.pageX + 10) + 'px');
-            // });
+            path.on('mousemove', function() {
+                tooltip.style('top', (d3.mouse(this)[0]+200) + 'px')
+                .style('left', (d3.mouse(this)[0]+200) + 'px');
+            });
 
           legend = svg.selectAll('.legend')
-              .data(color.domain())
+              .data(pie(dataset))
               .enter()
               .append('g')
               .attr('class', 'legend')
               .attr('transform', function(d, i) {
                   var height = legendRectSize + legendSpacing;
-                  var offset =  height * color.domain().length / 2;
+                  var offset =  height * dataset.length / 2;
                   var horz = -2 * legendRectSize;
                   var vert = i * height - offset;
                   return 'translate(' + horz + ',' + vert + ')';
@@ -1309,14 +1301,18 @@ export default
             legend.append('rect')
               .attr('width', legendRectSize)
               .attr('height', legendRectSize)
-              .style('fill', color)
-              .style('stroke', color);
+              .attr('fill', function(d) {
+                return d.data.color;
+              })
+              .attr('stroke', function(d) {
+                return d.data.color;
+              });
 
             legend.append('text')
               .attr('x', legendRectSize + legendSpacing)
               .attr('y', legendRectSize - legendSpacing)
               .text(function(d) {
-                  return d;
+                  return d.data.label;
               });
         };
     }])
