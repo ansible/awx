@@ -11,7 +11,7 @@
 */
 
 
-export function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
+export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
     UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices) {
 
@@ -26,8 +26,101 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         job_type_options;
 
     scope.plays = [];
+
+    scope.$watch('plays', function(plays) {
+        for (var play in plays) {
+            if (plays[play].elapsed) {
+                plays[play].finishedTip = "Play completed at " + $filter("longDate")(plays[play].finished) + ".";
+            } else {
+                plays[play].finishedTip = "Play not completed.";
+            }
+        }
+    });
     scope.hosts = [];
+    scope.$watch('hosts', function(hosts) {
+        for (var host in hosts) {
+            if (hosts[host].ok) {
+                hosts[host].okTip = hosts[host].ok;
+                hosts[host].okTip += (hosts[host].ok === 1) ? " host was" : " hosts were";
+                hosts[host].okTip += " successful during this run.";
+            } else {
+                hosts[host].okTip = "No hosts were successful during this run.";
+            }
+            if (hosts[host].changed) {
+                hosts[host].changedTip = hosts[host].changed;
+                hosts[host].changedTip += (hosts[host].changed === 1) ? " host" : " hosts";
+                hosts[host].changedTip += " changed during this run.";
+            } else {
+                hosts[host].changedTip = "No hosts changed during this run.";
+            }
+            if (hosts[host].failed) {
+                hosts[host].failedTip = hosts[host].failed;
+                hosts[host].failedTip += (hosts[host].failed === 1) ? " host" : " hosts";
+                hosts[host].failedTip += " failed during this run.";
+            } else {
+                hosts[host].failedTip = "No hosts failed during this run.";
+            }
+            if (hosts[host].unreachable) {
+                hosts[host].unreachableTip = hosts[host].unreachable;
+                hosts[host].unreachableTip += (hosts[host].unreachable === 1) ? " host was" : " hosts were";
+                hosts[host].unreachableTip += " unreachable during this run";
+            } else {
+                hosts[host].unreachableTip = "No hosts were unreachable during this run.";
+            }
+        }
+    });
     scope.tasks = [];
+    scope.$watch('tasks', function(tasks) {
+        for (var task in tasks) {
+            if (tasks[task].elapsed) {
+                tasks[task].finishedTip = "Task completed at " + $filter("longDate")(tasks[task].finished) + ".";
+            } else {
+                tasks[task].finishedTip = "Task not completed.";
+            }
+            if (tasks[task].successfulCount) {
+                tasks[task].successfulCountTip = tasks[task].successfulCount;
+                tasks[task].successfulCountTip += (tasks[task].successfulCount === 1) ? " host was" : " hosts were";
+                tasks[task].successfulCountTip += " successful during this run.";
+            } else {
+                tasks[task].successfulCountTip = "No hosts were successful during this run.";
+            }
+            if (tasks[task].changedCount) {
+                tasks[task].changedCountTip = tasks[task].changedCount;
+                tasks[task].changedCountTip += (tasks[task].changedCount === 1) ? " host" : " hosts";
+                tasks[task].changedCountTip += " changed during this run.";
+            } else {
+                tasks[task].changedCountTip = "No hosts changed during this run.";
+            }
+            if (tasks[task].skippedCount) {
+                tasks[task].skippedCountTip = tasks[task].skippedCount;
+                tasks[task].skippedCountTip += (tasks[task].skippedCount === 1) ? " host was" : " hosts were";
+                tasks[task].skippedCountTip += " skipped during this run.";
+            } else {
+                tasks[task].skippedCountTip = "No hosts were skipped during this run.";
+            }
+            if (tasks[task].failedCount) {
+                tasks[task].failedCountTip = tasks[task].failedCount;
+                tasks[task].failedCountTip += (tasks[task].failedCount === 1) ? " host" : " hosts";
+                tasks[task].failedCountTip += " failed during this run.";
+            } else {
+                tasks[task].failedCountTip = "No hosts failed during this run.";
+            }
+            if (tasks[task].unreachableCount) {
+                tasks[task].unreachableCountTip = tasks[task].unreachableCount;
+                tasks[task].unreachableCountTip += (tasks[task].unreachableCount === 1) ? " host was" : " hosts were";
+                tasks[task].unreachableCountTip += " unreachable during this run.";
+            } else {
+                tasks[task].unreachableCountTip = "No hosts were unreachable during this run.";
+            }
+            if (tasks[task].missingCount) {
+                tasks[task].missingCountTip = tasks[task].missingCount;
+                tasks[task].missingCountTip += (tasks[task].missingCount === 1) ? " host was" : " hosts were";
+                tasks[task].missingCountTip += " missing during this run.";
+            } else {
+                tasks[task].missingCountTip = "No hosts were missing during this run.";
+            }
+        }
+    });
     scope.hostResults = [];
 
     scope.hostResultsMaxRows = 200;
@@ -1311,7 +1404,7 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
     };
 }
 
-JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
+JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
     'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices'
