@@ -26,8 +26,8 @@ function controller($rootScope,
     $scope.hostIds = $routeParams.hosts;
     $scope.inventory = $routeParams.model.inventory;
 
-    $scope.factModulePickersLabelLeft = "Compare facts collected on or before";
-    $scope.factModulePickersLabelRight = "To facts collected on or before";
+    $scope.factModulePickersLabelLeft = "Compare latest facts collected on or before";
+    $scope.factModulePickersLabelRight = "To latest facts collected on or before";
 
     $scope.modules = moduleOptions;
 
