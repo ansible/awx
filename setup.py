@@ -129,7 +129,7 @@ setup(
                                     "tools/munin_monitors/redis_alive",
                                     "tools/munin_monitors/socketio_alive",
                                     "tools/munin_monitors/taskmanager_alive",
-                                    "tools/munin_monitors/mongo_cocnn",
+                                    "tools/munin_monitors/mongo_conn",
                                     "tools/munin_monitors/mongo_docs",
                                     "tools/munin_monitors/mongo_mem",
                                     "tools/munin_monitors/mongo_ops"]),
