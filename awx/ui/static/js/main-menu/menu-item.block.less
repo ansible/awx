@@ -118,13 +118,20 @@
       }
   }
 
-  &-username {
+  &--socketStatus {
+      @media screen and (max-width: @menu-breakpoint) {
+          display: none;
+      }
+  }
+
+  &--username {
       padding-right: 0.25rem;
       @media screen and (max-width: @menu-breakpoint) {
           order: 1; // moves this to the bottom
       }
       @media screen and (min-width: (@menu-breakpoint + 1px)) {
           max-width: 110px;
+          margin-left: -3px;
       }
   }
 

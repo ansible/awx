@@ -51,10 +51,10 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 var result = '';
                 switch(status) {
                     case 'error':
-                        result = "Live events: error connecting to the Tower server. Click for troubleshooting help.";
+                        result = "Live events: error connecting to the Tower server.";
                         break;
                     case 'connecting':
-                        result = "Live events: attempting to connect to the Tower server. Click for troubleshooting help.";
+                        result = "Live events: attempting to connect to the Tower server.";
                         break;
                     case "ok":
                         result = "Live events: connected. Pages containing job status information will automatically update in real-time.";
