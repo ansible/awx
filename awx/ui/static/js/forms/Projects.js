@@ -93,8 +93,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'alertblock',
                 "class": 'alert-info',
                 ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
-                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.' +
-                    'Either that directory is empty, or all of the contents are already assigned to other projects.' +
+                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.  ' +
+                    'Either that directory is empty, or all of the contents are already assigned to other projects.  ' +
                     'Create a new directory there and make sure the playbook files can be read by the "awx" system user, ' +
                     'or have Tower directly retrieve your playbooks from source control using the SCM Type option above.</p>',
                 closeable: false
