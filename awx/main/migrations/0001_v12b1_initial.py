@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 AnsibleWorks, Inc.
+# Copyright (c) 2015 Ansible, Inc. (formerly Ansibleworks, Inc.)
 # All Rights Reserved.
 
 import datetime
