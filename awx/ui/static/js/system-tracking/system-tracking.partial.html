@@ -67,7 +67,7 @@
 
             <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
 
-                <div class="FactDataTable-row FactDataGroup-headings" ng-switch="group.nestingLevel">
+                <div class="FactDataTable-groupHeadingRow" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">
                     <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header" ng-switch-when="0">
                         {{group.displayKeyPath}}
                     </h2>

@@ -1,7 +1,7 @@
 /** @define FactDataTable */
 
 .FactDataTable {
-    &-row, &-headingRow {
+    &-row, &-headingRow, &-groupHeadingRow {
         display: flex;
     }
 
@@ -9,7 +9,8 @@
       margin-bottom: 0.5em;
       align-items: center;
       transition: background-color 100ms, border-color 100ms;
-      border: solid 1px transparent;
+      max-height: 36px;
+      border: solid 1px #fff;
       &:hover {
         background-color: #ebebeb;
         border-color: #adadad;
@@ -22,7 +23,7 @@
     }
 
     &-column {
-        padding: 0.5em 0;
+        padding: 8px;
         flex: 1;
         white-space: nowrap;
         &--offsetLeft {

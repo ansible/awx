@@ -9,14 +9,13 @@
 @import 'shared/text-label.less';
 
 .FactDataGroup {
-    &-header {
-        display: flex;
-        &--new {
-            &:after {
-                .include-text-label(#676767; white; "new");
-                align-self: center;
-                font-size: 1rem;
-            }
+    &-headings {
+        &:hover {
+            background-color: #fff;
+            border-color: transparent;
         }
+    }
+    &-header {
+        padding: 0;
     }
 }
