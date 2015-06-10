@@ -77,8 +77,8 @@ export function formatFacts(diffedResults) {
                 if (isNestedFactArray(obj)) {
                     // factArrayIndex = obj.keyPath.length > 1 ? Number(_.last(obj.keyPath)) : obj.keyName;
                     displayKeyPath = _.initial(obj.keyPath).join('.');
-                } else if (keyPathStr !== rootKey) {
-                    displayKeyPath = _.difference(obj.keyPath, rootKeyPath).join('.');
+                // } else {
+                    // displayKeyPath = _.difference(obj.keyPath, rootKeyPath).join('.');
                 } else {
                     displayKeyPath = rootKeyPath.join('.');
                 }

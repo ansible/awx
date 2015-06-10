@@ -67,19 +67,10 @@
 
             <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
 
-                <div class="FactDataTable-groupHeadingRow" ng-switch="group.nestingLevel" ng-if="group.displayKeyPath">
-                    <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header" ng-switch-when="0">
+                <div class="FactDataTable-groupHeadingRow" ng-if="group.displayKeyPath">
+                    <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header">
                         {{group.displayKeyPath}}
                     </h2>
-                    <h3 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="1">
-                        {{group.displayKeyPath}}
-                    </h3>
-                    <h4 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="2">
-                        {{group.displayKeyPath}}
-                    </h4>
-                    <h5 class="FactDataTable-column FactDataTable-column--full" ng-switch-when="3">
-                        {{group.displayKeyPath}}
-                    </h5>
                 </div>
                 <div class="FactDataGroup-facts" data-facts="{{group.facts}}">
                     <div class="FactDataTable-arrayGroup" ng-if="group.isFactArray" ng-repeat="arrayGroup in group.facts" data-array-group="{{arrayGroup}}">
