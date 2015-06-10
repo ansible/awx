@@ -1,7 +1,8 @@
 <a href="#portal" title="Portal" class="MenuItem MenuItem--hoverable">
     Portal
 </a>
-<a link-to="userEdit" model="{ user_id: currentUser }" class="MenuItem MenuItem--right MenuItem--fixed MenuItem-username">
+<web-socket-status class="MenuItem MenuItem--socketStatus MenuItem--right MenuItem--fixed"></web-socket-status>
+<a link-to="userEdit" model="{ user_id: currentUser }" class="MenuItem MenuItem--fixed MenuItem-username">
   <i class="MenuItem-icon MenuItem-icon--labelled">
     <aw-icon name="User"></aw-icon>
   </i>
