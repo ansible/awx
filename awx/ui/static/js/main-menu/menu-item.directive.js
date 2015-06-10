@@ -2,7 +2,7 @@
 
 export default ['$route', '$rootScope', function($route, $rootScope) {
     return {
-        require: '^^mainMenu',
+        require: '?^^mainMenu',
         link: function(scope, element, attrs, mainMenuController) {
             var routeName = attrs.linkTo;
 
