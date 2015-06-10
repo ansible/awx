@@ -8,8 +8,8 @@ export default function() {
 
             scope.$on('$destroy', function() {
                 contents.remove();
+                $(".MenuItem--socketStatus").remove();
             });
         }
     };
 }
-
