@@ -1281,8 +1281,11 @@ export default
               });
 
             path.on('mousemove', function() {
-                tooltip.style('top', (d3.mouse(this)[0]+200) + 'px')
-                .style('left', (d3.mouse(this)[0]+200) + 'px');
+                // d3.mouse() gives the coordinates of hte mouse, then add
+                // some offset to provide breathing room for hte tooltip
+                // based on the dimensions of the donut
+                tooltip.style('top', (d3.mouse(this)[1] + (height/5) + 'px'))
+                .style('left', (d3.mouse(this)[0] + (width/3) + 'px'));
             });
 
           legend = svg.selectAll('.legend')
