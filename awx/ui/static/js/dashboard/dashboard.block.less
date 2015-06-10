@@ -21,13 +21,13 @@
 }
 
 .Dashboard-list {
-    display: flex;
     border: 1px solid #a9a9a9;
     border-radius: 4px;
     margin-top: 15px;
     width: 50%;
     padding: 15px;
-    flex-basis: ~"calc(50% - 7px)";
+    max-width: ~"calc(50% - 7px)";
+    position: relative;
 }
 
 @media only screen and (max-width: 710px) {
@@ -39,5 +39,6 @@
     .Dashboard-list {
         flex: initial;
         width: 100%;
+        max-width: 100%;
     }
 }

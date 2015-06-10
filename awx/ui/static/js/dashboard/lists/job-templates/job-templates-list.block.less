@@ -2,8 +2,6 @@
 
 .DashboardJobTemplates {
     flex: 1;
-    display: flex;
-    flex-direction: column;
 }
 .DashboardJobTemplates--noJobTemplates {
     color: #8d8d8d;
@@ -17,10 +15,8 @@
 
 .DashboardJobTemplates-container {
     flex: 1;
-    display: flex;
-    flex-direction: column;
     width: 100%;
-    padding-bottom: 15px;
+    padding-bottom: 42px;
 }
 
 .DashboardJobTemplates-item {
@@ -44,7 +40,7 @@
 .DashboardJobTemplates-seeMore {
     padding-top: 11px;
     padding-bottom: 11px;
-    width: ~"calc(100% + 32px)";
+    width: ~"calc(100% + 2px)";
     margin-left: -16px;
     margin-bottom: -16px;
     border-bottom-left-radius: 4px;
@@ -53,6 +49,10 @@
     font-size: 17px;
     text-align: center;
     background-color: #1778c3;
+    display: block;
+    position: absolute;
+    max-width: ~"calc(100% + 2px)";
+    bottom: 16px;
 }
 
 .DashboardJobTemplates-seeMore:hover {
