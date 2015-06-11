@@ -774,11 +774,8 @@ class RunJob(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def pre_run_hook(self, job, **kwargs):
-        print("In pre-run")
         if job.job_type == PERM_INVENTORY_SCAN:
-            print("In scan")
             if not test_mongo_connection():
-                print("Mongo isn't running")
                 raise RuntimeError("Fact Scan Database is offline")
 
     def post_run_hook(self, job, **kwargs):
