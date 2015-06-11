@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Ansible, Inc. (formerly AnsibleWorks, Inc.)
+# Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
 from optparse import make_option

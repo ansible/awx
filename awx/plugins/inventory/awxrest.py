@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2015 Ansible, Inc. (formerly AnsibleWorks, Inc.)
+# Copyright (c) 2015 Ansible, Inc.
 # This file is a utility script that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.

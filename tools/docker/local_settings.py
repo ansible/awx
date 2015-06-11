@@ -1,4 +1,4 @@
-# Copyright (c) 2014 AnsibleWorks, Inc.
+# Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
 # Local Django settings for AWX project.  Rename to "local_settings.py" and

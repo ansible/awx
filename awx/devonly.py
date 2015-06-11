@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Ansible, Inc. (formerly AnsibleWorks, Inc.)
+# Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
 # This file should only be present in a source checkout, and never in a release

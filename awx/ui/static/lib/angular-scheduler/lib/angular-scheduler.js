@@ -1,7 +1,7 @@
 /***************************************************************************
  * angular-scheruler.js
  *
- * Copyright (c) 2014 Ansible, Inc.
+ * Copyright (c) 2015 Ansible, Inc.
  *
  * Maintainers:
  *

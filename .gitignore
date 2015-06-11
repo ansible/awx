@@ -1,3 +1,7 @@
+# Tags
+.tags
+.tags1
+
 # Tower
 awx/settings/local_settings.py*
 awx/*.sqlite3

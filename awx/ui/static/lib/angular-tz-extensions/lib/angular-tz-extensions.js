@@ -1,7 +1,7 @@
 /**
  * angular-tz-extensions.js 
  *
- * Copyright (c) 2014 Ansible, Inc. 
+ * Copyright (c) 2015 Ansible, Inc. 
  *
  * Distributed under The MIT License (MIT).
  *
