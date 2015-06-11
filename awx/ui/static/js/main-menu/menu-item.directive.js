@@ -19,7 +19,11 @@ export default ['$route', '$rootScope', function($route, $rootScope) {
                 } else {
                     element.removeClass('MenuItem--active');
                 }
-                return nextRoute.$$route.name;
+                if (nextRoute.$$route) {
+                    return nextRoute.$$route.name;
+                } else {
+                    return undefined;
+                }
             });
 
             scope.$on('$destroy', function() {
