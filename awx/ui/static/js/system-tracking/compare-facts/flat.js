@@ -4,23 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import stringFilters from 'tower/shared/string-filters/main';
-
-var $injector = angular.injector(['ng', stringFilters.name]);
-var $interpolate = $injector.get('$interpolate');
-
-function getFactTemplate(factTemplate, fact) {
-    if (_.isFunction(factTemplate)) {
-        return factTemplate(fact);
-    } else {
-        return factTemplate;
-    }
-}
-
-function renderFactTemplate(template, fact) {
-    return $interpolate(template)(fact);
-}
-
 function slotFactValues(basisPosition, basisValue, comparatorValue) {
     var leftValue, rightValue;
 
@@ -45,7 +28,7 @@ export default
             var searcher = {};
             searcher[nameKey] = basisFact[nameKey];
 
-            var basisTemplate, comparatorTemplate, slottedValues, basisValue, comparatorValue;
+            var slottedValues, basisValue, comparatorValue;
 
             var matchingFact = _.where(comparatorFacts.facts, searcher);
             var diffs;
@@ -54,9 +37,7 @@ export default
 
                 if (!_.isUndefined(factTemplate)) {
 
-                    basisTemplate = getFactTemplate(factTemplate, basisFact);
-
-                    basisValue = renderFactTemplate(basisTemplate, basisFact);
+                    basisValue = factTemplate.render(basisFact);
                     slottedValues = slotFactValues(basisFacts.position, basisValue, 'absent');
 
                     diffs =
@@ -76,7 +57,7 @@ export default
                                         value1IsAbsent: slottedValues.left === 'absent',
                                         value2: slottedValues.right,
                                         value2IsAbsent: slottedValues.right === 'absent'
-                                    };
+                                   };
                         });
                 }
             } else {
@@ -85,11 +66,8 @@ export default
 
                 if (!_.isUndefined(factTemplate)) {
 
-                    basisTemplate = getFactTemplate(factTemplate, basisFact);
-                    comparatorTemplate = getFactTemplate(factTemplate, matchingFact);
-
-                    basisValue = renderFactTemplate(basisTemplate, basisFact);
-                    comparatorValue = renderFactTemplate(comparatorTemplate, matchingFact);
+                    basisValue = factTemplate.render(basisFact);
+                    comparatorValue = factTemplate.render(matchingFact);
 
                     slottedValues = slotFactValues(basisFacts.position, basisValue, comparatorValue);
 

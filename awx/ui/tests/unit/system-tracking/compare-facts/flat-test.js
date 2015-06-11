@@ -73,10 +73,6 @@ describe('CompareFacts.Flat', function() {
             return facts;
         }
 
-        beforeEach(function () {
-
-        });
-
         it('uses "absent" for the missing value', function() {
 
             var facts = factData([{  'name': 'foo'
@@ -123,5 +119,62 @@ describe('CompareFacts.Flat', function() {
                 }]);
 
         });
+
+        context('with factTemplate', function() {
+            it('does not attempt to render the absent fact', function() {
+                var facts = factData([{  'name': 'foo'
+                                     }]);
+
+                var renderCallCount = 0;
+                var factTemplate =
+                    {   render: function() {
+                                    renderCallCount++;
+                                },
+                        template: ""
+                    };
+
+                compareFacts(facts[0], facts[1], 'name', ['value'], factTemplate);
+
+                expect(renderCallCount).to.equal(1);
+
+            });
+        });
+    });
+
+    context('with factTemplate', function() {
+        var factData;
+
+        beforeEach(function() {
+            factData = [{   position: 'left',
+                            facts:
+                            [{  'name': 'foo',
+                                'value': 'bar'
+                            }]
+                        },
+                        {   position: 'right',
+                            facts:
+                            [{  'name': 'foo',
+                                'value': 'baz'
+                            }]
+                        }];
+        });
+
+        it('renders the template with each provided fact', function() {
+
+            var renderCalledWith = [];
+            var factTemplate =
+                {   render: function(fact) {
+                                renderCalledWith.push(fact);
+                            },
+                    template: ""
+                };
+
+            compareFacts(factData[0], factData[1], 'name', ['value'], factTemplate);
+
+            expect(renderCalledWith).to.include(factData[0].facts[0]);
+            expect(renderCalledWith).to.include(factData[1].facts[0]);
+        });
+
+
     });
 });
