@@ -40,7 +40,7 @@ from django.utils.timezone import now
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
-from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
+from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 from awx.fact.utils.connection import test_mongo_connection
@@ -273,10 +273,12 @@ class BaseTask(Task):
         private_data = self.build_private_data(instance, **kwargs)
         private_data_files = {}
         if private_data is not None:
+            ssh_ver = get_ssh_version()
+            ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
             for name, data in private_data.iteritems():
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'scm_credential', 'ad_hoc_credential'):
+                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
                     os.mkfifo(path, 0600)
                     thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
