@@ -904,8 +904,21 @@ class JobTemplateAccess(BaseAccess):
             inventory__permissions__pk=F('project__permissions__pk'),
         )
 
+        perm_inventory_read_user_qs = qs.filter(
+            inventory__permissions__user__in=[self.user],
+            inventory__permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+            inventory__permissions__active=True)
+
+        perm_inventory_read_team_qs = qs.filter(
+            inventory__permissions__team__users__in=[self.user],
+            inventory__permissions__team__active=True,
+            inventory__permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+            inventory__permissions__active=True)
+
+        perm_inventory = perm_inventory_read_user_qs | perm_inventory_read_team_qs
+
         # FIXME: I *think* this should work... needs more testing.
-        return org_admin_qs | perm_deploy_qs | perm_check_qs
+        return org_admin_qs | (perm_deploy_qs & perm_inventory) | (perm_check_qs & perm_inventory)
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
