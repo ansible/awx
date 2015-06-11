@@ -75,7 +75,7 @@ export default
                                         value1: slottedValues.left,
                                         value1IsAbsent: slottedValues.left === 'absent',
                                         value2: slottedValues.right,
-                                        value2IsAbsent: slotFactValues.right === 'absent'
+                                        value2IsAbsent: slottedValues.right === 'absent'
                                     };
                         });
                 }
@@ -113,7 +113,7 @@ export default
 
                             if (slottedValues.left !== slottedValues.right) {
                                 return {
-                                    keyName: key,
+                                    keyName: basisFact[nameKey],
                                     value1: slottedValues.left,
                                     value2: slottedValues.right
                                 };
