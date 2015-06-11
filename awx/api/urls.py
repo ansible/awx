@@ -206,6 +206,7 @@ system_job_template_urls = patterns('awx.api.views',
 system_job_urls = patterns('awx.api.views',
     url(r'^$',                                          'system_job_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'system_job_detail'),
+    url(r'^(?P<pk>[0-9]+)/cancel/$',                    'system_job_cancel'),
 )
 
 schedule_urls = patterns('awx.api.views',

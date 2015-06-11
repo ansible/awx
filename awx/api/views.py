@@ -2745,6 +2745,21 @@ class SystemJobDetail(RetrieveDestroyAPIView):
     model = SystemJob
     serializer_class = SystemJobSerializer
 
+class SystemJobCancel(RetrieveAPIView):
+
+    model = SystemJob
+    serializer_class = SystemJobCancelSerializer
+    is_job_cancel = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+
 class UnifiedJobTemplateList(ListAPIView):
 
     model = UnifiedJobTemplate

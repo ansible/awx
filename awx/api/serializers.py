@@ -1717,7 +1717,16 @@ class SystemJobSerializer(UnifiedJobSerializer):
         if obj.system_job_template and obj.system_job_template.active:
             res['system_job_template'] = reverse('api:system_job_template_detail',
                                                  args=(obj.system_job_template.pk,))
+        if obj.can_cancel or True:
+            res['cancel'] = reverse('api:system_job_cancel', args=(obj.pk,))
         return res
+
+class SystemJobCancelSerializer(SystemJobSerializer):
+
+    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
     pass
