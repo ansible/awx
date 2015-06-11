@@ -1144,28 +1144,28 @@ export default
             if (scope.host_summary.ok) {
                 graph_data.push({
                     label: 'OK',
-                    value: (scope.host_summary.ok === scope.host_summary.total) ? 1 : scope.host_summary.ok,
+                    value: scope.host_summary.ok,
                     color: '#60D66F'
                 });
             }
             if (scope.host_summary.changed) {
                 graph_data.push({
                     label: 'Changed',
-                    value: (scope.host_summary.changed === scope.host_summary.total) ? 1 : scope.host_summary.changed,
+                    value: scope.host_summary.changed,
                     color: '#FF9900'
                 });
             }
             if (scope.host_summary.unreachable) {
                 graph_data.push({
                     label: 'Unreachable',
-                    value: (scope.host_summary.unreachable === scope.host_summary.total) ? 1 : scope.host_summary.unreachable,
+                    value: scope.host_summary.unreachable,
                     color: '#FF0000'
                 });
             }
             if (scope.host_summary.failed) {
                 graph_data.push({
                     label: 'Failed',
-                    value: (scope.host_summary.failed === scope.host_summary.total) ? 1 : scope.host_summary.failed,
+                    value: scope.host_summary.failed,
                     color: '#ff5850'
                 });
             }
@@ -1247,13 +1247,7 @@ export default
                 .attr('class', 'donut-tooltip');
 
             tooltip.append('div')
-                .attr('class', 'donut-label');
-
-            tooltip.append('div')
-                .attr('class', 'donut-count');
-
-            tooltip.append('div')
-                .attr('class', 'donut-percent');
+                .attr('class', 'donut-tooltip-inner');
 
             path = svg.selectAll('path')
                 .data(pie(dataset))
@@ -1268,11 +1262,17 @@ export default
                 var total = d3.sum(dataset.map(function(d) {
                   return d.value;
                 }));
+
+                var label;
+                if (d.data.value === 1) {
+                    label = " host ";
+                } else {
+                    label = " hosts ";
+                }
                 var percent = Math.round(1000 * d.data.value / total) / 10;
-                tooltip.select('.donut-label').html(d.data.label);
+                tooltip.select('.donut-tooltip-inner').html(d.data.value + label + " (" +
+                    percent + "%) " + d.data.label + ".");
                 //.attr('style', 'color:white;font-family:');
-                tooltip.select('.donut-count').html(d.data.value);
-                tooltip.select('.donut-percent').html(percent + '%');
                 tooltip.style('display', 'block');
               });
 

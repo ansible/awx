@@ -41,31 +41,31 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
         for (var host in hosts) {
             if (hosts[host].ok) {
                 hosts[host].okTip = hosts[host].ok;
-                hosts[host].okTip += (hosts[host].ok === 1) ? " host was" : " hosts were";
-                hosts[host].okTip += " successful during this run.";
+                hosts[host].okTip += (hosts[host].ok === 1) ? " host event was" : " host events were";
+                hosts[host].okTip += " ok.";
             } else {
-                hosts[host].okTip = "No hosts were successful during this run.";
+                hosts[host].okTip = "No host events were ok.";
             }
             if (hosts[host].changed) {
                 hosts[host].changedTip = hosts[host].changed;
-                hosts[host].changedTip += (hosts[host].changed === 1) ? " host" : " hosts";
-                hosts[host].changedTip += " changed during this run.";
+                hosts[host].changedTip += (hosts[host].changed === 1) ? " host event" : " host eventss";
+                hosts[host].changedTip += " changed.";
             } else {
-                hosts[host].changedTip = "No hosts changed during this run.";
+                hosts[host].changedTip = "No host events changed.";
             }
             if (hosts[host].failed) {
                 hosts[host].failedTip = hosts[host].failed;
-                hosts[host].failedTip += (hosts[host].failed === 1) ? " host" : " hosts";
-                hosts[host].failedTip += " failed during this run.";
+                hosts[host].failedTip += (hosts[host].failed === 1) ? " host event" : " host events";
+                hosts[host].failedTip += " failed.";
             } else {
-                hosts[host].failedTip = "No hosts failed during this run.";
+                hosts[host].failedTip = "No host events failed.";
             }
             if (hosts[host].unreachable) {
                 hosts[host].unreachableTip = hosts[host].unreachable;
-                hosts[host].unreachableTip += (hosts[host].unreachable === 1) ? " host was" : " hosts were";
-                hosts[host].unreachableTip += " unreachable during this run";
+                hosts[host].unreachableTip += (hosts[host].unreachable === 1) ? " host event was" : " hosts events were";
+                hosts[host].unreachableTip += " unreachable";
             } else {
-                hosts[host].unreachableTip = "No hosts were unreachable during this run.";
+                hosts[host].unreachableTip = "No host events were unreachable.";
             }
         }
     });
@@ -79,45 +79,45 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
             }
             if (tasks[task].successfulCount) {
                 tasks[task].successfulCountTip = tasks[task].successfulCount;
-                tasks[task].successfulCountTip += (tasks[task].successfulCount === 1) ? " host was" : " hosts were";
-                tasks[task].successfulCountTip += " successful during this run.";
+                tasks[task].successfulCountTip += (tasks[task].successfulCount === 1) ? " host event was" : " host events were";
+                tasks[task].successfulCountTip += " ok.";
             } else {
-                tasks[task].successfulCountTip = "No hosts were successful during this run.";
+                tasks[task].successfulCountTip = "No host events were ok.";
             }
             if (tasks[task].changedCount) {
                 tasks[task].changedCountTip = tasks[task].changedCount;
-                tasks[task].changedCountTip += (tasks[task].changedCount === 1) ? " host" : " hosts";
-                tasks[task].changedCountTip += " changed during this run.";
+                tasks[task].changedCountTip += (tasks[task].changedCount === 1) ? " host event" : " host events";
+                tasks[task].changedCountTip += " changed.";
             } else {
-                tasks[task].changedCountTip = "No hosts changed during this run.";
+                tasks[task].changedCountTip = "No host events changed.";
             }
             if (tasks[task].skippedCount) {
                 tasks[task].skippedCountTip = tasks[task].skippedCount;
-                tasks[task].skippedCountTip += (tasks[task].skippedCount === 1) ? " host was" : " hosts were";
-                tasks[task].skippedCountTip += " skipped during this run.";
+                tasks[task].skippedCountTip += (tasks[task].skippedCount === 1) ? " host event was" : " hosts events were";
+                tasks[task].skippedCountTip += " skipped.";
             } else {
-                tasks[task].skippedCountTip = "No hosts were skipped during this run.";
+                tasks[task].skippedCountTip = "No host events were skipped.";
             }
             if (tasks[task].failedCount) {
                 tasks[task].failedCountTip = tasks[task].failedCount;
-                tasks[task].failedCountTip += (tasks[task].failedCount === 1) ? " host" : " hosts";
-                tasks[task].failedCountTip += " failed during this run.";
+                tasks[task].failedCountTip += (tasks[task].failedCount === 1) ? " host event" : " host events";
+                tasks[task].failedCountTip += " failed.";
             } else {
-                tasks[task].failedCountTip = "No hosts failed during this run.";
+                tasks[task].failedCountTip = "No host events failed.";
             }
             if (tasks[task].unreachableCount) {
                 tasks[task].unreachableCountTip = tasks[task].unreachableCount;
-                tasks[task].unreachableCountTip += (tasks[task].unreachableCount === 1) ? " host was" : " hosts were";
-                tasks[task].unreachableCountTip += " unreachable during this run.";
+                tasks[task].unreachableCountTip += (tasks[task].unreachableCount === 1) ? " host event was" : " hosts events were";
+                tasks[task].unreachableCountTip += " unreachable.";
             } else {
-                tasks[task].unreachableCountTip = "No hosts were unreachable during this run.";
+                tasks[task].unreachableCountTip = "No host events were unreachable.";
             }
             if (tasks[task].missingCount) {
                 tasks[task].missingCountTip = tasks[task].missingCount;
-                tasks[task].missingCountTip += (tasks[task].missingCount === 1) ? " host was" : " hosts were";
-                tasks[task].missingCountTip += " missing during this run.";
+                tasks[task].missingCountTip += (tasks[task].missingCount === 1) ? " host event was" : " host events were";
+                tasks[task].missingCountTip += " missing.";
             } else {
-                tasks[task].missingCountTip = "No hosts were missing during this run.";
+                tasks[task].missingCountTip = "No host events were missing.";
             }
         }
     });
