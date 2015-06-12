@@ -54,7 +54,9 @@ describe('CompareFacts.Flat', function() {
                     facts:
                     [{  keyName: 'foo',
                         value1: 'bar',
-                        value2: 'baz'
+                        value1IsAbsent: false,
+                        value2: 'baz',
+                        value2IsAbsent: false
                     }]
                 }]);
         });

@@ -33,12 +33,17 @@ export default
             var matchingFact = _.where(comparatorFacts.facts, searcher);
             var diffs;
 
-            if (_.isEmpty(matchingFact)) {
-
                 if (!_.isUndefined(factTemplate)) {
 
                     basisValue = factTemplate.render(basisFact);
-                    slottedValues = slotFactValues(basisFacts.position, basisValue, 'absent');
+
+                    if (_.isEmpty(matchingFact)) {
+                        comparatorValue = 'absent';
+                    } else {
+                        comparatorValue = factTemplate.render(matchingFact[0]);
+                    }
+
+                    slottedValues = slotFactValues(basisFacts.position, basisValue, comparatorValue);
 
                     diffs =
                         {   keyName: basisFact[nameKey],
@@ -48,59 +53,39 @@ export default
 
                 } else {
 
-                    diffs =
-                        _.map(basisFact, function(value, key) {
-                            var slottedValues = slotFactValues(basisFacts.position, value, 'absent');
+                    if (_.isEmpty(matchingFact)) {
+                        matchingFact = {};
+                    } else {
+                        matchingFact = matchingFact[0];
+                    }
 
-                            return {    keyName: key,
+                    diffs =
+                        _(basisFact).map(function(value, key) {
+                            var slottedValues = slotFactValues(basisFacts.position, value, matchingFact[key] || 'absent');
+                            var keyName;
+
+                            if (slottedValues.right !== 'absent') {
+                                if(slottedValues.left === slottedValues.right) {
+                                    return;
+                                }
+
+                                if (!_.include(compareKeys, key)) {
+                                    return;
+                                }
+                                 keyName = basisFact[nameKey];
+                            } else {
+                                keyName = key;
+                            }
+
+                            return {    keyName: keyName,
                                         value1: slottedValues.left,
                                         value1IsAbsent: slottedValues.left === 'absent',
                                         value2: slottedValues.right,
                                         value2IsAbsent: slottedValues.right === 'absent'
                                    };
-                        });
-                }
-            } else {
-
-                matchingFact = matchingFact[0];
-
-                if (!_.isUndefined(factTemplate)) {
-
-                    basisValue = factTemplate.render(basisFact);
-                    comparatorValue = factTemplate.render(matchingFact);
-
-                    slottedValues = slotFactValues(basisFacts.position, basisValue, comparatorValue);
-
-                    if (basisValue !== comparatorValue) {
-
-                        diffs =
-                            {   keyName: basisFact[nameKey],
-                                value1: slottedValues.left,
-                                value2: slottedValues.right
-                            };
-
-                    }
-
-                } else {
-
-                    diffs = _(compareKeys)
-                        .map(function(key) {
-                            var slottedValues = slotFactValues(basisFacts.position,
-                                                               basisFact[key],
-                                                               matchingFact[key]);
-
-                            if (slottedValues.left !== slottedValues.right) {
-                                return {
-                                    keyName: basisFact[nameKey],
-                                    value1: slottedValues.left,
-                                    value2: slottedValues.right
-                                };
-                            }
                         }).compact()
                         .value();
                 }
-
-            }
 
             var descriptor =
                     {   displayKeyPath: basisFact[nameKey],
