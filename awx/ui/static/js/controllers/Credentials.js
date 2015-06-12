@@ -166,7 +166,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         current_item: (!Empty($routeParams.user_id)) ? $routeParams.user_id : null,
         list: UserList,
         field: 'user',
-        input_type: 'radio'
+        input_type: 'radio',
+        autopopulateLookup: false
     });
 
     LookUpInit({
@@ -174,7 +175,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         form: form,
         current_item: (!Empty($routeParams.team_id)) ? $routeParams.team_id : null,
         list: TeamList,
-        field: 'team'
+        field: 'team',
+        autopopulateLookup: false
     });
 
     if (!Empty($routeParams.user_id)) {
