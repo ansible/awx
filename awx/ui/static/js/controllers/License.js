@@ -16,7 +16,7 @@
 
 export function LicenseController(ClearScope, $location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert,
     GetBasePath, ProcessErrors, FormatDate, Prompt, Empty, LicenseForm, IsAdmin, CreateDialog, CheckLicense,
-    TextareaResize, $scope) {
+    TextareaResize, $scope, Wait) {
 
         ClearScope();
 
@@ -178,6 +178,7 @@ export function LicenseController(ClearScope, $location, $rootScope, $compile, $
                     });
                 }
             });
+            Wait("stop");
         });
         CheckLicense.GetLicense('LicenseDataReady', $scope);
 
@@ -185,4 +186,4 @@ export function LicenseController(ClearScope, $location, $rootScope, $compile, $
 
 LicenseController.$inject = ['ClearScope', '$location', '$rootScope', '$compile', '$filter', 'GenerateForm', 'Rest', 'Alert',
 'GetBasePath', 'ProcessErrors', 'FormatDate', 'Prompt', 'Empty', 'LicenseForm', 'IsAdmin', 'CreateDialog',
-'CheckLicense', 'TextareaResize', '$scope'];
+'CheckLicense', 'TextareaResize', '$scope', "Wait"];
