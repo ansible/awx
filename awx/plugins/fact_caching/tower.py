@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+import os
 import time
 import datetime
 from copy import deepcopy
@@ -111,8 +112,14 @@ class CacheModule(BaseCacheModule):
         self._cache_prev = deepcopy(self._cache)
         self._cache[key] = value
 
+        packet = {
+            'host': key,
+            'inventory_id': os.environ['INVENTORY_ID'],
+            'facts': facts,
+            'date_key': self.date_key,
+        }
         # Emit fact data to tower for processing
-        self.socket.send_json(dict(host=key, facts=facts, date_key=self.date_key))
+        self.socket.send_json(packet)
         self.socket.recv()
 
     def keys(self):

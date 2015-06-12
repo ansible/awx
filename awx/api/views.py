@@ -1162,7 +1162,7 @@ class HostFactVersionsList(MongoListAPIView):
         self.check_parent_access(host)
 
         try:
-            fact_host = FactHost.objects.get(hostname=host.name)
+            fact_host = FactHost.objects.get(hostname=host.name, inventory_id=host.inventory.pk)
         except FactHost.DoesNotExist:
             return None
         except mongoengine.ConnectionError:
@@ -1234,7 +1234,7 @@ class HostFactCompareView(MongoAPIView):
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
 
         host_obj = self.get_parent_object()
-        fact_entry = Fact.get_host_version(host_obj.name, datetime_actual, module_spec)
+        fact_entry = Fact.get_host_version(host_obj.name, host_obj.inventory.pk, datetime_actual, module_spec)
         host_data = FactSerializer(fact_entry).data if fact_entry is not None else {}
 
         return Response(host_data)

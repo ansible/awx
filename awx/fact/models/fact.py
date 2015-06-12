@@ -2,7 +2,7 @@
 # All Rights Reserved
 
 from mongoengine.base import BaseField
-from mongoengine import Document, DateTimeField, ReferenceField, StringField
+from mongoengine import Document, DateTimeField, ReferenceField, StringField, IntField
 from awx.fact.utils.dbtransform import KeyTransform
 
 key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
@@ -22,21 +22,16 @@ class TransformField(BaseField):
 
 class FactHost(Document):
     hostname = StringField(max_length=100, required=True, unique=True)
+    inventory_id = IntField(required=True)
 
     # TODO: Consider using hashed index on hostname. django-mongo may not support this but
     # executing raw js will
     meta = {
         'indexes': [
-            'hostname' 
+            'hostname',
+            'inventory_id'
         ]
     }
-
-    @staticmethod
-    def get_host_id(hostname):
-        host = FactHost.objects.get(hostname=hostname)
-        if host:
-            return host.id
-        return None
 
 class Fact(Document):
     timestamp = DateTimeField(required=True)
@@ -49,7 +44,7 @@ class Fact(Document):
     meta = {
         'indexes': [
             '-timestamp',
-            'host'
+            'host',
         ]
     }
 
@@ -65,9 +60,9 @@ class Fact(Document):
     # If module not specified then filter query may return more than 1 result.
     # Thus, the resulting facts must somehow be unioned/concated/ or kept as an array.
     @staticmethod
-    def get_host_version(hostname, timestamp, module):
+    def get_host_version(hostname, inventory_id, timestamp, module):
         try:
-            host = FactHost.objects.get(hostname=hostname)
+            host = FactHost.objects.get(hostname=hostname, inventory_id=inventory_id)
         except FactHost.DoesNotExist:
             return None
 
@@ -86,9 +81,9 @@ class Fact(Document):
             return None
 
     @staticmethod
-    def get_host_timeline(hostname, module):
+    def get_host_timeline(hostname, inventory_id, module):
         try:
-            host = FactHost.objects.get(hostname=hostname)
+            host = FactHost.objects.get(hostname=hostname, inventory_id=inventory_id)
         except FactHost.DoesNotExist:
             return None
 
@@ -99,6 +94,7 @@ class Fact(Document):
 
         return FactVersion.objects.filter(**kv).order_by("-timestamp").values_list('timestamp')
 
+    # FIXME: single facts no longer works with the addition of the inventory_id field to the FactHost document
     @staticmethod
     def get_single_facts(hostnames, fact_key, fact_value, timestamp, module):
         kv = {
