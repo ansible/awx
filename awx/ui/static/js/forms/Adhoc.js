@@ -37,7 +37,7 @@ export default
                     label: 'Arguments',
                     type: 'text',
                     awPopOverWatch: 'argsPopOver',
-                    awPopOver: 'See adhoc controller...set as argsPopOver',
+                    awPopOver: '{{ argsPopOver }}',
                     dataTitle: 'Arguments',
                     dataPlacement: 'right',
                     dataContainer: 'body',

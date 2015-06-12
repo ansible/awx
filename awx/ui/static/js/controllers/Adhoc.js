@@ -58,7 +58,7 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
             // give the docs for the selected module
             $scope.argsPopOver = "<p>These arguments are used with the" +
                 " specified module. You can find information about the " +
-                $scope.module_name.value +
+                $scope.module_name.value + " module " +
                 " <a id=\"adhoc_module_arguments_docs_link_for_module_" +
                 $scope.module_name.value +
                 "\"" +
