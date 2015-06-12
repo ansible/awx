@@ -355,6 +355,29 @@ class BaseJobTestMixin(BaseTestMixin):
             created_by = self.user_sue,
         )
 
+        self.ops_east_permission = Permission.objects.create(
+            inventory       = self.inv_ops_east,
+            project         = self.proj_prod,
+            team            = self.team_ops_east,
+            permission_type = PERM_JOBTEMPLATE_CREATE,
+            created_by      = self.user_sue
+        )
+
+        self.ops_east_permission_prod_east = Permission.objects.create(
+            inventory       = self.inv_ops_east,
+            project         = self.proj_prod_east,
+            team            = self.team_ops_east,
+            permission_type = PERM_JOBTEMPLATE_CREATE,
+            created_by      = self.user_sue
+        )
+
+        self.ops_east_permission_inv_admin = Permission.objects.create(
+            inventory       = self.inv_ops_east,
+            team            = self.team_ops_east,
+            permission_type = PERM_INVENTORY_ADMIN,
+            created_by      = self.user_sue
+        )
+
         self.ops_testers_permission = Permission.objects.create(
             inventory       = self.inv_ops_west,
             project         = self.proj_prod,
@@ -363,11 +386,25 @@ class BaseJobTestMixin(BaseTestMixin):
             created_by      = self.user_sue
         )
 
+        self.ops_testers_permission_inv_read = Permission.objects.create(
+            inventory       = self.inv_ops_west,
+            team            = self.team_ops_testers,
+            permission_type = PERM_INVENTORY_READ,
+            created_by      = self.user_sue
+        )
+
         self.doug_check_permission = Permission.objects.create(
             inventory       = self.inv_eng,
             project         = self.proj_dev,
             user            = self.user_doug,
             permission_type = PERM_INVENTORY_CHECK,
+            created_by      = self.user_sue
+        )
+
+        self.doug_inv_read_permission = Permission.objects.create(
+            inventory       = self.inv_eng,
+            user            = self.user_doug,
+            permission_type = PERM_INVENTORY_READ,
             created_by      = self.user_sue
         )
 
@@ -488,6 +525,16 @@ class BaseJobTestMixin(BaseTestMixin):
             host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
+        self.jt_ops_east_run_prod_east = JobTemplate.objects.create(
+            name='ops-east-prod-run-on-prod-east',
+            job_type='run',
+            inventory= self.inv_ops_east,
+            project=self.proj_prod_east,
+            playbook=self.proj_prod_east.playbooks[0],
+            credential=self.cred_ops_east,
+            host_config_key=uuid.uuid4().hex,
+            created_by=self.user_sue,
+        )
         # self.job_ops_east_run = self.jt_ops_east_run.create_job(
         #     created_by=self.user_sue,
         # )
@@ -498,6 +545,16 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
+            host_config_key=uuid.uuid4().hex,
+            created_by=self.user_sue,
+        )
+        self.jt_ops_west_check_test_team = JobTemplate.objects.create(
+            name='ops-west-prod-check-testers',
+            job_type='check',
+            inventory= self.inv_ops_west,
+            project=self.proj_prod,
+            playbook=self.proj_prod.playbooks[0],
+            credential=self.cred_ops_test,
             host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
