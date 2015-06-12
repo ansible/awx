@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this software.  If not, see <http://www.gnu.org/licenses/>.
 
-# The OpenStack Inventory module uses os-client-config for configuation.
+# The OpenStack Inventory module uses os-client-config for configuration.
 # https://github.com/stackforge/os-client-config
 # This means it will either:
 #  - Respect normal OS_* environment variables like other OpenStack tools
@@ -50,13 +50,16 @@ import shade
 
 class OpenStackInventory(object):
 
-    def __init__(self, refresh=False):
-        config_files = [ os.environ.get('OPENSTACK_CONFIG_FILE', None) 
-            or '/etc/ansible/openstack.yml' ]
+    def __init__(self, private=False, refresh=False):
+        config_files = os_client_config.config.CONFIG_FILES
+        if os.environ.get('OPENSTACK_CONFIG_FILE', None):
+            config_files.insert(0, os.environ['OPENSTACK_CONFIG_FILE'])
+        config_files.append('/etc/ansible/openstack.yml')
         self.openstack_config = os_client_config.config.OpenStackConfig(
             config_files)
         self.clouds = shade.openstack_clouds(self.openstack_config)
-        self.refresh = True
+        self.private = private
+        self.refresh = refresh
 
         self.cache_max_age = self.openstack_config.get_cache_max_age()
         cache_path = self.openstack_config.get_cache_path()
@@ -92,8 +95,11 @@ class OpenStackInventory(object):
         hostvars = collections.defaultdict(dict)
 
         for cloud in self.clouds:
+            cloud.private = cloud.private or self.private
+
             # Cycle on servers
             for server in cloud.list_servers():
+
                 meta = cloud.get_server_meta(server)
 
                 if 'interface_ip' not in meta['server_vars']:
@@ -101,9 +107,9 @@ class OpenStackInventory(object):
                     continue
 
                 server_vars = meta['server_vars']
-                hostvars[server.name]['ansible_ssh_host'] = server_vars['interface_ip']
+                hostvars[server.name][
+                    'ansible_ssh_host'] = server_vars['interface_ip']
                 hostvars[server.name]['openstack'] = server_vars
-                hostvars[server.name]['id'] = server_vars['id']
 
                 for group in meta['groups']:
                     groups[group].append(server.name)
@@ -129,6 +135,9 @@ class OpenStackInventory(object):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='OpenStack Inventory Module')
+    parser.add_argument('--private',
+                        action='store_true',
+                        help='Use private address for ansible host')
     parser.add_argument('--refresh', action='store_true',
                         help='Refresh cached information')
     group = parser.add_mutually_exclusive_group(required=True)
@@ -141,14 +150,13 @@ def parse_args():
 def main():
     args = parse_args()
     try:
-        inventory = OpenStackInventory(args.refresh)
+        inventory = OpenStackInventory(args.private, args.refresh)
         if args.list:
             inventory.list_instances()
         elif args.host:
             inventory.get_host(args.host)
     except shade.OpenStackCloudException as e:
-        print(e.message)
-        sys.exit(1)
+        sys.exit(e.message)
     sys.exit(0)
 
 

@@ -986,8 +986,24 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
-            private_state = str(inventory_update.source_vars_dict.get("private", "true"))
-            openstack_data = {"clouds": {"devstack": {"private": private_state, "auth": openstack_auth}}}
+            private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
+            # Retrieve cache path from inventory update vars if available,
+            # otherwise create a temporary cache path only for this update.
+            cache = inventory_update.source_vars_dict.get('cache', {})
+            if not isinstance(cache, dict):
+                cache = {}
+            if not cache.get('path', ''):
+                cache_path = tempfile.mkdtemp(prefix='openstack_cache', dir=kwargs.get('private_data_dir', None))
+                cache['path'] = cache_path
+            openstack_data = {
+                'clouds': {
+                    'devstack': {
+                        'private': private_state,
+                        'auth': openstack_auth,
+                    },
+                },
+                'cache': cache,
+            }
             return dict(cloud_credential=yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True))
 
         cp = ConfigParser.ConfigParser()

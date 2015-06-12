@@ -530,7 +530,8 @@ class Command(NoArgsCommand):
                     'to load'),
         make_option('--enabled-var', dest='enabled_var', type='str',
                     default=None, metavar='v', help='host variable used to '
-                    'set/clear enabled flag when host is online/offline'),
+                    'set/clear enabled flag when host is online/offline, may '
+                    'be specified as "foo.bar" to traverse nested dicts.'),
         make_option('--enabled-value', dest='enabled_value', type='str',
                     default=None, metavar='v', help='value of host variable '
                     'specified by --enabled-var that indicates host is '
@@ -547,7 +548,8 @@ class Command(NoArgsCommand):
                     'variables.'),
         make_option('--instance-id-var', dest='instance_id_var', type='str',
                     default=None, metavar='v', help='host variable that '
-                    'specifies the unique, immutable instance ID'),
+                    'specifies the unique, immutable instance ID, may be '
+                    'specified as "foo.bar" to traverse nested dicts.'),
     )
 
     def init_logging(self):
@@ -566,6 +568,51 @@ class Command(NoArgsCommand):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
+
+    def _get_instance_id(self, from_dict, default=''):
+        '''
+        Retrieve the instance ID from the given dict of host variables.
+        
+        The instance ID variable may be specified as 'foo.bar', in which case
+        the lookup will traverse into nested dicts, equivalent to:
+
+        from_dict.get('foo', {}).get('bar', default)
+        '''
+        instance_id = default
+        if getattr(self, 'instance_id_var', None):
+            for key in self.instance_id_var.split('.'):
+                if not hasattr(from_dict, 'get'):
+                    instance_id = default
+                    break
+                instance_id = from_dict.get(key, default)
+                from_dict = instance_id
+        return instance_id
+
+    def _get_enabled(self, from_dict, default=None):
+        '''
+        Retrieve the enabled state from the given dict of host variables.
+
+        The enabled variable may be specified as 'foo.bar', in which case
+        the lookup will traverse into nested dicts, equivalent to:
+
+        from_dict.get('foo', {}).get('bar', default)
+        '''
+        enabled = default
+        if getattr(self, 'enabled_var', None):
+            default = object()
+            for key in self.enabled_var.split('.'):
+                if not hasattr(from_dict, 'get'):
+                    enabled = default
+                    break
+                enabled = from_dict.get(key, default)
+                from_dict = enabled
+            if enabled is not default:
+                enabled_value = getattr(self, 'enabled_value', None)
+                if enabled_value is not None:
+                    enabled = bool(unicode(enabled_value) == unicode(enabled))
+                else:
+                    enabled = bool(enabled)
+        return enabled
 
     def load_inventory_from_database(self):
         '''
@@ -643,9 +690,9 @@ class Command(NoArgsCommand):
             else:
                 host_qs = self.inventory.hosts.all()
             host_qs = host_qs.filter(active=True, instance_id='',
-                                     variables__contains=self.instance_id_var)
+                                     variables__contains=self.instance_id_var.split('.')[0])
             for host in host_qs:
-                instance_id = host.variables_dict.get(self.instance_id_var, '')
+                instance_id = self._get_instance_id(host.variables_dict)
                 if not instance_id:
                     continue
                 self.db_instance_id_map[instance_id] = host.pk
@@ -658,7 +705,7 @@ class Command(NoArgsCommand):
         self.mem_instance_id_map = {}
         if self.instance_id_var:
             for mem_host in self.all_group.all_hosts.values():
-                instance_id = mem_host.variables.get(self.instance_id_var, '')
+                instance_id = self._get_instance_id(mem_host.variables)
                 if not instance_id:
                     self.logger.warning('Host "%s" has no "%s" variable',
                                         mem_host.name, self.instance_id_var)
@@ -908,13 +955,7 @@ class Command(NoArgsCommand):
             db_host.variables = json.dumps(db_variables)
             update_fields.append('variables')
         # Update host enabled flag.
-        enabled = None
-        if self.enabled_var and self.enabled_var in mem_host.variables:
-            value = mem_host.variables[self.enabled_var]
-            if self.enabled_value is not None:
-                enabled = bool(unicode(self.enabled_value) == unicode(value))
-            else:
-                enabled = bool(value)
+        enabled = self._get_enabled(mem_host.variables)
         if enabled is not None and db_host.enabled != enabled:
             db_host.enabled = enabled
             update_fields.append('enabled')
@@ -924,10 +965,7 @@ class Command(NoArgsCommand):
             db_host.name = mem_host.name
             update_fields.append('name')
         # Update host instance_id.
-        if self.instance_id_var:
-            instance_id = mem_host.variables.get(self.instance_id_var, '')
-        else:
-            instance_id = ''
+        instance_id = self._get_instance_id(mem_host.variables)
         if instance_id != db_host.instance_id:
             old_instance_id = db_host.instance_id
             db_host.instance_id = instance_id
@@ -973,10 +1011,8 @@ class Command(NoArgsCommand):
         mem_host_name_map = {}
         mem_host_names_to_update = set(self.all_group.all_hosts.keys())
         for k,v in self.all_group.all_hosts.iteritems():
-            instance_id = ''
             mem_host_name_map[k] = v
-            if self.instance_id_var:
-                instance_id = v.variables.get(self.instance_id_var, '')
+            instance_id = self._get_instance_id(v.variables)
             if instance_id in self.db_instance_id_map:
                 mem_host_pk_map[self.db_instance_id_map[instance_id]] = v
             elif instance_id:
@@ -1023,16 +1059,11 @@ class Command(NoArgsCommand):
             mem_host = self.all_group.all_hosts[mem_host_name]
             host_attrs = dict(variables=json.dumps(mem_host.variables),
                               name=mem_host_name, description='imported')
-            enabled = None
-            if self.enabled_var and self.enabled_var in mem_host.variables:
-                value = mem_host.variables[self.enabled_var]
-                if self.enabled_value is not None:
-                    enabled = bool(unicode(self.enabled_value) == unicode(value))
-                else:
-                    enabled = bool(value)
+            enabled = self._get_enabled(mem_host.variables)
+            if enabled is not None:
                 host_attrs['enabled'] = enabled
             if self.instance_id_var:
-                instance_id = mem_host.variables.get(self.instance_id_var, '')
+                instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
             db_host = self.inventory.hosts.create(**host_attrs)
             if enabled is False:

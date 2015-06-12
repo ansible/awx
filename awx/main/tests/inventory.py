@@ -2000,6 +2000,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                project=api_project)
         inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
         self.check_inventory_source(inventory_source)
+        self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
 
     def test_update_from_azure(self):
         source_username = getattr(settings, 'TEST_AZURE_USERNAME', '')
