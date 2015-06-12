@@ -26,5 +26,5 @@ RUN /etc/init.d/postgresql start; cd /tower ; make migrate ; make init ; /etc/in
 ADD start_everything.sh /start_everything.sh
 ADD start_development.sh /start_development.sh
 
-EXPOSE 8013 8080 27017
+EXPOSE 8013 8080 27017 22
 CMD /start_development.sh
