@@ -211,29 +211,67 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         # Alex's credentials (admin of all orgs) == 200, full list
         self.check_get_list(url, self.user_alex, qs, fields)
 
-        # Bob's credentials (admin of eng, user of ops) == 200, all from
-        # engineering and operations.
-        qs.filter(
-            Q(project__organizations__admins__in=[self.user_bob]) |
-            Q(project__teams__users__in=[self.user_bob]),
-        )
-        #self.check_get_list(url, self.user_bob, bob_qs, fields)
+        # # Bob is an admin for Eng he can see all Engineering templates
+        # this is: 2 Engineering templates and 1 Support Template
+        # Note: He is able to see the scan job from the support organization possibly incorrect
+        #       due to being an org admin for that project and no credential assigned to that template
+        with self.current_user(self.user_bob):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 3)
+            
+        # Chuck has permission to see all Eng Job Templates as Lead Engineer
+        # Note: Since chuck is an org admin he can also see the support scan template
+        with self.current_user(self.user_chuck):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 3)
 
-        # Chuck's credentials (admin of eng) == 200, all from engineering.
-        qs.filter(
-            Q(project__organizations__admins__in=[self.user_chuck]) |
-            Q(project__teams__users__in=[self.user_chuck]),
-        )
-        #self.check_get_list(url, self.user_chuck, chuck_qs, fields)
+        # Doug is in engineering but can only run scan jobs so he can only see the one Job Template
+        with self.current_user(self.user_doug):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 1)
 
-        # Doug's credentials (user of eng) == 200, none?.
-        qs.filter(
-            Q(project__organizations__admins__in=[self.user_doug]) |
-            Q(project__teams__users__in=[self.user_doug]),
-        )
-        #self.check_get_list(url, self.user_doug, doug_qs, fields)
+        # Juan can't see any job templates in Engineering because he lacks the inventory read permission
+        with self.current_user(self.user_juan):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 0)
 
-        # FIXME: Check with other credentials.
+        # We give Juan inventory permission and he can see both Job Templates because he already has deploy permission
+        # Now he can see both job templates
+        juan_inv_permission = Permission.objects.create(
+            inventory       = self.inv_eng,
+            user            = self.user_juan,
+            permission_type = PERM_INVENTORY_READ,
+            created_by      = self.user_sue
+        )
+        with self.current_user(self.user_juan):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 2)
+
+        # Randall is on the ops testers team that has permission to run a single check playbook on ops west
+        with self.current_user(self.user_randall):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 1)
+
+        # Holly is on the ops east team and can see all of that team's job templates
+        with self.current_user(self.user_holly):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 3)
+
+        # Chuck is temporarily assigned to ops east team to help them running some playbooks
+        # even though he's in a different group and org entirely he'll now see their job templates
+        self.team_ops_east.users.add(self.user_chuck)
+        with self.current_user(self.user_chuck):
+            resp = self.get(url, expect=200)
+            print [x['name'] for x in resp['results']]
+            self.assertEquals(resp['count'], 6)
+        
 
     def test_credentials_list(self):
         url = reverse('api:credential_list')
