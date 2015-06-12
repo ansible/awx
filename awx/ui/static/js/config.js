@@ -34,7 +34,7 @@
 
         password_length: 8,                      // Minimum user password length.  Set to 0 to not set a limit
         password_hasLowercase: true,             // require a lowercase letter in the password
-        password_hasUppercase: true,             // require an uppercase letter in the password
+        password_hasUppercase: false,             // require an uppercase letter in the password
         password_hasNumber: true,                // require a number in the password
         password_hasSymbol: false,                // require one of these symbols to be
                                                  // in the password: -!$%^&*()_+|~=`{}[]:";'<>?,./
