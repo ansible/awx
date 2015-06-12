@@ -36,7 +36,7 @@
         password_hasLowercase: true,             // require a lowercase letter in the password
         password_hasUppercase: true,             // require an uppercase letter in the password
         password_hasNumber: true,                // require a number in the password
-        password_hasSymbol: true,                // require one of these symbols to be
+        password_hasSymbol: false,                // require one of these symbols to be
                                                  // in the password: -!$%^&*()_+|~=`{}[]:";'<>?,./
 
         session_timeout: 1800,                   // Number of seconds before an inactive session is automatically timed out and forced to log in again.
