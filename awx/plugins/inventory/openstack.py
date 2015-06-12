@@ -56,7 +56,7 @@ class OpenStackInventory(object):
             config_files.insert(0, os.environ['OPENSTACK_CONFIG_FILE'])
         config_files.append('/etc/ansible/openstack.yml')
         self.openstack_config = os_client_config.config.OpenStackConfig(
-            config_files, private)
+            config_files)
         self.clouds = shade.openstack_clouds(self.openstack_config)
         self.private = private
         self.refresh = refresh
