@@ -2,29 +2,26 @@ var moduleConfig =
     {   'packages':
             {   compareKey: ['release', 'version'],
                 nameKey: 'name',
-                displayType: 'flat',
                 sortKey: 1,
                 factTemplate: "{{epoch|append:':'}}{{version}}-{{release}}{{arch|prepend:'.'}}"
             },
         'services':
             {   compareKey: ['state', 'source'],
                 nameKey: 'name',
-                displayType: 'flat',
                 factTemplate: '{{state}} ({{source}})',
                 sortKey: 2
             },
         'files':
             {   compareKey: ['size', 'mode', 'md5', 'mtime', 'gid', 'uid'],
                 nameKey: 'path',
-                displayType: 'flat',
+                displayKeys: ['size', 'mode', 'mtime', 'uid', 'gid', 'md5'],
                 sortKey: 3
             },
         'ansible':
-            {   displayType: 'nested',
-                sortKey: 4
+            {   sortKey: 4
             },
         'custom':
-            {   displayType: 'nested'
+            {
             }
     };
 

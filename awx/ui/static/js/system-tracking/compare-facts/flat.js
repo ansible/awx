@@ -21,7 +21,14 @@ function slotFactValues(basisPosition, basisValue, comparatorValue) {
 }
 
 export default
-    function flatCompare(basisFacts, comparatorFacts, nameKey, compareKeys, factTemplate) {
+    function flatCompare(basisFacts,
+                         comparatorFacts, renderOptions) {
+
+        var nameKey = renderOptions.nameKey;
+        var compareKeys = renderOptions.compareKey;
+        var keyNameMap = renderOptions.keyNameMap;
+        var valueFormatter = renderOptions.valueFormatter;
+        var factTemplate = renderOptions.factTemplate;
 
 
         return basisFacts.facts.reduce(function(arr, basisFact) {
@@ -33,7 +40,44 @@ export default
             var matchingFact = _.where(comparatorFacts.facts, searcher);
             var diffs;
 
-                if (!_.isUndefined(factTemplate)) {
+            // Perform comparison and get back comparisonResults; like:
+            //  {   'value':
+            //      {   leftValue: 'blah',
+            //          rightValue: 'doo'
+            //      }
+            //  };
+            //
+            var comparisonResults =
+                _.reduce(compareKeys, function(result, compareKey) {
+
+                    if (_.isEmpty(matchingFact)) {
+                        comparatorValue = 'absent';
+                    } else {
+                        comparatorValue = matchingFact[0][compareKey];
+                    }
+
+                    var slottedValues = slotFactValues(basisFacts.position,
+                                                       basisFact[compareKey],
+                                                       comparatorValue);
+
+                    if (_.isUndefined(slottedValues.left) && _.isUndefined(slottedValues.right)) {
+                        return result;
+                    }
+
+                    if (slottedValues.left !== slottedValues.right) {
+                        slottedValues.isDivergent = true;
+                    } else {
+                        slottedValues.isDivergent = false;
+                    }
+
+                    result[compareKey] = slottedValues;
+
+                    return result;
+                }, {});
+
+                var hasDiffs = _.any(comparisonResults, { isDivergent: true });
+
+                if (hasDiffs && factTemplate.hasTemplate()) {
 
                     basisValue = factTemplate.render(basisFact);
 
@@ -43,45 +87,34 @@ export default
                         comparatorValue = factTemplate.render(matchingFact[0]);
                     }
 
-                    slottedValues = slotFactValues(basisFacts.position, basisValue, comparatorValue);
+                    if (!_.isEmpty(comparisonResults)) {
 
-                    diffs =
-                        {   keyName: basisFact[nameKey],
-                            value1: slottedValues.left,
-                            value2: slottedValues.right
-                        };
+                        slottedValues = slotFactValues(basisFact.position, basisValue, comparatorValue);
 
-                } else {
-
-                    if (_.isEmpty(matchingFact)) {
-                        matchingFact = {};
-                    } else {
-                        matchingFact = matchingFact[0];
+                        diffs =
+                            {   keyName: basisFact[nameKey],
+                                value1: slottedValues.left,
+                                value2: slottedValues.right
+                            };
                     }
 
+                } else if (hasDiffs) {
+
                     diffs =
-                        _(basisFact).map(function(value, key) {
-                            var slottedValues = slotFactValues(basisFacts.position, value, matchingFact[key] || 'absent');
-                            var keyName;
+                        _(comparisonResults).map(function(slottedValues, key) {
 
-                            if (slottedValues.right !== 'absent') {
-                                if(slottedValues.left === slottedValues.right) {
-                                    return;
-                                }
+                            var keyName = key;
 
-                                if (!_.include(compareKeys, key)) {
-                                    return;
-                                }
-                                 keyName = basisFact[nameKey];
-                            } else {
-                                keyName = key;
+                            if (keyNameMap && keyNameMap[key]) {
+                                keyName = keyNameMap[key];
                             }
 
                             return {    keyName: keyName,
                                         value1: slottedValues.left,
                                         value1IsAbsent: slottedValues.left === 'absent',
                                         value2: slottedValues.right,
-                                        value2IsAbsent: slottedValues.right === 'absent'
+                                        value2IsAbsent: slottedValues.right === 'absent',
+                                        isDivergent: slottedValues.isDivergent
                                    };
                         }).compact()
                         .value();

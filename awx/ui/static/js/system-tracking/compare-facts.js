@@ -9,11 +9,10 @@ import compareFlatFacts from './compare-facts/flat';
 import FactTemplate from './compare-facts/fact-template';
 
 export function compareFacts(module, facts) {
-    if (module.displayType === 'nested') {
-        return {    factData: compareNestedFacts(facts),
-                    isNestedDisplay: true
-               };
-    } else {
+    // If the module has a template or includes a list of keys to display,
+    // then perform a flat comparison, otherwise assume nested
+    //
+    if (module.factTemplate || module.nameKey) {
         // For flat structures we compare left-to-right, then right-to-left to
         // make sure we get a good comparison between both hosts
         var compare = _.partialRight(compareFlatFacts,
@@ -33,5 +32,9 @@ export function compareFacts(module, facts) {
                                 };
                     })
                     .value();
+    } else {
+        return {    factData: compareNestedFacts(facts),
+                    isNestedDisplay: true
+               };
     }
 }

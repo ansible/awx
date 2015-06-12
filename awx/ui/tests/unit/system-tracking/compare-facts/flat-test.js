@@ -1,17 +1,34 @@
+import compareFacts from 'tower/system-tracking/compare-facts/flat';
+
 /* jshint node: true */
 /* globals -expect, -_ */
 
-import compareFacts from 'tower/system-tracking/compare-facts/flat';
-
-var expect = require('chai').expect;
+var chai = require('chai');
 var _ = require('lodash');
+var chaiThings = require('chai-things');
 
+chai.use(chaiThings);
+
+global.expect = chai.expect;
 global._ = _;
 
 describe('CompareFacts.Flat', function() {
 
+    function options(overrides) {
+        return _.merge({}, defaultOptions, overrides);
+    }
+
+    var defaultTemplate =
+        {   hasTemplate: function() { return false; }
+        };
+
+    var defaultOptions =
+        {   factTemplate: defaultTemplate,
+            nameKey: 'name'
+        };
+
     it('returns empty array with empty basis facts', function() {
-        var result = compareFacts({ facts: [] }, { facts: [] });
+        var result = compareFacts({ facts: [] }, { facts: [] }, defaultOptions);
 
         expect(result).to.deep.equal([]);
     });
@@ -27,39 +44,177 @@ describe('CompareFacts.Flat', function() {
                             [{  'name': 'foo',
                                 'value': 'bar'
                             }]
-                        }, 'name', ['value']);
+                        }, options({ nameKey: 'name',
+                                     compareKey: ['value'],
+                                   }));
+
+        expect(result).to.deep.equal([]);
+    });
+
+    it('returns empty array with multiple compare keys and no differences', function() {
+        var result = compareFacts(
+                        {   facts:
+                            [{  'name': 'foo',
+                                'value': 'bar'
+                            }]
+                        },
+                        {   facts:
+                            [{  'name': 'foo',
+                                'value': 'bar'
+                            }]
+                        }, options({    compareKey: ['name', 'value']
+                                  }));
 
         expect(result).to.deep.equal([]);
     });
 
     context('when both collections contain facts', function() {
-        it('includes each fact value when a compareKey differs', function() {
+        it('includes each compare key value when a compareKey differs', function() {
             var result = compareFacts(
                             {   position: 'left',
                                 facts:
                                 [{  'name': 'foo',
-                                    'value': 'bar'
+                                    'value': 'bar',
+                                    'extra': 'doo'
                                 }]
                             },
                             {   position: 'right',
                                 facts:
                                 [{  'name': 'foo',
-                                    'value': 'baz'
+                                    'value': 'baz',
+                                    'extra': 'doo'
                                 }]
-                            }, 'name', ['value']);
+                            }, options({ compareKey: ['value', 'extra'] }));
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
                     nestingLevel: 0,
                     facts:
-                    [{  keyName: 'foo',
+                    [{  keyName: 'value',
                         value1: 'bar',
                         value1IsAbsent: false,
                         value2: 'baz',
-                        value2IsAbsent: false
+                        value2IsAbsent: false,
+                        isDivergent: true
+                    },
+                    {   keyName: 'extra',
+                        value1: 'doo',
+                        value1IsAbsent: false,
+                        value2: 'doo',
+                        value2IsAbsent: false,
+                        isDivergent: false
                     }]
                 }]);
         });
+
+        it('ignores compare keys with no values in fact', function() {
+            var result = compareFacts(
+                            {   position: 'left',
+                                facts:
+                                [{  'name': 'foo',
+                                    'value': 'bar',
+                                    'extra': 'doo'
+                                }]
+                            },
+                            {   position: 'right',
+                                facts:
+                                [{  'name': 'foo',
+                                    'value': 'baz',
+                                    'extra': 'doo'
+                                }]
+                            }, options({ compareKey: ['value', 'extra', 'blah'] }));
+
+            expect(result).to.deep.equal(
+                [{  displayKeyPath: 'foo',
+                    nestingLevel: 0,
+                    facts:
+                    [{  keyName: 'value',
+                        value1: 'bar',
+                        value1IsAbsent: false,
+                        value2: 'baz',
+                        value2IsAbsent: false,
+                        isDivergent: true
+                    },
+                    {   keyName: 'extra',
+                        value1: 'doo',
+                        value1IsAbsent: false,
+                        value2: 'doo',
+                        value2IsAbsent: false,
+                        isDivergent: false
+                    }]
+                }]);
+
+        });
+
+        it('allows mapping key names with keyNameMap parameter', function() {
+            var keyNameMap =
+                {   'extra': 'blah'
+                };
+
+            var result = compareFacts(
+                            {   position: 'left',
+                                facts:
+                                [{  'name': 'foo',
+                                    'value': 'bar',
+                                    'extra': 'doo'
+                                }]
+                            },
+                            {   position: 'right',
+                                facts:
+                                [{  'name': 'foo',
+                                    'value': 'baz',
+                                    'extra': 'doo'
+                                }]
+                            }, options({    compareKey: ['value', 'extra', 'blah'],
+                                            keyNameMap: keyNameMap
+                                      }));
+
+            expect(result[0].facts).to.include.something.that.deep.equals(
+                    {   keyName: 'blah',
+                        value1: 'doo',
+                        value1IsAbsent: false,
+                        value2: 'doo',
+                        value2IsAbsent: false,
+                        isDivergent: false
+                    });
+
+        });
+
+        // it('allows formatting values with valueFormat parameter', function() {
+        //     var valueFormat =
+        //         function(key, values) {
+        //             if (key === 'extra') {
+        //                 return 'formatted';
+        //             }
+        //         }
+
+        //     var result = compareFacts(
+        //                     {   position: 'left',
+        //                         facts:
+        //                         [{  'name': 'foo',
+        //                             'value': 'bar',
+        //                             'extra': 'doo'
+        //                         }]
+        //                     },
+        //                     {   position: 'right',
+        //                         facts:
+        //                         [{  'name': 'foo',
+        //                             'value': 'baz',
+        //                             'extra': 'doo'
+        //                         }]
+        //                     }, 'name', ['value', 'extra', 'blah'], keyNameMap, defaultTemplate, );
+
+        //     expect(result[0].facts).to.include.something.that.deep.equals(
+        //             {   keyName: 'extra',
+        //                 value1: 'formatted',
+        //                 value1IsAbsent: false,
+        //                 value2: 'formatted',
+        //                 value2IsAbsent: false,
+        //                 isDivergent: false
+        //             });
+
+        // });
+
     });
 
     context('when value for nameKey is present in one collection but not the other', function() {
@@ -77,46 +232,55 @@ describe('CompareFacts.Flat', function() {
 
         it('uses "absent" for the missing value', function() {
 
-            var facts = factData([{  'name': 'foo'
-                                 }]);
-
-            var result = compareFacts(facts[0], facts[1], 'name', ['value']);
-
-            expect(result).to.deep.equal(
-                [{  displayKeyPath: 'foo',
-                    nestingLevel: 0,
-                    facts:
-                    [{  keyName: 'name',
-                        value1: 'foo',
-                        value1IsAbsent: false,
-                        value2: 'absent',
-                        value2IsAbsent: true
-                    }]
-                }]);
-        });
-
-        it('includes all keys from basisFacts', function() {
             var facts = factData([{  'name': 'foo',
                                      'value': 'bar'
                                  }]);
 
-            var result = compareFacts(facts[0], facts[1], 'name', ['value']);
+            var result = compareFacts(facts[0], facts[1],
+                                      options({ compareKey: ['value']
+                                             }));
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
                     nestingLevel: 0,
                     facts:
-                    [{  keyName: 'name',
-                        value1: 'foo',
-                        value1IsAbsent: false,
-                        value2: 'absent',
-                        value2IsAbsent: true
-                     },
-                     {  keyName: 'value',
+                    [{  keyName: 'value',
                         value1: 'bar',
                         value1IsAbsent: false,
                         value2: 'absent',
-                        value2IsAbsent: true
+                        value2IsAbsent: true,
+                        isDivergent: true
+                    }]
+                }]);
+        });
+
+        it('includes given compare keys from basisFacts', function() {
+            var facts = factData([{  'name': 'foo',
+                                     'value': 'bar',
+                                     'extra': 'doo'
+                                 }]);
+
+            var result = compareFacts(facts[0], facts[1],
+                                      options({ compareKey: ['value', 'extra']
+                                             }));
+
+            expect(result).to.deep.equal(
+                [{  displayKeyPath: 'foo',
+                    nestingLevel: 0,
+                    facts:
+                    [{  keyName: 'value',
+                        value1: 'bar',
+                        value1IsAbsent: false,
+                        value2: 'absent',
+                        value2IsAbsent: true,
+                        isDivergent: true
+                     },
+                     {  keyName: 'extra',
+                        value1: 'doo',
+                        value1IsAbsent: false,
+                        value2: 'absent',
+                        value2IsAbsent: true,
+                        isDivergent: true
                      }]
                 }]);
 
@@ -132,10 +296,14 @@ describe('CompareFacts.Flat', function() {
                     {   render: function() {
                                     renderCallCount++;
                                 },
+                        hasTemplate: function() { return true; },
                         template: ""
                     };
 
-                compareFacts(facts[0], facts[1], 'name', ['value'], factTemplate);
+                compareFacts(facts[0], facts[1],
+                             options({  compareKey: ['value'],
+                                        factTemplate: factTemplate
+                                    }));
 
                 expect(renderCallCount).to.equal(1);
 
@@ -168,10 +336,14 @@ describe('CompareFacts.Flat', function() {
                 {   render: function(fact) {
                                 renderCalledWith.push(fact);
                             },
+                    hasTemplate: function() { return true; },
                     template: ""
                 };
 
-            compareFacts(factData[0], factData[1], 'name', ['value'], factTemplate);
+            compareFacts(factData[0], factData[1],
+                         options({  compareKey: ['value'],
+                                    factTemplate: factTemplate
+                                 }));
 
             expect(renderCalledWith).to.include(factData[0].facts[0]);
             expect(renderCalledWith).to.include(factData[1].facts[0]);
