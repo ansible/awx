@@ -15,18 +15,20 @@ successful release.
     __version__ = 'X.Y.Z'
 ```
 
-2. Update the rpm package changelog by adding a new entry to the file `packaging/rpm/ansible-tower.spec`.
+2. Update the "Release History" in the file `README.md`.
 
-3. Update the debian package changelog by adding a new entry to the file `packaging/debian/changelog`.
+3. Update the rpm package changelog by adding a new entry to the file `packaging/rpm/ansible-tower.spec`.
 
-4. Tag and push the release to git.
+4. Update the debian package changelog by adding a new entry to the file `packaging/debian/changelog`.
+
+5. Tag and push the release to git.
 
 ```
     git tag <X.Y.Z>
     git push --tags
 ```
 
-5. Create and push a release branch to git.
+6. Create and push a release branch to git.
 
 ```
     git branch release_<X.Y.Z>

@@ -8,7 +8,7 @@ The current version under development is 2.1.0.
 
 Development releases always use the 'master' branch.
 
-Release schedule
+Release History
 ================
 
 * 1.2.2, July 31, 2013.
@@ -25,8 +25,12 @@ Release schedule
 * 2.0.2, October 6, 2014
 * 2.0.3, November 14, 2014
 * 2.0.4, November 21, 2014
-* 2.0.5, ...
-* 2.1.0, January 7, 2014
+* 2.0.5, December 10, 2014
+* 2.1.0, January 7, 2015
+* 2.1.1, February 4, 2015
+* 2.1.2, March 25, 2015
+* 2.1.3, April 15, 2015
+* 2.1.4, June 12, 2015
 
 Any fixes should be applied on the appropriate release branch and be cherry-picked to
 master.
