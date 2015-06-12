@@ -2001,6 +2001,19 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
         self.check_inventory_source(inventory_source)
 
+    def test_update_from_azure(self):
+        source_username = getattr(settings, 'TEST_AZURE_USERNAME', '')
+        source_key_data = getattr(settings, 'TEST_AZURE_KEY_DATA', '')
+        if not all([source_username, source_key_data]):
+            self.skipTest("No test azure credentials defined")
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='azure',
+                                               username=source_username,
+                                               ssh_key_data=source_key_data)
+        inventory_source = self.update_inventory_source(self.group, source='azure', credential=credential)
+        self.check_inventory_source(inventory_source)
+        self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
+
 
 class InventoryCredentialTest(BaseTest):
     def setUp(self):
