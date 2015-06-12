@@ -48,7 +48,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
             }
             if (hosts[host].changed) {
                 hosts[host].changedTip = hosts[host].changed;
-                hosts[host].changedTip += (hosts[host].changed === 1) ? " host event" : " host eventss";
+                hosts[host].changedTip += (hosts[host].changed === 1) ? " host event" : " host events";
                 hosts[host].changedTip += " changed.";
             } else {
                 hosts[host].changedTip = "No host events changed.";
