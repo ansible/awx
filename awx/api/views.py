@@ -45,7 +45,7 @@ import qsstats
 import ansiconv
 
 # AWX
-from awx.main.task_engine import TaskSerializer, TASK_FILE
+from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
 from awx.main.tasks import mongodb_control
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
@@ -268,12 +268,21 @@ class ApiV1ConfigView(APIView):
     def delete(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        try:
-            os.remove(TASK_FILE)
+
+        # Remove license file
+        has_error = False
+        for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
+            try:
+                os.remove(fname)
+            except OSError:
+                has_error = True
+
+        # Only stop mongod if license removal succeeded
+        if has_error:
+            return Response({"error": "Failed to remove license"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
             mongodb_control.delay('stop')
-        except OSError:
-            pass
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 class DashboardView(APIView):
 
