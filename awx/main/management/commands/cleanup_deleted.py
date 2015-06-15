@@ -40,24 +40,24 @@ class Command(BaseCommand):
                 yield submodel
 
     def cleanup_model(self, model):
-        name_field = None
+
+        '''
+        Presume the '_deleted_' string to be in the 'name' field unless considering the User model.
+        When considering the User model, presume the '_d_' string to be in the 'username' field.
+        '''
+        name_field = 'name'
+        name_prefix = '_deleted_'
+        if model is User:
+            name_field = 'username'
+            name_prefix = '_d_'
         active_field = None
         n_deleted_items = 0
         for field in model._meta.fields:
-            if field.name in ('name', 'username'):
-                name_field = field.name
             if field.name in ('is_active', 'active'):
                 active_field = field.name
-        if not name_field:
-            self.logger.warning('skipping model %s, no name field', model)
-            return n_deleted_items
         if not active_field:
             self.logger.warning('skipping model %s, no active field', model)
             return n_deleted_items
-        if name_field == 'username' and active_field == 'is_active':
-            name_prefix = '_d_'
-        else:
-            name_prefix = '_deleted_'
         qs = model.objects.filter(**{
             active_field: False,
             '%s__startswith' % name_field: name_prefix,
