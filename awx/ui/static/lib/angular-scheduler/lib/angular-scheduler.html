@@ -25,6 +25,13 @@
             <div class="factDetailsNote" ng-if="isFactCleanup"><span class="factDetailsHeader">Note:</span> For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.
 Caution: Setting both numerical variables to "0" will delete all facts.</div>
 
+            <div class="form-group" ng-show="cleanupJob  && !isFactCleanup">
+                <label><span class="red-text">*</span> Days of data to keep</label>
+                <input type="number" class="form-control input-sm" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep">
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
+            </div>
+
             <div class="form-group cleanupStretcher factDaysToKeepCompacter" ng-if="isFactCleanup">
                 <div class="col-md-12">
                     <label><span class="red-text">*</span> Select a time period after which to remove old facts</label>

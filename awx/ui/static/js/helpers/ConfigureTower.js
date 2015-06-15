@@ -480,32 +480,34 @@ export default
                     container.show('slide', { direction: 'right' }, 300);
                     // scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
                     target.show();
-                    scope.$watch('scheduler_form.keep_amount.$modelValue', function(newVal) {
-                        if (!newVal && newVal !== 0) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (isNaN(newVal)) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (newVal < 0) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (newVal > 9999) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else {
-                            $('#configure-save-button').prop("disabled", false);
-                        }
-                    });
-                    scope.$watch('scheduler_form.granularity_keep_amount.$modelValue', function(newVal2) {
-                        if (!newVal2 && newVal2 !== 0) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (isNaN(newVal2)) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (newVal2 < 0) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else if (newVal2 > 9999) {
-                            $('#configure-save-button').prop("disabled", true);
-                        } else {
-                            $('#configure-save-button').prop("disabled", false);
-                        }
-                    });
+                    if (scope.isFactCleanup) {
+                        scope.$watch('scheduler_form.keep_amount.$modelValue', function(newVal) {
+                            if (!newVal && newVal !== 0) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (isNaN(newVal)) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (newVal < 0) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (newVal > 9999) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else {
+                                $('#configure-save-button').prop("disabled", false);
+                            }
+                        });
+                        scope.$watch('scheduler_form.granularity_keep_amount.$modelValue', function(newVal2) {
+                            if (!newVal2 && newVal2 !== 0) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (isNaN(newVal2)) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (newVal2 < 0) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else if (newVal2 > 9999) {
+                                $('#configure-save-button').prop("disabled", true);
+                            } else {
+                                $('#configure-save-button').prop("disabled", false);
+                            }
+                        });
+                    }
                     if(mode==="add"){
                         scope.$apply(function(){
                             scope.schedulerPurgeDays = 30;
@@ -565,10 +567,16 @@ export default
                 if (scheduler.isValid()) {
                     scope.schedulerIsValid = true;
                     url = (mode==="edit") ? GetBasePath('schedules')+id+'/' : url;
-
-                    extra_vars = {
-                        "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
-                    };
+                    if (scope.isFactCleanup) {
+                        extra_vars = {
+                            "older_than": scope.keep_amount+scope.keep_unit.value,
+                            "granularity": scope.granularity_keep_amount+scope.granularity_keep_unit.value
+                        };
+                    } else {
+                        extra_vars = {
+                            "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
+                        };
+                    }
                     schedule.extra_data = JSON.stringify(extra_vars);
 
                     SchedulePost({
