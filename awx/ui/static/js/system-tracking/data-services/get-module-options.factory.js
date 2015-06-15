@@ -13,8 +13,16 @@ var moduleConfig =
             },
         'files':
             {   compareKey: ['size', 'mode', 'md5', 'mtime', 'gid', 'uid'],
+                keyNameMap:
+                    {   'uid': 'ownership'
+                    },
+                factTemplate:
+                    {   'uid': 'user id: {{uid}}, group id: {{gid}}',
+                        'mode': true,
+                        'md5': true,
+                        'mtime': '{{mtime|formatEpoch}}'
+                    },
                 nameKey: 'path',
-                displayKeys: ['size', 'mode', 'mtime', 'uid', 'gid', 'md5'],
                 sortKey: 3
             },
         'ansible':
