@@ -3,7 +3,6 @@
 
 # Python
 import datetime
-import logging
 from optparse import make_option
 
 # Django

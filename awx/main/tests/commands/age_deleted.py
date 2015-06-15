@@ -1,14 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-# Python
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-import mock
-
-#Django
-from django.core.management.base import CommandError
-
 # AWX
 from awx.main.tests.base import BaseTest
 from awx.main.tests.commands.base import BaseCommandMixin
