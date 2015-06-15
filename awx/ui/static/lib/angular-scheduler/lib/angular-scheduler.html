@@ -22,11 +22,39 @@
                 <div class="error" ng-show="scheduler_form.schedulerName.$dirty && scheduler_form.schedulerName.$error.required">A schedule name is required.</div>
             </div>
 
-            <div class="form-group" ng-show="cleanupJob">
-                <label><span class="red-text">*</span>Days of data to keep</label>
-                <input type="number" class="form-control input-sm" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep">
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
+            <div class="factDetailsNote" ng-if="isFactCleanup"><span class="factDetailsHeader">Note:</span> For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.
+Caution: Setting both numerical variables to "0" will delete all facts.</div>
+
+            <div class="form-group cleanupStretcher factDaysToKeepCompacter" ng-if="isFactCleanup">
+                <div class="col-md-12">
+                    <label><span class="red-text">*</span> Select a time period after which to remove old facts</label>
+                </div>
+                <div class="col-md-6 inputSpacer inputCompactMobile">
+                    <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control input-sm" aw-min=0 aw-max=9999 integer></input>
+                    <div class="error" ng-show="scheduler_form.keep_amount.$dirty && scheduler_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.number || scheduler_form.keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                </div>
+                <div class="col-md-6 inputSpacer">
+                    <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm"></select>
+                </div>
+            </div>
+
+            <div class="form-group cleanupStretcher" ng-if="isFactCleanup">
+                <div class="col-md-12">
+                    <label><span class="red-text">*</span> Select a frequency for snapshot retention</label>
+                </div>
+                <div class="col-md-6 inputSpacer inputCompactMobile">
+                    <input type="number" class="form-control input-sm" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" aw-min=0 aw-max=9999 >
+                    <div class="error" ng-show="scheduler_form.granularity_keep_amount.$dirty && scheduler_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.number || scheduler_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                </div>
+                <div class="col-md-6 inputSpacer">
+                    <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm"></select>
+                </div>
             </div>
 
             <div class="row">

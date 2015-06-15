@@ -344,6 +344,40 @@ export default
                 };
 
                 scope.configureSchedule = function(id, name) {
+                    if (id === 4) {
+                        scope.isFactCleanup = true;
+                        scope.keep_unit_choices = [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        scope.granularity_keep_unit_choices =  [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        scope.prompt_for_days_facts_form.keep_amount.$setViewValue(30);
+                        scope.prompt_for_days_facts_form.granularity_keep_amount.$setViewValue(1);
+                        scope.keep_unit = scope.keep_unit_choices[0];
+                        scope.granularity_keep_unit = scope.granularity_keep_unit_choices[1];
+                    } else {
+                        scope.isFactCleanup = false;
+                    }
+
                     Rest.setUrl(scheduleUrl+id+'/schedules/');
                     Rest.get()
                         .success(function(data) {
@@ -446,6 +480,32 @@ export default
                     container.show('slide', { direction: 'right' }, 300);
                     // scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
                     target.show();
+                    scope.$watch('scheduler_form.keep_amount.$modelValue', function(newVal) {
+                        if (!newVal && newVal !== 0) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (isNaN(newVal)) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (newVal < 0) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (newVal > 9999) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else {
+                            $('#configure-save-button').prop("disabled", false);
+                        }
+                    });
+                    scope.$watch('scheduler_form.granularity_keep_amount.$modelValue', function(newVal2) {
+                        if (!newVal2 && newVal2 !== 0) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (isNaN(newVal2)) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (newVal2 < 0) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else if (newVal2 > 9999) {
+                            $('#configure-save-button').prop("disabled", true);
+                        } else {
+                            $('#configure-save-button').prop("disabled", false);
+                        }
+                    });
                     if(mode==="add"){
                         scope.$apply(function(){
                             scope.schedulerPurgeDays = 30;
