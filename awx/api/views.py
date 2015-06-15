@@ -10,6 +10,7 @@ import dateutil
 import time
 import socket
 import sys
+import errno
 
 # Django
 from django.conf import settings
@@ -270,19 +271,21 @@ class ApiV1ConfigView(APIView):
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         # Remove license file
-        has_error = False
+        errno = None
         for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
             try:
                 os.remove(fname)
-            except OSError:
-                has_error = True
+            except OSError, e:
+                if e.errno != errno.ENOENT
+                    errno = e.errno
+                    break
 
         # Only stop mongod if license removal succeeded
-        if has_error:
-            return Response({"error": "Failed to remove license"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
+        if errno is None:
             mongodb_control.delay('stop')
             return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"error": "Failed to remove license (%s)" % errno}, status=status.HTTP_400_BAD_REQUEST)
 
 class DashboardView(APIView):
 
