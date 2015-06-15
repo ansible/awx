@@ -127,16 +127,23 @@ export function formatFacts(diffedResults) {
 }
 
 export function findFacts(factData) {
-    var rightData = factData[0].facts;
-    var leftData = factData[1].facts;
+    var leftData = factData[0].facts;
+    var rightData = factData[1].facts;
 
     function factObject(keyPath, key, leftValue, rightValue) {
         var obj =
             {   keyPath: keyPath,
-                keyName: key,
-                value1: leftValue,
-                value2: rightValue
+                keyName: key
             };
+
+        if (factData[0].position === 'left') {
+                obj.value1 = leftValue;
+                obj.value2 = rightValue;
+        } else {
+                obj.value1 = rightValue;
+                obj.value2 = leftValue;
+        }
+
         return obj;
     }
 
