@@ -14,7 +14,6 @@ import urlparse
 import django.test
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.test.utils import override_settings
 from django.utils.encoding import smart_str
 
@@ -241,7 +240,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # We give Juan inventory permission and he can see both Job Templates because he already has deploy permission
         # Now he can see both job templates
-        juan_inv_permission = Permission.objects.create(
+        Permission.objects.create(
             inventory       = self.inv_eng,
             user            = self.user_juan,
             permission_type = PERM_INVENTORY_READ,
