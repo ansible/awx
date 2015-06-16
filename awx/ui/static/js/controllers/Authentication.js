@@ -175,6 +175,7 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
         Authorization.getLicense()
             .success(function (data) {
                 Authorization.setLicense(data);
+                Wait("stop");
                 if (lastPath()) {
                     // Go back to most recent navigation path
                     $location.path(lastPath());
