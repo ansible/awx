@@ -136,31 +136,25 @@ function controller($rootScope,
     }
 
     $scope.setActiveModule = function(newModuleName, initialData) {
-        var isAlreadyActive = false;
-        for (var i in $scope.modules) {
-            if ($scope.modules[i].name === newModuleName &&
-                $scope.modules[i].isActive) {
-                isAlreadyActive = true;
-            }
-        }
-
         var newModule = _.find($scope.modules, function(module) {
             return module.name === newModuleName;
         });
 
-        if (!isAlreadyActive) {
-            $scope.modules.forEach(function(module) {
-                module.isActive = false;
-            });
-
-            newModule.isActive = true;
-
-            $location.replace();
-            $location.search('module', newModuleName);
-
-            reloadData({   module: newModule
-                       }, initialData).value();
+        if (newModule.isActive) {
+            return;
         }
+
+        $scope.modules.forEach(function(module) {
+            module.isActive = false;
+        });
+
+        newModule.isActive = true;
+
+        $location.replace();
+        $location.search('module', newModuleName);
+
+        reloadData({   module: newModule
+                   }, initialData).value();
     };
 
     function dateWatcher(dateProperty) {
