@@ -21,7 +21,7 @@
             ng-class="{  'btn': true,
                          'btn-default': true,
                          'FactModuleFilter-module': true,
-                         'FactModuleFilter-module--isActive': module.isActive,
+                         'is-active': module.isActive,
                       }"
             ng-click="setActiveModule(module.name)"
             ng-repeat="module in modules | orderBy: 'sortKey'">
