@@ -21,7 +21,8 @@ __all__ = ['RunFactCacheReceiverUnitTest', 'RunFactCacheReceiverFunctionalTest']
 TEST_MSG_BASE = {
     'host': 'hostname1',
     'date_key': time.mktime(datetime.utcnow().timetuple()),
-    'facts' : { }
+    'facts' : { },
+    'inventory_id': 1
 }
 
 TEST_MSG_MODULES = {
