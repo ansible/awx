@@ -31,6 +31,14 @@ from awx.main.task_engine import TaskSerializer as LicenseReader
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
+LICENSE_EXPIRED_MESSAGE = '''\
+License expired.
+See http://www.ansible.com/renew for license extension information.'''
+
+LICENSE_NON_EXISTANT_MESSAGE = '''\
+No license.
+See http://www.ansible.com/renew for license information.'''
+
 LICENSE_MESSAGE = '''\
 Number of licensed instances exceeded, would bring available instances to %(new_count)d, system is licensed for %(available_instances)d.
 See http://www.ansible.com/renew for license extension information.'''
@@ -635,6 +643,7 @@ class Command(NoArgsCommand):
         # Load inventory source if specified via environment variable (when
         # inventory_import is called from an InventoryUpdate task).
         inventory_source_id = os.getenv('INVENTORY_SOURCE_ID', None)
+        inventory_update_id = os.getenv('INVENTORY_UPDATE_ID', None)
         if inventory_source_id:
             try:
                 self.inventory_source = InventorySource.objects.get(pk=inventory_source_id,
@@ -643,7 +652,11 @@ class Command(NoArgsCommand):
             except InventorySource.DoesNotExist:
                 raise CommandError('Inventory source with id=%s not found' %
                                    inventory_source_id)
-            self.inventory_update = None
+            try:
+                self.inventory_update = InventoryUpdate.objects.get(pk=inventory_update_id)
+            except InventorySource.DoesNotExist:
+                raise CommandError('Inventory update with id=%s not found' %
+                                   inventory_update_id)
         # Otherwise, create a new inventory source to capture this invocation
         # via command line.
         else:
@@ -1167,12 +1180,15 @@ class Command(NoArgsCommand):
     def check_license(self):
         reader = LicenseReader()
         license_info = reader.from_file()
+        if not license_info or len(license_info) == 0:
+            self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
+            raise CommandError('No Tower license found!')
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)
         new_count = Host.objects.active_count()
         if time_remaining <= 0 and not license_info.get('demo', False):
-            self.logger.error('License has expired')
+            self.logger.error(LICENSE_EXPIRED_MESSAGE)
             raise CommandError("License has expired!")
         if free_instances < 0:
             d = {
@@ -1184,6 +1200,10 @@ class Command(NoArgsCommand):
             else:
                 self.logger.error(LICENSE_MESSAGE % d)
             raise CommandError('License count exceeded!')
+
+    def mark_license_failure(self, save=True):
+        self.inventory_update.license_error = True
+        self.inventory_update.save(update_fields=['license_error'])
 
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
@@ -1220,9 +1240,14 @@ class Command(NoArgsCommand):
         except re.error:
             raise CommandError('invalid regular expression for --host-filter')
 
-        self.check_license()
         begin = time.time()
         self.load_inventory_from_database()
+
+        try:
+            self.check_license()
+        except CommandError as e:
+            self.mark_license_failure(save=True)
+            raise e
 
         status, tb, exc = 'error', '', None
         try:
@@ -1232,7 +1257,7 @@ class Command(NoArgsCommand):
             # Update inventory update for this command line invocation.
             with ignore_inventory_computed_fields():
                 iu = self.inventory_update
-                if iu and iu.status != 'running':
+                if iu.status != 'running':
                     with transaction.atomic():
                         self.inventory_update.status = 'running'
                         self.inventory_update.save()
@@ -1263,7 +1288,11 @@ class Command(NoArgsCommand):
                     if settings.SQL_DEBUG:
                         self.logger.warning('update computed fields took %d queries',
                                             len(connection.queries) - queries_before2)
-                self.check_license()
+                try:
+                    self.check_license()
+                except CommandError as e:
+                    self.mark_license_failure(save=True)
+                    raise e
      
                 if self.inventory_source.group:
                     inv_name = 'group "%s"' % (self.inventory_source.group.name)
@@ -1295,15 +1324,13 @@ class Command(NoArgsCommand):
             else:
                 tb = traceback.format_exc()
                 exc = e
-            if self.inventory_update:
-                transaction.rollback()
+            transaction.rollback()
 
-        if self.inventory_update:
-            with ignore_inventory_computed_fields():
-                self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
-                self.inventory_update.result_traceback = tb
-                self.inventory_update.status = status
-                self.inventory_update.save(update_fields=['status', 'result_traceback'])
+        with ignore_inventory_computed_fields():
+            self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
+            self.inventory_update.result_traceback = tb
+            self.inventory_update.status = status
+            self.inventory_update.save(update_fields=['status', 'result_traceback'])
             
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
