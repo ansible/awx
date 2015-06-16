@@ -276,7 +276,7 @@ class ApiV1ConfigView(APIView):
             try:
                 os.remove(fname)
             except OSError, e:
-                if e.errno != errno.ENOENT
+                if e.errno != errno.ENOENT:
                     errno = e.errno
                     break
 
