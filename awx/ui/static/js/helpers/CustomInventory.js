@@ -161,9 +161,10 @@ export default
                             });
                     };
 
+                    var bodyHtml = "<div class=\"alert alert-info\">Are you sure you want to delete " + name + "?</div>";
                     Prompt({
                         hdr: 'Delete',
-                        body: "<div class\"alert alert-info\">Are you sure you want to delete  " + name + "?</div>",
+                        body: bodyHtml,
                         action: action
                     });
                 };
