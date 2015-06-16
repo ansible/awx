@@ -243,7 +243,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
     'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
 ];
 
-export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
+export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
     CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices) {
@@ -494,7 +494,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         list: ProjectList,
         field: 'project',
         input_type: "radio",
-        autopopulateLookup: (context === 'inv') ? false : true 
+        autopopulateLookup: (context === 'inv') ? false : true
     });
 
     if ($scope.removeSurveySaved) {
@@ -534,7 +534,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         if (data.related && data.related.callback) {
             Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
                 '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
-                '<p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+                '<p>The host configuration key is: <strong>' + $filter('sanitize')(data.host_config_key) + '</strong></p>', 'alert-info', saveCompleted, null, null, null, true);
         }
         else {
             saveCompleted();
@@ -651,14 +651,14 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     };
 }
 
-JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
+JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'SurveyControllerInit', 'Prompt', 'GetChoices'
 ];
 
 
-export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
+export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
@@ -1048,7 +1048,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
             if (data.related && data.related.callback) {
                 Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
                     '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
-                    '<p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+                    '<p>The host configuration key is: <strong>' + $filter('sanitize')(data.host_config_key) + '</strong></p>', 'alert-info', saveCompleted, null, null, null, true);
             }
             else {
                 saveCompleted();
@@ -1231,7 +1231,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
 
 }
 
-JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
+JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',

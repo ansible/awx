@@ -103,9 +103,11 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
 .factory('Alert', ['$rootScope', '$filter', function ($rootScope, $filter) {
-    return function (hdr, msg, cls, action, secondAlert, disableButtons, backdrop) {
+    return function (hdr, msg, cls, action, secondAlert, disableButtons, backdrop, customStyle) {
         var scope = $rootScope.$new(), alertClass, local_backdrop;
-        msg = $filter('sanitize')(msg);
+        if (customStyle !== true) {
+            msg = $filter('sanitize')(msg);
+        }
         if (secondAlert) {
 
             $('#alertHeader2').html(hdr);
