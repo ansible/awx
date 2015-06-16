@@ -271,21 +271,21 @@ class ApiV1ConfigView(APIView):
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         # Remove license file
-        errno = None
+        has_error = None
         for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
             try:
                 os.remove(fname)
             except OSError, e:
                 if e.errno != errno.ENOENT:
-                    errno = e.errno
+                    has_error = e.errno
                     break
 
         # Only stop mongod if license removal succeeded
-        if errno is None:
+        if has_error is None:
             mongodb_control.delay('stop')
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            return Response({"error": "Failed to remove license (%s)" % errno}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
 
 class DashboardView(APIView):
 
