@@ -63,6 +63,9 @@ function controller($rootScope,
             rightRange = searchConfig.leftRange;
         }
 
+        $scope.leftDataNoScans = false;
+        $scope.rightDataNoScans = false;
+
         waitIndicator('start');
 
         return getDataForComparison(
@@ -73,8 +76,19 @@ function controller($rootScope,
                 .then(function(responses) {
                     var data = _.pluck(responses, 'fact');
 
-                    $scope.leftScanDate = moment(responses[0].timestamp);
-                    $scope.rightScanDate = moment(responses[1].timestamp);
+                    if (_.isEmpty(data[0])) {
+                        $scope.leftDataNoScans = true;
+                        $scope.leftScanDate = $scope.leftDate;
+                    } else {
+                        $scope.leftScanDate = moment(responses[0].timestamp);
+                    }
+
+                    if (_.isEmpty(data[1])) {
+                        $scope.rightDataNoScans = true;
+                        $scope.rightScanDate = $scope.rightDate;
+                    } else {
+                        $scope.rightScanDate = moment(responses[1].timestamp);
+                    }
 
                     return data;
                 })

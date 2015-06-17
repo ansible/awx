@@ -6,11 +6,13 @@
           </span>
         </h3>
         <h3 class="FactDataTable-column FactDataTableHeading">
-          <span class="FactDataTableHeading-host">{{leftHostname}}</span>
+          <span ng-if="leftDataNoScans">No scans for {{leftHostname}} on</span>
+          <span class="FactDataTableHeading-host" ng-if="!leftDataNoScans">{{leftHostname}}</span>
           <span class="FactDataTableHeading-date">{{leftScanDate|longDate}}</span>
         </h3>
         <h3 class="FactDataTable-column FactDataTableHeading">
-          <span class="FactDataTableHeading-host">{{rightHostname}}</span>
+          <span ng-if="rightDataNoScans">No scans for {{rightHostname}} on</span>
+          <span class="FactDataTableHeading-host" ng-if="!rightDataNoScans">{{rightHostname}}</span>
           <span class="FactDataTableHeading-date">{{rightScanDate|longDate}}</span>
         </h3>
     </div>

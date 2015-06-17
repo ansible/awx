@@ -9,6 +9,8 @@ export default
                                 rightHostname: '=',
                                 leftScanDate: '=',
                                 rightScanDate: '=',
+                                leftDataNoScans: '=',
+                                rightDataNoScans: '=',
                                 factData: '='
                             }
                     };
