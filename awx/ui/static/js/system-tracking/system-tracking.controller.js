@@ -23,11 +23,17 @@ function controller($rootScope,
     var hosts = $routeParams.model.hosts;
     var moduleParam = $routeParams.module || 'packages';
 
+    $scope.compareMode =
+        hostIds.length === 1 ? 'single-host' : 'host-to-host';
     $scope.hostIds = $routeParams.hosts;
     $scope.inventory = $routeParams.model.inventory;
 
-    $scope.factModulePickersLabelLeft = "Compare latest facts collected on or before";
-    $scope.factModulePickersLabelRight = "To latest facts collected on or before";
+    if ($scope.compareMode === 'host-to-host') {
+        $scope.factModulePickersLabelLeft = "Compare latest facts collected across both hosts on or before";
+    } else {
+        $scope.factModulePickersLabelLeft = "Compare latest facts collected on or before";
+        $scope.factModulePickersLabelRight = "To latest facts collected on or before";
+    }
 
     $scope.modules = moduleOptions;
 
@@ -53,6 +59,9 @@ function controller($rootScope,
         var rightRange = searchConfig.rightRange;
         var activeModule = searchConfig.module;
 
+        if ($scope.compareMode === 'host-to-host') {
+            rightRange = searchConfig.leftRange;
+        }
 
         waitIndicator('start');
 

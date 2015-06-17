@@ -4,15 +4,20 @@
  * All Rights Reserved
  *************************************************/
 
+import dedupeVersions from './dedupe-versions';
+
 export default
     [   'factScanDataService',
         'getModuleOptions',
-        'resolveVersions',
+        'resolveEmptyVersions',
         'lodashAsPromised',
-        function(factScanDataService, getModuleOptions, resolveVersions, _) {
+        function(factScanDataService, getModuleOptions, resolveEmptyVersions, _) {
             return function(hostIds, moduleName, leftDate, rightDate) {
 
+                var singleHostMode = false;
+
                 if (hostIds.length === 1) {
+                    singleHostMode = true;
                     hostIds = hostIds.concat(hostIds[0]);
                 }
 
@@ -27,26 +32,36 @@ export default
                      }
                     ];
 
-                return _(hostVersionParams)
-                        .map(function(versionParam) {
-                            var versionWithRequest =
-                                [   versionParam,
-                                    factScanDataService.
-                                     getVersion(versionParam)
-                                ];
+                return _(factScanDataService.getVersion(hostVersionParams[1]))
+                        .then(function(result) {
+                            return resolveEmptyVersions(result);
+                        }).thenAll(function(firstResult) {
 
-                            return versionWithRequest;
-                        }).thenAll(function(versions) {
-                            return resolveVersions(versions);
-                        }, true)
-                        .thenMap(function(versionData) {
+                            return factScanDataService.getVersion(hostVersionParams[0])
+                                    .then(function(secondResult) {
+                                        if (_.isEmpty(secondResult.versions)) {
+                                            secondResult = resolveEmptyVersions(secondResult);
+                                        }
+
+                                        return [firstResult, secondResult];
+                                    });
+                        }).thenAll(function(results) {
+                            var finalSet;
+
+                            if (singleHostMode) {
+                                finalSet = dedupeVersions(results.reverse());
+                            } else {
+                                finalSet = _.pluck(results, 'versions[0]').reverse();
+                            }
+
+                            return finalSet;
+                        }).thenMap(function(versionData) {
                             if (versionData) {
                                 return factScanDataService.getFacts(versionData);
                             } else {
                                 return { fact: [] };
                             }
-                        })
-                        .thenAll(function(hostFacts) {
+                        }).thenAll(function(hostFacts) {
                             return hostFacts;
                         });
             };

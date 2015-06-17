@@ -10,7 +10,7 @@
             <span class="FactModulePickers-label">{{ factModulePickersLabelLeft }}</span>
             <date-picker date="leftDate"></date-picker>
         </div>
-        <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right">
+        <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right" ng-show="compareMode == 'single-host'">
             <span class="FactModulePickers-label">{{ factModulePickersLabelRight }}</span>
             <date-picker date="rightDate"></date-picker>
         </div>

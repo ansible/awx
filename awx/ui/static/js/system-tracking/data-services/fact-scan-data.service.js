@@ -51,7 +51,8 @@ function (Rest, GetBasePath, ProcessErrors, _) {
             Rest.setUrl(url);
             promise = Rest.get();
             return promise.then(function(response) {
-                return response.data.results;
+                versionParams.versions = response.data.results;
+                return versionParams;
             }).catch(function (response) {
                 ProcessErrors(null, response.data, response.status, null, {
                     hdr: 'Error!',
