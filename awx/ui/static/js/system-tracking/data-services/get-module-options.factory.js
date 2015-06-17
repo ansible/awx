@@ -20,6 +20,7 @@ var moduleConfig =
                     {   'uid': 'user id: {{uid}}, group id: {{gid}}',
                         'mode': true,
                         'md5': true,
+                        'size': true,
                         'mtime': '{{mtime|formatEpoch}}'
                     },
                 nameKey: 'path',
