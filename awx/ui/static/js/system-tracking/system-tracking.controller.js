@@ -35,7 +35,7 @@ function controller($rootScope,
         $scope.factModulePickersLabelRight = "To latest facts collected on or before";
     }
 
-    $scope.modules = moduleOptions;
+    $scope.modules = _.clone(moduleOptions, true);
 
     var leftSearchRange = searchDateRange();
     var rightSearchRange = searchDateRange();
