@@ -93,7 +93,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             $rootScope.removeJobStatusChange();
         }
         $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
-            jobs_scope.refreshJobs();
+            $scope.refreshJobs();
         });
 
         if ($rootScope.removeScheduleStatusChange) {
