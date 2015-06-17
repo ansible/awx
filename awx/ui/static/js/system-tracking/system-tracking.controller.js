@@ -37,7 +37,7 @@ function controller($rootScope,
 
     $scope.modules = moduleOptions;
 
-    var leftSearchRange = searchDateRange('yesterday');
+    var leftSearchRange = searchDateRange();
     var rightSearchRange = searchDateRange();
 
     var searchConfig =
