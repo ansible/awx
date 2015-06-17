@@ -20,6 +20,7 @@ __all__ = ['FactVersionApiTest', 'FactViewApiTest', 'SingleFactApiTest',]
 class FactApiBaseTest(BaseLiveServerTest, BaseFactTestMixin):
     def setUp(self):
         super(FactApiBaseTest, self).setUp()
+        self.create_test_license_file()
         self.setup_instances()
         self.setup_users()
         self.organization = self.make_organization(self.super_django_user)
