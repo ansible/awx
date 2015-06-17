@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-import compareNestedFacts from './compare-facts/nested';
-import compareFlatFacts from './compare-facts/flat';
-import FactTemplate from './compare-facts/fact-template';
+import compareNestedFacts from './nested';
+import compareFlatFacts from './flat';
+import FactTemplate from './fact-template';
 
 export function compareFacts(module, facts) {
 

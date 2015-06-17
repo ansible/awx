@@ -40,65 +40,11 @@
         To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates".
         </p>
     </section>
-    <section class="FactDataTable SystemTrackingContainer-main" ng-if="!error">
-        <div class="FactDataTable-headingRow">
-            <h3 class="FactDataTable-column FactDataTableHeading">
-              <span class="FactDataTableHeading-label">
-                Comparing facts collected from:
-              </span>
-            </h3>
-            <h3 class="FactDataTable-column FactDataTableHeading">
-              <span class="FactDataTableHeading-host">{{leftHostname}}</span>
-              <span class="FactDataTableHeading-date">{{leftScanDate|longDate}}</span>
-            </h3>
-            <h3 class="FactDataTable-column FactDataTableHeading">
-              <span class="FactDataTableHeading-host">{{rightHostname}}</span>
-              <span class="FactDataTableHeading-date">{{rightScanDate|longDate}}</span>
-            </h3>
-        </div>
-        <div ng-if="!isNestedDisplay">
-            <div class="FactDataTable-row" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
-                <span class="FactDataTable-column">{{group.facts.keyName}}</span>
-                <span class="FactDataTable-column">{{group.facts.value1}}</span>
-                <span class="FactDataTable-column">{{group.facts.value2}}</span>
-            </div>
-        </div>
-        <div ng-if="isNestedDisplay">
-
-            <div class="FactDataTable-factGroup FactDataGroup" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
-
-                <div class="FactDataTable-groupHeadingRow" ng-if="group.displayKeyPath">
-                    <h2 class="FactDataTable-column FactDataTable-column--full FactDataGroup-header">
-                        {{group.displayKeyPath}}
-                    </h2>
-                </div>
-                <div class="FactDataGroup-facts" data-facts="{{group.facts}}">
-                    <div class="FactDataTable-arrayGroup" ng-if="group.isFactArray" ng-repeat="arrayGroup in group.facts" data-array-group="{{arrayGroup}}">
-                        <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in arrayGroup" data-fact="{{fact}}">
-                            <span class="FactDatum-keyName FactDataTable-column">
-                            {{fact.keyName}}
-                            </span>
-                            <span class="FactDatum-value FactDataTable-column u-truncatedText">
-                            {{fact.value1}}
-                            </span>
-                            <span class="FactDatum-value FactDataTable-column u-truncatedText">
-                            {{fact.value2}}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in group.facts" ng-unless="group.isFactArray" data-fact="{{fact}}">
-                        <span class="FactDataTable-column FactDatum-keyName">
-                        {{fact.keyName}}
-                        </span>
-                        <span class="FactDataTable-column FactDatum-value" truncated-text>
-                        {{fact.value1}}
-                        </span>
-                        <span class="FactDataTable-column FactDatum-value" truncated-text>
-                        {{fact.value2}}
-                        </span>
-                    </div>
-                </div>
-        </div>
-
-    </section>
+    <fact-data-table
+        left-hostname="leftHostname"
+        right-hostname="rightHostname"
+        left-scan-date="leftScanDate"
+        right-scan-date="rightScanDate"
+        fact-data="factData">
+    </fact-data-table>
 </section>

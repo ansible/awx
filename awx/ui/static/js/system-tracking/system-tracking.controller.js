@@ -5,7 +5,7 @@
  *************************************************/
 
 import {searchDateRange} from './search-date-range';
-import {compareFacts} from './compare-facts';
+import {compareFacts} from './compare-facts/main';
 
 function controller($rootScope,
                     $scope,
