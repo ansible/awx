@@ -654,7 +654,7 @@ class Command(NoArgsCommand):
                                    inventory_source_id)
             try:
                 self.inventory_update = InventoryUpdate.objects.get(pk=inventory_update_id)
-            except InventorySource.DoesNotExist:
+            except InventoryUpdate.DoesNotExist:
                 raise CommandError('Inventory update with id=%s not found' %
                                    inventory_update_id)
         # Otherwise, create a new inventory source to capture this invocation
@@ -1222,6 +1222,8 @@ class Command(NoArgsCommand):
         self.exclude_empty_groups = bool(options.get('exclude_empty_groups', False))
         self.instance_id_var = options.get('instance_id_var', None)
 
+        self.celery_invoked = False if os.getenv('INVENTORY_SOURCE_ID', None) is None else True
+
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:
             raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
@@ -1326,11 +1328,12 @@ class Command(NoArgsCommand):
                 exc = e
             transaction.rollback()
 
-        with ignore_inventory_computed_fields():
-            self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
-            self.inventory_update.result_traceback = tb
-            self.inventory_update.status = status
-            self.inventory_update.save(update_fields=['status', 'result_traceback'])
+        if self.celery_invoked is False:
+            with ignore_inventory_computed_fields():
+                self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
+                self.inventory_update.result_traceback = tb
+                self.inventory_update.status = status
+                self.inventory_update.save(update_fields=['status', 'result_traceback'])
             
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
