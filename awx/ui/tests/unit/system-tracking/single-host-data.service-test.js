@@ -11,31 +11,38 @@ describeModule(systemTracking.name)
             service = _service;
         });
 
-        it('returns list of versions', function() {
-            var version = [{}],
-            host_id = 1,
-            module = 'packages',
-            start = moment('2015-05-05'),
-            end = moment('2015-05-06'),
-            result = {
+        it('returns list of versions with search parameters', function() {
+            var version = { result: 'test' };
+            var host_id = 1;
+            var module = 'packages';
+            var start = moment('2015-05-05');
+            var end = moment('2015-05-06');
+            var result = {
                 data: {
-                    results: version
+                    results: [version]
                 }
             };
+            var actual, expected;
 
-            var actual = service.getVersion(
+            var searchParams =
                 {   hostId: host_id,
-                    moduleName: module,
                     dateRange:
-                        {   from: start,
-                            to: end
-                        }
-                });
+                    {   from: start,
+                        to: end
+                    },
+                    endDate: end,
+                    moduleName: module
+                };
+
+            actual = service.getVersion(searchParams);
+
+            expected = _.clone(searchParams);
+            expected.versions = [version];
 
             restStub.succeed(result);
             restStub.flush();
 
-            return expect(actual).to.eventually.equal(version);
+            return expect(actual).to.eventually.deep.equal(expected);
 
         });
 
