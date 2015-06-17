@@ -11,6 +11,7 @@ export default
                                 rightScanDate: '=',
                                 leftDataNoScans: '=',
                                 rightDataNoScans: '=',
+                                isNestedDisplay: '=',
                                 factData: '='
                             }
                     };
