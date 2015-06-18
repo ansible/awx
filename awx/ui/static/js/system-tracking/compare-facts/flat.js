@@ -20,6 +20,33 @@ function slotFactValues(basisPosition, basisValue, comparatorValue) {
             };
 }
 
+/*
+ * @name flatCompare
+ * @description
+ *  Takes two separate fact objects and combines any differences into a single result
+ *  object, formatted for display.
+ *
+ * @param {Tower.SystemTracking.ResolvedFact} basisFacts - The facts we will use as the basis for this comparison
+ * @param {Tower.SystemTracking.ResolvedFact} comparatorFacts - The facts we will compare against the basis
+ * @param {Tower.SystemTracking.RenderOptions} renderOptions - Options specified in the module for rendering values
+ *
+ * @returns {Array.<Tower.SystemTracking.FactComparisonDescriptor>}
+ *
+ * @typedef {Object} Tower.SystemTracking.RenderOptions
+ * @property {string} nameKey - The name of the key that is used to locate facts from basisFacts in comparatorFacts
+ * @property {string|string[]} compareKey - A single key or list of keys to compare in the two fact collections
+ * @property {Tower.SystemTracking.KeyNameMap} keyNameMap - An object mapping existing key names to new key names for display
+ * @prperty {Tower.SystemTracking.FactTemplate} factTemplate - An optional template used as the string for comparing and displaying a fact
+ *
+ * @typedef {(string|boolean)} Tower.SystemTracking.KeyNameMapValue - The name you want to use for the display of a key or "true" to indicate a key should be displayed without changing its name (all keys are hidden by default)
+ *
+ * @typedef {Object.<string, Tower.SystemTracking.KeyNameMapValue>} Tower.SystemTracking.KeyNameMap - An object whose keys are the names of keys that exist in a fact and whose values control how that key is displayed
+ *
+ * @typedef {{displayKeyPath: string, nestingLevel: number, facts: Array.<Tower.SystemTracking.FactComparisonResult>}} Tower.SystemTracking.FactComparisonDescription
+ *
+ * @typedef {{keyName: string, value1, value2, isDivergent: bool}} Tower.SystemTracking.FactComparisonResult
+ *
+ */
 export default
     function flatCompare(basisFacts,
                          comparatorFacts, renderOptions) {
