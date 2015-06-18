@@ -105,6 +105,7 @@ describe('CompareFacts.Flat', function() {
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
+                    containsValueArray: false,
                     nestingLevel: 0,
                     facts:
                     [{  keyName: 'value',
@@ -139,6 +140,7 @@ describe('CompareFacts.Flat', function() {
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
+                    containsValueArray: false,
                     nestingLevel: 0,
                     facts:
                     [{  keyName: 'value',
@@ -334,6 +336,7 @@ describe('CompareFacts.Flat', function() {
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
+                    containsValueArray: false,
                     nestingLevel: 0,
                     facts:
                     [{  keyName: 'value',
@@ -368,6 +371,7 @@ describe('CompareFacts.Flat', function() {
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
+                    containsValueArray: false,
                     nestingLevel: 0,
                     facts:
                         {   keyName: 'foo',
@@ -389,6 +393,7 @@ describe('CompareFacts.Flat', function() {
 
             expect(result).to.deep.equal(
                 [{  displayKeyPath: 'foo',
+                    containsValueArray: false,
                     nestingLevel: 0,
                     facts:
                     [{  keyName: 'value',
@@ -405,6 +410,101 @@ describe('CompareFacts.Flat', function() {
 
         });
 
+    });
+
+    describe('when value for nameKey exists multiple times in a single collection', function() {
+
+        context('with differences between any of the values', function() {
+
+            it('includes rendered values as array for value properties', function() {
+
+                var factTemplate =
+                    {   hasTemplate:
+                            function() {
+                                return true;
+                            },
+                        render: function(fact) {
+                            return fact.version;
+                        }
+                };
+
+                var result = compareFacts(
+                                {   position: 'left',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'abcd'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'efgh'
+                                    }]
+                                },
+                                {   position: 'right',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'abcd'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'ijkl'
+                                    }]
+
+                                }, options({    compareKey: ['value'],
+                                                factTemplate: factTemplate,
+                                                supportsValueArray: true
+                                          }));
+
+                expect(result[0].containsValueArray).to.equal(true);
+                expect(result[0].facts).to.deep.equal(
+                        {   keyName: 'some-package',
+                            value1: ['abcd', 'efgh'],
+                            value2: ['abcd', 'ijkl']
+                        });
+                });
+
+        });
+
+        context('with no differences between any of the values', function() {
+
+            it('does not include the property at all', function() {
+                var expectation;
+                var factTemplate =
+                    {   hasTemplate:
+                            function() {
+                                return true;
+                            },
+                        render: function(fact) {
+                            return fact.version;
+                        }
+                };
+
+                var result = compareFacts(
+                                {   position: 'left',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'abcd'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'efgh'
+                                    }]
+                                },
+                                {   position: 'right',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'abcd'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'efgh'
+                                    }]
+
+                                }, options({    compareKey: ['value'],
+                                                factTemplate: factTemplate,
+                                                supportsValueArray: true
+                                          }));
+
+                // Use assignment to avoid jshint warning
+                expectation = expect(result).to.be.empty;
+            });
+
+        });
     });
 
     context('with factTemplate', function() {

@@ -36,15 +36,18 @@ function slotFactValues(basisPosition, basisValue, comparatorValue) {
  * @property {string} nameKey - The name of the key that is used to locate facts from basisFacts in comparatorFacts
  * @property {string|string[]} compareKey - A single key or list of keys to compare in the two fact collections
  * @property {Tower.SystemTracking.KeyNameMap} keyNameMap - An object mapping existing key names to new key names for display
- * @prperty {Tower.SystemTracking.FactTemplate} factTemplate - An optional template used as the string for comparing and displaying a fact
+ * @property {Tower.SystemTracking.FactTemplate} factTemplate - An optional template used as the string for comparing and displaying a fact
+ * @property {boolean} supportsValueArray - Indicates that the module we're rendering supports values in an array of strings rather than just a string; iterim measure to make sure modules with multiple facts matching nameKey don't get evaluated because we won't know how to dipslay them
  *
  * @typedef {(string|boolean)} Tower.SystemTracking.KeyNameMapValue - The name you want to use for the display of a key or "true" to indicate a key should be displayed without changing its name (all keys are hidden by default)
  *
  * @typedef {Object.<string, Tower.SystemTracking.KeyNameMapValue>} Tower.SystemTracking.KeyNameMap - An object whose keys are the names of keys that exist in a fact and whose values control how that key is displayed
  *
- * @typedef {{displayKeyPath: string, nestingLevel: number, facts: Array.<Tower.SystemTracking.FactComparisonResult>}} Tower.SystemTracking.FactComparisonDescription
+ * @typedef {{displayKeyPath: string, nestingLevel: number, facts: Array.<Tower.SystemTracking.FactComparisonResult>}} Tower.SystemTracking.FactComparisonDescriptor
  *
- * @typedef {{keyName: string, value1, value2, isDivergent: bool}} Tower.SystemTracking.FactComparisonResult
+ * @typedef {{keyName: string, value1: Tower.SystemTracking.FactComparisonValue, value2: Tower.SystemTracking.FactComparisonValue, isDivergent: boolean}} Tower.SystemTracking.FactComparisonResult
+ *
+ * @typedef {(string|string[])} Tower.SystemTracking.FactComparisonValue
  *
  */
 export default
@@ -58,79 +61,124 @@ export default
 
 
         return basisFacts.facts.reduce(function(arr, basisFact) {
+
+            // First, make sure this fact hasn't already been processed, if it
+            // has don't process it again
+            //
+            if (_.any(arr, { displayKeyPath: basisFact[nameKey] })) {
+                return arr;
+            }
+
             var searcher = {};
             searcher[nameKey] = basisFact[nameKey];
 
-            var matchingFact = _.where(comparatorFacts.facts, searcher);
+            var containsValueArray = false;
+            var matchingFacts = _.where(comparatorFacts.facts, searcher);
+            var comparisonResults;
             var diffs;
 
-            // Perform comparison and get back comparisonResults; like:
-            //  {   'value':
-            //      {   leftValue: 'blah',
-            //          rightValue: 'doo'
-            //      }
-            //  };
+            // If this fact exists more than once in `basisFacts`, then
+            // we need to process it differently
             //
-            var comparisonResults =
-                _.reduce(compareKeys, function(result, compareKey) {
+            var otherBasisFacts = _.where(basisFacts.facts, searcher);
+            if (renderOptions.supportsValueArray && otherBasisFacts.length > 1) {
+                comparisonResults = processFactsForValueArray(basisFacts.position, otherBasisFacts, matchingFacts);
+            } else {
+                comparisonResults = processFactsForSingleValue(basisFact, matchingFacts[0] || {});
+            }
 
-                    var comparatorFact = matchingFact[0] || {};
-                    var isNestedDisplay = false;
+            function processFactsForValueArray(basisPosition, basisFacts, comparatorFacts) {
 
-                    var slottedValues = slotFactValues(basisFacts.position,
-                                                       basisFact[compareKey],
-                                                       comparatorFact[compareKey]);
+                function renderFactValues(facts) {
+                    return facts.map(function(fact) {
+                        return factTemplate.render(fact);
+                    });
+                }
 
-                    if (_.isUndefined(slottedValues.left) && _.isUndefined(slottedValues.right)) {
-                        return result;
-                    }
+                var basisFactValues = renderFactValues(basisFacts);
+                var comparatorFactValues = renderFactValues(comparatorFacts);
 
-                    var template = factTemplate;
+                var slottedValues = slotFactValues(basisPosition, basisFactValues, comparatorFactValues);
 
-                    if (_.isObject(template) && template.hasOwnProperty(compareKey)) {
-                        template = template[compareKey];
+                if (!_.isEqual(slottedValues.left, slottedValues.right)) {
+                    slottedValues.isDivergent = true;
+                    containsValueArray = true;
+                } else {
+                    slottedValues.isDivergent = false;
+                }
 
-                        // 'true' means render the key without formatting
-                        if (template === true) {
+                return slottedValues;
+            }
+
+            function processFactsForSingleValue(basisFact, comparatorFact) {
+                // Perform comparison and get back comparisonResults; like:
+                //  {   'value':
+                //      {   leftValue: 'blah',
+                //          rightValue: 'doo'
+                //      }
+                //  };
+                //
+                return _.reduce(compareKeys, function(result, compareKey) {
+
+                        var isNestedDisplay = false;
+                        var basisFactValue = basisFact[compareKey];
+                        var comparatorFactValue = comparatorFact[compareKey];
+                        var slottedValues;
+
+                        if (_.isUndefined(basisFactValue) && _.isUndefined(comparatorFactValue)) {
+                            return result;
+                        }
+
+                        var template = factTemplate;
+
+                        if (_.isObject(template) && template.hasOwnProperty(compareKey)) {
+                            template = template[compareKey];
+
+                            // 'true' means render the key without formatting
+                            if (template === true) {
+                                template =
+                                    {   render: function(fact) { return fact[compareKey]; }
+                                    };
+                            }
+
+                            isNestedDisplay = true;
+                        } else if (typeof template.hasTemplate === 'function' && !template.hasTemplate()) {
                             template =
                                 {   render: function(fact) { return fact[compareKey]; }
                                 };
+                            isNestedDisplay = true;
+                        } else if (typeof factTemplate.render === 'function') {
+                            template = factTemplate;
+                        } else if (!template.hasOwnProperty(compareKey)) {
+                            return result;
                         }
 
-                        isNestedDisplay = true;
-                    } else if (typeof template.hasTemplate === 'function' && !template.hasTemplate()) {
-                        template =
-                            {   render: function(fact) { return fact[compareKey]; }
-                            };
-                        isNestedDisplay = true;
-                    } else if (typeof factTemplate.render === 'function') {
-                        template = factTemplate;
-                    } else if (!template.hasOwnProperty(compareKey)) {
+                        // if (!renderOptions.supportsValueArray) {
+                        //     comparatorFact = comparatorFact[0];
+                        // }
+
+                        basisFactValue = template.render(basisFact);
+                        comparatorFactValue = template.render(comparatorFact);
+
+                        slottedValues = slotFactValues(basisFacts.position,
+                                                       basisFactValue,
+                                                       comparatorFactValue);
+
+                        if (slottedValues.left !== slottedValues.right) {
+                            slottedValues.isDivergent = true;
+                        } else {
+                            slottedValues.isDivergent = false;
+                        }
+
+                        if (isNestedDisplay) {
+                            result[compareKey] = slottedValues;
+                        } else {
+                            result = slottedValues;
+                        }
+
                         return result;
-                    }
-
-                    if (basisFacts.position === 'left') {
-                        slottedValues.left = template.render(basisFact);
-                        slottedValues.right = template.render(comparatorFact);
-                    } else {
-                        slottedValues.left = template.render(comparatorFact);
-                        slottedValues.right = template.render(basisFact);
-                    }
-
-                    if (slottedValues.left !== slottedValues.right) {
-                        slottedValues.isDivergent = true;
-                    } else {
-                        slottedValues.isDivergent = false;
-                    }
-
-                    if (isNestedDisplay) {
-                        result[compareKey] = slottedValues;
-                    } else {
-                        result = slottedValues;
-                    }
-
-                    return result;
-                }, {});
+                    }, {});
+            }
 
                 var hasDiffs =
                     _.any(comparisonResults, { isDivergent: true }) ||
@@ -167,6 +215,7 @@ export default
             var descriptor =
                     {   displayKeyPath: basisFact[nameKey],
                         nestingLevel: 0,
+                        containsValueArray: containsValueArray,
                         facts: diffs
                     };
 

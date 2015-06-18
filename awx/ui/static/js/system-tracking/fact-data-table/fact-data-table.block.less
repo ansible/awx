@@ -15,6 +15,12 @@
         background-color: #ebebeb;
         border-color: #adadad;
       }
+
+      &--flexible {
+          max-height: initial;
+          align-items: flex-start;
+      }
+
     }
 
     &-headingRow {
@@ -26,8 +32,21 @@
         padding: 8px;
         flex: 1 0 33%;
         white-space: nowrap;
+        align-self: flex-start;
         &--offsetLeft {
             margin-left: 33%;
+        }
+    }
+
+    &-columnArray {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &-columnMember {
+        margin-bottom: 16px;
+        &:last-child {
+            margin-bottom: inherit;
         }
     }
 }

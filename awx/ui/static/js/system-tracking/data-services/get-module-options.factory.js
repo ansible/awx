@@ -3,7 +3,8 @@ var moduleConfig =
             {   compareKey: ['release', 'version'],
                 nameKey: 'name',
                 sortKey: 1,
-                factTemplate: "{{epoch|append:':'}}{{version}}-{{release}}{{arch|prepend:'.'}}"
+                factTemplate: "{{epoch|append:':'}}{{version}}-{{release}}{{arch|prepend:'.'}}",
+                supportsValueArray: true
             },
         'services':
             {   compareKey: ['state', 'source'],

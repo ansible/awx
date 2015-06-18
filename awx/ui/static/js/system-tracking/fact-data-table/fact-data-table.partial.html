@@ -17,10 +17,25 @@
         </h3>
     </div>
     <div ng-if="!isNestedDisplay">
-        <div class="FactDataTable-row" ng-repeat="group in factData | orderBy: 'displayKeyPath'">
-            <span class="FactDataTable-column">{{group.facts.keyName}}</span>
-            <span class="FactDataTable-column">{{group.facts.value1}}</span>
-            <span class="FactDataTable-column">{{group.facts.value2}}</span>
+        <div ng-repeat="group in factData | orderBy: 'displayKeyPath'">
+            <div class="FactDataTable-row FactDataTable-row--flexible" ng-if="group.containsValueArray">
+                <span class="FactDataTable-column">{{group.facts.keyName}}</span>
+                <span class="FactDataTable-column FactDataTable-columnArray">
+                    <span class="FactDataTable-columnMember" ng-repeat="value in group.facts.value1">
+                        {{value}}
+                    </span>
+                </span>
+                <span class="FactDataTable-column FactDataTable-columnArray">
+                    <span class="FactDataTable-columnMember" ng-repeat="value in group.facts.value2">
+                        {{value}}
+                    </span>
+                </span>
+            </div>
+            <div class="FactDataTable-row" ng-if="!group.containsValueArray">
+                <span class="FactDataTable-column">{{group.facts.keyName}}</span>
+                <span class="FactDataTable-column">{{group.facts.value1}}</span>
+                <span class="FactDataTable-column">{{group.facts.value2}}</span>
+            </div>
         </div>
     </div>
     <div ng-if="isNestedDisplay">
@@ -35,7 +50,7 @@
             <div class="FactDataGroup-facts" data-facts="{{group.facts}}">
                 <div class="FactDataTable-arrayGroup" ng-if="group.isFactArray" ng-repeat="arrayGroup in group.facts" data-array-group="{{arrayGroup}}">
                     <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in arrayGroup" data-fact="{{fact}}">
-                        <span class="FactDatum-keyName FactDataTable-column" ng-unless="fact.isArrayMember">
+                        <span class="FactDatum-keyName FactDataTable-column" ng-if="!fact.isArrayMember">
                         {{fact.keyName}}
                         </span>
                         <span class="FactDatum-keyName FactDataTable-column" ng-if="fact.isArrayMember">
