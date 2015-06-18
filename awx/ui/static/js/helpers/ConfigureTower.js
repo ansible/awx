@@ -569,8 +569,8 @@ export default
                     url = (mode==="edit") ? GetBasePath('schedules')+id+'/' : url;
                     if (scope.isFactCleanup) {
                         extra_vars = {
-                            "older_than": scope.keep_amount+scope.keep_unit.value,
-                            "granularity": scope.granularity_keep_amount+scope.granularity_keep_unit.value
+                            "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
+                            "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
                         };
                     } else {
                         extra_vars = {
