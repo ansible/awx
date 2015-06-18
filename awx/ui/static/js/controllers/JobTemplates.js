@@ -468,7 +468,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
                         break;
                     }
                     if (msg) {
-                        Alert('Warning', msg, 'alert-info');
+                        Alert('Warning', msg, 'alert-info', null, null, null, null, true);
                     }
                 })
                 .error(function (data, status) {
