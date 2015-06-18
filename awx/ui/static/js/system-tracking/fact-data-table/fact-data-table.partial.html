@@ -35,8 +35,11 @@
             <div class="FactDataGroup-facts" data-facts="{{group.facts}}">
                 <div class="FactDataTable-arrayGroup" ng-if="group.isFactArray" ng-repeat="arrayGroup in group.facts" data-array-group="{{arrayGroup}}">
                     <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in arrayGroup" data-fact="{{fact}}">
-                        <span class="FactDatum-keyName FactDataTable-column">
+                        <span class="FactDatum-keyName FactDataTable-column" ng-unless="fact.isArrayMember">
                         {{fact.keyName}}
+                        </span>
+                        <span class="FactDatum-keyName FactDataTable-column" ng-if="fact.isArrayMember">
+                          {{fact.keyPath[0]}}.{{fact.keyName}}
                         </span>
                         <span class="FactDatum-value FactDataTable-column u-truncatedText">
                         {{fact.value1}}
@@ -47,8 +50,11 @@
                     </div>
                 </div>
                 <div class="FactDataTable-row FactDatum" ng-class="{'FactDatum--divergent': fact.isDivergent }" ng-repeat="fact in group.facts" ng-unless="group.isFactArray" data-fact="{{fact}}">
-                    <span class="FactDataTable-column FactDatum-keyName">
+                    <span class="FactDataTable-column FactDatum-keyName" ng-if="!fact.isArrayMember">
                     {{fact.keyName}}
+                    </span>
+                    <span class="FactDataTable-column FactDatum-keyName" ng-if="fact.isArrayMember">
+                      {{fact.keyPath[0]}}.{{fact.keyName}}
                     </span>
                     <span class="FactDataTable-column FactDatum-value" truncated-text>
                     {{fact.value1}}
