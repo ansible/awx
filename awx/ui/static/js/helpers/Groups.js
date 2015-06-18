@@ -931,8 +931,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            if (modal_scope.groupVariablesLoadedRemove) {
                                modal_scope.groupVariablesLoadedRemove();
                            }
-                           modal_scope.groupVariablesLoadedRemove = modal_scope.$on('groupVariablesLoaded', function () {
-                               modal_scope.showSourceTab = (mode === 'edit' && group.has_inventory_sources && Empty(group.summary_fields.inventory_source.source) && sources_scope.source.value!=='manual') ? false :  true;
+                          modal_scope.groupVariablesLoadedRemove = modal_scope.$on('groupVariablesLoaded', function () {
+                              if (mode === 'edit' &&
+                                  group.has_inventory_sources &&
+                                  Empty(group.summary_fields.inventory_source.source) &&
+                                  sources_scope.source &&
+                                  sources_scope.source.value !== 'manual') {
+                                  modal_scope.showSourceTab = false;
+                              } else {
+                                  modal_scope.showSourceTab = true;
+                              }
                                modal_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value!=='manual') ? true : false;
                                if (mode === 'edit' && modal_scope.showSourceTab) {
                                    // the use has access to the source tab, so they may create a schedule
