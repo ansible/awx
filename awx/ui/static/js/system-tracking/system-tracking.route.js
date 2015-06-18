@@ -33,7 +33,7 @@ export default {
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.hasModelKey('inventory')) {
+                    if ($route.current.hasModelKey('inventory')) {
                         return $q.when($route.current.params.model.inventory);
                     }
 
@@ -53,7 +53,7 @@ export default {
                 'Rest',
                 'GetBasePath',
                 function($route, $q, rest, getBasePath) {
-                    if ($route.current.params.hasModelKey('hosts')) {
+                    if ($route.current.hasModelKey('hosts')) {
                         return $q.when($route.current.params.model.hosts);
                     }
 

@@ -11,7 +11,7 @@ export default
         '$routeParams',
         function($rootScope, $routeParams) {
             $rootScope.$on('$routeChangeStart', function(e, newRoute) {
-                wrapDelegate(newRoute.params);
+                wrapDelegate(newRoute);
             });
 
             $rootScope.$on('$routeChangeSuccess', function(e, newRoute) {
