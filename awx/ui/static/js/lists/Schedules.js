@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('SchedulesListDefinition', [])
@@ -42,12 +42,6 @@ export default
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 hidden-xs"
             }
-            /*,
-            id: {
-                label: 'ID',
-                searchType: 'int',
-                searchOnly: true
-            }*/
         },
 
         actions: {

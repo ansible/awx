@@ -266,7 +266,6 @@ export default
                     control: '<button type="button" class="btn btn-sm btn-primary" id="job_templates_create_survey_btn" ng-show="survey_enabled" ng-click="addSurvey()"><i class="fa fa-pencil"></i>   Create Survey</button>'+
                             '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
                             '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'+
-                            // '<div class="error ng-hide" id="job-template-survey-error" ng-show="survey_enabled === true && survey_exists!==true">A survey is enabled but it does not exist. Create a survey or disable the survey. </div>'
                             '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or uncheck the Enable Survey box to disable the survey. </div>'
                 },
                 become_enabled: {
@@ -336,9 +335,81 @@ export default
             },
 
             related: {
-
                 schedules: {
-                    include: "SchedulesList"
+                    type: 'collection',
+                    title: 'Schedules',
+                    iterator: 'schedule',
+                    index: false,
+                    open: false,
+
+                    actions: {
+                        add: {
+                            mode: 'all',
+                            ngClick: 'addSchedule()',
+                            awToolTip: 'Add a new schedule'
+                        },
+                        refresh: {
+                            mode: 'all',
+                            awToolTip: "Refresh the page",
+                            ngClick: "refreshSchedules()"
+                        },
+                        stream: {
+                            ngClick: "showActivity()",
+                            awToolTip: "View Activity Stream",
+                            mode: 'edit',
+                            awFeature: 'activity_streams'
+                        }
+                    },
+                    fields: {
+                        name: {
+                            key: true,
+                            label: 'Name',
+                            ngClick: "editSchedule(schedule.id)",
+                            columnClass: "col-md-3 col-sm-3 col-xs-3"
+                        },
+                        dtstart: {
+                            label: 'First Run',
+                            filter: "longDate",
+                            searchable: false,
+                            columnClass: "col-md-2 col-sm-3 hidden-xs"
+                        },
+                        next_run: {
+                            label: 'Next Run',
+                            filter: "longDate",
+                            searchable: false,
+                            columnClass: "col-md-2 col-sm-3 col-xs-3"
+                        },
+                        dtend: {
+                            label: 'Final Run',
+                            filter: "longDate",
+                            searchable: false,
+                            columnClass: "col-md-2 col-sm-3 hidden-xs"
+                        }
+                    },
+                    fieldActions: {
+                        "play": {
+                            mode: "all",
+                            ngClick: "toggleSchedule($event, schedule.id)",
+                            awToolTip: "{{ schedule.play_tip }}",
+                            dataTipWatch: "schedule.play_tip",
+                            iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
+                            dataPlacement: "top"
+                        },
+                        edit: {
+                            label: 'Edit',
+                            ngClick: "editSchedule(schedule.id)",
+                            icon: 'icon-edit',
+                            awToolTip: 'Edit schedule',
+                            dataPlacement: 'top'
+                        },
+                        "delete": {
+                            label: 'Delete',
+                            ngClick: "deleteSchedule(schedule.id)",
+                            icon: 'icon-trash',
+                            awToolTip: 'Delete schedule',
+                            dataPlacement: 'top'
+                        }
+                    }
                 },
                 "completed_jobs": {
                     include: "CompletedJobsList"

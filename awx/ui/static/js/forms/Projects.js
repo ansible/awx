@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Projects
@@ -25,15 +25,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         collapseOpen: true,
 
         actions: {
-            // scm_update: {
-            //     mode: 'edit',
-            //     ngClick: 'SCMUpdate()',
-            //     awToolTip: "{{ scm_update_tooltip }}",
-            //     dataTipWatch: "scm_update_tooltip",
-            //     ngClass: "scm_type_class",
-            //     dataPlacement: 'top',
-            //     ngDisabled: "scm_type.value === 'manual' "
-            // },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",
@@ -296,8 +287,80 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             },
 
             schedules: {
-                include: "SchedulesList",
-                index: false
+                type: 'collection',
+                title: 'Schedules',
+                iterator: 'schedule',
+                index: false,
+                open: false,
+
+                actions: {
+                    add: {
+                        mode: 'all',
+                        ngClick: 'addSchedule()',
+                        awToolTip: 'Add a new schedule'
+                    },
+                    refresh: {
+                        mode: 'all',
+                        awToolTip: "Refresh the page",
+                        ngClick: "refreshSchedules()"
+                    },
+                    stream: {
+                        ngClick: "showActivity()",
+                        awToolTip: "View Activity Stream",
+                        mode: 'edit',
+                        awFeature: 'activity_streams'
+                    }
+                },
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name',
+                        ngClick: "editSchedule(schedule.id)",
+                        columnClass: "col-md-3 col-sm-3 col-xs-3"
+                    },
+                    dtstart: {
+                        label: 'First Run',
+                        filter: "longDate",
+                        searchable: false,
+                        columnClass: "col-md-2 col-sm-3 hidden-xs"
+                    },
+                    next_run: {
+                        label: 'Next Run',
+                        filter: "longDate",
+                        searchable: false,
+                        columnClass: "col-md-2 col-sm-3 col-xs-3"
+                    },
+                    dtend: {
+                        label: 'Final Run',
+                        filter: "longDate",
+                        searchable: false,
+                        columnClass: "col-md-2 col-sm-3 hidden-xs"
+                    }
+                },
+                fieldActions: {
+                    "play": {
+                        mode: "all",
+                        ngClick: "toggleSchedule($event, schedule.id)",
+                        awToolTip: "{{ schedule.play_tip }}",
+                        dataTipWatch: "schedule.play_tip",
+                        iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
+                        dataPlacement: "top"
+                    },
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "editSchedule(schedule.id)",
+                        icon: 'icon-edit',
+                        awToolTip: 'Edit schedule',
+                        dataPlacement: 'top'
+                    },
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "deleteSchedule(schedule.id)",
+                        icon: 'icon-trash',
+                        awToolTip: 'Delete schedule',
+                        dataPlacement: 'top'
+                    }
+                }
             }
 
         },

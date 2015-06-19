@@ -1818,7 +1818,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
                     html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
                     html += ">";
-                    html += SelectIcon({ action: act });
+                    if (fAction.iconClass) {
+                        html += "<i class=\"" + fAction.iconClass + "\"></i>";
+                    } else {
+                        html += SelectIcon({
+                            action: act
+                        });
+                    }
+                    // html += SelectIcon({ action: act });
                     //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
                     html += "</a>";
                 }

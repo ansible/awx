@@ -669,7 +669,6 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
     var defaultUrl = GetBasePath('job_templates'),
         generator = GenerateForm,
         form = JobTemplateForm(),
-        loadingFinishedCount = 0,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
         id = $routeParams.template_id,
@@ -832,19 +831,15 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
         $scope.removeJobTemplateLoadFinished();
     }
     $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
-        loadingFinishedCount++;
-        if (loadingFinishedCount >= 2) {
-            // The initial template load finished. Now load related jobs, which
-            // will turn off the 'working' spinner.
-            for (var set in relatedSets) {
-                $scope.search(relatedSets[set].iterator);
-            }
-            SchedulesControllerInit({
-                scope: $scope,
-                parent_scope: $scope,
-                iterator: 'schedule'
-            });
+        for (var set in relatedSets) {
+            $scope.search(relatedSets[set].iterator);
         }
+        SchedulesControllerInit({
+            scope: $scope,
+            parent_scope: $scope,
+            iterator: 'schedule'
+        });
+
     });
 
     // Set the status/badge for each related job

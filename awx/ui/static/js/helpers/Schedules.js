@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:Schedules
@@ -26,7 +26,8 @@ export default
 
                 var buttons,
                     scope = params.scope,
-                    callback = params.callback;
+                    callback = params.callback,
+                    title = params.title;
 
                 buttons = [{
                     "label": "Cancel",
@@ -54,6 +55,7 @@ export default
                     id: 'scheduler-modal-dialog',
                     scope: scope,
                     buttons: buttons,
+                    title: title,
                     width: 700,
                     height: 725,
                     minWidth: 400,
@@ -111,7 +113,7 @@ export default
                     schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
                     schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
 
-                    ShowSchedulerModal({ scope: scope, callback: 'DialogReady' });
+                    ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Edit Schedule' });
                     scope.showRRuleDetail = false;
                 });
 
@@ -194,7 +196,7 @@ export default
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
                 scheduler.clear();
-                ShowSchedulerModal({ scope: scope, callback: 'DialogReady' });
+                ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Add Schedule' });
                 scope.showRRuleDetail = false;
 
                 if (scope.removeScheduleSaved) {
