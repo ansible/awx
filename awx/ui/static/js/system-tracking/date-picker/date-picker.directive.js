@@ -13,7 +13,8 @@ export default
                 restrict: 'E',
                 scope: {
                     date: '=',
-                    minDate: '='
+                    minDate: '=',
+                    autoUpdate: '=?'
                 },
                 templateUrl: '/static/js/system-tracking/date-picker/date-picker.partial.html',
                 link: function(scope, element, attrs) {
@@ -21,10 +22,16 @@ export default
                     // We need to make sure this _never_ recurses, which sometimes happens
                     // with two-way binding.
                     var mustUpdateValue = true;
+                    scope.autoUpdate = scope.autoUpdate === false ? false : true;
 
                     scope.$watch('minDate', function(newValue) {
                         if (newValue) {
-                            $('.date', element).systemTrackingDP('setStartDate', newValue.toString());
+
+                            if (scope.autoUpdate && scope.date.isBefore(newValue)) {
+                                scope.date = newValue;
+                            }
+
+                            $('.date', element).systemTrackingDP('setStartDate', newValue.toDate());
                         }
                     });
 
