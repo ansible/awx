@@ -15,12 +15,20 @@ export default {
             moduleOptions:
                 [   'getModuleOptions',
                     'lodashAsPromised',
+                    'ProcessErrors',
                     '$route',
-                    function(getModuleOptions, _, $route) {
+                    function(getModuleOptions, _, ProcessErrors, $route) {
                     var hostIds = $route.current.params.hosts.split(',');
 
                     var data =
                         getModuleOptions(hostIds[0])
+                            .catch(function (response) {
+                                ProcessErrors(null, response.data, response.status, null, {
+                                    hdr: 'Error!',
+                                    msg: 'Failed to get license info. GET returned status: ' +
+                                    response.status
+                                });
+                            })
                             .value();
 
                     return data;
@@ -32,7 +40,8 @@ export default {
                 '$q',
                 'Rest',
                 'GetBasePath',
-                function($route, $q, rest, getBasePath) {
+                'ProcessErrors',
+                function($route, $q, rest, getBasePath, ProcessErrors) {
                     if ($route.current.hasModelKey('inventory')) {
                         return $q.when($route.current.params.model.inventory);
                     }
@@ -44,7 +53,13 @@ export default {
                     return rest.get()
                             .then(function(data) {
                                 return data.data;
-                            });
+                            }).catch(function (response) {
+                ProcessErrors(null, response.data, response.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to get license info. GET returned status: ' +
+                    response.status
+                });
+            });
                 }
             ],
             hosts:
@@ -52,7 +67,8 @@ export default {
                 '$q',
                 'Rest',
                 'GetBasePath',
-                function($route, $q, rest, getBasePath) {
+                'ProcessErrors',
+                function($route, $q, rest, getBasePath, ProcessErrors) {
                     if ($route.current.hasModelKey('hosts')) {
                         return $q.when($route.current.params.model.hosts);
                     }
@@ -68,7 +84,13 @@ export default {
                             return rest.get()
                                     .then(function(data) {
                                         return data.data;
-                                    });
+                                    }).catch(function (response) {
+                ProcessErrors(null, response.data, response.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to get license info. GET returned status: ' +
+                    response.status
+                });
+            });
                         });
 
                     return $q.all(hosts);
