@@ -1093,6 +1093,7 @@ class RunInventoryUpdate(BaseTask):
 
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
+        env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
 
         # Set environment variables specific to each source.
         #
