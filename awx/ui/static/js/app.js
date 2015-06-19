@@ -1047,6 +1047,9 @@ var tower = angular.module('Tower', [
                 });
 
                 $rootScope.$on("$routeChangeStart", function (event, next) {
+                    // this line removes the query params attached to a route
+                    $location.search('');
+
                     // Before navigating away from current tab, make sure the primary view is visible
                     if ($('#stream-container').is(':visible')) {
                         HideStream();
