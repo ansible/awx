@@ -21,15 +21,14 @@ class TransformField(BaseField):
         return value
 
 class FactHost(Document):
-    hostname = StringField(max_length=100, required=True, unique=True)
-    inventory_id = IntField(required=True)
+    hostname = StringField(max_length=100, required=True, unique_with='inventory_id')
+    inventory_id = IntField(required=True, unique_with='hostname')
 
     # TODO: Consider using hashed index on hostname. django-mongo may not support this but
     # executing raw js will
     meta = {
         'indexes': [
-            'hostname',
-            'inventory_id'
+            ('hostname', 'inventory_id')
         ]
     }
 
