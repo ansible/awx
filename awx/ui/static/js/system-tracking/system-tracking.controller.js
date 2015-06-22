@@ -27,6 +27,13 @@ function controller($rootScope,
         hostIds.length === 1 ? 'single-host' : 'host-to-host';
     $scope.hostIds = $routeParams.hosts;
     $scope.inventory = $routeParams.model.inventory;
+    $scope.noModuleData = false;
+
+    // this means no scans have been run
+    if (_.isEmpty(moduleOptions)) {
+        $scope.noModuleData = true;
+        return;
+    }
 
     if ($scope.compareMode === 'host-to-host') {
         $scope.factModulePickersLabelLeft = "Compare latest facts collected across both hosts on or before";
@@ -75,7 +82,16 @@ function controller($rootScope,
                             rightRange)
                 .then(function(responses) {
                     var data = _.pluck(responses, 'fact');
-
+                    if (_.isEmpty(data[0]) && _.isEmpty(data[1])) {
+                        return _.reject({
+                                name: 'NoScanData',
+                                message: 'There was insufficient scan data for both of the dates you selected. Please try selecting a different date or module.',
+                                dateValues:
+                                    {   leftDate: $scope.leftDate.clone(),
+                                        rightDate: $scope.rightDate.clone()
+                                    }
+                            });
+                    }
                     if (_.isEmpty(data[0])) {
                         $scope.leftDataNoScans = true;
                         $scope.leftScanDate = $scope.leftDate;
@@ -119,7 +135,7 @@ function controller($rootScope,
                         // we have NO data, throw an error
                         result = _.reject({
                             name: 'NoScanData',
-                            message: 'No scans ran on eithr of the dates you selected. Please try selecting different dates.',
+                            message: 'No scans ran on either of the dates you selected. Please try selecting different dates.',
                             dateValues:
                                 {   leftDate: $scope.leftDate.clone(),
                                     rightDate: $scope.rightDate.clone()
@@ -146,6 +162,16 @@ function controller($rootScope,
                     // Clear out any errors from the previous run...
                     $scope.error = null;
 
+                    if (_.isEmpty(info.factData)) {
+                        info = _.reject({
+                            name: 'NoScanDifferences',
+                            message: 'No differences in the scans on the dates you selected. Please try selecting different dates.',
+                            dateValues:
+                                {   leftDate: $scope.leftDate.clone(),
+                                    rightDate: $scope.rightDate.clone()
+                                }
+                        });
+                    }
                     $scope.factData =  info.factData;
                     $scope.isNestedDisplay = info.isNestedDisplay;
 
@@ -163,21 +189,22 @@ function controller($rootScope,
             return module.name === newModuleName;
         });
 
-        if (newModule.isActive) {
-            return;
+        if (newModule) {
+            if (newModule.isActive) {
+                return;
+            }
+            $scope.modules.forEach(function(module) {
+                module.isActive = false;
+            });
+
+            newModule.isActive = true;
+
+            $location.replace();
+            $location.search('module', newModuleName);
+
+            reloadData({   module: newModule
+                       }, initialData).value();
         }
-
-        $scope.modules.forEach(function(module) {
-            module.isActive = false;
-        });
-
-        newModule.isActive = true;
-
-        $location.replace();
-        $location.search('module', newModuleName);
-
-        reloadData({   module: newModule
-                   }, initialData).value();
     };
 
     function dateWatcher(dateProperty) {
