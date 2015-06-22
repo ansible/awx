@@ -962,7 +962,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             }
             if (scope.socketStatus === 'error') {
               Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-              'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
+              'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
               if (scope.refresh) {
                 scope.refresh();
               }

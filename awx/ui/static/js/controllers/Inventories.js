@@ -1186,7 +1186,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
                 // if no source, do nothing.
             } else if (group.status === 'updating') {
                 Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                    group.name + '</em> Click the <i class="fa fa-refresh"></i> button to monitor the status.', 'alert-info');
+                    group.name + '</em> Click the <i class="fa fa-refresh"></i> button to monitor the status.', 'alert-info', null, null, null, null, true);
             } else {
                 Wait('start');
                 Rest.setUrl(group.related.inventory_source);

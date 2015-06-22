@@ -788,7 +788,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
                     }
                     Wait('stop');
                     if (msg) {
-                        Alert('Warning', msg, 'alert-info');
+                        Alert('Warning', msg, 'alert-info', null, null, null, null, true);
                     }
                 })
                 .error(function (data, status) {

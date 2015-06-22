@@ -300,7 +300,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
                     $scope.$emit('Cancel_Update', url);
                 } else {
                     Alert('Cancel Not Allowed', 'Either you do not have access or the SCM update process completed. ' +
-                        'Click the <em>Refresh</em> button to view the latest status.', 'alert-info');
+                        'Click the <em>Refresh</em> button to view the latest status.', 'alert-info', null, null, null, null, true);
                 }
             })
             .error(function (data, status) {

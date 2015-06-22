@@ -87,7 +87,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          // do nothing
                      } else if (Empty(group.status) || group.status === "never updated") {
                          Alert('No Status Available', 'An inventory sync has not been performed for the selected group. Start the process by ' +
-                               'clicking the <i class="fa fa-exchange"></i> button.', 'alert-info');
+                               'clicking the <i class="fa fa-exchange"></i> button.', 'alert-info', null, null, null, null, true);
                      } else {
                          Wait('start');
                          Rest.setUrl(group.related.inventory_source);
@@ -703,11 +703,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
+.factory('GroupsEdit', ['$filter', '$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
          'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
          'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
-         function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
+         function ($filter, $rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
                    SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
@@ -1438,7 +1438,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                          'and then run an update.', 'alert-info');
                                } else if (sources_scope.status === 'updating') {
                                    Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                                         sources_scope.summary_fields.group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info');
+                                         $filter('sanitize')(sources_scope.summary_fields.group.name) + '</em>. Use the Refresh button to monitor the status.', 'alert-info', null, null, null, null, true);
                                } else {
                                    InventoryUpdate({
                                        scope: parent_scope,
