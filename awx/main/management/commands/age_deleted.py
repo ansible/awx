@@ -88,9 +88,13 @@ class Command(BaseCommand):
                 print('unable to find deleted timestamp in %s field' % name_field)
             else:
                 aged_date = dt - datetime.timedelta(days=self.days)
-                setattr(instance, name_field, name_prefix + aged_date.isoformat() + name_append)
+                if model is User:
+                    aged_ts_append = aged_date.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                else:
+                    aged_ts_append = aged_date.isoformat() + name_append
+                setattr(instance, name_field, name_prefix +  aged_ts_append)
                 instance.save()
-                #print("Aged %s" % instance.name)
+                #print("Aged %s" % getattr(instance, name_field))
                 n_aged_items += 1
 
 
