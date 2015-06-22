@@ -66,7 +66,10 @@
         <p class="FactDataError-message" ng-switch-when="InsufficientScanData">
             There were no facts collected on or before one of the dates you selected ({{error.dateValue|amDateFormat:'L'}}). Please select a different date and try again.
         </p>
-        <p class="FactDataError-note">
+        <p class="FactDataError-message" ng-switch-when="NoScanDifferences">
+            The two fact scans were identical for this module.
+        </p>
+        <p class="FactDataError-note" ng-switch-default>
             We were not able to find any facts collected for this inventory or module.  To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates".
         </p>
     </section>
