@@ -1028,7 +1028,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
           Wait('stop');
           if (scope.socketStatus === 'error') {
             Alert('Sync Started', 'The request to start the inventory sync process was submitted. ' +
-            'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
+            'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
             if (scope.refreshGroups) {
               // inventory detail page
               scope.refreshGroups();
