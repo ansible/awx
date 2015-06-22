@@ -14,7 +14,8 @@ export default
                 scope: {
                     date: '=',
                     minDate: '=',
-                    autoUpdate: '=?'
+                    autoUpdate: '=?',
+                    inputClass: '&'
                 },
                 templateUrl: '/static/js/system-tracking/date-picker/date-picker.partial.html',
                 link: function(scope, element, attrs) {

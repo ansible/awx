@@ -72,6 +72,8 @@ function controller($rootScope,
 
         $scope.leftDataNoScans = false;
         $scope.rightDataNoScans = false;
+        $scope.leftDateWarning = false;
+        $scope.rightDateWarning = false;
 
         waitIndicator('start');
 
@@ -97,6 +99,10 @@ function controller($rootScope,
                         $scope.leftScanDate = $scope.leftDate;
                     } else {
                         $scope.leftScanDate = moment(responses[0].timestamp);
+
+                        if (!$scope.leftScanDate.isSame($scope.leftDate, 'd')) {
+                            $scope.leftDateWarning = true;
+                        }
                     }
 
                     if (_.isEmpty(data[1])) {
@@ -104,6 +110,10 @@ function controller($rootScope,
                         $scope.rightScanDate = $scope.rightDate;
                     } else {
                         $scope.rightScanDate = moment(responses[1].timestamp);
+
+                        if (!$scope.rightScanDate.isSame($scope.rightDate, 'd')) {
+                            $scope.rightDateWarning = true;
+                        }
                     }
 
                     return data;

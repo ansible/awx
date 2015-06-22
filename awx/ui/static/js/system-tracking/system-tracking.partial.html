@@ -21,11 +21,28 @@
     <div class="FactModulePickers">
         <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--left">
             <span class="FactModulePickers-label">{{ factModulePickersLabelLeft }}</span>
-            <date-picker date="leftDate"></date-picker>
+            <date-picker
+                date="leftDate"
+                input-class='{ "u-input-info-alert": leftDateWarning }'>
+            </date-picker>
+            <span
+                class="FactModulePickers-warning"
+                ng-class='{ "u-hiddenVisually": !leftDateWarning, "u-info-alert": leftDateWarning }'>
+                There were no fact scans on this date, using a prior scan instead.
+            </span>
         </div>
         <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right" ng-show="compareMode == 'single-host'">
             <span class="FactModulePickers-label">{{ factModulePickersLabelRight }}</span>
-            <date-picker date="rightDate" min-date="leftDate"></date-picker>
+            <date-picker
+                date="rightDate"
+                min-date="leftDate"
+                input-class='{ "u-input-info-alert": rightDateWarning }'>
+            </date-picker>
+            <span
+                class="FactModulePickers-warning"
+                ng-class='{ "u-hiddenVisually": !rightDateWarning, "u-info-alert": rightDateWarning }'>
+                There were no fact scans on this date, using a prior scan instead.
+            </span>
         </div>
     </div>
 
