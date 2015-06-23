@@ -101,6 +101,19 @@
                 </div>
             </div>
 
+            <div class="form-group StandardOutDetails-detailRow
+                StandardOutDetails-detailRow--closable"
+                ng-show="created_by">
+                <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12
+                    StandardOutDetails-detailContent">Launched By</label>
+                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9
+                    StandardOutDetails-detailContent">
+                    <a href="/#/users/{{ created_by.id }}"
+                        aw-tool-tip="See the user who ran this command"
+                        data-placement="top">{{ created_by.username }}</a>
+                </div>
+            </div>
+
             <!-- since zero is a falsy value, you need ng-show such that
             the number is >= 0 -->
             <div class="form-group StandardOutDetails-detailRow

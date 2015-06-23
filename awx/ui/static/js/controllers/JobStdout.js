@@ -165,6 +165,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         .success(function(data) {
             $scope.job = data;
             $scope.job_template_name = data.name;
+            $scope.created_by = data.summary_fields.created_by;
             $scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
             $scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
             $scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
