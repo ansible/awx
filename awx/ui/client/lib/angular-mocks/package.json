@@ -1,8 +1,8 @@
 {
-  "name": "angular",
+  "name": "angular-mocks",
   "version": "1.4.3",
-  "description": "HTML enhanced for web apps",
-  "main": "index.js",
+  "description": "AngularJS mocks for testing",
+  "main": "angular-mocks.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,6 +14,8 @@
     "angular",
     "framework",
     "browser",
+    "mocks",
+    "testing",
     "client-side"
   ],
   "author": "Angular Core Team <angular-core+npm@google.com>",

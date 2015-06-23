@@ -99,7 +99,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('test', ['jshint', 'karma:unit']);
+  grunt.registerTask('test', ['jshint', 'karma:local']);
   grunt.registerTask('test-travis', ['jshint', 'karma:travis']);
 
   grunt.registerTask('build', ['clean', 'ngmin', 'concat', 'uglify', 'clean:temp']);

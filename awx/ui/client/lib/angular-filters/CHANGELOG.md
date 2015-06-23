@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+#### v1.1.2 (2015-06-13)
+
+- Updated to angular 1.4.0
+
+#### v1.1.1
+
+- Treat `NaN` as an invalid value for the `default` filter
+
 #### v1.1.0
 
 - Added `property` filter

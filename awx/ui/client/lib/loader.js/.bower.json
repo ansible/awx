@@ -23,7 +23,7 @@
     "tag": "v3.2.1",
     "commit": "0133801b954773bab68e67cbb477774d1de197e8"
   },
-  "_source": "git://github.com/ember-cli/loader.js.git",
-  "_target": "3.2.1",
-  "_originalSource": "ember-cli/loader.js"
+  "_source": "git://github.com/stefanpenner/loader.js.git",
+  "_target": "~3.2.1",
+  "_originalSource": "loader.js"
 }

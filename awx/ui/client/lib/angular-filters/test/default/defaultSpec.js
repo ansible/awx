@@ -27,6 +27,12 @@ describe('default', function () {
     expect(defaultFilter(inputVal, defaultVal)).toEqual('default');
   });
 
+  it('should return a "default" string', function () {
+    var inputVal = NaN;
+    var defaultVal = 'default';
+    expect(defaultFilter(inputVal, defaultVal)).toEqual('default');
+  });
+
   it('should return the number 0', function () {
     var inputVal = 0;
     var defaultVal = 'default';
