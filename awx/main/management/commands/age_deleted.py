@@ -92,12 +92,10 @@ class Command(BaseCommand):
                     aged_ts_append = aged_date.strftime('%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     aged_ts_append = aged_date.isoformat() + name_append
-                setattr(instance, name_field, name_prefix +  aged_ts_append)
+                setattr(instance, name_field, name_prefix + aged_ts_append)
                 instance.save()
                 #print("Aged %s" % getattr(instance, name_field))
                 n_aged_items += 1
-
-
 
         return n_aged_items
 
