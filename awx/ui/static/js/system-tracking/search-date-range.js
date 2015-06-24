@@ -23,6 +23,6 @@ export function searchDateRange(dateString) {
 
     return {
         from: date.clone().startOf('day'),
-        to: date.clone().endOf('day')
+        to: date.clone().add(1, 'day').startOf('day')
     };
 }
