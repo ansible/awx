@@ -61,7 +61,12 @@
 
     <section class="FactDataError SystemTrackingContainer-main" ng-if="error" ng-switch="error.name">
         <p class="FactDataError-message" ng-switch-when="NoScanData">
-            There was insufficient scan data for either of the dates you selected. Please try selecting a different date or module.
+            <span ng-if="compareMode == 'single-host'">
+                There was insufficient scan data for one or both of the dates you selected. Please try selecting a different date or module.
+            </span>
+            <span ng-if="compareMode == 'host-to-host'">
+                There was insufficient scan data for the date you selected. Please try selecting a different date or module.
+            </span>
         </p>
         <p class="FactDataError-message" ng-switch-when="InsufficientScanData">
             There were no facts collected on or before one of the dates you selected ({{error.dateValue|amDateFormat:'L'}}). Please select a different date and try again.
