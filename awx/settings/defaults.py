@@ -643,6 +643,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
+        'fact_receiver': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        }
     },
     'loggers': {
         'django': {
@@ -675,6 +684,10 @@ LOGGING = {
         },
         'awx.main.commands.run_task_system': {
             'handlers': ['console', 'file', 'task_system'],
+            'propagate': False
+        },
+        'awx.main.commands.run_fact_cache_receiver': {
+            'handlers': ['console', 'file', 'fact_receiver'],
             'propagate': False
         },
         'awx.main.access': {
