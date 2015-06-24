@@ -85,6 +85,16 @@ LOGGING['handlers']['task_system'] = {
     'formatter':'simple',
 }
 
+LOGGING['handlers']['fact_receiver'] = {
+    'level': 'WARNING',
+    'class':'logging.handlers.RotatingFileHandler',
+    'filters': ['require_debug_false'],
+    'filename': '/var/log/tower/fact_receiver.log',
+    'maxBytes': 1024 * 1024 * 5, # 5 MB
+    'backupCount': 5,
+    'formatter':'simple',
+}
+
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.
 settings_dir = os.environ.get('AWX_SETTINGS_DIR', '/etc/tower/conf.d/')
