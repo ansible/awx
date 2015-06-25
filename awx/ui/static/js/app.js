@@ -1046,9 +1046,11 @@ var tower = angular.module('Tower', [
                     },2000);
                 });
 
-                $rootScope.$on("$routeChangeStart", function (event, next) {
+                $rootScope.$on("$routeChangeStart", function (event, next, prev) {
                     // this line removes the query params attached to a route
-                    $location.search('');
+                    if(prev.$$route.name === 'systemTracking'){
+                        $location.replace($location.search('').$$url);
+                    }
 
                     // Before navigating away from current tab, make sure the primary view is visible
                     if ($('#stream-container').is(':visible')) {
