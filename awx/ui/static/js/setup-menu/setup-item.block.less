@@ -52,6 +52,12 @@
         margin-left: -0.8rem;
       }
 
+      // HACK: IE11 does not respect a fluid height for svg
+      // elements; explicitly setting for now
+      svg {
+        max-height: 33px;
+      }
+
       flex: none; // do not let the flex container adjust this width!
       width: @icon-large-size;
       align-self: center;
