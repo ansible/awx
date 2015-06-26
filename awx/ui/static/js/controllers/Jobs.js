@@ -37,12 +37,14 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         }
     });
 
+
+
     // After all choices are ready, load up the lists and populate the page
     if ($scope.removeBuildJobsList) {
         $scope.removeBuildJobsList();
     }
     $scope.removeBuildJobsList = $scope.$on('buildJobsList', function() {
-        var opt, search_params;
+        var opt, search_params={};
 
         if (AllJobsList.fields.type) {
             AllJobsList.fields.type.searchOptions = $scope.type_choices;
@@ -69,8 +71,11 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             id: 'active-jobs',
             url: GetBasePath('unified_jobs') + '?status__in=pending,running,completed,failed,successful,error,canceled',
             pageSize: max_rows,
+            searchParams: search_params,
             spinner: false
         });
+
+
         scheduled_scope = $scope.$new(true);
         LoadSchedulesScope({
             parent_scope: $scope,
