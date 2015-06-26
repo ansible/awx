@@ -33,7 +33,7 @@ class Command(BaseCommandInstance):
 
             # Sanity check: Do not remove the primary instance.
             if instance.primary:
-                raise CommandError('Can not remove primary instance %s. Another instance must be promoted to primary first.' % instance_str(instance))
+                raise CommandError('Cannot remove primary instance %s. Another instance must be promoted to primary first.' % instance_str(instance))
 
             # Remove the instance.
             instance.delete()
