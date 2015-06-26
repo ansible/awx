@@ -34,7 +34,7 @@ class Command(BaseCommandInstance):
         super(Command, self).handle(*args, **options)
 
         # You can only promote/demote if your license allows HA
-        if feature_enabled('ha'):
+        if not feature_enabled('ha'):
             raise CommandError('Your Tower license does not permit promoting a secondary instance')
 
         # Is there an existing record for this machine? If so, retrieve that record and look for issues.
