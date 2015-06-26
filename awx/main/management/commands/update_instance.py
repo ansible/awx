@@ -5,7 +5,7 @@ from django.core.management.base import CommandError
 from django.db import transaction
 
 from awx.main.management.commands._base_instance import BaseCommandInstance
-
+from awx.api.license import feature_enabled
 from awx.main.models import Instance
 
 instance_str = BaseCommandInstance.instance_str
@@ -32,6 +32,10 @@ class Command(BaseCommandInstance):
     @transaction.atomic
     def handle(self, *args, **options):
         super(Command, self).handle(*args, **options)
+
+        # You can only promote/demote if your license allows HA
+        if feature_enabled('ha'):
+            raise CommandError('Your Tower license does not permit promoting a secondary instance')
 
         # Is there an existing record for this machine? If so, retrieve that record and look for issues.
         try:

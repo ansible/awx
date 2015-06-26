@@ -3,7 +3,6 @@
 
 from django.core.management.base import CommandError
 
-from awx.api.license import feature_enabled
 from awx.main.management.commands._base_instance import BaseCommandInstance
 from awx.main.models import Instance
 
@@ -32,13 +31,6 @@ class Command(BaseCommandInstance):
         super(Command, self).handle(*args, **options)
 
         uuid = self.get_UUID()
-
-        # Are we attempting to register a secondary instance?
-        # If so, we are only willing to do that if the Tower license allows
-        # it.
-        if self.is_option_secondary() and not feature_enabled('ha'):
-            raise CommandError('Your Tower license does not permit creation '
-                               'of secondary instances.')
 
         # Is there an existing record for this machine? If so, retrieve that record and look for issues.
         try:
