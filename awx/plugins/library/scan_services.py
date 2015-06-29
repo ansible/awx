@@ -57,6 +57,7 @@ class ServiceScanService(BaseService):
             return None
         initctl_path = self.module.get_bin_path("initctl")
         chkconfig_path = self.module.get_bin_path("chkconfig")
+
         # Upstart and sysvinit
         if initctl_path is not None and chkconfig_path is None:
             rc, stdout, stderr = self.module.run_command("%s --status-all 2>&1 | grep -E \"\\[ (\\+|\\-) \\]\"" % service_path, use_unsafe_shell=True)
@@ -91,25 +92,23 @@ class ServiceScanService(BaseService):
         # RH sysvinit
         elif chkconfig_path is not None:
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
-            rc, stdout, stderr = self.module.run_command('%s --status-all | grep -E "dead|is (running|stopped)"' % service_path, use_unsafe_shell=True)
-            for line in stdout.split("\n"):
-                line_data = line.split()
-                if re.match(".+\(pid.+[0-9]+\).+is running", line) is not None and len(line_data) == 5:
-                    service_name = line_data[0]
-                    service_pid = line_data[2].replace(")","")
-                    service_state = "running"
-                elif len(line_data) > 2 and line_data[1] == "dead":
-                    service_name = line_data[0]
-                    service_pid = None
-                    service_state = "dead"
-                elif len(line_data) == 3:
-                    service_name = line_data[0]
-                    service_pid = None  # NOQA
-                    service_state = "stopped"
-                else:
-                    continue
-                service_data = {"name": service_name, "state": service_state, "source": "sysv"}
-                services.append(service_data)
+            p = re.compile('(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
+            rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
+            for line in stdout.split('\n'):
+                m = p.match(line)
+                if m:
+                    service_name = m.group('service')
+                    service_state = 'stopped'
+                    if m.group('rl3') == 'on':
+                        rc, stdout, stderr = self.module.run_command('%s %s status' % (service_path, service_name), use_unsafe_shell=True)
+                        service_state = rc
+                        if rc in (0,):
+                            service_state = 'running'
+                        #elif rc in (1,3):
+                        else:
+                            service_state = 'stopped'
+                    service_data = {"name": service_name, "state": service_state, "source": "sysv"}
+                    services.append(service_data)
             # rc, stdout, stderr = self.module.run_command("%s --list" % chkconfig_path)
             # Do something with chkconfig status
         return services
