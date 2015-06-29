@@ -102,6 +102,12 @@ EXPERIMENT_DEFAULT = {
     ]
 }
 
+# damn you python 2.6
+def timedelta_total_seconds(timedelta):
+    return (
+        timedelta.microseconds + 0.0 +
+        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+
 class Experiment(object):
     def __init__(self, exp, fact_fixtures, raw_db, mongoengine_db):
         self.db = raw_db
@@ -115,7 +121,7 @@ class Experiment(object):
         self.fact_fixtures = fact_fixtures
         self.host_count = exp['hosts']
         self.scans_total = int(exp['scan']['duration'] / exp['scan']['period']) # round down
-        self.scan_end = int((datetime.datetime(2015,1,1) - datetime.datetime(1970,1,1)).total_seconds() / 60)
+        self.scan_end = int(timedelta_total_seconds((datetime.datetime(2015,1,1) - datetime.datetime(1970,1,1))) / 60)
         self.scan_start = self.scan_end - exp['scan']['duration']
         self.scan_period = exp['scan']['period']
         self.modules = exp['modules']
@@ -192,7 +198,7 @@ class Experiment(object):
         time_end = now()
         print("")
         print("Finished at: %s" % time_end)
-        print("Total runtime: %s seconds" % (time_end - time_start).total_seconds())
+        print("Total runtime: %s seconds" % timedelta_total_seconds(time_end - time_start))
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
