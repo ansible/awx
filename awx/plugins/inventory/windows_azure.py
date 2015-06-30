@@ -67,18 +67,18 @@ class AzureInventory(object):
         self.index = {}
         self.host_metadata = {}
 
-        # Read settings and parse CLI arguments
-        self.read_settings()
-        self.read_environment()
-        self.parse_cli_args()
-
         # Cache setting defaults.
         # These can be overridden in settings (see `read_settings`).
         cache_dir = os.path.expanduser('~')
         self.cache_path_cache = '%s/.ansible-azure.cache' % cache_dir
         self.cache_path_index = '%s/.ansible-azure.index' % cache_dir
         self.cache_max_age = 0
-        
+
+        # Read settings and parse CLI arguments
+        self.read_settings()
+        self.read_environment()
+        self.parse_cli_args()
+
         # Initialize Azure ServiceManagementService
         self.sms = ServiceManagementService(self.subscription_id, self.cert_path)
 
