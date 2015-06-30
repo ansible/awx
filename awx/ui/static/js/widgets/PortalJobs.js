@@ -97,8 +97,8 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
         html += "<div class=\"portal-job-template-container\">\n";
         html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
         html += "<div class=\"row search-row\" id='portal-job-template-search'>\n";
-        html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
-        html += "<div class=\"form-group\">" ;
+        html += "<div class=\"col-md-6 col-xs-12\" id=\"active-jobs-search-container\"></div>\n";
+        html += "<div class=\"form-group col-md-6 col-xs-12\">" ;
         html += "<div class=\"btn-group\" aw-toggle-button data-after-toggle=\"filterPortalJobs\">" ;
         html += "<button id='portal-toggle-user' class=\"btn btn-xs btn-primary active\">My Jobs</button>" ;
         html += "<button id='portal-toggle-all' class=\"btn btn-xs btn-default\">All Jobs</button>" ;
