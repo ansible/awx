@@ -100,14 +100,14 @@ class AzureInventory(object):
             if self.args.host:
                 data_to_print = self.get_host(self.args.host)
             else:
-                # Add the `_meta` information.
-                _meta = {}
+                # Add the `['_meta']['hostvars']` information.
+                hostvars = {}
                 if len(data) > 0:
                     for host in set(reduce(lambda x, y: x + y,
                                            [i for i in data.values()])):
                         if host is not None:
-                            _meta[host] = self.get_host(host, jsonify=False)
-                data['_meta'] = _meta
+                            hostvars[host] = self.get_host(host, jsonify=False)
+                data['_meta'] = {'hostvars': hostvars}
 
                 # JSONify the data.
                 data_to_print = self.json_format_dict(data, pretty=True)
