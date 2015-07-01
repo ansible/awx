@@ -100,11 +100,13 @@ export default
 
                 var slottedValues = slotFactValues(basisPosition, basisFactValues, comparatorFactValues);
 
-                if (!_.isEqual(slottedValues.left, slottedValues.right)) {
+                var remaining = _.difference(slottedValues.left, slottedValues.right);
+
+                if (_.isEmpty(remaining)) {
+                    slottedValues.isDivergent = false;
+                } else {
                     slottedValues.isDivergent = true;
                     containsValueArray = true;
-                } else {
-                    slottedValues.isDivergent = false;
                 }
 
                 return slottedValues;

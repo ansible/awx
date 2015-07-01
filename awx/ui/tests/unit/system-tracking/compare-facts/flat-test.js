@@ -504,6 +504,47 @@ describe('CompareFacts.Flat', function() {
                 expectation = expect(result).to.be.empty;
             });
 
+            it('is insensitive to the order of the facts', function() {
+                var expectation;
+                var factTemplate =
+                    {   hasTemplate:
+                            function() {
+                                return true;
+                            },
+                        render: function(fact) {
+                            return fact.version;
+                        }
+                };
+
+                var result = compareFacts(
+                                {   position: 'left',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'efgh'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'abcd'
+                                    }]
+                                },
+                                {   position: 'right',
+                                    facts:
+                                    [{  'name': 'some-package',
+                                        'version': 'abcd'
+                                    },
+                                    {   'name': 'some-package',
+                                        'version': 'efgh'
+                                    }]
+
+                                }, options({    compareKey: ['value'],
+                                                factTemplate: factTemplate,
+                                                supportsValueArray: true
+                                          }));
+
+                // Use assignment to avoid jshint warning
+                expectation = expect(result).to.be.empty;
+            });
+
+
         });
     });
 
