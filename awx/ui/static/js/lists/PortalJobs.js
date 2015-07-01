@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('PortalJobsListDefinition', [])
@@ -53,7 +53,7 @@ export default
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                columnClass: "col-lg-3 col-md-3 hidden-xs"
+                columnClass: "col-lg-3 col-md-3 hidden-sm"
             },
             name: {
                 label: 'Name',
