@@ -1,4 +1,7 @@
 <section class="FactDataTable SystemTrackingContainer-main" ng-if="!error">
+    <div class="alert alert-info" ng-if="singleResultView">
+        The selected fact scans were identical for this module. Showing all facts from the latest selected scan instead.
+    </div>
     <div class="FactDataTable-headingRow">
         <h3 class="FactDataTable-column FactDataTableHeading">
           <span class="FactDataTableHeading-label">
@@ -10,7 +13,7 @@
           <span class="FactDataTableHeading-host" ng-if="!leftDataNoScans">{{leftHostname}}</span>
           <span class="FactDataTableHeading-date">{{leftScanDate|longDate}}</span>
         </h3>
-        <h3 class="FactDataTable-column FactDataTableHeading">
+        <h3 class="FactDataTable-column FactDataTableHeading" ng-if="!singleResultView">
           <span ng-if="rightDataNoScans">No scans for {{rightHostname}} on</span>
           <span class="FactDataTableHeading-host" ng-if="!rightDataNoScans">{{rightHostname}}</span>
           <span class="FactDataTableHeading-date">{{rightScanDate|longDate}}</span>
@@ -25,7 +28,7 @@
                         {{value}}
                     </span>
                 </span>
-                <span class="FactDataTable-column FactDataTable-columnArray">
+                <span class="FactDataTable-column FactDataTable-columnArray" ng-if="!singleResultView">
                     <span class="FactDataTable-columnMember" ng-repeat="value in group.facts.value2">
                         {{value}}
                     </span>
@@ -34,7 +37,7 @@
             <div class="FactDataTable-row" ng-if="!group.containsValueArray">
                 <span class="FactDataTable-column">{{group.facts.keyName}}</span>
                 <span class="FactDataTable-column">{{group.facts.value1}}</span>
-                <span class="FactDataTable-column">{{group.facts.value2}}</span>
+                <span class="FactDataTable-column" ng-if="!singleResultView">{{group.facts.value2}}</span>
             </div>
         </div>
     </div>

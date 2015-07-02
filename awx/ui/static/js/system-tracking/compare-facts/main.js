@@ -41,7 +41,9 @@ export function compareFacts(module, facts) {
                     .unique('displayKeyPath')
                     .thru(function(result) {
                         return  {   factData: result,
-                                    isNestedDisplay: _.isPlainObject(renderOptions.factTemplate)
+                                    isNestedDisplay: _.isPlainObject(renderOptions.factTemplate),
+                                    leftData: facts[0].facts,
+                                    rightData: facts[1].facts
                                 };
                     })
                     .value();

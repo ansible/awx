@@ -12,6 +12,7 @@ export default
                                 leftDataNoScans: '=',
                                 rightDataNoScans: '=',
                                 isNestedDisplay: '=',
+                                singleResultView: '=',
                                 factData: '='
                             }
                     };

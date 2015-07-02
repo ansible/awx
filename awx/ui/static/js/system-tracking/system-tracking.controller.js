@@ -6,6 +6,8 @@
 
 import {searchDateRange} from './search-date-range';
 import {compareFacts} from './compare-facts/main';
+import {formatFactForDisplay} from './format-facts';
+import FactTemplate from './compare-facts/fact-template';
 
 function controller($rootScope,
                     $scope,
@@ -74,6 +76,8 @@ function controller($rootScope,
         $scope.rightDataNoScans = false;
         $scope.leftDateWarning = false;
         $scope.rightDateWarning = false;
+
+        $scope.singleFactOnly = false;
 
         waitIndicator('start');
 
@@ -173,17 +177,76 @@ function controller($rootScope,
                     $scope.error = null;
 
                     if (_.isEmpty(info.factData)) {
-                        info = _.reject({
-                            name: 'NoScanDifferences',
-                            message: 'No differences in the scans on the dates you selected. Please try selecting different dates.',
-                            dateValues:
-                                {   leftDate: $scope.leftDate.clone(),
-                                    rightDate: $scope.rightDate.clone()
-                                }
+                        // info = _.reject({
+                        //     name: 'NoScanDifferences',
+                        //     message: 'No differences in the scans on the dates you selected. Please try selecting different dates.',
+                        //     dateValues:
+                        //         {   leftDate: $scope.leftDate.clone(),
+                        //             rightDate: $scope.rightDate.clone()
+                        //         }
+                        // });
+                        $scope.singleFactOnly = true;
+                        $scope.factData = info.leftData.map(function(fact) {
+                            var keyNameMap = activeModule.keyNameMap;
+                            var nameKey = activeModule.nameKey;
+                            var renderOptions = _.merge({}, activeModule);
+                            var isNestedDisplay = false;
+                            var facts;
+
+                            if (_.isObject(renderOptions.factTemplate) &&
+                                    _.isArray(renderOptions.compareKey)) {
+
+                                isNestedDisplay = true;
+
+                                var templates = _.mapValues(renderOptions.factTemplate, function(template, key) {
+                                    if (template === true) {
+                                        return  {   render: function(fact) {
+                                                        return fact[key];
+                                                    }
+                                                };
+                                    } else {
+                                        return new FactTemplate(template);
+                                    }
+                                });
+
+                                facts = _.map(templates, function(template, key) {
+                                    var keyName = key;
+
+                                    if (_.isObject(keyNameMap) && keyNameMap.hasOwnProperty(key)) {
+                                        keyName = keyNameMap[key];
+                                    }
+
+                                    renderOptions.factTemplate = template;
+                                    var formattedValue = formatFactForDisplay(fact, renderOptions);
+                                    return {   keyName: keyName,
+                                                isNestedDisplay: true,
+                                                value1: formattedValue
+                                            };
+                                });
+
+
+                            } else {
+                                renderOptions.factTemplate = new FactTemplate(renderOptions.factTemplate);
+                                var formattedValue = formatFactForDisplay(fact, renderOptions);
+                                isNestedDisplay = false;
+                                facts = {   keyName: fact[nameKey],
+                                            value1: formattedValue
+                                        };
+                            }
+
+                            $scope.isNestedDisplay = isNestedDisplay;
+
+                            return {    displayKeyPath: fact[renderOptions.nameKey],
+                                        nestingLevel: 0,
+                                        containsValueArray: false,
+                                        facts: facts
+                                   };
                         });
+                    } else {
+                        $scope.singleFactOnly = false;
+                        $scope.factData =  info.factData;
+                        $scope.isNestedDisplay = info.isNestedDisplay;
                     }
-                    $scope.factData =  info.factData;
-                    $scope.isNestedDisplay = info.isNestedDisplay;
 
                     return info;
 
