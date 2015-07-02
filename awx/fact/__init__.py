@@ -28,4 +28,4 @@ try:
             tz_aware=settings.USE_TZ)
     register_key_transform(get_db())
 except ConnectionError:
-    logger.warn('Failed to establish connect to MongoDB "%s"' % (settings.MONGO_DB))
+    logger.info('Failed to establish connect to MongoDB')
