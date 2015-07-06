@@ -137,7 +137,7 @@ def mongodb_control(cmd):
 
     # Check to make sure the stop actually succeeded
     p = subprocess.Popen('pidof mongod', shell=True)
-    shutdown_failed = p.wait() == 1
+    shutdown_failed = p.wait() == 0
 
     # If there was an error, log it.
     if err:
