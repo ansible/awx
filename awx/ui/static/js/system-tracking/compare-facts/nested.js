@@ -8,6 +8,12 @@ import {formatFacts, findFacts} from './nested-helpers';
 
 export default function nestedCompare(basisFacts, comparatorFacts) {
 
+    if (_.isEmpty(basisFacts.facts)) {
+        var tmp = _.merge({}, basisFacts);
+        basisFacts = _.merge({}, comparatorFacts);
+        comparatorFacts = tmp;
+    }
+
     var factsList = [basisFacts, comparatorFacts];
     factsList = findFacts(factsList);
     factsList = compareFacts(factsList);

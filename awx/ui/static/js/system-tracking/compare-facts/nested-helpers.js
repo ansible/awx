@@ -130,11 +130,32 @@ export function findFacts(factData) {
     var leftData = factData[0].facts;
     var rightData = factData[1].facts;
 
+    // For value types (boolean, number) or complex objects use the value
+    // as is. For collection types, return 'absent' if it's empty
+    // otherwise, use the value as is.
+    //
+    function factValueOrAbsent(value) {
+
+        if (_.isBoolean(value) ||
+                _.isNumber(value)) {
+            return value;
+        }
+
+        if (_.isNull(value) || _.isEmpty(value)) {
+            return 'absent';
+        }
+
+        return value;
+    }
+
     function factObject(keyPath, key, leftValue, rightValue) {
         var obj =
             {   keyPath: keyPath,
                 keyName: key
             };
+
+        leftValue = factValueOrAbsent(leftValue);
+        rightValue = factValueOrAbsent(rightValue);
 
         if (factData[0].position === 'left') {
                 obj.value1 = leftValue;
@@ -155,10 +176,10 @@ export function findFacts(factData) {
             }, []);
         } else {
 
+            // default value in _.get ('absent') only hits if it's undefined, so we need to handle other falsey cases with ||
             var rightValue =
                 _.get(rightData,
-                      parentKeys,
-                      'absent');
+                      parentKeys);
 
             return factObject(
                 // TODO: Currently parentKeys is getting passed with the final key
