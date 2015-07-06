@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Inventories
@@ -433,7 +433,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
                 .success(function (data) {
                     var inventory_id = data.id;
                     Wait('stop');
-                    $location.path('/inventories/' + inventory_id + '/');
+                    $location.path('/inventories/' + inventory_id + '/manage');
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, form, { hdr: 'Error!',
