@@ -144,9 +144,9 @@ def mongodb_control(cmd):
         logger.error(err)
 
     if cmd == 'stop' and shutdown_failed:
-        time.sleep(30)
         p = subprocess.Popen('sudo mongod --shutdown -f /etc/mongod.conf', shell=True)
         out, err = p.communicate()
+        p.wait()
         logger.info("Shutdown command output: %s;%s" % (out, err))
 
 @task(bind=True)
