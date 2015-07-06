@@ -9,7 +9,11 @@
           </span>
         </h3>
         <h3 class="FactDataTable-column FactDataTableHeading">
-          <span ng-if="leftDataNoScans">No scans for {{leftHostname}} on</span>
+          <span ng-if="leftDataNoScans">
+              <span class="u-unbold">No scans for</span>
+              {{leftHostname}}
+              <span class="u-unbold">on</span>
+          </span>
           <span class="FactDataTableHeading-host" ng-if="!leftDataNoScans">{{leftHostname}}</span>
           <span class="FactDataTableHeading-date">{{leftScanDate|longDate}}</span>
         </h3>
