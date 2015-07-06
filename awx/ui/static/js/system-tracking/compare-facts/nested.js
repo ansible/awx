@@ -6,8 +6,9 @@
 
 import {formatFacts, findFacts} from './nested-helpers';
 
-export default function nestedCompare(factsList) {
+export default function nestedCompare(basisFacts, comparatorFacts) {
 
+    var factsList = [basisFacts, comparatorFacts];
     factsList = findFacts(factsList);
     factsList = compareFacts(factsList);
     return formatFacts(factsList);

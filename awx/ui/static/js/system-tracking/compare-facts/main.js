@@ -48,7 +48,7 @@ export function compareFacts(module, facts) {
                     })
                     .value();
     } else {
-        return {    factData: compareNestedFacts(facts),
+        return {    factData: compareNestedFacts(facts[0], facts[1]),
                     isNestedDisplay: true
                };
     }
