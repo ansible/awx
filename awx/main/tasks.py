@@ -133,14 +133,19 @@ def mongodb_control(cmd):
     p = subprocess.Popen('sudo service mongod %s' % cmd, shell=True,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
+    p.wait()
+
+    # Check to make sure the stop actually succeeded
+    p = subprocess.Popen('pidof mongod', shell=True)
+    shutdown_failed = p.wait() == 1
 
     # If there was an error, log it.
     if err:
         logger.error(err)
 
-    if cmd == 'stop':
+    if cmd == 'stop' and shutdown_failed:
         time.sleep(30)
-        p = subprocess.Popen('sudo mongod --shutdown -f /etc/mongod.conf')
+        p = subprocess.Popen('sudo mongod --shutdown -f /etc/mongod.conf', shell=True)
         out, err = p.communicate()
         logger.info("Shutdown command output: %s;%s" % (out, err))
 
