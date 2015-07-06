@@ -67,8 +67,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                 var scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 //$rootScope.$destroy();
-                $cookieStore.remove('token_expires');
-                $cookieStore.remove('current_user');
+
 
                 if($cookieStore.get('lastPath')==='/portal'){
                     $cookieStore.put( 'lastPath', '/portal');
@@ -76,7 +75,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                 }
                 else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/' || $cookieStore.get('lastPath') !== '/login' || $cookieStore.get('lastPath') !== '/logout'){
                     // do nothing
-                    $rootScope.lastPath = $cookieStore.get('lastPath');
+                    $rootScope.lastPath = $cookieStore.get('lastPath');    
                 }
                 else {
                     // your last path was home
@@ -84,6 +83,9 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                     $rootScope.lastPath = '/home';
                 }
 
+                $rootScope.lastUser = $cookieStore.get('current_user').id;
+                $cookieStore.remove('token_expires');
+                $cookieStore.remove('current_user');
                 $cookieStore.remove('token');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);

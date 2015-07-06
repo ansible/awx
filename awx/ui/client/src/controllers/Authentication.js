@@ -58,7 +58,7 @@
 export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty, ClearScope) {
 
-    var setLoginFocus, lastPath, sessionExpired, loginAgain,
+    var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain,
         e, html, scope = $rootScope.$new();
 
     setLoginFocus = function () {
@@ -81,6 +81,15 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
 
     lastPath = function () {
         return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
+    };
+
+    lastUser = function(){
+        if(!Empty($rootScope.lastUser) && $rootScope.lastUser === $rootScope.current_user.id){
+            return true;
+        }
+        else {
+            return false;
+        }
     };
 
     $log.debug('User session expired: ' + sessionExpired);
@@ -176,7 +185,7 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
             .success(function (data) {
                 Authorization.setLicense(data);
                 Wait("stop");
-                if (lastPath()) {
+                if (lastPath() && lastUser()) {
                     // Go back to most recent navigation path
                     $location.path(lastPath());
                 } else {
