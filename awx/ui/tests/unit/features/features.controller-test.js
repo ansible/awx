@@ -1,8 +1,10 @@
+import '../setup-browser';
+
 import featuresController from 'tower/shared/features/features.controller';
 
 describe('featuresController', function() {
 
-    it('checks if a feature is enabled', inject(['$rootScope', function($rootScope) {
+    it('checks if a feature is enabled', window.inject(['$rootScope', function($rootScope) {
         var actual;
 
         $rootScope.features = {

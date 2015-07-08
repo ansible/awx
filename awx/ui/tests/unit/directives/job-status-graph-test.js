@@ -1,11 +1,22 @@
-import Tower from 'tower/app';
-import {describeModule} from 'tests/unit/describe-module';
-import JobStatusGraph from 'tower/dashboard/graphs/job-status/main'
+/* jshint node: true */
+
+import '../setup-browser';
+
+import {describeModule} from '../describe-module';
+import 'tower/shared/Utilities';
+import 'tower/shared/RestServices';
+import JobStatusGraph from 'tower/dashboard/graphs/job-status/main';
+
+var sinon = require('sinon');
 
 var resizeHandler = sinon.spy();
 
+window.$.fn.removeResize = angular.noop;
+
 describeModule(JobStatusGraph.name)
     .mockProvider('adjustGraphSize', resizeHandler)
+    .mockProvider('Wait', angular.noop)
+    .mockProvider('Rest', angular.noop)
     .testDirective('jobStatusGraph', function(directive) {
 
 

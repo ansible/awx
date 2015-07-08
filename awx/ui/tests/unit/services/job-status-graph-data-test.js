@@ -1,5 +1,9 @@
-import {describeModule} from 'tests/unit/describe-module';
-import JobStatusGraph from 'tower/dashboard/graphs/job-status/main'
+import '../setup-browser';
+
+import {describeModule} from '../describe-module';
+import JobStatusGraph from 'tower/dashboard/graphs/job-status/main';
+
+var sinon = require('sinon');
 
 var processErrors = sinon.spy();
 

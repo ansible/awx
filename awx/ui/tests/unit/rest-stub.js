@@ -63,7 +63,7 @@ RestStub.prototype =
                 inject(['$rootScope', function($rootScope) {
                     $rootScope.$apply();
                 }]);
-            }, 1000);
+            }, 10);
         }
     };
 

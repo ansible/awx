@@ -1,3 +1,5 @@
+import '../setup-browser';
+
 import jobTemplates from 'tower/job-templates/main';
 import {describeModule} from '../describe-module';
 

@@ -1,33 +1,32 @@
-import compareFacts from 'tower/system-tracking/compare-facts/flat';
-
 /* jshint node: true */
-/* globals -expect, -_ */
 
-var _, expect;
+import '../../setup-browser';
+
+import compareFacts from 'tower/system-tracking/compare-facts/flat';
 
 // This makes this test runnable in node OR karma. The sheer
 // number of times I had to run this test made the karma
 // workflow just too dang slow for me. Maybe this can
 // be a pattern going forward? Not sure...
 //
-(function(global) {
-    var chai = global.chai || require('chai');
+// (function(global) {
+//     var chai = global.chai || require('chai');
 
-    if (typeof window === 'undefined') {
-        var chaiThings = global.chaiThings || require('chai-things');
-        chai.use(chaiThings);
-    }
+//     if (typeof window === 'undefined') {
+//         var chaiThings = global.chaiThings || require('chai-things');
+//         chai.use(chaiThings);
+//     }
 
-    _ = global._ || require('lodash');
-    expect = global.expect || chai.expect;
+//     _ = global._ || require('lodash');
+//     expect = global.expect || chai.expect;
 
-    global.expect = expect;
+//     global.expect = expect;
 
 
 
-    global._ = _;
+//     global._ = _;
 
-})(typeof window === 'undefined' ? global : window);
+// })(typeof window === 'undefined' ? global : window);
 
 describe('CompareFacts.Flat', function() {
 

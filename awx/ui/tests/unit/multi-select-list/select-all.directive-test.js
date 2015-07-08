@@ -1,4 +1,9 @@
-import {describeModule} from 'tests/unit/describe-module';
+import '../setup-browser';
+
+import {describeModule} from '../describe-module';
+import mod from 'tower/shared/multi-select-list/main';
+
+var sinon = require('sinon');
 
 var mockController = {
     selectAll: sinon.spy(),
@@ -7,7 +12,7 @@ var mockController = {
     deselectAllExtended: sinon.spy()
 };
 
-describeModule('multiSelectList')
+describeModule(mod.name)
     .testDirective('selectAll', function(directive) {
 
         var $scope;
@@ -36,7 +41,7 @@ describeModule('multiSelectList')
         });
 
         it('works as an element tag', function() {
-            var classes = Array.prototype.slice.apply(directive.$element[0].classList);
+            var classes = directive.$element.attr('class').split(' ');
             expect(classes).to.contain('ng-scope');
         });
 
@@ -91,4 +96,4 @@ describeModule('multiSelectList')
 
 
     });
-        });
+});

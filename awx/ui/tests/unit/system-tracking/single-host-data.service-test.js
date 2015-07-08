@@ -1,4 +1,6 @@
-import systemTracking from 'tower/system-tracking/main';
+import '../setup-browser';
+
+import systemTracking from 'tower/system-tracking/data-services/main';
 import {describeModule} from '../describe-module';
 import moment from 'tower/shared/moment/moment';
 

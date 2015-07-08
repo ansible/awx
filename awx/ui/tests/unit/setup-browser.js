@@ -1,3 +1,5 @@
+/* jshint node: true */
+
 var jsdom = require('jsdom').jsdom;
 var document = jsdom('tower');
 var window = document.parentWindow;
@@ -9,8 +11,11 @@ window.afterEach = afterEach;
 global.document = document;
 global.window = window;
 
-require('angular/angular');
 var jquery = require('jquery');
+global.$ = window.$ = global.jQuery = window.jQuery = jquery;
+
+require('angular/angular');
+
 require('angular-mocks/angular-mocks');
 
 var chai = require('chai');
@@ -24,12 +29,18 @@ chai.use(sinonChai);
 chai.use(chaiAsPromised);
 chai.use(chaiThings);
 
-global.$ = window.$ = jquery;
 global.angular = window.angular;
+global.inject = window.inject;
 global.expect = chai.expect;
 
 angular.module('templates', []);
 require('../../templates');
+
+var d3 = require('d3');
+global.d3 = d3;
+
+var nv = require('nvd3');
+global.nv = nv;
 
 var lodash = require('lodash');
 global._ = lodash;
@@ -37,3 +48,5 @@ global._ = lodash;
 var LocalStorage = require('node-localstorage').LocalStorage;
 global.localStorage = window.localStorage = new LocalStorage('./scratch');
 
+var moment = require('moment');
+window.moment = moment;

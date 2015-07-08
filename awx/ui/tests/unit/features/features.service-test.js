@@ -1,3 +1,5 @@
+import '../setup-browser';
+
 import features from 'tower/shared/features/main';
 import {describeModule} from '../describe-module';
 
@@ -31,7 +33,7 @@ describeModule(features.name)
 
         });
 
-        it('caches in rootScope', inject(['$rootScope',
+        it('caches in rootScope', window.inject(['$rootScope',
             function($rootScope){
                 var features = {},
                 result = {

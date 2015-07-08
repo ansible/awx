@@ -1,3 +1,5 @@
+import '../setup-browser';
+
 import 'tower/shared/main';
 
 describe('LodashAsPromised', function() {
@@ -17,7 +19,7 @@ describe('LodashAsPromised', function() {
         return memo + value;
     }
 
-    beforeEach(module('shared'));
+    beforeEach(window.module('shared'));
 
     beforeEach(inject(['lodashAsPromised', '$q', function(_lodash, _$q) {
         _ = _lodash;

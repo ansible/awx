@@ -1,4 +1,4 @@
-import RestStub from 'tests/unit/rest-stub';
+import RestStub from './rest-stub';
 
 var $provide;
 
@@ -7,7 +7,7 @@ function wrapInjected(dslFn) {
     // }));
     return function(fn) {
         dslFn.apply(this,
-            [inject(
+            [window.inject(
             [   '$injector',
                 function($injector) {
                     var $compile = $injector.get('$compile');
@@ -28,18 +28,19 @@ function TestModule(name, deps) {
         registerPreHooks: function() {
 
                     var self = this;
-                    beforeEach("tower module", module('Tower'));
-                    beforeEach(name + " module", module(name));
-                    beforeEach("templates module", module('templates'));
-                    beforeEach("mock app setup", module(['$provide', function(_provide_) {
+                    // beforeEach("tower module", window.module('Tower'));
+                    beforeEach(name + " module", window.module(name));
+                    beforeEach("templates module", window.module('templates'));
+                    beforeEach("mock app setup", window.module(['$provide', function(_provide_) {
 
                        var getBasePath = function(path) {
                          return '/' + path + '/';
-                       }
+                       };
 
                         $provide = _provide_;
                         $provide.value('LoadBasePaths', angular.noop);
                         $provide.value('GetBasePath', getBasePath);
+                        $provide.value('ProcessErrors', angular.noop);
 
                         for (var name in self.mockedProviders) {
                             $provide.value(name, self.mockedProviders[name]);
@@ -47,12 +48,12 @@ function TestModule(name, deps) {
 
                     }]));
 
-                    wrapInjected(beforeEach)(function($httpBackend) {
+                    // wrapInjected(beforeEach)(function($httpBackend) {
 
-                        $httpBackend
-                            .expectGET('/static/js/local_config.js')
-                            .respond({});
-                });
+                    //     $httpBackend
+                    //         .expectGET('/static/js/local_config.js')
+                    //         .respond({});
+                // });
             },
             mockProvider: function(name, value) {
                 this.mockedProviders[name] = value;
@@ -64,7 +65,7 @@ function TestModule(name, deps) {
                 });
             },
             registerPostHooks: function() {
-                afterEach(inject(['$httpBackend', function($httpBackend) {
+                afterEach(window.inject(['$httpBackend', function($httpBackend) {
                     $httpBackend.verifyNoOutstandingExpectation();
                     $httpBackend.verifyNoOutstandingRequest();
                 }]));
@@ -81,7 +82,7 @@ function TestService(name) {
 
     return {
         withService: function(fn) {
-            beforeEach(name + " service", inject([name, function() {
+            beforeEach(name + " service", window.inject([name, function() {
                 var service = arguments[0];
                 fn(service);
             }]));
@@ -104,7 +105,7 @@ function TestDirective(name, deps) {
             // by the test
             withScope: function(fn) {
                 var self = this;
-                beforeEach("capture outer $scope", inject(['$rootScope', function($rootScope) {
+                beforeEach("capture outer $scope", window.inject(['$rootScope', function($rootScope) {
                     var $scope = self.$scope = self.$scope || $rootScope.$new();
                     // `this` refers to mocha test suite
                     fn.apply(this, [$scope]);
@@ -112,7 +113,7 @@ function TestDirective(name, deps) {
             },
             withIsolateScope: function(fn) {
                 var self = this;
-                beforeEach("capture isolate scope", inject(['$rootScope', function($rootScope) {
+                beforeEach("capture isolate scope", window.inject(['$rootScope', function($rootScope) {
                     // `this` refers to mocha test suite
                     fn.apply(this, [self.$element.isolateScope()]);
                 }]));
@@ -165,7 +166,7 @@ function TestDirective(name, deps) {
                 }
 
                 beforeEach("compile directive element",
-                           inject(['$compile', '$httpBackend', '$rootScope', function($compile, $httpBackend, $rootScope) {
+                           window.inject(['$compile', '$httpBackend', '$rootScope', function($compile, $httpBackend, $rootScope) {
 
                     if (!self.$scope) {
                         self.$scope = $rootScope.$new();
@@ -176,13 +177,14 @@ function TestDirective(name, deps) {
 
                     self.$scope.$digest();
 
-                    $httpBackend.flush();
+                    // $httpBackend.flush();
 
                 }]));
 
                 afterEach("cleanup directive element", function() {
-                    self.$element.trigger('$destroy');
+                    $(self.$element).trigger('$destroy');
                     self.$element.remove();
+                    delete self.$scope;
                 });
 
                 this._compileRegistered = true;
@@ -200,7 +202,7 @@ function TestDirective(name, deps) {
             },
             provideTemplate: function(url, template) {
                 var $scope = this.$scope;
-                beforeEach("mock template endpoint", inject(['$httpBackend', function($httpBackend) {
+                beforeEach("mock template endpoint", window.inject(['$httpBackend', function($httpBackend) {
                     $httpBackend
                         .whenGET(url)
                         .respond(template);
@@ -233,7 +235,7 @@ function ModuleDescriptor(name, deps) {
                     testModule.mockProvider('$cookieStore', { get: angular.noop });
                     testModule.registerPreHooks();
 
-                    beforeEach("$q", inject(['$q', function($q) {
+                    beforeEach("$q", window.inject(['$q', function($q) {
                         testService.restStub.$q = $q;
                     }]));
 

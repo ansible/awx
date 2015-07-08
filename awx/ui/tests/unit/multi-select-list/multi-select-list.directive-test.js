@@ -1,5 +1,8 @@
-import {describeModule} from 'tests/unit/describe-module';
+import '../setup-browser';
+
+import {describeModule} from '../describe-module';
 import mod from 'tower/shared/multi-select-list/main';
+var sinon = require('sinon');
 
 describeModule(mod.name)
     .testDirective('multiSelectList', function(test) {
@@ -18,9 +21,9 @@ describeModule(mod.name)
         });
 
         it('works as an attribute on elements', function() {
-            inject(['$compile', function($compile) {
+            window.inject(['$compile', function($compile) {
                 var node = $compile('<div multi-select-list></div>')($scope);
-                var classes = Array.prototype.slice.apply(node[0].classList)
+                var classes = Array.prototype.slice.apply(node.attr('class').split(' '));
                 expect(classes).to.contain('ng-scope');
            }]);
         });
