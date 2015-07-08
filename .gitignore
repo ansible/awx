@@ -49,6 +49,8 @@ npm-debug.log
 coverage.xml
 htmlcov
 pep8.txt
+scratch
+testem.log
 
 # Mac OS X
 *.DS_Store

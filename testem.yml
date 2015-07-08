@@ -1,0 +1,25 @@
+---
+# before_tests: cd ../../.. && sudo make devjs
+framework: mocha
+cwd: awx/ui/dist/node-tests
+src_files:
+  - tests/**.js
+  - static/js/**/*.js
+  - static/lib/**/*.js
+disable_watching: true
+serve_files:
+  - ../tower.concat.js
+  - tests/templates.js
+  - tests/test-support.js
+  - tests/unit/**/*.js
+  - tests/unit.js
+unsafe_file_serving: true
+routes:
+  /awx/ui/dist: /static
+launch_in_dev:
+  - Mocha
+launch_in_ci:
+  - PhantomJS
+launchers:
+  Mocha:
+    command: NODE_PATH=awx/ui/dist/node-tests ./node_modules/.bin/mocha awx/ui/dist/node-tests/tests/unit/**/*.js
