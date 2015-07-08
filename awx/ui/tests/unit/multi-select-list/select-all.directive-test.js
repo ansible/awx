@@ -3,8 +3,6 @@ import '../setup-browser';
 import {describeModule} from '../describe-module';
 import mod from 'tower/shared/multi-select-list/main';
 
-var sinon = require('sinon');
-
 var mockController = {
     selectAll: sinon.spy(),
     deselectAll: sinon.spy(),

@@ -1,52 +1,68 @@
 /* jshint node: true */
 
-var jsdom = require('jsdom').jsdom;
-var document = jsdom('tower');
-var window = document.parentWindow;
-var mocha = require('mocha');
-window.mocha = mocha;
-window.beforeEach = beforeEach;
-window.afterEach = afterEach;
+(function() {
+    var isNode = typeof window === 'undefined';
 
-global.document = document;
-global.window = window;
+    if (!isNode) {
+        window.expect = chai.expect;
+        return;
+    }
 
-var jquery = require('jquery');
-global.$ = window.$ = global.jQuery = window.jQuery = jquery;
+    setupNode();
 
-require('angular/angular');
+    function setupNode() {
 
-require('angular-mocks/angular-mocks');
+        var jsdom = require('jsdom').jsdom;
+        var document = jsdom('tower');
+        var window = document.parentWindow;
+        var mocha = require('mocha');
+        window.mocha = mocha;
+        window.beforeEach = beforeEach;
+        window.afterEach = afterEach;
 
-var chai = require('chai');
-var expect = chai.expect;
-var sinonChai = require('sinon-chai');
-var chaiAsPromised = require('chai-as-promised');
-var sinon = require('sinon');
-var chaiThings = require('chai-things');
+        global.document = document;
+        global.window = window;
 
-chai.use(sinonChai);
-chai.use(chaiAsPromised);
-chai.use(chaiThings);
+        var jquery = require('jquery');
+        global.$ = window.$ = global.jQuery = window.jQuery = jquery;
 
-global.angular = window.angular;
-global.inject = window.inject;
-global.expect = chai.expect;
+        require('angular/angular');
 
-angular.module('templates', []);
-require('../../templates');
+        require('angular-mocks/angular-mocks');
 
-var d3 = require('d3');
-global.d3 = d3;
+        var chai = require('chai');
+        var expect = chai.expect;
+        var sinonChai = require('sinon-chai');
+        var chaiAsPromised = require('chai-as-promised');
+        var sinon = require('sinon');
+        var chaiThings = require('chai-things');
 
-var nv = require('nvd3');
-global.nv = nv;
+        chai.use(sinonChai);
+        chai.use(chaiAsPromised);
+        chai.use(chaiThings);
 
-var lodash = require('lodash');
-global._ = lodash;
+        global.angular = window.angular;
+        global.inject = window.inject;
+        global.expect = chai.expect;
+        global.sinon = require('sinon');
 
-var LocalStorage = require('node-localstorage').LocalStorage;
-global.localStorage = window.localStorage = new LocalStorage('./scratch');
+        angular.module('templates', []);
+        require('../../templates');
 
-var moment = require('moment');
-window.moment = moment;
+        var d3 = require('d3');
+        global.d3 = d3;
+
+        var nv = require('nvd3');
+        global.nv = nv;
+
+        var lodash = require('lodash');
+        global._ = lodash;
+
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        global.localStorage = window.localStorage = new LocalStorage('./scratch');
+
+        var moment = require('moment');
+        window.moment = moment;
+    }
+
+})();

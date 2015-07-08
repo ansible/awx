@@ -2,7 +2,6 @@ import '../setup-browser';
 
 import {describeModule} from '../describe-module';
 import mod from 'tower/shared/multi-select-list/main';
-var sinon = require('sinon');
 
 describeModule(mod.name)
     .testDirective('multiSelectList', function(test) {

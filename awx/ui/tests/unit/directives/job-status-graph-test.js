@@ -7,8 +7,6 @@ import 'tower/shared/Utilities';
 import 'tower/shared/RestServices';
 import JobStatusGraph from 'tower/dashboard/graphs/job-status/main';
 
-var sinon = require('sinon');
-
 var resizeHandler = sinon.spy();
 
 window.$.fn.removeResize = angular.noop;

@@ -1,25 +1,30 @@
 ---
-# before_tests: cd ../../.. && sudo make devjs
 framework: mocha
-cwd: awx/ui/dist/node-tests
+cwd: awx/ui/
+port: 7358
 src_files:
-  - tests/**.js
   - static/js/**/*.js
   - static/lib/**/*.js
-disable_watching: true
+  - tests/**/*.js
 serve_files:
-  - ../tower.concat.js
-  - tests/templates.js
-  - tests/test-support.js
-  - tests/unit/**/*.js
-  - tests/unit.js
+  - dist/tower.concat.js
+  - dist/tests/**/*.js
+  - dist/tests/unit.js
 unsafe_file_serving: true
+test_page: tests.html
+disable_watching: true
 routes:
   /awx/ui/dist: /static
+  /tests.html: ../../packaging/grunt/testem.mustache
+  /test-loader.js: static/lib/ember-cli-test-loader/test-loader.js
+  /vendor: ../../node_modules
+  /angular-mocks.js: dist/lib/angular-mocks/angular-mocks.js
+  /templates.js: dist/node-tests/templates.js
+reporter: xunit
 launch_in_dev:
   - Mocha
 launch_in_ci:
   - PhantomJS
 launchers:
   Mocha:
-    command: NODE_PATH=awx/ui/dist/node-tests ./node_modules/.bin/mocha awx/ui/dist/node-tests/tests/unit/**/*.js
+    command: NODE_PATH=awx/ui/dist/node-tests ./node_modules/.bin/mocha $(find  awx/ui/dist/node-tests/tests/ -name '*-test.js')
