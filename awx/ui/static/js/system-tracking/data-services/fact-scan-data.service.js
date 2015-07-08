@@ -9,7 +9,7 @@ function (Rest, GetBasePath, ProcessErrors, _) {
 
     function buildUrl (host_id, module, startDate, endDate) {
         var url = GetBasePath('hosts') + host_id + '/fact_versions/',
-            params= [["module", module] , ['from', startDate.format('YYYY-MM-DD')],  ['to', endDate.format('YYYY-MM-DD')]];
+            params= [["module", module] , ['from', startDate.format()],  ['to', endDate.format()]];
 
         params = params.filter(function(p){
             return !_.isEmpty(p[1]);
