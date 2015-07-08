@@ -28,12 +28,12 @@
             <div class="FactDataTable-row FactDataTable-row--flexible" ng-if="group.containsValueArray">
                 <span class="FactDataTable-column">{{group.facts.keyName}}</span>
                 <span class="FactDataTable-column FactDataTable-columnArray">
-                    <span class="FactDataTable-columnMember" ng-repeat="value in group.facts.value1">
+                    <span class="FactDataTable-columnMember" truncated-text ng-repeat="value in group.facts.value1">
                         {{value}}
                     </span>
                 </span>
                 <span class="FactDataTable-column FactDataTable-columnArray" ng-if="!singleResultView">
-                    <span class="FactDataTable-columnMember" ng-repeat="value in group.facts.value2">
+                    <span class="FactDataTable-columnMember" truncated-text ng-repeat="value in group.facts.value2">
                         {{value}}
                     </span>
                 </span>
@@ -63,10 +63,10 @@
                         <span class="FactDatum-keyName FactDataTable-column" ng-if="fact.isArrayMember">
                           {{fact.keyPath[0]}}.{{fact.keyName}}
                         </span>
-                        <span class="FactDatum-value FactDataTable-column u-truncatedText">
+                        <span class="FactDatum-value FactDataTable-column" truncated-text>
                         {{fact.value1}}
                         </span>
-                        <span class="FactDatum-value FactDataTable-column u-truncatedText" ng-if="!singleResultView">
+                        <span class="FactDatum-value FactDataTable-column" truncated-text ng-if="!singleResultView">
                         {{fact.value2}}
                         </span>
                     </div>
