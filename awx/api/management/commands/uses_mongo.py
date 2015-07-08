@@ -5,7 +5,7 @@ import sys
 
 from optparse import make_option
 from django.core.management.base import BaseCommand
-from awx.main.models import Instance
+from awx.main.ha import is_ha_environment
 from awx.main.task_engine import TaskSerializer
 
 
@@ -45,7 +45,7 @@ class Command(BaseCommand):
         # rules here will grow more complicated over time.
         uses_mongo = system_tracking  # noqa
 
-        if Instance.objects.count() > 1 and kwargs['local'] and uses_mongo:
+        if is_ha_environment() and kwargs['local'] and uses_mongo:
             print("HA Configuration detected.  Database should be remote")
             uses_mongo = False
 
