@@ -69,7 +69,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             scope: jobs_scope,
             list: AllJobsList,
             id: 'active-jobs',
-            url: GetBasePath('unified_jobs') + '?status__in=pending,running,completed,failed,successful,error,canceled',
+            url: GetBasePath('unified_jobs') + '?status__in=pending,waiting,running,completed,failed,successful,error,canceled',
             pageSize: max_rows,
             searchParams: search_params,
             spinner: false
