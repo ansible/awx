@@ -12,16 +12,17 @@
         'Wait',
         'adjustGraphSize',
         'jobStatusGraphData',
+        'templateUrl',
         JobStatusGraph
     ];
 
-function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService) {
+function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService, templateUrl) {
             return {
                 restrict: 'E',
                 scope: {
                     data: '='
                 },
-                templateUrl: '/static/js/dashboard/graphs/job-status/job_status_graph.partial.html',
+                templateUrl: templateUrl('dashboard/graphs/job-status/job_status_graph'),
                 link: link
             };
 

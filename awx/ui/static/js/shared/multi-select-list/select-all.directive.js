@@ -129,12 +129,10 @@
 //      // =>
 //      '/static/js/shared/multi-select-list/select-all.html
 //
-function template(base) {
-    return '/static/js/' + base + '.partial.html';
-}
 
 export default
-    [   function() {
+    [   'templateUrl',
+        function(templateUrl) {
         return {
             require: '^multiSelectList',
             restrict: 'E',
@@ -145,7 +143,7 @@ export default
                 extendedLabel: '&',
                 isSelectionEmpty: '=selectionsEmpty'
             },
-            templateUrl: template('shared/multi-select-list/select-all'),
+            templateUrl: templateUrl('shared/multi-select-list/select-all'),
             link: function(scope, element, attrs, controller) {
 
                 scope.label = scope.label || 'All';

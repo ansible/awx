@@ -1,14 +1,15 @@
 /* jshint unused: vars */
 export default
     [   "PlaybookRun",
-        function JobTemplatesList(PlaybookRun) {
+        'templateUrl',
+        function JobTemplatesList(PlaybookRun, templateUrl) {
             return {
                 restrict: 'E',
                 link: link,
                 scope: {
                     data: '='
                 },
-                templateUrl: '/static/js/dashboard/lists/job-templates/job-templates-list.partial.html'
+                templateUrl: templateUrl('dashboard/lists/job-templates/job-templates-list')
             };
 
             function link(scope, element, attr) {

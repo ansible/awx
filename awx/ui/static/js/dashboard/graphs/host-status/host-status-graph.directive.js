@@ -8,14 +8,15 @@
     [   '$compile',
         '$window',
         'adjustGraphSize',
+        'templateUrl',
         HostStatusGraph,
     ];
 
-function HostStatusGraph($compile, $window, adjustGraphSize) {
+function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
         return {
             restrict: 'E',
             link: link,
-            templateUrl: '/static/js/dashboard/graphs/host-status/host_status_graph.partial.html'
+            templateUrl: templateUrl('dashboard/graphs/host-status/host_status_graph')
         };
 
         function link(scope, element, attr) {

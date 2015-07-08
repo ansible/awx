@@ -1,11 +1,11 @@
 /* jshint unused: vars */
 export default
-    [   '$rootScope',
-        function() {
+    [   'templateUrl',
+        function(templateUrl) {
             return {
                 restrict: 'E',
                 scope: true,
-                templateUrl: '/static/js/dashboard/graphs/dashboard-graphs.partial.html',
+                templateUrl: templateUrl('dashboard/graphs/dashboard-graphs'),
                 link: function(scope, element, attrs) {
                     function clearGraphs() {
                         scope.jobStatusSelected = false;

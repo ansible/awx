@@ -1,9 +1,10 @@
 /* jshint unused: vars */
 
 export default
-    [   function() {
+    [   'templateUrl',
+        function(templateUrl) {
             return  {   restrict: 'E',
-                        templateUrl: '/static/js/system-tracking/fact-data-table/fact-data-table.partial.html',
+                        templateUrl: templateUrl('system-tracking/fact-data-table/fact-data-table'),
                         scope:
                             {   leftHostname: '=',
                                 rightHostname: '=',

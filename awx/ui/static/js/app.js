@@ -38,6 +38,7 @@ import mainMenu from 'tower/main-menu/main';
 import browserData from 'tower/browser-data/main';
 import dashboard from 'tower/dashboard/main';
 import moment from 'tower/shared/moment/main';
+import templateUrl from 'tower/shared/template-url/main';
 
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
@@ -84,6 +85,7 @@ var tower = angular.module('Tower', [
     mainMenu.name,
     dashboard.name,
     moment.name,
+    templateUrl.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',

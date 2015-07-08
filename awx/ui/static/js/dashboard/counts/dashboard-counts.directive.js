@@ -1,14 +1,14 @@
 /* jshint unused: vars */
 export default
-    [   '$rootScope',
-        function() {
+    [   'templateUrl',
+        function(templateUrl) {
             return {
                 restrict: 'E',
                 scope: {
                     data: '='
                 },
                 replace: false,
-                templateUrl: '/static/js/dashboard/counts/dashboard-counts.partial.html',
+                templateUrl: templateUrl('dashboard/counts/dashboard-counts'),
                 link: function(scope, element, attrs) {
                     scope.$watch("data", function(data) {
                         if (data && data.hosts) {

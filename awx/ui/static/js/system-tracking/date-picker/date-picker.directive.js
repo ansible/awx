@@ -8,7 +8,8 @@
 
 export default
     [   'moment',
-        function(moment) {
+        'templateUrl',
+        function(moment, templateUrl) {
             return {
                 restrict: 'E',
                 scope: {
@@ -17,7 +18,7 @@ export default
                     autoUpdate: '=?',
                     inputClass: '&'
                 },
-                templateUrl: '/static/js/system-tracking/date-picker/date-picker.partial.html',
+                templateUrl: templateUrl('system-tracking/date-picker/date-picker'),
                 link: function(scope, element, attrs) {
 
                     // We need to make sure this _never_ recurses, which sometimes happens
