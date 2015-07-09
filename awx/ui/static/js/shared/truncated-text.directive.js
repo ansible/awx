@@ -25,7 +25,17 @@ function link($compile, scope, element, attrs) {
         var fullTextWidth = element[0].scrollWidth;
         var elementWidth = element.outerWidth();
 
-        if(fullTextWidth > elementWidth) {
+        // HACK: For some reason many of my divs
+        // are ending up with a 1px size diff.
+        // Guessing this is because of 3 cols
+        // at 33% flex-basis, with 8px padding.
+        // Perhaps the padding is pushing it over
+        // in JavaScript but not visually? Using
+        // threshold to filter those out.
+        var threshold = 5;
+
+        if(fullTextWidth > elementWidth &&
+               fullTextWidth - elementWidth > threshold) {
             return true;
         }
 
@@ -49,6 +59,19 @@ function link($compile, scope, element, attrs) {
     }
 
     scope.$watch(getText, addTitleIfWrapping);
+
+    // HACK: This handles truncating _after_ other elements
+    // are added that affect the size of this element. I
+    // wanted to leave this as a regular event binding, but
+    // was running into issues with the resized element getting
+    // removed from the DOM after truncating! No idea why yet.
+    element.resize(function() {
+        addTitleIfWrapping(getText());
+    });
+
+    scope.$watch('$destroy', function() {
+        element.off('resize');
+    });
 }
 
 export default
