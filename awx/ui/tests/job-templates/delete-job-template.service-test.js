@@ -1,7 +1,7 @@
-import '../setup-browser';
+import '../support/node';
 
 import jobTemplates from 'tower/job-templates/main';
-import {describeModule} from '../describe-module';
+import {describeModule} from '../support/describe-module';
 
 describeModule(jobTemplates.name)
     .testService('deleteJobTemplate', function(test, restStub) {

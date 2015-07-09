@@ -1,4 +1,4 @@
-import '../setup-browser';
+import '../support/node';
 
 import 'tower/shared/main';
 

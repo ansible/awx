@@ -1,4 +1,4 @@
-import '../setup-browser';
+import '../support/node';
 
 import featuresController from 'tower/shared/features/features.controller';
 

@@ -1,6 +1,6 @@
-import '../setup-browser';
+import '../support/node';
 
-import {describeModule} from '../describe-module';
+import {describeModule} from '../support/describe-module';
 import mod from 'tower/shared/multi-select-list/main';
 
 describeModule(mod.name)

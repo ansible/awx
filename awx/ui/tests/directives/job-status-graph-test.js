@@ -1,8 +1,8 @@
 /* jshint node: true */
 
-import '../setup-browser';
+import '../support/node';
 
-import {describeModule} from '../describe-module';
+import {describeModule} from '../support/describe-module';
 import 'tower/shared/Utilities';
 import 'tower/shared/RestServices';
 import JobStatusGraph from 'tower/dashboard/graphs/job-status/main';

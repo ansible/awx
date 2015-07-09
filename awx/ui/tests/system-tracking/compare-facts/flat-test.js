@@ -1,6 +1,6 @@
 /* jshint node: true */
 
-import '../../setup-browser';
+import '../../support/node';
 
 import compareFacts from 'tower/system-tracking/compare-facts/flat';
 
