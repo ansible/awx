@@ -28,10 +28,11 @@ export default ['$scope', '$filter',
 
                 data.jobId = job.id;
                 data.smartStatus = job.status;
+                data.sortDate = job.finished || "running" + data.jobId;
                 data.finished = $filter('longDate')(job.finished) || "running";
 
                 return data;
-            }), "finished").reverse();
+            }), "sortDate").reverse();
 
         $scope.sparkArray = _.pluck(sparkData, 'value');
         $scope.jobIds = _.pluck(sparkData, 'jobId');
