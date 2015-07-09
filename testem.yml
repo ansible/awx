@@ -27,4 +27,4 @@ launch_in_ci:
   - PhantomJS
 launchers:
   Mocha:
-    command: NODE_PATH=awx/ui/dist/node-tests ./node_modules/.bin/mocha $(find  awx/ui/dist/node-tests/tests/ -name '*-test.js')
+    command: npm test
