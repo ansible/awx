@@ -28,20 +28,20 @@
             <div class="FactDataTable-row FactDataTable-row--flexible" ng-if="group.containsValueArray">
                 <span class="FactDataTable-column">{{group.facts.keyName}}</span>
                 <span class="FactDataTable-column FactDataTable-columnArray">
-                    <span class="FactDataTable-columnMember" truncated-text ng-repeat="value in group.facts.value1">
+                    <span class="FactDataTable-columnMember u-wrappedText" ng-repeat="value in group.facts.value1" style="position: relative;">
                         {{value}}
                     </span>
                 </span>
                 <span class="FactDataTable-column FactDataTable-columnArray" ng-if="!singleResultView">
-                    <span class="FactDataTable-columnMember" truncated-text ng-repeat="value in group.facts.value2">
+                    <span class="FactDataTable-columnMember u-wrappedText" ng-repeat="value in group.facts.value2" style="position: relative;">
                         {{value}}
                     </span>
                 </span>
             </div>
             <div class="FactDataTable-row" ng-if="!group.containsValueArray">
                 <span class="FactDataTable-column">{{group.facts.keyName}}</span>
-                <span class="FactDataTable-column">{{group.facts.value1}}</span>
-                <span class="FactDataTable-column" ng-if="!singleResultView">{{group.facts.value2}}</span>
+                <span class="FactDataTable-column u-wrappedText" style="position: relative;">{{group.facts.value1}}</span>
+                <span class="FactDataTable-column u-wrappedText" ng-if="!singleResultView" style="position: relative;">{{group.facts.value2}}</span>
             </div>
         </div>
     </div>
@@ -60,13 +60,13 @@
                         <span class="FactDatum-keyName FactDataTable-column" ng-if="!fact.isArrayMember">
                         {{fact.keyName}}
                         </span>
-                        <span class="FactDatum-keyName FactDataTable-column" ng-if="fact.isArrayMember">
+                        <span class="FactDatum-keyName FactDataTable-column u-wrappedText" ng-if="fact.isArrayMember">
                           {{fact.keyPath[0]}}.{{fact.keyName}}
                         </span>
-                        <span class="FactDatum-value FactDataTable-column" truncated-text>
+                        <span class="FactDatum-value FactDataTable-column u-wrappedText" style="position: relative;">
                         {{fact.value1}}
                         </span>
-                        <span class="FactDatum-value FactDataTable-column" truncated-text ng-if="!singleResultView">
+                        <span class="FactDatum-value FactDataTable-column u-wrappedText" ng-if="!singleResultView" style="position: relative;">
                         {{fact.value2}}
                         </span>
                     </div>
@@ -78,10 +78,10 @@
                     <span class="FactDataTable-column FactDatum-keyName" ng-if="fact.isArrayMember">
                       {{fact.keyPath[0]}}.{{fact.keyName}}
                     </span>
-                    <span class="FactDataTable-column FactDatum-value" truncated-text>
+                    <span class="FactDataTable-column FactDatum-value u-wrappedText" style="position: relative;">
                     {{fact.value1}}
                     </span>
-                    <span class="FactDataTable-column FactDatum-value" truncated-text ng-if="!singleResultView">
+                    <span class="FactDataTable-column FactDatum-value u-wrappedText" ng-if="!singleResultView" style="position: relative;">
                     {{fact.value2}}
                     </span>
                 </div>

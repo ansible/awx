@@ -1,4 +1,5 @@
 /* jshint unused: vars */
+import {addResizeListener, removeResizeListener} from 'tower/shared/element-resize';
 
 function link($compile, scope, element, attrs) {
 
@@ -65,12 +66,14 @@ function link($compile, scope, element, attrs) {
     // wanted to leave this as a regular event binding, but
     // was running into issues with the resized element getting
     // removed from the DOM after truncating! No idea why yet.
-    element.resize(function() {
+    function resizeListener() {
         addTitleIfWrapping(getText());
-    });
+    }
+
+    addResizeListener(element[0], resizeListener);
 
     scope.$watch('$destroy', function() {
-        element.off('resize');
+        removeResizeListener(element[0], resizeListener);
     });
 }
 
