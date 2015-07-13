@@ -16,8 +16,10 @@ service_action() {
     # Should MongoDB be managed by this script?
     # We only manage MongoDB if the license uses it.
     tower-manage uses_mongo > /dev/null 2> /dev/null
-    if [ $? == 0 ]; then
+    if [ $? == 0 && ${1} == start ]; then
         SERVICES="$SERVICES mongod"
+    elif [ $? == 0 && ${1} == stop ]; then
+        SERVICES="mongod $SERVICES"
     fi
 
     for svc in ${SERVICES}; do
