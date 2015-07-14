@@ -29,7 +29,7 @@ service_action() {
 
         # Determine whether mongod is needed
         if [[ ${svc} == mongod ]]; then
-            tower-manage uses_mongo 2> /dev/null >/dev/null
+            tower-manage uses_mongo --local 2> /dev/null >/dev/null
             # if mongod is not required, break
             if [ $? -ne 0 ]; then
                 break
