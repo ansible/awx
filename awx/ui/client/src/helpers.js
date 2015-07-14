@@ -10,9 +10,7 @@ import './lists';
 import AboutAnsible from "./helpers/AboutAnsible";
 import Access from "./helpers/Access";
 import Children from "./helpers/Children";
-import ConfigureTower from "./helpers/ConfigureTower";
 import Credentials from "./helpers/Credentials";
-import CustomInventory from "./helpers/CustomInventory";
 import EventViewer from "./helpers/EventViewer";
 import Events from "./helpers/Events";
 import Groups from "./helpers/Groups";
@@ -51,9 +49,7 @@ export
     {   AboutAnsible,
         Access,
         Children,
-        ConfigureTower,
         Credentials,
-        CustomInventory,
         EventViewer,
         Events,
         Groups,

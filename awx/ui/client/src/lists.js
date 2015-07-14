@@ -8,9 +8,7 @@ import Admins from "./lists/Admins";
 import CloudCredentials from "./lists/CloudCredentials";
 import CompletedJobs from "./lists/CompletedJobs";
 import AllJobs from "./lists/AllJobs";
-import ConfigureTowerJobs from "./lists/ConfigureTowerJobs";
 import Credentials from "./lists/Credentials";
-import CustomInventory from "./lists/CustomInventory";
 import Groups from "./lists/Groups";
 import HomeGroups from "./lists/HomeGroups";
 import HomeHosts from "./lists/HomeHosts";
@@ -39,9 +37,7 @@ export
         CloudCredentials,
         CompletedJobs,
         AllJobs,
-        ConfigureTowerJobs,
         Credentials,
-        CustomInventory,
         Groups,
         HomeGroups,
         HomeHosts,

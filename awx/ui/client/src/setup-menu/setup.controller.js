@@ -3,13 +3,11 @@ export default
         '$rootScope',
         'AboutAnsibleHelp',
         'ConfigureTower',
-        'CreateCustomInventory',
         function(
             $scope,
             $rootScope,
             showAboutModal,
-            configureTower,
-            showInventoryScriptsModal
+            configureTower
         ) {
             $scope.showAboutModal = showAboutModal;
 
@@ -18,10 +16,6 @@ export default
                                     {   scope: $rootScope,
                                         parent_scope: $rootScope
                                     });
-
-            $scope.showInventoryScriptsModal = showInventoryScriptsModal.bind(null,
-                                                                              { parent_scope: $rootScope
-                                                                              });
 
         }
     ];
