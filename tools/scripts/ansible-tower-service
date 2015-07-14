@@ -32,7 +32,7 @@ service_action() {
             tower-manage uses_mongo --local 2> /dev/null >/dev/null
             # if mongod is not required, break
             if [ $? -ne 0 ]; then
-                break
+                continue
             fi
         fi
 
