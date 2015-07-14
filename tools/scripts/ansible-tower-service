@@ -13,16 +13,29 @@ fi
 service_action() {
     SERVICES=$TOWER_SERVICES
 
-    # Should MongoDB be managed by this script?
-    # We only manage MongoDB if the license uses it.
-    tower-manage uses_mongo
-    if [ $? == 0 && ${1} == start ]; then
-        SERVICES="$SERVICES mongod"
-    elif [ $? == 0 && ${1} == stop ]; then
-        SERVICES="mongod $SERVICES"
-    fi
+    # When determining whether mongod is required, postgres is required.  The
+    # following ensures mongod is started after postgres, and stopped before
+    # postgres.
+    case ${1} in
+        start|status)
+            SERVICES="$SERVICES mongod"
+            ;;
+        stop)
+            SERVICES="mongod $SERVICES"
+            ;;
+    esac
 
     for svc in ${SERVICES}; do
+
+        # Determine whether mongod is needed
+        if [[ ${svc} == mongod ]]; then
+            tower-manage uses_mongo 2> /dev/null >/dev/null
+            # if mongod is not required, break
+            if [ $? -ne 0 ]; then
+                break
+            fi
+        fi
+
         service ${svc} $1
         this_return=$?
         if [ $this_return -gt $worst_return ]; then
