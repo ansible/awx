@@ -1,4 +1,4 @@
-export default ['$http', function($http) {
+export default ['$http', '$rootScope', function($http, $rootScope) {
     return {
         restrict: 'E',
         link: function(scope, element, attrs) {
@@ -6,6 +6,7 @@ export default ['$http', function($http) {
 
             $http.get(path).then(function(response) {
                 element.append(response.data);
+                $rootScope.$emit('include-svg.svg-ready');
             });
         }
     };

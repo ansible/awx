@@ -86,6 +86,7 @@ var tower = angular.module('Tower', [
     dashboard.name,
     moment.name,
     templateUrl.name,
+    'templates',
     'AuthService',
     'Utilities',
     'LicenseHelper',
