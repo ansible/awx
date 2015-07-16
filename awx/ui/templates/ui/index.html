@@ -5,8 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Ansible Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.min.css" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/ansible-bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}assets/custom-theme/jquery-ui-1.10.3.custom.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}assets/ansible-bootstrap.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2-bootstrap.css" />
@@ -18,7 +18,7 @@
 
   <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
-  <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico?v={{version}}" />
+  <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
@@ -28,7 +28,7 @@
 </head>
 <body data-user-agent="{{userAgent}}">
 
-    <include-svg href="{{ STATIC_URL }}img/icons.svg"></include-svg>
+    <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu
           menu-style="portalMode ? 'portal' : 'default'"
@@ -271,7 +271,7 @@
         //  config-loading behavior
         var $AnsibleConfig;
 
-        require('tower/app');
+        require('app');
   </script>
 
 </body>

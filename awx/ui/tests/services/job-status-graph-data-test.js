@@ -1,7 +1,7 @@
 import '../support/node';
 
 import {describeModule} from '../support/describe-module';
-import JobStatusGraph from 'tower/dashboard/graphs/job-status/main';
+import JobStatusGraph from '../../src/dashboard/graphs/job-status/main';
 
 var processErrors = sinon.spy();
 

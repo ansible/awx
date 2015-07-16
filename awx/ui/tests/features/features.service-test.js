@@ -1,6 +1,6 @@
 import '../support/node';
 
-import features from 'tower/shared/features/main';
+import features from '../../src/shared/features/main';
 import {describeModule} from '../support/describe-module';
 
 //test that it returns features, as well as test that it is returned in rootScope

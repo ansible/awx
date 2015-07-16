@@ -1,6 +1,6 @@
 import '../support/node';
 
-import jobTemplates from 'tower/job-templates/main';
+import jobTemplates from '../../src/job-templates/main';
 import {describeModule} from '../support/describe-module';
 
 describeModule(jobTemplates.name)

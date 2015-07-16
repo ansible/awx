@@ -2,7 +2,7 @@
 
 import '../../support/node';
 
-import compareFacts from 'tower/system-tracking/compare-facts/flat';
+import compareFacts from '../../../src/system-tracking/compare-facts/flat';
 
 // This makes this test runnable in node OR karma. The sheer
 // number of times I had to run this test made the karma

@@ -2,7 +2,7 @@
 
 import '../../support/node';
 
-import compareFacts from 'tower/system-tracking/compare-facts/nested';
+import compareFacts from '../../../src/system-tracking/compare-facts/nested';
 
 describe('CompareFacts.Nested', function() {
 
