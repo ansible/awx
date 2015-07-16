@@ -4,8 +4,9 @@ OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
-BROCCOLI ?= ./node_modules/.bin/broccoli
+BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
 NODE ?= node
+
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -291,7 +292,7 @@ ui_analysis_report: reports/ui_code node_modules Gruntfile.js
 
 reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	rm -rf reports/ui_code
-	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
+	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci
@@ -318,25 +319,25 @@ package.json: packaging/grunt/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/dist -- --debug
+	$(NODE) tools/ui/timepiece.js awx/ui/dist -- $(UI_FLAGS)
 
 # Update local npm install
 node_modules: package.json
 	npm install
 	touch $@
+	
+awx/ui/%: node_modules clean-ui Brocfile.js bower.json
+	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/dist
-
-devjs_debug: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/dist -- --debug
+	make awx/ui/dist
 
 # Build minified JS/CSS.
 minjs: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs --no-sourcemaps
+	make -e awx/ui/dist UI_FLAGS="--silent --no-debug --no-tests --compress --no-docs --no-sourcemaps"
 
 minjs_ci: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress --no-docs
+	make -e awx/ui/dist UI_FLAGS="--no-debug --compress --no-docs"
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
