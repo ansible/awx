@@ -72,12 +72,12 @@ class FactTest(BaseFactTest):
             t1 = now()
             (f_obj, v_obj) = Fact.add_fact(host=host, timestamp=timestamp, module='packages', fact=data)
             t2 = now()
-            diff = (t2-t1).total_seconds()
+            diff = (t2 - t1).total_seconds()
             print("add_fact save time: %s (s)" % diff)
             self.assertLessEqual(diff, 4)
 
-            f = Fact.objects.get(id=f_obj.id)
-            v = FactVersion.objects.get(id=v_obj.id)
+            Fact.objects.get(id=f_obj.id)
+            FactVersion.objects.get(id=v_obj.id)
 
 class FactGetHostVersionTest(BaseFactTest):
     def setUp(self):
