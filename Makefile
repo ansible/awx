@@ -5,8 +5,10 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
 BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
+MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
 
+CLIENT_TEST_DIR ?= build_test
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -320,7 +322,7 @@ package.json: packaging/grunt/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/dist -- $(UI_FLAGS)
+	$(NODE) tools/ui/timepiece.js awx/ui/static -- $(UI_FLAGS)
 
 # Update local npm install
 node_modules: package.json
@@ -330,15 +332,18 @@ node_modules: package.json
 awx/ui/%: node_modules clean-ui Brocfile.js bower.json
 	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
-devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	make awx/ui/static
+testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
+testjs: awx/ui/build_test
+	$(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+
+devjs: awx/ui/static
 
 # Build minified JS/CSS.
-minjs: node_modules clean-ui Brocfile.js
-	make -e awx/ui/static UI_FLAGS="--silent --no-debug --no-tests --compress --no-docs --no-sourcemaps"
+minjs: UI_FLAGS=--silent --compress --no-docs --no-sourcemaps $(EXTRA_UI_FLAGS)
+minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
-minjs_ci: node_modules clean-ui Brocfile.js
-	make -e awx/ui/static UI_FLAGS="--no-debug --compress --no-docs"
+minjs_ci: UI_FLAGS=--compress --no-docs --browser-tests $(EXTRA_UI_FLAGS)
+minjs_ci: awx/ui/static node_modules clean-ui Brocfile.js
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
