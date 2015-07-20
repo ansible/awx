@@ -322,7 +322,7 @@ package.json: packaging/grunt/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/static -- $(UI_FLAGS)
+	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
 
 # Update local npm install
 node_modules: package.json
