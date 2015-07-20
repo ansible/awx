@@ -97,7 +97,7 @@ pytz,MIT,http://pythonhosted.org/pytz,pip
 pywinrm,MIT,http://github.com/diyan/pywinrm/,pip
 rackspace-auth-openstack,Apache 2.0,https://github.com/rackerlabs/rackspace-auth-openstack,pip
 rackspace-novaclient,Apache 2.0,https://github.com/rackerlabs/rackspace-novaclient,pip
-rax_default_network_flags_python_novaclient_ext,Apache 2.0,https://github.com/rackspace/rax_default_network_flags_python_novaclient_ext,pip
+rax_default_network_flags_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/rax_default_network_flags_python_novaclient_ext,pip
 rax_scheduled_images_python_novaclient_ext,Apache 2.0,https://github.com/rackspace-titan/rax_scheduled_images_python_novaclient_ext,pip
 redis,MIT,http://github.com/andymccurdy/redis-py,pip
 requests,Apache 2.0,http://python-requests.org,pip
