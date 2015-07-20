@@ -106,9 +106,10 @@ clean-grunt:
 
 # Remove UI build files
 clean-ui:
-	rm -rf awx/ui/static/dist
+	rm -rf DEBUG
+	rm -rf awx/ui/build_test
+	rm -rf awx/ui/static/
 	rm -rf awx/ui/dist
-	rm -rf awx/ui/static/docs
 
 # Remove packer artifacts
 clean-packer:
@@ -330,14 +331,14 @@ awx/ui/%: node_modules clean-ui Brocfile.js bower.json
 	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	make awx/ui/dist
+	make awx/ui/static
 
 # Build minified JS/CSS.
 minjs: node_modules clean-ui Brocfile.js
-	make -e awx/ui/dist UI_FLAGS="--silent --no-debug --no-tests --compress --no-docs --no-sourcemaps"
+	make -e awx/ui/static UI_FLAGS="--silent --no-debug --no-tests --compress --no-docs --no-sourcemaps"
 
 minjs_ci: node_modules clean-ui Brocfile.js
-	make -e awx/ui/dist UI_FLAGS="--no-debug --compress --no-docs"
+	make -e awx/ui/static UI_FLAGS="--no-debug --compress --no-docs"
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
