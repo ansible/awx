@@ -295,7 +295,7 @@ ui_analysis_report: reports/ui_code node_modules Gruntfile.js
 
 reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	rm -rf reports/ui_code
-	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
+	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci
@@ -339,10 +339,10 @@ testjs: awx/ui/build_test
 devjs: awx/ui/static
 
 # Build minified JS/CSS.
-minjs: UI_FLAGS=--silent --compress --no-docs --no-sourcemaps $(EXTRA_UI_FLAGS)
+minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
 minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
-minjs_ci: UI_FLAGS=--compress --no-docs --browser-tests $(EXTRA_UI_FLAGS)
+minjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
 minjs_ci: awx/ui/static node_modules clean-ui Brocfile.js
 
 # Check .js files for errors and lint
