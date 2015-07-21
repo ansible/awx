@@ -1,15 +1,18 @@
-export default function() {
-    return {
-        restrict: 'E',
-        templateUrl: '/static/js/main-menu/menu-portal.partial.html',
-        link: function(scope, element) {
-            var contents = element.contents();
-            contents.unwrap();
+export default
+    [   'templateUrl',
+        function(templateUrl) {
+            return {
+                restrict: 'E',
+                templateUrl: templateUrl('main-menu/menu-portal'),
+                link: function(scope, element) {
+                    var contents = element.contents();
+                    contents.unwrap();
 
-            scope.$on('$destroy', function() {
-                contents.remove();
-                $(".MenuItem--socketStatus").remove();
-            });
+                    scope.$on('$destroy', function() {
+                        contents.remove();
+                        $(".MenuItem--socketStatus").remove();
+                    });
+                }
+            };
         }
-    };
-}
+    ];

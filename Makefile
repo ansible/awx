@@ -3,6 +3,7 @@ SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; pr
 OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
+TESTEM ?= ./node_modules/.bin/testem
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
 
@@ -293,8 +294,8 @@ reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
 
 # Run UI unit tests
-test_ui: node_modules minjs_ci Gruntfile.js
-	$(GRUNT) karma:ci
+test_ui: node_modules minjs_ci
+	$(TESTEM) ci --file testem.yml -R xunit
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:

@@ -55,7 +55,11 @@ var define, requireModule, require, requirejs;
     }
 
     if (!registry[name]) {
-      throw new Error('Could not find module ' + name);
+        name = name + '/index';
+
+        if (!registry[name]) {
+          throw new Error('Could not find module ' + name);
+        }
     }
 
     var mod = registry[name];

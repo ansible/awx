@@ -1,11 +1,11 @@
 /* jshint unused: vars */
 export default
-    [   '$rootScope',
-        function() {
+    [   'templateUrl',
+        function(templateUrl) {
             return {
                 restrict: 'E',
                 scope: true,
-                templateUrl: '/static/js/dashboard/dashboard.partial.html',
+                templateUrl: templateUrl('dashboard/dashboard'),
                 link: function(scope, element, attrs) {
                 }
             };

@@ -1,0 +1,5 @@
+{
+  "expr": true,
+  "esnext": true,
+  "node": true
+}
