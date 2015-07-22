@@ -1,6 +1,6 @@
 import '../support/node';
 
-import featuresController from '../../src/shared/features/features.controller';
+import featuresController from 'shared/features/features.controller';
 
 describe('featuresController', function() {
 

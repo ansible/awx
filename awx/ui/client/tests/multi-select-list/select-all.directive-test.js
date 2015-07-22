@@ -1,7 +1,7 @@
 import '../support/node';
 
 import {describeModule} from '../support/describe-module';
-import mod from '../../src/shared/multi-select-list/main';
+import mod from 'shared/multi-select-list/main';
 
 var mockController = {
     selectAll: sinon.spy(),

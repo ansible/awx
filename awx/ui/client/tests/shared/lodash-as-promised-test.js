@@ -1,6 +1,6 @@
 import '../support/node';
 
-import '../../src/shared/main';
+import 'shared/main';
 
 describe('LodashAsPromised', function() {
 

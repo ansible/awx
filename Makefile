@@ -86,7 +86,7 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui \
+	deb deb-src debian reprepro setup_tarball sync_ui node-tests \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
 
 # Remove setup build files
@@ -333,8 +333,10 @@ awx/ui/%: node_modules clean-ui Brocfile.js bower.json
 	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
 testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
-testjs: awx/ui/build_test
-	$(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+testjs: awx/ui/build_test node-tests
+
+node-tests:
+	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
 
 devjs: awx/ui/static
 

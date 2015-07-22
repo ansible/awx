@@ -1,8 +1,8 @@
 import '../support/node';
 
-import systemTracking from '../../src/system-tracking/data-services/main';
+import systemTracking from 'system-tracking/data-services/main';
 import {describeModule} from '../support/describe-module';
-import moment from '../../src/shared/moment/moment';
+import moment from 'shared/moment/moment';
 
 describeModule(systemTracking.name)
     .testService('factScanDataService', function(test, restStub) {
