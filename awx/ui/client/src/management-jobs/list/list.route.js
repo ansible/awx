@@ -5,10 +5,10 @@
  *************************************************/
 
 export default {
-    name: 'inventoryScriptsList',
-    route: '/inventory_scripts',
-    templateUrl: '/static/js/inventory-scripts/list/list.partial.html',
-    controller: 'inventoryScriptsListController',
+    name: 'managementJobsList',
+    route: '/management_jobs',
+    templateUrl: '/static/js/management-jobs/list/list.partial.html',
+    controller: 'listController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

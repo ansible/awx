@@ -3,30 +3,31 @@
  *
  * All Rights Reserved
  *************************************************/
- 
 
-
-
-export default
-    angular.module('ConfigureTowerJobsListDefinition', [])
-    .value('ConfigureTowerJobsList', {
-
+export default function(){
+    return {
         name: 'configure_jobs',
         iterator: 'configure_job',
-        selectTitle: 'Configure Tower Jobs',
-        editTitle: 'Configure Tower Jobs',
         index: false,
         hover: true,
 
         fields: {
             name: {
-                // key: true,
                 label: 'Name',
                 columnClass: 'col-sm-4 col-xs-4'
             },
             description: {
                 label: 'Description',
                 columnClass: 'col-sm-6 col-xs-6 hidden-sm hidden-xs'
+            }
+        },
+        actions: {
+            stream: {
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                awFeature: 'activity_streams'
             }
         },
         fieldActions: {
@@ -40,16 +41,10 @@ export default
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                ngClick: 'configureSchedule(configure_job.id, configure_job.name)', // '#/job_templates/{{ configure_job.id }}/schedules',
+                ngClick: 'configureSchedule()',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
             }
-            // delete: {
-            //     label: 'Delete Schedule',
-            //     mode: 'all',
-            //     ngClick: 'deleteSystemSchedule(configure_job.id)', // '#/job_templates/{{ configure_job.id }}/schedules',
-            //     awToolTip: 'Delete the schedule ',
-            //     dataPlacement: 'top'
-            // }
         }
-    });
+    };
+}

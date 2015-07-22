@@ -7,11 +7,11 @@
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', 'transitionTo',
+        'Rest' , 'ProcessErrors', 'Prompt', 'transitionTo', 'Stream',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, transitionTo
+            Rest, ProcessErrors, Prompt, transitionTo, Stream
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -19,12 +19,8 @@ export default
                 view = GenerateList;
 
             view.inject( list, {
-                id : 'inventory_scripts',
                 mode: 'edit',
-                scope: scope,
-                breadCrumbs: false,
-                activityStream: false,
-                showSearch: true
+                scope: scope
             });
 
             SearchInit({
@@ -46,6 +42,11 @@ export default
                     inventory_script: this.inventory_script
                 });
             };
+
+            scope.showActivity = function () {
+                Stream({ scope: scope });
+            };
+
             scope.deleteCustomInv =  function(id, name){
 
                 var action = function () {

@@ -41,6 +41,13 @@ export default function(){
                 ngClick: 'addCustomInv()',
                 awToolTip: 'Create a new credential'
             },
+            stream: {
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                awFeature: 'activity_streams'
+            }
         },
 
         fieldActions: {

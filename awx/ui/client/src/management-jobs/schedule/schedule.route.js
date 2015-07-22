@@ -5,28 +5,28 @@
  *************************************************/
 
 export default {
-    name: 'inventoryScriptsEdit',
-    route: '/inventory_scripts/:inventory_script',
-    templateUrl: '/static/js/inventory-scripts/edit/edit.partial.html',
-    controller: 'editController',
+    name: 'managementJobsSchedule',
+    route: '/management_jobs/:management_job/schedules',
+    templateUrl: '/static/js/management-jobs/schedule/schedule.partial.html',
+    controller: 'scheduleController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        inventory_script:
+        management_job:
         [   '$route',
             '$q',
             'Rest',
             'GetBasePath',
             'ProcessErrors',
             function($route, $q, rest, getBasePath, ProcessErrors) {
-                if ($route.current.hasModelKey('inventory_script')) {
-                    return $q.when($route.current.params.model.inventory_script);
+                if ($route.current.hasModelKey('management_job')) {
+                    return $q.when($route.current.params.model.management_job);
                 }
 
-                var inventoryScriptId = $route.current.params.inventory_script;
+                var managementJobId = $route.current.params.management_job;
 
-                var url = getBasePath('inventory_scripts') + inventoryScriptId + '/';
+                var url = getBasePath('system_job_templates') + managementJobId + '/';
                 rest.setUrl(url);
                 return rest.get()
                     .then(function(data) {

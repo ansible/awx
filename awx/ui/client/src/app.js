@@ -30,8 +30,10 @@ import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
+import managementJobs from './management-jobs/main';
 import routeExtensions from './shared/route-extensions/main';
 import breadcrumbs from './shared/breadcrumbs/main';
+
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -84,6 +86,7 @@ var tower = angular.module('Tower', [
     breadcrumbs.name,
     systemTracking.name,
     inventoryScripts.name,
+    managementJobs.name,
     setupMenu.name,
     mainMenu.name,
     dashboard.name,
@@ -183,8 +186,8 @@ var tower = angular.module('Tower', [
     'AboutAnsibleHelpModal',
     'SurveyQuestionFormDefinition',
     'PortalJobsListDefinition',
-    'ConfigureTowerHelper',
-    'ConfigureTowerJobsListDefinition',
+
+
     'AdhocHelper',
     'features',
     'longDateFilter'
@@ -944,9 +947,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'ConfigureTower',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, ConfigureTower) {
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp) {
 
 
             var sock;
@@ -1152,13 +1155,6 @@ var tower = angular.module('Tower', [
                 $rootScope.leavePortal = function() {
                     $rootScope.portalMode=false;
                     $location.path('/home/');
-                };
-
-                $rootScope.configureTower = function(){
-                    ConfigureTower({
-                        scope: $rootScope,
-                        parent_scope: $rootScope
-                    });
                 };
 
             }); // end of 'ConfigReady'
