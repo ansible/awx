@@ -303,6 +303,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
         'schedule': timedelta(seconds=30)
     },
+    'job_stdout_cleanup': {
+        'task': 'awx.main.tasks.clean_stdout_tempfiles',
+        'schedule': timedelta(hours=3)
+    },
 }
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
