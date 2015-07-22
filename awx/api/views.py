@@ -2788,7 +2788,7 @@ class UnifiedJobStdout(RetrieveAPIView):
 
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
-                        PlainTextRenderer, AnsiTextRenderer,
+                        PlainTextRenderer, AnsiTextRenderer, DownloadTextRenderer,
                         renderers.JSONRenderer]
     filter_backends = ()
     new_in_148 = True
@@ -2820,6 +2820,10 @@ class UnifiedJobStdout(RetrieveAPIView):
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
+        elif request.accepted_renderer.format == 'txt_download':
+            content = unified_job.result_stdout
+            headers = {"Content-Disposition": 'attachment; filename="job_%s.txt"' % str(unified_job.id)}
+            return Response(content, headers=headers)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 
