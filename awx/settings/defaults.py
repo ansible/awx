@@ -562,6 +562,8 @@ FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+STDOUT_MAX_BYTES_DISPLAY = 1000000
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
