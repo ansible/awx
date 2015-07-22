@@ -2846,10 +2846,13 @@ class UnifiedJobStdout(RetrieveAPIView):
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
         elif request.accepted_renderer.format == 'txt_download':
-            content_fd = open(unified_job.dump_result_stdout(), 'r')
-            response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
-            response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
-            return response
+            try:
+                content_fd = open(unified_job.dump_result_stdout(), 'r')
+                response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+                response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
+                return response
+            except Exception, e:
+                return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 
