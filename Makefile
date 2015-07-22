@@ -326,6 +326,9 @@ node_modules: package.json
 	touch $@
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
+	$(BROCCOLI) build awx/ui/dist
+
+devjs_debug: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	$(BROCCOLI) build awx/ui/dist -- --debug
 
 # Build minified JS/CSS.

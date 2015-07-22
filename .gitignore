@@ -41,7 +41,7 @@ node_modules/**
 npm-debug.log
 
 # UI build debugging
-/DEBUG-*
+/DEBUG
 
 # Testing
 .coverage
