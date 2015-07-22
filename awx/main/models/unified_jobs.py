@@ -5,6 +5,7 @@
 import codecs
 import json
 import logging
+import uuid
 import re
 import os
 import os.path
@@ -663,6 +664,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         cursor.execute("select length(result_stdout_text) from main_unifiedjob where id = %d" % self.pk)
         record_size = cursor.fetchone()[0]
         return record_size
+
+    def dump_result_stdout(self):
+        tower_file = "towerjob-%s" % str(uuid.uuid1())[:8]
+        out_path = os.path.join(settings.STDOUT_TEMP_DIR, tower_file)
+        tower_fd = open(out_path, 'w')
+        cursor = connection.cursor()
+        cursor.copy_expert("copy (select result_stdout_text from main_unifiedjob where id = %d) to stdout" % (self.pk), tower_fd)
+        tower_fd.close()
+        return out_path
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""

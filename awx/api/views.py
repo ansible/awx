@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
+from django.core.servers.basehttp import FileWrapper
+from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
@@ -2844,9 +2846,10 @@ class UnifiedJobStdout(RetrieveAPIView):
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
         elif request.accepted_renderer.format == 'txt_download':
-            content = unified_job.result_stdout
-            headers = {"Content-Disposition": 'attachment; filename="job_%s.txt"' % str(unified_job.id)}
-            return Response(content, headers=headers)
+            content_fd = open(unified_job.dump_result_stdout(), 'r')
+            response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+            response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
+            return response
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 
