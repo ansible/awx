@@ -86,6 +86,9 @@ export default
                     schedule, scheduler,
                     url = GetBasePath('schedules') + id + '/';
 
+                delete scope.isFactCleanup;
+                delete scope.cleanupJob;
+
                 function setGranularity(){
                     var a,b, prompt_for_days,
                         keep_unit,
@@ -124,27 +127,19 @@ export default
                         // the API returns something like 20w or 1y
                         a = schedule.extra_data.older_than; // "20y"
                         b = schedule.extra_data.granularity; // "1w"
-                        prompt_for_days = Number(_.initial(a,1).join(''));
+                        prompt_for_days = Number(_.initial(a,1).join('')); // 20
                         keep_unit = _.last(a); // "y"
-                        granularity = Number(_.initial(b,1).join(''));
+                        granularity = Number(_.initial(b,1).join('')); // 1
                         granularity_keep_unit = _.last(b); // "w"
 
-                        scope.prompt_for_days_facts_form.keep_amount.$setViewValue(prompt_for_days);
-                        scope.prompt_for_days_facts_form.granularity_keep_amount.$setViewValue(granularity);
+                        scope.keep_amount = prompt_for_days;
+                        scope.granularity_keep_amount = granularity;
                         scope.keep_unit = _.find(scope.keep_unit_choices, function(i){
                             return i.value === keep_unit;
                         });
                         scope.granularity_keep_unit =_.find(scope.granularity_keep_unit_choices, function(i){
                             return i.value === granularity_keep_unit;
                         });
-                    }
-                }
-
-                if(!Empty($routeParams.management_job)) {
-                    if(scope.management_job.id === 4){
-                        scope.isFactCleanup = true;
-                    } else {
-                        scope.cleanupJob = true;
                     }
                 }
 
@@ -158,7 +153,7 @@ export default
                         scope.$apply(function() {
                             scheduler.setRRule(schedule.rrule);
                             scheduler.setName(schedule.name);
-                            if(!Empty(scope.management_job)){
+                            if(scope.isFactCleanup || scope.cleanupJob){
                                 setGranularity();
                             }
 
@@ -225,6 +220,13 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        if(schedule.hasOwnProperty('extra_data')) {
+                            if(schedule.extra_data.hasOwnProperty('granularity')){
+                                scope.isFactCleanup = true;
+                            } else {
+                                scope.cleanupJob = true;
+                            }
+                        }
                         scope.$emit('ScheduleFound');
                     })
                     .error(function(data,status){
