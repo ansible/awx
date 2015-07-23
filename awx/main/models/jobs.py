@@ -282,6 +282,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                                                                     survey_element['variable'],
                                                                                     survey_element['choices']))
         return errors
+ 
+    def _update_unified_job_kwargs(self, **kwargs):
+        # Overwrite job extra_vars with job template extra vars
+        extra_vars = self.extra_vars_dict
+
+        # Overwrite with job template survey default vars
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            for survey_element in self.survey_spec.get("spec", []):
+                if survey_element['default']:
+                    extra_vars[survey_element['variable']] = survey_element['default']
+
+        kwargs['extra_vars'] = json.dumps(extra_vars)
+        return kwargs
 
     @property
     def cache_timeout_blocked(self):
