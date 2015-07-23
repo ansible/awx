@@ -1050,8 +1050,9 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on("$routeChangeStart", function (event, next, prev) {
                     // this line removes the query params attached to a route
-                    if(prev.$$route.name === 'systemTracking'){
-                        $location.replace($location.search('').$$url);
+                    if(prev && prev.$$route &&
+                        prev.$$route.name === 'systemTracking'){
+                            $location.replace($location.search('').$$url);
                     }
 
                     // Before navigating away from current tab, make sure the primary view is visible
