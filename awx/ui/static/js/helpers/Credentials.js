@@ -220,6 +220,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                  data.kind = scope.kind.value;
                  if (scope.become_method === null) {
                     data.become_method = "";
+                    data.become_username = "";
+                    data.become_password = "";
                  } else {
                     data.become_method = (scope.become_method.value) ? scope.become_method.value : "";
                  }

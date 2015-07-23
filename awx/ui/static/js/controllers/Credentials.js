@@ -400,6 +400,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
                         break;
                     }
                 }
+
+                if ($scope.become_method && $scope.become_method.value === "") {
+                    $scope.become_method = null;
+                }
                 master.become_method = $scope.become_method;
 
                 for (i = 0; i < $scope.credential_kind_options.length; i++) {
