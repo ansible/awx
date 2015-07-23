@@ -96,7 +96,7 @@ export default
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false',
-                    addRequired: false,
+                    addRequired: true,
                     editRequired: false,
                     awPassMatch: true,
                     associated: 'password',
