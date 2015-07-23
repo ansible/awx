@@ -218,7 +218,11 @@ angular.module('CredentialsHelper', ['Utilities'])
                  }
 
                  data.kind = scope.kind.value;
-                 data.become_method = (scope.become_method.value) ? scope.become_method.value : "";
+                 if (scope.become_method === null) {
+                    data.become_method = "";
+                 } else {
+                    data.become_method = (scope.become_method.value) ? scope.become_method.value : "";
+                 }
                  switch (data.kind) {
                      case 'ssh':
                          data.password = scope.ssh_password;
