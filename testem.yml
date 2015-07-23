@@ -14,7 +14,7 @@ test_page: tests.html
 disable_watching: true
 routes:
   /static: ../static
-  /tests.html: ../../../packaging/grunt/testem.mustache
+  /tests.html: ../../../packaging/node/testem.mustache
   /test-loader.js: lib/ember-cli-test-loader/test-loader.js
   /vendor: ../../../node_modules
   /angular-mocks.js: lib/angular-mocks/angular-mocks.js

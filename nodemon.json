@@ -7,8 +7,8 @@
   ],
   "watch": [
     "tools/ui/timepiece.js",
-    "packaging/grunt/Brocfile.js",
-    "packaging/grunt/tower-app.js"
+    "packaging/node/Brocfile.js",
+    "packaging/node/tower-app.js"
   ],
   "ext": "js json less html"
 }

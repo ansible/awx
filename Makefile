@@ -299,7 +299,7 @@ reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci
-	$(TESTEM) ci --file testem.yml -R xunit
+	$(TESTEM) ci --file testem.yml -p 7359 -R xunit
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
@@ -309,16 +309,16 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
 
-Gruntfile.js: packaging/grunt/Gruntfile.js
+Gruntfile.js: packaging/node/Gruntfile.js
 	cp $< $@
 
-Brocfile.js: packaging/grunt/Brocfile.js
+Brocfile.js: packaging/node/Brocfile.js
 	cp $< $@
 
-bower.json: packaging/grunt/bower.json
+bower.json: packaging/node/bower.json
 	cp $< $@
 
-package.json: packaging/grunt/package.template
+package.json: packaging/node/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
