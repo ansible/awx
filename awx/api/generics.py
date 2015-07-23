@@ -202,6 +202,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                     'model_verbose_name_plural': unicode(self.model._meta.verbose_name_plural),
                 })
             d.update({'serializer_fields': self.get_serializer().metadata()})
+        d['settings'] = settings
         return d
 
     def metadata(self, request):

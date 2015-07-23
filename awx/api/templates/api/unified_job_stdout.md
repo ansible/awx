@@ -21,7 +21,7 @@ to specify a range of line numbers to retrieve.
 Use `dark=1` or `dark=0` as a query string parameter to force or disable a
 dark background.
 
-Files over 1MB (configurable) will not display in the browser. Use the `txt_download`
+Files over {{ settings.STDOUT_MAX_BYTES_DISPLAY|filesizeformat }} (configurable) will not display in the browser. Use the `txt_download`
 format to download the file directly to view it.
 
 {% include "api/_new_in_awx.md" %}

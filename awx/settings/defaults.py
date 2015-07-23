@@ -567,7 +567,7 @@ FACT_CACHE_PORT = 6564
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
 # Control when we display stdout and where to store the temporary files for downloading
-STDOUT_MAX_BYTES_DISPLAY = 1000000
+STDOUT_MAX_BYTES_DISPLAY = 1048576
 STDOUT_TEMP_DIR = "/var/lib/awx/"
 
 # Logging configuration.
