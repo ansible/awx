@@ -48,7 +48,7 @@ export default [
                     scope: $scope,
                     list: SchedulesList,
                     id: 'management_jobs_schedule',
-                    url: url,
+                    url: url  + '?next_run__isnull=false',
                     pageSize: 20
                 });
             });
