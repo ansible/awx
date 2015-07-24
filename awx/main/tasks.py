@@ -23,6 +23,7 @@ import uuid
 from distutils.version import LooseVersion as Version
 import dateutil.parser
 import yaml
+import psutil
 
 # Pexpect
 import pexpect
@@ -432,7 +433,16 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    os.kill(child.pid, signal.SIGINT)
+                    if settings.AWX_PROOT_ENABLED:
+                        main_proc = psutil.Process(pid=child.pid)
+                        if hasattr(main_proc, "children"):
+                            child_procs = main_proc.children(recursive=False)
+                        else:
+                            child_procs = main_proc.get_children(recursive=False)
+                        for child_proc in child_procs:
+                            os.kill(child_proc.pid, signal.SIGTERM)
+                    else:
+                        os.kill(child.pid, signal.SIGTERM)
                     time.sleep(3)
                     canceled = True
                 except OSError:
