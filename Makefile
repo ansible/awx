@@ -299,7 +299,7 @@ reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci
-	$(TESTEM) ci --file testem.yml -p 7359 -R xunit
+	PATH=./node_modules/.bin $(TESTEM) ci --file testem.yml -p 7359 -R xunit
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
