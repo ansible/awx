@@ -303,10 +303,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
         'schedule': timedelta(seconds=30)
     },
-    'job_stdout_cleanup': {
-        'task': 'awx.main.tasks.clean_stdout_tempfiles',
-        'schedule': timedelta(hours=3)
-    },
 }
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
@@ -565,10 +561,6 @@ SOCKETIO_LISTEN_PORT = 8080
 FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
-
-# Control when we display stdout and where to store the temporary files for downloading
-STDOUT_MAX_BYTES_DISPLAY = 1048576
-STDOUT_TEMP_DIR = "/var/lib/awx/"
 
 # Logging configuration.
 LOGGING = {

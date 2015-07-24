@@ -114,17 +114,6 @@ def tower_periodic_scheduler(self):
             new_unified_job.socketio_emit_status("failed")
         emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
 
-@task(bind=True)
-def clean_stdout_tempfiles(self):
-    nowtime = time.time()
-    removed = 0
-    for this_file in os.listdir(settings.STDOUT_TEMP_DIR):
-        this_file = os.path.join(settings.STDOUT_TEMP_DIR, this_file)
-        if "towerjob" in this_file and os.stat(this_file).st_mtime < nowtime - 86400:
-            os.remove(this_file)
-            removed += 1
-    print("Removed %d files" % removed)
-
 @task()
 def notify_task_runner(metadata_dict):
     """Add the given task into the Tower task manager's queue, to be consumed
