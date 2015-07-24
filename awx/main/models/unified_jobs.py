@@ -5,7 +5,6 @@
 import codecs
 import json
 import logging
-import uuid
 import re
 import os
 import os.path
@@ -13,7 +12,7 @@ from StringIO import StringIO
 
 # Django
 from django.conf import settings
-from django.db import models, connection
+from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
@@ -657,22 +656,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def result_stdout(self):
         return self._result_stdout_raw(escape_ascii=True)
-
-    @property
-    def result_stdout_size(self):
-        cursor = connection.cursor()
-        cursor.execute("select length(result_stdout_text) from main_unifiedjob where id = %d" % self.pk)
-        record_size = cursor.fetchone()[0]
-        return record_size
-
-    def dump_result_stdout(self):
-        tower_file = "towerjob-%s" % str(uuid.uuid1())[:8]
-        out_path = os.path.join(settings.STDOUT_TEMP_DIR, tower_file)
-        tower_fd = open(out_path, 'w')
-        cursor = connection.cursor()
-        cursor.copy_expert("copy (select result_stdout_text from main_unifiedjob where id = %d) to stdout" % (self.pk), tower_fd)
-        tower_fd.close()
-        return out_path
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""

@@ -45,9 +45,6 @@ class PlainTextRenderer(renderers.BaseRenderer):
             data = unicode(data)
         return data.encode(self.charset)
 
-class DownloadTextRenderer(PlainTextRenderer):
-    format = "txt_download"
-
 class AnsiTextRenderer(PlainTextRenderer):
 
     media_type = 'text/plain'
