@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
+from django.core.servers.basehttp import FileWrapper
+from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
@@ -2109,10 +2111,19 @@ class JobList(ListCreateAPIView):
     model = Job
     serializer_class = JobListSerializer
 
+    def get_queryset(self):
+        qs = self.request.user.get_queryset(self.model).defer('result_stdout_text')
+        return qs
+
 class JobDetail(RetrieveUpdateDestroyAPIView):
 
     model = Job
     serializer_class = JobSerializer
+
+    
+    def get_queryset(self):
+        qs = super(JobDetail, self).get_queryset().defer('result_stdout_text')
+        return qs
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2783,18 +2794,32 @@ class UnifiedJobList(ListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobListSerializer
     new_in_148 = True
+    
+    def get_queryset(self):
+        qs = self.request.user.get_queryset(self.model).defer('result_stdout_text')
+        return qs
+
 
 class UnifiedJobStdout(RetrieveAPIView):
 
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
-                        PlainTextRenderer, AnsiTextRenderer,
+                        PlainTextRenderer, AnsiTextRenderer, DownloadTextRenderer,
                         renderers.JSONRenderer]
     filter_backends = ()
     new_in_148 = True
 
+    def get_queryset(self):
+        qs = super(UnifiedJobStdout, self).get_queryset().defer('result_stdout_text')
+        return qs    
+
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
+        obj_size = unified_job.result_stdout_size
+        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+            return Response("Standard Output too large to display (%d bytes), "
+                            "only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY))
+
         if request.accepted_renderer.format in ('html', 'api', 'json'):
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
@@ -2820,6 +2845,14 @@ class UnifiedJobStdout(RetrieveAPIView):
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
+        elif request.accepted_renderer.format == 'txt_download':
+            try:
+                content_fd = open(unified_job.dump_result_stdout(), 'r')
+                response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+                response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
+                return response
+            except Exception, e:
+                return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 

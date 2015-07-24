@@ -64,6 +64,8 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+STDOUT_TEMP_DIR = "/tmp"
+
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())

@@ -464,7 +464,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
 class UnifiedJobSerializer(BaseSerializer):
 
-    result_stdout = serializers.CharField(source='result_stdout', label='result stdout', read_only=True)
+    #result_stdout = serializers.CharField(source='result_stdout', label='result stdout', read_only=True)
+    result_stdout = serializers.SerializerMethodField('get_result_stdout')
     unified_job_template = serializers.Field(source='unified_job_template_id', label='unified job template')
     job_env = serializers.CharField(source='job_env', label='job env', read_only=True)
 
@@ -474,6 +475,13 @@ class UnifiedJobSerializer(BaseSerializer):
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
                   'result_traceback')
+
+
+    def get_result_stdout(self, obj):
+        obj_size = obj.result_stdout_size
+        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        return obj.result_stdout
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:
