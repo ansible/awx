@@ -1,0 +1,29 @@
+{
+  "name": "loader.js",
+  "main": "loader.js",
+  "version": "3.2.1",
+  "homepage": "https://github.com/ember-cli/loader.js",
+  "authors": [
+    "Stefan Penner <stefan.penner@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "qunit": "~1.14.0"
+  },
+  "_release": "3.2.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v3.2.1",
+    "commit": "0133801b954773bab68e67cbb477774d1de197e8"
+  },
+  "_source": "git://github.com/ember-cli/loader.js.git",
+  "_target": "3.2.1",
+  "_originalSource": "ember-cli/loader.js"
+}

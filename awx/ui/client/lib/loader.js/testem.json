@@ -1,0 +1,14 @@
+{
+  "framework": "qunit",
+  "src_files": [
+    "loader.js"
+  ],
+  "test_page": "tests/index.html",
+  "launch_in_dev": [
+    "PhantomJS",
+    "Chrome"
+  ],
+  "launch_in_ci": [
+    "PhantomJS"
+  ]
+}

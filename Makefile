@@ -4,8 +4,11 @@ OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
-BROCCOLI ?= ./node_modules/.bin/broccoli
+BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
+MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
+
+CLIENT_TEST_DIR ?= build_test
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -83,7 +86,7 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui \
+	deb deb-src debian reprepro setup_tarball sync_ui node-tests \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
 
 # Remove setup build files
@@ -105,9 +108,10 @@ clean-grunt:
 
 # Remove UI build files
 clean-ui:
-	rm -rf awx/ui/static/dist
+	rm -rf DEBUG
+	rm -rf awx/ui/build_test
+	rm -rf awx/ui/static/
 	rm -rf awx/ui/dist
-	rm -rf awx/ui/static/docs
 
 # Remove packer artifacts
 clean-packer:
@@ -291,11 +295,11 @@ ui_analysis_report: reports/ui_code node_modules Gruntfile.js
 
 reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	rm -rf reports/ui_code
-	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
+	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci
-	$(TESTEM) ci --file testem.yml -R xunit
+	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
@@ -305,38 +309,43 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
 
-Gruntfile.js: packaging/grunt/Gruntfile.js
+Gruntfile.js: packaging/node/Gruntfile.js
 	cp $< $@
 
-Brocfile.js: packaging/grunt/Brocfile.js
+Brocfile.js: packaging/node/Brocfile.js
 	cp $< $@
 
-bower.json: packaging/grunt/bower.json
+bower.json: packaging/node/bower.json
 	cp $< $@
 
-package.json: packaging/grunt/package.template
+package.json: packaging/node/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/dist -- --debug
+	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
 
 # Update local npm install
 node_modules: package.json
 	npm install
 	touch $@
+	
+awx/ui/%: node_modules clean-ui Brocfile.js bower.json
+	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
-devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/dist
+testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
+testjs: awx/ui/build_test node-tests
 
-devjs_debug: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/dist -- --debug
+node-tests:
+	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+
+devjs: awx/ui/static
 
 # Build minified JS/CSS.
-minjs: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs --no-sourcemaps
+minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
+minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
-minjs_ci: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress --no-docs
+minjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
+minjs_ci: awx/ui/static node_modules clean-ui Brocfile.js
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js

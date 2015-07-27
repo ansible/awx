@@ -1,0 +1,19 @@
+.include-font(@family-name; @filename; @weight: normal; @style: normal) {
+  @font-face {
+    font-family: @family-name;
+    src: url("/static/assets/@{filename}.woff2") format('woff2'),
+         url("/static/assets/@{filename}.woff") format('woff');
+    font-weight: @weight;
+    font-style: @style;
+  }
+}
+
+.include-font('merriweather'; 'merriweather_light-webfont'; 200);
+.include-font('merriweather'; 'merriweather-regular-webfont');
+.include-font('merriweather'; 'merriweather-bold-webfont'; bold);
+.include-font('merriweather'; 'merriweather_ultrabold-webfont'; 800);
+.include-font('merriweather'; 'merriweather-lightitalic-webfont'; 200; italic);
+.include-font('merriweather'; 'merriweather-bolditalic-webfont'; bold; italic);
+.include-font('merriweather'; 'merriweather-heavyitalic-webfont'; 800; italic);
+.include-font('merriweather'; 'merriweather-italic-webfont'; normal; italic);
+

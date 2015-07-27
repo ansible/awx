@@ -18,15 +18,15 @@ awx/main/fixtures
 awx/*.log
 tower/tower_warnings.log
 celerybeat-schedule
-awx/ui/static/docs
-awx/ui/dist
+awx/ui/static
+awx/ui/build_test
 
 # Python & setuptools
 __pycache__
-build
-deb-build
-rpm-build
-tar-build
+/build
+/deb-build
+/rpm-build
+/tar-build
 /dist
 *.egg-info
 *.py[c,o]

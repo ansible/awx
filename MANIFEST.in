@@ -3,7 +3,7 @@ recursive-include awx/static *.ico
 recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md *.html
 recursive-include awx/ui/templates *.html
-recursive-include awx/ui/dist *
+recursive-include awx/ui/static *
 recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
 recursive-include config *
@@ -12,6 +12,7 @@ recursive-include config/rpm *
 recursive-exclude awx devonly.py*
 recursive-exclude awx/api/tests *
 recursive-exclude awx/main/tests *
+recursive-exclude awx/ui/client *
 recursive-exclude awx/settings local_settings.py*
 include tools/scripts/request_tower_configuration.sh
 include tools/scripts/ansible-tower-service

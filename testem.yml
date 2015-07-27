@@ -1,25 +1,23 @@
 ---
 framework: mocha
-cwd: awx/ui/
+cwd: awx/ui/client
 port: 7358
 src_files:
-  - static/js/**/*.js
-  - static/lib/**/*.js
+  - src/**/*.js
   - tests/**/*.js
 serve_files:
-  - dist/tower.concat.js
-  - dist/tests/**/*.js
-  - dist/tests/unit.js
+  - ../static/tower.concat.js
+  - ../static/tests/**/*.js
+  - ../static/tests/unit.js
 unsafe_file_serving: true
 test_page: tests.html
 disable_watching: true
 routes:
-  /awx/ui/dist: /static
-  /tests.html: ../../packaging/grunt/testem.mustache
-  /test-loader.js: static/lib/ember-cli-test-loader/test-loader.js
-  /vendor: ../../node_modules
-  /angular-mocks.js: dist/lib/angular-mocks/angular-mocks.js
-  /templates.js: dist/node-tests/templates.js
+  /static: ../static
+  /tests.html: ../../../packaging/node/testem.mustache
+  /test-loader.js: lib/ember-cli-test-loader/test-loader.js
+  /vendor: ../../../node_modules
+  /angular-mocks.js: lib/angular-mocks/angular-mocks.js
 reporter: xunit
 launch_in_dev:
   - Mocha
@@ -27,4 +25,4 @@ launch_in_ci:
   - PhantomJS
 launchers:
   Mocha:
-    command: npm test
+    command: make node-tests
