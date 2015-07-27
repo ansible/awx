@@ -896,7 +896,19 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
-                            html += (field.ask) ? " ng-disabled='" + fld + "_ask'" : "";
+                            if (field.ngDisabled || field.ask) {
+                                var disabled = "";
+                                if (field.ngDisabled) {
+                                    disabled += field.ngDisabled;
+                                }
+                                if (field.ngDisabled && field.ask) {
+                                    disabled += " || ";
+                                }
+                                if (field.ask) {
+                                    disabled += fld + "_ask";
+                                }
+                                html += "ng-disabled='" + disabled + "'";
+                            }
                             html += ">\n" + field.showInputInnerHTML;
                             html += "\n</button>\n";
                             html += "</span>\n";
@@ -931,12 +943,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.awPassMatch) ? "awpassmatch='" + field.associated + "' " : "";
                             html += (field.capitalize) ? "capitalize " : "";
                             html += (field.awSurveyQuestion) ? "aw-survey-question" : "";
-                            html += (field.ask) ? "ng-disabled='" + fld + "_ask' " : "";
+
+                            if (field.ngDisabled || field.ask) {
+                                var disabled = "";
+                                if (field.ngDisabled) {
+                                    disabled += field.ngDisabled;
+                                }
+                                if (field.ngDisabled && field.ask) {
+                                    disabled += " || ";
+                                }
+                                if (field.ask) {
+                                    disabled += fld + "_ask";
+                                }
+                                html += "ng-disabled='" + disabled + "'";
+                            }
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                             html += (field.awRequiredWhen) ? "data-awrequired-init='" + field.awRequiredWhen.init + "' aw-required-when='" +
                                 field.awRequiredWhen.variable + "' " : "";
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
-                            html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_ask' " : "";
+                            html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_foo' " : "";
                             html += ">\n";
                         }
 
@@ -960,6 +985,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<input type=\"checkbox\" ng-model=\"" +
                                 fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            if (field.ngDisabled) {
+                                html += "ng-disabled='" + field.ngDisabled + "'";
+                            }
                             html += "> Ask at runtime?</label>";
                         }
 

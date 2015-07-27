@@ -275,6 +275,7 @@ export default
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                     addRequired: false,
                     editRequired: false,
+                    ngDisabled: "keyEntered === false",
                     ask: true,
                     hasShowInputButton: true,
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
