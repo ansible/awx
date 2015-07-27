@@ -153,6 +153,22 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
         input_type: 'radio'
     });
 
+    $scope.$watch("category", function(val) {
+        if (val === 'Deploy') {
+            $scope.projectrequired = true;
+            LookUpInit({
+                scope: $scope,
+                form: form,
+                current_item: null,
+                list: ProjectList,
+                field: 'project',
+                input_type: 'radio'
+            });
+        } else {
+            $scope.projectrequired = false;
+        }
+    });
+
     $scope.changeAdhocCommandCheckbox = function () {
         if ($scope.category === 'Deploy') {
             $scope.run_ad_hoc_command = false;
