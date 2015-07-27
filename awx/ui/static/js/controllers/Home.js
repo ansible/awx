@@ -29,6 +29,15 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
     var dataCount = 0;
 
     $rootScope.$on('JobStatusChange-home', function () {
+        Rest.setUrl(GetBasePath('dashboard'));
+        Rest.get()
+        .success(function (data) {
+            $scope.dashboardData = data;
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
+        });
+
         Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
         Rest.get()
         .success(function (data) {
@@ -37,6 +46,7 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
         });
+
         Rest.setUrl(GetBasePath("job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false");
         Rest.get()
         .success(function (data) {
@@ -45,6 +55,7 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
         });
+
     });
 
     if ($scope.removeDashboardDataLoadComplete) {
