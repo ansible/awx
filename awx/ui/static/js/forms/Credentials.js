@@ -286,7 +286,7 @@ export default
                     ngShow: "kind.value == 'ssh'",
                     dataTitle: 'Privilege Escalation',
                     ngOptions: 'become.label for become in become_options track by become.value',
-                    awPopOver: "<p>Specify a username for 'become' operations. " +
+                    awPopOver: "<p>Specify a method for 'become' operations. " +
                     "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
                     "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
                     dataPlacement: 'right',
