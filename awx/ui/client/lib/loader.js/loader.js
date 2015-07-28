@@ -105,7 +105,13 @@ var define, requireModule, require, requirejs;
   }
 
   function requireFrom(name, origin) {
+
+    if (!registry[name]) {
+        name = name + '/index';
+    }
+
     var mod = registry[name];
+
     if (!mod) {
       throw new Error('Could not find module `' + name + '` imported from `' + origin + '`');
     }
