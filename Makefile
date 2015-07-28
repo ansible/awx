@@ -290,17 +290,6 @@ test_coverage:
 coverage_html:
 	coverage html
 
-ui_analysis_report: reports/ui_code node_modules Gruntfile.js
-	$(GRUNT) plato:report
-
-reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	rm -rf reports/ui_code
-	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
-
-# Run UI unit tests
-test_ui: node_modules minjs_ci
-	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
-
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
@@ -308,6 +297,9 @@ test_tox:
 # Run unit tests to produce output for Jenkins.
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
+
+# UI TASKS
+# --------------------------------------
 
 Gruntfile.js: packaging/node/Gruntfile.js
 	cp $< $@
@@ -321,9 +313,6 @@ bower.json: packaging/node/bower.json
 package.json: packaging/node/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
-sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
-
 # Update local npm install
 node_modules: package.json
 	npm install
@@ -332,27 +321,52 @@ node_modules: package.json
 awx/ui/%: node_modules clean-ui Brocfile.js bower.json
 	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
-testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
-testjs: awx/ui/build_test node-tests
-
-node-tests:
-	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
-
+# Concatenated, non-minified build; contains debug code and sourcemaps; does not include any tests
 devjs: awx/ui/static
 
-# Build minified JS/CSS.
+# Concatenated, minified, compressed (production) build with no sourcemaps or tests
 minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
 minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
-minjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
-minjs_ci: awx/ui/static node_modules clean-ui Brocfile.js
+# Performs build to awx/ui/build_test and runs node tests via mocha
+testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
+testjs: awx/ui/build_test node-tests
+
+# Performs minified, compressed build to awx/ui/static and runs browsers tests with testem ci
+testjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
+testjs_ci: awx/ui/static browser-tests
+
+# Runs node tests via mocha without building
+node-tests:
+	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+
+# Runs browser tests using settings from `testem.yml`
+browser-tests:
+	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
 	$(GRUNT) $@
 
+# Generate UI code documentation
 ngdocs: devjs Gruntfile.js
 	$(GRUNT) $@
+
+# Launch watcher for build process
+sync_ui: node_modules Brocfile.js
+	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
+
+# Build code complexity report for UI code
+ui_analysis_report: reports/ui_code node_modules Gruntfile.js
+	$(GRUNT) plato:report
+
+# Non-concatenated, non-minified build with no tests, no debug code, no sourcemaps for plato reports
+reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
+	rm -rf reports/ui_code
+	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
+
+# END UI TASKS
+# --------------------------------------
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
