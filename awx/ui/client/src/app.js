@@ -898,18 +898,7 @@ var tower = angular.module('Tower', [
                     }]
                 }
             }).
-
-            // when('/inventory_scripts', {
-            //     name: 'inventoryScriptsList',
-            //     templateUrl: urlPrefix + 'partials/inventory_scripts.html',
-            //     controller: InventoryScriptsList,
-            //     resolve: {
-            //         features: ['FeaturesService', function(FeaturesService) {
-            //             return FeaturesService.get();
-            //         }]
-            //     }
-            // }).
-
+            
             when('/license', {
                 name: 'license',
                 templateUrl: urlPrefix + 'partials/license.html',

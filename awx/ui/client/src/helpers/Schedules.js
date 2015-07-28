@@ -76,9 +76,9 @@ export default
         }])
 
         .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait',
-        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost', 'Empty', '$routeParams',
+        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost',
         function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors,
-            GetBasePath, SchedulePost, Empty, $routeParams) {
+            GetBasePath, SchedulePost) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
