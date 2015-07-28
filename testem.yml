@@ -19,6 +19,7 @@ routes:
   /vendor: ../../../node_modules
   /angular-mocks.js: lib/angular-mocks/angular-mocks.js
 reporter: xunit
+report_file: reports/test-results-ui.xml
 launch_in_dev:
   - Mocha
 launch_in_ci:
