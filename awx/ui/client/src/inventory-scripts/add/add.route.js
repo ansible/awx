@@ -4,10 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
+import {templateUrl} from '../../shared/template-url/template-url.factory';
+
 export default {
     name: 'inventoryScriptsAdd',
     route: '/inventory_scripts/add',
-    templateUrl: '/static/js/inventory-scripts/add/add.partial.html',
+    templateUrl: templateUrl('inventory-scripts/add/add'),
     controller: 'addController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

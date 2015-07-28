@@ -4,10 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
+import {templateUrl} from '../../shared/template-url/template-url.factory';
+
 export default {
     name: 'managementJobsList',
     route: '/management_jobs',
-    templateUrl: '/static/js/management-jobs/list/list.partial.html',
+    templateUrl: templateUrl('management-jobs/list/list'),
     controller: 'listController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

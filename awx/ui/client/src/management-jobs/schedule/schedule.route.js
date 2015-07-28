@@ -4,10 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
+import {templateUrl} from '../../shared/template-url/template-url.factory';
+
 export default {
     name: 'managementJobsSchedule',
     route: '/management_jobs/:management_job/schedules',
-    templateUrl: '/static/js/management-jobs/schedule/schedule.partial.html',
+    templateUrl: templateUrl('management-jobs/schedule/schedule'),
     controller: 'scheduleController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
