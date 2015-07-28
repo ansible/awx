@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 'use strict';
 
 /**
@@ -235,8 +235,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList', 'CreateSelect2',
-        function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList, CreateSelect2) {
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'inventoryScriptsListObject', 'CreateSelect2',
+        function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, inventoryScriptsListObject, CreateSelect2) {
             return function (params) {
 
                 var scope = params.scope,
@@ -289,7 +289,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                             scope: scope,
                             form: form,
                             hdr: "Select Custom Inventory",
-                            list: CustomInventoryList,
+                            list: inventoryScriptsListObject,
                             field: 'source_script',
                             input_type: 'radio'
                         });

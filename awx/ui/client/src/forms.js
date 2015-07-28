@@ -7,7 +7,6 @@
 import ActivityDetail from "./forms/ActivityDetail";
 import Credentials from "./forms/Credentials";
 import Adhoc from "./forms/Adhoc";
-import CustomInventory from "./forms/CustomInventory";
 import EventsViewer from "./forms/EventsViewer";
 import Groups from "./forms/Groups";
 import HostGroups from "./forms/HostGroups";
@@ -37,7 +36,6 @@ export
     {   ActivityDetail,
         Credentials,
         Adhoc,
-        CustomInventory,
         EventsViewer,
         Groups,
         HostGroups,

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Credentials
@@ -176,6 +176,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         current_item: (!Empty($routeParams.team_id)) ? $routeParams.team_id : null,
         list: TeamList,
         field: 'team',
+        input_type: 'radio',
         autopopulateLookup: false
     });
 
@@ -347,6 +348,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             form: form,
             current_item: (!Empty($scope.team_id)) ? $scope.team_id : null,
             list: TeamList,
+            input_type: 'radio',
             field: 'team'
         });
 

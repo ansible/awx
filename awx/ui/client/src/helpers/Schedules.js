@@ -75,14 +75,73 @@ export default
             };
         }])
 
-        .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost',
-        function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors, GetBasePath, SchedulePost) {
+        .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait',
+        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost',
+        function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors,
+            GetBasePath, SchedulePost) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
                     callback = params.callback,
                     schedule, scheduler,
                     url = GetBasePath('schedules') + id + '/';
+
+                delete scope.isFactCleanup;
+                delete scope.cleanupJob;
+
+                function setGranularity(){
+                    var a,b, prompt_for_days,
+                        keep_unit,
+                        granularity,
+                        granularity_keep_unit;
+
+                    if(scope.cleanupJob){
+                        scope.schedulerPurgeDays = Number(schedule.extra_data.days);
+                        // scope.scheduler_form.schedulerPurgeDays.$setViewValue( Number(schedule.extra_data.days));
+                    }
+                    else if(scope.isFactCleanup){
+                        scope.keep_unit_choices = [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        scope.granularity_keep_unit_choices =  [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        // the API returns something like 20w or 1y
+                        a = schedule.extra_data.older_than; // "20y"
+                        b = schedule.extra_data.granularity; // "1w"
+                        prompt_for_days = Number(_.initial(a,1).join('')); // 20
+                        keep_unit = _.last(a); // "y"
+                        granularity = Number(_.initial(b,1).join('')); // 1
+                        granularity_keep_unit = _.last(b); // "w"
+
+                        scope.keep_amount = prompt_for_days;
+                        scope.granularity_keep_amount = granularity;
+                        scope.keep_unit = _.find(scope.keep_unit_choices, function(i){
+                            return i.value === keep_unit;
+                        });
+                        scope.granularity_keep_unit =_.find(scope.granularity_keep_unit_choices, function(i){
+                            return i.value === granularity_keep_unit;
+                        });
+                    }
+                }
 
                 if (scope.removeDialogReady) {
                     scope.removeDialogReady();
@@ -94,6 +153,10 @@ export default
                         scope.$apply(function() {
                             scheduler.setRRule(schedule.rrule);
                             scheduler.setName(schedule.name);
+                            if(scope.isFactCleanup || scope.cleanupJob){
+                                setGranularity();
+                            }
+
                         });
                     }, 300);
                 });
@@ -112,7 +175,6 @@ export default
                     }
                     schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
                     schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-
                     ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Edit Schedule' });
                     scope.showRRuleDetail = false;
                 });
@@ -141,6 +203,8 @@ export default
                     });
                 };
 
+
+
                 $('#scheduler-tabs li a').on('shown.bs.tab', function(e) {
                     if ($(e.target).text() === 'Details') {
                         if (!scheduler.isValid()) {
@@ -156,6 +220,13 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        if(schedule.hasOwnProperty('extra_data')) {
+                            if(schedule.extra_data.hasOwnProperty('granularity')){
+                                scope.isFactCleanup = true;
+                            } else {
+                                scope.cleanupJob = true;
+                            }
+                        }
                         scope.$emit('ScheduleFound');
                     })
                     .error(function(data,status){
@@ -180,6 +251,43 @@ export default
                 }
                 else if (!Empty($routeParams.id)) {
                     url += $routeParams.id + '/schedules/';
+                }
+                else if (!Empty($routeParams.management_job)) {
+                    url += $routeParams.management_job + '/schedules/';
+                    if(scope.management_job.id === 4){
+                        scope.isFactCleanup = true;
+                        scope.keep_unit_choices = [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        scope.granularity_keep_unit_choices =  [{
+                            "label" : "Days",
+                            "value" : "d"
+                        },
+                        {
+                            "label": "Weeks",
+                            "value" : "w"
+                        },
+                        {
+                            "label" : "Years",
+                            "value" : "y"
+                        }];
+                        scope.prompt_for_days_facts_form.keep_amount.$setViewValue(30);
+                        scope.prompt_for_days_facts_form.granularity_keep_amount.$setViewValue(1);
+                        scope.keep_unit = scope.keep_unit_choices[0];
+                        scope.granularity_keep_unit = scope.granularity_keep_unit_choices[1];
+                    }
+                    else {
+                        scope.cleanupJob = true;
+                    }
                 }
 
                 if (scope.removeDialogReady) {
@@ -239,7 +347,7 @@ export default
                     mode = params.mode,
                     schedule = (params.schedule) ? params.schedule : {},
                     callback = params.callback,
-                    newSchedule, rrule;
+                    newSchedule, rrule, extra_vars;
 
                 if (scheduler.isValid()) {
                     Wait('start');
@@ -248,6 +356,20 @@ export default
                     schedule.name = newSchedule.name;
                     schedule.rrule = RRuleToAPI(rrule.toString());
                     schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
+
+                    if (scope.isFactCleanup) {
+                        extra_vars = {
+                            "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
+                            "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
+                        };
+                    } else if (scope.cleanupJob) {
+                        extra_vars = {
+                            "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
+                        };
+                    }
+                    schedule.extra_data = JSON.stringify(extra_vars);
+
+
                     Rest.setUrl(url);
                     if (mode === 'add') {
                         Rest.post(schedule)
@@ -442,8 +564,10 @@ export default
         }])
 
 
-        .factory('SchedulesControllerInit', ['$location', 'ToggleSchedule', 'DeleteSchedule', 'EditSchedule', 'AddSchedule',
-            function($location, ToggleSchedule, DeleteSchedule, EditSchedule, AddSchedule) {
+        .factory('SchedulesControllerInit', ['$location', 'ToggleSchedule',
+        'DeleteSchedule', 'EditSchedule', 'AddSchedule',
+            function($location, ToggleSchedule, DeleteSchedule, EditSchedule,
+                AddSchedule) {
             return function(params) {
                 var scope = params.scope,
                     parent_scope = params.parent_scope,

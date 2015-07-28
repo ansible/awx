@@ -29,8 +29,11 @@ import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Cr
 import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
+import inventoryScripts from './inventory-scripts/main';
+import managementJobs from './management-jobs/main';
 import routeExtensions from './shared/route-extensions/main';
 import breadcrumbs from './shared/breadcrumbs/main';
+
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -67,6 +70,7 @@ import './shared/Socket';
 import './job-templates/main';
 import './shared/features/main';
 
+
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
 __deferLoadIfEnabled();
@@ -81,6 +85,8 @@ var tower = angular.module('Tower', [
     browserData.name,
     breadcrumbs.name,
     systemTracking.name,
+    inventoryScripts.name,
+    managementJobs.name,
     setupMenu.name,
     mainMenu.name,
     dashboard.name,
@@ -104,7 +110,6 @@ var tower = angular.module('Tower', [
     'PaginationHelpers',
     'RefreshHelper',
     'AdminListDefinition',
-    'CustomInventoryListDefinition',
     'AWDirectives',
     'AdhocFormDefinition',
     'InventoriesListDefinition',
@@ -181,10 +186,8 @@ var tower = angular.module('Tower', [
     'AboutAnsibleHelpModal',
     'SurveyQuestionFormDefinition',
     'PortalJobsListDefinition',
-    'ConfigureTowerHelper',
-    'ConfigureTowerJobsListDefinition',
-    'CreateCustomInventoryHelper',
-    'CustomInventoryListDefinition',
+
+
     'AdhocHelper',
     'features',
     'longDateFilter'
@@ -895,7 +898,7 @@ var tower = angular.module('Tower', [
                     }]
                 }
             }).
-
+            
             when('/license', {
                 name: 'license',
                 templateUrl: urlPrefix + 'partials/license.html',
@@ -933,9 +936,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp) {
 
 
             var sock;
@@ -1141,19 +1144,6 @@ var tower = angular.module('Tower', [
                 $rootScope.leavePortal = function() {
                     $rootScope.portalMode=false;
                     $location.path('/home/');
-                };
-
-                $rootScope.configureTower = function(){
-                    ConfigureTower({
-                        scope: $rootScope,
-                        parent_scope: $rootScope
-                    });
-                };
-
-                $rootScope.createCustomInv = function(){
-                    CreateCustomInventory({
-                        parent_scope: $rootScope
-                    });
                 };
 
             }); // end of 'ConfigReady'

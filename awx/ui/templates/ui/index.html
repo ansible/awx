@@ -152,33 +152,9 @@
 
     <div id="login-modal-dialog" style="display: none;"></div>
     <div id="help-modal-dialog" style="display: none;"></div>
-    
+
     <div id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}assets/cowsay-about.html ' "></div>
-    <div id="custom-script-dialog" style="display:none;" > </div>
-    <div id='configure-tower-dialog' style="display:none" >
-      <div id="configure-jobs" ></div>
-      <div class="tab-pane" id="configure-schedules-tab">
-            <div id="configure-schedules-overlay"></div>
-            <div id="configure-schedules-list"></div>
-            <div id="configure-schedules-form-container">
-                <div id="configure-schedules-title">
-                    <h4 ng-bind="schedulesTitle"></h4>
-                    <button type="button"  class="close pull-right" ng-click="cancelScheduleForm()">x</button>
-                </div>
-                <div id="configure-schedules-form-container-body">
-                    <div id="configure-schedules-form"></div>
-                    <div id="configure-schedules-detail"></div>
-                </div>
-                <div id="configure-schedules-buttons" >
-                    <a id="configure-schedules-flip-link" ng-show="formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-search-plus"></i> View Details</a>
-                    <a id="configure-schedules-flip-link" ng-show="!formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-arrow-circle-left"></i> Back to options</a>
-                    <button type="button" class="btn btn-default btn-sm" id="configure-schedule-delete-button" ng-show="mode==='edit'" ng-click="deleteSystemSchedule($event)"><i class="fa fa-trash-o"></i> Delete</button>
-                    <button type="button" class="btn btn-default btn-sm" id="configure-cancel-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
-                    <!-- <button type="button" class="btn btn-primary btn-sm" id="configure-save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button> -->
-                </div>
-            </div>
-        </div>
-    </div>
+
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             Set how many days of data should be retained. <br>

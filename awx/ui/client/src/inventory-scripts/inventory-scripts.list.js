@@ -3,24 +3,19 @@
  *
  * All Rights Reserved
  *************************************************/
- 
 
 
-export default
-    angular.module('CustomInventoryListDefinition', [])
-    .value('CustomInventoryList', {
 
-        name:  'source_scripts' ,  // 'custom_inventories',
-        iterator: 'source_script',  //'custom_inventory',
-        selectTitle: 'Add custom inventory',
-        editTitle: 'Custom Inventories',
+export default function(){
+    return {
+        name:  'inventory_scripts' ,
+        iterator: 'inventory_script',
         index: false,
         hover: false,
 
         fields: {
             name: {
                 key: true,
-                noLink: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8'
@@ -32,8 +27,7 @@ export default
             },
             organization: {
                 label: 'Organization',
-                ngBind: 'source_script.summary_fields.organization.name',
-                // linkTo: '/#/organizations/{{ custom_inventory.organization }}',
+                ngBind: 'inventory_script.summary_fields.organization.name',
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
@@ -47,11 +41,18 @@ export default
                 ngClick: 'addCustomInv()',
                 awToolTip: 'Create a new credential'
             },
+            stream: {
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                awFeature: 'activity_streams'
+            }
         },
 
         fieldActions: {
             edit: {
-                ngClick: "editCustomInv(source_script.id)",
+                ngClick: "editCustomInv(inventory_script.id)",
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
@@ -59,7 +60,7 @@ export default
                 dataPlacement: 'top'
             },
             "delete": {
-                ngClick: "deleteCustomInv(source_script.id, source_script.name)",
+                ngClick: "deleteCustomInv(inventory_script.id, inventory_script.name)",
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',
@@ -67,4 +68,5 @@ export default
                 dataPlacement: 'top'
             }
         }
-    });
+    };
+}
