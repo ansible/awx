@@ -82,6 +82,16 @@ export default
         },
 
         actions: {
+            create: {
+                mode: 'all',
+                ngClick: "createGroup()",
+                awToolTip: "Create a new group"
+            },
+            properties: {
+                mode: 'all',
+                awToolTip: "Edit inventory properties",
+                ngClick: 'editInventoryProperties()'
+            },
             launch: {
                 mode: 'all',
                 ngShow: 'inventory.can_run_ad_hoc_commands',
@@ -92,16 +102,6 @@ export default
                 // commented out in the inventory controller within the watchers.
                 // awToolTip: "{{ adhocButtonTipContents }}",
                 // dataTipWatch: "adhocButtonTipContents"
-            },
-            create: {
-                mode: 'all',
-                ngClick: "createGroup()",
-                awToolTip: "Create a new group"
-            },
-            properties: {
-                mode: 'all',
-                awToolTip: "Edit inventory properties",
-                ngClick: 'editInventoryProperties()'
             },
             refresh: {
                 mode: 'all',
