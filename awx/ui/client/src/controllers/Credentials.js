@@ -142,6 +142,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         defaultUrl = GetBasePath('credentials'),
         url;
 
+    $scope.keyEntered = false;
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
 
@@ -214,6 +216,15 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         OwnerChange({ scope: $scope });
     }
 
+    $scope.$watch("ssh_key_data", function(val) {
+        if (val === "" || val === null || val === undefined) {
+            $scope.keyEntered = false;
+            $scope.ssh_key_unlock_ask = false;
+            $scope.ssh_key_unlock = "";
+        } else {
+            $scope.keyEntered = true;
+        }
+    });
 
     // Handle Kind change
     $scope.kindChange = function () {
@@ -359,6 +370,15 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             reset: false
         });
         OwnerChange({ scope: $scope });
+        $scope.$watch("ssh_key_data", function(val) {
+            if (val === "" || val === null || val === undefined) {
+                $scope.keyEntered = false;
+                $scope.ssh_key_unlock_ask = false;
+                $scope.ssh_key_unlock = "";
+            } else {
+                $scope.keyEntered = true;
+            }
+        });
         Wait('stop');
     });
 
