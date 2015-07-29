@@ -1,0 +1,52 @@
+---
+- hosts: local
+  vars:
+    src_region: 'us-east-1'
+    dst_regions:
+        - us-east-1
+        - us-west-1
+        - us-west-2
+        - eu-central-1
+        - eu-west-1
+        - ap-northeast-1
+        - ap-southeast-1
+        - ap-southeast-2
+        - sa-east-1
+
+  tasks:
+    - name: Gather AMI information
+      ec2_ami_find:
+        ami_id: '{{ src_ami_id }}'
+        region: '{{ src_region }}'
+        no_result_action: fail
+      register: ami_info
+
+    - name: Assert that the AMI is not already public
+      assert:
+        that: 'not {{ item.is_public }}'
+      with_items: ami_info.results
+
+    - name: Copy AMI to desired regions
+      ec2_ami_copy:
+        source_region: '{{ src_region }}'
+        region: '{{ item }}'
+        source_image_id: '{{ ami_info.results[0].ami_id }}'
+        name: '{{ ami_info.results[0].name }}'
+        description: '{{ ami_info.results[0].description }}'
+        tags: '{{ ami_info.results[0].tags }}'
+        wait: true
+      with_items: dst_regions
+      register: ami_copy
+
+    - name: Make image publicly available
+      command: 'ec2-modify-image-attribute {{ item.image_id }} --launch-permission -a all'
+      with_items: ami_copy.results
+
+    - debug:
+        var: ami_copy.results
+
+    - name: Display AMI launch URL
+      debug:
+        msg: 'https://console.aws.amazon.com/ec2/home?region={{ item.item }}#launchAmi={{ item.image_id }}'
+      with_items: ami_copy.results
+      when: ami_copy is defined
