@@ -84,9 +84,10 @@ MOCK_CFG ?=
 
 .PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
-	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
+	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui node-tests \
+	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
+	deb deb-src debian reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
 
 # Remove setup build files
