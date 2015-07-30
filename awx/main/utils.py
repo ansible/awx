@@ -511,3 +511,11 @@ def timestamp_apiformat(timestamp):
     if timestamp.endswith('+00:00'):
         timestamp = timestamp[:-6] + 'Z'
     return timestamp
+
+# damn you python 2.6
+def timedelta_total_seconds(timedelta):
+    return (
+        timedelta.microseconds + 0.0 +
+        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+
+
