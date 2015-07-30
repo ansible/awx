@@ -22,7 +22,7 @@ export default
                     parent_scope = scope,
                     defaultUrl = GetBasePath('system_job_templates'),
                     list = managementJobsListObject,
-                    view = GenerateList, e;
+                    view = GenerateList;
 
                 scope.cleanupJob = true;
 
@@ -82,65 +82,48 @@ export default
                         minWidth: 200,
                         callback: 'PromptForDaysFacts',
                         onOpen: function(){
-                            scope.keep_unit_choices = [{
-                                "label" : "Days",
-                                "value" : "d"
-                            },
-                            {
-                                "label": "Weeks",
-                                "value" : "w"
-                            },
-                            {
-                                "label" : "Years",
-                                "value" : "y"
-                            }];
-                            scope.granularity_keep_unit_choices =  [{
-                                "label" : "Days",
-                                "value" : "d"
-                            },
-                            {
-                                "label": "Weeks",
-                                "value" : "w"
-                            },
-                            {
-                                "label" : "Years",
-                                "value" : "y"
-                            }];
-                            e = angular.element(document.getElementById('prompt_for_days_facts_form'));
-                            scope.prompt_for_days_facts_form.keep_amount.$setViewValue(30);
-                            scope.prompt_for_days_facts_form.granularity_keep_amount.$setViewValue(1);
-                            $compile(e)(scope);
-                            scope.keep_unit = scope.keep_unit_choices[0];
-                            scope.granularity_keep_unit = scope.granularity_keep_unit_choices[1];
+                            scope.$watch('prompt_for_days_facts_form.$invalid', function(invalid) {
+                                if (invalid === true) {
+                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
+                                } else {
+                                    $('#prompt-for-days-facts-launch').prop("disabled", false);
+                                }
+                            });
 
-                            // this is a work-around for getting awMax to work (without
-                            // clearing out the form)
-                            scope.$watch('keep_amount', function(newVal) {
-                                if (!newVal && newVal !== 0) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (isNaN(newVal)) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (newVal < 0) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (newVal > 9999) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", false);
-                                }
-                            });
-                            scope.$watch('granularity_keep_amount', function(newVal2) {
-                                if (!newVal2 && newVal2 !== 0) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (isNaN(newVal2)) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (newVal2 < 0) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else if (newVal2 > 9999) {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", true);
-                                } else {
-                                    $('#prompt-for-days-facts-launch').prop("disabled", false);
-                                }
-                            });
+                            var fieldScope = scope.$parent;
+
+                            // set these form elements up on the scope where the form
+                            // is the parent of the current scope
+                            fieldScope.keep_unit_choices = [{
+                                "label" : "Days",
+                                "value" : "d"
+                            },
+                            {
+                                "label": "Weeks",
+                                "value" : "w"
+                            },
+                            {
+                                "label" : "Years",
+                                "value" : "y"
+                            }];
+                            fieldScope.granularity_keep_unit_choices =  [{
+                                "label" : "Days",
+                                "value" : "d"
+                            },
+                            {
+                                "label": "Weeks",
+                                "value" : "w"
+                            },
+                            {
+                                "label" : "Years",
+                                "value" : "y"
+                            }];
+                            scope.prompt_for_days_facts_form.$setPristine();
+                            scope.prompt_for_days_facts_form.$invalid = false;
+                            fieldScope.keep_unit =  fieldScope.keep_unit_choices[0];
+                            fieldScope.granularity_keep_unit = fieldScope.granularity_keep_unit_choices[1];
+                            fieldScope.keep_amount = 30;
+                            fieldScope.granularity_keep_amount = 1;
                         },
                         buttons: [{
                             "label": "Cancel",
@@ -207,25 +190,18 @@ export default
                             minWidth: 200,
                             callback: 'PromptForDays',
                             onOpen: function(){
-                                e = angular.element(document.getElementById('prompt_for_days_form'));
-                                scope.prompt_for_days_form.days_to_keep.$setViewValue(30);
-                                $compile(e)(scope);
-
-                                // this is a work-around for getting awMax to work (without
-                                // clearing out the form)
-                                scope.$watch('days_to_keep', function(newVal) {   // oldVal, scope) { // unused params get caught by jshint
-                                    if (!newVal && newVal !== 0) {
-                                        $('#prompt-for-days-launch').prop("disabled", true);
-                                    } else if (isNaN(newVal)) {
-                                        $('#prompt-for-days-launch').prop("disabled", true);
-                                    } else if (newVal < 0) {
-                                        $('#prompt-for-days-launch').prop("disabled", true);
-                                    } else if (newVal > 9999) {
+                                scope.$watch('prompt_for_days_form.$invalid', function(invalid) {
+                                    if (invalid === true) {
                                         $('#prompt-for-days-launch').prop("disabled", true);
                                     } else {
                                         $('#prompt-for-days-launch').prop("disabled", false);
                                     }
                                 });
+
+                                var fieldScope = scope.$parent;
+                                fieldScope.days_to_keep = 30;
+                                scope.prompt_for_days_form.$setPristine();
+                                scope.prompt_for_days_form.$invalid = false;
                             },
                             buttons: [{
                                 "label": "Cancel",

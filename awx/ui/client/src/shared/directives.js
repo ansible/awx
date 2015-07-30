@@ -202,6 +202,24 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
+    .directive('awNoDash', ['Empty', function (Empty) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elem, attr, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    if (!Empty(viewValue) && viewValue === "-") {
+                        ctrl.$setValidity('awNoDash', false);
+                        return viewValue;
+                    } else {
+                        ctrl.$setValidity('awNoDash', true);
+                        return viewValue;
+                    }
+                });
+            }
+        };
+    }])
+
     .directive('awMin', ['Empty', function (Empty) {
         return {
             restrict: 'A',
