@@ -252,17 +252,17 @@ export default
         },
 
         actions: {
+            close: {
+                mode: 'all',
+                awToolTip: "Close Activity Stream view",
+                ngClick: "closeStream()"
+            },
             refresh: {
                 mode: 'all',
                 id: 'activity-stream-refresh-btn',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()"
-            },
-            close: {
-                mode: 'all',
-                awToolTip: "Close Activity Stream view",
-                ngClick: "closeStream()"
             }
         },
 

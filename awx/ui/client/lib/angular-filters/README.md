@@ -47,6 +47,7 @@ The `default` filter allows to **specify a default fallback value** if an object
 - `null`
 - `undefined`
 - empty string, `''`
+- `NaN`
 
 Please notice that if a value equals to `0`, the default value won't be returned, as `0` is accepted.
 
@@ -184,7 +185,7 @@ To contribute, please follow the generic [AngularJS Contributing Guidelines](htt
 ## License
 
 ```
-  Copyright 2014 Francesco Pontillo
+  Copyright 2014-2015 Francesco Pontillo
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.

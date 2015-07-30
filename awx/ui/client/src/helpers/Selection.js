@@ -45,9 +45,8 @@ export default
                     var i, j, found;
                     for (i = 0; i < scope[list.name].length; i++) {
                         if (scope[list.name][i].id === id) {
-                            if ((scope[list.name][i].checked === "0" && !ischeckbox) || (scope[list.name][i].checked === "0" && ischeckbox)) {
-                                // select the row
-                                scope[list.name][i].checked = '1';
+                            var control = scope[list.name][i];
+                            if (ischeckbox && control.checked) {
                                 scope[list.name][i].success_class = 'success';
                                 // add selected object to the array
                                 found = false;
@@ -60,9 +59,7 @@ export default
                                 if (!found) {
                                     selected.push(scope[list.name][i]);
                                 }
-                            } else {
-                                // unselect the row
-                                scope[list.name][i].checked = '0';
+                            } else if (ischeckbox) {
                                 scope[list.name][i].success_class = '';
 
                                 // remove selected object from the array

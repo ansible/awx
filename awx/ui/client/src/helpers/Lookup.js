@@ -277,22 +277,20 @@ export default
                         var count = 0;
                         scope[list.name].forEach( function(row, i) {
                             if (row.id === id) {
-                                if (row.checked === '0') {
-                                    scope[list.name][i].checked = '1';
+                                if (row.checked) {
                                     scope[list.name][i].success_class = 'success';
                                 }
                                 else {
-                                    scope[list.name][i].checked = '0';
                                     scope[list.name][i].success_class = '';
                                 }
                             } else {
-                                scope[list.name][i].checked = '0';
+                                scope[list.name][i].checked = 0;
                                 scope[list.name][i].success_class = '';
                             }
                         });
                         // Check if any rows are checked
                         scope[list.name].forEach(function(row) {
-                            if (row.checked === '1') {
+                            if (row.checked) {
                                 count++;
                             }
                         });

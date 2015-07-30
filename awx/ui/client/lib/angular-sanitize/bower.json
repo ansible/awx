@@ -1,8 +1,9 @@
 {
   "name": "angular-sanitize",
-  "version": "1.2.23",
+  "version": "1.4.3",
   "main": "./angular-sanitize.js",
+  "ignore": [],
   "dependencies": {
-    "angular": "1.2.23"
+    "angular": "1.4.3"
   }
 }

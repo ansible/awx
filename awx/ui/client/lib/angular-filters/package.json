@@ -6,7 +6,7 @@
   },
   "name": "angular-filters",
   "description": "A collection of filters for AngularJS.",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "homepage": "https://github.com/frapontillo/angular-filters",
   "repository": {
     "type": "git",

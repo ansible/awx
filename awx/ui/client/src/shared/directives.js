@@ -32,7 +32,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     }
                     // Invalid, return undefined (no model update)
                     ctrl.$setValidity('awpassmatch', false);
-                    return undefined;
+                    return viewValue;
                 });
             }
         };
@@ -147,13 +147,15 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 ctrl.$setValidity('reqCheck', false);
             }
 
-            ctrl.$parsers.unshift(function(){
+            ctrl.$parsers.unshift(function(viewValue){
                 for (var c in scope.cbModel) {
                     if (scope.cbModel[c]) {
                         ctrl.$setValidity('checkbox', true);
                     }
                 }
                 ctrl.$setValidity('checkbox', false);
+
+                return viewValue;
             });
 
             scope.update = function(){
@@ -421,6 +423,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         ctrl.$setValidity('awlookup', true);
                         scope[elm.attr('data-source')] = null;
                     }
+                    return viewValue;
                 });
             }
         };
@@ -444,6 +447,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         }
                     }
                     ctrl.$setValidity('awvalidurl', validity);
+
+                    return viewValue;
                 });
             }
         };

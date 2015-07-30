@@ -906,22 +906,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                                                                                                         list = GroupList;
                                                                                                                         scope[list.name].forEach( function(row, i) {
                                                                                                                             if (row.id === id) {
-                                                                                                                                if (row.checked === '0') {
-                                                                                                                                    scope[list.name][i].checked = '1';
+                                                                                                                                if (row.checked) {
                                                                                                                                     scope[list.name][i].success_class = 'success';
                                                                                                                                 }
                                                                                                                                 else {
-                                                                                                                                    scope[list.name][i].checked = '0';
                                                                                                                                     scope[list.name][i].success_class = '';
                                                                                                                                 }
                                                                                                                             } else {
-                                                                                                                                scope[list.name][i].checked = '0';
+                                                                                                                                scope[list.name][i].checked = 0;
                                                                                                                                 scope[list.name][i].success_class = '';
                                                                                                                             }
                                                                                                                         });
                                                                                                                         // Check if any rows are checked
                                                                                                                         scope[list.name].forEach(function(row) {
-                                                                                                                            if (row.checked === '1') {
+                                                                                                                            if (row.checked) {
                                                                                                                                 count++;
                                                                                                                             }
                                                                                                                         });
@@ -945,7 +943,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                                                                                                         }
                                                                                                                         else {
                                                                                                                             scope[list.name].every(function(row) {
-                                                                                                                                if (row.checked === '1') {
+                                                                                                                                if (row.checked === 1) {
                                                                                                                                     target = row;
                                                                                                                                     return false;
                                                                                                                                 }
