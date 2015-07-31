@@ -339,7 +339,7 @@ testjs_ci: awx/ui/static browser-tests
 
 # Runs node tests via mocha without building
 node-tests:
-	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js') $(MOCHA_FLAGS)
 
 # Runs browser tests using settings from `testem.yml`
 browser-tests:
