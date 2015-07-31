@@ -38,11 +38,17 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             result = s + "=\"" + value + "\" ";
         } else {
             switch (key) {
+            // In the cases where we specify trueValue and falseValue,
+            // the boolean value from the API is getting converted to
+            // a string. After upgrading to angular 1.4, we need to quote
+            // the ng-true-value and ng-false-value values so we compare
+            // them appropriately.
+            //
             case 'trueValue':
-                result = "ng-true-value=\"" + value + "\" ";
+                result = "ng-true-value=\"'" + value + "'\" ";
                 break;
             case 'falseValue':
-                result = "ng-false-value=\"" + value + "\" ";
+                result = "ng-false-value=\"'" + value + "'\" ";
                 break;
             case 'awPopOver':
                 // construct the entire help link
