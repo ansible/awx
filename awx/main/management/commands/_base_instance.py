@@ -70,8 +70,13 @@ class BaseCommandInstance(BaseCommand):
                            default='',
                            help='Find instance by specified uuid.')
 
+    def include_option_primary_role(self):
+        BaseCommand.option_list += ( BaseCommandInstance.generate_option_primary(), )
+        self.enforce_primary_role = True
+
     def include_options_roles(self):
-        BaseCommand.option_list += ( BaseCommandInstance.generate_option_primary(), BaseCommandInstance.generate_option_secondary(), )
+        self.include_option_primary_role()
+        BaseCommand.option_list += ( BaseCommandInstance.generate_option_secondary(), )
         self.enforce_roles = True
 
     def include_option_hostname_set(self):
@@ -107,6 +112,8 @@ class BaseCommandInstance(BaseCommand):
             return CommandError('--hostname and one of --primary or --secondary is required.')
         elif self.enforce_hostname_set:
             return CommandError('--hostname is required.')
+        elif self.enforce_primary_role:
+            return CommandError('--primary is required.')
         elif self.enforce_roles:
             return CommandError('One of --primary or --secondary is required.')
 
@@ -119,6 +126,11 @@ class BaseCommandInstance(BaseCommand):
             self.option_secondary = options['secondary']
 
             if self.is_option_primary() and self.is_option_secondary() or not (self.is_option_primary() or self.is_option_secondary()):
+                raise self.usage_error
+        elif self.enforce_primary_role:
+            if options['primary']:
+                self.option_primary = options['primary']
+            else:
                 raise self.usage_error
 
         if self.enforce_hostname_set:
