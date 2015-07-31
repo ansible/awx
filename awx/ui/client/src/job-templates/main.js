@@ -5,7 +5,10 @@
  *************************************************/
 
 import deleteJobTemplate from './delete-job-template.service';
+import surveyMaker from './survey-maker/main';
 
 export default
-    angular.module('jobTemplates', [])
+    angular.module('jobTemplates',
+                   [    surveyMaker.name
+                   ])
         .service('deleteJobTemplate', deleteJobTemplate);

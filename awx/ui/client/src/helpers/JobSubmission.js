@@ -497,10 +497,10 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
       };
     }])
 
-    .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
-    'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
-    function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
-      GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
+    .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'GetBasePath', 'Rest' , 'Empty',
+    'GenerateForm', 'ProcessErrors', '$routeParams' ,
+    function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, GetBasePath, Rest, Empty,
+      GenerateForm, ProcessErrors, $routeParams) {
         return function(params) {
           var html = params.html || "",
           id= params.id,
