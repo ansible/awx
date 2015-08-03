@@ -13,7 +13,7 @@ from StringIO import StringIO
 
 # Django
 from django.conf import settings
-from django.db import models, connection
+from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
@@ -552,25 +552,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if 'finished' not in update_fields:
                 update_fields.append('finished')
 
-            # Take the output from the filesystem and record it in the
-            # database.
-            stdout = self.result_stdout_raw_handle()
-            if not isinstance(stdout, StringIO):
-                self.result_stdout_text = stdout.read()
-                if 'result_stdout_text' not in update_fields:
-                    update_fields.append('result_stdout_text')
-
-                # Attempt to delete the job output from the filesystem if it
-                # was moved to the database.
-                if self.result_stdout_file:
-                    try:
-                        os.remove(self.result_stdout_file)
-                        self.result_stdout_file = ''
-                        if 'result_stdout_file' not in update_fields:
-                            update_fields.append('result_stdout_file')
-                    except:
-                        pass  # Meh. We don't care that much.
-
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
         if self.started and self.finished and not self.elapsed:
@@ -660,19 +641,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     @property
     def result_stdout_size(self):
-        cursor = connection.cursor()
-        cursor.execute("select length(result_stdout_text) from main_unifiedjob where id = %d" % self.pk)
-        record_size = cursor.fetchone()[0]
-        return record_size
-
-    def dump_result_stdout(self):
-        tower_file = "towerjob-%s" % str(uuid.uuid1())[:8]
-        out_path = os.path.join(settings.STDOUT_TEMP_DIR, tower_file)
-        tower_fd = open(out_path, 'w')
-        cursor = connection.cursor()
-        cursor.copy_expert("copy (select result_stdout_text from main_unifiedjob where id = %d) to stdout" % (self.pk), tower_fd)
-        tower_fd.close()
-        return out_path
+        try:
+            return os.stat(self.result_stdout_file).st_size
+        except:
+            return 0
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
@@ -865,3 +837,4 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
+

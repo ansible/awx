@@ -2111,19 +2111,10 @@ class JobList(ListCreateAPIView):
     model = Job
     serializer_class = JobListSerializer
 
-    def get_queryset(self):
-        qs = self.request.user.get_queryset(self.model).defer('result_stdout_text')
-        return qs
-
 class JobDetail(RetrieveUpdateDestroyAPIView):
 
     model = Job
     serializer_class = JobSerializer
-
-    
-    def get_queryset(self):
-        qs = super(JobDetail, self).get_queryset().defer('result_stdout_text')
-        return qs
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2794,11 +2785,6 @@ class UnifiedJobList(ListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobListSerializer
     new_in_148 = True
-    
-    def get_queryset(self):
-        qs = self.request.user.get_queryset(self.model).defer('result_stdout_text')
-        return qs
-
 
 class UnifiedJobStdout(RetrieveAPIView):
 
@@ -2809,16 +2795,15 @@ class UnifiedJobStdout(RetrieveAPIView):
     filter_backends = ()
     new_in_148 = True
 
-    def get_queryset(self):
-        qs = super(UnifiedJobStdout, self).get_queryset().defer('result_stdout_text')
-        return qs    
-
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
         if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return Response("Standard Output too large to display (%d bytes), "
-                            "only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY))
+            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+            if request.accepted_renderer.format == 'json':
+                return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
+            else:
+                return Response(response_message)
 
         if request.accepted_renderer.format in ('html', 'api', 'json'):
             start_line = request.QUERY_PARAMS.get('start_line', 0)
@@ -2847,7 +2832,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             return Response(unified_job.result_stdout_raw)
         elif request.accepted_renderer.format == 'txt_download':
             try:
-                content_fd = open(unified_job.dump_result_stdout(), 'r')
+                content_fd = open(unified_job.result_stdout_file, 'r')
                 response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
                 return response

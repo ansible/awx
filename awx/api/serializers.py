@@ -464,7 +464,6 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
 class UnifiedJobSerializer(BaseSerializer):
 
-    #result_stdout = serializers.CharField(source='result_stdout', label='result stdout', read_only=True)
     result_stdout = serializers.SerializerMethodField('get_result_stdout')
     unified_job_template = serializers.Field(source='unified_job_template_id', label='unified job template')
     job_env = serializers.CharField(source='job_env', label='job env', read_only=True)
@@ -565,8 +564,16 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
 class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
+    result_stdout = serializers.SerializerMethodField('get_result_stdout')
+
     class Meta:
         fields = ('result_stdout',)
+
+    def get_result_stdout(self, obj):
+        obj_size = obj.result_stdout_size
+        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        return obj.result_stdout
 
     def get_types(self):
         if type(self) is UnifiedJobStdoutSerializer:
@@ -574,9 +581,10 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
         else:
             return super(UnifiedJobStdoutSerializer, self).get_types()
 
-    def to_native(self, obj):
-        ret = super(UnifiedJobStdoutSerializer, self).to_native(obj)
-        return ret.get('result_stdout', '')
+    # TODO: Needed?
+    #def to_native(self, obj):
+    #    ret = super(UnifiedJobStdoutSerializer, self).to_native(obj)
+    #    return ret.get('result_stdout', '')
 
 
 class UserSerializer(BaseSerializer):
