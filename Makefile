@@ -314,6 +314,9 @@ bower.json: packaging/node/bower.json
 package.json: packaging/node/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
+testem.yml: packaging/node/testem.yml
+	cp $< $@
+
 # Update local npm install
 node_modules: package.json
 	npm install
@@ -331,11 +334,11 @@ minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
 # Performs build to awx/ui/build_test and runs node tests via mocha
 testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
-testjs: awx/ui/build_test node-tests
+testjs: awx/ui/build_test node-tests testem.yml
 
 # Performs minified, compressed build to awx/ui/static and runs browsers tests with testem ci
 testjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
-testjs_ci: awx/ui/static browser-tests
+testjs_ci: awx/ui/static browser-tests testem.yml
 
 # Runs node tests via mocha without building
 node-tests:
