@@ -493,7 +493,7 @@ class BaseTask(Task):
             safe_env = self.build_safe_env(instance, **kwargs)
             if not os.path.exists(settings.JOBOUTPUT_ROOT):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
-            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
+            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
             stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
