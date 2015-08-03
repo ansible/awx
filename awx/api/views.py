@@ -2795,6 +2795,14 @@ class UnifiedJobStdout(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
+        obj_size = unified_job.result_stdout_size
+        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+            if request.accepted_renderer.format == 'json':
+                return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
+            else:
+                return Response(response_message)
+
         if request.accepted_renderer.format in ('html', 'api', 'json'):
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
@@ -2820,6 +2828,14 @@ class UnifiedJobStdout(RetrieveAPIView):
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
+        elif request.accepted_renderer.format == 'txt_download':
+            try:
+                content_fd = open(unified_job.result_stdout_file, 'r')
+                response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+                response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
+                return response
+            except Exception, e:
+                return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 

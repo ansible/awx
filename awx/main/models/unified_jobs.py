@@ -551,25 +551,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if 'finished' not in update_fields:
                 update_fields.append('finished')
 
-            # Take the output from the filesystem and record it in the
-            # database.
-            stdout = self.result_stdout_raw_handle()
-            if not isinstance(stdout, StringIO):
-                self.result_stdout_text = stdout.read()
-                if 'result_stdout_text' not in update_fields:
-                    update_fields.append('result_stdout_text')
-
-                # Attempt to delete the job output from the filesystem if it
-                # was moved to the database.
-                if self.result_stdout_file:
-                    try:
-                        os.remove(self.result_stdout_file)
-                        self.result_stdout_file = ''
-                        if 'result_stdout_file' not in update_fields:
-                            update_fields.append('result_stdout_file')
-                    except:
-                        pass  # Meh. We don't care that much.
-
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
         if self.started and self.finished and not self.elapsed:
@@ -656,6 +637,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def result_stdout(self):
         return self._result_stdout_raw(escape_ascii=True)
+
+    @property
+    def result_stdout_size(self):
+        try:
+            return os.stat(self.result_stdout_file).st_size
+        except:
+            return 0
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
@@ -848,3 +836,4 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
+
