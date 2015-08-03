@@ -36,6 +36,7 @@ __pycache__
 /Brocfile.js
 /bower.json
 /package.json
+/testem.yml
 node_modules/**
 /tmp
 npm-debug.log
