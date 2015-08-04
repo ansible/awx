@@ -14,7 +14,9 @@ define([
   Utils.Extend(ArrayAdapter, SelectAdapter);
 
   ArrayAdapter.prototype.select = function (data) {
-    var $option = this.$element.find('option[value="' + data.id + '"]');
+    var $option = this.$element.find('option').filter(function (i, elm) {
+      return elm.value == data.id.toString();
+    });
 
     if ($option.length === 0) {
       $option = this.option(data);
@@ -33,7 +35,7 @@ define([
       return self.item($(this)).id;
     }).get();
 
-    var $options = $();
+    var $options = [];
 
     // Filter out all items except for the one passed in the argument
     function onlyItem (item) {
@@ -64,10 +66,10 @@ define([
       if (item.children) {
         var $children = this.convertToOptions(item.children);
 
-        $option.append($children);
+        Utils.appendMany($option, $children);
       }
 
-      $options = $options.add($option);
+      $options.push($option);
     }
 
     return $options;

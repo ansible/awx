@@ -1,5 +1,5 @@
 /*!
- * Select2 4.0.0-rc.2
+ * Select2 4.0.0
  * https://select2.github.io
  *
  * Released under the MIT license
@@ -714,6 +714,23 @@ S2.define('select2/utils',[
     });
   };
 
+  // Append an array of jQuery nodes to a given element.
+  Utils.appendMany = function ($element, $nodes) {
+    // jQuery 1.7.x does not support $.fn.append() with an array
+    // Fall back to a jQuery object collection using $.fn.add()
+    if ($.fn.jquery.substr(0, 3) === '1.7') {
+      var $jqNodes = $();
+
+      $.map($nodes, function (node) {
+        $jqNodes = $jqNodes.add(node);
+      });
+
+      $nodes = $jqNodes;
+    }
+
+    $element.append($nodes);
+  };
+
   return Utils;
 });
 
@@ -828,7 +845,8 @@ S2.define('select2/results',[
         // id needs to be converted to a string when comparing
         var id = '' + item.id;
 
-        if ($.inArray(id, selectedIds) > -1) {
+        if ((item.element != null && item.element.selected) ||
+            (item.element == null && $.inArray(id, selectedIds) > -1)) {
           $option.attr('aria-selected', 'true');
         } else {
           $option.attr('aria-selected', 'false');
@@ -1564,7 +1582,7 @@ S2.define('select2/selection/multiple',[
       return;
     }
 
-    var $selections = $();
+    var $selections = [];
 
     for (var d = 0; d < data.length; d++) {
       var selection = data[d];
@@ -1577,10 +1595,12 @@ S2.define('select2/selection/multiple',[
 
       $selection.data('data', selection);
 
-      $selections = $selections.add($selection);
+      $selections.push($selection);
     }
 
-    this.$selection.find('.select2-selection__rendered').append($selections);
+    var $rendered = this.$selection.find('.select2-selection__rendered');
+
+    Utils.appendMany($rendered, $selections);
   };
 
   return MultipleSelection;
@@ -1637,8 +1657,9 @@ S2.define('select2/selection/placeholder',[
 });
 
 S2.define('select2/selection/allowClear',[
-  'jquery'
-], function ($) {
+  'jquery',
+  '../keys'
+], function ($, KEYS) {
   function AllowClear () { }
 
   AllowClear.prototype.bind = function (decorated, container, $container) {
@@ -1646,8 +1667,8 @@ S2.define('select2/selection/allowClear',[
 
     decorated.call(this, container, $container);
 
-    if (self.placeholder == null) {
-      if (self.options.get('debug') && window.console && console.error) {
+    if (this.placeholder == null) {
+      if (this.options.get('debug') && window.console && console.error) {
         console.error(
           'Select2: The `allowClear` option should be used in combination ' +
           'with the `placeholder` option.'
@@ -1657,34 +1678,59 @@ S2.define('select2/selection/allowClear',[
 
     this.$selection.on('mousedown', '.select2-selection__clear',
       function (evt) {
-        // Ignore the event if it is disabled
-        if (self.options.get('disabled')) {
-          return;
-        }
-
-        evt.stopPropagation();
-
-        var data = $(this).data('data');
-
-        for (var d = 0; d < data.length; d++) {
-          var unselectData = {
-            data: data[d]
-          };
-
-          // Trigger the `unselect` event, so people can prevent it from being
-          // cleared.
-          self.trigger('unselect', unselectData);
-
-          // If the event was prevented, don't clear it out.
-          if (unselectData.prevented) {
-            return;
-          }
-        }
-
-        self.$element.val(self.placeholder.id).trigger('change');
-
-        self.trigger('toggle');
+        self._handleClear(evt);
     });
+
+    container.on('keypress', function (evt) {
+      self._handleKeyboardClear(evt, container);
+    });
+  };
+
+  AllowClear.prototype._handleClear = function (_, evt) {
+    // Ignore the event if it is disabled
+    if (this.options.get('disabled')) {
+      return;
+    }
+
+    var $clear = this.$selection.find('.select2-selection__clear');
+
+    // Ignore the event if nothing has been selected
+    if ($clear.length === 0) {
+      return;
+    }
+
+    evt.stopPropagation();
+
+    var data = $clear.data('data');
+
+    for (var d = 0; d < data.length; d++) {
+      var unselectData = {
+        data: data[d]
+      };
+
+      // Trigger the `unselect` event, so people can prevent it from being
+      // cleared.
+      this.trigger('unselect', unselectData);
+
+      // If the event was prevented, don't clear it out.
+      if (unselectData.prevented) {
+        return;
+      }
+    }
+
+    this.$element.val(this.placeholder.id).trigger('change');
+
+    this.trigger('toggle');
+  };
+
+  AllowClear.prototype._handleKeyboardClear = function (_, evt, container) {
+    if (container.isOpen()) {
+      return;
+    }
+
+    if (evt.which == KEYS.DELETE || evt.which == KEYS.BACKSPACE) {
+      this._handleClear(evt);
+    }
   };
 
   AllowClear.prototype.update = function (decorated, data) {
@@ -1785,6 +1831,8 @@ S2.define('select2/selection/search',[
           var item = $previousChoice.data('data');
 
           self.searchRemoveChoice(item);
+
+          evt.preventDefault();
         }
       }
     });
@@ -2865,7 +2913,9 @@ S2.define('select2/data/select',[
   SelectAdapter.prototype.select = function (data) {
     var self = this;
 
-    // If data.element is a DOM nose, use it instead
+    data.selected = true;
+
+    // If data.element is a DOM node, use it instead
     if ($(data.element).is('option')) {
       data.element.selected = true;
 
@@ -2906,6 +2956,8 @@ S2.define('select2/data/select',[
     if (!this.$element.prop('multiple')) {
       return;
     }
+
+    data.selected = false;
 
     if ($(data.element).is('option')) {
       data.element.selected = false;
@@ -2982,7 +3034,7 @@ S2.define('select2/data/select',[
   };
 
   SelectAdapter.prototype.addOptions = function ($options) {
-    this.$element.append($options);
+    Utils.appendMany(this.$element, $options);
   };
 
   SelectAdapter.prototype.option = function (data) {
@@ -3131,7 +3183,9 @@ S2.define('select2/data/array',[
   Utils.Extend(ArrayAdapter, SelectAdapter);
 
   ArrayAdapter.prototype.select = function (data) {
-    var $option = this.$element.find('option[value="' + data.id + '"]');
+    var $option = this.$element.find('option').filter(function (i, elm) {
+      return elm.value == data.id.toString();
+    });
 
     if ($option.length === 0) {
       $option = this.option(data);
@@ -3150,7 +3204,7 @@ S2.define('select2/data/array',[
       return self.item($(this)).id;
     }).get();
 
-    var $options = $();
+    var $options = [];
 
     // Filter out all items except for the one passed in the argument
     function onlyItem (item) {
@@ -3181,10 +3235,10 @@ S2.define('select2/data/array',[
       if (item.children) {
         var $children = this.convertToOptions(item.children);
 
-        $option.append($children);
+        Utils.appendMany($option, $children);
       }
 
-      $options = $options.add($option);
+      $options.push($option);
     }
 
     return $options;
@@ -3238,8 +3292,12 @@ S2.define('select2/data/ajax',[
     var matches = [];
     var self = this;
 
-    if (this._request) {
-      this._request.abort();
+    if (this._request != null) {
+      // JSONP requests cannot always be aborted
+      if ($.isFunction(this._request.abort)) {
+        this._request.abort();
+      }
+
       this._request = null;
     }
 
@@ -3364,7 +3422,7 @@ S2.define('select2/data/tags',[
         var $option = self.option(tag);
         $option.attr('data-select2-tag', true);
 
-        self.addOptions($option);
+        self.addOptions([$option]);
 
         self.insertTag(data, tag);
       }
@@ -4040,9 +4098,16 @@ S2.define('select2/dropdown/attachBody',[
   AttachBody.prototype._resizeDropdown = function () {
     this.$dropdownContainer.width();
 
-    this.$dropdown.css({
+    var css = {
       width: this.$container.outerWidth(false) + 'px'
-    });
+    };
+
+    if (this.options.get('dropdownAutoWidth')) {
+      css.minWidth = css.width;
+      css.width = 'auto';
+    }
+
+    this.$dropdown.css(css);
   };
 
   AttachBody.prototype._showDropdown = function (decorated) {
@@ -4117,7 +4182,9 @@ S2.define('select2/dropdown/selectOnClose',[
       return;
     }
 
-    $highlightedResults.trigger('mouseup');
+    this.trigger('select', {
+        data: $highlightedResults.data('data')
+    });
   };
 
   return SelectOnClose;
@@ -4368,6 +4435,19 @@ S2.define('select2/defaults',[
         );
       }
 
+      if (
+        options.dropdownCssClass != null ||
+        options.dropdownCss != null ||
+        options.adaptDropdownCssClass != null
+      ) {
+        var DropdownCSS = require(options.amdBase + 'compat/dropdownCss');
+
+        options.dropdownAdapter = Utils.Decorate(
+          options.dropdownAdapter,
+          DropdownCSS
+        );
+      }
+
       options.dropdownAdapter = Utils.Decorate(
         options.dropdownAdapter,
         AttachBody
@@ -4400,6 +4480,19 @@ S2.define('select2/defaults',[
         options.selectionAdapter = Utils.Decorate(
           options.selectionAdapter,
           SelectionSearch
+        );
+      }
+
+      if (
+        options.containerCssClass != null ||
+        options.containerCss != null ||
+        options.adaptContainerCssClass != null
+      ) {
+        var ContainerCSS = require(options.amdBase + 'compat/containerCss');
+
+        options.selectionAdapter = Utils.Decorate(
+          options.selectionAdapter,
+          ContainerCSS
         );
       }
 
@@ -4460,7 +4553,14 @@ S2.define('select2/defaults',[
 
       options.translations = languages;
     } else {
-      options.translations = new Translation(options.language);
+      var baseTranslation = Translation.loadPath(
+        this.defaults.amdLanguageBase + 'en'
+      );
+      var customTranslation = new Translation(options.language);
+
+      customTranslation.extend(baseTranslation);
+
+      options.translations = customTranslation;
     }
 
     return options;
@@ -4526,6 +4626,7 @@ S2.define('select2/defaults',[
       amdLanguageBase: './i18n/',
       closeOnSelect: true,
       debug: false,
+      dropdownAutoWidth: false,
       escapeMarkup: Utils.escapeMarkup,
       language: EnglishTranslation,
       matcher: matcher,
@@ -4565,10 +4666,11 @@ S2.define('select2/defaults',[
 });
 
 S2.define('select2/options',[
+  'require',
   'jquery',
   './defaults',
   './utils'
-], function ($, Defaults, Utils) {
+], function (require, $, Defaults, Utils) {
   function Options (options, $element) {
     this.options = options;
 
@@ -4765,8 +4867,9 @@ S2.define('select2/core',[
     });
 
     // Hide the original select
-    $element.hide();
-
+    $element.addClass('select2-hidden-accessible');
+	$element.attr('aria-hidden', 'true');
+	
     // Synchronize any monitored attributes
     this._syncAttributes();
 
@@ -5177,7 +5280,8 @@ S2.define('select2/core',[
     this.$element.off('.select2');
     this.$element.attr('tabindex', this.$element.data('old-tabindex'));
 
-    this.$element.show();
+    this.$element.removeClass('select2-hidden-accessible');
+	this.$element.attr('aria-hidden', 'false');
     this.$element.removeData('select2');
 
     this.dataAdapter.destroy();
@@ -5215,15 +5319,18 @@ S2.define('select2/core',[
 
 S2.define('jquery.select2',[
   'jquery',
+  'require',
+
   './select2/core',
   './select2/defaults'
-], function ($, Select2, Defaults) {
+], function ($, require, Select2, Defaults) {
   // Force jQuery.mousewheel to be loaded if it hasn't already
-  try {
-    require('jquery.mousewheel');
-  } catch (Exception) { }
+  require('jquery.mousewheel');
 
   if ($.fn.select2 == null) {
+    // All methods that should return the element
+    var thisMethods = ['open', 'close', 'destroy'];
+
     $.fn.select2 = function (options) {
       options = options || {};
 
@@ -5237,9 +5344,24 @@ S2.define('jquery.select2',[
         return this;
       } else if (typeof options === 'string') {
         var instance = this.data('select2');
+
+        if (instance == null && window.console && console.error) {
+          console.error(
+            'The select2(\'' + options + '\') method was called on an ' +
+            'element that is not using Select2.'
+          );
+        }
+
         var args = Array.prototype.slice.call(arguments, 1);
 
-        return instance[options](args);
+        var ret = instance[options](args);
+
+        // Check if we should be returning `this`
+        if ($.inArray(options, thisMethods) > -1) {
+          return this;
+        }
+
+        return ret;
       } else {
         throw new Error('Invalid arguments for Select2: ' + options);
       }
@@ -5251,6 +5373,13 @@ S2.define('jquery.select2',[
   }
 
   return Select2;
+});
+
+S2.define('jquery.mousewheel',[
+  'jquery'
+], function ($) {
+  // Used to shim jQuery.mousewheel for non-full builds.
+  return $;
 });
 
   // Return the AMD loader configuration so it can be used outside of this file
@@ -5267,7 +5396,7 @@ S2.define('jquery.select2',[
   // Hold the AMD module references on the jQuery function that was just loaded
   // This allows Select2 to use the internal loader outside of this file, such
   // as in the language files.
-  $.fn.select2.amd = S2;
+  jQuery.fn.select2.amd = S2;
 
   // Return the Select2 instance for anyone who is importing it.
   return select2;
