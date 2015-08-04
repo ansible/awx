@@ -241,6 +241,11 @@ server: server_noattach
 servercc: server_noattach
 	tmux -2 -CC attach-session -t tower
 
+# Alternate approach to tmux to run all development tasks specified in
+# Procfile.  https://youtu.be/OPMgaibszjk
+honcho:
+	honcho start
+
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	$(PYTHON) manage.py runserver
