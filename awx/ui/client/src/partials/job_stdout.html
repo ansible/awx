@@ -21,7 +21,8 @@
         <div class="row">
             <div class="panel panel-default job-stdout-panel">
               <div class="panel-heading">
-                <h3 class="panel-title">Standard Output</h3>
+                <h3 class="panel-title">Standard Output
+                <a href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download" class="btn btn-primary btn-xs DownloadStandardOut DownloadStandardOut--onStandardOutPage" id="download-stdout-button" type="button" aw-tool-tip="Download standard out as a .txt file" data-placement="top"><i class="fa fa-download DownloadStandardOut-icon DownloadStandardOut-icon--withText"></i>Download</a>
               </div>
               <div class="panel-body stdout-panel-body">
                   <div class="row">
