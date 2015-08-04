@@ -34,7 +34,7 @@ export default
                 };
 
                 scope.toggleCallback = function (fld) {
-                    if (scope.allow_callbacks === 'false') {
+                    if (scope.allow_callbacks === false) {
                         scope[fld] = '';
                     }
                 };

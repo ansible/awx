@@ -284,8 +284,6 @@ export default
                     type: 'checkbox',
                     addRequired: false,
                     editRequird: false,
-                    trueValue: 'true',
-                    falseValue: 'false',
                     ngChange: "toggleCallback('host_config_key')",
                     column: 2,
                     awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +

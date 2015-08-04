@@ -274,7 +274,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
     ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
     $scope.playbook_options = [];
-    $scope.allow_callbacks = 'false';
+    $scope.allow_callbacks = false;
 
     generator.reset();
     LoadBreadCrumbs();

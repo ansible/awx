@@ -281,6 +281,7 @@ export default
                                     scope[list.name][i].success_class = 'success';
                                 }
                                 else {
+                                    row.checked = true;
                                     scope[list.name][i].success_class = '';
                                 }
                             } else {
