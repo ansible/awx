@@ -96,10 +96,11 @@ export default
 
                     if (data.result_stdout) {
                         $('#logview-tabs li:eq(1)').show();
+                        var showStandardOut = (data.type !== "system_job") ? true : false;
                         AddPreFormattedText({
                             id: 'stdout-form-container',
                             val: data.result_stdout,
-                            standardOut: true,
+                            standardOut: showStandardOut,
                             jobUrl: data.url
                         });
                     }
