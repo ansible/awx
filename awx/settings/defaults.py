@@ -115,6 +115,8 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+STDOUT_MAX_BYTES_DISPLAY = 1048576
+
 TEMPLATE_CONTEXT_PROCESSORS += (  # NOQA
     'django.core.context_processors.request',
     'awx.ui.context_processors.settings',

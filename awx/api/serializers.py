@@ -519,6 +519,11 @@ class UnifiedJobSerializer(BaseSerializer):
             ret['elapsed'] = float(ret['elapsed'])
         return ret
 
+    def get_result_stdout(self, obj):
+        obj_size = obj.result_stdout_size
+        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        return obj.result_stdout
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
 
