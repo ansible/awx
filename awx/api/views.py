@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
+from django.core.servers.basehttp import FileWrapper
+from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
@@ -2789,7 +2791,7 @@ class UnifiedJobStdout(RetrieveAPIView):
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,
-                        renderers.JSONRenderer]
+                        renderers.JSONRenderer, DownloadTextRenderer]
     filter_backends = ()
     new_in_148 = True
 
