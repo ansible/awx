@@ -158,7 +158,7 @@
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             Set how many days of data should be retained. <br>
-            <input type="integer" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" min=0 aw-min=0 max=9999 aw-max=9999 aw-no-dash style="margin-top:10px;" integer>
+            <input type="integer" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer>
             <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && (prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer ||
             prompt_for_days_form.days_to_keep.$error.required ||
             prompt_for_days_form.days_to_keep.$error.min ||
@@ -181,7 +181,7 @@
                     </label>
                     <div class="row">
                         <div class="col-xs-4">
-                            <input type="integer" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control" min=0 aw-min=0 max=9999 aw-max=9999 aw-no-dash style="margin-top:10px;" integer></input>
+                            <input type="integer" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer></input>
                         </div>
                         <div class="col-xs-4">
                             <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control"  style="margin-top:10px;"></select>
@@ -201,7 +201,7 @@
                     </label>
                     <div class="row">
                         <div class="col-xs-4">
-                            <input type="integer" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" class="form-control" min=0 aw-min=0 max=9999 aw-max=9999 aw-no-dash style="margin-top:10px;" integer></input>
+                            <input type="integer" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer></input>
                         </div>
                         <div class="col-xs-4">
                             <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit"

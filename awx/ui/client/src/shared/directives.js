@@ -293,8 +293,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     if (/^\-?\d*$/.test(viewValue)) {
                        // it is valid
                         ctrl.$setValidity('integer', true);
-                        if ( elm.attr('min') &&
-                            ( viewValue === '' || viewValue === null || parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) ) {
+                        if ( viewValue === '-' || viewValue === '' || viewValue === null) {
+                            ctrl.$setValidity('integer', false);
+                            return viewValue;
+                        }
+                        if (elm.attr('min') &&
+                            parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) {
                             ctrl.$setValidity('min', false);
                             return viewValue;
                         }
