@@ -598,7 +598,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.result_stdout_text:
             return StringIO(self.result_stdout_text)
         else:
-            if not os.path.exists(self.result_stdout_file):
+            if not os.path.exists(self.result_stdout_file) or os.stat(self.result_stdout_file).st_size < 1:
                 return StringIO(msg['missing' if self.finished else 'pending'])
 
             # There is a potential timing issue here, because another
