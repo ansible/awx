@@ -23,6 +23,10 @@ import uuid
 from distutils.version import LooseVersion as Version
 import dateutil.parser
 import yaml
+try:
+    import psutil
+except:
+    psutil = None
 
 # Pexpect
 import pexpect
