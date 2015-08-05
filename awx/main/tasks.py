@@ -442,9 +442,9 @@ class BaseTask(Task):
                         else:
                             main_proc = psutil.Process(pid=child.pid)
                             if hasattr(main_proc, "children"):
-                                child_procs = main_proc.children(recursive=False)
+                                child_procs = main_proc.children(recursive=True)
                             else:
-                                child_procs = main_proc.get_children(recursive=False)
+                                child_procs = main_proc.get_children(recursive=True)
                             for child_proc in child_procs:
                                 os.kill(child_proc.pid, signal.SIGTERM)
                     else:
