@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<ErrorResponse xmlns="https://route53.amazonaws.com/doc/2012-02-29/">
-  <Error>
-    <Type>Sender</Type>
-    <Code>NoSuchHostedZone</Code>
-    <Message>No hosted zone found with ID: 47234</Message>
-  </Error>
-  <RequestId>376c64a6-6194-11e1-847f-ddaa49e4c811</RequestId>
-</ErrorResponse>

@@ -1,9 +1,0 @@
-<Session user="a" org="MyOrg" type="application/vnd.vmware.vcloud.session+xml" href="https://vm-vcloud/api/session/"
-		 xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd"
-		 xmlns="http://www.vmware.com/vcloud/v1.5"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   <Link rel="down" type="application/vnd.vmware.vcloud.orgList+xml" href="https://vm-vcloud/api/org/"/>
-   <Link rel="down" type="application/vnd.vmware.admin.vcloud+xml" href="https://vm-vcloud/api/admin/"/>
-   <Link rel="down" type="application/vnd.vmware.vcloud.query.queryList+xml" href="https://vm-vcloud/api/query"/>
-   <Link rel="entityResolver" type="application/vnd.vmware.vcloud.entity+xml" href="https://vm-vcloud/api/entity/"/>
-</Session>

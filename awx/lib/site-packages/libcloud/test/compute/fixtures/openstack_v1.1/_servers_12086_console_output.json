@@ -1,3 +1,0 @@
-{
-    "output": "FAKE CONSOLE OUTPUT\nANOTHER\nLAST LINE"
-}

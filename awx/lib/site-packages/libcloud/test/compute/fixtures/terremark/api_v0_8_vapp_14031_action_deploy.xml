@@ -1,4 +1,0 @@
-<Task href="https://services.vcloudexpress.terremark.com/api/v0.8/task/10496" type="application/vnd.vmware.vcloud.task+xml" status="queued" startTime="2009-11-13T23:58:22.893Z" xmlns="http://www.vmware.com/vcloud/v0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Owner href="https://services.vcloudexpress.terremark.com/api/v0.8/vdc/224" type="application/vnd.vmware.vcloud.vdc+xml" name="Miami Environment 1"/>
-  <Result href="https://services.vcloudexpress.terremark.com/api/v0.8/vapp/14031" type="application/vnd.vmware.vcloud.vApp+xml" name="testerpart2"/>
-</Task>

@@ -1,4 +1,0 @@
-<ns0:Error majorErrorCode="403"
-           message="No access to entity &quot;(com.vmware.vcloud.entity.vapp:474bdb3d-1286-4e3d-b07f-15bab487479b)&quot;."
-           minorErrorCode="ACCESS_TO_RESOURCE_IS_FORBIDDEN" ns1:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd"
-           xmlns:ns0="http://www.vmware.com/vcloud/v1.5" xmlns:ns1="http://www.w3.org/2001/XMLSchema-instance" />
