@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
    /**
  * @ngdoc function
@@ -244,7 +244,7 @@ export default
                     scope.selectAction = function () {
                         var i, found = false;
                         for (i = 0; i < scope[list.name].length; i++) {
-                            if (scope[list.name][i].checked === '1' || scope[list.name][i].checked===1) {
+                            if (scope[list.name][i].checked === '1' || scope[list.name][i].checked===1 || scope[list.name][i].checked === true) {
                                 found = true;
                                 parent_scope[field] = scope[list.name][i].id;
                                 if (parent_scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
