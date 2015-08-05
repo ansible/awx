@@ -432,7 +432,19 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    os.kill(child.pid, signal.SIGINT)
+                    if settings.AWX_PROOT_ENABLED:
+                        if not psutil:
+                            os.kill(child.pid, signal.SIGKILL)
+                        else:
+                            main_proc = psutil.Process(pid=child.pid)
+                            if hasattr(main_proc, "children"):
+                                child_procs = main_proc.children(recursive=True)
+                            else:
+                                child_procs = main_proc.get_children(recursive=True)
+                            for child_proc in child_procs:
+                                os.kill(child_proc.pid, signal.SIGTERM)
+                    else:
+                        os.kill(child.pid, signal.SIGTERM)
                     time.sleep(3)
                     canceled = True
                 except OSError:
