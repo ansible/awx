@@ -18,6 +18,7 @@ import mongoengine
 # awx
 from awx.fact.models.fact import * # noqa
 from awx.main.models import * # noqa
+from awx.main.utils import timedelta_total_seconds
 
 TEST_FACT_ANSIBLE = {
     "ansible_swapfree_mb" : 4092,
@@ -197,12 +198,6 @@ EXPERIMENT_DEFAULT = {
         "files"
     ]
 }
-
-# damn you python 2.6
-def timedelta_total_seconds(timedelta):
-    return (
-        timedelta.microseconds + 0.0 +
-        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
 
 class Experiment(object):
     def __init__(self, exp, fact_fixtures, raw_db, mongoengine_db):

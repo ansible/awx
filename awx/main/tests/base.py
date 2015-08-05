@@ -56,8 +56,12 @@ class QueueTestMixin(object):
 
     def start_redis(self):
         if not getattr(self, 'redis_process', None):
-            self.redis_process = Popen('redis-server --port 16379 > /dev/null',
-                                       shell=True, executable='/bin/bash')
+            # Centos 6.5 redis is runnable by non-root user but is not in a normal users path by default
+            env = dict(os.environ)
+            env['PATH'] = '%s:/usr/sbin/' % env['PATH']
+            self.redis_process = Popen('echo "port 16379" | redis-server - > /dev/null',
+                                       shell=True, executable='/bin/bash',
+                                       env=env)
 
     def stop_redis(self):
         if getattr(self, 'redis_process', None):

@@ -8,7 +8,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-import unittest
+import unittest2 as unittest
 
 # Django
 from django.conf import settings

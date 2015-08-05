@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 import urlparse
-import unittest
+import unittest2 as unittest
 
 # Django
 import django
@@ -25,9 +25,6 @@ from django.test.utils import override_settings
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
-
-if not hasattr(unittest, 'skipIf'):
-    import unittest2 as unittest
 
 __all__ = ['CreateDefaultOrgTest', 'DumpDataTest', 'CleanupDeletedTest',
            'CleanupJobsTest', 'CleanupActivityStreamTest',

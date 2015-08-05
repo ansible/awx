@@ -16,6 +16,13 @@ from awx.fact.tests.base import BaseFactTest, FactScanBuilder, TEST_FACT_PACKAGE
 
 __all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimelineTest']
 
+# damn you python 2.6
+def timedelta_total_seconds(timedelta):
+    return (
+        timedelta.microseconds + 0.0 +
+        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+
+
 class FactHostTest(BaseFactTest):
     def test_create_host(self):
         host = FactHost(hostname='hosty', inventory_id=1)
@@ -72,7 +79,7 @@ class FactTest(BaseFactTest):
             t1 = now()
             (f_obj, v_obj) = Fact.add_fact(host=host, timestamp=timestamp, module='packages', fact=data)
             t2 = now()
-            diff = (t2 - t1).total_seconds()
+            diff = timedelta_total_seconds(t2 - t1)
             print("add_fact save time: %s (s)" % diff)
             # Note: 20 is realllly high. This should complete in < 2 seconds
             self.assertLessEqual(diff, 20)
