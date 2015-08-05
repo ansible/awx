@@ -1,8 +1,0 @@
-{
-    "volumeAttachment": {
-        "device": "/dev/vdb",
-        "id": "cd76a3a1-c4ce-40f6-9b9f-07a61508938d",
-        "serverId": "12065",
-        "volumeId": "cd76a3a1-c4ce-40f6-9b9f-07a61508938d"
-    }
-}

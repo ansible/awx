@@ -1,6 +1,0 @@
-<SetLoadBalancerPoliciesForBackendServerResponse xmlns="http://elasticloadbalancing.amazonaws.com/doc/2012-06-01/">
-  <SetLoadBalancerPoliciesForBackendServerResult/>
-  <ResponseMetadata>
-    <RequestId>0eb9b381-dde0-11e2-8d78-6ddbaEXAMPLE</RequestId>
-  </ResponseMetadata>
-</SetLoadBalancerPoliciesForBackendServerResponse>

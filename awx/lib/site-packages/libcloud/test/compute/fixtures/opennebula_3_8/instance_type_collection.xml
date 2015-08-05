@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<INSTANCE_TYPE_COLLECTION>  
-    <INSTANCE_TYPE href="http://www.opennebula.org/instance_type/small" name="small"/>
-    <INSTANCE_TYPE href="http://www.opennebula.org/instance_type/medium" name="medium"/>
-    <INSTANCE_TYPE href="http://www.opennebula.org/instance_type/large" name="large"/>
-</INSTANCE_TYPE_COLLECTION>

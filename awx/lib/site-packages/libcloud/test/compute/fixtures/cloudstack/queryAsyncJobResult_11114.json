@@ -1,1 +1,0 @@
-{ "queryasyncjobresultresponse" : {"accountid":"cb13887c-7c6a-464d-aa8f-c6971f9dd458","userid":"11110e27-5a51-4109-9598-7df34141761a","cmd":"org.apache.cloudstack.api.command.user.firewall.DeletePortForwardingRuleCmd","jobstatus":1,"jobprocstatus":0,"jobresultcode":0,"jobresulttype":"object","jobresult":{"success":true},"created":"2013-09-05T09:09:01-0400","jobid":"11114"} }

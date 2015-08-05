@@ -1,4 +1,0 @@
-<CreateTagsResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-    <requestId>b001068a-ca0d-4f05-b622-28fe984f44be</requestId>
-    <return>true</return>
-</CreateTagsResponse>

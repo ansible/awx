@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Response><Errors><Error><Code>InvalidKeyPair.NotFound</Code><Message>The key pair 'test-key-pair' does not exist</Message></Error></Errors><RequestID>31b97300-eb8e-405e-9567-b0f57b791fed</RequestID></Response>

@@ -1,7 +1,0 @@
-The json responses contained in this directory are copied directly from the
-OpenStack 1.1 documentation at
-http://docs.openstack.org/trunk/openstack-compute/developer/openstack-compute-api-1.1/
-as of this writing.
-
-The only exception is _os_quota_sets_aTenantId.json, which was captured (and
-perturbed) via packet capture.

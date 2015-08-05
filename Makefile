@@ -82,7 +82,7 @@ RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
-.PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
+.PHONY: clean rebase push requirements requirements_dev requirements_jenkins requirements_post \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -137,51 +137,35 @@ rebase:
 push:
 	git push origin master
 
-# Install third-party requirements needed for development environment (using
-# locally downloaded packages).
-requirements:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index setuptools-12.0.5.tar.gz); \
-	    (cd requirements && pip install --no-index Django-1.6.7.tar.gz); \
-	    (cd requirements && pip install --no-index -r dev_local.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install --no-index -r dev_local.txt); \
-	fi
+requirements_post:
+	touch awx/lib/site-packages/oslo/__init__.py
+	touch awx/lib/site-packages/dogpile/__init__.py
 
-# Install third-party requirements needed for development environment
-# (downloading from PyPI if necessary).
-requirements_pypi:
+# Install third-party requirements needed for development environment.
+requirements:
+	(pip install -r requirements/requirements.txt -t awx/lib/site-packages/);
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    pip install setuptools==12.0.5; \
-	    pip install Django\>=1.6.7,\<1.7; \
-	    pip install -r requirements/dev.txt; \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    sudo pip install -r requirements/dev.txt; \
+		$(PYTHON) fix_virtualenv_setuptools.py; \
 	fi
+	$(MAKE) requirements_post
+
+requirements_dev:
+	(cat requirements/requirements.txt requirements/requirements_dev.txt > /tmp/req_dev.txt);
+	(pip install -r /tmp/req_dev.txt -t awx/lib/site-packages/);
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+		$(PYTHON) fix_virtualenv_setuptools.py; \
+	fi
+	$(MAKE) requirements_post
 
 # Install third-party requirements needed for running unittests in jenkins
-# (using locally downloaded packages).
-requirements_jenkins:
+requirements_jenkins: requirements
+	(pip install -r requirements/requirements_jenkins.txt);
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && pip install --no-index pip-1.5.4.tar.gz || true); \
-	else \
-	    (cd requirements && sudo pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && sudo pip install --no-index pip-1.5.4.tar.gz || true); \
-	fi
-	$(MAKE) requirements
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -r jenkins.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install -r jenkins.txt); \
+		$(PYTHON) fix_virtualenv_setuptools.py; \
 	fi
 	npm install csslint jshint
 
-# "Install" ansible-tower package in development mode.  Creates link to working
-# copy in site-packages and installs awx-manage command.
+# "Install" ansible-tower package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -190,6 +174,10 @@ develop:
 	    sudo pip uninstall -y awx; \
 	    sudo $(PYTHON) setup.py develop; \
 	fi
+
+version_file:
+	mkdir -p /var/lib/awx/
+	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.tower_version
 
 # Do any one-time init tasks.
 init:
@@ -200,7 +188,7 @@ init:
 	fi
 
 # Refresh development environment after pulling new code.
-refresh: clean requirements develop migrate
+refresh: clean requirements_dev version_file develop migrate
 
 # Create Django superuser.
 adduser:
@@ -407,7 +395,7 @@ release_clean:
 dist/$(SDIST_TAR_FILE):
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
-sdist: minjs dist/$(SDIST_TAR_FILE)
+sdist: minjs requirements dist/$(SDIST_TAR_FILE)
 
 rpm-build:
 	mkdir -p rpm-build

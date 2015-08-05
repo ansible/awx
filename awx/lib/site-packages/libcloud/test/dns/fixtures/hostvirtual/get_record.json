@@ -1,8 +1,0 @@
-{
-	"id": "300377",
-	"name": "*.t.com",
-	"type": "CNAME",
-	"content": "t.com",
-	"ttl": "86400",
-	"prio": null
-}
