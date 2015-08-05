@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns12:Status xmlns="http://oec.api.opsource.net/schemas/server" xmlns:ns9="http://oec.api.opsource.net/schemas/reset" xmlns:ns5="http://oec.api.opsource.net/schemas/vip" xmlns:ns12="http://oec.api.opsource.net/schemas/general" xmlns:ns6="http://oec.api.opsource.net/schemas/imageimportexport" xmlns:ns13="http://oec.api.opsource.net/schemas/support" xmlns:ns7="http://oec.api.opsource.net/schemas/whitelabel" xmlns:ns10="http://oec.api.opsource.net/schemas/ipplan" xmlns:ns8="http://oec.api.opsource.net/schemas/datacenter" xmlns:ns11="http://oec.api.opsource.net/schemas/storage" xmlns:ns2="http://oec.api.opsource.net/schemas/organization" xmlns:ns4="http://oec.api.opsource.net/schemas/network" xmlns:ns3="http://oec.api.opsource.net/schemas/directory">
-    <ns12:operation>Delete Server</ns12:operation>
-    <ns12:result>SUCCESS</ns12:result>
-    <ns12:resultDetail>Server "Delete" issued</ns12:resultDetail>
-    <ns12:resultCode>REASON_0</ns12:resultCode>
-</ns12:Status>

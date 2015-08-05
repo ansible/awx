@@ -1,4 +1,0 @@
-<SetLoadBalancerPoliciesOfListenerResult xmlns="http://elasticloadbalancing.amazonaws.com/doc/2012-06-01/">
-  <Instances>
-  </Instances>
-</SetLoadBalancerPoliciesOfListenerResult>

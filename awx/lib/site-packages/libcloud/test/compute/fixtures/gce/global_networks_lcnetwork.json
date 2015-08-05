@@ -1,9 +1,0 @@
-{
-  "IPv4Range": "10.11.0.0/16",
-  "creationTimestamp": "2013-06-26T10:05:03.500-07:00",
-  "gatewayIPv4": "10.11.0.1",
-  "id": "16211908079305042870",
-  "kind": "compute#network",
-  "name": "lcnetwork",
-  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/lcnetwork"
-}

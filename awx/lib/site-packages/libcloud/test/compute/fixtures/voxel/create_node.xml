@@ -1,7 +1,0 @@
-<rsp stat="ok">
-  <device>
-     <id>1234</id>
-     <last_update>1235386846</last_update>
-     <status>QUEUED</status>
-  </device>
-</rsp>

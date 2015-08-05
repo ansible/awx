@@ -1,1 +1,0 @@
-[{"error_point": null, "error_type": "permission", "error_message": "Cannot start guest in state \"started\". Guest should be in state \"stopped\""}]

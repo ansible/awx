@@ -83,3 +83,7 @@ tower-backup-*
 env/*
 nohup.out
 reports
+
+# AWX python libs populated by requirements.txt
+awx/lib/site-packages
+

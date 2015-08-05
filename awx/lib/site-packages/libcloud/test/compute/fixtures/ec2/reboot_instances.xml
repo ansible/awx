@@ -1,4 +1,0 @@
-<RebootInstancesResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-  <requestId>76dabb7a-fb39-4ed1-b5e0-31a4a0fdf5c0</requestId>
-  <return>true</return>
-</RebootInstancesResponse>

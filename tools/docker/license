@@ -1,1 +1,12 @@
-{"instance_count": "10000000", "contact_email": "dave@ansible.com", "company_name": "Demo Company", "contact_name": "Sallly Demopolois", "license_date": "1425393123000", "license_key": "078b8f661cc6c5a5a8438a42d6eafc20cd95e04c0706fdfda08b454293aa4de7"}
+{
+    "subscription_name": "Enterprise Tower up to 100000 Nodes",
+    "features": {},
+    "instance_count": 100000,
+    "trial": false,
+    "contact_email": "gross@weiner.com",
+    "company_name": "Dr. James Grossweiner",
+    "license_type": "enterprise",
+    "contact_name": "Dr. James Grossweiner",
+    "license_date": 2524608000,
+    "license_key": "cf2da1fdbc196c3f9a354d871cdad572dcd2e309a1e49616d8d9c600a9b7fc91"
+}

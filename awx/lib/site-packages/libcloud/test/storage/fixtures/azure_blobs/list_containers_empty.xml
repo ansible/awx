@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<EnumerationResults AccountName="http://account.blob.core.windows.net">
-  <Prefix></Prefix>
-  <Marker></Marker>
-  <MaxResults>100</MaxResults>
-  <Containers />
-  <NextMarker />
-</EnumerationResults>

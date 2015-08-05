@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sharedIpGroups xmlns="http://docs.rackspacecloud.com/servers/api/v1.0">
-    <sharedIpGroup id="1234" name="Shared IP Group 1"/>
-    <sharedIpGroup id="5678" name="Shared IP Group 2"/>
-</sharedIpGroups>

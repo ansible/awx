@@ -1,5 +1,0 @@
-<AssociateAddressResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-    <requestId>s132fsz2-6cdg-4ox3-a148-lpqnvdc98c2a</requestId>
-    <return>true</return>
-    <associationId>eipassoc-167a8073</associationId>
-</AssociateAddressResponse>
