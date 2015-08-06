@@ -25,7 +25,7 @@ django-taggit==0.11.2
 dogpile.cache==0.5.6
 dogpile.core==0.4.1
 enum34==1.0.4
-functools32==3.2.3-2
+#functools32==3.2.3-2
 gevent==1.0.2
 gevent-websocket==0.9.3
 git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=jsonfield-tower_0.9.12
