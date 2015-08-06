@@ -222,6 +222,9 @@ class Inventory(CommonModel):
 
         def update_group_depths(group_pk, current_depth=0):
             max_depth = group_depths.get(group_pk, -1)
+            # Arbitrarily limit depth to avoid hitting Python recursion limit (which defaults to 1000).
+            if current_depth > 100:
+                return
             if current_depth > max_depth:
                 group_depths[group_pk] = current_depth
             for child_pk in group_children_map.get(group_pk, set()):
