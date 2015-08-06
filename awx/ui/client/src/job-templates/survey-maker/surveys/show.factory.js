@@ -70,6 +70,9 @@ export default
                     }
 
                 },
+                _allowInteraction: function(e) {
+                    return !!$(e.target).is('.select2-input') || this._super(e);
+                },
                 callback: callback
             });
         };

@@ -55,6 +55,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 onResizeStop = params.onResizeStop,
                 onClose = params.onClose,
                 onOpen = params.onOpen,
+                _allowInteraction = params._allowInteraction,
                 callback = params.callback,
                 beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
@@ -177,7 +178,8 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                     if (onOpen) {
                         onOpen();
                     }
-                }
+                },
+                _allowInteraction: _allowInteraction
             });
         };
     }])

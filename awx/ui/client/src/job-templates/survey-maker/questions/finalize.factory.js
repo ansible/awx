@@ -18,13 +18,9 @@ export default
                 index = params.index,
                 required,
                 element,
-                choices,
-                i,
-                checked,
                 max,
                 min,
                 defaultValue,
-                answers,
                 html = "";
 
             question.index = index;
@@ -65,18 +61,28 @@ export default
                     '</div></div>';
             }
             if(question.type === 'multiplechoice' || question.type === "multiselect"){
-                choices = question.choices.split(/\n/);
-                element = (question.type==="multiselect") ? "checkbox" : 'radio';
-                question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
-                answers = question.default.split(/\n/);
-                html += '<div class="input_area">';
-                for( i = 0; i<choices.length; i++){
-                    checked = (!Empty(question.default) && $.inArray(choices[i], answers) !== -1) ? "checked" : "";
-                    choices[i] = $filter('sanitize')(choices[i]);
-                    choices[i] = scope.serialize(choices[i]);
-                    html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' disabled>' +
-                        '<span>'+choices[i] +'</span><br>' ;
+
+                question.default = question.default_multiselect || question.default;
+
+                var defaultScopePropertyName =
+                    question.variable + '_default';
+
+                if (question.default) {
+                    if (question.type === 'multiselect' && typeof question.default.split === 'function') {
+                        scope[defaultScopePropertyName] = question.default.split('\n');
+                    } else if (question.type !== 'multiselect') {
+                        scope[defaultScopePropertyName] = question.default;
+                    }
+                } else {
+                    scope[defaultScopePropertyName] = '';
                 }
+
+                html += '<div class="row">';
+                html += '<div class="col-xs-8">';
+                html += '<div class="SurveyControls-selectWrapper">';
+                html += '<survey-question type="' + question.type + '" index="' + question.index + '" survey-questions="survey_questions" ng-required="' + question.required + '" ng-model="' + defaultScopePropertyName + '"></survey-question>';
+                html += '</div>';
+                html += '</div>';
                 html += '</div>';
             }
 

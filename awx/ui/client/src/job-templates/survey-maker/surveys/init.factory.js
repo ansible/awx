@@ -136,13 +136,13 @@ export default
                         if(questions.length>0){
                             $('#survey-save-button').removeAttr('disabled');
                         }
-                        scope.finalizeQuestion(questions[key], key);
+                        scope.finalizeQuestion(questions[key], Number(key));
                     }
                     else if(scope.mode=== 'edit' ){
                         if(scope.survey_questions.length>0 && scope.can_edit === true){
                             $('#survey-save-button').removeAttr('disabled');
                         }
-                        scope.finalizeQuestion(scope.survey_questions[key] , key);
+                        scope.finalizeQuestion(scope.survey_questions[key] , Number(key));
                     }
                 }
             };
@@ -464,7 +464,7 @@ export default
                             scope.survey_questions[key] = data;
                         }
                         $('#'+elementID).empty();
-                        scope.finalizeQuestion(data , key);
+                        scope.finalizeQuestion(data , Number(key));
                     }
 
 
