@@ -327,11 +327,11 @@ minjs: awx/ui/static node_modules clean-ui Brocfile.js
 
 # Performs build to awx/ui/build_test and runs node tests via mocha
 testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
-testjs: awx/ui/build_test node-tests testem.yml
+testjs: awx/ui/build_test node-tests
 
 # Performs minified, compressed build to awx/ui/static and runs browsers tests with testem ci
 testjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
-testjs_ci: awx/ui/static browser-tests testem.yml
+testjs_ci: awx/ui/static testem.yml browser-tests
 
 # Runs node tests via mocha without building
 node-tests:
@@ -350,7 +350,7 @@ ngdocs: devjs Gruntfile.js
 	$(GRUNT) $@
 
 # Launch watcher for build process
-sync_ui: node_modules Brocfile.js
+sync_ui: node_modules Brocfile.js testem.yml
 	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
 
 # Build code complexity report for UI code
