@@ -1,5 +1,5 @@
 amqp==1.4.5
-ansiconv==1.0.0
+git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv-tower_1.0.0
 anyjson==0.3.3
 apache-libcloud==0.15.1
 argparse==1.2.1
