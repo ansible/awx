@@ -1,2 +1,3 @@
 django-devserver
 django-debug-toolbar
+unittest2
