@@ -284,15 +284,32 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         return errors
  
     def _update_unified_job_kwargs(self, **kwargs):
-        # Overwrite job extra_vars with job template extra vars
+        # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
-        # Overwrite with job template survey default vars
+        # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
             for survey_element in self.survey_spec.get("spec", []):
                 if survey_element['default']:
                     extra_vars[survey_element['variable']] = survey_element['default']
 
+        # transform to dict
+        if 'extra_vars' in kwargs:
+            kwargs_extra_vars = kwargs['extra_vars']
+            if not isinstance(kwargs_extra_vars, dict):
+                try:
+                    kwargs_extra_vars = json.loads(kwargs_extra_vars)
+                except Exception:
+                    try:
+                        yaml.safe_load(kwargs_extra_vars)
+                    except:
+                        kwargs_extra_vars = {}
+        else:
+            kwargs_extra_vars = {}
+
+        # Overwrite job template extra vars with explicit job extra vars
+        # and add on job extra vars
+        extra_vars.update(kwargs_extra_vars)
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
 
