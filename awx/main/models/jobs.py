@@ -284,6 +284,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         return errors
  
     def _update_unified_job_kwargs(self, **kwargs):
+        if 'launch_type' in kwargs and kwargs['launch_type'] == 'relaunch':
+            return kwargs
+
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
