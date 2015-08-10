@@ -343,6 +343,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     LAUNCH_TYPE_CHOICES = [
         ('manual', _('Manual')),            # Job was started manually by a user.
+        ('relaunch', _('Relaunch')),        # Job was started via relaunch.
         ('callback', _('Callback')),        # Job was started via host callback.
         ('scheduled', _('Scheduled')),      # Job was started from a schedule.
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
