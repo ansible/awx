@@ -55,7 +55,7 @@ msgpack-python==0.4.6
 netaddr==0.7.14
 netifaces==0.10.4
 ordereddict==1.1
-os-client-config==0.6.0
+os-client-config==1.6.1
 os-diskconfig-python-novaclient-ext==0.1.2
 oslo.config==1.9.3
 oslo.i18n==1.5.0

@@ -1153,7 +1153,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
         elif inventory_update.source == 'openstack':
-            env['OPENSTACK_CONFIG_FILE'] = cloud_credential
+            env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
