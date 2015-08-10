@@ -52,17 +52,16 @@ export default
                     scope.removeBuildAboutDialog = scope.$on('BuildAboutDialog', function(e, data) {
                         var spaces, i, j,
                         paddedStr  = "",
+                        versionParts,
                         str = data.version,
                         subscription = data.license_info.subscription_name || "";
 
-                        if(str.search('-')){
-                            str = str.substr(0,str.search('-'));
-                        }
-                        spaces = Math.floor((16-str.length)/2);
+                        versionParts = str.split('-');
+                        spaces = Math.floor((16-versionParts[0].length)/2);
                         for( i=0; i<=spaces; i++){
                             paddedStr = paddedStr +" ";
                         }
-                        paddedStr = paddedStr+str;
+                        paddedStr = paddedStr + versionParts[0];
                         for( j = paddedStr.length; j<16; j++){
                             paddedStr = paddedStr + " ";
                         }
