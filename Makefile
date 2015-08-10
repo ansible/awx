@@ -125,6 +125,7 @@ clean-packer:
 
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
+	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
