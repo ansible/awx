@@ -437,16 +437,20 @@ class BaseTask(Task):
             if instance.cancel_flag:
                 try:
                     if settings.AWX_PROOT_ENABLED:
+                        # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
                         else:
-                            main_proc = psutil.Process(pid=child.pid)
-                            if hasattr(main_proc, "children"):
-                                child_procs = main_proc.children(recursive=True)
-                            else:
-                                child_procs = main_proc.get_children(recursive=True)
-                            for child_proc in child_procs:
-                                os.kill(child_proc.pid, signal.SIGTERM)
+                            try:
+                                main_proc = psutil.Process(pid=child.pid)
+                                if hasattr(main_proc, "children"):
+                                    child_procs = main_proc.children(recursive=True)
+                                else:
+                                    child_procs = main_proc.get_children(recursive=True)
+                                for child_proc in child_procs:
+                                    os.kill(child_proc.pid, signal.SIGTERM)
+                            except TypeError:
+                                os.kill(child.pid, signal.SIGKILL)
                     else:
                         os.kill(child.pid, signal.SIGTERM)
                     time.sleep(3)
