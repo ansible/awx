@@ -5,6 +5,10 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
+DEPS_SCRIPT ?= deps.py
+DIST ?= el
+DIST_MAJOR ?= 6
+AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -49,6 +53,16 @@ SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
+# Offline TAR build parameters
+DIST_FULL=$(DIST)$(DIST_MAJOR)
+ifeq ($(OFFICIAL), yes)
+    OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)
+else
+    OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(BUILD)
+endif
+OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
+
 # DEB build parameters
 DEBUILD_BIN ?= debuild
 DEBUILD_OPTS = --source-option="-I"
@@ -83,8 +97,10 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
+	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
+	deb deb-src debian reprepro setup_tarball \
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
+	clean-offline setup_offline_tarball
 
 # Remove setup build files
 clean-tar:
@@ -118,8 +134,11 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
+clean-offline:
+	rm -rf offline_tar-build
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-offline
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
@@ -354,6 +373,32 @@ dist/$(SDIST_TAR_FILE):
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: minjs requirements dist/$(SDIST_TAR_FILE)
+
+# Build setup tarball
+tar-build/$(SETUP_TAR_FILE):
+	@mkdir -p tar-build
+	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
+	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
+	@echo "#############################################"
+	@echo "setup artifacts:"
+	@echo tar-build/$(setup_tar_file)
+	@echo tar-build/$(setup_tar_link)
+	@echo "#############################################"
+
+# Build setup offline tarball
+offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
+	mkdir -p offline_tar-build/$(DIST_FULL)
+	cp tar-build/$(SETUP_TAR_FILE) offline_tar-build/$(DIST_FULL)/
+	cd offline_tar-build/$(DIST_FULL) && tar zxf $(SETUP_TAR_FILE) && mv $(SETUP_TAR_NAME) $(OFFLINE_TAR_NAME)
+	cp packaging/offline/$(DEPS_SCRIPT) offline_tar-build/$(DIST_FULL)/
+	# TODO: REMOVE THE BELOW LINE WHEN WE CONSUME REPOS FROM SETUP PLAYBOOK
+	cp -a packaging/offline/repos_el6 offline_tar-build/$(DIST_FULL)/
+	cd offline_tar-build/$(DIST_FULL)/ && $(PYTHON) $(DEPS_SCRIPT) -d el -r 6 -u $(AW_REPO_URL) -s $(OFFLINE_TAR_NAME) -v -v -v
+	cd offline_tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) $(OFFLINE_TAR_NAME)/
+
+setup_offline_tarball: setup_tarball offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
 
 rpm-build:
 	mkdir -p rpm-build
