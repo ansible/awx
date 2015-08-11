@@ -8,7 +8,7 @@ from awx import __version__ as tower_version
 from awx import prepare_env
 prepare_env()
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import get_wsgi_application  # NOQA
 
 """
 WSGI config for AWX project.
