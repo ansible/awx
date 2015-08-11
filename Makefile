@@ -82,7 +82,8 @@ RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
-.PHONY: clean rebase push requirements requirements_dev requirements_jenkins requirements_post \
+.PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
+	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -138,32 +139,24 @@ rebase:
 push:
 	git push origin master
 
-requirements_post:
-	touch awx/lib/site-packages/oslo/__init__.py
-	touch awx/lib/site-packages/dogpile/__init__.py
+# Install runtime, development and jenkins requirements
+requirements requirements_dev requirements_jenkins: %: real-% awx/lib/site-packages/oslo/__init__.py awx/lib/site-packages/dogpile/__init__.py
+
+# Create missing __init__.py files
+awx/lib/site-packages/%/__init__.py:
+	touch $@
 
 # Install third-party requirements needed for development environment.
-requirements:
-	(pip install -r requirements/requirements.txt -t awx/lib/site-packages/);
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-		$(PYTHON) fix_virtualenv_setuptools.py; \
-	fi
-	$(MAKE) requirements_post
+real-requirements:
+	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --ignore-installed
 
-requirements_dev:
-	(cat requirements/requirements.txt requirements/requirements_dev.txt > /tmp/req_dev.txt);
-	(pip install -r /tmp/req_dev.txt -t awx/lib/site-packages/);
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-		$(PYTHON) fix_virtualenv_setuptools.py; \
-	fi
-	$(MAKE) requirements_post
+real-requirements_dev: real-requirements
+	# (cat requirements/requirements.txt requirements/requirements_dev.txt > /tmp/req_dev.txt);
+	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --ignore-installed
 
 # Install third-party requirements needed for running unittests in jenkins
-requirements_jenkins: requirements
-	(pip install -r requirements/requirements_jenkins.txt);
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-		$(PYTHON) fix_virtualenv_setuptools.py; \
-	fi
+real-requirements_jenkins: real-requirements
+	pip install -r requirements/requirements_jenkins.txt
 	npm install csslint jshint
 
 # "Install" ansible-tower package in development mode.
@@ -315,7 +308,7 @@ testem.yml: packaging/node/testem.yml
 node_modules: package.json
 	npm install
 	touch $@
-	
+
 awx/ui/%: node_modules clean-ui Brocfile.js bower.json
 	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
