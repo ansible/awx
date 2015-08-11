@@ -54,6 +54,12 @@ __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
 
 HIDDEN_PASSWORD = '**********'
 
+OPENSSH_KEY_ERROR = u'''\
+It looks like you're trying to use a private key in OpenSSH format, which \
+isn't supported by the installed version of OpenSSH on this Tower instance. \
+Try upgrading OpenSSH or providing your private key in an different format. \
+'''
+
 logger = logging.getLogger('awx.main.tasks')
 
 @task()
@@ -287,6 +293,12 @@ class BaseTask(Task):
         if private_data is not None:
             ssh_ver = get_ssh_version()
             ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
+            openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
+            for name, data in private_data.iteritems():
+                # Bail out now if a private key was provided in OpenSSH format
+                # and we're running an earlier version (<6.5).
+                if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
+                    raise RuntimeError(OPENSSH_KEY_ERROR)
             for name, data in private_data.iteritems():
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
