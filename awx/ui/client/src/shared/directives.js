@@ -275,7 +275,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     if (/^\-?\d*$/.test(viewValue)) {
                        // it is valid
                         ctrl.$setValidity('integer', true);
-                        if ( viewValue === '-' || viewValue === '' || viewValue === null) {
+                        if ( viewValue === '-' || viewValue === '-0' || viewValue === '' || viewValue === null) {
                             ctrl.$setValidity('integer', false);
                             return viewValue;
                         }
