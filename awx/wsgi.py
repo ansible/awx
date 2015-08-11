@@ -2,9 +2,13 @@
 # All Rights Reserved.
 
 import logging
-from django.core.wsgi import get_wsgi_application
-from awx import prepare_env
 from awx import __version__ as tower_version
+
+# Prepare the AWX environment.
+from awx import prepare_env
+prepare_env()
+
+from django.core.wsgi import get_wsgi_application
 
 """
 WSGI config for AWX project.
@@ -14,9 +18,6 @@ It exposes the WSGI callable as a module-level variable named ``application``.
 For more information on this file, see
 https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/
 """
-
-# Prepare the AWX environment.
-prepare_env()
 
 logger = logging.getLogger('awx.main.models.jobs')
 try:
