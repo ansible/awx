@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from distutils.version import LooseVersion as Version
 import glob
 import json
 import os
@@ -1089,6 +1090,24 @@ class RunJobTest(BaseJobExecutionTest):
         self.check_job_result(job, 'successful')
         self.assertFalse('"--private-key=' in job.job_args)
         self.assertTrue('ssh-agent' in job.job_args)
+
+    def test_openssh_key_format(self):
+        ssh_ver = get_ssh_version()
+        openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
+        self.create_test_credential(ssh_key_data=TEST_OPENSSH_KEY_DATA)
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        if openssh_keys_supported:
+            self.check_job_result(job, 'successful')
+            self.assertFalse('"--private-key=' in job.job_args)
+            self.assertTrue('ssh-agent' in job.job_args)
+        else:
+            self.check_job_result(job, 'error', expect_traceback=True)
 
     def test_locked_ssh_key_with_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
