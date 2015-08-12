@@ -9,12 +9,13 @@
  * })
  *
  */
+
 export default
-    function FinalizeQuestion(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty, $filter) {
+    function FinalizeQuestion(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty, $filter, questionScope) {
         return function(params) {
 
-            var scope = params.scope,
-                question = params.question,
+            var question = params.question,
+                scope = questionScope(question, params.scope),
                 index = params.index,
                 required,
                 element,
@@ -80,7 +81,7 @@ export default
                 html += '<div class="row">';
                 html += '<div class="col-xs-8">';
                 html += '<div class="SurveyControls-selectWrapper">';
-                html += '<survey-question type="' + question.type + '" index="' + question.index + '" survey-questions="survey_questions" ng-required="' + question.required + '" ng-model="' + defaultScopePropertyName + '"></survey-question>';
+                html += '<survey-question type="' + question.type + '" question="question" ng-required="' + question.required + '" ng-model="' + defaultScopePropertyName + '"></survey-question>';
                 html += '</div>';
                 html += '</div>';
                 html += '</div>';
@@ -132,8 +133,8 @@ export default
             element = angular.element(document.getElementById('question_'+question.index));
             // // element.html(html);
             //element.css('opacity', 0.7);
+
             $compile(element)(scope);
-            // var questionScope = scope.$new;
 
             $('#add_question_btn').show();
             $('#add_question_btn').removeAttr('disabled');
@@ -187,5 +188,6 @@ FinalizeQuestion.$inject =
         'ProcessErrors',
         '$compile',
         'Empty',
-        '$filter'
+        '$filter',
+        'questionScope'
     ];

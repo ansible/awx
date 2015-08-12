@@ -24,12 +24,13 @@ function findQuestionByIndex(questions, index) {
 }
 
 function link(scope, element, attrs) {
-    var question = findQuestionByIndex(scope.surveyQuestions, Number(attrs.index));
 
-    scope.question = question;
+    if (!scope.question) {
+        scope.question = findQuestionByIndex(scope.surveyQuestions, Number(attrs.index));
+    }
 
-    if (!_.isUndefined(question.choices)) {
-        scope.choices = question.choices.split('\n');
+    if (!_.isUndefined(scope.question.choices)) {
+        scope.choices = scope.question.choices.split('\n');
     }
 }
 
@@ -38,8 +39,9 @@ export default
         var directive =
             {   restrict: 'E',
                 scope:
-                    {   surveyQuestions: '=',
+                    {   question: '=',
                         selectedValue: '=ngModel',
+                        surveyQuestions: '=',
                         isRequired: '@ngRequired'
                     },
                 templateUrl: templateUrl('job-templates/survey-maker/render/survey-question'),
