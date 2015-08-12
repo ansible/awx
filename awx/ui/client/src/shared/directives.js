@@ -491,7 +491,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     title: attrs.awToolTip,
                     container: 'body',
                     trigger: 'hover focus',
-                    template: '<div class="Tooltip tooltip" role="tooltip"><div class="Tooltip-arrow tooltip-arrow"></div><div class="Tooltip-inner tooltip-inner"></div></div>'
+                    template: '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>'
                 });
 
                 if (attrs.tipWatch) {
