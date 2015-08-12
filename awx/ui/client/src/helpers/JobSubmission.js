@@ -154,9 +154,31 @@ function(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath) {
           if(scope.survey_questions[i].required || (scope.survey_questions[i].required === false && scope[fld].toString()!=="")) {
             job_launch_data.extra_vars[fld] = scope[fld];
           }
-          // for optional text and text-areas, submit a blank string if min length is 0
-          if(scope.survey_questions[i].required === false && (scope.survey_questions[i].type === "text" || scope.survey_questions[i].type === "textarea") && scope.survey_questions[i].min === 0 && (scope[fld] === "" || scope[fld] === undefined)){
-            job_launch_data.extra_vars[fld] = "";
+
+
+          if(scope.survey_questions[i].required === false && _.isEmpty(scope[fld])) {
+              switch (scope.survey_questions[i].type) {
+                  // for optional text and text-areas, submit a blank string if min length is 0
+                  // -- this is confusing, for an explanation see:
+                  //    http://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html#optional-survey-questions
+                  //
+                  case "text":
+                  case "textarea":
+                      if (scope.survey_questions[i].min === 0) {
+                          job_launch_data.extra_vars[fld] = "";
+                      }
+                      break;
+
+                  // for optional select lists, if they are left blank make sure we submit
+                  // a value that the API will consider "empty"
+                  //
+                  case "multiplechoice":
+                      job_launch_data.extra_vars[fld] = "";
+                      break;
+                  case "multiselect":
+                      job_launch_data.extra_vars[fld] = [];
+                      break;
+              }
           }
         }
       }
