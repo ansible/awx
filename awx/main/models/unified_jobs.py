@@ -622,7 +622,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ansi_escape = re.compile(r'\x1b[^m]*m')
         return ansi_escape.sub('', content)
 
-    def _result_stdout_raw(self, redact_sensitive=True, escape_ascii=False):
+    def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
         content = self.result_stdout_raw_handle().read()
         if redact_sensitive:
             content = UriCleaner.remove_sensitive(content)
