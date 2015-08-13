@@ -30,7 +30,7 @@ export default
                 item: '=item'
             },
             require: '^multiSelectList',
-            template: '<input type="checkbox" ng-model="isSelected">',
+            template: '<input type="checkbox" data-multi-select-list-item ng-model="isSelected">',
             link: function(scope, element, attrs, multiSelectList) {
 
                 scope.isSelected = false;
