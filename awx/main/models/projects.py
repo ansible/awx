@@ -353,6 +353,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     def task_impact(self):
         return 20
 
+    @property
+    def result_stdout(self):
+        return self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
+
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
 
