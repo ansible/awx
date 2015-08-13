@@ -32,7 +32,6 @@ import Projects from "./helpers/Projects";
 import Schedules from "./helpers/Schedules";
 import Selection from "./helpers/Selection";
 import SocketHelper from "./helpers/SocketHelper";
-import Survey from "./helpers/Survey";
 import Users from "./helpers/Users";
 import Variables from "./helpers/Variables";
 import ApiDefaults from "./helpers/api-defaults";
@@ -71,7 +70,6 @@ export
         Schedules,
         Selection,
         SocketHelper,
-        Survey,
         Users,
         Variables,
         ApiDefaults,

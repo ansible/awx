@@ -177,14 +177,12 @@ var tower = angular.module('Tower', [
     'LogViewerOptionsDefinition',
     'EventViewerHelper',
     'HostEventsViewerHelper',
-    'SurveyHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'SocketHelper',
     'AboutAnsibleHelpModal',
-    'SurveyQuestionFormDefinition',
     'PortalJobsListDefinition',
 
 

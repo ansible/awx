@@ -154,9 +154,31 @@ function(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath) {
           if(scope.survey_questions[i].required || (scope.survey_questions[i].required === false && scope[fld].toString()!=="")) {
             job_launch_data.extra_vars[fld] = scope[fld];
           }
-          // for optional text and text-areas, submit a blank string if min length is 0
-          if(scope.survey_questions[i].required === false && (scope.survey_questions[i].type === "text" || scope.survey_questions[i].type === "textarea") && scope.survey_questions[i].min === 0 && (scope[fld] === "" || scope[fld] === undefined)){
-            job_launch_data.extra_vars[fld] = "";
+
+
+          if(scope.survey_questions[i].required === false && _.isEmpty(scope[fld])) {
+              switch (scope.survey_questions[i].type) {
+                  // for optional text and text-areas, submit a blank string if min length is 0
+                  // -- this is confusing, for an explanation see:
+                  //    http://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html#optional-survey-questions
+                  //
+                  case "text":
+                  case "textarea":
+                      if (scope.survey_questions[i].min === 0) {
+                          job_launch_data.extra_vars[fld] = "";
+                      }
+                      break;
+
+                  // for optional select lists, if they are left blank make sure we submit
+                  // a value that the API will consider "empty"
+                  //
+                  case "multiplechoice":
+                      job_launch_data.extra_vars[fld] = "";
+                      break;
+                  case "multiselect":
+                      job_launch_data.extra_vars[fld] = [];
+                      break;
+              }
           }
         }
       }
@@ -497,24 +519,24 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
       };
     }])
 
-    .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
-    'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
-    function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
-      GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
+    .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'GetBasePath', 'Rest' , 'Empty',
+    'GenerateForm', 'ProcessErrors', '$routeParams' ,
+    function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, GetBasePath, Rest, Empty,
+      GenerateForm, ProcessErrors, $routeParams) {
         return function(params) {
           var html = params.html || "",
           id= params.id,
           url = params.url,
           callback=params.callback,
           scope = params.scope,
-          i, j,
+          i,
           requiredAsterisk,
           requiredClasses,
           defaultValue,
           choices,
           element,
           minlength, maxlength,
-          checked, min, max,
+          min, max,
           survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
 
           //for toggling the input on password inputs
@@ -605,41 +627,35 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             if(question.type === 'multiplechoice'){
               choices = question.choices.split(/\n/);
               element = (question.type==="multiselect") ? "checkbox" : 'radio';
-              question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
-              html+='<div class="survey_taker_input" > ';
-              for( j = 0; j<choices.length; j++){
-                checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                choices[j]  = $filter('sanitize')(choices[j]);
-                html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="'+question.required+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
-                '<span>'+choices[j] +'</span><br>' ;
+
+              if (question.default) {
+                  scope[question.variable] = question.default;
+              } else {
+                  scope[question.variable] = '';
               }
-              html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
-              'job_launch_form.'+question.variable+'.$error.required\">Please select an answer.</div>'+
-              '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
+
+              html+='<div class="survey_taker_input" > ';
+              html += '<survey-question type="' + question.type + '" index="' + question.index + '" survey-questions="survey_questions" ng-model="' + question.variable + '" ng-required="' + question.required + '"></survey-question>';
+              // html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+              // 'job_launch_form.'+question.variable+'.$error.required\">Please select an answer.</div>'+
+              // '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
               html+= '</div>'; //end survey_taker_input
             }
 
             if(question.type === "multiselect"){
               //seperate the choices out into an array
               choices = question.choices.split(/\n/);
-              question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
               //ensure that the default answers are in an array
-              scope[question.variable] = question.default.split(/\n/);
-              //create a new object to be used by the surveyCheckboxes directive
-              scope[question.variable + '_object'] = {
-                name: question.variable,
-                value: (question.default.split(/\n/)[0]==="") ? [] : question.default.split(/\n/) ,
-                required: question.required,
-                options:[]
-              };
-              //load the options into the 'options' key of the new object
-              for(j=0; j<choices.length; j++){
-                scope[question.variable+'_object'].options.push( {value:choices[j]} );
+              if (question.default) {
+                  scope[question.variable] = question.default.split(/\n/);
+              } else {
+                  scope[question.variable] = '';
               }
-              //surveyCheckboxes takes a list of checkboxes and connects them to one scope variable
-              html += '<survey-checkboxes name="'+question.variable+'" ng-model=" '+question.variable + '_object " ng-required="'+question.required+'">'+
-              '</survey-checkboxes>{{job_launch_form.'+question.variable+'_object.$error.checkbox}}'+
-              '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.checkbox">Please select at least one answer.</div>';
+              //create a new object to be used by the surveyCheckboxes directive
+              html += '<survey-question type="' + question.type + '" index="' + question.index + '" survey-questions="survey_questions" ng-model="' + question.variable + '" ng-required="' + question.required + '"></survey-question>';
+              // html += '<survey-checkboxes name="'+question.variable+'" ng-model=" '+question.variable + '_object " ng-required="'+question.required+'">'+
+              // '</survey-checkboxes>{{job_launch_form.'+question.variable+'_object.$error.checkbox}}'+
+              // '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.checkbox">Please select at least one answer.</div>';
             }
 
             if(question.type === 'integer'){

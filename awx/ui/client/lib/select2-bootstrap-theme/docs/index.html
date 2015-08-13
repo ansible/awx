@@ -1,0 +1,54 @@
+---
+layout: minimal
+version: 4.0.0-rc.2
+---
+<div class="jumbotron">
+	<div class="container">
+		<div class="select2-wrapper">
+			<select class="form-control input-lg select2" dir="rtl">
+				<option></option>
+				{% include select2-select.html %}
+			</select>
+		</div>
+		<div class="select2-wrapper">
+			<select class="form-control select2" multiple="multiple">
+				<option></option>
+				{% include select2-select.html %}
+			</select>
+		</div>
+		<div class="select2-wrapper">
+			<div class="form-group">
+				<div class="input-group input-group-sm select2-bootstrap-prepend">
+					<span class="input-group-addon">
+						<input type="checkbox">
+					</span>
+					<select id="select2-single-input-group-sm" class="form-control select2" disabled>
+						<option></option>
+						{% include select2-select.html %}
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<h1 class="jumbotron-title">Select2 Bootstrap Theme</h1>
+
+		<p class="lead">A <a href="https://select2.github.io/examples.html#themes">Select2 v4 theme</a> built with <a href="http://getbootstrap.com/">Bootstrap 3</a> variables and mixins.</p>
+
+		<a href="4.0.0.html" class="btn btn-outline btn-lg">Demonstrations</a>
+	</div>
+</div>
+
+{% include footer.html %}
+
+{% include scripts.html %}
+<script>
+	$( ".select2" ).select2( {
+		theme: "bootstrap",
+		placeholder: "Select a State",
+		maximumSelectionSize: 6
+	} );
+
+	$( ":checkbox" ).on( "click", function() {
+		$( this ).parent().nextAll( "select" ).prop( "disabled", !this.checked );
+	});
+</script>

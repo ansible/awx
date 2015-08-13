@@ -27,7 +27,6 @@ import Permissions from "./forms/Permissions";
 import ProjectStatus from "./forms/ProjectStatus";
 import Projects from "./forms/Projects";
 import Source from "./forms/Source";
-import SurveyQuestion from "./forms/SurveyQuestion";
 import Teams from "./forms/Teams";
 import Users from "./forms/Users";
 
@@ -56,7 +55,6 @@ export
         ProjectStatus,
         Projects,
         Source,
-        SurveyQuestion,
         Teams,
         Users
     };

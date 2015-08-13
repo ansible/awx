@@ -654,7 +654,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'SurveyControllerInit', 'Prompt', 'GetChoices'
+    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices'
 ];
 
 
@@ -1231,5 +1231,5 @@ JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$loc
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , 'SurveyControllerInit'
+    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , 'initSurvey'
 ];
