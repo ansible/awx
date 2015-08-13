@@ -413,7 +413,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                             var results = data.data.results;
                             if (results.length > 0) {
                                 scope[elm.attr('data-source')] = results[0].id;
-                                scope[elm.attr('name')] = results[0].name;
+
+                                // For user lookups the API endpoint doesn't
+                                // have a `name` property, so this is `undefined`
+                                // which causes the input to clear after typing
+                                // a valid value O_o
+                                //
+                                // Only assign if there is a value, so that we avoid
+                                // this situation.
+                                //
+                                // TODO: Evaluate if assigning name on the scope is
+                                // even necessary at all.
+                                //
+                                if (!_.isEmpty(results[0].name)) {
+                                    scope[elm.attr('name')] = results[0].name;
+                                }
+
                                 ctrl.$setValidity('required', true);
                                 ctrl.$setValidity('awlookup', true);
                                 return viewValue;
