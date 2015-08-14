@@ -658,7 +658,12 @@ export default
             var task = params.task,
                 diff;
 
-            task.missingCount = task.hostCount - (task.failedCount + task.changedCount + task.skippedCount + task.successfulCount + task.unreachableCount);
+            task.missingCount = task.hostCount - (task.failedCount + task.changedCount + task.skippedCount + task.successfulCount +
+                task.unreachableCount);
+            if(task.missingCount<0){
+                task.hostCount = (task.failedCount + task.changedCount + task.skippedCount + task.successfulCount +
+                    task.unreachableCount);
+            }
             task.missingPct = (task.hostCount > 0) ? Math.ceil((100 * (task.missingCount / task.hostCount))) : 0;
             task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
             task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
