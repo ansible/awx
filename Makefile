@@ -57,11 +57,11 @@ endif
 ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
-    PACKER_BUILD_OPTS=-var-file=vars-release.json
+    PACKER_BUILD_OPTS ?= -var-file=vars-release.json
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
-    PACKER_BUILD_OPTS=-var-file=vars-nightly.json
+    PACKER_BUILD_OPTS ?= -var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
@@ -189,8 +189,10 @@ clean-packer:
 	rm -rf packer_cache
 	rm -rf packaging/packer/packer_cache
 	rm -rf packaging/packer/output-virtualbox-iso/
+	rm -rf packaging/packer/output-vmware-iso
 	rm -f packaging/packer/ansible-tower-*.box
 	rm -rf packaging/packer/ansible-tower*-ova
+	rm -rf packaging/packer/ansible-tower*-vmx
 	rm -f Vagrantfile
 
 clean-bundle:
@@ -656,6 +658,7 @@ reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
 amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
+# virtualbox
 virtualbox-ovf: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box
 
 packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
@@ -664,12 +667,22 @@ packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/outpu
 packaging/packer/output-virtualbox-iso/centos-6.ovf:
 	cd packaging/packer && $(PACKER) build packer-centos-6.json
 
-virtualbox-centos-6: packaging/packer/output-virtualbox-iso/centos-6.ovf
-
 packaging/packer/output-virtualbox-iso/centos-7.ovf:
-	cd packaging/packer && $(PACKER) build packer-centos-7.json
+	cd packaging/packer && $(PACKER) build -only virtualbox-iso packer-centos-7.json
 
-virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
+# virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-6.ovf
+virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-7.ovf
+
+# vmware
+packaging/packer/output-vmware-iso/centos-7.vmx:
+	cd packaging/packer && $(PACKER) build -only vmware-iso packer-centos-7.json
+
+vmware-iso: packaging/packer/output-vmware-iso/centos-7.vmx
+
+vmware-vmx: packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx
+
+packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx: packaging/packer/output-vmware-iso/centos-7.vmx
+	cd packaging/packer && $(PACKER) build -only vmware-vmx $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
 # TODO - figure out how to build the front-end and python requirements with
 # 'build'
