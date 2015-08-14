@@ -497,18 +497,18 @@ export default
                 scope.host_summary.failed;
             */
 
-            if (scope.jobData.hostSummaries[name] !== undefined) {
-                scope.jobData.hostSummaries[name].ok += (status === 'successful') ? 1 : 0;
-                scope.jobData.hostSummaries[name].changed += (status === 'changed') ? 1 : 0;
-                scope.jobData.hostSummaries[name].unreachable += (status === 'unreachable') ? 1 : 0;
-                scope.jobData.hostSummaries[name].failed += (status === 'failed') ? 1 : 0;
+            if (scope.jobData.hostSummaries[host_id] !== undefined) {
+                scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
+                scope.jobData.hostSummaries[host_id].changed += (status === 'changed') ? 1 : 0;
+                scope.jobData.hostSummaries[host_id].unreachable += (status === 'unreachable') ? 1 : 0;
+                scope.jobData.hostSummaries[host_id].failed += (status === 'failed') ? 1 : 0;
                 if (status === 'failed' || status === 'unreachable') {
                     scope.jobData.hostSummaries[name].status = 'failed';
                 }
             }
             else {
-                scope.jobData.hostSummaries[name] = {
-                    id: name,
+                scope.jobData.hostSummaries[host_id] = {
+                    id: host_id,
                     name: name,
                     ok: (status === 'successful') ? 1 : 0,
                     changed: (status === 'changed') ? 1 : 0,
