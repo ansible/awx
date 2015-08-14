@@ -14,6 +14,10 @@
         - sa-east-1
 
   tasks:
+    - fail:
+        msg: 'No source AMI id defined, please provide a value for variable src_ami_id.'
+      when: src_ami_id is undefined
+
     - name: Gather AMI information
       ec2_ami_find:
         ami_id: '{{ src_ami_id }}'
