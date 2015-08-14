@@ -26,7 +26,6 @@ import LogViewer from "./helpers/LogViewer";
 import Lookup from "./helpers/Lookup";
 import PaginationHelpers from "./helpers/PaginationHelpers";
 import Parse from "./helpers/Parse";
-import Permissions from "./helpers/Permissions";
 import ProjectPath from "./helpers/ProjectPath";
 import Projects from "./helpers/Projects";
 import Schedules from "./helpers/Schedules";
@@ -64,7 +63,6 @@ export
         Lookup,
         PaginationHelpers,
         Parse,
-        Permissions,
         ProjectPath,
         Projects,
         Schedules,

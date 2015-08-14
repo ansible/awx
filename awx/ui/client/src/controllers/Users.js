@@ -208,7 +208,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
-    Prompt, CheckAccess, ResetForm, Wait, Stream) {
+    Prompt, CheckAccess, ResetForm, Wait, Stream, permissionsLabel) {
 
     ClearScope();
 
@@ -220,10 +220,22 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         id = $routeParams.user_id,
         relatedSets = {};
 
+    $scope.permission_label = {};
+
+    permissionsLabel({
+        scope: $scope,
+        url: 'api/v1/' + base + '/' + id + '/permissions/'
+    }).then(function(choices) {
+        _.map(choices, function(n, key) {
+            $scope.permission_label[key] = n;
+        });
+    });
+
     if ($scope.removeFormReady) {
         $scope.removeFormReady();
     }
     $scope.removeFormReady = $scope.$on('formReady', function () {
+
         generator.inject(form, { mode: 'edit', related: true, scope: $scope });
         generator.reset();
 
@@ -293,12 +305,12 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     $routeParams.id + '. GET status: ' + status });
             });
 
-        // if the permission includes adhoc (and is not admin), display that
         $scope.getPermissionText = function () {
             if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
-                return this.permission.permission_type + " + run commands";
+                return $scope.permission_label[this.permission.permission_type] +
+                " and " + $scope.permission_label.adhoc;
             } else {
-                return this.permission.permission_type;
+                return $scope.permission_label[this.permission.permission_type];
             }
         };
 
@@ -489,5 +501,5 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream'
+    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'permissionsLabel'
 ];

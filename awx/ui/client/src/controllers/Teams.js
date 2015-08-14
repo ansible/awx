@@ -176,7 +176,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
-    OrganizationList, Wait, Stream) {
+    OrganizationList, Wait, Stream, permissionsLabel) {
 
     ClearScope();
 
@@ -187,6 +187,17 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         master = {},
         id = $routeParams.team_id,
         relatedSets = {};
+
+        $scope.permission_label = {};
+
+    permissionsLabel({
+        scope: $scope,
+        url: 'api/v1/' + base + '/' + id + '/permissions/'
+    }).then(function(choices) {
+        _.map(choices, function(n, key) {
+            $scope.permission_label[key] = n;
+        });
+    });
 
     $scope.team_id = id;
 
@@ -276,6 +287,15 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
             ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
                 '. GET status: ' + status });
         });
+
+    $scope.getPermissionText = function () {
+        if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
+            return $scope.permission_label[this.permission.permission_type] +
+            " and " + $scope.permission_label.adhoc;
+        } else {
+            return $scope.permission_label[this.permission.permission_type];
+        }
+    };
 
     $scope.showActivity = function () {
         Stream({ scope: $scope });
@@ -392,5 +412,5 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream'
+    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'permissionsLabel'
 ];

@@ -3,11 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
- 
 
-export default
-    angular.module('PermissionListDefinition', [])
-    .value('PermissionList', {
+
+ export default function() {
+     return {
 
         name: 'permissions',
         iterator: 'permission',
@@ -77,4 +76,5 @@ export default
                 dataPlacement: 'top'
             }
         }
-    });
+    };
+}
