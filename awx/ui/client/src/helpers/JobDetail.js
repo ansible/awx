@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:JobDetail
@@ -503,7 +503,7 @@ export default
                 scope.jobData.hostSummaries[host_id].unreachable += (status === 'unreachable') ? 1 : 0;
                 scope.jobData.hostSummaries[host_id].failed += (status === 'failed') ? 1 : 0;
                 if (status === 'failed' || status === 'unreachable') {
-                    scope.jobData.hostSummaries[name].status = 'failed';
+                    scope.jobData.hostSummaries[host_id].status = 'failed';
                 }
             }
             else {
