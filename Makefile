@@ -150,7 +150,7 @@ awx/lib/site-packages/%/__init__.py:
 real-requirements:
 	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --ignore-installed
 
-real-requirements_dev: real-requirements
+real-requirements_dev:
 	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --ignore-installed
 
 # Install third-party requirements needed for running unittests in jenkins

@@ -1,3 +1,4 @@
+-r requirements.txt
 django-devserver
 django-debug-toolbar
 unittest2
