@@ -298,7 +298,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                         else {
                             name = "<deleted host>";
                         }
-                        scope.jobData.hostSummaries[name] = {
+                        scope.jobData.hostSummaries[event.host] = {
                             id: event.host,
                             name: name,
                             ok: event.ok,
