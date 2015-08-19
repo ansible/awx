@@ -290,7 +290,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                             form: form,
                             hdr: "Select Custom Inventory",
                             list: inventoryScriptsListObject,
-                            field: 'source_script',
+                            field: 'inventory_script',
                             input_type: 'radio'
                         });
                         scope.extra_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
