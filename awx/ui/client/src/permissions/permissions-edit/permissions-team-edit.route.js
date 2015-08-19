@@ -8,7 +8,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'teamPermissionsEdit',
-    route: '/teams/:team_id/permissions/edit',
+    route: '/teams/:team_id/permissions/:permission_id',
     templateUrl: templateUrl('permissions/team-permissions'),
     controller: 'editController',
     resolve: {
