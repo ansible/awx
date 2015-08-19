@@ -21,7 +21,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTransactionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK, TEST_OPENSSH_KEY_DATA, TEST_OPENSSH_KEY_DATA_LOCKED
 from awx.main.utils import decrypt_field, update_scm_url
 
 TEST_PLAYBOOK = '''- hosts: mygroup
@@ -576,6 +576,20 @@ class ProjectsTest(BaseTransactionTest):
             data['ssh_key_data'] = TEST_SSH_KEY_DATA.replace('--B', '---B')
             self.post(url, data, expect=400)
             data['ssh_key_data'] = TEST_SSH_KEY_DATA
+            self.post(url, data, expect=201)
+
+        # Test with OpenSSH format private key.
+        with self.current_user(self.super_django_user):
+            data = dict(name='openssh-unlocked', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_data=TEST_OPENSSH_KEY_DATA)
+            self.post(url, data, expect=201)
+
+        # Test with OpenSSH format private key that requires passphrase.
+        with self.current_user(self.super_django_user):
+            data = dict(name='openssh-locked', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_data=TEST_OPENSSH_KEY_DATA_LOCKED)
+            self.post(url, data, expect=400)
+            data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
             self.post(url, data, expect=201)
 
         # Test post as organization admin where team is part of org, but user

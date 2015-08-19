@@ -99,6 +99,19 @@ lb[01:09:2].example.us even_odd=odd
 media[0:9][0:9].example.cc
 '''
 
+TEST_INVENTORY_INI_WITH_RECURSIVE_GROUPS = '''\
+[family:children]
+parent
+
+[parent:children]
+child
+
+[child:children]
+grandchild
+
+[grandchild:children]
+parent
+'''
 
 class BaseCommandMixin(object):
     '''
@@ -973,6 +986,16 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                                   inventory_id=new_inv.pk,
                                                   source=self.ini_path)
         self.assertTrue(isinstance(result, ValueError), result)
+
+    def test_ini_file_with_recursive_groups(self):
+        self.create_test_ini(ini_content=TEST_INVENTORY_INI_WITH_RECURSIVE_GROUPS)
+        new_inv = self.organizations[0].inventories.create(name='new')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertEqual(result, None, stdout + stderr)
 
     def test_executable_file(self):
         # Use existing inventory as source.

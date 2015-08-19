@@ -23,6 +23,10 @@ import uuid
 from distutils.version import LooseVersion as Version
 import dateutil.parser
 import yaml
+try:
+    import psutil
+except:
+    psutil = None
 
 # Pexpect
 import pexpect
@@ -49,6 +53,12 @@ __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
+
+OPENSSH_KEY_ERROR = u'''\
+It looks like you're trying to use a private key in OpenSSH format, which \
+isn't supported by the installed version of OpenSSH on this Tower instance. \
+Try upgrading OpenSSH or providing your private key in an different format. \
+'''
 
 logger = logging.getLogger('awx.main.tasks')
 
@@ -283,6 +293,12 @@ class BaseTask(Task):
         if private_data is not None:
             ssh_ver = get_ssh_version()
             ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
+            openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
+            for name, data in private_data.iteritems():
+                # Bail out now if a private key was provided in OpenSSH format
+                # and we're running an earlier version (<6.5).
+                if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
+                    raise RuntimeError(OPENSSH_KEY_ERROR)
             for name, data in private_data.iteritems():
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
@@ -432,7 +448,23 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    os.kill(child.pid, signal.SIGINT)
+                    if settings.AWX_PROOT_ENABLED:
+                        # NOTE: Refactor this once we get a newer psutil across the board
+                        if not psutil:
+                            os.kill(child.pid, signal.SIGKILL)
+                        else:
+                            try:
+                                main_proc = psutil.Process(pid=child.pid)
+                                if hasattr(main_proc, "children"):
+                                    child_procs = main_proc.children(recursive=True)
+                                else:
+                                    child_procs = main_proc.get_children(recursive=True)
+                                for child_proc in child_procs:
+                                    os.kill(child_proc.pid, signal.SIGTERM)
+                            except TypeError:
+                                os.kill(child.pid, signal.SIGKILL)
+                    else:
+                        os.kill(child.pid, signal.SIGTERM)
                     time.sleep(3)
                     canceled = True
                 except OSError:
@@ -493,7 +525,7 @@ class BaseTask(Task):
             safe_env = self.build_safe_env(instance, **kwargs)
             if not os.path.exists(settings.JOBOUTPUT_ROOT):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
-            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
+            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
             stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():

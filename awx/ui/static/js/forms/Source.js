@@ -150,7 +150,7 @@ export default
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',
                     awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
-                        "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/ec2.ini\" target=\"_blank\">" +
+                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/ec2.ini\" target=\"_blank\">" +
                         "view ec2.ini in the Ansible github repo.</a></p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
@@ -175,7 +175,7 @@ export default
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',
                     awPopOver: "<p>Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables " +
-                        "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/vmware.ini\" target=\"_blank\">" +
+                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/vmware.ini\" target=\"_blank\">" +
                         "view vmware.ini in the Ansible github repo.</a></p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +

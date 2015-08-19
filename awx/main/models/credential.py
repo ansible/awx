@@ -158,7 +158,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             ssh_key_data = decrypt_field(self, 'ssh_key_data')
         else:
             ssh_key_data = self.ssh_key_data
-        return 'ENCRYPTED' in ssh_key_data
+        try:
+            key_data = self._validate_ssh_private_key(ssh_key_data)
+        except ValidationError:
+            return False
+        else:
+            return bool(key_data['key_enc'])
 
     @property
     def needs_ssh_key_unlock(self):
@@ -231,27 +236,52 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         """Validate that the given SSH private key or certificate is,
         in fact, valid.
         """
-        cert = ''
+        # Map the X in BEGIN X PRIVATE KEY to the key type (ssh-keygen -t).
+        # Tower jobs using OPENSSH format private keys may still fail if the
+        # system SSH implementation lacks support for this format.
+        key_types = {
+            'RSA': 'rsa',
+            'DSA': 'dsa',
+            'EC': 'ecdsa',
+            'OPENSSH': 'ed25519',
+            '': 'rsa1',
+        }
+        # Key properties to return if valid.
+        key_data = {
+            'key_type': None,   # Key type (from above mapping).
+            'key_seg': '',      # Key segment (all text including begin/end).
+            'key_b64': '',      # Key data as base64.
+            'key_bin': '',      # Key data as binary.
+            'key_enc': None,    # Boolean, whether key is encrypted.
+            'cert_seg': '',     # Cert segment (all text including begin/end).
+            'cert_b64': '',     # Cert data as base64.
+            'cert_bin': '',     # Cert data as binary.
+        }
         data = data.strip()
         validation_error = ValidationError('Invalid private key')
-
-        # Set up the valid private key header and footer.
-        begin_re = r'(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
-        end_re = r'(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
 
         # Sanity check: We may potentially receive a full PEM certificate,
         # and we want to accept these.
         cert_begin_re = r'(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
         cert_end_re = r'(-{4,})\s*END\s+CERTIFICATE\s*(-{4,})'
         cert_begin_match = re.search(cert_begin_re, data)
-        if cert_begin_match:
-            cert_end_match = re.search(cert_end_re, data)
-            if not cert_end_match:
+        cert_end_match = re.search(cert_end_re, data)
+        if cert_begin_match and not cert_end_match:
+            raise validation_error
+        elif not cert_begin_match and cert_end_match:
+            raise validation_error
+        elif cert_begin_match and cert_end_match:
+            cert_dashes = set([cert_begin_match.groups()[0], cert_begin_match.groups()[1],
+                               cert_end_match.groups()[0], cert_end_match.groups()[1]])
+            if len(cert_dashes) != 1:
                 raise validation_error
-            cert = data[cert_begin_match.start():cert_end_match.end()]
+            key_data['cert_seg'] = data[cert_begin_match.start():cert_end_match.end()]
 
         # Find the private key, and also ensure that it internally matches
         # itself.
+        # Set up the valid private key header and footer.
+        begin_re = r'(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
+        end_re = r'(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
         begin_match = re.search(begin_re, data)
         end_match = re.search(end_re, data)
         if not begin_match or not end_match:
@@ -265,18 +295,22 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             raise validation_error
         if begin_match.groups()[1] != end_match.groups()[1]:
             raise validation_error
-        line_continues = False
+        key_type = begin_match.groups()[1]
+        try:
+            key_data['key_type'] = key_types[key_type]
+        except KeyError:
+            raise ValidationError('Invalid private key: unsupported type %s' % key_type)
 
         # The private key data begins and ends with the private key.
-        data = data[begin_match.start():end_match.end()]
+        key_data['key_seg'] = data[begin_match.start():end_match.end()]
 
         # Establish that we are able to base64 decode the private key;
         # if we can't, then it's not a valid key.
         #
         # If we got a certificate, validate that also, in the same way.
         header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
-        base64_data = ''
-        for segment_to_validate in (cert, data):
+        for segment_name in ('cert', 'key'):
+            segment_to_validate = key_data['%s_seg' % segment_name]
             # If we have nothing; skip this one.
             # We've already validated that we have a private key above,
             # so we don't need to do it again.
@@ -284,6 +318,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
                 continue
 
             # Ensure that this segment is valid base64 data.
+            base64_data = ''
+            line_continues = False
             lines = segment_to_validate.splitlines()
             for line in lines[1:-1]:
                 line = line.strip()
@@ -301,8 +337,22 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
                 decoded_data = base64.b64decode(base64_data)
                 if not decoded_data:
                     raise validation_error
+                key_data['%s_b64' % segment_name] = base64_data
+                key_data['%s_bin' % segment_name] = decoded_data
             except TypeError:
                 raise validation_error
+
+        # Determine if key is encrypted.
+        if key_data['key_type'] == 'ed25519':
+            # See https://github.com/openssh/openssh-portable/blob/master/sshkey.c#L3218
+            # Decoded key data starts with magic string (null-terminated), four byte
+            # length field, followed by the ciphername -- if ciphername is anything
+            # other than 'none' the key is encrypted.
+            key_data['key_enc'] = not bool(key_data['key_bin'].startswith('openssh-key-v1\x00\x00\x00\x00\x04none'))
+        else:
+            key_data['key_enc'] = bool('ENCRYPTED' in key_data['key_seg'])
+
+        return key_data
 
     def clean_ssh_key_data(self):
         if self.pk:

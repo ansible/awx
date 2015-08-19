@@ -3,12 +3,12 @@
  *
  * All Rights Reserved
  *************************************************/
- 
-   /**
- * @ngdoc function
- * @name helpers.function:LogViewer
- * @description    logviewer
-*/
+
+ /**
+  * @ngdoc function
+  * @name helpers.function:LogViewer
+  * @description    logviewer
+  */
 
 export default
     angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 'VariablesHelper'])
@@ -96,9 +96,12 @@ export default
 
                     if (data.result_stdout) {
                         $('#logview-tabs li:eq(1)').show();
+                        var showStandardOut = (data.type !== "system_job") ? true : false;
                         AddPreFormattedText({
                             id: 'stdout-form-container',
-                            val: data.result_stdout
+                            val: data.result_stdout,
+                            standardOut: showStandardOut,
+                            jobUrl: data.url
                         });
                     }
 
@@ -360,8 +363,13 @@ export default
             return function(params) {
                 var id = params.id,
                     val = params.val,
-                    html;
-                html = "<pre ng-non-bindable>" + val + "</pre>\n";
+                    html = "";
+                if (params.standardOut) {
+                    html += '<a href="' + params.jobUrl + 'stdout?format=txt_download" class="btn btn-primary btn-xs  DownloadStandardOut DownloadStandardOut--onModal" id="download-stdout-button" type="button" aw-tool-tip="Download standard out as a .txt file" data-placement="top" ng-show="status === \'cancelled\' || status === \'failed\' || status === \'error\' || status === \'successful\'"><i class="fa fa-download DownloadStandardOut-icon DownloadStandardOut-icon--withText"></i>Download</a>';
+                    html += "<pre class='DownloadStandardOut-pre' ng-non-bindable>" + val + "</pre>\n";
+                } else {
+                    html += "<pre ng-non-bindable>" + val + "</pre>\n";
+                }
                 $('#' + id).empty().html(html);
             };
         }])

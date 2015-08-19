@@ -44,7 +44,15 @@ def read_requirements(towerpath):
     return ret
 
 def get_python(towerpath):
-    excludes = [ 'README*', '*.dist-info', 'funtests', 'easy_install.py', 'oslo', 'pkg_resources', '_markerlib' ]
+    excludes = [ 
+        'README*', 
+        '*.dist-info', 
+        'funtests', 
+        'easy_install.py', 
+        'oslo', 
+        'pkg_resources', 
+        '_markerlib'
+    ]
     directory = '%s/awx/lib/site-packages' % (towerpath,)
     dirlist = os.listdir(directory)
     ret = []
@@ -82,13 +90,13 @@ def get_js(towerpath):
             bowerfile.close()
             pkg = {}
             pkg['name'] = item
-            if pkginfo.has_key('license'):
+            if 'license' in pkginfo:
                 pkg['license'] = normalize_license(pkginfo['license'])
             else:
                 pkg['license'] = 'UNKNOWN'
-            if pkginfo.has_key('homepage'):
+            if 'homepage' in pkginfo:
                 pkg['url'] = pkginfo['homepage']
-            elif pkginfo.has_key('url'):
+            elif 'url' in pkginfo:
                 pkg['url'] = pkginfo['url']
             else:
                 pkg['url'] = 'UNKNOWN'
@@ -209,7 +217,7 @@ for req in requirements.values():
     cs_info = cs.release_data(req['name'],req['version'])
     if not cs_info:
         print "Couldn't find '%s-%s'" %(req['name'],req['version'])
-        if not olddata.has_key(req['name']):
+        if 'name' not in olddata:
             print "... and it's not in the current data. This needs fixed!"
             sys.exit(1)
         continue
@@ -233,7 +241,7 @@ for req in requirements.values():
 
 # Update JS package info
 for pkg in js:
-    if olddata.has_key(pkg):
+    if 'pkg' in olddata:
         data = olddata[pkg]
         new = js_packages[pkg]
         if new['license'] != 'UNKNOWN' and new['license'] != data['license']:
