@@ -220,13 +220,13 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
-                        if(schedule.hasOwnProperty('extra_data')) {
-                            if(schedule.extra_data.hasOwnProperty('granularity')){
-                                scope.isFactCleanup = true;
-                            } else {
-                                scope.cleanupJob = true;
-                            }
+                        if(schedule.extra_data.hasOwnProperty('granularity')){
+                            scope.isFactCleanup = true;
                         }
+                        if (schedule.extra_data.hasOwnProperty('days')){
+                            scope.cleanupJob = true;
+                        }
+
                         scope.$emit('ScheduleFound');
                     })
                     .error(function(data,status){
