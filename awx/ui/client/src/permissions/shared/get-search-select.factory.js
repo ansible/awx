@@ -17,14 +17,13 @@
         return function (params) {
             // convert the choices from the API from the format
             // [["read", "Read Inventory"], ...] to
-            // {name: "read", value: "Read Inventory", ...}
-            return params.choices.reduce(function(obj, kvp) {
-                // for now, remove adhoc from those choices
-                if (kvp[0] !== adhoc) {
-                    return {name: kvp[0], value: kvp[1]};
-                } else {
-                    return null;
+            // [{name: "read", value: "Read Inventory"}, ...]
+            return params.choices.filter(function (kvp) {
+                return (kvp[0] !== "adhoc");
+            }).map(function (kvp) {
+                if (kvp[0] !== "adhoc") {
+                    return {name: kvp[1], value: kvp[0]};
                 }
-            }, {});
+            });
         };
     }];

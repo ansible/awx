@@ -176,7 +176,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
-    OrganizationList, Wait, Stream, permissionsLabel) {
+    OrganizationList, Wait, Stream, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
 
     ClearScope();
 
@@ -188,12 +188,22 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         id = $routeParams.team_id,
         relatedSets = {};
 
-        $scope.permission_label = {};
+    $scope.permission_label = {};
+    $scope.permission_search_select = [];
 
-    permissionsLabel({
+    // return a promise from the options request with the permission type choices (including adhoc) as a param
+    var permissionsChoice = permissionsChoices({
         scope: $scope,
         url: 'api/v1/' + base + '/' + id + '/permissions/'
-    }).then(function(choices) {
+    });
+
+    // manipulate the choices from the options request to be set on
+    // scope and be usable by the list form
+    permissionsChoice.then(function (choices) {
+        choices =
+            permissionsLabel({
+                choices: choices
+            });
         _.map(choices, function(n, key) {
             $scope.permission_label[key] = n;
         });
@@ -201,8 +211,17 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
     $scope.team_id = id;
 
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    generator.reset();
+    // manipulate the choices from the options request to be usable
+    // by the search option for permission_type, you can't inject the
+    // list until this is done!
+    permissionsChoice.then(function (choices) {
+        form.related.permissions.fields.permission_type.searchOptions =
+            permissionsSearchSelect({
+                choices: choices
+            });
+        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+        generator.reset();
+    });
 
     $scope.PermissionAddAllowed = false;
 
@@ -412,5 +431,5 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'permissionsLabel'
+    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect'
 ];

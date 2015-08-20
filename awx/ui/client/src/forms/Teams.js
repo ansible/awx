@@ -158,16 +158,7 @@ export default
                         permission_type: {
                             label: 'Permission',
                             ngBind: 'getPermissionText()',
-                            searchType: 'select',
-                            searchOptions: [
-                                { name: "Read Inventory", value: "read" },
-                                { name: "Edit Inventory", value: "write" },
-                                { name: "Administrate Inventory", value: "admin" },
-                                { name: "Deploy to Inventory", value: "run" },
-                                { name: "Deploy to Inventory (Dry Run)", value: "check" },
-                                { name: "Scan an Inventory", value: "scan" },
-                                { name: "Create a Job Template", value: "create" }
-                            ]
+                            searchType: 'select'
                         }
                     },
 

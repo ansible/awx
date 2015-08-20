@@ -10,8 +10,8 @@
  * @description This controller for permissions add
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'permissionsLabel',
-        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, permissionsLabel) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'permissionsChoices', 'permissionsLabel',
+        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, permissionsChoices, permissionsLabel) {
 
             ClearScope();
 
@@ -22,10 +22,16 @@ export default
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {};
 
-            permissionsLabel({
+            var permissionsChoice = permissionsChoices({
                 scope: $scope,
                 url: 'api/v1/' + base + '/' + id + '/permissions/'
-            }).then(function(choices) {
+            });
+
+            permissionsChoice.then(function (choices) {
+                return permissionsLabel({
+                    choices: choices
+                });
+            }).then(function (choices) {
                 _.map(choices, function(n, key) {
                     $scope.permission_label[key] = n;
                 });

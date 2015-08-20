@@ -12,8 +12,8 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'permissionsLabel',
-        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, permissionsLabel) {
+    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect',
+        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
 
             ClearScope();
 
@@ -24,17 +24,37 @@ export default
                 generator = GenerateList;
 
             $scope.permission_label = {};
+            $scope.permission_search_select = [];
 
-            permissionsLabel({
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var permissionsChoice = permissionsChoices({
                 scope: $scope,
                 url: 'api/v1/' + base + '/' + base_id + '/permissions/'
-            }).then(function(choices) {
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            permissionsChoice.then(function (choices) {
+                choices =
+                    permissionsLabel({
+                        choices: choices
+                    });
                 _.map(choices, function(n, key) {
                     $scope.permission_label[key] = n;
                 });
             });
 
-            generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+            // manipulate the choices from the options request to be usable
+            // by the search option for permission_type, you can't inject the
+            // list until this is done!
+            permissionsChoice.then(function (choices) {
+                list.fields.permission_type.searchOptions =
+                    permissionsSearchSelect({
+                        choices: choices
+                    });
+                generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+            });
+
             defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
             defaultUrl += '/permissions/';
 

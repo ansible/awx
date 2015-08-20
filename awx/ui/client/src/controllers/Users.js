@@ -208,7 +208,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
-    Prompt, CheckAccess, ResetForm, Wait, Stream, permissionsLabel) {
+    Prompt, CheckAccess, ResetForm, Wait, Stream, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
 
     ClearScope();
 
@@ -221,11 +221,21 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         relatedSets = {};
 
     $scope.permission_label = {};
+    $scope.permission_search_select = [];
 
-    permissionsLabel({
+    // return a promise from the options request with the permission type choices (including adhoc) as a param
+    var permissionsChoice = permissionsChoices({
         scope: $scope,
         url: 'api/v1/' + base + '/' + id + '/permissions/'
-    }).then(function(choices) {
+    });
+
+    // manipulate the choices from the options request to be set on
+    // scope and be usable by the list form
+    permissionsChoice.then(function (choices) {
+        choices =
+            permissionsLabel({
+                choices: choices
+            });
         _.map(choices, function(n, key) {
             $scope.permission_label[key] = n;
         });
@@ -235,9 +245,17 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $scope.removeFormReady();
     }
     $scope.removeFormReady = $scope.$on('formReady', function () {
-
-        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-        generator.reset();
+        // manipulate the choices from the options request to be usable
+        // by the search option for permission_type, you can't inject the
+        // list until this is done!
+        permissionsChoice.then(function (choices) {
+            form.related.permissions.fields.permission_type.searchOptions =
+                permissionsSearchSelect({
+                    choices: choices
+                });
+            generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+            generator.reset();
+        });
 
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
@@ -501,5 +519,5 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'permissionsLabel'
+    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect'
 ];
