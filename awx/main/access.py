@@ -864,11 +864,11 @@ class JobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
+        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
         base_qs = qs.filter(
             Q(credential_id__in=credential_ids) | Q(credential__isnull=True),
             Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
-        # FIXME: Check active status on related objects!
         org_admin_qs = base_qs.filter(
             Q(project__organizations__admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
@@ -895,6 +895,7 @@ class JobTemplateAccess(BaseAccess):
             inventory__permissions__in=deploy_permissions_ids,
             project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
+            inventory_id__in=inventory_ids,
         )
 
         perm_check_qs = base_qs.filter(
@@ -902,23 +903,10 @@ class JobTemplateAccess(BaseAccess):
             inventory__permissions__in=check_permissions_ids,
             project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
+            inventory_id__in=inventory_ids,
         )
 
-        perm_inventory_read_user_qs = qs.filter(
-            inventory__permissions__user__in=[self.user],
-            inventory__permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-            inventory__permissions__active=True)
-
-        perm_inventory_read_team_qs = qs.filter(
-            inventory__permissions__team__users__in=[self.user],
-            inventory__permissions__team__active=True,
-            inventory__permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-            inventory__permissions__active=True)
-
-        perm_inventory = perm_inventory_read_user_qs | perm_inventory_read_team_qs
-
-        # FIXME: I *think* this should work... needs more testing.
-        return org_admin_qs | (perm_deploy_qs & perm_inventory) | (perm_check_qs & perm_inventory)
+        return org_admin_qs | perm_deploy_qs | perm_check_qs
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
