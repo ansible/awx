@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Source
@@ -108,14 +108,14 @@ export default
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body'
                 },
-                source_script: {
+                inventory_script: {
                     label :  "Custom Inventory Script",
                     labelClass: 'prepend-asterisk',
                     type: 'lookup',
                     ngShow: "source && source.value === 'custom'",
-                    sourceModel: 'source_script',
+                    sourceModel: 'inventory_script',
                     sourceField: 'name',
-                    ngClick: 'lookUpSource_script()' ,
+                    ngClick: 'lookUpInventory_script()' ,
                     addRequired: false,
                     editRequired: false,
                     ngRequired: "source && source.value === 'custom'",

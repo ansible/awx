@@ -290,7 +290,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                             form: form,
                             hdr: "Select Custom Inventory",
                             list: inventoryScriptsListObject,
-                            field: 'source_script',
+                            field: 'inventory_script',
                             input_type: 'radio'
                         });
                         scope.extra_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
@@ -1027,9 +1027,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                sources_scope.source_vars = ParseVariableString(data.source_vars);
                                                master.source_vars = sources_scope.variables;
                                            }
-                                           // else if(fld === "source_script"){
-                                           //     sources_scope[fld] = data
-                                           // }
+                                           else if(fld === "inventory_script"){
+                                               // the API stores it as 'source_script', we call it inventory_script
+                                               data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                                           }
 
                                            else if (data[fld] !== undefined) {
                                                sources_scope[fld] = data[fld];
@@ -1275,7 +1276,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    credential: sources_scope.credential,
                                    overwrite: sources_scope.overwrite,
                                    overwrite_vars: sources_scope.overwrite_vars,
-                                   source_script: sources_scope.source_script,
+                                   source_script: sources_scope.inventory_script,
                                    update_on_launch: sources_scope.update_on_launch,
                                    update_cache_timeout: (sources_scope.update_cache_timeout || 0)
                                };
