@@ -6,8 +6,6 @@ GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
 DEPS_SCRIPT ?= deps.py
-DIST ?= el
-DIST_MAJOR ?= 6
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 # Get the branch information from git
@@ -53,16 +51,6 @@ SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
-# Offline TAR build parameters
-DIST_FULL=$(DIST)$(DIST_MAJOR)
-ifeq ($(OFFICIAL), yes)
-    OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)
-else
-    OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(BUILD)
-endif
-OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
-
 # DEB build parameters
 DEBUILD_BIN ?= debuild
 DEBUILD_OPTS = --source-option="-I"
@@ -91,6 +79,14 @@ RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
+
+# Offline TAR build parameters
+DIST=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\1|')
+DIST_MAJOR=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\2|')
+DIST_FULL=$(DIST)$(DIST_MAJOR)
+OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
@@ -373,19 +369,6 @@ dist/$(SDIST_TAR_FILE):
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: minjs requirements dist/$(SDIST_TAR_FILE)
-
-# Build setup tarball
-tar-build/$(SETUP_TAR_FILE):
-	@mkdir -p tar-build
-	@cp -a setup tar-build/$(SETUP_TAR_NAME)
-	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
-	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
-	@echo "#############################################"
-	@echo "setup artifacts:"
-	@echo tar-build/$(setup_tar_file)
-	@echo tar-build/$(setup_tar_link)
-	@echo "#############################################"
 
 # Build setup offline tarball
 offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
