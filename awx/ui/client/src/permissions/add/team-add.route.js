@@ -7,10 +7,10 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'userPermissionsList',
-    route: '/users/:user_id/permissions',
-    templateUrl: templateUrl('permissions/user-permissions'),
-    controller: 'permissionsListController',
+    name: 'teamPermissionsAdd',
+    route: '/teams/:team_id/permissions/add',
+    templateUrl: templateUrl('permissions/shared/team-permissions'),
+    controller: 'addController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

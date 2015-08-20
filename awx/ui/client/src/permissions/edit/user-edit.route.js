@@ -7,9 +7,9 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'teamPermissionsEdit',
-    route: '/teams/:team_id/permissions/:permission_id',
-    templateUrl: templateUrl('permissions/team-permissions'),
+    name: 'userPermissionsEdit',
+    route: '/users/:user_id/permissions/:permission_id',
+    templateUrl: templateUrl('permissions/shared/user-permissions'),
     controller: 'editController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

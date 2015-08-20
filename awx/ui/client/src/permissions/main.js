@@ -4,13 +4,17 @@
  * All Rights Reserved
  *************************************************/
 
-import permissionsList from './permissions-list/main';
-import permissionsAdd from './permissions-add/main';
-import permissionsEdit from './permissions-edit/main';
-import list from './permissions-list';
-import form from './permissions-form';
-import permissionsCategoryChange from './permissions-category-change.factory';
-import permissionsLabel from './permissions-labels.factory';
+import permissionsList from './list/main';
+import permissionsAdd from './add/main';
+import permissionsEdit from './edit/main';
+
+import list from './shared/permissions.list';
+import form from './shared/permissions.form';
+
+import permissionsCategoryChange from './shared/category-change.factory';
+import permissionsChoices from './shared/get-choices.factory';
+import permissionsLabel from './shared/get-labels.factory';
+import permissionsSearchSelect from './shared/get-search-select.factory';
 
 export default
     angular.module('permissions', [
@@ -21,4 +25,6 @@ export default
         .factory('permissionsList', list)
         .factory('permissionsForm', form)
         .factory('permissionsCategoryChange', permissionsCategoryChange)
-        .factory('permissionsLabel', permissionsLabel);
+        .factory('permissionsChoices', permissionsChoices)
+        .factory('permissionsLabel', permissionsLabel)
+        .factory('permissionsSearchSelect', permissionsSearchSelect);

@@ -4,13 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
-import userRoute from './permissions-user-edit.route';
-import teamRoute from './permissions-team-edit.route';
-import controller from './permissions-edit.controller';
+import userRoute from './user-list.route';
+import teamRoute from './team-list.route';
+import controller from './list.controller';
 
 export default
-    angular.module('permissionsEdit', [])
-        .controller('editController', controller)
+    angular.module('permissionsList', [])
+        .controller('permissionsListController', controller)
         .config(['$routeProvider', function($routeProvider) {
             var url = userRoute.route;
             delete userRoute.route;
