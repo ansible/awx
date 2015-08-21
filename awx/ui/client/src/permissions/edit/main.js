@@ -10,7 +10,7 @@ import controller from './edit.controller';
 
 export default
     angular.module('permissionsEdit', [])
-        .controller('editController', controller)
+        .controller('permissionsEditController', controller)
         .config(['$routeProvider', function($routeProvider) {
             var url = userRoute.route;
             delete userRoute.route;
