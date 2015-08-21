@@ -30,6 +30,7 @@ import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
+import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import routeExtensions from './shared/route-extensions/main';
 import breadcrumbs from './shared/breadcrumbs/main';
@@ -55,7 +56,6 @@ import {AdhocCtrl} from './controllers/Adhoc';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
-import {PermissionsAdd, PermissionsList, PermissionsEdit} from './controllers/Permissions';
 import './shared/RestServices';
 import './shared/api-loader';
 import './shared/form-generator';
@@ -86,6 +86,7 @@ var tower = angular.module('Tower', [
     breadcrumbs.name,
     systemTracking.name,
     inventoryScripts.name,
+    permissions.name,
     managementJobs.name,
     setupMenu.name,
     mainMenu.name,
@@ -140,9 +141,6 @@ var tower = angular.module('Tower', [
     'ProjectFormDefinition',
     'ProjectStatusDefinition',
     'ProjectsHelper',
-    'PermissionFormDefinition',
-    'PermissionListDefinition',
-    'PermissionsHelper',
     'CompletedJobsDefinition',
     'AllJobsDefinition',
     'JobFormDefinition',
@@ -591,39 +589,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/permissions/add', {
-                name: 'teamPermissionAdd',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/permissions', {
-                name: 'teamPermissions',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/permissions/:permission_id', {
-                name: 'teamPermissionEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             when('/teams/:team_id/users', {
                 name: 'teamUsers',
                 templateUrl: urlPrefix + 'partials/teams.html',
@@ -789,39 +754,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users/:user_id/permissions/add', {
-                name: 'userPermissionAdd',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/:user_id/permissions', {
-                name: 'userPermissions',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/:user_id/permissions/:permission_id', {
-                name: 'userPermissionEdit',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             when('/users/:user_id/credentials/add', {
                 name: 'userCredentialAdd',
                 templateUrl: urlPrefix + 'partials/teams.html',
@@ -896,7 +828,7 @@ var tower = angular.module('Tower', [
                     }]
                 }
             }).
-            
+
             when('/license', {
                 name: 'license',
                 templateUrl: urlPrefix + 'partials/license.html',

@@ -21,7 +21,6 @@ import JobHosts from "./lists/JobHosts";
 import JobTemplates from "./lists/JobTemplates";
 import Jobs from "./lists/Jobs";
 import Organizations from "./lists/Organizations";
-import Permissions from "./lists/Permissions";
 import PortalJobTemplates from "./lists/PortalJobTemplates";
 import PortalJobs from "./lists/PortalJobs";
 import Projects from "./lists/Projects";
@@ -50,7 +49,6 @@ export
         JobTemplates,
         Jobs,
         Organizations,
-        Permissions,
         PortalJobTemplates,
         PortalJobs,
         Projects,

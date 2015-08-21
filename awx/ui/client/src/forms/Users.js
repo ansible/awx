@@ -212,7 +212,8 @@ export default
                         },
                         permission_type: {
                             label: 'Permission',
-                            ngBind: 'getPermissionText()'
+                            ngBind: 'getPermissionText()',
+                            searchType: 'select'
                         }
                     },
 

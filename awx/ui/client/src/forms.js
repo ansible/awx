@@ -23,7 +23,6 @@ import LicenseUpdate from "./forms/LicenseUpdate";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
-import Permissions from "./forms/Permissions";
 import ProjectStatus from "./forms/ProjectStatus";
 import Projects from "./forms/Projects";
 import Source from "./forms/Source";
@@ -51,7 +50,6 @@ export
         LogViewerOptions,
         LogViewerStatus,
         Organizations,
-        Permissions,
         ProjectStatus,
         Projects,
         Source,

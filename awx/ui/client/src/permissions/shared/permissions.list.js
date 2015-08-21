@@ -3,11 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
- 
 
-export default
-    angular.module('PermissionListDefinition', [])
-    .value('PermissionList', {
+
+ export default function() {
+     return {
 
         name: 'permissions',
         iterator: 'permission',
@@ -38,7 +37,8 @@ export default
             },
             permission_type: {
                 label: 'Permission',
-                ngBind: 'getPermissionText()'
+                ngBind: 'getPermissionText()',
+                searchType: 'select'
             }
         },
 
@@ -77,4 +77,5 @@ export default
                 dataPlacement: 'top'
             }
         }
-    });
+    };
+}
