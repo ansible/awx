@@ -1,4 +1,0 @@
-<DeregisterImageResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-  <requestId>d06f248d-444e-475d-a8f8-1ebb4ac39842</requestId>
-  <return>true</return>
-</DeregisterImageResponse>

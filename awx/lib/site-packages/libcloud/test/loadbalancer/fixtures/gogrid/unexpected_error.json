@@ -1,1 +1,0 @@
-{"summary":{"total":1,"start":0,"returned":1},"status":"failure","method":"/grid/loadbalancer/add","list":[{"message":"An unexpected server error has occured. Please email this error to apisupport@gogrid.com.  Error Message : null","object":"error","errorcode":"UnexpectedException"}]}

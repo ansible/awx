@@ -1,9 +1,0 @@
-{"templates": [
-
-{"uuid": "1", "hypervisor_name": "kvm-hvm", "cpus": 1, "memory": 512, "arch": "i686", "id": 1, "name": "Small"},
-
-{"uuid": "2", "hypervisor_name": "kvm-hvm", "cpus": 2, "memory": 1024, "arch": "i686", "id": 2, "name": "Medium"},
- 
-{"uuid": "3", "hypervisor_name": "kvm-hvm", "cpus": 3, "memory": 2048, "arch": "x86_64", "id": 3, "name": "Large"}
-
-], "errno": 0, "message": "Success"}

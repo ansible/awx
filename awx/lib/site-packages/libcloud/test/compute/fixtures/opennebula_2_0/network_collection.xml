@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<NETWORK_COLLECTION>  
-    <NETWORK href="http://www.opennebula.org/network/5" name="Network 5"/>  
-    <NETWORK href="http://www.opennebula.org/network/15" name="Network 15"/>
-</NETWORK_COLLECTION>

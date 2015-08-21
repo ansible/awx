@@ -1,8 +1,0 @@
-{
-   "request":"{\"comment\": \"lulz\", \"data\": \"127.3.3.3\", \"name\": \"www.bar.foo1.com\", \"ttl\": 777}",
-   "status":"COMPLETED",
-   "verb":"PUT",
-   "jobId":"251c0d0c-95bc-4e09-b99f-4b8748b66246",
-   "callbackUrl":"https://dns.api.rackspacecloud.com/v1.0/546514/status/251c0d0c-95bc-4e09-b99f-4b8748b66246",
-   "requestUrl":"http://dns.api.rackspacecloud.com/v1.0/546514/domains/2946173/records/A-7423317"
-}

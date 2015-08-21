@@ -1,6 +1,0 @@
-{"errno": 0, "message": "Success", "packages": [
-
-{"os": "unknown", "description": "AUTO import from /opt/enomalism2/repo/5d407a68-c76c-11de-86e5-000475cb7577.xvm2", "storage": 20480, "uuid": "1", "name": "centos54"},
-
-{"os": "unknown", "description": "AUTO import from /opt/enomalism2/repo/5d407a68-c76c-11de-86e5-000475cb7577.xvm2", "storage": 20480, "uuid": "2", "name": "centos54 two"}
-]}

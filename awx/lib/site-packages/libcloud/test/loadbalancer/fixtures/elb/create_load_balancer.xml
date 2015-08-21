@@ -1,3 +1,0 @@
-<CreateLoadBalancerResult xmlns="http://elasticloadbalancing.amazonaws.com/doc/2012-06-01/">
-	<DNSName>tests.example.com</DNSName>
-</CreateLoadBalancerResult>

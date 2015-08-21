@@ -3,6 +3,7 @@
 
 import os
 import sys
+import djcelery
 from datetime import timedelta
 
 # Update this module's local settings from the global settings module.
@@ -287,7 +288,6 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 SOUTH_TESTS_MIGRATE = False
 
 # Initialize Django-Celery.
-import djcelery
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost/'

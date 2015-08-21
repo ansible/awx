@@ -1,7 +1,0 @@
-{
-  "ERRORARRAY": [],
-  "ACTION": "domain.delete",
-  "DATA": {
-    "DomainID": 5123
-  }
-}

@@ -1,4 +1,0 @@
-<DetachInternetGatewayResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-    <requestId>7098cc6d-a984-4d34-a5ed-6ae1a645c0b6</requestId>
-    <return>true</return>
-</DetachInternetGatewayResponse>

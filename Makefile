@@ -5,6 +5,8 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
+DEPS_SCRIPT ?= deps.py
+AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -78,12 +80,23 @@ RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
-.PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
+# Offline TAR build parameters
+DIST=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\1|')
+DIST_MAJOR=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\2|')
+DIST_FULL=$(DIST)$(DIST_MAJOR)
+OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
+
+.PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
+	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
+	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
+	deb deb-src debian reprepro setup_tarball \
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
+	clean-offline setup_offline_tarball
 
 # Remove setup build files
 clean-tar:
@@ -117,8 +130,12 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
+clean-offline:
+	rm -rf offline_tar-build
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-offline
+	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -131,51 +148,27 @@ rebase:
 push:
 	git push origin master
 
-# Install third-party requirements needed for development environment (using
-# locally downloaded packages).
-requirements:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index setuptools-12.0.5.tar.gz); \
-	    (cd requirements && pip install --no-index Django-1.6.7.tar.gz); \
-	    (cd requirements && pip install --no-index -r dev_local.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install --no-index -r dev_local.txt); \
-	fi
+# Install runtime, development and jenkins requirements
+requirements requirements_dev requirements_jenkins: %: real-% awx/lib/site-packages/oslo/__init__.py awx/lib/site-packages/dogpile/__init__.py
 
-# Install third-party requirements needed for development environment
-# (downloading from PyPI if necessary).
-requirements_pypi:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    pip install setuptools==12.0.5; \
-	    pip install Django\>=1.6.7,\<1.7; \
-	    pip install -r requirements/dev.txt; \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    sudo pip install -r requirements/dev.txt; \
-	fi
+# Create missing __init__.py files
+awx/lib/site-packages/%/__init__.py:
+	touch $@
+
+# Install third-party requirements needed for development environment.
+real-requirements:
+	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --ignore-installed
+
+real-requirements_dev: real-requirements
+	# (cat requirements/requirements.txt requirements/requirements_dev.txt > /tmp/req_dev.txt);
+	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --ignore-installed
 
 # Install third-party requirements needed for running unittests in jenkins
-# (using locally downloaded packages).
-requirements_jenkins:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && pip install --no-index pip-1.5.4.tar.gz || true); \
-	else \
-	    (cd requirements && sudo pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && sudo pip install --no-index pip-1.5.4.tar.gz || true); \
-	fi
-	$(MAKE) requirements
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -r jenkins.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install -r jenkins.txt); \
-	fi
+real-requirements_jenkins: real-requirements
+	pip install -r requirements/requirements_jenkins.txt
 	npm install csslint jshint
 
-# "Install" ansible-tower package in development mode.  Creates link to working
-# copy in site-packages and installs awx-manage command.
+# "Install" ansible-tower package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -184,6 +177,10 @@ develop:
 	    sudo pip uninstall -y awx; \
 	    sudo $(PYTHON) setup.py develop; \
 	fi
+
+version_file:
+	mkdir -p /var/lib/awx/
+	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.tower_version
 
 # Do any one-time init tasks.
 init:
@@ -194,7 +191,7 @@ init:
 	fi
 
 # Refresh development environment after pulling new code.
-refresh: clean requirements develop migrate
+refresh: clean requirements_dev version_file develop migrate
 
 # Create Django superuser.
 adduser:
@@ -371,7 +368,20 @@ release_clean:
 dist/$(SDIST_TAR_FILE):
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
-sdist: minjs dist/$(SDIST_TAR_FILE)
+sdist: minjs requirements dist/$(SDIST_TAR_FILE)
+
+# Build setup offline tarball
+offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
+	mkdir -p offline_tar-build/$(DIST_FULL)
+	cp tar-build/$(SETUP_TAR_FILE) offline_tar-build/$(DIST_FULL)/
+	cd offline_tar-build/$(DIST_FULL) && tar zxf $(SETUP_TAR_FILE) && mv $(SETUP_TAR_NAME) $(OFFLINE_TAR_NAME)
+	cp packaging/offline/$(DEPS_SCRIPT) offline_tar-build/$(DIST_FULL)/
+	# TODO: REMOVE THE BELOW LINE WHEN WE CONSUME REPOS FROM SETUP PLAYBOOK
+	cp -a packaging/offline/repos_el6 offline_tar-build/$(DIST_FULL)/
+	cd offline_tar-build/$(DIST_FULL)/ && $(PYTHON) $(DEPS_SCRIPT) -d el -r 6 -u $(AW_REPO_URL) -s $(OFFLINE_TAR_NAME) -v -v -v
+	cd offline_tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) $(OFFLINE_TAR_NAME)/
+
+setup_offline_tarball: setup_tarball offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
 
 rpm-build:
 	mkdir -p rpm-build

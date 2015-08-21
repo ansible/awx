@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<QueryResultRecords xmlns="http://www.vmware.com/vcloud/v1.5" total="1" pageSize="30" page="2" name="user" type="application/vnd.vmware.vcloud.query.records+xml" href="https://vm-vcloud/api/query?type=user&amp;page=2&amp;pageSize=30&amp;format=records&amp;filter=(name==jrambo)" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://66.58.64.27/api/v1.5/schema/master.xsd">
-    <Link rel="alternate" type="application/vnd.vmware.vcloud.query.references+xml" href="https://vm-vcloud/api/query?type=user&amp;page=2&amp;pageSize=30&amp;format=references&amp;filter=(name==jrambo)"/>
-    <Link rel="alternate" type="application/vnd.vmware.vcloud.query.idrecords+xml" href="https://vm-vcloud/api/query?type=user&amp;page=2&amp;pageSize=30&amp;format=idrecords&amp;filter=(name==jrambo)"/>
-    <UserRecord storedVMQuota="0" numberOfStoredVMs="0" numberOfDeployedVMs="0" name="jrambo" isLdapUser="true" isEnabled="true" fullName="Galet, Michal" deployedVMQuota="0" href="https://vm-vcloud/api/admin/user/a0d29e8e-2b32-4739-ab7d-6a3e795be4db" storedVMQuotaRank="-1" deployedVMQuotaRank="-1"/>
-</QueryResultRecords>

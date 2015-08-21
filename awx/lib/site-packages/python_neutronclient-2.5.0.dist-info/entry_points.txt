@@ -1,3 +1,0 @@
-[console_scripts]
-neutron = neutronclient.shell:main
-
