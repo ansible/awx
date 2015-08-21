@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import uuid
 import os
+import subprocess
 
 from south.utils import datetime_utils as datetime
 from south.db import db
@@ -20,6 +21,8 @@ class Migration(DataMigration):
             j.result_stdout_file = stdout_filename
             j.result_stdout_text = ""
             j.save()
+            sed_command = subprocess.Popen(["sed", "-i", "-e", "s/\\\\r\\\\n/\\n/g", stdout_filename])
+            sed_command.wait()
 
     def backwards(self, orm):
         pass
