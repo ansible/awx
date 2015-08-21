@@ -376,8 +376,6 @@ offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
 	cp tar-build/$(SETUP_TAR_FILE) offline_tar-build/$(DIST_FULL)/
 	cd offline_tar-build/$(DIST_FULL) && tar zxf $(SETUP_TAR_FILE) && mv $(SETUP_TAR_NAME) $(OFFLINE_TAR_NAME)
 	cp packaging/offline/$(DEPS_SCRIPT) offline_tar-build/$(DIST_FULL)/
-	# TODO: REMOVE THE BELOW LINE WHEN WE CONSUME REPOS FROM SETUP PLAYBOOK
-	cp -a packaging/offline/repos_el6 offline_tar-build/$(DIST_FULL)/
 	cd offline_tar-build/$(DIST_FULL)/ && $(PYTHON) $(DEPS_SCRIPT) -d el -r 6 -u $(AW_REPO_URL) -s $(OFFLINE_TAR_NAME) -v -v -v
 	cd offline_tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) $(OFFLINE_TAR_NAME)/
 
