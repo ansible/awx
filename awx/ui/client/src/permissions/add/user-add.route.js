@@ -10,7 +10,7 @@ export default {
     name: 'userPermissionsAdd',
     route: '/users/:user_id/permissions/add',
     templateUrl: templateUrl('permissions/shared/user-permissions'),
-    controller: 'addController',
+    controller: 'permissionsAddController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

@@ -10,7 +10,7 @@ export default {
     name: 'inventoryScriptsAdd',
     route: '/inventory_scripts/add',
     templateUrl: templateUrl('inventory-scripts/add/add'),
-    controller: 'addController',
+    controller: 'inventoryScriptsAddController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

@@ -10,7 +10,7 @@ export default {
     name: 'teamPermissionsAdd',
     route: '/teams/:team_id/permissions/add',
     templateUrl: templateUrl('permissions/shared/team-permissions'),
-    controller: 'addController',
+    controller: 'permissionsAddController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

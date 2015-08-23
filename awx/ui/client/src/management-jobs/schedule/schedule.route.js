@@ -10,7 +10,7 @@ export default {
     name: 'managementJobsSchedule',
     route: '/management_jobs/:management_job/schedules',
     templateUrl: templateUrl('management-jobs/schedule/schedule'),
-    controller: 'scheduleController',
+    controller: 'managementJobsScheduleController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
