@@ -10,7 +10,7 @@ export default {
     name: 'managementJobsList',
     route: '/management_jobs',
     templateUrl: templateUrl('management-jobs/list/list'),
-    controller: 'listController',
+    controller: 'managementJobsListController',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

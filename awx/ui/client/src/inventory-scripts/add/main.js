@@ -9,7 +9,7 @@ import controller from './add.controller';
 
 export default
     angular.module('inventoryScriptsAdd', [])
-        .controller('addController', controller)
+        .controller('inventoryScriptsAddController', controller)
         .config(['$routeProvider', function($routeProvider) {
             var url = route.route;
             delete route.route;

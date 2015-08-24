@@ -9,7 +9,7 @@ import controller from './schedule.controller';
 
 export default
     angular.module('managementJobsSchedule', [])
-        .controller('scheduleController', controller)
+        .controller('managementJobsScheduleController', controller)
         .config(['$routeProvider', function($routeProvider) {
              var url = route.route;
              delete route.route;

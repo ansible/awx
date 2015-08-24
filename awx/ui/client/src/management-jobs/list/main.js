@@ -9,7 +9,7 @@ import controller from './list.controller';
 
 export default
     angular.module('managementJobsList', [])
-        .controller('listController', controller)
+        .controller('managementJobsListController', controller)
         .config(['$routeProvider', function($routeProvider) {
              var url = route.route;
              delete route.route;
