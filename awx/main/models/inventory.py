@@ -1259,8 +1259,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         if not super(InventoryUpdate, self).can_start:
             return False
 
-        if (self.source != 'custom'
-                and not (self.credential and self.credential.active)):
+        if (self.source != 'custom' and
+                not (self.credential and self.credential.active)):
             return False
         return True
 
