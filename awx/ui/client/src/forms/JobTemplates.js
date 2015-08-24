@@ -298,7 +298,7 @@ export default
                     addRequired: false,
                     editRequired: false,
                     readonly: true,
-                    ngShow: "allow_callbacks",
+                    ngShow: "allow_callbacks && allow_callbacks !== 'false'",
                     column: 2,
                     awPopOver: "callback_help",
                     awPopOverWatch: "callback_help",
@@ -309,7 +309,7 @@ export default
                 host_config_key: {
                     label: 'Host Config Key',
                     type: 'text',
-                    ngShow: "allow_callbacks",
+                    ngShow: "allow_callbacks  && allow_callbacks !== 'false'",
                     ngChange: "configKeyChange()",
                     genMD5: true,
                     column: 2,
