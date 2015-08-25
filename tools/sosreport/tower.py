@@ -8,14 +8,16 @@ SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
     "tower-manage --version", # tower version
     "supervisorctl status",   # tower process status
-    "pip list"		          # pip package list
+    "pip freeze",             # pip package list
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
     "ls -ll /etc/tower",
+    "ls -ll /var/lib/awx/job_status/"
 ]
 
 SOSREPORT_TOWER_DIRS = [
     "/etc/tower/",
+    "/etc/ansible/",
     "/var/log/tower",
     "/var/log/httpd",
     "/var/log/apache2",
@@ -30,6 +32,13 @@ SOSREPORT_TOWER_DIRS = [
     "/var/log/apport.log"
 ]
 
+SOSREPORT_FORBIDDEN_PATHS = [
+    "/etc/tower/SECRET_KEY",
+    "/etc/tower/tower.key",
+    "/etc/tower/awx.key",
+    "/etc/tower/tower.cert",
+    "/etc/tower/awx.cert"
+]
 
 if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
     from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
@@ -42,6 +51,9 @@ if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
 
             for path in SOSREPORT_TOWER_DIRS:
                 self.add_copy_spec(path)
+
+            for path in SOSREPORT_FORBIDDEN_PATHS:
+                self.add_forbidden_path(path)
 
             for command in SOSREPORT_TOWER_COMMANDS:
                 self.add_cmd_output(command)
@@ -56,6 +68,9 @@ else:
 
             for path in SOSREPORT_TOWER_DIRS:
                 self.addCopySpec(path)
+
+            for path in SOSREPORT_FORBIDDEN_PATHS:
+                self.addForbiddenPath(path)
 
             for command in SOSREPORT_TOWER_COMMANDS:
                 self.collectExtOutput(command)
