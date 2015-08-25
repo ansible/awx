@@ -670,11 +670,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         return return_buffer, start_actual, end_actual, absolute_end
 
-    def result_stdout_raw_limited(self, start_line=0, end_line=None):
-        return self._result_stdout_raw_limited(start_line, end_line)
+    def result_stdout_raw_limited(self, start_line=0, redact_sensitive=False, end_line=None):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive)
 
-    def result_stdout_limited(self, start_line=0, end_line=None):
-        return self._result_stdout_raw_limited(start_line, end_line, escape_ascii=True)
+    def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=False):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
 
     @property
     def celery_task(self):

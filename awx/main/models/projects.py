@@ -357,6 +357,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     def result_stdout(self):
         return self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
 
+    def result_stdout_raw_limited(self, start_line=0, redact_sensitive=True, end_line=None):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive)
+
+    def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=True):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
+
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
 
