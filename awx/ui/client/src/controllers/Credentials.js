@@ -428,6 +428,15 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
                 }
                 master.become_method = $scope.become_method;
 
+                $scope.$watch('become_method', function(val) {
+                    if (val !== null) {
+                        if (val.value === "") {
+                            $scope.become_username = "";
+                            $scope.become_password = "";
+                        }
+                    }
+                });
+
                 for (i = 0; i < $scope.credential_kind_options.length; i++) {
                     if ($scope.credential_kind_options[i].value === data.kind) {
                         $scope.kind = $scope.credential_kind_options[i];

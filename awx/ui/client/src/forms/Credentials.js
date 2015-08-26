@@ -296,7 +296,7 @@ export default
                 "become_username": {
                     label: 'Privilege Escalation Username',
                     type: 'text',
-                    ngShow: "kind.value == 'ssh' && become_method",
+                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
                     addRequired: false,
                     editRequired: false,
                     autocomplete: false
@@ -304,7 +304,7 @@ export default
                 "become_password": {
                     label: 'Privilege Escalation Password',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && become_method",
+                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
                     addRequired: false,
                     editRequired: false,
                     ask: true,
