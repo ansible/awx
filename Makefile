@@ -90,6 +90,15 @@ OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
 OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
 OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
+DISTRO := $(shell source /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
+ifeq ($(DISTRO),ubuntu)
+    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v --install-layout=deb
+else
+    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
+endif
+
+.DEFAULT_GOAL := build
+
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
@@ -152,10 +161,6 @@ push:
 
 # Install runtime, development and jenkins requirements
 requirements requirements_dev requirements_jenkins: %: real-%
-
-# Create missing __init__.py files
-awx/lib/site-packages/%/__init__.py:
-	touch $@
 
 # Install third-party requirements needed for development environment.
 # NOTE:
@@ -502,5 +507,11 @@ virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 docker-dev:
 	docker build --no-cache=true --rm=true -t ansible/tower_devel:latest tools/docker
 
+# TODO - figure out how to build the front-end and python requirements with
+# 'build'
+build:
+	$(PYTHON) setup.py build
+
+# TODO - only use --install-layout=deb on Debian
 install:
-	$(PYTHON) setup.py install egg_info -b ""
+	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
