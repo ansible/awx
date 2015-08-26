@@ -11,8 +11,10 @@
     require('./setup/jsdom');
     require('./setup/mocha');
     require('./setup/jquery');
+    require('./setup/jquery-ui');
     require('./setup/angular');
     require('./setup/angular-mocks');
+    require('./setup/angular-route');
     require('./setup/angular-templates');
     require('./setup/sinon');
     require('./setup/chai');

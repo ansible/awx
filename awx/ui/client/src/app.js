@@ -43,6 +43,7 @@ import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
+import adhoc from './adhoc/main';
 
 import {JobDetailController} from './controllers/JobDetail';
 import {JobStdoutController} from './controllers/JobStdout';
@@ -52,7 +53,6 @@ import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
 import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from './controllers/Inventories';
-import {AdhocCtrl} from './controllers/Adhoc';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
@@ -93,6 +93,7 @@ var tower = angular.module('Tower', [
     dashboard.name,
     moment.name,
     templateUrl.name,
+    adhoc.name,
     'templates',
     'AuthService',
     'Utilities',
@@ -112,7 +113,6 @@ var tower = angular.module('Tower', [
     'RefreshHelper',
     'AdminListDefinition',
     'AWDirectives',
-    'AdhocFormDefinition',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
     'InventoryHelper',
@@ -182,9 +182,6 @@ var tower = angular.module('Tower', [
     'SocketHelper',
     'AboutAnsibleHelpModal',
     'PortalJobsListDefinition',
-
-
-    'AdhocHelper',
     'features',
     'longDateFilter'
 ])
@@ -461,17 +458,6 @@ var tower = angular.module('Tower', [
                 name: 'inventoryManage',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/:inventory_id/adhoc', {
-                name: 'inventoryAdhoc',
-                templateUrl: urlPrefix + 'partials/adhoc.html',
-                controller: AdhocCtrl,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();

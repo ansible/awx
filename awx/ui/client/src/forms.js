@@ -6,7 +6,6 @@
 
 import ActivityDetail from "./forms/ActivityDetail";
 import Credentials from "./forms/Credentials";
-import Adhoc from "./forms/Adhoc";
 import EventsViewer from "./forms/EventsViewer";
 import Groups from "./forms/Groups";
 import HostGroups from "./forms/HostGroups";
@@ -33,7 +32,6 @@ import Users from "./forms/Users";
 export
     {   ActivityDetail,
         Credentials,
-        Adhoc,
         EventsViewer,
         Groups,
         HostGroups,
