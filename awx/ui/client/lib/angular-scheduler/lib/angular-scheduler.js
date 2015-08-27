@@ -297,7 +297,10 @@ angular.module('AngularScheduler', ['underscore'])
                             }
                             return false;
                         });
-                        scope.rrule_nlp_description = rrule.toText().replace(/^RRule error.*$/,'Natural language description not available');
+                        scope.rrule_nlp_description = rrule.toText().replace(/^RRule error.*$/,'Minutely or hourly frequency selected');
+                        if(rrule === "none"){
+                            scope.rrule_nlp_description = 'Natural language description not available';
+                        }
                         scope.rrule = rrule.toString();
                     }
                 };
