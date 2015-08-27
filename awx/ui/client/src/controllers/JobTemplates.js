@@ -478,13 +478,24 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
         }
     };
 
+
+    // $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (newval, oldval) {
+    //     selectPlaybook(oldval, newval);
+    //     checkSCMStatus(oldval, newval);
+    // });
+
     // Register a watcher on project_name
     if ($scope.selectPlaybookUnregister) {
         $scope.selectPlaybookUnregister();
     }
-    $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (newval, oldval) {
-        selectPlaybook(oldval, newval);
-        checkSCMStatus(oldval, newval);
+    $scope.selectPlaybookUnregister = $scope.$watch('project', function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            if (!Empty(oldValue)) {
+                $scope.playbook = null;
+            }
+            selectPlaybook(oldValue, newValue);
+            checkSCMStatus();
+        }
     });
 
     LookUpInit({
