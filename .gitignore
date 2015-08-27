@@ -27,6 +27,7 @@ build
 deb-build
 rpm-build
 tar-build
+/offline_tar-build
 /dist
 *.egg-info
 *.py[c,o]
