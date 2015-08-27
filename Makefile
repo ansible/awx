@@ -90,7 +90,7 @@ OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
 OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
 OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
-DISTRO := $(shell source /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
+DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
     SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v --install-layout=deb
 else
