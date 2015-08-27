@@ -60,7 +60,7 @@ class Inventory(CommonModel):
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total mumber of hosts in this inventory.'),
+        help_text=_('Total number of hosts in this inventory.'),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
