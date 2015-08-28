@@ -240,7 +240,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                         errors.append("'%s' value %s is too small (must be at least %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than%s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
@@ -250,7 +250,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
                        data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than%s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != int:
                         errors.append("Value %s for %s expected to be an integer" % (data[survey_element['variable']],
@@ -261,7 +261,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                         errors.append("'%s' value %s is too small (must be at least %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than%s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
                         errors.append("Value %s for %s expected to be a numeric type" % (data[survey_element['variable']],
@@ -282,7 +282,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                                                                     survey_element['variable'],
                                                                                     survey_element['choices']))
         return errors
- 
+
     def _update_unified_job_kwargs(self, **kwargs):
         if 'launch_type' in kwargs and kwargs['launch_type'] == 'relaunch':
             return kwargs
@@ -859,7 +859,7 @@ class JobEvent(CreatedModifiedModel):
                 try:
                     failures_dict = self.event_data.get('failures', {})
                     dark_dict = self.event_data.get('dark', {})
-                    self.failed = bool(sum(failures_dict.values()) + 
+                    self.failed = bool(sum(failures_dict.values()) +
                                        sum(dark_dict.values()))
                     if 'failed' not in update_fields:
                         update_fields.append('failed')
@@ -1085,4 +1085,3 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     @property
     def task_impact(self):
         return 150
-
