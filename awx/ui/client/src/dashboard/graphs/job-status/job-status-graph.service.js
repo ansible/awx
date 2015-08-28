@@ -21,7 +21,18 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
     }
 
     function getData(period, jobType) {
-        var url = getBasePath('dashboard')+'graphs/jobs/?period='+period+'&job_type='+jobType;
+        var url, dash_path = getBasePath('dashboard');
+        if(dash_path === '' ){
+            processErrors(null,
+                          null,
+                          null,
+                          null, {
+                hdr: 'Error!',
+                msg: "There was an error. Please try again."
+            });
+            return;
+        }
+        url = dash_path + 'graphs/jobs/?period='+period+'&job_type='+jobType;
         Rest.setUrl(url);
         var result = Rest.get()
         .catch(function(response) {
