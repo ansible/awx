@@ -104,7 +104,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // Load the breadcrumbs array. We have to do things a bit different than Utilities.LoadBreadcrumbs.
             // Rather than botch that all up, we'll do our own thing here.
             $rootScope.breadcrumbs = [];
-            var path, title, i, j, paths = $location.path().split('/');
+            var path, title, i, j, paths = $location.path().split('/'),
+                capitalizeTitle = function(title) {
+                    return title.split("_")
+                        .map(function(title) {
+                            return title.charAt(0).toUpperCase() + title.slice(1);
+                        }).join(" ");
+                };
             paths.splice(0, 1);
             for (i = 0; i < paths.length; i++) {
                 if (/^\d+/.test(paths[i])) {
@@ -121,7 +127,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     }
                     if (!title) {
                         title = paths[i - 1].substr(0, paths[i - 1].length - 1);
-                        title = title.charAt(0).toUpperCase() + title.slice(1);
+                        title = capitalizeTitle(title);
                         title = (title === 'Inventorie') ? 'Inventory' : title;
                     }
                 } else {
@@ -135,7 +141,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         path = '/' + paths[i];
                     }
                     title = paths[i];
-                    title = title.charAt(0).toUpperCase() + title.slice(1);
+                    title = capitalizeTitle(title);
                 }
                 $rootScope.breadcrumbs.push({
                     path: path,
