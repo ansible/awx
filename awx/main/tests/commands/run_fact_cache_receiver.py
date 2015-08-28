@@ -142,7 +142,7 @@ class RunFactCacheReceiverUnitTest(BaseTest, MongoDBRequired):
 
         receiver = FactCacheReceiver()
         receiver.process_fact_message = MagicMock(name='process_fact_message')
-        receiver.run_receiver()
+        receiver.run_receiver(use_processing_threads=False)
 
         receiver.process_fact_message.assert_called_once_with(TEST_MSG)
 
