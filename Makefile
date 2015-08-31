@@ -390,7 +390,7 @@ offline-tar-build/$(DIST_FULL):
 
 # TODO - Somehow share implementation with setup_tarball
 offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
-	cp -a setup offline-build/$(SETUP_TAR_NAME)
+	cp -a setup offline-tar-build/$(SETUP_TAR_NAME)
 	cd offline-tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	cd offline-tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	ln -sf $(SETUP_TAR_FILE) offline-tar-build/$(SETUP_TAR_LINK)
