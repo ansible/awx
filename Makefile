@@ -83,8 +83,8 @@ MOCK_BIN ?= mock
 MOCK_CFG ?=
 
 # Offline TAR build parameters
-DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\..*\(el\)\([0-9]\)|\1|')
-DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\..*\(el\)\([0-9]\)|\2|')
+DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
+DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
 OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
