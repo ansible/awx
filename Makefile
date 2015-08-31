@@ -5,7 +5,7 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
-DEPS_SCRIPT ?= deps.py
+DEPS_SCRIPT ?= packaging/offline/deps.py
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 # Get the branch information from git
@@ -83,12 +83,12 @@ MOCK_BIN ?= mock
 MOCK_CFG ?=
 
 # Offline TAR build parameters
-DIST=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\1|')
-DIST_MAJOR=$(shell echo ${RPM_DIST} | sed 's|^\.\([^0-9]\+\)\([0-9]\).*|\2|')
-DIST_FULL=$(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME=$(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
-OFFLINE_TAR_FILE=$(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK=$(NAME)-setup-latest.tar.gz
+DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\..*\(el\)\([0-9]\)|\1|')
+DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\..*\(el\)\([0-9]\)|\2|')
+DIST_FULL = $(DIST)$(DIST_MAJOR)
+OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK = $(NAME)-setup-latest.tar.gz
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
@@ -142,7 +142,7 @@ clean-packer:
 	rm -f Vagrantfile
 
 clean-offline:
-	rm -rf offline_tar-build
+	rm -rf offline-tar-build
 
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-offline
@@ -364,13 +364,13 @@ tar-build/$(SETUP_TAR_FILE):
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
+
+setup_tarball: tar-build/$(SETUP_TAR_FILE)
 	@echo "#############################################"
 	@echo "Setup artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
 	@echo "#############################################"
-
-setup_tarball: tar-build/$(SETUP_TAR_FILE)
 
 release_clean:
 	-(rm *.tar)
@@ -382,18 +382,30 @@ dist/$(SDIST_TAR_FILE):
 sdist: minjs dist/$(SDIST_TAR_FILE)
 
 # Build setup offline tarball
-offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
-	mkdir -p offline_tar-build/$(DIST_FULL)
-	cp tar-build/$(SETUP_TAR_FILE) offline_tar-build/$(DIST_FULL)/
-	cd offline_tar-build/$(DIST_FULL) && tar zxf $(SETUP_TAR_FILE) && mv $(SETUP_TAR_NAME) $(OFFLINE_TAR_NAME)
-	cp packaging/offline/$(DEPS_SCRIPT) offline_tar-build/$(DIST_FULL)/
-	cd offline_tar-build/$(DIST_FULL)/ && $(PYTHON) $(DEPS_SCRIPT) -d el -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s $(OFFLINE_TAR_NAME) -v -v -v
-	cd offline_tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) $(OFFLINE_TAR_NAME)/
+offline-tar-build:
+	mkdir -p $@
 
-setup_offline_tarball: setup_tarball offline_tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+offline-tar-build/$(DIST_FULL):
+	mkdir -p $@
+
+# TODO - Somehow share implementation with setup_tarball
+offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
+	cp -a setup offline-build/$(SETUP_TAR_NAME)
+	cd offline-tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	cd offline-tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
+	ln -sf $(SETUP_TAR_FILE) offline-tar-build/$(SETUP_TAR_LINK)
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) -v -v -v
+	cd offline-tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) $(OFFLINE_TAR_NAME)/
+
+setup_offline_tarball: offline-tar-build offline-tar-build/$(DIST_FULL) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+	@echo "#############################################"
+	@echo "Offline artifacts:"
+	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+	@echo "#############################################"
 
 rpm-build:
-	mkdir -p rpm-build
+	mkdir -p $@
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
