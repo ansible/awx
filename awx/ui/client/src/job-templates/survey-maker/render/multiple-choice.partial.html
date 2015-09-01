@@ -1,5 +1,5 @@
 <div>
-  <select class="form-control" ng-model="selectedValue" multi-select ng-required="isRequired">
+  <select class="form-control" ng-model="selectedValue" multi-select ng-required="isRequired" ng-disabled="isDisabled">
     <option ng-repeat="choice in choices" value="{{choice}}" ng-selected="selectedValue.indexOf(choice) !== -1">{{choice}}</option>
   </select>
 </div>
