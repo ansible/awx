@@ -88,7 +88,7 @@ DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
 OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-setup-latest.tar.gz
+OFFLINE_TAR_LINK = $(NAME)-offline-$(DIST_FULL)-latest.tar.gz
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
