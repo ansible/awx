@@ -710,7 +710,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                            }, Dropdown);
 
                 $(element).select2({
-                    dropdownAdapter: CustomAdapter,
                     multiple: 'true',
                     theme: "bootstrap",
                     width: '100%',
