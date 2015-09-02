@@ -167,15 +167,15 @@ requirements requirements_dev requirements_jenkins: %: real-%
 #  * --target is only supported on newer versions of pip
 #  * https://github.com/pypa/pip/issues/3056 - the workaround is to override the `install-platlib`
 #  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
+#  * --target implies --ignore-installed
 real-requirements:
-	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --ignore-installed --install-option="--install-platlib=\$$base/lib/python"
+	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
 
-real-requirements_dev: real-requirements
-	# (cat requirements/requirements.txt requirements/requirements_dev.txt > /tmp/req_dev.txt);
-	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --ignore-installed
+real-requirements_dev:
+	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
 
 # Install third-party requirements needed for running unittests in jenkins
-real-requirements_jenkins: real-requirements
+real-requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
 	npm install csslint jshint
 
