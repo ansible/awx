@@ -35,6 +35,7 @@ git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=socket
 git+https://github.com/chrismeyersfsu/python-ipy.git@master#egg=ipy
 git+https://github.com/chrismeyersfsu/python-keystoneclient.git@1.3.0#egg=keystoneclient-1.3.0
 git+https://github.com/chrismeyersfsu/shade.git@tower_0.5.0#egg=shade-tower_0.5.0
+git+https://github.com/chrismeyersfsu/sitecustomize.git#egg=sitecustomize
 greenlet==0.4.7
 httplib2==0.9
 idna==2.0

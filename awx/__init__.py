@@ -4,6 +4,7 @@
 import os
 import sys
 import warnings
+import site
 
 __version__ = '2.4.0'
 
@@ -39,7 +40,10 @@ def prepare_env():
     # Add local site-packages directory to path.
     local_site_packages = os.path.join(os.path.dirname(__file__), 'lib',
                                        'site-packages')
-    sys.path.insert(0, local_site_packages)
+    site.addsitedir(local_site_packages)
+    # Work around https://bugs.python.org/issue7744
+    # by moving  local_site_packages to the front of sys.path
+    sys.path.insert(0, sys.path.pop())
     # Hide DeprecationWarnings when running in production.  Need to first load
     # settings to apply our filter after Django's own warnings filter.
     from django.conf import settings

@@ -2839,6 +2839,8 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return response
             except Exception, e:
                 return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        elif request.accepted_renderer.format == 'txt':
+            return Response(unified_job.result_stdout)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 

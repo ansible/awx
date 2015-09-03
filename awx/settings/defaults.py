@@ -352,6 +352,9 @@ AWX_PROOT_SHOW_PATHS = []
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
+# The directory in which proot will create new temporary directories for its root
+AWX_PROOT_BASE_PATH = "/tmp"
+
 # Default list of modules allowed for ad hoc commands.
 AD_HOC_COMMANDS = [
     'command',

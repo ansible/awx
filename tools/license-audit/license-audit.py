@@ -17,52 +17,55 @@ def usage():
     sys.exit(1)
 
 def read_requirements(towerpath):
-    filename = '%s/awx/lib/site-packages/README' % (towerpath,)
+    filename = '%s/requirements/requirements.txt' % (towerpath,)
     ret = {}
-    f = open(filename)
-    if not f:
+    try:
+        f = open(filename)
+    except:
         print "failed to open %s" %(filename,)
         return None
     data = f.readlines()
     f.close()
     for line in data:
+        if line[0] == '#':
+            continue
         if '==' in line:
-            m = re.match(r"(\S+)==(\S+) \((\S+)",line)
+            m = re.match(r"(\S+)==(\S+)",line)
             if m:
                 name = m.group(1)
                 version = m.group(2)
-                pathname = m.group(3)
-                if pathname.endswith(',') or pathname.endswith(')'):
-                    pathname = pathname[:-1]
-                if pathname.endswith('/*'):
-                    pathname = pathname[:-2]
                 item = {}
                 item['name'] = name
                 item['version'] = version
-                item['path'] = pathname
                 ret[name] = item
-    return ret
-
-def get_python(towerpath):
-    excludes = [ 
-        'README*', 
-        '*.dist-info', 
-        'funtests', 
-        'easy_install.py', 
-        'oslo', 
-        'pkg_resources', 
-        '_markerlib'
-    ]
-    directory = '%s/awx/lib/site-packages' % (towerpath,)
-    dirlist = os.listdir(directory)
-    ret = []
-    for item in dirlist:
-        use = True
-        for exclude in excludes:
-            if fnmatch.fnmatch(item, exclude):
-                use = False
-        if use:
-            ret.append(item)
+                continue
+        elif line.startswith("git+https"):
+            l = line.rsplit('/',1)
+            m = re.match(r"(\S+).git@(\S+)#",l[1])
+            if m:
+                name = m.group(1)
+                version = m.group(2)
+                if version.startswith('tower_'):
+                    version = version[6:]
+                item = {}
+                if name == 'python-ipy':
+                    name='ipy'
+                item['name'] = name
+                item['version'] = version
+                if len(version) > 20:
+                    # it's a sha1sum, read it off the egg spec
+                    lver = l[1].rsplit('-',1)
+                    if lver[1] == l[1]:
+                        lver = l[1].rsplit('_',1)
+                    item['version'] = lver[1][:-1]
+                ret[name] = item
+                continue
+        else:
+            item = {}
+            item['name'] = line[:-1]
+            item['version'] = ''
+            ret[name] = item
+            continue
     return ret
 
 def get_js(towerpath):
@@ -116,13 +119,13 @@ def normalize_license(license):
     license = license.replace('"','')
     if license == 'None':
         return 'UNKNOWN'
-    if license in ['Apache License, Version 2.0', 'Apache License (2.0)', 'Apache License 2.0', 'Apache-2.0', 'Apache License, v2.0']:
+    if license in ['Apache License, Version 2.0', 'Apache License (2.0)', 'Apache License 2.0', 'Apache-2.0', 'Apache License, v2.0', 'APL2']:
         return 'Apache 2.0'
     if license == 'ISC license':
         return 'ISC'
     if license == 'MIT License' or license == 'MIT license':
         return 'MIT'
-    if license == 'BSD License' or license == 'Simplified BSD':
+    if license in ['BSD License', 'Simplified BSD', 'BSD-derived (http://www.repoze.org/LICENSE.txt)', 'BSD-like', 'Modified BSD License']:
         return 'BSD'
     if license == 'LGPL':
         return 'LGPL 2.1'
@@ -131,6 +134,10 @@ def normalize_license(license):
         return 'Apache 2.0'
     if license.find('https://github.com/umutbozkurt/django-rest-framework-mongoengine/blob/master/LICENSE') != -1:
         return 'MIT'
+    if license == '"BSD or Apache License, Version 2.0"':
+        return 'BSD or Apache 2.0'
+    if license == 'Modified BSD License':
+        return 'BSD'
     if license == 'Python Software Foundation License':
         return 'PSF'
     return license
@@ -183,24 +190,11 @@ if not olddata or not requirements:
     print "No starting data"
     sys.exit(1)
 
-# Get directory of vendored things from site-packages...
-python_packages = get_python(tower_path)
-
-# ... and ensure they're noted in the requirements file
-ok = True
-for package in python_packages:
-    if not search_requirements(requirements, package):
-        print "%s not in requirements!" % (package,)
-        ok = False
-if not ok:
-    sys.exit(1)
-
-
 # See if there's pip things in our current license list that we don't have now
 reqs = requirements.keys()
 for item in olddata.values():
     if item['source'] == 'pip' and item['name'] not in reqs:
-        print "No longer vendoring %s" %(item['name'],)
+        print "Potentially no longer vendoring %s" %(item['name'],)
 
 # Get directory of vendored JS things from the js dir
 js_packages = get_js(tower_path)
@@ -214,10 +208,12 @@ for item in olddata.values():
 # Take the requirements file, and get license information where necessary
 cs = yolk.pypi.CheeseShop()
 for req in requirements.values():
-    cs_info = cs.release_data(req['name'],req['version'])
+    # name sanitization
+    (pname, pvers) = cs.query_versions_pypi(req['name'])
+    cs_info = cs.release_data(pname,req['version'])
     if not cs_info:
-        print "Couldn't find '%s-%s'" %(req['name'],req['version'])
-        if 'name' not in olddata:
+        print "Couldn't find '%s==%s'" %(req['name'],req['version'])
+        if req['name'] not in olddata:
             print "... and it's not in the current data. This needs fixed!"
             sys.exit(1)
         continue
@@ -241,7 +237,7 @@ for req in requirements.values():
 
 # Update JS package info
 for pkg in js:
-    if 'pkg' in olddata:
+    if pkg in olddata:
         data = olddata[pkg]
         new = js_packages[pkg]
         if new['license'] != 'UNKNOWN' and new['license'] != data['license']:

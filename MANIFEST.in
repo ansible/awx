@@ -6,9 +6,8 @@ recursive-include awx/ui/templates *.html
 recursive-include awx/ui/static *
 recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
+recursive-include requirements *.txt
 recursive-include config *
-recursive-include config/deb *
-recursive-include config/rpm *
 recursive-exclude awx devonly.py*
 recursive-exclude awx/api/tests *
 recursive-exclude awx/main/tests *
@@ -19,5 +18,6 @@ include tools/scripts/ansible-tower-service
 include tools/munin_monitors/*
 include tools/sosreport/*
 include COPYING
+include Makefile
 prune awx/public
 prune awx/projects

@@ -1,7 +1,8 @@
 Babel,BSD,http://babel.pocoo.org/,pip
-IPy,BSD,https://github.com/autocracy/python-ipy,pip
+Django,BSD,http://www.djangoproject.com/,pip
 Markdown,BSD,http://packages.python.org/Markdown/,pip
 PrettyTable,BSD,http://code.google.com/p/prettytable/,pip
+PyYAML,MIT,http://pyyaml.org/wiki/PyYAML,pip
 South,Apache 2.0,http://south.aeracode.org/,pip
 amqp,LGPL 2.1,http://github.com/celery/py-amqp,pip
 angular,MIT,https://github.com/angular/angular.js.git,js
@@ -27,8 +28,12 @@ bootstrap,MIT,https://github.com/twbs/bootstrap.git,js
 bootstrap-datepicker,Apache 2.0,https://github.com/eternicode/bootstrap-datepicker,js
 boto,MIT,https://github.com/boto/boto/,pip
 celery,BSD,http://celeryproject.org,pip
+cffi,MIT,http://cffi.readthedocs.org,pip
+cliff,Apache 2.0,https://launchpad.net/python-cliff,pip
+cmd2,MIT,http://packages.python.org/cmd2/,pip
 codemirror,MIT,https://github.com/codemirror/CodeMirror.git,js
 components-font-awesome,SIL Open Font License and MIT,http://fortawesome.github.io/Font-Awesome/,js
+cryptography,BSD or Apache 2.0,https://github.com/pyca/cryptography,pip
 d2to1,BSD,http://pypi.python.org/pypi/d2to1,pip
 d3,BSD,https://github.com/mbostock/d3.git,js
 distribute,PSF or ZPL,http://packages.python.org/distribute,pip
@@ -37,6 +42,7 @@ django-celery,BSD,http://celeryproject.org,pip
 django-crum,BSD,https://projects.ninemoreminutes.com/projects/django-crum/,pip
 django-extensions,MIT,http://github.com/django-extensions/django-extensions,pip
 django-jsonfield,BSD,http://bitbucket.org/schinckel/django-jsonfield/,pip
+django-polymorphic,BSD,https://github.com/chrisglass/django_polymorphic,pip
 django-qsstats-magic,MIT,http://bitbucket.org/kmike/django-qsstats-magic/,pip
 django-rest-framework-mongoengine,MIT,https://github.com/umutbozkurt/django-rest-framework-mongoengine,pip
 django-split-settings,BSD,http://github.com/2general/django-split-settings,pip
@@ -46,10 +52,16 @@ djangorestframework,BSD,http://www.django-rest-framework.org,pip
 dogpile.cache,BSD,http://bitbucket.org/zzzeek/dogpile.cache,pip
 dogpile.core,BSD,http://bitbucket.org/zzzeek/dogpile.core,pip
 ember-cli-test-loader,MIT,https://github.com/rjackson/ember-cli-test-loader,js
+enum34,BSD,https://pypi.python.org/pypi/enum34,pip
+gevent,MIT,http://www.gevent.org/,pip
 gevent-socketio,BSD,https://github.com/abourget/gevent-socketio,pip
 gevent-websocket,Apache 2.0,https://bitbucket.org/Jeffrey/gevent-websocket,pip
+greenlet,MIT,https://github.com/python-greenlet/greenlet,pip
 httplib2,MIT,https://github.com/jcgregorio/httplib2,pip
+idna,BSD,https://github.com/kjd/idna,pip
 importlib,PSF,https://pypi.python.org/pypi/importlib,pip
+ipaddress,PSF,https://github.com/phihag/ipaddress,pip
+ipy,BSD,https://github.com/autocracy/python-ipy,pip
 iso8601,MIT,https://bitbucket.org/micktwomey/pyiso8601,pip
 isodate,BSD,http://cheeseshop.python.org/pypi/isodate,pip
 jQuery.dotdotdot,MIT and GPL (*Ansible licenses via MIT),https://github.com/BeSite/jQuery.dotdotdot,js
@@ -59,19 +71,28 @@ jquery-ui,MIT,http://jqueryui.com/,js
 jqueryui,MIT,http://jqueryui.com/,js
 js-yaml,MIT,https://github.com/nodeca/js-yaml,js
 jsonlint,MIT,https://github.com/zaach/jsonlint.git,js
+jsonpatch,BSD,https://github.com/stefankoegl/python-json-patch,pip
+jsonpointer,BSD,https://github.com/stefankoegl/python-json-pointer,pip
+jsonschema,MIT,http://github.com/Julian/jsonschema,pip
 kapusta-jquery.sparkline,BSD,http://omnipotent.net/jquery.sparkline/,js
 keyring,PSF and MIT,http://bitbucket.org/kang/python-keyring-lib,pip
 kombu,BSD,http://kombu.readthedocs.org,pip
 loader.js,MIT,https://github.com/stefanpenner/loader.js,js
 lodash,MIT,https://github.com/lodash/lodash,js
 lrInfiniteScroll,MIT,https://github.com/lorenzofox3/lrInfiniteScroll,js
+lxml,BSD,http://lxml.de/,pip
 mock,BSD,http://www.voidspace.org.uk/python/mock/,pip
 moment,MIT,http://momentjs.com/,js
 mongoengine,MIT,http://mongoengine.org/,pip
+msgpack-python,Apache 2.0,http://msgpack.org/,pip
 netaddr,BSD,https://github.com/drkjam/netaddr/,pip
+netifaces,MIT,https://bitbucket.org/al45tair/netifaces,pip
 nvd3,Apache 2.0,http://www.nvd3.org,js
 ordereddict,MIT,https://pypi.python.org/pypi/ordereddict,pip
 os-client-config,Apache 2.0,http://www.openstack.org/,pip
+os-diskconfig-python-novaclient-ext,Apache 2.0,https://github.com/rackerlabs/os_diskconfig_python_novaclient_ext,pip
+os-networksv2-python-novaclient-ext,Apache 2.0,https://github.com/rackerlabs/os_networksv2_python_novaclient_ext,pip
+os-virtual-interfacesv2-python-novaclient-ext,Apache 2.0,https://github.com/rackerlabs/os_virtual_interfacesv2_ext,pip
 os_diskconfig_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/os_diskconfig_python_novaclient_ext,pip
 os_networksv2_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/os_networksv2_python_novaclient_ext,pip
 os_virtual_interfacesv2_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/os_virtual_interfacesv2_ext,pip
@@ -82,19 +103,29 @@ oslo.utils,Apache 2.0,http://launchpad.net/oslo,pip
 pbr,Apache 2.0,http://pypi.python.org/pypi/pbr,pip
 pexpect,ISC,http://pexpect.readthedocs.org/,pip
 pip,MIT,http://www.pip-installer.org,pip
+prettytable,BSD,http://code.google.com/p/prettytable/,pip
 psphere,Apache 2.0,https://github.com/jkinred/psphere,pip
+psycopg2,LGPL with exceptions or ZPL,http://initd.org/psycopg/,pip
+pyOpenSSL,Apache 2.0,https://github.com/pyca/pyopenssl,pip
+pyasn1,BSD,http://sourceforge.net/projects/pyasn1/,pip
+pycparser,BSD,https://github.com/eliben/pycparser,pip
+pycrypto,Public domain,http://www.pycrypto.org/,pip
+pymongo,Apache 2.0,http://github.com/mongodb/mongo-python-driver,pip
+pyparsing,MIT,http://pyparsing.wikispaces.com/,pip
 pyrax,Apache 2.0,https://github.com/rackspace/pyrax,pip
 python-cinderclient,Apache 2.0,http://www.openstack.org/,pip
 python-dateutil,BSD,https://dateutil.readthedocs.org,pip
 python-glanceclient,Apache 2.0,http://www.openstack.org/,pip
 python-ironicclient,Apache 2.0,http://www.openstack.org/,pip
 python-keystoneclient,Apache 2.0,http://www.openstack.org/,pip
+python-ldap,Python style,http://www.python-ldap.org/,pip
 python-neutronclient,Apache 2.0,http://www.openstack.org/,pip
 python-novaclient,Apache 2.0,https://git.openstack.org/cgit/openstack/python-novaclient,pip
 python-swiftclient,Apache 2.0,http://www.openstack.org/,pip
 python-troveclient,Apache 2.0,http://www.openstack.org/,pip
 pytz,MIT,http://pythonhosted.org/pytz,pip
 pywinrm,MIT,http://github.com/diyan/pywinrm/,pip
+pyzmq,LGPL+BSD,http://github.com/zeromq/pyzmq,pip
 rackspace-auth-openstack,Apache 2.0,https://github.com/rackerlabs/rackspace-auth-openstack,pip
 rackspace-novaclient,Apache 2.0,https://github.com/rackerlabs/rackspace-novaclient,pip
 rax_default_network_flags_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/rax_default_network_flags_python_novaclient_ext,pip
@@ -112,7 +143,11 @@ sizzle,MIT,https://github.com/jquery/sizzle.git,js
 socket.io-client,MIT,https://github.com/Automattic/socket.io-client.git,js
 stevedore,Apache 2.0,https://github.com/dreamhost/stevedore,pip
 suds,LGPL 3,https://fedorahosted.org/suds,pip
+superlance,BSD,http://supervisord.org,pip
 timezone-js,Apache 2.0,https://github.com/mde/timezone-js.git,js
 twitter,MIT,http://getbootstrap.com,js
 underscore,MIT,https://github.com/jashkenas/underscore,js
+warlock,Apache 2.0,http://github.com/bcwaldon/warlock,pip
+wheel,MIT,http://bitbucket.org/pypa/wheel/,pip
+wsgiref,PSF or ZPL,http://cheeseshop.python.org/pypi/wsgiref,pip
 xmltodict,MIT,https://github.com/martinblech/xmltodict,pip

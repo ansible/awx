@@ -627,7 +627,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         msg += '"%s" found in: "%s"' % (substr, string)
         self.assertEqual(count, 0, msg)
 
-    def check_found(self, string, substr, count, description=None, word_boundary=False):
+    def check_found(self, string, substr, count=-1, description=None, word_boundary=False):
         if word_boundary:
             count_actual = len(re.findall(r'\b%s\b' % re.escape(substr), string))
         else:
@@ -636,8 +636,11 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         msg = ''
         if description:
             msg = 'Test "%s".\n' % description
-        msg += 'Found %d occurances of "%s" instead of %d in: "%s"' % (count_actual, substr, count, string)
-        self.assertEqual(count_actual, count, msg)
+        if count == -1:
+            self.assertTrue(count_actual > 0)
+        else:
+            msg += 'Found %d occurances of "%s" instead of %d in: "%s"' % (count_actual, substr, count, string)
+            self.assertEqual(count_actual, count, msg)
         
     def check_job_result(self, job, expected='successful', expect_stdout=True,
                          expect_traceback=False):

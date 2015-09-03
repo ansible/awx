@@ -1,3 +1,4 @@
+-r requirements.txt
 ansible
 django-jenkins
 coverage

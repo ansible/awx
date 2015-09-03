@@ -7,6 +7,8 @@ TESTEM ?= ./node_modules/.bin/testem
 BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
 MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
+DEPS_SCRIPT ?= packaging/offline/deps.py
+AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 CLIENT_TEST_DIR ?= build_test
 
@@ -73,14 +75,33 @@ else
 endif
 DEBUILD = $(DEBUILD_BIN) $(DEBUILD_OPTS)
 DEB_PPA ?= reprepro
+DEB_ARCH ?= amd64
 
 # RPM build parameters
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
+
+# Offline TAR build parameters
+DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
+DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
+DIST_FULL = $(DIST)$(DIST_MAJOR)
+OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK = $(NAME)-offline-$(DIST_FULL)-latest.tar.gz
+
+DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
+ifeq ($(DISTRO),ubuntu)
+    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v --install-layout=deb
+else
+    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
+endif
+
+.DEFAULT_GOAL := build
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
@@ -89,7 +110,8 @@ MOCK_CFG ?=
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
 	deb deb-src debian reprepro setup_tarball \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
+	clean-offline setup_offline_tarball
 
 # Remove setup build files
 clean-tar:
@@ -124,6 +146,9 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
+clean-offline:
+	rm -rf offline-tar-build
+
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
 	rm -rf awx/lib/site-packages
@@ -140,21 +165,22 @@ push:
 	git push origin master
 
 # Install runtime, development and jenkins requirements
-requirements requirements_dev requirements_jenkins: %: real-% awx/lib/site-packages/oslo/__init__.py awx/lib/site-packages/dogpile/__init__.py
-
-# Create missing __init__.py files
-awx/lib/site-packages/%/__init__.py:
-	touch $@
+requirements requirements_dev requirements_jenkins: %: real-%
 
 # Install third-party requirements needed for development environment.
+# NOTE:
+#  * --target is only supported on newer versions of pip
+#  * https://github.com/pypa/pip/issues/3056 - the workaround is to override the `install-platlib`
+#  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
+#  * --target implies --ignore-installed
 real-requirements:
-	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --ignore-installed
+	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
 
 real-requirements_dev:
-	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --ignore-installed
+	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
 
 # Install third-party requirements needed for running unittests in jenkins
-real-requirements_jenkins: real-requirements
+real-requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
 	npm install csslint jshint
 
@@ -373,13 +399,13 @@ tar-build/$(SETUP_TAR_FILE):
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
+
+setup_tarball: tar-build/$(SETUP_TAR_FILE)
 	@echo "#############################################"
 	@echo "Setup artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
 	@echo "#############################################"
-
-setup_tarball: tar-build/$(SETUP_TAR_FILE)
 
 release_clean:
 	-(rm *.tar)
@@ -390,8 +416,30 @@ dist/$(SDIST_TAR_FILE):
 
 sdist: minjs requirements dist/$(SDIST_TAR_FILE)
 
+# Build setup offline tarball
+offline-tar-build:
+	mkdir -p $@
+
+offline-tar-build/$(DIST_FULL):
+	mkdir -p $@
+
+# TODO - Somehow share implementation with setup_tarball
+offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
+	cp -a setup offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME)
+	cd offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) -v -v -v
+	cd offline-tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
+	ln -sf $(OFFLINE_TAR_FILE) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+
+setup_offline_tarball: offline-tar-build offline-tar-build/$(DIST_FULL) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+	@echo "#############################################"
+	@echo "Offline artifacts:"
+	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+	@echo "#############################################"
+
 rpm-build:
-	mkdir -p rpm-build
+	mkdir -p $@
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
@@ -419,22 +467,22 @@ rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 
 mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 
-rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
+rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
 	@echo "#############################################"
 	@echo "RPM artifacts:"
-	@echo rpm-build/$(RPM_NVR).noarch.rpm
+	@echo rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	@echo "#############################################"
 
-mock-rpm: rpmtar rpm-build/$(RPM_NVR).noarch.rpm
+mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 
 ifeq ($(OFFICIAL),yes)
 rpm-build/$(GPG_FILE): rpm-build
 	gpg --export -a "${GPG_KEY}" > "$@"
 
-rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).noarch.rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).noarch.rpm
+rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
 
 deb-build/$(SDIST_TAR_NAME):
@@ -446,14 +494,14 @@ deb-build/$(SDIST_TAR_NAME):
 
 debian: sdist deb-build/$(SDIST_TAR_NAME)
 
-deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb:
+deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
 	@echo "#############################################"
 	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
+	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb
 	@echo "#############################################"
 
-deb: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
+deb: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb
 
 deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -S
@@ -465,7 +513,7 @@ deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes:
 deb-src: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
 
 deb-upload: deb
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_amd64.changes ; \
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).changes ; \
 
 deb-src-upload: deb-src
 	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
@@ -473,7 +521,7 @@ deb-src-upload: deb-src
 reprepro: deb
 	mkdir -p reprepro/conf
 	cp -a packaging/reprepro/* reprepro/conf/
-	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb ; \
+	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
 	for DIST in trusty precise ; do \
 	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
 	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
@@ -505,5 +553,11 @@ virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 docker-dev:
 	docker build --no-cache=true --rm=true -t ansible/tower_devel:latest tools/docker
 
+# TODO - figure out how to build the front-end and python requirements with
+# 'build'
+build:
+	$(PYTHON) setup.py build
+
+# TODO - only use --install-layout=deb on Debian
 install:
-	$(PYTHON) setup.py install egg_info -b ""
+	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
