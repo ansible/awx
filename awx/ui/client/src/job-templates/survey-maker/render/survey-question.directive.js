@@ -42,7 +42,8 @@ export default
                     {   question: '=',
                         selectedValue: '=ngModel',
                         surveyQuestions: '=',
-                        isRequired: '@ngRequired'
+                        isRequired: '@ngRequired',
+                        isDisabled: '@ngDisabled'
                     },
                 templateUrl: templateUrl('job-templates/survey-maker/render/survey-question'),
                 link: link

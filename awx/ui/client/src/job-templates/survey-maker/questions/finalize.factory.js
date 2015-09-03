@@ -81,7 +81,7 @@ export default
                 html += '<div class="row">';
                 html += '<div class="col-xs-8">';
                 html += '<div class="SurveyControls-selectWrapper">';
-                html += '<survey-question type="' + question.type + '" question="question" ng-required="' + question.required + '" ng-model="' + defaultScopePropertyName + '"></survey-question>';
+                html += '<survey-question type="' + question.type + '" question="question" ng-required="' + question.required + '" ng-model="' + defaultScopePropertyName + '" ng-disabled=true></survey-question>';
                 html += '</div>';
                 html += '</div>';
                 html += '</div>';

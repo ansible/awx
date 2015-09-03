@@ -46,7 +46,8 @@ export default
                         choices: '=',
                         question: '=',
                         isRequired: '=ngRequired',
-                        selectedValue: '=ngModel'
+                        selectedValue: '=ngModel',
+                        isDisabled: '=ngDisabled'
                     },
                     templateUrl: templateUrl('job-templates/survey-maker/render/multiple-choice'),
                     link: _.partial(link, $timeout)
