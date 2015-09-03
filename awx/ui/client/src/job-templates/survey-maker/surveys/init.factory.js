@@ -434,6 +434,11 @@ export default
                     }
                     data.choices = (scope.type.type === "multiplechoice") ? scope.choices : (scope.type.type === 'multiselect') ? scope.choices : "" ;
 
+                    if (data.choices !== "") {
+                        // remove duplicates from the choices
+                        data.choices = _.uniq(data.choices.split("\n")).join("\n");
+                    }
+
                     Wait('stop');
                     if(scope.mode === 'add' || scope.mode==="edit" && scope.can_edit === true){
                         $('#survey-save-button').removeAttr('disabled');
