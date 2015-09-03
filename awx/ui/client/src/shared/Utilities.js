@@ -695,25 +695,26 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             options = params.opts;
 
             $.fn.select2.amd.require([
-              "select2/utils",
-              "select2/dropdown",
-              "select2/dropdown/attachContainer",
-              "select2/dropdown/search",
-          ], function (Utils, DropdownAdapter, AttachContainer, DropdownSearch) {
+                'select2/utils',
+                'select2/dropdown',
+                'select2/dropdown/search',
+                'select2/dropdown/attachContainer',
+                'select2/dropdown/closeOnSelect',
+                'select2/dropdown/minimumResultsForSearch'
+          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch) {
 
-                var CustomAdapter = Utils.Decorate(
-                    Utils.Decorate(
-                        DropdownAdapter,
-                        DropdownSearch
-                    ),
-                      AttachContainer
-                 );
+              var CustomAdapter =
+                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch],
+                           function(Adapter, Decorator) {
+                               return Utils.Decorate(Adapter, Decorator);
+                           }, Dropdown);
 
                 $(element).select2({
-                    dropdownAdapter: CustomAdapter,
                     multiple: 'true',
                     theme: "bootstrap",
-                    width: '100%'
+                    width: '100%',
+                    minimumResultsForSearch: Infinity,
+                    dropdownAdapter: CustomAdapter
                 });
                 if(options){
                     for (var d = 0; d < $(element + " option").length; d++) {

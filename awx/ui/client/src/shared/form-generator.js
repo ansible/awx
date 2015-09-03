@@ -1117,15 +1117,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += buildId(field, fld, this.form);
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                        //used for select2 combo boxes
                         html += (field.multiSelect) ? "multiple " : "";
                         html += (field.readonly) ? "disabled " : "";
                         html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                             field.awRequiredWhen.variable + "\" " : "";
                         html += ">\n";
-                        html += "<option value=\"\">";
-                            // Add a custom default select 'value' (default text)
-                        html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
-                        html += "</option>\n";
+                        if(!field.multiSelect){
+                            html += "<option value=\"\">";
+                                // Add a custom default select 'value' (default text)
+                            html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
+                            html += "</option>\n";
+                        }
                         html += "</select>\n";
                             // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
