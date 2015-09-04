@@ -5,7 +5,7 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
-DEPS_SCRIPT ?= packaging/offline/deps.py
+DEPS_SCRIPT ?= packaging/bundle/deps.py
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 # Determine appropriate shasum command
