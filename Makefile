@@ -77,7 +77,13 @@ DEB_ARCH ?= amd64
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+ifeq ($(RPM_DIST),)
+RPM_DIST = .el6
+endif
 RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
+ifeq ($(RPM_ARCH),)
+RPM_ARCH = $(shell uname -m)
+endif
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
@@ -86,9 +92,9 @@ MOCK_CFG ?=
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
 DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_NAME = $(NAME)-offline-$(VERSION)-$(RELEASE).$(DIST_FULL)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-offline-$(DIST_FULL)-latest.tar.gz
+OFFLINE_TAR_LINK = $(NAME)-offline-latest.$(DIST_FULL).tar.gz
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
@@ -385,22 +391,19 @@ sdist: minjs dist/$(SDIST_TAR_FILE)
 offline-tar-build:
 	mkdir -p $@
 
-offline-tar-build/$(DIST_FULL):
-	mkdir -p $@
-
 # TODO - Somehow share implementation with setup_tarball
-offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
-	cp -a setup offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME)
-	cd offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) -v -v -v
-	cd offline-tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
-	ln -sf $(OFFLINE_TAR_FILE) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+offline-tar-build/$(OFFLINE_TAR_FILE):
+	cp -a setup offline-tar-build/$(OFFLINE_TAR_NAME)
+	cd offline-tar-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(OFFLINE_TAR_NAME) -v -v -v
+	cd offline-tar-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
+	ln -sf $(OFFLINE_TAR_FILE) offline-tar-build/$(OFFLINE_TAR_LINK)
 
-setup_offline_tarball: offline-tar-build offline-tar-build/$(DIST_FULL) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+setup_offline_tarball: offline-tar-build offline-tar-build/$(OFFLINE_TAR_FILE)
 	@echo "#############################################"
 	@echo "Offline artifacts:"
-	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
-	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+	@echo offline-tar-build/$(OFFLINE_TAR_FILE)
+	@echo offline-tar-build/$(OFFLINE_TAR_LINK)
 	@echo "#############################################"
 
 rpm-build:
