@@ -8,6 +8,15 @@ NODE ?= node
 DEPS_SCRIPT ?= packaging/offline/deps.py
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
+# Determine appropriate shasum command
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    SHASUM_BIN ?= sha256sum
+endif
+ifeq ($(UNAME_S),Darwin)
+    SHASUM_BIN ?= shasum -a 256
+endif
+
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
@@ -26,6 +35,7 @@ endif
 AWS_INSTANCE_COUNT ?= 0
 
 # GPG signature parameters (BETA key not yet used)
+GPG_BIN ?= gpg
 GPG_RELEASE = 442667A9
 GPG_BETA = D7B00447
 GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
@@ -43,13 +53,14 @@ ifeq ($(OFFICIAL),yes)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
     PACKER_BUILD_OPTS=-var-file=vars-release.json
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
     PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
+SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
@@ -74,8 +85,11 @@ DEB_PPA ?= reprepro
 DEB_ARCH ?= amd64
 
 # RPM build parameters
+MOCK_BIN ?= mock
+MOCK_CFG ?=
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
+# Provide a fallback value for RPM_DIST
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
 ifeq ($(RPM_DIST),)
 RPM_DIST = .el6
@@ -85,16 +99,15 @@ ifeq ($(RPM_ARCH),)
 RPM_ARCH = $(shell uname -m)
 endif
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
-MOCK_BIN ?= mock
-MOCK_CFG ?=
 
-# Offline TAR build parameters
+# TAR Bundle build parameters
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
 DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME = $(NAME)-offline-$(VERSION)-$(RELEASE).$(DIST_FULL)
+OFFLINE_TAR_NAME = $(NAME)-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-offline-latest.$(DIST_FULL).tar.gz
+OFFLINE_TAR_LINK = $(NAME)-bundle-latest.$(DIST_FULL).tar.gz
+OFFLINE_TAR_CHECKSUM=$(NAME)-bundle-CHECKSUM
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
@@ -113,7 +126,7 @@ endif
 	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
 	deb deb-src debian reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-offline setup_offline_tarball
+	clean-bundle setup_bundle_tarball
 
 # Remove setup build files
 clean-tar:
@@ -147,11 +160,11 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
-clean-offline:
-	rm -rf offline-tar-build
+clean-bundle:
+	rm -rf setup-bundle-build
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-offline
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
@@ -371,11 +384,19 @@ tar-build/$(SETUP_TAR_FILE):
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 
-setup_tarball: tar-build/$(SETUP_TAR_FILE)
+tar-build/$(SETUP_TAR_CHECKSUM):
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	    $(SHASUM_BIN) tar-build/$(NAME)*.tar.gz > $@ ; \
+	else \
+	    $(SHASUM_BIN) tar-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+	fi
+
+setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
 	@echo "Setup artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
+	@echo tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
 
 release_clean:
@@ -387,23 +408,27 @@ dist/$(SDIST_TAR_FILE):
 
 sdist: minjs dist/$(SDIST_TAR_FILE)
 
-# Build setup offline tarball
-offline-tar-build:
+# Build setup bundle tarball
+setup-bundle-build:
 	mkdir -p $@
 
 # TODO - Somehow share implementation with setup_tarball
-offline-tar-build/$(OFFLINE_TAR_FILE):
-	cp -a setup offline-tar-build/$(OFFLINE_TAR_NAME)
-	cd offline-tar-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(OFFLINE_TAR_NAME) -v -v -v
-	cd offline-tar-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
-	ln -sf $(OFFLINE_TAR_FILE) offline-tar-build/$(OFFLINE_TAR_LINK)
+setup-bundle-build/$(OFFLINE_TAR_FILE):
+	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
+	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
+	ln -sf $(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_LINK)
 
-setup_offline_tarball: offline-tar-build offline-tar-build/$(OFFLINE_TAR_FILE)
+setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
+	@$(SHASUM_BIN) tar-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ -
+
+setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
 	@echo "#############################################"
 	@echo "Offline artifacts:"
-	@echo offline-tar-build/$(OFFLINE_TAR_FILE)
-	@echo offline-tar-build/$(OFFLINE_TAR_LINK)
+	@echo setup-bundle-build/$(OFFLINE_TAR_FILE)
+	@echo setup-bundle-build/$(OFFLINE_TAR_LINK)
+	@echo setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
 	@echo "#############################################"
 
 rpm-build:
@@ -447,7 +472,7 @@ mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 
 ifeq ($(OFFICIAL),yes)
 rpm-build/$(GPG_FILE): rpm-build
-	gpg --export -a "${GPG_KEY}" > "$@"
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 
 rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
