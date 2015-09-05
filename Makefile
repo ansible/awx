@@ -386,9 +386,9 @@ tar-build/$(SETUP_TAR_FILE):
 
 tar-build/$(SETUP_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-	    $(SHASUM_BIN) tar-build/$(NAME)*.tar.gz > $@ ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $@ ; \
 	else \
-	    $(SHASUM_BIN) tar-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
 	fi
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
@@ -422,9 +422,9 @@ setup-bundle-build/$(OFFLINE_TAR_FILE):
 
 setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-        $(SHASUM_BIN) setup-bundle-build/$(NAME)*.tar.gz > $@ ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $@ ; \
 	else \
-        @$(SHASUM_BIN) setup-bundle-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
 	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
