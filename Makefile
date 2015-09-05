@@ -104,10 +104,10 @@ RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
 DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME = $(NAME)-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
+OFFLINE_TAR_NAME = $(NAME)-setup-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-bundle-latest.$(DIST_FULL).tar.gz
-OFFLINE_TAR_CHECKSUM=$(NAME)-bundle-CHECKSUM
+OFFLINE_TAR_LINK = $(NAME)-setup-bundle-latest.$(DIST_FULL).tar.gz
+OFFLINE_TAR_CHECKSUM=$(NAME)-setup-bundle-CHECKSUM
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
@@ -386,9 +386,9 @@ tar-build/$(SETUP_TAR_FILE):
 
 tar-build/$(SETUP_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $@ ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $(notdir $@) - ; \
 	fi
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
@@ -422,9 +422,9 @@ setup-bundle-build/$(OFFLINE_TAR_FILE):
 
 setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $@ ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $(notdir $@) - ; \
 	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
