@@ -421,7 +421,11 @@ setup-bundle-build/$(OFFLINE_TAR_FILE):
 	ln -sf $(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_LINK)
 
 setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
-	@$(SHASUM_BIN) setup-bundle-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ -
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+        $(SHASUM_BIN) setup-bundle-build/$(NAME)*.tar.gz > $@ ; \
+	else \
+        @$(SHASUM_BIN) setup-bundle-build/$(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $@ - ; \
+	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
 	@echo "#############################################"
