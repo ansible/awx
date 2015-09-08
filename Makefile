@@ -390,7 +390,7 @@ tar-build/$(SETUP_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
 	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --no-tty --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
@@ -426,7 +426,7 @@ setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
         cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --no-tty --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
