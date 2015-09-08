@@ -45,6 +45,7 @@ DEB_GPG_RELEASE_FILE = DEB-GPG-KEY-ansible-release
 
 # Determine GPG key for package signing
 ifeq ($(OFFICIAL),yes)
+    TAR_GPG_KEY = $(RPM_GPG_RELEASE)
     RPM_GPG_KEY = $(RPM_GPG_RELEASE)
     RPM_GPG_FILE = $(RPM_GPG_RELEASE_FILE)
     DEB_GPG_KEY = $(DEB_GPG_RELEASE)
@@ -389,7 +390,7 @@ tar-build/$(SETUP_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
 	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $(notdir $@) - ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
@@ -425,7 +426,7 @@ setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
         cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(GPG_RELEASE)" -o $(notdir $@) - ; \
+        cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
