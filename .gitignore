@@ -24,10 +24,10 @@ awx/ui/dist
 # Python & setuptools
 __pycache__
 build
-deb-build
-rpm-build
-tar-build
-/offline_tar-build
+/deb-build
+/rpm-build
+/tar-build
+/setup-bundle-build
 /dist
 *.egg-info
 *.py[c,o]
