@@ -15,3 +15,12 @@ expect {
     }
     eof { }
 }
+
+lassign [wait] pid spawnid os_error_flag retval
+
+if {$os_error_flag == 0} {
+    puts "exit status: $retval"
+} else {
+    puts "errno: $retval"
+}
+exit $retval
