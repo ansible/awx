@@ -20,8 +20,7 @@ import '../forms';
 
 export default
     angular.module('LicenseHelper', ['RestServices', 'Utilities', 'LicenseUpdateFormDefinition',
-    'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper', 'LicenseFormDefinition',
-    'AccessHelper'])
+    'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper', 'LicenseFormDefinition'])
 
 
     .factory('CheckLicense', ['$rootScope', '$compile', 'CreateDialog', 'Store',

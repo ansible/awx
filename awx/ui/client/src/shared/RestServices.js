@@ -54,10 +54,8 @@
  *
  */
 
-import AuthService from './AuthService';
-
 export default
-angular.module('RestServices', ['ngCookies', AuthService.name])
+angular.module('RestServices', ['ngCookies'])
     .factory('Rest', ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
         function ($http, $rootScope, $cookieStore, $q, Authorization) {
             return {

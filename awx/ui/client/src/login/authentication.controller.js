@@ -54,12 +54,13 @@
  * This is usage information.
  */
 
-
-export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty, ClearScope) {
+export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
+    'Timer', 'Empty', 'ClearScope', '$scope',
+    function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
+    Timer, Empty, ClearScope, scope) {
 
     var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain,
-        e, html, scope = $rootScope.$new();
+        e, html;
 
     setLoginFocus = function () {
         // Need to clear out any open dialog windows that might be open when this modal opens.
@@ -68,10 +69,8 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
     };
 
     loginAgain = function() {
-        Authorization.logout();
         setTimeout(function() {
-            //$location.url('/logout');
-            window.location = '/#/logout';  // if we get here, force user back to re-login
+            $location.path('/logout');
         }, 1000);
     };
 
@@ -107,55 +106,9 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
     Wait('stop');
     window.scrollTo(0,0);
 
-    if ($location.path() === '/logout') {
-        //if logout request, clear AuthToken and user session data
-        Authorization.logout();
-    }
-
-    e = angular.element(document.getElementById('login-modal-content'));
-    html = "<div class=\"modal-header login-header\">\n" +
-        "<img src=\"" + $basePath + "assets/tower_console_logo.png\" />" +
-        "</div>\n" +
-        "<div class=\"modal-body\" id=\"login-modal-body\">\n" +
-        "<div class=\"login-alert\" ng-show=\"!sessionExpired\">Welcome to Ansible Tower! &nbsp;Please sign in.</div>\n" +
-        "<div class=\"login-alert\" ng-show=\"sessionExpired\">Your session timed out due to inactivity. Please sign in.</div>\n" +
-        "<form id=\"login-form\" name=\"loginForm\" class=\"form-horizontal\" autocomplete=\"off\" novalidate >\n" +
-        "<div class=\"form-group\">\n" +
-        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk prepend-asterisk--login\">Username</label>\n" +
-        "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
-        "<input type=\"text\" name=\"login_username\" class=\"form-control\" ng-model=\"login_username\"" +
-        "id=\"login-username\" autocomplete=\"off\" required>\n" +
-        "<div class=\"error\" ng-show=\"loginForm.login_username.$dirty && loginForm.login_username.$error.required\">Please enter a username.</div>\n" +
-        "<div class=\"error api-error\" ng-bind=\"usernameError\"></div>\n" +
-        "</div>\n" +
-        "</div>\n" +
-        "<div class=\"form-group\">\n" +
-        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk prepend-asterisk--login\">Password</label>\n" +
-        "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
-        "<input type=\"password\" name=\"login_password\" id=\"login-password\" class=\"form-control\"" +
-        "ng-model=\"login_password\" required autocomplete=\"off\">\n" +
-        "<div class=\"error\" ng-show=\"loginForm.login_password.$dirty && loginForm.login_password.$error.required\">Please enter a password.</div>\n" +
-        "<div class=\"error api-error\" ng-bind=\"passwordError\"></div>\n" +
-        "</div>\n" +
-        "</div>\n" +
-        "</form>\n" +
-        "</div>\n" +
-        "<div class=\"modal-footer\">\n" +
-        "<button ng-click=\"systemLogin(login_username, login_password)\" id=\"login-button\" class=\"btn btn-primary\"><i class=\"fa fa-sign-in\"></i> Sign In</button>\n" +
-        "</div>\n";
-    e.empty().html(html);
-    $compile(e)(scope);
-
     // Set focus to username field
     $('#login-modal').on('shown.bs.modal', function () {
         setLoginFocus();
-    });
-
-    // Display the login dialog
-    $('#login-modal').modal({
-        show: true,
-        keyboard: false,
-        backdrop: 'static'
     });
 
     // Reset the login form
@@ -254,8 +207,4 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
                 });
         }
     };
-}
-
-Authenticate.$inject = ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty', 'ClearScope'
-];
+}];

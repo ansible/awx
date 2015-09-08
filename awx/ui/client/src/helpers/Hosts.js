@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 /* jshint loopfunc: true */
 /**
@@ -18,7 +18,7 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'HostListDefinition',
-               'SearchHelper', 'PaginationHelpers', listGenerator.name, 'AuthService', 'HostsHelper',
+               'SearchHelper', 'PaginationHelpers', listGenerator.name, 'HostsHelper',
                'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper',
                'GroupListDefinition'

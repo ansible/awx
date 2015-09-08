@@ -8,7 +8,6 @@ import './forms';
 import './lists';
 
 import AboutAnsible from "./helpers/AboutAnsible";
-import Access from "./helpers/Access";
 import Children from "./helpers/Children";
 import Credentials from "./helpers/Credentials";
 import EventViewer from "./helpers/EventViewer";
@@ -45,7 +44,6 @@ import AdhocHelper from "./helpers/Adhoc";
 
 export
     {   AboutAnsible,
-        Access,
         Children,
         Credentials,
         EventViewer,
