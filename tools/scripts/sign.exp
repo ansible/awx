@@ -1,0 +1,17 @@
+#!/usr/bin/expect -f
+#
+# Helper script to respond to passphrase prompts from the gpg command.
+#
+
+set timeout 600
+set command [join $argv]
+set passphrase $env(PASSPHRASE)
+puts "# $command"
+spawn -noecho {*}$command
+expect {
+    -exact "Enter passphrase: " {
+        send -- "$passphrase\r"
+        exp_continue
+    }
+    eof { }
+}
