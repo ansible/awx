@@ -36,15 +36,19 @@ AWS_INSTANCE_COUNT ?= 0
 
 # GPG signature parameters (BETA key not yet used)
 GPG_BIN ?= gpg
-GPG_RELEASE = 442667A9
-GPG_BETA = D7B00447
-GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
-GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
+RPM_GPG_RELEASE = 442667A9
+RPM_GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
+RPM_GPG_BETA = D7B00447
+RPM_GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
+DEB_GPG_RELEASE = 3DD29021
+DEB_GPG_RELEASE_FILE = DEB-GPG-KEY-ansible-release
 
-# Determine GPG key for RPM signing
+# Determine GPG key for package signing
 ifeq ($(OFFICIAL),yes)
-    GPG_KEY = $(GPG_RELEASE)
-    GPG_FILE = $(GPG_RELEASE_FILE)
+    RPM_GPG_KEY = $(RPM_GPG_RELEASE)
+    RPM_GPG_FILE = $(RPM_GPG_RELEASE_FILE)
+    DEB_GPG_KEY = $(DEB_GPG_RELEASE)
+    DEB_GPG_FILE = $(DEB_GPG_RELEASE_FILE)
 endif
 
 # TAR build parameters
@@ -69,11 +73,8 @@ DPUT_BIN ?= dput
 DPUT_OPTS ?=
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
-    # Sign OFFICIAL builds using 'DEBSIGN_KEYID'
-    # DEBSIGN_KEYID is required when signing
-    ifneq ($(DEBSIGN_KEYID),)
-        DEBUILD_OPTS += -k$(DEBSIGN_KEYID)
-    endif
+    # Sign official builds
+    DEBUILD_OPTS += -k$(DEB_GPG_KEY)
 else
     DEB_DIST ?= unstable
     # Do not sign development builds
@@ -475,11 +476,11 @@ rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 
 ifeq ($(OFFICIAL),yes)
-rpm-build/$(GPG_FILE): rpm-build
-	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
+rpm-build/$(RPM_GPG_FILE): rpm-build
+	$(GPG_BIN) --export -a "${RPM_GPG_KEY}" > "$@"
 
-rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+rpm-sign: rpm-build/$(RPM_GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(RPM_GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
 
 deb-build/$(SDIST_TAR_NAME):
