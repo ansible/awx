@@ -9,7 +9,7 @@ set passphrase $env(PASSPHRASE)
 puts "# $command"
 spawn -noecho {*}$command
 expect {
-    -exact "Enter passphrase: " {
+    -exact -nocase "enter passphrase: " {
         send -- "$passphrase\r"
         exp_continue
     }
