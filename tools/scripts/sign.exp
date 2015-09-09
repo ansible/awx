@@ -4,14 +4,32 @@
 #
 
 set timeout 600
+
+# Optionally print usage message
+if {[llength $argv] <= 0} {
+  puts "Usage: sign.exp <command>"
+  exit 1
+}
+
+# Process arguments
 set command [join $argv]
-set passphrase $env(PASSPHRASE)
-puts "# $command"
-spawn -noecho {*}$command
+
+if { [info exists env(PASSPHRASE) ] } {
+   set passphrase $env(PASSPHRASE)
+} else {
+   set passphrase ""
+}
+
+# Run the desired command
+spawn {*}$command
 expect {
     -exact -nocase "enter passphrase: " {
         send -- "$passphrase\r"
         exp_continue
+    }
+    timeout {
+        puts "[error] expect timeout"
+        exit 1
     }
     eof { }
 }
