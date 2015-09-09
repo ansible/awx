@@ -28,6 +28,10 @@ expect {
         send -- "$passphrase\r"
         exp_continue
     }
+    -nocase "enter pass phrase:" {
+        send -- "$passphrase\r"
+        exp_continue
+    }
     timeout {
         puts "expect timeout"
         exit 1
