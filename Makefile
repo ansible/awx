@@ -484,6 +484,9 @@ rpm-sign: rpm-build/$(RPM_GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	rpm --define "_signature gpg" --define "_gpg_name $(RPM_GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
 
+deb-build:
+	mkdir -p $@
+
 deb-build/$(SDIST_TAR_NAME):
 	mkdir -p deb-build
 	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
@@ -491,7 +494,14 @@ deb-build/$(SDIST_TAR_NAME):
 	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
+ifeq ($(OFFICIAL),yes)
+debian: sdist deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_GPG_FILE)
+
+deb-build/$(DEB_GPG_FILE): deb-build
+	$(GPG_BIN) --export -a "${DEB_GPG_KEY}" > "$@"
+else
 debian: sdist deb-build/$(SDIST_TAR_NAME)
+endif
 
 deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
@@ -518,18 +528,26 @@ deb-src-upload: deb-src
 	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
 
 reprepro: deb
-	mkdir -p reprepro/conf
-	cp -a packaging/reprepro/* reprepro/conf/
+	mkdir -p $@/conf
+	cp -a packaging/reprepro/* $@/conf/
+	if [ "$(OFFICIAL)" == "yes" ] ; then \
+        echo "ask-passphrase" >> $@/conf; \
+        sed -i -e 's|^\(Codename:\)|SignWith: $(DEB_GPG_KEY)\n\1|' $@/distributions ; \
+    fi
 	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
 	for DIST in trusty precise ; do \
 	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
-	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
+	    echo reprepro --export=force -b $@ remove $${DIST} $(NAME) ; \
 	done; \
-	reprepro --export=force -b reprepro clearvanished; \
+	reprepro --export=force -b $@ clearvanished; \
 	for DIST in trusty precise ; do \
 	    echo "Adding $${DEB} to the $${DIST} apt repo"; \
-	    reprepro --keepunreferencedfiles --export=force -b reprepro --ignore=brokenold includedeb $${DIST} $${DEB} ; \
+	    reprepro --keepunreferencedfiles --export=force -b $@ --ignore=brokenold includedeb $${DIST} $${DEB} ; \
 	done; \
+
+#
+# Packer build targets
+#
 
 amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
@@ -557,6 +575,5 @@ docker-dev:
 build:
 	$(PYTHON) setup.py build
 
-# TODO - only use --install-layout=deb on Debian
 install:
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
