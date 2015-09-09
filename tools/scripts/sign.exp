@@ -23,7 +23,7 @@ if { [info exists env(PASSPHRASE) ] } {
 # Run the desired command
 spawn {*}$command
 expect {
-    -exact -nocase "enter passphrase: " {
+    -nocase "enter passphrase: " {
         send -- "$passphrase\r"
         exp_continue
     }
