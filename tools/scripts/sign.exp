@@ -3,7 +3,8 @@
 # Helper script to respond to passphrase prompts from the gpg command.
 #
 
-set timeout 600
+# Disable timeout
+set timeout -1
 
 # Optionally print usage message
 if {[llength $argv] <= 0} {
@@ -28,7 +29,7 @@ expect {
         exp_continue
     }
     timeout {
-        puts "[error] expect timeout"
+        puts "expect timeout"
         exit 1
     }
     eof { }
