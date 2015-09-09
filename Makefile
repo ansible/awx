@@ -529,11 +529,11 @@ deb-src-upload: deb-src
 
 reprepro: deb
 	mkdir -p $@/conf
-	cp -a packaging/reprepro $@/conf
+	cp -a packaging/reprepro/* $@/conf/
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-        echo "ask-passphrase" >> $@/conf/options; \
-        sed -i -e 's|^\(Codename:\)|SignWith: $(DEB_GPG_KEY)\n\1|' $@/conf/distributions ; \
-    fi
+	    echo "ask-passphrase" >> $@/conf/options; \
+	    sed -i -e 's|^\(Codename:\)|SignWith: $(DEB_GPG_KEY)\n\1|' $@/conf/distributions ; \
+	fi
 	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
 	for DIST in trusty precise ; do \
 	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
