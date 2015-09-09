@@ -550,9 +550,6 @@ packaging/packer/output-virtualbox-iso/centos-7.ovf:
 
 virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
-docker-dev:
-	docker build --no-cache=true --rm=true -t ansible/tower_devel:latest tools/docker
-
 # TODO - figure out how to build the front-end and python requirements with
 # 'build'
 build:
@@ -561,3 +558,7 @@ build:
 # TODO - only use --install-layout=deb on Debian
 install:
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
+
+# Docker Compose Development environment
+docker-compose:
+	docker-compose -f tools/docker-compose.yml up --no-recreate

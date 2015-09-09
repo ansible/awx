@@ -86,5 +86,6 @@ nohup.out
 reports
 
 # AWX python libs populated by requirements.txt
+awx/lib/.deps_built
 awx/lib/site-packages
 
