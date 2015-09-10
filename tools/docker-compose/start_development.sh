@@ -18,7 +18,13 @@ elif [ -f "/tower_devel/ansible-tower/manage.py" ]; then
 else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
-make develop
+
+if [ -f "/.develop_run" ]; then
+    echo "Skipping 'make develop' step since it has already run - remove /.develop_run to force it"
+else
+    make develop
+    touch /.develop_run
+fi
 
 # Check if we need to build dependencies
 if [ -f "awx/lib/.deps_built" ]; then
