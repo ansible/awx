@@ -46,7 +46,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
                         $rootScope.$emit('ConfigReady');
                     }
 
-                }, function(response) {
+                }, function() {
                     //local_settings.json not found
                     $log.info('local_settings.json not found');
                     $rootScope.$emit('ConfigReady');

@@ -55,7 +55,8 @@ import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} fro
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
-import './shared/RestServices';
+
+import RestServices from './rest/main';
 import './shared/api-loader';
 import './shared/form-generator';
 import './shared/Modal';
@@ -78,7 +79,7 @@ var tower = angular.module('Tower', [
     'ngRoute',
     'ngSanitize',
     'ngCookies',
-    'RestServices',
+    RestServices.name,
     routeExtensions.name,
     browserData.name,
     breadcrumbs.name,
@@ -878,7 +879,6 @@ var tower = angular.module('Tower', [
 
                 $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
-                $rootScope.sessionTimer = Timer.init();
 
                 if ($rootScope.removeOpenSocket) {
                     $rootScope.removeOpenSocket();
@@ -976,12 +976,12 @@ var tower = angular.module('Tower', [
                     }
 
                     if (Authorization.isUserLoggedIn() === false) {
-                        if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
+                        if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $location.path('/login');
                         }
                     } else if ($rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
-                        if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
+                        if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $rootScope.sessionTimer.expireSession();
                             if (sock) {
                                 sock.socket.socket.disconnect();
@@ -1010,6 +1010,7 @@ var tower = angular.module('Tower', [
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if($location.$$url !== '/login'){
+                        $rootScope.sessionTimer = Timer.init();
                         $rootScope.$emit('OpenSocket');
                         pendoService.issuePendoIdentity();
                     }

@@ -55,8 +55,7 @@
  */
 
 export default
-angular.module('RestServices', ['ngCookies'])
-    .factory('Rest', ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
+    ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
         function ($http, $rootScope, $cookieStore, $q, Authorization) {
             return {
 
@@ -269,4 +268,4 @@ angular.module('RestServices', ['ngCookies'])
                 }
             };
         }
-    ]);
+    ];
