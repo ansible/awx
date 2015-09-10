@@ -4,6 +4,7 @@ OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
+TESTEM_DEBUG_BROWSER ?= Chrome
 BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
 MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
@@ -348,17 +349,28 @@ minjs: awx/ui/static node_modules clean-ui Brocfile.js
 testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
 testjs: awx/ui/build_test node-tests
 
-# Performs minified, compressed build to awx/ui/static and runs browsers tests with testem ci
-testjs_ci: UI_FLAGS=--compress --no-docs --no-debug --browser-tests $(EXTRA_UI_FLAGS)
-testjs_ci: awx/ui/static testem.yml browser-tests
+# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci
+testjs_ci: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
+testjs_ci: awx/ui/static testem.yml browser-tests-ci
+
+# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci in Chrome
+testjs_debug: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
+testjs_debug: awx/ui/static testem.yml browser-tests-debug
 
 # Runs node tests via mocha without building
 node-tests:
 	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js') $(MOCHA_FLAGS)
 
-# Runs browser tests using settings from `testem.yml`
-browser-tests:
+# Runs browser tests on PhantomJS.  Outputs the results in a consumable manner for Jenkins.
+browser-tests-ci:
 	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
+
+# Runs browser tests using settings from `testem.yml` you can pass in the browser you'd
+# like to run the tests on (Defaults to Chrome, other options Safari, Firefox, and PhantomJS).
+# If you want to run the tests in Node (which is the quickest, but also more difficult to debug),
+# make sure to run the testjs/node-tests targets
+browser-tests-debug:
+	PATH=./node_modules/.bin:$(PATH) $(TESTEM) --file testem.yml -l $(TESTEM_DEBUG_BROWSER)
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
