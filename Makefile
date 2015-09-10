@@ -5,6 +5,7 @@ PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
+NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
@@ -193,7 +194,7 @@ real-requirements_dev:
 # Install third-party requirements needed for running unittests in jenkins
 real-requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
-	npm install csslint jshint
+	$(NPM_BIN) install csslint jshint
 
 # "Install" ansible-tower package in development mode.
 develop:
@@ -345,7 +346,7 @@ sync_ui: node_modules Brocfile.js
 
 # Update local npm install
 node_modules: package.json
-	npm install
+	$(NPM_BIN) install
 	touch $@
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
