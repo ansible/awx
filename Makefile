@@ -36,20 +36,15 @@ AWS_INSTANCE_COUNT ?= 0
 
 # GPG signature parameters (BETA key not yet used)
 GPG_BIN ?= gpg
-RPM_GPG_RELEASE = 442667A9
-RPM_GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
-RPM_GPG_BETA = D7B00447
-RPM_GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
-DEB_GPG_RELEASE = 3DD29021
-DEB_GPG_RELEASE_FILE = DEB-GPG-KEY-ansible-release
+GPG_RELEASE = 442667A9
+GPG_RELEASE_FILE = GPG-KEY-ansible-release
+GPG_BETA = D7B00447
+GPG_BETA_FILE = GPG-KEY-ansible-beta
 
 # Determine GPG key for package signing
 ifeq ($(OFFICIAL),yes)
-    TAR_GPG_KEY = $(RPM_GPG_RELEASE)
-    RPM_GPG_KEY = $(RPM_GPG_RELEASE)
-    RPM_GPG_FILE = $(RPM_GPG_RELEASE_FILE)
-    DEB_GPG_KEY = $(DEB_GPG_RELEASE)
-    DEB_GPG_FILE = $(DEB_GPG_RELEASE_FILE)
+    GPG_KEY = $(GPG_RELEASE)
+    GPG_FILE = $(GPG_RELEASE_FILE)
 endif
 
 # TAR build parameters
@@ -75,7 +70,7 @@ DPUT_OPTS ?=
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
     # Sign official builds
-    DEBUILD_OPTS += -k$(DEB_GPG_KEY)
+    DEBUILD_OPTS += -k$(GPG_KEY)
 else
     DEB_DIST ?= unstable
     # Do not sign development builds
@@ -390,7 +385,7 @@ tar-build/$(SETUP_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
 	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
@@ -426,7 +421,7 @@ setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
 	@if [ "$(OFFICIAL)" != "yes" ] ; then \
 	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
 	else \
-	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(TAR_GPG_KEY)" -o $(notdir $@) - ; \
+	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
 	fi
 
 setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
@@ -477,11 +472,11 @@ rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 
 ifeq ($(OFFICIAL),yes)
-rpm-build/$(RPM_GPG_FILE): rpm-build
-	$(GPG_BIN) --export -a "${RPM_GPG_KEY}" > "$@"
+rpm-build/$(GPG_FILE): rpm-build
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 
-rpm-sign: rpm-build/$(RPM_GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(RPM_GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
 
 deb-build:
@@ -495,10 +490,10 @@ deb-build/$(SDIST_TAR_NAME):
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
 ifeq ($(OFFICIAL),yes)
-debian: sdist deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_GPG_FILE)
+debian: sdist deb-build/$(SDIST_TAR_NAME) deb-build/$(GPG_FILE)
 
-deb-build/$(DEB_GPG_FILE): deb-build
-	$(GPG_BIN) --export -a "${DEB_GPG_KEY}" > "$@"
+deb-build/$(GPG_FILE): deb-build
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 else
 debian: sdist deb-build/$(SDIST_TAR_NAME)
 endif
@@ -532,7 +527,7 @@ reprepro: deb
 	cp -a packaging/reprepro/* $@/conf/
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	    echo "ask-passphrase" >> $@/conf/options; \
-	    sed -i -e 's|^\(Codename:\)|SignWith: $(DEB_GPG_KEY)\n\1|' $@/conf/distributions ; \
+	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/conf/distributions ; \
 	fi
 	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
 	for DIST in trusty precise ; do \
