@@ -27,7 +27,7 @@ __pycache__
 /deb-build
 /rpm-build
 /tar-build
-/offline_tar-build
+/setup-bundle-build
 /dist
 *.egg-info
 *.py[c,o]

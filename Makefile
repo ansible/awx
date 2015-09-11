@@ -8,10 +8,20 @@ TESTEM_DEBUG_BROWSER ?= Chrome
 BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
 MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
-DEPS_SCRIPT ?= packaging/offline/deps.py
+NPM_BIN ?= npm
+DEPS_SCRIPT ?= packaging/bundle/deps.py
 AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
 
 CLIENT_TEST_DIR ?= build_test
+
+# Determine appropriate shasum command
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    SHASUM_BIN ?= sha256sum
+endif
+ifeq ($(UNAME_S),Darwin)
+    SHASUM_BIN ?= shasum -a 256
+endif
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -31,12 +41,13 @@ endif
 AWS_INSTANCE_COUNT ?= 0
 
 # GPG signature parameters (BETA key not yet used)
+GPG_BIN ?= gpg
 GPG_RELEASE = 442667A9
+GPG_RELEASE_FILE = GPG-KEY-ansible-release
 GPG_BETA = D7B00447
-GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
-GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
+GPG_BETA_FILE = GPG-KEY-ansible-beta
 
-# Determine GPG key for RPM signing
+# Determine GPG key for package signing
 ifeq ($(OFFICIAL),yes)
     GPG_KEY = $(GPG_RELEASE)
     GPG_FILE = $(GPG_RELEASE_FILE)
@@ -48,13 +59,14 @@ ifeq ($(OFFICIAL),yes)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
     PACKER_BUILD_OPTS=-var-file=vars-release.json
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
     PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
+SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
@@ -63,11 +75,8 @@ DPUT_BIN ?= dput
 DPUT_OPTS ?=
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
-    # Sign OFFICIAL builds using 'DEBSIGN_KEYID'
-    # DEBSIGN_KEYID is required when signing
-    ifneq ($(DEBSIGN_KEYID),)
-        DEBUILD_OPTS += -k$(DEBSIGN_KEYID)
-    endif
+    # Sign official builds
+    DEBUILD_OPTS += -k$(GPG_KEY)
 else
     DEB_DIST ?= unstable
     # Do not sign development builds
@@ -79,21 +88,29 @@ DEB_PPA ?= reprepro
 DEB_ARCH ?= amd64
 
 # RPM build parameters
-RPM_SPECDIR= packaging/rpm
-RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
-RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
-RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
+RPM_SPECDIR= packaging/rpm
+RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
+# Provide a fallback value for RPM_DIST
+RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+ifeq ($(RPM_DIST),)
+RPM_DIST = .el6
+endif
+RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
+ifeq ($(RPM_ARCH),)
+RPM_ARCH = $(shell uname -m)
+endif
+RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
-# Offline TAR build parameters
+# TAR Bundle build parameters
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
 DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
 DIST_FULL = $(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME = $(NAME)-offline-$(DIST_FULL)-$(VERSION)-$(RELEASE)
+OFFLINE_TAR_NAME = $(NAME)-setup-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
 OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-offline-$(DIST_FULL)-latest.tar.gz
+OFFLINE_TAR_LINK = $(NAME)-setup-bundle-latest.$(DIST_FULL).tar.gz
+OFFLINE_TAR_CHECKSUM=$(NAME)-setup-bundle-CHECKSUM
 
 DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
 ifeq ($(DISTRO),ubuntu)
@@ -112,7 +129,7 @@ endif
 	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
 	deb deb-src debian reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-offline setup_offline_tarball
+	clean-bundle setup_bundle_tarball
 
 # Remove setup build files
 clean-tar:
@@ -147,11 +164,11 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
-clean-offline:
-	rm -rf offline-tar-build
+clean-bundle:
+	rm -rf setup-bundle-build
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
@@ -183,7 +200,7 @@ real-requirements_dev:
 # Install third-party requirements needed for running unittests in jenkins
 real-requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
-	npm install csslint jshint
+	$(NPM_BIN) install csslint jshint
 
 # "Install" ansible-tower package in development mode.
 develop:
@@ -332,7 +349,7 @@ testem.yml: packaging/node/testem.yml
 
 # Update local npm install
 node_modules: package.json
-	npm install
+	$(NPM_BIN) install
 	touch $@
 
 awx/ui/%: node_modules clean-ui Brocfile.js bower.json
@@ -412,11 +429,19 @@ tar-build/$(SETUP_TAR_FILE):
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 
-setup_tarball: tar-build/$(SETUP_TAR_FILE)
+tar-build/$(SETUP_TAR_CHECKSUM):
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
+	else \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
+	fi
+
+setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
 	@echo "Setup artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
+	@echo tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
 
 release_clean:
@@ -428,26 +453,31 @@ dist/$(SDIST_TAR_FILE):
 
 sdist: minjs requirements dist/$(SDIST_TAR_FILE)
 
-# Build setup offline tarball
-offline-tar-build:
-	mkdir -p $@
-
-offline-tar-build/$(DIST_FULL):
+# Build setup bundle tarball
+setup-bundle-build:
 	mkdir -p $@
 
 # TODO - Somehow share implementation with setup_tarball
-offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE):
-	cp -a setup offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME)
-	cd offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_NAME) -v -v -v
-	cd offline-tar-build/$(DIST_FULL) && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
-	ln -sf $(OFFLINE_TAR_FILE) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+setup-bundle-build/$(OFFLINE_TAR_FILE):
+	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
+	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
+	ln -sf $(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_LINK)
 
-setup_offline_tarball: offline-tar-build offline-tar-build/$(DIST_FULL) offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
+setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
+	else \
+	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
+	fi
+
+setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
 	@echo "#############################################"
 	@echo "Offline artifacts:"
-	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_FILE)
-	@echo offline-tar-build/$(DIST_FULL)/$(OFFLINE_TAR_LINK)
+	@echo setup-bundle-build/$(OFFLINE_TAR_FILE)
+	@echo setup-bundle-build/$(OFFLINE_TAR_LINK)
+	@echo setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
 	@echo "#############################################"
 
 rpm-build:
@@ -491,11 +521,14 @@ mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 
 ifeq ($(OFFICIAL),yes)
 rpm-build/$(GPG_FILE): rpm-build
-	gpg --export -a "${GPG_KEY}" > "$@"
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 
 rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
+
+deb-build:
+	mkdir -p $@
 
 deb-build/$(SDIST_TAR_NAME):
 	mkdir -p deb-build
@@ -504,7 +537,14 @@ deb-build/$(SDIST_TAR_NAME):
 	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
+ifeq ($(OFFICIAL),yes)
+debian: sdist deb-build/$(SDIST_TAR_NAME) deb-build/$(GPG_FILE)
+
+deb-build/$(GPG_FILE): deb-build
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
+else
 debian: sdist deb-build/$(SDIST_TAR_NAME)
+endif
 
 deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
@@ -531,18 +571,26 @@ deb-src-upload: deb-src
 	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
 
 reprepro: deb
-	mkdir -p reprepro/conf
-	cp -a packaging/reprepro/* reprepro/conf/
+	mkdir -p $@/conf
+	cp -a packaging/reprepro/* $@/conf/
+	if [ "$(OFFICIAL)" = "yes" ] ; then \
+	    echo "ask-passphrase" >> $@/conf/options; \
+	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/conf/distributions ; \
+	fi
 	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
 	for DIST in trusty precise ; do \
 	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
-	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
+	    echo reprepro --export=force -b $@ remove $${DIST} $(NAME) ; \
 	done; \
-	reprepro --export=force -b reprepro clearvanished; \
+	reprepro --export=force -b $@ clearvanished; \
 	for DIST in trusty precise ; do \
 	    echo "Adding $${DEB} to the $${DIST} apt repo"; \
-	    reprepro --keepunreferencedfiles --export=force -b reprepro --ignore=brokenold includedeb $${DIST} $${DEB} ; \
+	    reprepro --keepunreferencedfiles --export=force -b $@ --ignore=brokenold includedeb $${DIST} $${DEB} ; \
 	done; \
+
+#
+# Packer build targets
+#
 
 amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
@@ -567,7 +615,6 @@ virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 build:
 	$(PYTHON) setup.py build
 
-# TODO - only use --install-layout=deb on Debian
 install:
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
