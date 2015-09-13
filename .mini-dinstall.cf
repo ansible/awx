@@ -1,0 +1,16 @@
+[DEFAULT]
+archivedir = FIXME/deb-repo
+mail_to =
+verify_sigs = false
+architectures = all, amd64
+archive_style = flat
+generate_release = true
+mail_on_success = false
+release_codename = ansible-tower
+release_description = Ansible Tower
+release_label = ansible-tower
+release_origin = ansible-tower
+
+[trusty]
+
+[precise]
