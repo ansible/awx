@@ -869,16 +869,17 @@ class JobTemplateAccess(BaseAccess):
             Q(credential_id__in=credential_ids) | Q(credential__isnull=True),
             Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
-        org_admin_qs = base_qs.filter(
+        org_admin_ids = set(base_qs.filter(
             Q(project__organizations__admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        )
+        ).values_list('id', flat=True))
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
 
+        # TODO: I think the below queries can be combined
         deploy_permissions_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             active=True,
@@ -890,23 +891,24 @@ class JobTemplateAccess(BaseAccess):
             permission_type__in=allowed_check,
         ).values_list('id', flat=True))
 
-        perm_deploy_qs = base_qs.filter(
+        perm_deploy_ids = set(base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
             inventory__permissions__in=deploy_permissions_ids,
             project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
             inventory_id__in=inventory_ids,
-        )
+        ).values_list('id', flat=True))
 
-        perm_check_qs = base_qs.filter(
+        perm_check_ids = set(base_qs.filter(
             job_type=PERM_INVENTORY_CHECK,
             inventory__permissions__in=check_permissions_ids,
             project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
             inventory_id__in=inventory_ids,
-        )
+        ).values_list('id', flat=True))
 
-        return org_admin_qs | perm_deploy_qs | perm_check_qs
+        base_ids = org_admin_ids.union(perm_deploy_ids).union(perm_check_ids)
+        return base_qs.filter(id__in=base_ids)
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
@@ -1081,15 +1083,16 @@ class JobAccess(BaseAccess):
         base_qs = qs.filter(
             credential_id__in=credential_ids,
         )
-        org_admin_qs = base_qs.filter(
+        org_admin_ids = set(base_qs.filter(
             Q(project__organizations__admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        )
+        ).values_list('id', flat=True))
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
 
+        # TODO: I think the below queries can be combined
         deploy_permissions_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             active=True,
@@ -1101,22 +1104,22 @@ class JobAccess(BaseAccess):
             permission_type__in=allowed_check,
         ).values_list('id', flat=True))
 
-        perm_deploy_qs = base_qs.filter(
+        perm_deploy_ids = set(base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
             inventory__permissions__in=deploy_permissions_ids,
             project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
-        )
+        ).values_list('id', flat=True))
 
-        perm_check_qs = base_qs.filter(
+        perm_check_ids = set(base_qs.filter(
             job_type=PERM_INVENTORY_CHECK,
             inventory__permissions__in=check_permissions_ids,
             project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
-        )
+        ).values_list('id', flat=True))
 
-        # FIXME: I *think* this should work... needs more testing.
-        return org_admin_qs | perm_deploy_qs | perm_check_qs
+        base_ids = org_admin_ids.union(perm_deploy_ids).union(perm_check_ids)
+        return base_qs.filter(id__in=base_ids)
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
