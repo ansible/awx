@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:LoadConfig
@@ -22,42 +22,52 @@
 export default
 angular.module('LoadConfigHelper', ['Utilities'])
 
-.factory('LoadConfig', ['$log', '$rootScope', '$http', '$location', 'ProcessErrors', 'Store', function($log, $rootScope, $http, $location, ProcessErrors, Store) {
+.factory('LoadConfig', ['$log', '$rootScope', '$http', '$location',
+    'ProcessErrors', 'Store',
+    function($log, $rootScope, $http, $location, ProcessErrors, Store) {
     return function() {
 
         if ($rootScope.removeLoadConfig) {
             $rootScope.removeLoadConfig();
         }
         $rootScope.removeLoadConfig = $rootScope.$on('LoadConfig', function() {
-            // local_config.js not found, so we'll load config.js
-            $log.info('attempting to load config.js');
-            $http({ method:'GET', url: $basePath + 'config.js' })
+            $rootScope.enteredPath = $location.path();
+            // Load js/local_settings.json
+            $http({ method:'GET', url: $basePath + 'local_settings.json' })
                 .success(function(data) {
-                    $log.info('loaded config.js');
-                    $AnsibleConfig = eval(data);
-                    Store('AnsibleConfig', $AnsibleConfig);
-                    $rootScope.$emit('ConfigReady');
+                    $log.info('loaded local_settings.json');
+                    if(angular.isObject(data)){
+                        $AnsibleConfig = _.extend($AnsibleConfig, data);
+                        Store('AnsibleConfig', $AnsibleConfig);
+                        $rootScope.$emit('ConfigReady');
+                    }
+                    else {
+                        $log.info('local_settings.json is not a valid object');
+                        $rootScope.$emit('ConfigReady');
+                    }
+
                 })
-                .error(function(data, status) {
-                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to load ' + $basePath + '/config.js. GET status: ' + status
-                    });
+                .error(function() {
+                    //local_settings.json not found
+                    $log.info('local_settings.json not found');
+                    $rootScope.$emit('ConfigReady');
                 });
         });
 
-        $rootScope.enteredPath = $location.path();
-        // Load js/local_config.js
-        $http({ method:'GET', url: $basePath + '/local_config.js' })
+
+        // load config.js
+        $log.info('attempting to load config.js');
+        $http({ method:'GET', url: $basePath + 'config.js' })
             .success(function(data) {
-                $log.info('loaded local_config.js');
+                $log.info('loaded config.js');
                 $AnsibleConfig = eval(data);
                 Store('AnsibleConfig', $AnsibleConfig);
-                $rootScope.$emit('ConfigReady');
-            })
-            .error(function() {
-                //local_config.js not found
-                $log.info('local_config.js not found');
                 $rootScope.$emit('LoadConfig');
+            })
+            .error(function(data, status) {
+                ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                    msg: 'Failed to load ' + $basePath + '/config.js. GET status: ' + status
+                });
             });
     };
 }]);
