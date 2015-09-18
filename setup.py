@@ -22,6 +22,7 @@ etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
 bindir = "/usr/bin"
+docdir = "/usr/share/doc/ansible-tower"
 munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
@@ -122,6 +123,7 @@ setup(
                                  "config/awx-httpd-443.conf",
                                  "config/awx-munin.conf"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
+        ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % munin_plugin_path, ["tools/munin_monitors/tower_jobs",
                                     "tools/munin_monitors/callbackr_alive",
                                     "tools/munin_monitors/celery_alive",
