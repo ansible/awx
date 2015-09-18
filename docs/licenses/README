@@ -1,0 +1,9 @@
+The components listed herein have been integrated into Ansible, Inc.’s
+distribution of Ansible Tower. Ansible, Inc. supports Tower’s use of and
+interactions with these components for both development and production
+purposes, subject to applicable terms and conditions. Unless otherwise
+agreed to in writing, the use of Ansible Tower is subject to the Ansible
+Software Subscription and Services Agreement located at
+http://www.ansible.com/subscription-agreement. Ansible Tower is a
+proprietary product offered by Ansible, Inc. and its use is not intended to
+prohibit the rights under any open source license.
