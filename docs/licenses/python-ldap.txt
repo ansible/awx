@@ -1,0 +1,19 @@
+
+Mentioning a Python style license was my fault for two reasons:
+
+1. It is an obstacle to incorporate python-ldap into Python's standard lib.
+
+2. It's not precise enough as you already said.
+
+Mainly the term "Python style" was used to express that you should be able to
+do whatever you're allowed to do with Python.
+
+The two authors (David and me) writing most of the code could agree on a quite
+liberal open source license. But since we did not insist on written statements
+to agree upon a license for the few contributions made by others we would have
+to ask all contributors. Most of them are not subscribed to the list anymore I
+guess.
+
+Frankly I'm not sure what to do to clarify this unfortunate situation.
+
+Ciao, Michael.
