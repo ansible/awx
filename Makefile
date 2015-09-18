@@ -444,6 +444,7 @@ setup-bundle-build:
 # TODO - Somehow share implementation with setup_tarball
 setup-bundle-build/$(OFFLINE_TAR_FILE):
 	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	cp -a docs/bundled_licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/licenses
 	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
 	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
