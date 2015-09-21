@@ -15,7 +15,6 @@ export default
                 controller: authenticationController,
                 templateUrl: templateUrl('login/loginModal'),
                 link: function(scope, element, attrs) {
-                    console.log('here you mfers');
                     // Display the login dialog
                     $('#login-modal').modal({
                         show: true,
