@@ -24,7 +24,6 @@ import './help';
 import './filters';
 import {Home, HomeGroups, HomeHosts} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
-import {Authenticate} from './controllers/Authentication';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
@@ -44,7 +43,7 @@ import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
 import adhoc from './adhoc/main';
-
+import login from './login/main';
 import {JobDetailController} from './controllers/JobDetail';
 import {JobStdoutController} from './controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
@@ -64,9 +63,7 @@ import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
 import './shared/InventoryTree';
-import './shared/Timer';
 import './shared/Socket';
-
 import './job-templates/main';
 import './shared/features/main';
 
@@ -94,8 +91,8 @@ var tower = angular.module('Tower', [
     moment.name,
     templateUrl.name,
     adhoc.name,
+    login.name,
     'templates',
-    'AuthService',
     'Utilities',
     'LicenseHelper',
     'OrganizationFormDefinition',
@@ -149,7 +146,6 @@ var tower = angular.module('Tower', [
     'ChildrenHelper',
     'ProjectPathHelper',
     'md5Helper',
-    'AccessHelper',
     'SelectionHelper',
     'HostGroupsFormDefinition',
     'PortalJobsWidget',
@@ -158,7 +154,6 @@ var tower = angular.module('Tower', [
     'InventoryGroupsHelpDefinition',
     'InventoryTree',
     'CredentialsHelper',
-    'TimerService',
     'StreamListDefinition',
     'HomeGroupListDefinition',
     'HomeHostListDefinition',
@@ -755,23 +750,6 @@ var tower = angular.module('Tower', [
                 name: 'teamUserCredentialEdit',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/login', {
-                name: 'signIn',
-                templateUrl: urlPrefix + 'partials/blank.html',
-                controller: Authenticate
-            }).
-
-            when('/logout', {
-                name: 'signOut',
-                templateUrl: urlPrefix + 'partials/blank.html',
-                controller: Authenticate,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();

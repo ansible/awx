@@ -1,4 +1,4 @@
-/*************************************************
+    /*************************************************
  * Copyright (c) 2015 Ansible, Inc.
  *
  * All Rights Reserved
@@ -14,12 +14,8 @@
  *
  */
 
-import Utilities from './Utilities';
-
 export default
-angular.module('AuthService', ['ngCookies', Utilities.name])
-
-.factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
+    ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
     function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store) {
         return {
             setToken: function (token, expires) {
@@ -75,7 +71,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                 }
                 else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/' || $cookieStore.get('lastPath') !== '/login' || $cookieStore.get('lastPath') !== '/logout'){
                     // do nothing
-                    $rootScope.lastPath = $cookieStore.get('lastPath');    
+                    $rootScope.lastPath = $cookieStore.get('lastPath');
                 }
                 else {
                     // your last path was home
@@ -169,4 +165,4 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
             }
         };
     }
-]);
+];

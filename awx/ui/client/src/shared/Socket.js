@@ -23,7 +23,7 @@
  * @description
  */
 export default
-angular.module('SocketIO', ['AuthService', 'Utilities'])
+angular.module('SocketIO', ['Utilities'])
 
     .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Store', function ($rootScope, $location, $log, Authorization, Store) {
         return function(params) {

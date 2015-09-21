@@ -16,7 +16,7 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', 'SearchHelper',
-               'PaginationHelpers', listGenerator.name, 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
+               'PaginationHelpers', listGenerator.name, 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
                'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
                'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
                'SchedulesHelper'

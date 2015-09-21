@@ -19,7 +19,7 @@ import listGenerator from '../shared/list-generator/main';
 
 
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
-    'RefreshHelper', listGenerator.name, 'StreamWidget', 'AuthService',
+    'RefreshHelper', listGenerator.name, 'StreamWidget',
 ])
 
 .factory('setStreamHeight', [

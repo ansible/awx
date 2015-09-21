@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:Inventory
@@ -16,7 +16,7 @@
 import listGenerator from '../shared/list-generator/main';
 
 export default
-    angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name, 'AuthService',
+    angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name,
         'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
     ])
 
