@@ -55,12 +55,11 @@
  */
 
 export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty', 'ClearScope', '$scope',
+    'Timer', 'Empty', 'ClearScope', '$scope', 'pendoService',
     function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty, ClearScope, scope) {
+    Timer, Empty, ClearScope, scope, pendoService) {
 
-    var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain,
-        e, html;
+    var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain;
 
     setLoginFocus = function () {
         // Need to clear out any open dialog windows that might be open when this modal opens.
@@ -143,6 +142,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         Authorization.getLicense()
             .success(function (data) {
                 Authorization.setLicense(data);
+                pendoService.issuePendoIdentity();
                 Wait("stop");
                 if (lastPath() && lastUser()) {
                     // Go back to most recent navigation path

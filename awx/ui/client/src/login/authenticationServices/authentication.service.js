@@ -1,4 +1,4 @@
-    /*************************************************
+/*************************************************
  * Copyright (c) 2015 Ansible, Inc.
  *
  * All Rights Reserved
@@ -109,6 +109,7 @@ export default
 
             setLicense: function (data) {
                 var license = data.license_info;
+                license.analytics_status = data.analytics_status; 
                 license.version = data.version;
                 license.tested = false;
                 Store('license', license);

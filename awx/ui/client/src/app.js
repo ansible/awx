@@ -74,6 +74,7 @@ __deferLoadIfEnabled();
 /*#endif#*/
 
 var tower = angular.module('Tower', [
+    'pendolytics',
     'ngRoute',
     'ngSanitize',
     'ngCookies',
@@ -830,9 +831,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp) {
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
 
 
             var sock;
@@ -1010,6 +1011,7 @@ var tower = angular.module('Tower', [
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if($location.$$url !== '/login'){
                         $rootScope.$emit('OpenSocket');
+                        pendoService.issuePendoIdentity();
                     }
                 }
 

@@ -9,9 +9,11 @@ import loginModal from './loginModal/main';
 
 import loginRoute from './login.route';
 import logoutRoute from './logout.route';
+import pendoService from './pendo/pendo.service';
 
 export default
     angular.module('login', [authentication.name, loginModal.name])
+        .service('pendoService', pendoService)
         .config(['$routeProvider', function($routeProvider) {
             var url = loginRoute.route;
             delete loginRoute.route;
