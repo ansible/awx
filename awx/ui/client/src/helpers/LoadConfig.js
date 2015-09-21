@@ -34,10 +34,10 @@ angular.module('LoadConfigHelper', ['Utilities'])
             $rootScope.enteredPath = $location.path();
             // Load js/local_settings.json
             $http({ method:'GET', url: $basePath + 'local_settings.json' })
-                .success(function(data) {
+                .then(function(response) {
                     $log.info('loaded local_settings.json');
-                    if(angular.isObject(data)){
-                        $AnsibleConfig = _.extend($AnsibleConfig, data);
+                    if(angular.isObject(response.data)){
+                        $AnsibleConfig = _.extend($AnsibleConfig, response.data);
                         Store('AnsibleConfig', $AnsibleConfig);
                         $rootScope.$emit('ConfigReady');
                     }
@@ -46,8 +46,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
                         $rootScope.$emit('ConfigReady');
                     }
 
-                })
-                .error(function() {
+                }, function(response) {
                     //local_settings.json not found
                     $log.info('local_settings.json not found');
                     $rootScope.$emit('ConfigReady');
