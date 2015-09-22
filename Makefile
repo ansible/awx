@@ -518,9 +518,14 @@ deb-build:
 
 deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
 	mkdir -p $(dir $@)
-	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
-	mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME)
-	cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME)
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	  tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE) ; \
+	  mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME) ; \
+	  cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME) ; \
+	else \
+	  cp -a dist/$(SDIST_TAR_FILE) deb-build/$(DEB_TAR_FILE) ; \
+	fi
+	cd deb-build && tar -xf $(DEB_TAR_FILE)
 	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
 	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
