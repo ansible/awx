@@ -1,4 +1,4 @@
-PYTHON=python
+PYTHON = python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
@@ -72,7 +72,7 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 DEBUILD_BIN ?= debuild
 DEBUILD_OPTS = --source-option="-I"
 DPUT_BIN ?= dput
-DPUT_OPTS ?=
+DPUT_OPTS ?= -c .dput.cf -u
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
     # Sign official builds
@@ -81,11 +81,20 @@ else
     DEB_DIST ?= unstable
     # Do not sign development builds
     DEBUILD_OPTS += -uc -us
-    DPUT_OPTS += -u
 endif
 DEBUILD = $(DEBUILD_BIN) $(DEBUILD_OPTS)
-DEB_PPA ?= reprepro
+DEB_PPA ?= mini_dinstall
 DEB_ARCH ?= amd64
+DEB_NVR = $(NAME)_$(VERSION)-$(RELEASE)~$(DEB_DIST)
+DEB_NVRA = $(DEB_NVR)_$(DEB_ARCH)
+DEB_NVRS = $(DEB_NVR)_source
+DEB_TAR_NAME=$(NAME)-$(VERSION)
+DEB_TAR_FILE=$(NAME)_$(VERSION).orig.tar.gz
+
+# pbuilder parameters
+PBUILDER_CACHE_DIR = /var/cache/pbuilder
+PBUILDER_BIN ?= pbuilder
+PBUILDER_OPTS ?= --debootstrapopts --variant=buildd --distribution $(DEB_DIST) --architecture $(DEB_ARCH) --basetgz $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz --buildresult $(PWD)/deb-build
 
 # RPM build parameters
 MOCK_BIN ?= mock
@@ -112,11 +121,28 @@ OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
 OFFLINE_TAR_LINK = $(NAME)-setup-bundle-latest.$(DIST_FULL).tar.gz
 OFFLINE_TAR_CHECKSUM=$(NAME)-setup-bundle-CHECKSUM
 
-DISTRO := $(shell . /etc/os-release 2>/dev/null && echo $${ID} || echo redhat)
+# Detect underlying OS distribution
+DISTRO ?=
+ifneq (,$(wildcard /etc/lsb-release))
+    DISTRO = $(shell . /etc/lsb-release && echo $${DISTRIB_ID} | tr '[:upper:]' '[:lower:]')
+endif
+ifneq (,$(wildcard /etc/os-release))
+    DISTRO = $(shell . /etc/os-release && echo $${ID})
+endif
+ifneq (,$(wildcard /etc/fedora-release))
+    DISTRO = fedora
+endif
+ifneq (,$(wildcard /etc/centos-release))
+    DISTRO = centos
+endif
+ifneq (,$(wildcard /etc/redhat-release))
+    DISTRO = redhat
+endif
+
+# Adjust `setup.py install` parameters based on OS distribution
+SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
 ifeq ($(DISTRO),ubuntu)
-    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v --install-layout=deb
-else
-    SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
+    SETUP_INSTALL_ARGS += --install-layout=deb
 endif
 
 .DEFAULT_GOAL := build
@@ -127,7 +153,7 @@ endif
 	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
-	deb deb-src debian reprepro setup_tarball \
+	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball
 
@@ -426,6 +452,7 @@ release_build:
 tar-build/$(SETUP_TAR_FILE):
 	@mkdir -p tar-build
 	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
@@ -439,7 +466,7 @@ tar-build/$(SETUP_TAR_CHECKSUM):
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
-	@echo "Setup artifacts:"
+	@echo "Artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
 	@echo tar-build/$(SETUP_TAR_CHECKSUM)
@@ -461,6 +488,7 @@ setup-bundle-build:
 # TODO - Somehow share implementation with setup_tarball
 setup-bundle-build/$(OFFLINE_TAR_FILE):
 	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	rsync -az docs/licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/
 	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
 	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
@@ -503,22 +531,22 @@ rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
-	@echo "#############################################"
-	@echo "SRPM artifacts:"
-	@echo rpm-build/$(RPM_NVR).src.rpm
-	@echo "#############################################"
 
 mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo rpm-build/$(RPM_NVR).src.rpm
+	@echo "#############################################"
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
-	@echo "#############################################"
-	@echo "RPM artifacts:"
-	@echo rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	@echo "#############################################"
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	@echo "#############################################"
 
 ifeq ($(OFFICIAL),yes)
 rpm-build/$(GPG_FILE): rpm-build
@@ -531,63 +559,77 @@ endif
 deb-build:
 	mkdir -p $@
 
-deb-build/$(SDIST_TAR_NAME):
-	mkdir -p deb-build
+deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
+	mkdir -p $(dir $@)
 	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
-	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
-	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
-	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
+	mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME)
+	cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME)
+	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
+	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
+	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
 
 ifeq ($(OFFICIAL),yes)
-debian: sdist deb-build/$(SDIST_TAR_NAME) deb-build/$(GPG_FILE)
+debian: deb-build/$(DEB_TAR_NAME) deb-build/$(GPG_FILE)
 
 deb-build/$(GPG_FILE): deb-build
 	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 else
-debian: sdist deb-build/$(SDIST_TAR_NAME)
+debian: deb-build/$(DEB_TAR_NAME)
 endif
 
-deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb:
-	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
-	@echo "#############################################"
-	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb
-	@echo "#############################################"
+deb-build/$(DEB_NVR).dsc: deb-build/$(DEB_TAR_NAME)
+	cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -S
 
-deb: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb
-
-deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes:
-	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -S
+deb-src: deb-build/$(DEB_NVR).dsc
 	@echo "#############################################"
-	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
+	@echo "Artifacts:"
+	@echo deb-build/$(DEB_NVR).dsc
+	@echo deb-build/$(DEB_NVRS).changes
 	@echo "#############################################"
 
-deb-src: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
+$(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz:
+	$(PBUILDER_BIN) create $(PBUILDER_OPTS)
 
-deb-upload: deb
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).changes ; \
+pbuilder: $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz deb-build/$(DEB_NVRA).deb
 
-deb-src-upload: deb-src
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
+deb-build/$(DEB_NVRA).deb: deb-build/$(DEB_NVR).dsc $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz
+	# cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -b
+	$(PBUILDER_BIN) update $(PBUILDER_OPTS)
+	$(PBUILDER_BIN) execute $(PBUILDER_OPTS) --save-after-exec packaging/pbuilder/setup.sh $(DEB_DIST)
+	$(PBUILDER_BIN) build $(PBUILDER_OPTS) deb-build/$(DEB_NVR).dsc
 
-reprepro: deb
-	mkdir -p $@/conf
-	cp -a packaging/reprepro/* $@/conf/
+deb: deb-build/$(DEB_NVRA).deb
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo deb-build/$(DEB_NVRA).deb
+	@echo "#############################################"
+
+deb-upload: deb-build/$(DEB_NVRA).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
+
+dput: deb-build/$(DEB_NVRA).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
+
+deb-src-upload: deb-build/$(DEB_NVRS).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRS).changes
+
+debsign: deb-build/$(DEB_NVRS).changes debian deb-build/$(DEB_NVR).dsc
+	debsign -k$(GPG_KEY) deb-build/$(DEB_NVRS).changes deb-build/$(DEB_NVR).dsc
+
+reprepro/conf:
+	mkdir -p $@
+	cp -a packaging/reprepro/* $@/
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	    echo "ask-passphrase" >> $@/conf/options; \
 	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/conf/distributions ; \
 	fi
-	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_$(DEB_ARCH).deb ; \
-	for DIST in trusty precise ; do \
-	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
-	    echo reprepro --export=force -b $@ remove $${DIST} $(NAME) ; \
-	done; \
-	reprepro --export=force -b $@ clearvanished; \
-	for DIST in trusty precise ; do \
-	    echo "Adding $${DEB} to the $${DIST} apt repo"; \
-	    reprepro --keepunreferencedfiles --export=force -b $@ --ignore=brokenold includedeb $${DIST} $${DEB} ; \
-	done; \
+
+reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
+	reprepro --export=force -b $@ clearvanished
+	for COMPONENT in non-free ; do \
+	  reprepro --export=force -b $@ -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
+	  reprepro --export=force -b $@ --keepunreferencedfiles --ignore=brokenold -C $$COMPONENT includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
+	done
 
 #
 # Packer build targets

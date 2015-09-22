@@ -8,6 +8,7 @@ recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
 recursive-include requirements *.txt
 recursive-include config *
+recursive-include docs/licenses *
 recursive-exclude awx devonly.py*
 recursive-exclude awx/api/tests *
 recursive-exclude awx/main/tests *
