@@ -114,7 +114,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     scope.customLogo = $AnsibleConfig.custom_logo || "tower_console_logo.png";
 
     scope.customLoginInfo = $AnsibleConfig.custom_login_info;
-    scope.customLoginInfoPresent = (scope.custom_login_info) ? true : false;
+    scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
 
     // Reset the login form
     //scope.loginForm.login_username.$setPristine();
