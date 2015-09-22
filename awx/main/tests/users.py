@@ -15,7 +15,28 @@ from django.core.urlresolvers import reverse
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
 
-__all__ = ['AuthTokenProxyTest', 'UsersTest', 'LdapTest']
+__all__ = ['AuthTokenTimeoutTest', 'AuthTokenProxyTest', 'UsersTest', 'LdapTest']
+
+
+class AuthTokenTimeoutTest(BaseTest):
+    def setUp(self):
+        super(AuthTokenTimeoutTest, self).setUp()
+        self.setup_users()
+        self.setup_instances()
+
+    def test_auth_token_timeout_exists(self):
+        auth_token_url = reverse('api:auth_token_view')
+        dashboard_url = reverse('api:dashboard_view')
+
+        data = dict(zip(('username', 'password'), self.get_super_credentials()))
+        auth = self.post(auth_token_url, data, expect=200)
+        kwargs = {
+            'HTTP_X_AUTH_TOKEN': 'Token %s' % auth['token']
+        }
+
+        response = self._generic_rest(dashboard_url, expect=200, method='get', return_response_object=True, client_kwargs=kwargs)
+        self.assertIn('Auth-Token-Timeout', response)
+        self.assertEqual(response['Auth-Token-Timeout'], str(settings.AUTH_TOKEN_EXPIRATION))
 
 '''
 Ensure ips from the X-Forwarded-For get honored and used in auth tokens

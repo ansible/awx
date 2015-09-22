@@ -128,6 +128,7 @@ MIDDLEWARE_CLASSES += (  # NOQA
     'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'awx.main.middleware.AuthTokenTimeoutMiddleware',
 )
 
 TEMPLATE_DIRS = (
