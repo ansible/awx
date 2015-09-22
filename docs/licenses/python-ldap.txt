@@ -1,19 +1,13 @@
 
-Mentioning a Python style license was my fault for two reasons:
+The python-ldap package is distributed under Python-style license.
 
-1. It is an obstacle to incorporate python-ldap into Python's standard lib.
+Standard disclaimer:
+   This software is made available by the author(s) to the public for free
+   and "as is".  All users of this free software are solely and entirely
+   responsible for their own choice and use of this software for their
+   own purposes.  By using this software, each user agrees that the
+   author(s) shall not be liable for damages of any kind in relation to
+   its use or performance. The author(s) do not warrant that this software
+   is fit for any purpose.
 
-2. It's not precise enough as you already said.
-
-Mainly the term "Python style" was used to express that you should be able to
-do whatever you're allowed to do with Python.
-
-The two authors (David and me) writing most of the code could agree on a quite
-liberal open source license. But since we did not insist on written statements
-to agree upon a license for the few contributions made by others we would have
-to ask all contributors. Most of them are not subscribed to the list anymore I
-guess.
-
-Frankly I'm not sure what to do to clarify this unfortunate situation.
-
-Ciao, Michael.
+$Id: LICENCE,v 1.1 2002/09/18 18:51:22 stroeder Exp $
