@@ -1,0 +1,23 @@
+tower:
+  build: ./docker-compose
+  ports:
+    - "8080:8080"
+    - "8013:8013"
+  links:
+    - postgres
+    - redis
+    - mongo
+  volumes:
+    - ../:/tower_devel
+postgres:
+  image: postgres:9.4.1
+  # ports:
+  #   - 5432:5432
+redis:
+  image: redis:3.0.1
+  # ports:
+  #   - 6379:6379
+mongo:
+  image: mongo:3.0
+  # ports:
+  #   - 27017:27017

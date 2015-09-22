@@ -24,9 +24,10 @@ awx/ui/dist
 # Python & setuptools
 __pycache__
 build
-deb-build
-rpm-build
-tar-build
+/deb-build
+/rpm-build
+/tar-build
+/setup-bundle-build
 /dist
 *.egg-info
 *.py[c,o]
@@ -80,3 +81,8 @@ tower-backup-*
 env/*
 nohup.out
 reports
+
+# AWX python libs populated by requirements.txt
+awx/lib/.deps_built
+awx/lib/site-packages
+

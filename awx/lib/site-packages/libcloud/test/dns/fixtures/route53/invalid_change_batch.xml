@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<ErrorResponse xmlns="https://route53.amazonaws.com/doc/2012-02-29/">
-  <Error>
-    <Type>Sender</Type>
-    <Code>InvalidChangeBatch</Code>
-    <Message>Invalid change</Message>
-  </Error>
-  <RequestId>376c64a6-6194-11e1-847f-ddaa49e4c811</RequestId>
-</ErrorResponse>

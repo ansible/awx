@@ -47,8 +47,8 @@ class ProjectOptions(models.Model):
     def get_local_path_choices(cls):
         if os.path.exists(settings.PROJECTS_ROOT):
             paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
-                     if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
-                     and not x.startswith('.') and not x.startswith('_')]
+                     if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
+                         not x.startswith('.') and not x.startswith('_'))]
             qs = Project.objects.filter(active=True)
             used_paths = qs.values_list('local_path', flat=True)
             return [x for x in paths if x not in used_paths]
@@ -356,6 +356,16 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     @property
     def result_stdout(self):
         return self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
+
+    @property
+    def result_stdout_raw(self):
+        return self._result_stdout_raw(redact_sensitive=True)
+
+    def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive)
+
+    def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=True):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive, escape_ascii=True)
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))

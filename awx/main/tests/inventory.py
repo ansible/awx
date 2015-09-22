@@ -1665,6 +1665,17 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
 
+    def test_update_from_ec2_without_credential(self):
+        self.create_test_license_file()
+        group = self.group
+        group.name = 'ec2'
+        group.save()
+        self.group = group
+        cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path)
+        inventory_source = self.update_inventory_source(self.group, source='ec2')
+        self.check_inventory_update(inventory_source, should_fail=True)
+
     def test_update_from_ec2_with_nested_groups(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
         source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')

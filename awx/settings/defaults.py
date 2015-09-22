@@ -3,6 +3,7 @@
 
 import os
 import sys
+import djcelery
 from datetime import timedelta
 
 # Update this module's local settings from the global settings module.
@@ -287,7 +288,6 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 SOUTH_TESTS_MIGRATE = False
 
 # Initialize Django-Celery.
-import djcelery
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost/'
@@ -351,6 +351,9 @@ AWX_PROOT_SHOW_PATHS = []
 
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
+
+# The directory in which proot will create new temporary directories for its root
+AWX_PROOT_BASE_PATH = "/tmp"
 
 # Default list of modules allowed for ad hoc commands.
 AD_HOC_COMMANDS = [

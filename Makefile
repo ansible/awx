@@ -1,10 +1,22 @@
-PYTHON=python
+PYTHON = python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
 NODE ?= node
+NPM_BIN ?= npm
+DEPS_SCRIPT ?= packaging/bundle/deps.py
+AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
+
+# Determine appropriate shasum command
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    SHASUM_BIN ?= sha256sum
+endif
+ifeq ($(UNAME_S),Darwin)
+    SHASUM_BIN ?= shasum -a 256
+endif
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -24,12 +36,13 @@ endif
 AWS_INSTANCE_COUNT ?= 0
 
 # GPG signature parameters (BETA key not yet used)
+GPG_BIN ?= gpg
 GPG_RELEASE = 442667A9
+GPG_RELEASE_FILE = GPG-KEY-ansible-release
 GPG_BETA = D7B00447
-GPG_RELEASE_FILE = RPM-GPG-KEY-ansible-release
-GPG_BETA_FILE = RPM-GPG-KEY-ansible-beta
+GPG_BETA_FILE = GPG-KEY-ansible-beta
 
-# Determine GPG key for RPM signing
+# Determine GPG key for package signing
 ifeq ($(OFFICIAL),yes)
     GPG_KEY = $(GPG_RELEASE)
     GPG_FILE = $(GPG_RELEASE_FILE)
@@ -41,49 +54,103 @@ ifeq ($(OFFICIAL),yes)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
     PACKER_BUILD_OPTS=-var-file=vars-release.json
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
     PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
+SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
 DEBUILD_OPTS = --source-option="-I"
 DPUT_BIN ?= dput
-DPUT_OPTS ?=
+DPUT_OPTS ?= -c .dput.cf -u
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
-    # Sign OFFICIAL builds using 'DEBSIGN_KEYID'
-    # DEBSIGN_KEYID is required when signing
-    ifneq ($(DEBSIGN_KEYID),)
-        DEBUILD_OPTS += -k$(DEBSIGN_KEYID)
-    endif
+    # Sign official builds
+    DEBUILD_OPTS += -k$(GPG_KEY)
 else
     DEB_DIST ?= unstable
     # Do not sign development builds
     DEBUILD_OPTS += -uc -us
-    DPUT_OPTS += -u
 endif
 DEBUILD = $(DEBUILD_BIN) $(DEBUILD_OPTS)
-DEB_PPA ?= reprepro
+DEB_PPA ?= mini_dinstall
+DEB_ARCH ?= amd64
+DEB_NVR = $(NAME)_$(VERSION)-$(RELEASE)~$(DEB_DIST)
+DEB_NVRA = $(DEB_NVR)_$(DEB_ARCH)
+DEB_NVRS = $(DEB_NVR)_source
+DEB_TAR_NAME=$(NAME)-$(VERSION)
+DEB_TAR_FILE=$(NAME)_$(VERSION).orig.tar.gz
+
+# pbuilder parameters
+PBUILDER_CACHE_DIR = /var/cache/pbuilder
+PBUILDER_BIN ?= pbuilder
+PBUILDER_OPTS ?= --debootstrapopts --variant=buildd --distribution $(DEB_DIST) --architecture $(DEB_ARCH) --basetgz $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz --buildresult $(PWD)/deb-build
 
 # RPM build parameters
-RPM_SPECDIR= packaging/rpm
-RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
-RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
+RPM_SPECDIR= packaging/rpm
+RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
+# Provide a fallback value for RPM_DIST
+RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+ifeq ($(RPM_DIST),)
+RPM_DIST = .el6
+endif
+RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
+ifeq ($(RPM_ARCH),)
+RPM_ARCH = $(shell uname -m)
+endif
+RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
-.PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
+# TAR Bundle build parameters
+DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
+DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
+DIST_FULL = $(DIST)$(DIST_MAJOR)
+OFFLINE_TAR_NAME = $(NAME)-setup-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
+OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
+OFFLINE_TAR_LINK = $(NAME)-setup-bundle-latest.$(DIST_FULL).tar.gz
+OFFLINE_TAR_CHECKSUM=$(NAME)-setup-bundle-CHECKSUM
+
+# Detect underlying OS distribution
+DISTRO ?=
+ifneq (,$(wildcard /etc/lsb-release))
+    DISTRO = $(shell . /etc/lsb-release && echo $${DISTRIB_ID} | tr '[:upper:]' '[:lower:]')
+endif
+ifneq (,$(wildcard /etc/os-release))
+    DISTRO = $(shell . /etc/os-release && echo $${ID})
+endif
+ifneq (,$(wildcard /etc/fedora-release))
+    DISTRO = fedora
+endif
+ifneq (,$(wildcard /etc/centos-release))
+    DISTRO = centos
+endif
+ifneq (,$(wildcard /etc/redhat-release))
+    DISTRO = redhat
+endif
+
+# Adjust `setup.py install` parameters based on OS distribution
+SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
+ifeq ($(DISTRO),ubuntu)
+    SETUP_INSTALL_ARGS += --install-layout=deb
+endif
+
+.DEFAULT_GOAL := build
+
+.PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
+	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian reprepro setup_tarball sync_ui \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
+	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
+	deb deb-src debian debsign pbuilder reprepro setup_tarball \
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
+	clean-bundle setup_bundle_tarball
 
 # Remove setup build files
 clean-tar:
@@ -117,8 +184,12 @@ clean-packer:
 	rm -rf packaging/packer/ansible-tower*-ova
 	rm -f Vagrantfile
 
+clean-bundle:
+	rm -rf setup-bundle-build
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
+	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -131,51 +202,27 @@ rebase:
 push:
 	git push origin master
 
-# Install third-party requirements needed for development environment (using
-# locally downloaded packages).
-requirements:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index setuptools-12.0.5.tar.gz); \
-	    (cd requirements && pip install --no-index Django-1.6.7.tar.gz); \
-	    (cd requirements && pip install --no-index -r dev_local.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install --no-index -r dev_local.txt); \
-	fi
+# Install runtime, development and jenkins requirements
+requirements requirements_dev requirements_jenkins: %: real-%
 
-# Install third-party requirements needed for development environment
-# (downloading from PyPI if necessary).
-requirements_pypi:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    pip install setuptools==12.0.5; \
-	    pip install Django\>=1.6.7,\<1.7; \
-	    pip install -r requirements/dev.txt; \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    sudo pip install -r requirements/dev.txt; \
-	fi
+# Install third-party requirements needed for development environment.
+# NOTE:
+#  * --target is only supported on newer versions of pip
+#  * https://github.com/pypa/pip/issues/3056 - the workaround is to override the `install-platlib`
+#  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
+#  * --target implies --ignore-installed
+real-requirements:
+	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
+
+real-requirements_dev:
+	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
 
 # Install third-party requirements needed for running unittests in jenkins
-# (using locally downloaded packages).
-requirements_jenkins:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && pip install --no-index pip-1.5.4.tar.gz || true); \
-	else \
-	    (cd requirements && sudo pip install --no-index distribute-0.7.3.zip || true); \
-	    (cd requirements && sudo pip install --no-index pip-1.5.4.tar.gz || true); \
-	fi
-	$(MAKE) requirements
-	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -r jenkins.txt); \
-	    $(PYTHON) fix_virtualenv_setuptools.py; \
-	else \
-	    (cd requirements && sudo pip install -r jenkins.txt); \
-	fi
-	npm install csslint jshint
+real-requirements_jenkins:
+	pip install -r requirements/requirements_jenkins.txt
+	$(NPM_BIN) install csslint jshint
 
-# "Install" ansible-tower package in development mode.  Creates link to working
-# copy in site-packages and installs awx-manage command.
+# "Install" ansible-tower package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -184,6 +231,10 @@ develop:
 	    sudo pip uninstall -y awx; \
 	    sudo $(PYTHON) setup.py develop; \
 	fi
+
+version_file:
+	mkdir -p /var/lib/awx/
+	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.tower_version
 
 # Do any one-time init tasks.
 init:
@@ -194,7 +245,7 @@ init:
 	fi
 
 # Refresh development environment after pulling new code.
-refresh: clean requirements develop migrate
+refresh: clean requirements_dev version_file develop migrate
 
 # Create Django superuser.
 adduser:
@@ -321,14 +372,15 @@ sync_ui: node_modules Brocfile.js
 
 # Update local npm install
 node_modules: package.json
-	npm install
+	$(NPM_BIN) install
 	touch $@
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	$(BROCCOLI) build awx/ui/dist -- --debug
 
 # Build minified JS/CSS.
-minjs: node_modules clean-ui Brocfile.js
+minjs: awx/ui/dist/tower.min.css.gz
+awx/ui/dist/tower.min.css.gz: node_modules Brocfile.js
 	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs --no-sourcemaps
 
 minjs_ci: node_modules clean-ui Brocfile.js
@@ -353,28 +405,69 @@ release_build:
 tar-build/$(SETUP_TAR_FILE):
 	@mkdir -p tar-build
 	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
+
+tar-build/$(SETUP_TAR_CHECKSUM):
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
+	else \
+	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
+	fi
+
+setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
-	@echo "Setup artifacts:"
+	@echo "Artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo tar-build/$(SETUP_TAR_LINK)
+	@echo tar-build/$(SETUP_TAR_CHECKSUM)
 	@echo "#############################################"
-
-setup_tarball: tar-build/$(SETUP_TAR_FILE)
 
 release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-dist/$(SDIST_TAR_FILE):
+dist/$(SDIST_TAR_FILE): awx/ui/dist/tower.min.css.gz
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
-sdist: minjs dist/$(SDIST_TAR_FILE)
+sdist: dist/$(SDIST_TAR_FILE)
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo dist/$(SDIST_TAR_FILE)
+	@echo "#############################################"
+
+# Build setup bundle tarball
+setup-bundle-build:
+	mkdir -p $@
+
+# TODO - Somehow share implementation with setup_tarball
+setup-bundle-build/$(OFFLINE_TAR_FILE):
+	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	rsync -az docs/licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/
+	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
+	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
+	ln -sf $(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_LINK)
+
+setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
+	else \
+	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
+	fi
+
+setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
+	@echo "#############################################"
+	@echo "Offline artifacts:"
+	@echo setup-bundle-build/$(OFFLINE_TAR_FILE)
+	@echo setup-bundle-build/$(OFFLINE_TAR_LINK)
+	@echo setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
+	@echo "#############################################"
 
 rpm-build:
-	mkdir -p rpm-build
+	mkdir -p $@
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
@@ -395,77 +488,109 @@ rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
+
+mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
-	@echo "SRPM artifacts:"
+	@echo "Artifacts:"
 	@echo rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
 
-mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
-
-rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
+rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
-	@echo "#############################################"
-	@echo "RPM artifacts:"
-	@echo rpm-build/$(RPM_NVR).noarch.rpm
-	@echo "#############################################"
 
-mock-rpm: rpmtar rpm-build/$(RPM_NVR).noarch.rpm
+mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	@echo "#############################################"
 
 ifeq ($(OFFICIAL),yes)
 rpm-build/$(GPG_FILE): rpm-build
-	gpg --export -a "${GPG_KEY}" > "$@"
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
 
-rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).noarch.rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).noarch.rpm
+rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 endif
 
-deb-build/$(SDIST_TAR_NAME):
-	mkdir -p deb-build
+deb-build:
+	mkdir -p $@
+
+deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
+	mkdir -p $(dir $@)
 	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
-	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
-	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
-	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
+	mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME)
+	cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME)
+	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
+	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
+	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
 
-debian: sdist deb-build/$(SDIST_TAR_NAME)
+ifeq ($(OFFICIAL),yes)
+debian: deb-build/$(DEB_TAR_NAME) deb-build/$(GPG_FILE)
 
-deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb:
-	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
+deb-build/$(GPG_FILE): deb-build
+	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
+else
+debian: deb-build/$(DEB_TAR_NAME)
+endif
+
+deb-build/$(DEB_NVR).dsc: deb-build/$(DEB_TAR_NAME)
+	cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -S
+
+deb-src: deb-build/$(DEB_NVR).dsc
 	@echo "#############################################"
-	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
+	@echo "Artifacts:"
+	@echo deb-build/$(DEB_NVR).dsc
+	@echo deb-build/$(DEB_NVRS).changes
 	@echo "#############################################"
 
-deb: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
+$(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz:
+	$(PBUILDER_BIN) create $(PBUILDER_OPTS)
 
-deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes:
-	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -S
+pbuilder: $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz deb-build/$(DEB_NVRA).deb
+
+deb-build/$(DEB_NVRA).deb: deb-build/$(DEB_NVR).dsc $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz
+	# cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -b
+	$(PBUILDER_BIN) update $(PBUILDER_OPTS)
+	$(PBUILDER_BIN) execute $(PBUILDER_OPTS) --save-after-exec packaging/pbuilder/setup.sh $(DEB_DIST)
+	$(PBUILDER_BIN) build $(PBUILDER_OPTS) deb-build/$(DEB_NVR).dsc
+
+deb: deb-build/$(DEB_NVRA).deb
 	@echo "#############################################"
-	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
+	@echo "Artifacts:"
+	@echo deb-build/$(DEB_NVRA).deb
 	@echo "#############################################"
 
-deb-src: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
+deb-upload: deb-build/$(DEB_NVRA).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
 
-deb-upload: deb
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_amd64.changes ; \
+dput: deb-build/$(DEB_NVRA).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
 
-deb-src-upload: deb-src
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
+deb-src-upload: deb-build/$(DEB_NVRS).changes
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRS).changes
 
-reprepro: deb
-	mkdir -p reprepro/conf
-	cp -a packaging/reprepro/* reprepro/conf/
-	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb ; \
-	for DIST in trusty precise ; do \
-	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
-	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
-	done; \
-	reprepro --export=force -b reprepro clearvanished; \
-	for DIST in trusty precise ; do \
-	    echo "Adding $${DEB} to the $${DIST} apt repo"; \
-	    reprepro --keepunreferencedfiles --export=force -b reprepro --ignore=brokenold includedeb $${DIST} $${DEB} ; \
-	done; \
+debsign: deb-build/$(DEB_NVRS).changes debian deb-build/$(DEB_NVR).dsc
+	debsign -k$(GPG_KEY) deb-build/$(DEB_NVRS).changes deb-build/$(DEB_NVR).dsc
+
+reprepro/conf:
+	mkdir -p $@
+	cp -a packaging/reprepro/* $@/
+	if [ "$(OFFICIAL)" = "yes" ] ; then \
+	    echo "ask-passphrase" >> $@/conf/options; \
+	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/conf/distributions ; \
+	fi
+
+reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
+	reprepro --export=force -b $@ clearvanished
+	for COMPONENT in non-free ; do \
+	  reprepro --export=force -b $@ -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
+	  reprepro --export=force -b $@ --keepunreferencedfiles --ignore=brokenold -C $$COMPONENT includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
+	done
+
+#
+# Packer build targets
+#
 
 amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
@@ -485,8 +610,14 @@ packaging/packer/output-virtualbox-iso/centos-7.ovf:
 
 virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
-docker-dev:
-	docker build --no-cache=true --rm=true -t ansible/tower_devel:latest tools/docker
+# TODO - figure out how to build the front-end and python requirements with
+# 'build'
+build:
+	$(PYTHON) setup.py build
 
 install:
-	$(PYTHON) setup.py install egg_info -b ""
+	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
+
+# Docker Compose Development environment
+docker-compose:
+	docker-compose -f tools/docker-compose.yml up --no-recreate

@@ -1,6 +1,0 @@
-{
-    "action": "open_vnc",
-    "result": "success",
-    "uuid": "2e64e5e4-f31d-471a-ac1b-1ae079652e40",
-    "vnc_url": "vnc://direct.lvs.cloudsigma.com:41111"
-}

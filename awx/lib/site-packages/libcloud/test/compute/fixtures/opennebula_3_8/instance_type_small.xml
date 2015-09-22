@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<INSTANCE_TYPE href="http://www.opennebula.org/instance_type/small">
-    <NAME>small</NAME>
-    <CPU>1</CPU>
-    <MEMORY>1024</MEMORY>
-</INSTANCE_TYPE>

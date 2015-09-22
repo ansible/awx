@@ -1,4 +1,0 @@
-<DeleteNetworkInterfaceResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-    <requestId>c0bc0036-e328-47c6-bd6d-318b007f66ee</requestId>
-    <return>true</return>
-</DeleteNetworkInterfaceResponse>

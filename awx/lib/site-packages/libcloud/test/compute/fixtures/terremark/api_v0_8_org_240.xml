@@ -1,5 +1,0 @@
-<Org href="https://services.vcloudexpress.terremark.com/api/v0.8/org/240" name="a@example.com" xmlns="http://www.vmware.com/vcloud/v0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Link rel="down" href="https://services.vcloudexpress.terremark.com/api/v0.8/vdc/224" type="application/vnd.vmware.vcloud.vdc+xml" name="Miami Environment 1"/>
-  <Link rel="down" href="https://services.vcloudexpress.terremark.com/api/v0.8/vdc/224/catalog" type="application/vnd.vmware.vcloud.catalog+xml" name="Miami Environment 1 Catalog"/>
-  <Link rel="down" href="https://services.vcloudexpress.terremark.com/api/v0.8/tasksList/224" type="application/vnd.vmware.vcloud.tasksList+xml" name="Miami Environment 1 Tasks List"/>
-</Org>

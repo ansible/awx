@@ -1,0 +1,49 @@
+#!/usr/bin/expect -f
+#
+# Helper script to respond to passphrase prompts from the gpg command.
+#
+
+# Disable timeout
+set timeout -1
+
+# Optionally print usage message
+if {[llength $argv] <= 0} {
+  puts "Usage: sign.exp <command>"
+  exit 1
+}
+
+# Process arguments
+set command [join $argv]
+
+if { [info exists env(PASSPHRASE) ] } {
+   set passphrase $env(PASSPHRASE)
+} else {
+   set passphrase ""
+}
+
+# Run the desired command
+spawn {*}$command
+expect {
+    -nocase "enter passphrase:" {
+        send -- "$passphrase\r"
+        exp_continue
+    }
+    -nocase "enter pass phrase:" {
+        send -- "$passphrase\r"
+        exp_continue
+    }
+    timeout {
+        puts "expect timeout"
+        exit 1
+    }
+    eof { }
+}
+
+lassign [wait] pid spawnid os_error_flag retval
+
+if {$os_error_flag == 0} {
+    puts "exit status: $retval"
+} else {
+    puts "errno: $retval"
+}
+exit $retval

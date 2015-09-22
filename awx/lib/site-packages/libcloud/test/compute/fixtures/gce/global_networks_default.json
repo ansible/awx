@@ -1,9 +1,0 @@
-{
-  "IPv4Range": "10.240.0.0/16",
-  "creationTimestamp": "2013-06-19T12:37:13.233-07:00",
-  "gatewayIPv4": "10.240.0.1",
-  "id": "08257021638942464470",
-  "kind": "compute#network",
-  "name": "default",
-  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default"
-}

@@ -1,1 +1,0 @@
-{"id":"2fb67f5f-53f2-40ab-9d99-b9ff68cfb2ab","name":"testlc","type":"virtualmachine","state":"provisioning","dataset":"sdc:sdc:ubuntu-10.04:1.0.1","ips":["165.225.129.129","10.112.1.130"],"memory":1024,"disk":30720,"metadata":{"root_authorized_keys":"ssh-rsa abcd== Joyent SSH\n"},"created":"2012-04-11T04:08:27+00:00","updated":"2012-04-11T04:08:27+00:00"}

@@ -1,4 +1,0 @@
-<DeleteInternetGatewayResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
-    <requestId>b1a5c8c9-91c7-43f3-8234-c162db89a2df</requestId>
-    <return>true</return>
-</DeleteInternetGatewayResponse>

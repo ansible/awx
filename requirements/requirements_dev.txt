@@ -1,0 +1,6 @@
+-r requirements.txt
+django-devserver
+django-debug-toolbar
+unittest2
+pep8
+flake8
