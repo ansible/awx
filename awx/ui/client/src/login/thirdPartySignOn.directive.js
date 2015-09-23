@@ -14,6 +14,8 @@ export default
                 // controller: authenticationController,
                 templateUrl: templateUrl('login/thirdPartySignOn'),
                 link: function(scope, element, attrs) {
+                    // these vars will be set programatically once
+                    // api stuff lands
                     scope.loginItems = [
                         {
                             type: "foo",
@@ -34,6 +36,8 @@ export default
                             tooltip: "Login in via SAML"
                         }
                     ]
+
+                    scope.thirdPartyLoginSupported = true;
                 }
             };
         }
