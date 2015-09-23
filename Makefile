@@ -387,7 +387,7 @@ devjs: awx/ui/static
 
 # Concatenated, minified, compressed (production) build with no sourcemaps or tests
 minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
-minjs: awx/ui/static node_modules clean-ui Brocfile.js
+minjs: awx/ui/static
 
 # Performs build to awx/ui/build_test and runs node tests via mocha
 testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
@@ -476,10 +476,14 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-dist/$(SDIST_TAR_FILE):
+dist/$(SDIST_TAR_FILE): minjs
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
-sdist: minjs requirements dist/$(SDIST_TAR_FILE)
+sdist: dist/$(SDIST_TAR_FILE)
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo dist/$(SDIST_TAR_FILE)
+	@echo "#############################################"
 
 # Build setup bundle tarball
 setup-bundle-build:
@@ -561,9 +565,14 @@ deb-build:
 
 deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
 	mkdir -p $(dir $@)
-	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
-	mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME)
-	cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME)
+	@if [ "$(OFFICIAL)" != "yes" ] ; then \
+	  tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE) ; \
+	  mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME) ; \
+	  cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME) ; \
+	else \
+	  cp -a dist/$(SDIST_TAR_FILE) deb-build/$(DEB_TAR_FILE) ; \
+	fi
+	cd deb-build && tar -xf $(DEB_TAR_FILE)
 	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
 	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
