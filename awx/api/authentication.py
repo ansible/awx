@@ -18,7 +18,8 @@ class TokenAuthentication(authentication.TokenAuthentication):
 
     model = AuthToken
 
-    def _get_x_auth_token_header(self, request):
+    @staticmethod
+    def _get_x_auth_token_header(request):
         auth = request.META.get('HTTP_X_AUTH_TOKEN', '')
         if isinstance(auth, type('')):
             # Work around django test client oddness
@@ -31,7 +32,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
         # Prefer the custom X-Auth-Token header over the Authorization header,
         # to handle cases where the browser submits saved Basic auth and
         # overrides the UI's normal use of the Authorization header.
-        auth = self._get_x_auth_token_header(request).split()
+        auth = TokenAuthentication._get_x_auth_token_header(request).split()
         if not auth or auth[0].lower() != 'token':
             auth = authentication.get_authorization_header(request).split()
             if not auth or auth[0].lower() != 'token':

@@ -11,9 +11,11 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import curry
+from django.conf import settings
 
 from awx import __version__ as version
 from awx.main.models import ActivityStream, Instance
+from awx.api.authentication import TokenAuthentication
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -100,3 +102,18 @@ class HAMiddleware(object):
 
         # Redirect to the base page of the primary instance.
         return HttpResponseRedirect('http://%s%s' % (primary.hostname, request.path))
+
+class AuthTokenTimeoutMiddleware(object):
+    """Presume that when the user includes the auth header, they go through the
+    authentication mechanism. Further, that mechanism is presumed to extend 
+    the users session validity time by AUTH_TOKEN_EXPIRATION.
+
+    If the auth token is not supplied, then don't include the header
+    """
+    def process_response(self, request, response):
+        if not TokenAuthentication._get_x_auth_token_header(request):
+            return response
+
+        response['Auth-Token-Timeout'] = int(settings.AUTH_TOKEN_EXPIRATION)
+        return response
+        
