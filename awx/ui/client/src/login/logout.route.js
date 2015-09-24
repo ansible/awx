@@ -13,7 +13,7 @@ export default {
         Authorization.logout();
         $location.path('/login');
     }],
-    templateUrl: '/static/partials/blank.html', //templateUrl('management-jobs/schedule/schedule'),
+    templateUrl: '/static/partials/blank.html',
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

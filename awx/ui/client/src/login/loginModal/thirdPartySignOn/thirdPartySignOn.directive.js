@@ -12,7 +12,7 @@ export default
                 restrict: 'E',
                 scope: true,
                 // controller: authenticationController,
-                templateUrl: templateUrl('login/thirdPartySignOn'),
+                templateUrl: templateUrl('login/loginModal/thirdPartySignOn/thirdPartySignOn'),
                 link: function(scope, element, attrs) {
                     // these vars will be set programatically once
                     // api stuff lands

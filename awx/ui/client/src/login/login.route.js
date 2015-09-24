@@ -9,8 +9,7 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 export default {
     name: 'signIn',
     route: '/login',
-    templateUrl: templateUrl('login/loginScreen'), //templateUrl('management-jobs/schedule/schedule'),
-    // controller: 'authenticationController',
+    templateUrl: templateUrl('login/loginBackDrop'),
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
