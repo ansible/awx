@@ -1,0 +1,10 @@
+<div class="ThirdPartySignOn" ng-if="thirdPartyLoginSupported">
+    <div class="ThirdPartySignOn-label">
+        Sign In With
+    </div>
+    <div ng-repeat="item in loginItems" class="ThirdPartySignOn-item">
+        <button type="button" class="ThirdPartySignOn-button" data-placement="top" ng-attr-aw-tool-tip="{{ item.tooltip }}">
+            <i class="fa ThirdPartySignOn-icon" ng-class="item.icon"></i>
+        </button>
+    </div>
+</div>

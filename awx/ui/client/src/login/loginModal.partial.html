@@ -63,11 +63,17 @@
                 </form>
                 <div class="LoginModalNotice" ng-if="customLoginInfoPresent"><div class="LoginModalNotice-title">Notice</div>{{ customLoginInfo | sanitize }}</div>
             </div>
-            <div class="modal-footer">
-                <button ng-click="systemLogin(login_username, login_password)"
-                    id="login-button" class="btn btn-primary">
-                    <i class="fa fa-sign-in"></i> Sign in
-                </button>
+            <div class="modal-footer LoginModal-footer">
+                <div class="LoginModal-footerBlock">
+                    <third-party-sign-on></third-party-sign-on>
+                </div>
+                <div class="LoginModal-footerBlock
+                    LoginModal-footerBlock--submit">
+                    <button ng-click="systemLogin(login_username, login_password)"
+                        id="login-button" class="btn btn-primary">
+                        <i class="fa fa-sign-in"></i> Sign in
+                    </button>
+                </div>
             </div>
         </div>
    </div>

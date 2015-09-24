@@ -11,6 +11,7 @@ import timer from './timer.factory';
 import loginRoute from './login.route';
 import logoutRoute from './logout.route';
 import loginModalDirective from './loginModal.directive';
+import thirdPartySignOnDirective from './thirdPartySignOn.directive';
 
 export default
     angular.module('login', [
@@ -20,6 +21,7 @@ export default
     .factory('IsAdmin', isAdmin)
     .factory('Timer', timer)
     .directive('loginModal', loginModalDirective)
+    .directive('thirdPartySignOn', thirdPartySignOnDirective)
     .config(['$routeProvider', function($routeProvider) {
         var url = loginRoute.route;
         delete loginRoute.route;
