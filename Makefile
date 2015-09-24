@@ -629,8 +629,8 @@ reprepro/conf:
 	mkdir -p $@
 	cp -a packaging/reprepro/* $@/
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	    echo "ask-passphrase" >> $@/conf/options; \
-	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/conf/distributions ; \
+	    echo "ask-passphrase" >> $@/options; \
+	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/distributions ; \
 	fi
 
 reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
