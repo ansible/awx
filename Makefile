@@ -73,12 +73,14 @@ DEBUILD_BIN ?= debuild
 DEBUILD_OPTS = --source-option="-I"
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
+REPREPRO_BIN ?= reprepro
+REPREPRO_OPTS ?= -b reprepro --export=force
+DEB_DIST ?=
 ifeq ($(OFFICIAL),yes)
-    DEB_DIST ?= stable
     # Sign official builds
     DEBUILD_OPTS += -k$(GPG_KEY)
+    REPREPRO_OPTS += --ask-passphrase
 else
-    DEB_DIST ?= unstable
     # Do not sign development builds
     DEBUILD_OPTS += -uc -us
 endif
@@ -101,14 +103,15 @@ MOCK_BIN ?= mock
 MOCK_CFG ?=
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-# Provide a fallback value for RPM_DIST
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+# Provide a fallback value for RPM_DIST
 ifeq ($(RPM_DIST),)
-RPM_DIST = .el6
+    RPM_DIST = .el6
 endif
 RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
+# Provide a fallback value for RPM_ARCH
 ifeq ($(RPM_ARCH),)
-RPM_ARCH = $(shell uname -m)
+    RPM_ARCH = $(shell uname -m)
 endif
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
@@ -200,6 +203,13 @@ clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bun
 	rm -rf tmp/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
+
+# convenience target to assert environment variables are defined
+guard-%:
+	@if [ "${${*}}" == "" ]; then \
+	    echo "The required environment variable '$*' is not set"; \
+	    exit 1; \
+	fi
 
 # Fetch from origin, rebase local commits on top of origin commits.
 rebase:
@@ -607,7 +617,7 @@ deb-build/$(DEB_NVRA).deb: deb-build/$(DEB_NVR).dsc $(PBUILDER_CACHE_DIR)/$(DEB_
 	$(PBUILDER_BIN) execute $(PBUILDER_OPTS) --save-after-exec packaging/pbuilder/setup.sh $(DEB_DIST)
 	$(PBUILDER_BIN) build $(PBUILDER_OPTS) deb-build/$(DEB_NVR).dsc
 
-deb: deb-build/$(DEB_NVRA).deb
+deb: guard-DEB_DIST deb-build/$(DEB_NVRA).deb
 	@echo "#############################################"
 	@echo "Artifacts:"
 	@echo deb-build/$(DEB_NVRA).deb
@@ -629,15 +639,14 @@ reprepro/conf:
 	mkdir -p $@
 	cp -a packaging/reprepro/* $@/
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	    echo "ask-passphrase" >> $@/options; \
 	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/distributions ; \
 	fi
 
 reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
-	reprepro --export=force -b $@ clearvanished
-	for COMPONENT in non-free ; do \
-	  reprepro --export=force -b $@ -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
-	  reprepro --export=force -b $@ --keepunreferencedfiles --ignore=brokenold -C $$COMPONENT includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
+	$(REPREPRO_BIN) $(REPREPRO_OPTS) clearvanished
+	for COMPONENT in non-free $(VERSION); do \
+	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
+	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --keepunreferencedfiles --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
 	done
 
 #
