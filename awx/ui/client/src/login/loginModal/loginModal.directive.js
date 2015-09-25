@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
-import authenticationController from './authentication.controller';
+import authenticationController from './loginModal.controller';
 
 /* jshint unused: vars */
 export default
@@ -13,7 +13,7 @@ export default
                 restrict: 'E',
                 scope: true,
                 controller: authenticationController,
-                templateUrl: templateUrl('login/loginModal'),
+                templateUrl: templateUrl('login/loginModal/loginModal'),
                 link: function(scope, element, attrs) {
                     // Display the login dialog
                     $('#login-modal').modal({
