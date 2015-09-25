@@ -16,16 +16,17 @@ class Migration(DataMigration):
                 if stj.name == "Cleanup Job Details":
                     sched = orm.Schedule(name="Cleanup Job Schedule", rrule="DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU" % nowtime,
                                          description="Automatically Generated Schedule", enabled=True, extra_data={"days": "120"})
-                if stj.name == "Cleanup Deleted Data":
+                elif stj.name == "Cleanup Deleted Data":
                     sched = orm.Schedule(name="Cleanup Deleted Data Schedule", rrule="DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO" % nowtime,
                                          description="Automatically Generated Schedule", enabled=True, extra_data={"days": "30"})
-                if stj.name == "Cleanup Activity Stream":
+                elif stj.name == "Cleanup Activity Stream":
                     sched = orm.Schedule(name="Cleanup Activity Schedule", rrule="DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU" % nowtime,
                                          description="Automatically Generated Schedule", enabled=True, extra_data={"days": "355"})
-                if feature_enabled('system_tracking'):
-                    if stj.name == "Cleanup Fact Details":
-                        sched = orm.Schedule(name="Cleanup Fact Schedule", rrule="DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1" % nowtime,
-                                             description="Automatically Generated Schedule", enabled=True, extra_data={'older_than': '120d', 'granularity': '1w'})
+                elif stj.name == "Cleanup Fact Details" and feature_enabled('system_tracking'):
+                    sched = orm.Schedule(name="Cleanup Fact Schedule", rrule="DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1" % nowtime,
+                                         description="Automatically Generated Schedule", enabled=True, extra_data={'older_than': '120d', 'granularity': '1w'})
+                else:
+                    continue
                 sched.unified_job_template = stj
                 sched.created = nowtime_actual
                 sched.modified = nowtime_actual
