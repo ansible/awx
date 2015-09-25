@@ -32,6 +32,8 @@ CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
 # Enable PROOT for tower-qa integration tests
 AWX_PROOT_ENABLED = True
 
+PENDO_TRACKING_STATE = "off"
+
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins

@@ -356,6 +356,9 @@ AWX_JOB_TEMPLATE_HISTORY = 10
 # The directory in which proot will create new temporary directories for its root
 AWX_PROOT_BASE_PATH = "/tmp"
 
+# Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
+PENDO_TRACKING_STATE = "off"
+
 # Default list of modules allowed for ad hoc commands.
 AD_HOC_COMMANDS = [
     'command',
