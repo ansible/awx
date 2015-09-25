@@ -345,6 +345,8 @@ class BaseTask(Task):
         if local_site_packages not in python_paths:
             python_paths.insert(0, local_site_packages)
         env['PYTHONPATH'] = os.pathsep.join(python_paths)
+        if self.should_use_proot:
+            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
