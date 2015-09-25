@@ -27,7 +27,7 @@
     $.fn.systemTrackingDP = datepicker;
 
     return {
-        // custom_logo: "example.png", // utilize a custom logo, see documentation for how to get the server to serve your logo to the browser
+        // custom_logo: true // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard tower console logo
         // custom_login_info: "example notice" // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
         tooltip_delay: {show: 500, hide: 100},   // Default number of milliseconds to delay displaying/hiding tooltips
 
