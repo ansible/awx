@@ -19,21 +19,21 @@ export default
                     scope.loginItems = [
                         {
                             type: "foo",
-                            icon: "fa-github",
+                            icon: "ThirdPartySignOn-icon--fontCustom icon-google",
                             link: "https://google.com",
-                            tooltip: "Login in via Google"
+                            tooltip: "Sign in with Google"
                         },
                         {
                             type: "foo",
                             icon: "fa-github",
                             link: "https://google.com",
-                            tooltip: "Login in via Github"
+                            tooltip: "Sign in with Github"
                         },
                         {
                             type: "foo",
-                            icon: "fa-github",
+                            icon: "ThirdPartySignOn-icon--fontCustom icon-saml-02",
                             link: "https://google.com",
-                            tooltip: "Login in via SAML"
+                            tooltip: "Sign in with SAML"
                         }
                     ]
 
