@@ -208,7 +208,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                             ' and accessible.';
                         }
                         scope.reset();
-                        Alert(hdr, msg, 'alert-danger', setLoginFocus, null, null, false);
+                        scope.attemptFailed = true;
                     }
                 });
         }
