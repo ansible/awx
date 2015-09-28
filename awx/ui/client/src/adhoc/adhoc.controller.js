@@ -159,7 +159,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
     privateFn.initializeForm = function(id, urls, hostPattern) {
         // inject the adhoc command form
         GenerateForm.inject(adhocForm,
-            { mode: 'edit', related: true, scope: $scope });
+            { mode: 'add', related: true, scope: $scope });
 
         // set when "working" starts and stops
         privateFn.setLoadingStartStop();
@@ -210,7 +210,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
         data = {
             "job_type": "run",
             "limit": "",
-            "credential": null,
+            "credential": "",
             "module_name": "command",
             "module_args": "",
             "forks": 0,
@@ -224,7 +224,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
         for (fld in adhocForm.fields) {
             if (adhocForm.fields[fld].type === 'select') {
                 data[fld] = $scope[fld].value;
-            } else {
+            } else if ($scope[fld]) {
                 data[fld] = $scope[fld];
             }
         }

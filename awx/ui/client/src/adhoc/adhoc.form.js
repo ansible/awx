@@ -25,7 +25,7 @@ export default function() {
                 ngOptions: 'module.label for module in adhoc_module_options' +
                     ' track by module.value',
                 ngChange: 'moduleChange()',
-                editRequired: true,
+                addRequired: true,
                 awPopOver:'<p>These are the modules that Tower supports ' +
                     'running commands against.',
                 dataTitle: 'Module',
@@ -40,14 +40,13 @@ export default function() {
                 dataTitle: 'Arguments',
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                editRequired: false,
+                addRequired: false,
                 autocomplete: false
             },
             limit: {
                 label: 'Host Pattern',
                 type: 'text',
                 addRequired: false,
-                editRequired: false,
                 awPopOver: '<p>The pattern used to target hosts in the ' +
                     'inventory. Leaving the field blank, all, and * will ' +
                     'all target all hosts in the inventory.  You can find ' +
@@ -83,7 +82,6 @@ export default function() {
                 label: 'Enable Privilege Escalation',
                 type: 'checkbox',
                 addRequired: false,
-                editRequired: false,
                 column: 2,
                 awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible</code> command. </p>",
                 dataPlacement: 'right',
@@ -97,7 +95,7 @@ export default function() {
                 ngOptions: 'verbosity.label for verbosity in ' +
                     'adhoc_verbosity_options ' +
                     'track by verbosity.value',
-                editRequired: true,
+                addRequired: true,
                 awPopOver:'<p>These are the verbosity levels for standard ' +
                     'out of the command run that are supported.',
                 dataTitle: 'Module',
@@ -113,8 +111,7 @@ export default function() {
                 min: 0,
                 spinner: true,
                 "default": 0,
-                addRequired: false,
-                editRequired: true,
+                addRequired: true,
                 'class': "input-small",
                 column: 1,
                 awPopOver: '<p>The number of parallel or simultaneous processes to use while executing the command. 0 signifies ' +
