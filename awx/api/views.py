@@ -524,9 +524,18 @@ class AuthTokenView(APIView):
             try:
                 token = AuthToken.objects.filter(user=serializer.object['user'],
                                                  request_hash=request_hash,
-                                                 expires__gt=now())[0]
+                                                 expires__gt=now(),
+                                                 reason='')[0]
                 token.refresh()
             except IndexError:
+                # Get user un-expired tokens that are not invalidated that are 
+                # over the configured limit.
+                # Mark them as invalid and inform the user
+                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.object['user'])
+                for t in invalid_tokens:
+                    # TODO: send socket notification
+                    t.invalidate(reason='limit_reached')
+
                 token = AuthToken.objects.create(user=serializer.object['user'],
                                                  request_hash=request_hash)
             return Response({'token': token.key, 'expires': token.expires})

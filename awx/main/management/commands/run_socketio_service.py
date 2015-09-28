@@ -55,11 +55,11 @@ class TowerBaseNamespace(BaseNamespace):
                 k, v = self.environ['QUERY_STRING'].split("=")
                 if k == "Token":
                     token_actual = urllib.unquote_plus(v).decode().replace("\"","")
-                    auth_token = AuthToken.objects.filter(key=token_actual)
+                    auth_token = AuthToken.objects.filter(key=token_actual, reason='')
                     if not auth_token.exists():
                         return False
                     auth_token = auth_token[0]
-                    if not auth_token.expired:
+                    if not auth_token.is_expired():
                         return auth_token.user
                     else:
                         return False
