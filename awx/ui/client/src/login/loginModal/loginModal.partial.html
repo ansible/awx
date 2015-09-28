@@ -62,6 +62,9 @@
                         </div>
                     </div>
                 </form>
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="attemptFailed">
+                    Invalid username and/or password.  Please try again.
+                </div>
                 <div class="LoginModalNotice" ng-if="customLoginInfoPresent"><div class="LoginModalNotice-title">Notice</div>{{ customLoginInfo | sanitize }}</div>
             </div>
             <div class="modal-footer LoginModal-footer">
