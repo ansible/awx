@@ -389,11 +389,13 @@ def get_system_task_capacity():
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
 
 
-def emit_websocket_notification(endpoint, event, payload):
+def emit_websocket_notification(endpoint, event, payload, token_key=None):
     from awx.main.socket import Socket
 
     try:
         with Socket('websocket', 'w', nowait=True, logger=logger) as websocket:
+            if token_key:
+                payload['token_key'] = token_key
             payload['event'] = event
             payload['endpoint'] = endpoint
             websocket.publish(payload)
