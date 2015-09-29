@@ -179,7 +179,8 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     scope.systemLogin = function (username, password) {
         $('.api-error').empty();
         if (Empty(username) || Empty(password)) {
-            Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus, null, null, false);
+            scope.reset();
+            scope.attemptFailed = true;
         } else {
             Wait('start');
             Authorization.retrieveToken(username, password)
@@ -198,15 +199,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                             scope[key + 'Error'] = data[key][0];
                         }
                     } else {
-                        if (data.non_field_errors && data.non_field_errors.length > 0) {
-                            hdr = 'Error';
-                            msg = data.non_field_errors[0];
-                        }
-                        else {
-                            hdr = 'Error';
-                            msg = 'The login attempt failed. The Tower server is not responding. Check that the Tower server processes are running' +
-                            ' and accessible.';
-                        }
                         scope.reset();
                         scope.attemptFailed = true;
                     }
