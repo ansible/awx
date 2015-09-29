@@ -673,3 +673,7 @@ install:
 # Docker Compose Development environment
 docker-compose:
 	docker-compose -f tools/docker-compose.yml up --no-recreate
+
+docker-compose-test:
+	cd tools && docker-compose run --service-ports tower /bin/bash
+
