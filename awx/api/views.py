@@ -186,12 +186,15 @@ class ApiV1ConfigView(APIView):
         license_reader = TaskSerializer()
         license_data   = license_reader.from_file(show_key=request.user.is_superuser)
 
+        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
             eula=render_to_string("eula.md"),
+            analytics_status=pendo_state
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field
