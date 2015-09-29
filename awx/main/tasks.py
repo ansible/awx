@@ -425,6 +425,15 @@ class BaseTask(Task):
         '''
         logfile = stdout_handle
         logfile_pos = logfile.tell()
+        if hasattr(instance, "extra_vars_dict") and "PEXPECT_SLEEP" in instance.extra_vars_dict:
+            pexpect_sleep = int(instance.extra_vars_dict['PEXPECT_SLEEP'])
+        elif 'PEXPECT_SLEEP' in os.environ:
+            pexpect_sleep = int(os.environ['PEXPECT_SLEEP'])
+        else:
+            pexpect_sleep = None
+        if pexpect_sleep is not None:
+            logger.info("Suspending Job Execution for QA Work")
+            time.sleep(pexpect_sleep)
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
