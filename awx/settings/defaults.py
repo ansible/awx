@@ -210,6 +210,10 @@ AUTH_LDAP_SERVER_URI = None
 # Seconds before auth tokens expire.
 AUTH_TOKEN_EXPIRATION = 1800
 
+# Maximum number of per-user valid, concurrent session.
+# -1 is unlimited
+AUTH_TOKEN_PER_USER = -1
+
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False
 

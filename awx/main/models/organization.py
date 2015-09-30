@@ -12,7 +12,8 @@ from django.conf import settings
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.utils.timezone import now
+from django.utils.timezone import now as tz_now
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.fields import AutoOneToOneField
@@ -164,12 +165,28 @@ class Profile(CreatedModifiedModel):
         default='',
     )
 
+"""
+Since expiration and session expiration is event driven a token could be 
+invalidated for both reasons. Further, we only support a single reason for a
+session token being invalid. For this case, mark the token as expired.
 
+Note: Again, because the value of reason is event based. The reason may not be
+set (i.e. may equal '') even though a session is expired or a limit is reached.
+"""
 class AuthToken(BaseModel):
     '''
     Custom authentication tokens per user with expiration and request-specific
     data.
     '''
+
+    REASON_CHOICES = [
+        ('', _('Token not invalidated')),
+        ('timeout_reached', _('Token is expired')),
+        ('limit_reached', _('Maximum per-user sessions reached')),
+        # invalid_token is not a used data-base value, but is returned by the
+        # api when a token is not found
+        ('invalid_token', _('Invalid token')),
+    ]
 
     class Meta:
         app_label = 'main'
@@ -179,8 +196,21 @@ class AuthToken(BaseModel):
                              on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    expires = models.DateTimeField(default=now)
+    expires = models.DateTimeField(default=tz_now)
     request_hash = models.CharField(max_length=40, blank=True, default='')
+    reason = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Reason the auth token was invalidated.')
+    )
+
+    @staticmethod
+    def reason_long(reason):
+        for x in AuthToken.REASON_CHOICES:
+            if x[0] == reason:
+                return x[1]
+        return None
 
     @classmethod
     def get_request_hash(cls, request):
@@ -201,25 +231,65 @@ class AuthToken(BaseModel):
             self.key = self.generate_key()
         return super(AuthToken, self).save(*args, **kwargs)
 
-    def refresh(self, save=True):
-        if not self.pk or not self.expired:
-            self.expires = now() + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
+    def refresh(self, now=None, save=True):
+        if not now:
+            now = tz_now()
+        if not self.pk or not self.is_expired(now=now):
+            self.expires = now + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
             if save:
                 self.save()
 
-    def invalidate(self, save=True):
-        if not self.expired:
-            self.expires = now() - datetime.timedelta(seconds=1)
-            if save:
-                self.save()
+    def invalidate(self, reason='timeout_reached', save=True):
+        if not AuthToken.reason_long(reason):
+            raise ValueError('Invalid reason specified')
+        self.reason = reason
+        if save:
+            self.save()
+        return reason
+
+    @staticmethod
+    def get_tokens_over_limit(user, now=None):
+        if now is None:
+            now = tz_now()
+        invalid_tokens = AuthToken.objects.none()
+        if settings.AUTH_TOKEN_PER_USER != -1:
+            invalid_tokens = AuthToken.objects.filter(
+                user=user,
+                expires__gt=now,
+                reason='',
+            ).order_by('-created')[settings.AUTH_TOKEN_PER_USER:]
+        return invalid_tokens
 
     def generate_key(self):
         unique = uuid.uuid4()
         return hmac.new(unique.bytes, digestmod=hashlib.sha1).hexdigest()
 
+    def is_expired(self, now=None):
+        if not now:
+            now = tz_now()
+        return bool(self.expires < now)
+
     @property
-    def expired(self):
-        return bool(self.expires < now())
+    def invalidated(self):
+        return bool(self.reason != '')
+
+    """
+    Token is valid if it's in the set of unexpired tokens.
+    The unexpired token set is:
+        * tokens not expired
+        * limited to number of tokens per-user
+        * sorted by created on date
+    """
+    def in_valid_tokens(self, now=None):
+        if not now:
+            now = tz_now()
+        valid_n_tokens_qs = self.user.auth_tokens.filter(
+            expires__gt=now,
+            reason='',
+        ).order_by('-created')[0:settings.AUTH_TOKEN_PER_USER]
+        valid_n_tokens = valid_n_tokens_qs.values_list('key', flat=True)
+
+        return bool(self.key in valid_n_tokens)
 
     def __unicode__(self):
         return self.key
@@ -231,7 +301,7 @@ def user_mark_inactive(user, save=True):
     if user.is_active:
         # Set timestamp to datetime.isoformat() but without the time zone
         # offset to stay withint the 30 character username limit.
-        dtnow = now()
+        dtnow = tz_now()
         deleted_ts = dtnow.strftime('%Y-%m-%dT%H:%M:%S.%f')
         user.username = '_d_%s' % deleted_ts
         user.is_active = False

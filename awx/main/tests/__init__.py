@@ -1,7 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-from awx.main.tests.organizations import OrganizationsTest # noqa
+from awx.main.tests.organizations import * # noqa
 from awx.main.tests.users import * # noqa
 from awx.main.tests.inventory import * # noqa
 from awx.main.tests.projects import ProjectsTest, ProjectUpdatesTest # noqa

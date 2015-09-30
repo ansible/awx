@@ -4,18 +4,20 @@
 # Python
 import datetime
 import urllib
+from mock import patch
 
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
 
-__all__ = ['AuthTokenTimeoutTest', 'AuthTokenProxyTest', 'UsersTest', 'LdapTest']
+__all__ = ['AuthTokenTimeoutTest', 'AuthTokenLimitTest', 'AuthTokenProxyTest', 'UsersTest', 'LdapTest']
 
 
 class AuthTokenTimeoutTest(BaseTest):
@@ -37,6 +39,41 @@ class AuthTokenTimeoutTest(BaseTest):
         response = self._generic_rest(dashboard_url, expect=200, method='get', return_response_object=True, client_kwargs=kwargs)
         self.assertIn('Auth-Token-Timeout', response)
         self.assertEqual(response['Auth-Token-Timeout'], str(settings.AUTH_TOKEN_EXPIRATION))
+
+class AuthTokenLimitTest(BaseTest):
+    def setUp(self):
+        super(AuthTokenLimitTest, self).setUp()
+        self.setup_users()
+        self.setup_instances()
+
+    @override_settings(AUTH_TOKEN_PER_USER=1)
+    @patch.object(awx.main.models.organization.AuthToken, 'get_request_hash')
+    def test_invalidate_first_session(self, mock_get_request_hash):
+        auth_token_url = reverse('api:auth_token_view')
+        user_me_url = reverse('api:user_me_list')
+
+        data = dict(zip(('username', 'password'), self.get_normal_credentials()))
+
+        mock_get_request_hash.return_value = "session_1"
+        response = self.post(auth_token_url, data, expect=200, auth=None)
+        auth_token1 = {
+            'token': response['token']
+        }
+        self.get(user_me_url, expect=200, auth=auth_token1)
+        
+        mock_get_request_hash.return_value = "session_2"
+        response = self.post(auth_token_url, data, expect=200, auth=None)
+        auth_token2 = {
+            'token': response['token']
+        }
+        self.get(user_me_url, expect=200, auth=auth_token2)
+
+        # Ensure our get_request_hash mock is working
+        self.assertNotEqual(auth_token1['token'], auth_token2['token'])
+
+        mock_get_request_hash.return_value = "session_1"
+        response = self.get(user_me_url, expect=401, auth=auth_token1)
+        self.assertEqual(AuthToken.reason_long('limit_reached'), response['detail'])
 
 '''
 Ensure ips from the X-Forwarded-For get honored and used in auth tokens
@@ -225,7 +262,7 @@ class UsersTest(BaseTest):
         remote_addr = '127.0.0.2'
         response = self.get(user_me_url, expect=401, auth=auth_token,
                             remote_addr=remote_addr)
-        self.assertEqual(response['detail'], 'Invalid token')
+        self.assertEqual(response['detail'], AuthToken.reason_long('invalid_token'))
 
         # The WWW-Authenticate header should specify Token auth, since that
         # auth method was used in the request.

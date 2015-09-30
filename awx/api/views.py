@@ -64,6 +64,7 @@ from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.fact.models import * # noqa
+from awx.main.utils import emit_websocket_notification
 
 def api_exception_handler(exc):
     '''
@@ -527,12 +528,30 @@ class AuthTokenView(APIView):
             try:
                 token = AuthToken.objects.filter(user=serializer.object['user'],
                                                  request_hash=request_hash,
-                                                 expires__gt=now())[0]
+                                                 expires__gt=now(),
+                                                 reason='')[0]
                 token.refresh()
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.object['user'],
                                                  request_hash=request_hash)
-            return Response({'token': token.key, 'expires': token.expires})
+                # Get user un-expired tokens that are not invalidated that are 
+                # over the configured limit.
+                # Mark them as invalid and inform the user
+                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.object['user'])
+                for t in invalid_tokens:
+                    # TODO: send socket notification
+                    emit_websocket_notification('/socket.io/control',
+                                                'limit_reached',
+                                                dict(reason=unicode(AuthToken.reason_long('limit_reached'))),
+                                                token_key=t.key)
+                    t.invalidate(reason='limit_reached')
+
+            # Note: This header is normally added in the middleware whenever an
+            # auth token is included in the request header.
+            headers = {
+                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+            }
+            return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationList(ListCreateAPIView):

@@ -1,6 +1,10 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Django
+from django.utils.timezone import now as tz_now
+from django.conf import settings
+
 # Django REST Framework
 from rest_framework import authentication
 from rest_framework import exceptions
@@ -48,6 +52,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
         return self.authenticate_credentials(auth[1])
 
     def authenticate_credentials(self, key):
+        now = tz_now()
         # Retrieve the request hash and token.
         try:
             request_hash = self.model.get_request_hash(self.request)
@@ -56,21 +61,31 @@ class TokenAuthentication(authentication.TokenAuthentication):
                 request_hash=request_hash,
             )
         except self.model.DoesNotExist:
-            raise exceptions.AuthenticationFailed('Invalid token')
+            raise exceptions.AuthenticationFailed(AuthToken.reason_long('invalid_token'))
 
-        # Sanity check: Ensure that the token is still valid.
-        # Tokens expire if they are not used for 30 minutes.
-        if token.expired:
-            raise exceptions.AuthenticationFailed('Token is expired')
+        # Tell the user why their token was previously invalidated.
+        if token.invalidated:
+            raise exceptions.AuthenticationFailed(AuthToken.reason_long(token.reason))
 
-        # Sanity check: If the user is inactive, then return an error.
+        # Explicitly handle expired tokens
+        if token.is_expired(now=now):
+            token.invalidate(reason='timeout_reached')
+            raise exceptions.AuthenticationFailed(AuthToken.reason_long('timeout_reached'))
+
+        # Token invalidated due to session limit config being reduced
+        # Session limit reached invalidation will also take place on authentication
+        if settings.AUTH_TOKEN_PER_USER != -1:
+            if not token.in_valid_tokens(now=now):
+                token.invalidate(reason='limit_reached')
+                raise exceptions.AuthenticationFailed(AuthToken.reason_long('limit_reached'))
+        
+        # If the user is inactive, then return an error.
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted')
 
         # Refresh the token.
-        # This updates the time that the token was last used, meaning that
-        # now the token is valid for 30 minutes from "right now".
-        token.refresh()
+        # The token is extended from "right now" + configurable setting amount.
+        token.refresh(now=now)
 
         # Return the user object and the token.
         return (token.user, token)
