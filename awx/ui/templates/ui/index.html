@@ -26,6 +26,15 @@
 
   <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
 
+  <script src="//d3accju1t3mngt.cloudfront.net/js/angular/ng-pendo.js"></script>
+  <script>
+    window.pendo_options = {
+
+        // This is required to be able to load data client side
+        usePendoAgentAPI: true
+    };
+  </script>
+
 </head>
 <body data-user-agent="{{userAgent}}">
 
