@@ -83,6 +83,7 @@ export default
                             hdr: 'Error!',
                             msg: 'Failed to get inventory name. GET returned status: ' +
                             response.status });
+                        deferred.reject('Could not resolve pendo role.');
                     });
                 }
                 return deferred.promise;
@@ -110,6 +111,7 @@ export default
                             hdr: 'Error!',
                             msg: 'Failed to get inventory name. GET returned status: ' +
                             response.status });
+                        deferred.reject('Could not resolve pendo config.');
                     });
                 }
                 else if(config.analytics_status !== 'off'){
@@ -127,8 +129,12 @@ export default
                     var options = that.setPendoOptions(config);
                     that.setRole(options).then(function(options){
                         $pendolytics.identify(options);
+                    }, function(reason){
+                        // reject function for setRole
+                        $log.debug(reason);
                     });
                 }, function(reason){
+                    // reject function for getConfig
                     $log.debug(reason);
                 });
              }
