@@ -704,7 +704,8 @@ class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local')
+                   ANSIBLE_TRANSPORT='local',
+                   DEBUG=True)
 class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
     '''
     Base class for celery task tests.
