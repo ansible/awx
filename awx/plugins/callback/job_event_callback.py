@@ -45,12 +45,7 @@ import requests
 # ZeroMQ
 import zmq
 
-# PSUtil
-try:
-    import psutil
-except ImportError:
-    psutil = None
-
+import psutil
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -249,19 +244,14 @@ class BaseCallbackModule(object):
         if not cp_files:
             return
 
-        # HACK: If psutil isn't available, sleep and allow the control master
-        # processes to timeout and die.
-        if not psutil:
-            time.sleep(60)
-
         # Attempt to find any running control master processes.
         username = pwd.getpwuid(os.getuid())[0]
         ssh_cm_procs = []
         for proc in psutil.process_iter():
             try:
-                pname = proc.name
-                pcmdline = proc.cmdline
-                pusername = proc.username
+                pname = proc.name()
+                pcmdline = proc.cmdline()
+                pusername = proc.username()
             except psutil.NoSuchProcess:
                 continue
             if pusername != username:
@@ -277,19 +267,7 @@ class BaseCallbackModule(object):
         # version of psutil that may not have wait_procs implemented.
         for proc in ssh_cm_procs:
             proc.terminate()
-        if hasattr(psutil, 'wait_procs'):
-            procs_gone, procs_alive = psutil.wait_procs(ssh_cm_procs, timeout=5)
-        else:
-            procs_gone = []
-            procs_alive = ssh_cm_procs[:]
-            for x in xrange(5):
-                for proc in procs_alive[:]:
-                    if not proc.is_running():
-                        procs_alive.remove(proc)
-                        procs_gone.append(proc)
-                if not procs_alive:
-                    break
-                time.sleep(1)
+        procs_gone, procs_alive = psutil.wait_procs(ssh_cm_procs, timeout=5)
         for proc in procs_alive:
             proc.kill()
 
