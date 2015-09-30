@@ -9,10 +9,5 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 export default {
     name: 'signIn',
     route: '/login',
-    templateUrl: templateUrl('login/loginBackDrop'),
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    templateUrl: templateUrl('login/loginBackDrop')
 };
