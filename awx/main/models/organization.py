@@ -129,7 +129,8 @@ class Permission(CommonModelNameNotUnique):
     # the project parameter is not used when dealing with READ, WRITE, or ADMIN permissions.
 
     permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
-    run_ad_hoc_commands = models.BooleanField(default=False)
+    run_ad_hoc_commands = models.BooleanField(default=False,
+                                              help_text=_('Execute Commands on the Inventory'))
 
     def __unicode__(self):
         return unicode("Permission(name=%s,ON(user=%s,team=%s),FOR(project=%s,inventory=%s,type=%s%s))" % (
