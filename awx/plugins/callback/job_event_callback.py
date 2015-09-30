@@ -37,7 +37,6 @@ import logging
 import os
 import pwd
 import urlparse
-import time
 
 # Requests
 import requests
