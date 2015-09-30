@@ -25,7 +25,7 @@ DATABASES = {
         'NAME': 'awx-dev',
         'USER': 'awx-dev',
         'PASSWORD': 'AWXsome1',
-        'HOST': 'localhost',
+        'HOST': 'postgres',
         'PORT': '',
     }
 }
@@ -46,7 +46,10 @@ if len(sys.argv) >= 2 and sys.argv[1] == 'test':
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'redis://redis/'
+
+# Mongo host configuration
+MONGO_HOST = 'mongo'
 
 # Set True to enable additional logging from the job_event_callback plugin
 JOB_CALLBACK_DEBUG = False
@@ -483,7 +486,6 @@ TEST_AWS_SECRET_ACCESS_KEY = ''
 TEST_AWS_REGIONS = 'all'
 # Check IAM STS credentials
 TEST_AWS_SECURITY_TOKEN = ''
-
 
 # Rackspace credentials
 TEST_RACKSPACE_USERNAME = ''
