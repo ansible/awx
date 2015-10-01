@@ -46,29 +46,33 @@ class SocketSession(object):
         return bool(not auth_token.is_expired())
 
 class SocketSessionManager(object):
-    sessions = []
-    session_token_key_map = {}
+    socket_sessions = []
+    socket_session_token_key_map = {}
 
     @classmethod
     def _prune(cls):
-        #cls.sessions = [s for s in cls.sessions if s.is_valid()]
-        if len(cls.sessions) > 1000:
-            del cls.session_token_key_map[cls.sessions[0].token_key]
-            cls.sessions = cls.sessions[1:]
+        if len(cls.socket_sessions) > 1000:
+            session = cls.socket_session[0]
+            del cls.socket_session_token_key_map[session.token_key]
+            cls.sessions = cls.socket_sessions[1:]
 
+    '''
+    Returns an dict of sessions <session_id, session>
+    '''
     @classmethod
     def lookup(cls, token_key=None):
         if not token_key:
             raise ValueError("token_key required")
-        for s in cls.sessions:
-            if s.token_key == token_key:
-                return s
-        return None
+        return cls.socket_session_token_key_map.get(token_key, None)
 
     @classmethod
     def add_session(cls, session):
-        cls.sessions.append(session)
-        cls.session_token_key_map[session.token_key] = session
+        cls.socket_sessions.append(session)
+        entries = cls.socket_session_token_key_map.get(session.token_key, None)
+        if not entries:
+            entries = {}
+            cls.socket_session_token_key_map[session.token_key] = entries
+        entries[session.session_id] = session
         cls._prune()
 
 class SocketController(object):
@@ -91,17 +95,22 @@ class SocketController(object):
     def send_packet(cls, packet, token_key):
         if not token_key:
             raise ValueError("token_key is required")
-        socket_session = SocketSessionManager.lookup(token_key=token_key)
+        socket_sessions = SocketSessionManager.lookup(token_key=token_key)
         # We may not find the socket_session if the user disconnected
         # (it's actually more compliciated than that because of our prune logic)
-        if socket_session and socket_session.is_valid():
-            socket = socket_session.socket()
-            if socket:
-                try:
-                    socket.send_packet(packet)
-                except Exception, e:
-                    logger.error("Error sending client packet to %s: %s" % (str(socket_session.session_id), str(packet)))
-                    logger.error("Error was: " + str(e))
+        if not socket_sessions:
+            return None
+        for session_id, socket_session in socket_sessions.iteritems():
+            logger.warn("Maybe sending packet to %s" % session_id)
+            if socket_session and socket_session.is_valid():
+                logger.warn("Sending packet to %s" % session_id)
+                socket = socket_session.socket()
+                if socket:
+                    try:
+                        socket.send_packet(packet)
+                    except Exception, e:
+                        logger.error("Error sending client packet to %s: %s" % (str(socket_session.session_id), str(packet)))
+                        logger.error("Error was: " + str(e))
 
     @classmethod
     def set_server(cls, server):
