@@ -1349,6 +1349,7 @@ class CredentialSerializer(BaseSerializer):
     # FIXME: may want to make some of these filtered based on user accessing
 
     password = serializers.CharField(required=False, default='')
+    security_token = serializers.CharField(required=False, default='')
     ssh_key_data = serializers.CharField(required=False, default='')
     ssh_key_unlock = serializers.CharField(required=False, default='')
     become_password = serializers.CharField(required=False, default='')
@@ -1357,7 +1358,7 @@ class CredentialSerializer(BaseSerializer):
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
-                  'password', 'project', 'ssh_key_data', 'ssh_key_unlock',
+                  'password', 'security_token', 'project', 'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 

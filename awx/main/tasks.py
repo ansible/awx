@@ -665,6 +665,8 @@ class RunJob(BaseTask):
         if cloud_cred and cloud_cred.kind == 'aws':
             env['AWS_ACCESS_KEY'] = cloud_cred.username
             env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
+            if len(cloud_cred.security_token) > 0:
+                env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
             # FIXME: Add EC2_URL, maybe EC2_REGION!
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
@@ -1127,7 +1129,7 @@ class RunInventoryUpdate(BaseTask):
         if credential:
             for subkey in ('username', 'host', 'project'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
-            for passkey in ('password', 'ssh_key_data'):
+            for passkey in ('password', 'ssh_key_data', 'security_token'):
                 k = 'source_%s' % passkey
                 passwords[k] = decrypt_field(credential, passkey)
         return passwords
@@ -1160,6 +1162,8 @@ class RunInventoryUpdate(BaseTask):
             if passwords.get('source_username', '') and passwords.get('source_password', ''):
                 env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
                 env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
+                if len(passwords['source_security_token']) > 0:
+                    env['AWS_SECURITY_TOKEN'] = passwords['source_security_token']
             env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = cloud_credential
@@ -1199,7 +1203,7 @@ class RunInventoryUpdate(BaseTask):
         inventory = inventory_source.group.inventory
 
         # Piece together the initial command to run via. the shell.
-        args = ['awx-manage', 'inventory_import']
+        args = ['tower-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
 
         # Add appropriate arguments for overwrite if the inventory_update
@@ -1461,7 +1465,7 @@ class RunSystemJob(BaseTask):
     model = SystemJob
 
     def build_args(self, system_job, **kwargs):
-        args = ['awx-manage', system_job.job_type]
+        args = ['tower-manage', system_job.job_type]
         try:
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':

@@ -1665,6 +1665,54 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
 
+
+    def test_update_from_ec2_sts_iam(self):
+        source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
+        source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')
+        source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
+        source_token = getattr(settings, 'TEST_AWS_SECURITY_TOKEN', '')
+        if not all([source_username, source_password, source_token]):
+            self.skipTest('no test ec2 sts credentials defined!')
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='aws',
+                                               user=self.super_django_user,
+                                               username=source_username,
+                                               password=source_password,
+                                               security_token=source_token)
+        # Set parent group name to one that might be created by the sync.
+        group = self.group
+        group.name = 'ec2'
+        group.save()
+        self.group = group
+        cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path)
+        inventory_source = self.update_inventory_source(self.group,
+                                                        source='ec2', credential=credential, source_regions=source_regions,
+                                                        source_vars='---\n\nnested_groups: false\ncache_path: %s\n' % cache_path)
+        self.check_inventory_source(inventory_source)
+
+    def test_update_from_ec2_sts_iam_bad_token(self):
+        source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
+        source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')
+        source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='aws',
+                                               user=self.super_django_user,
+                                               username=source_username,
+                                               password=source_password,
+                                               security_token="BADTOKEN")
+        # Set parent group name to one that might be created by the sync.
+        group = self.group
+        group.name = 'ec2'
+        group.save()
+        self.group = group
+        cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path)
+        inventory_source = self.update_inventory_source(self.group,
+                                                        source='ec2', credential=credential, source_regions=source_regions,
+                                                        source_vars='---\n\nnested_groups: false\ncache_path: %s\n' % cache_path)
+        self.check_inventory_update(inventory_source, should_fail=True)
+
     def test_update_from_ec2_without_credential(self):
         self.create_test_license_file()
         group = self.group
