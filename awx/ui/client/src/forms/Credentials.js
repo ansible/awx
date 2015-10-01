@@ -153,6 +153,18 @@ export default
                     hasShowInputButton: true,
                     apiField: 'passwowrd'
                 },
+                security_token: {
+                    label: 'STS Token',
+                    type: 'sensitive',
+                    ngShow: "kind.value == 'aws'",
+                    autocomplete: false,
+                    apiField: 'security_token',
+                    awPopOver: "<div>Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users.</div><div style='padding-top: 10px'>To learn more about the IAM STS Token, refer to the <a href='http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html' target='_blank'>Amazon documentation</a>.</div>",
+                    hasShowInputButton: true,
+                    dataTitle: 'STS Token',
+                    dataPlacement: 'right',
+                    dataContainer: "body"
+                },
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
