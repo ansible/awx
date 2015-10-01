@@ -128,6 +128,17 @@ export default
                     //         '</dl>\n'
                     // }]
                 },
+                security_token: {
+                    label: 'Security Token',
+                    type: 'text',
+                    ngShow: "kind.value == 'aws'",
+                    autocomplete: false,
+                    apiField: 'security_token',
+                    awPopOver: "To learn more about AWS IAM sts security tokens, see <a href='http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html' target='_blank'>here</a>",
+                    dataTitle: 'Security Token',
+                    dataPlacement: 'right',
+                    dataContainer: "body"
+                },
                 access_key: {
                     label: 'Access Key',
                     type: 'text',
