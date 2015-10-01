@@ -59,9 +59,16 @@ export default
                 }
             },
 
-            expireSession: function () {
+            expireSession: function (reason) {
+                if(reason === 'session_limit'){
+                    $rootScope.sessionLimitExpired = true;
+                    $rootScope.sessionExpired = false;
+                }
+                else if(reason === 'idle'){
+                    $rootScope.sessionExpired = true;
+                    $rootScope.sessionLimitExpired = false;
+                }
                 this.sessionTime = 0;
-                $rootScope.sessionExpired = true;
                 this.clearTimers();
                 $cookieStore.put('sessionExpired', true);
                 transitionTo('signOut');
@@ -89,7 +96,7 @@ export default
                 // make a timeout that will go off in 30 mins to log them out
                 // unless they extend their time
                 $rootScope.endTimer = setTimeout(function(){
-                    that.expireSession();
+                    that.expireSession('idle');
                 }, tm * 1000);
 
                 // notify the user a minute before the end of their session that

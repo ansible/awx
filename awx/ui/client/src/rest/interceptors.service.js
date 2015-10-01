@@ -11,16 +11,21 @@
   *************************************************/
 
  export default
-    ['$rootScope',
+    [ '$rootScope',
         function ($rootScope) {
             return {
                 response: function(config) {
                     if(config.headers('auth-token-timeout') !== null){
-                        // $rootScope.sessionTimer = Number(config.headers('auth-token-timeout'));
                         $AnsibleConfig.session_timeout = Number(config.headers('auth-token-timeout'));
-                        // $rootScope.sessionTimer = Timer.init();
                     }
                     return config;
+                },
+                responseError: function(rejection){
+                    if(rejection.data.detail && rejection.data.detail === "Maximum per-user sessions reached"){
+                        $rootScope.sessionTimer.expireSession('session_limit');
+                        return rejection;
+                    }
+                    return rejection;
                 }
             };
  }];

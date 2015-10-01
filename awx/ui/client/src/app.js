@@ -887,7 +887,7 @@ var tower = angular.module('Tower', [
                     // Listen for job changes and issue callbacks to initiate
                     // DOM updates
                     function openSocket() {
-                        var schedule_socket;
+                        var schedule_socket, control_socket;
 
                         sock = Socket({ scope: $rootScope, endpoint: "jobs" });
                         sock.init();
@@ -936,6 +936,16 @@ var tower = angular.module('Tower', [
                             $log.debug('Schedule  ' + data.unified_job_id + ' status changed to ' + data.status);
                             $rootScope.$emit('ScheduleStatusChange', data);
                         });
+
+                        control_socket = Socket({
+                            scope: $rootScope,
+                            endpoint: "control"
+                        });
+                        control_socket.init();
+                        control_socket.on("limit_reached", function(data) {
+                            $log.debug(data.reason);
+                            Timer.expireSession('session_limit');
+                        });
                     }
                     openSocket();
 
@@ -982,7 +992,7 @@ var tower = angular.module('Tower', [
                     } else if ($rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
-                            $rootScope.sessionTimer.expireSession();
+                            $rootScope.sessionTimer.expireSession('idle');
                             if (sock) {
                                 sock.socket.socket.disconnect();
                             }

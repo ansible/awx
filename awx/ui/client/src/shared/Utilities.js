@@ -200,7 +200,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             } else if ((status === 'Token is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
                 (status === 401 && data.detail && data.detail === 'Invalid token')) {
                 if ($rootScope.sessionTimer) {
-                    $rootScope.sessionTimer.expireSession();
+                    $rootScope.sessionTimer.expireSession('idle');
                 }
                 $location.url('/login');
             } else if (data.non_field_errors) {
