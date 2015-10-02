@@ -90,6 +90,17 @@ class TokenAuthentication(authentication.TokenAuthentication):
         # Return the user object and the token.
         return (token.user, token)
 
+
+class TokenGetAuthentication(TokenAuthentication):
+
+    def authenticate(self, request):
+        if request.method.lower() == 'get':
+            token = request.GET.get('token', None)
+            if token:
+                request.META['HTTP_X_AUTH_TOKEN'] = 'Token %s' % token
+        return super(TokenGetAuthentication, self).authenticate(request)
+
+
 class TaskAuthentication(authentication.BaseAuthentication):
     '''
     Custom authentication used for views accessed by the inventory and callback

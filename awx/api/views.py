@@ -52,7 +52,7 @@ from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
 from awx.main.tasks import mongodb_control
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.api.authentication import TaskAuthentication
+from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.utils.decorators import paginated
 from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
@@ -2805,6 +2805,7 @@ class UnifiedJobList(ListAPIView):
 
 class UnifiedJobStdout(RetrieveAPIView):
 
+    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,

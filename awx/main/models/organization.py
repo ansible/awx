@@ -210,7 +210,7 @@ class AuthToken(BaseModel):
     def reason_long(reason):
         for x in AuthToken.REASON_CHOICES:
             if x[0] == reason:
-                return x[1]
+                return unicode(x[1])
         return None
 
     @classmethod
