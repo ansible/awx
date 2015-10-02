@@ -18,6 +18,8 @@ logger = logging.getLogger('awx.fact.models.fact')
 
 key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
 
+# NOTE: I think it might be better to use register_connection here: https://github.com/MongoEngine/mongoengine/blob/0.9/mongoengine/connection.py#L21
+#       but I'm not doing that because I don't see how we can also register the key transform as needed or set the tz_aware preference
 @classmethod
 def _get_db_monkeypatched(cls):
     """ Override the default _get_db mechanism to start a connection to the database """
