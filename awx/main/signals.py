@@ -407,5 +407,4 @@ def get_current_user_from_drf_request(sender, **kwargs):
     '''
     request = get_current_request()
     drf_request = getattr(request, 'drf_request', None)
-    print drf_request
     return (getattr(drf_request, 'user', False), 0)

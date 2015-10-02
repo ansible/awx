@@ -5,7 +5,6 @@
 import urllib
 
 # Django
-from django.contrib.auth import logout as auth_logout
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.utils.timezone import now, utc

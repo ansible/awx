@@ -8,7 +8,7 @@ import urllib
 import six
 
 # Django
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect
 from django.utils.timezone import now
 
@@ -87,4 +87,4 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
     def get_redirect_uri(self, request, exception):
         strategy = getattr(request, 'social_strategy', None)
-        return strategy.session_get('next', '')  or strategy.setting('LOGIN_ERROR_URL')
+        return strategy.session_get('next', '') or strategy.setting('LOGIN_ERROR_URL')
