@@ -78,6 +78,7 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 try:
     include(
         optional('local_*.py'),
+        'postprocess.py',
         scope=locals(),
     )
 except ImportError:

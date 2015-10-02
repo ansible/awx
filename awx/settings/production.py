@@ -111,6 +111,7 @@ try:
     include(
         settings_file,
         optional(settings_files),
+        'postprocess.py',
         scope=locals(),
     )
 except ImportError:

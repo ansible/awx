@@ -1,6 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
+import urllib
+
 # Django
 from django.utils.timezone import now as tz_now
 from django.conf import settings
@@ -30,6 +33,13 @@ class TokenAuthentication(authentication.TokenAuthentication):
             auth = auth.encode(HTTP_HEADER_ENCODING)
         return auth
 
+    @staticmethod
+    def _get_auth_token_cookie(request):
+        token = request.COOKIES.get('token', '')
+        if token:
+            token = urllib.unquote(token).strip('"')
+            return 'token %s' % token
+
     def authenticate(self, request):
         self.request = request
 
@@ -40,7 +50,9 @@ class TokenAuthentication(authentication.TokenAuthentication):
         if not auth or auth[0].lower() != 'token':
             auth = authentication.get_authorization_header(request).split()
             if not auth or auth[0].lower() != 'token':
-                return None
+                auth = TokenAuthentication._get_auth_token_cookie(request).split()
+                if not auth or auth[0].lower() != 'token':
+                    return None
 
         if len(auth) == 1:
             msg = 'Invalid token header. No credentials provided.'

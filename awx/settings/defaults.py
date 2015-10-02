@@ -118,15 +118,30 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 
-TEMPLATE_CONTEXT_PROCESSORS += (  # NOQA
+TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
     'awx.ui.context_processors.settings',
     'awx.ui.context_processors.version',
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
 )
 
-MIDDLEWARE_CLASSES += (  # NOQA
+MIDDLEWARE_CLASSES = (  # NOQA
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
+    'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.AuthTokenTimeoutMiddleware',
 )
@@ -160,10 +175,12 @@ INSTALLED_APPS = (
     'kombu.transport.django',
     'polymorphic',
     'taggit',
+    'social.apps.django_app.default',
     'awx.main',
     'awx.api',
     'awx.ui',
     'awx.fact',
+    'awx.sso',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -201,11 +218,22 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = (
     'awx.main.backend.LDAPBackend',
+    'radiusauth.backends.RADIUSBackend',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.github.GithubOAuth2',
+    'social.backends.github.GithubOrganizationOAuth2',
+    'social.backends.github.GithubTeamOAuth2',
+    'social.backends.saml.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 # LDAP server (default to None to skip using LDAP authentication).
 AUTH_LDAP_SERVER_URI = None
+
+# Radius server settings (default to empty string to skip using Radius auth).
+RADIUS_SERVER = ''
+RADIUS_PORT = 1812
+RADIUS_SECRET = ''
 
 # Seconds before auth tokens expire.
 AUTH_TOKEN_EXPIRATION = 1800
@@ -311,6 +339,62 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=30)
     },
 }
+
+# Social Auth configuration.
+SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
+SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
+SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.social_auth.associate_by_email',
+    'social.pipeline.mail.mail_validation',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'awx.sso.pipeline.set_is_active_for_new_user',
+    'social.pipeline.user.user_details',
+    'awx.sso.pipeline.prevent_inactive_login',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
+
+SOCIAL_AUTH_GITHUB_KEY = ''
+SOCIAL_AUTH_GITHUB_SECRET = ''
+
+SOCIAL_AUTH_GITHUB_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ORG_NAME = ''
+
+SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_TEAM_ID = ''
+
+SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
+SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
+SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
+SOCIAL_AUTH_SAML_ORG_INFO = {}
+SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
+SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
+SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
+
+SOCIAL_AUTH_LOGIN_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
+SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
+
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
+SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+SOCIAL_AUTH_CLEAN_USERNAMES = True
+
+SOCIAL_AUTH_SANITIZE_REDIRECTS = True
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
