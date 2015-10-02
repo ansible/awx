@@ -51,6 +51,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
                     logout(request)
                 elif auth_token and request.user != auth_token.user:
                     logout(request)
+                    auth_token.user.backend = ''
                     login(request, auth_token.user)
                     auth_token.refresh()
 
