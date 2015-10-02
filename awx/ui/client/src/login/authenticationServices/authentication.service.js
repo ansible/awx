@@ -94,8 +94,7 @@ export default
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
-                clearTimeout($rootScope.idleTimer);
-                clearTimeout($rootScope.endTimer);
+                $rootScope.sessionTimer.expireSession();
             },
 
             getLicense: function () {

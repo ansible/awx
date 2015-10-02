@@ -21,7 +21,7 @@
                     return config;
                 },
                 responseError: function(rejection){
-                    if(rejection.data.detail && rejection.data.detail === "Maximum per-user sessions reached"){
+                    if( !_.isEmpty(rejection.data.detail) && rejection.data.detail === "Maximum per-user sessions reached"){
                         $rootScope.sessionTimer.expireSession('session_limit');
                         return rejection;
                     }
