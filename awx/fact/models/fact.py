@@ -6,9 +6,6 @@ from mongoengine.base import BaseField
 from mongoengine import Document, DateTimeField, ReferenceField, StringField, IntField
 from mongoengine.connection import get_db, ConnectionError
 from awx.fact.utils.dbtransform import register_key_transform, KeyTransform
-from awx.fact.utils.dbtransform import KeyTransform
-
-from mongoengine.connection import get_db, DEFAULT_CONNECTION_NAME
 
 from django.conf import settings
 
