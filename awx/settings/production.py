@@ -108,12 +108,8 @@ settings_file = os.environ.get('AWX_SETTINGS_FILE',
 # Attempt to load settings from /etc/tower/settings.py first, followed by
 # /etc/tower/conf.d/*.py.
 try:
-    include(
-        settings_file,
-        optional(settings_files),
-        'postprocess.py',
-        scope=locals(),
-    )
+    include(settings_file, optional(settings_files), scope=locals())
+    include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

@@ -39,6 +39,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
         if token:
             token = urllib.unquote(token).strip('"')
             return 'token %s' % token
+        return ''
 
     def authenticate(self, request):
         self.request = request
