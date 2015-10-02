@@ -144,7 +144,7 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $routePara
 
 
         CreateDialog({
-            id: 'copy-job-modal'    ,
+            id: 'copy-job-modal',
             title: "Copy",
             scope: $scope,
             buttons: buttons,

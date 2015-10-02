@@ -13,10 +13,5 @@ export default {
         Authorization.logout();
         $location.path('/login');
     }],
-    templateUrl: '/static/partials/blank.html',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    templateUrl: '/static/partials/blank.html'
 };

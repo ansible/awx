@@ -4,7 +4,7 @@ import '../support/node';
 
 import {describeModule} from '../support/describe-module';
 import 'shared/Utilities';
-import 'shared/RestServices';
+
 import JobStatusGraph from 'dashboard/graphs/job-status/main';
 
 var resizeHandler = sinon.spy();

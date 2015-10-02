@@ -158,7 +158,7 @@ angular.module('SocketIO', ['Utilities'])
                     }
                     else {
                         // encountered expired token, redirect to login page
-                        $rootScope.sessionTimer.expireSession();
+                        $rootScope.sessionTimer.expireSession('idle');
                         $location.url('/login');
                     }
                 },

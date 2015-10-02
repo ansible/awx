@@ -40,10 +40,6 @@
         password_hasSymbol: false,                // require one of these symbols to be
                                                  // in the password: -!$%^&*()_+|~=`{}[]:";'<>?,./
 
-        session_timeout: 1800,                   // Number of seconds before an inactive session is automatically timed out and forced to log in again.
-                                                 // Separate from time out value set in API.
-
-
         variable_edit_modes: {                   // Options we pass to ControlMirror for editing YAML/JSON variables
             yaml: {
                 mode:"text/x-yaml",

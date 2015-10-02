@@ -6,11 +6,15 @@
                     ng-src="/static/assets/{{ customLogo }}" >
             </div>
             <div class="modal-body">
-                <div class="LoginModal-alert" ng-show="!sessionExpired">
+                <div class="LoginModal-alert" ng-show="!sessionExpired && !sessionLimitExpired">
                     Welcome to Ansible Tower! &nbsp;Please sign in.
                 </div>
                 <div class="LoginModal-alert" ng-show="sessionExpired">
                     Your session timed out due to inactivity. Please
+                    sign in.
+                </div>
+                <div class="LoginModal-alert" ng-show="sessionLimitExpired">
+                    Maximum per-user sessions reached. Please
                     sign in.
                 </div>
                 <form id="login-form"

@@ -94,6 +94,8 @@ export default
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
+                clearTimeout($rootScope.idleTimer);
+                clearTimeout($rootScope.endTimer);
             },
 
             getLicense: function () {
@@ -109,7 +111,7 @@ export default
 
             setLicense: function (data) {
                 var license = data.license_info;
-                license.analytics_status = data.analytics_status; 
+                license.analytics_status = data.analytics_status;
                 license.version = data.version;
                 license.tested = false;
                 Store('license', license);
@@ -138,7 +140,8 @@ export default
                     method: 'GET',
                     url: '/api/v1/me/',
                     headers: {
-                        'Authorization': 'Token ' + this.getToken()
+                        'Authorization': 'Token ' + this.getToken(),
+                        "X-Auth-Token": 'Token ' + this.getToken()
                     }
                 });
             },
