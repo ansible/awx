@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# flake8: noqa
+
 # Runs after all configuration files have been loaded to fix/check/update
 # settings as needed.
 
