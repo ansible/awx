@@ -1,11 +1,45 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
+from mongoengine import connect
 from mongoengine.base import BaseField
 from mongoengine import Document, DateTimeField, ReferenceField, StringField, IntField
-from awx.fact.utils.dbtransform import KeyTransform
+from mongoengine.connection import get_db, ConnectionError
+from awx.fact.utils.dbtransform import register_key_transform, KeyTransform
+
+from django.conf import settings
+
+import logging
+logger = logging.getLogger('awx.fact.models.fact')
+
 
 key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
+
+# NOTE: I think it might be better to use register_connection here: https://github.com/MongoEngine/mongoengine/blob/0.9/mongoengine/connection.py#L21
+#       but I'm not doing that because I don't see how we can also register the key transform as needed or set the tz_aware preference
+@classmethod
+def _get_db_monkeypatched(cls):
+    """ Override the default _get_db mechanism to start a connection to the database """
+    # Connect to Mongo
+    try:
+        # Sanity check: If we have intentionally invalid settings, then we
+        # know we cannot connect.
+        if settings.MONGO_HOST == NotImplemented:
+            raise ConnectionError
+
+        # Attempt to connect to the MongoDB database.
+        connect(settings.MONGO_DB,
+                host=settings.MONGO_HOST,
+                port=int(settings.MONGO_PORT),
+                username=settings.MONGO_USERNAME,
+                password=settings.MONGO_PASSWORD,
+                tz_aware=settings.USE_TZ)
+        register_key_transform(get_db())
+    except ConnectionError:
+        logger.info('Failed to establish connect to MongoDB')
+    return get_db(cls._meta.get("db_alias", "default"))
+
+Document._get_db = _get_db_monkeypatched
 
 class TransformField(BaseField):
     def to_python(self, value):
