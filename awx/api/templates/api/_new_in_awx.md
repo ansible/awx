@@ -4,3 +4,5 @@
 {% if new_in_148 %}> _Added in Ansible Tower 1.4.8_{% endif %}
 {% if new_in_200 %}> _New in Ansible Tower 2.0.0_{% endif %}
 {% if new_in_220 %}> _New in Ansible Tower 2.2.0_{% endif %}
+{% if new_in_230 %}> _New in Ansible Tower 2.3.0_{% endif %}
+{% if new_in_240 %}> _New in Ansible Tower 2.4.0_{% endif %}

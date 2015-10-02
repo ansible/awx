@@ -601,6 +601,8 @@ class UserSerializer(BaseSerializer):
         ret = super(UserSerializer, self).to_native(obj)
         ret.pop('password', None)
         ret.fields.pop('password', None)
+        if obj:
+            ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
 
     def get_validation_exclusions(self):

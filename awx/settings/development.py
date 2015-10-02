@@ -76,10 +76,8 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 # default settings for development.  If not present, we can still run using
 # only the defaults.
 try:
-    include(
-        optional('local_*.py'),
-        scope=locals(),
-    )
+    include(optional('local_*.py'), scope=locals())
+    include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
