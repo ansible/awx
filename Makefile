@@ -203,7 +203,8 @@ clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bun
 	rm -rf awx/lib/site-packages
 	rm- rf awx/lib/.deps_built
 	rm -rf dist/*
-	rm -rf tmp/*
+	rm -rf tmp
+	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
