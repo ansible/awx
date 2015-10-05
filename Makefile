@@ -202,7 +202,8 @@ clean-bundle:
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
-	rm -rf tmp/*
+	rm -rf tmp
+	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
