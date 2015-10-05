@@ -473,6 +473,61 @@ TEST_AUTH_LDAP_TEAM_MAP_2_RESULT = {
 }
 
 ###############################################################################
+# RADIUS AUTH SETTINGS
+###############################################################################
+
+RADIUS_SERVER = ''
+RADIUS_PORT = 1812
+RADIUS_SECRET = ''
+
+###############################################################################
+# SOCIAL AUTH SETTINGS
+###############################################################################
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+#SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
+#SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com']
+#SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'hd': 'example.com'}
+
+SOCIAL_AUTH_GITHUB_KEY = ''
+SOCIAL_AUTH_GITHUB_SECRET = ''
+
+SOCIAL_AUTH_GITHUB_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ORG_NAME = ''
+
+SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_TEAM_ID = ''
+
+SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
+SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
+SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
+SOCIAL_AUTH_SAML_ORG_INFO = {
+    'en-US': {
+        'name': 'example',
+        'displayname': 'Example',
+        'url': 'http://www.example.com',
+    },
+}
+SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {
+    'givenName': 'Some User',
+    'emailAddress': 'suser@example.com',
+}
+SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {
+    'givenName': 'Some User',
+    'emailAddress': 'suser@example.com',
+}
+SOCIAL_AUTH_SAML_ENABLED_IDPS = {
+    #'myidp': {
+    #    'entity_id': 'https://idp.example.com',
+    #    'url': 'https://myidp.example.com/sso',
+    #    'x509cert': '',
+    #},
+}
+
+###############################################################################
 # INVENTORY IMPORT TEST SETTINGS
 ###############################################################################
 
