@@ -136,12 +136,11 @@ EMAIL_SUBJECT_PREFIX = '[AWX] '
 
 # Enable logging to syslog. Setting level to ERROR captures 500 errors,
 # WARNING also logs 4xx responses.
+
 LOGGING['handlers']['syslog'] = {
     'level': 'WARNING',
-    'filters': [],
-    'class': 'logging.handlers.SysLogHandler',
-    'address': '/dev/log',
-    'facility': 'local0',
+    'filters': ['require_debug_false'],
+    'class': 'django.utils.log.NullHandler',
     'formatter': 'simple',
 }
 
