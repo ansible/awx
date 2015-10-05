@@ -201,6 +201,7 @@ clean-bundle:
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
+	rm- rf awx/lib/.deps_built
 	rm -rf dist/*
 	rm -rf tmp
 	mkdir tmp
