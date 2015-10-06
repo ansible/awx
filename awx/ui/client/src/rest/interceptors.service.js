@@ -11,8 +11,8 @@
   *************************************************/
 
  export default
-    [ '$rootScope',
-        function ($rootScope) {
+    [ '$rootScope', '$q',
+        function ($rootScope, $q) {
             return {
                 response: function(config) {
                     if(config.headers('auth-token-timeout') !== null){
@@ -23,9 +23,9 @@
                 responseError: function(rejection){
                     if( !_.isEmpty(rejection.data.detail) && rejection.data.detail === "Maximum per-user sessions reached"){
                         $rootScope.sessionTimer.expireSession('session_limit');
-                        return rejection;
+                        return $q.reject(rejection);
                     }
-                    return rejection;
+                    return $q.reject(rejection);
                 }
             };
  }];
