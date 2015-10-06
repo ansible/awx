@@ -24,10 +24,10 @@
                 .then(function (data) {
                     data = data.data;
                     var choices = data.actions.GET.permission_type.choices;
-                    
+
                     // manually add the adhoc label to the choices object
                     choices.push(["adhoc",
-                        data.actions.GET.run_ad_hoc_commands.label]);
+                        data.actions.GET.run_ad_hoc_commands.help_text]);
 
                     return choices;
                 })
