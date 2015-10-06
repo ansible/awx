@@ -238,7 +238,7 @@ RADIUS_SECRET = ''
 # Seconds before auth tokens expire.
 AUTH_TOKEN_EXPIRATION = 1800
 
-# Maximum number of per-user valid, concurrent session.
+# Maximum number of per-user valid, concurrent tokens.
 # -1 is unlimited
 AUTH_TOKEN_PER_USER = -1
 
