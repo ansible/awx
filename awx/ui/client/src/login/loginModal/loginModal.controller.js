@@ -186,17 +186,17 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
             Authorization.retrieveToken(username, password)
                 .then(function (data) {
                     $('#login-modal').modal('hide');
-                    Authorization.setToken(data.token, data.expires);
+                    Authorization.setToken(data.data.token, data.data.expires);
                     $rootScope.sessionTimer = Timer.init();
                     scope.$emit('AuthorizationGetUser');
                 },
                 function (data) {
                     var key;
                     Wait('stop');
-                    if (data.non_field_errors && data.non_field_errors.length === 0) {
+                    if (data.data.non_field_errors && data.data.non_field_errors.length === 0) {
                         // show field specific errors returned by the API
-                        for (key in data) {
-                            scope[key + 'Error'] = data[key][0];
+                        for (key in data.data) {
+                            scope[key + 'Error'] = data.data[key][0];
                         }
                     } else {
                         scope.reset();
