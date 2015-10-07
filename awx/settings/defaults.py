@@ -242,6 +242,10 @@ AUTH_TOKEN_EXPIRATION = 1800
 # -1 is unlimited
 AUTH_TOKEN_PER_USER = -1
 
+# Enable / Disable HTTP Basic Authentication used in the API browser
+# Note: Session limits are not enforced when using HTTP Basic Authentication.
+AUTH_BASIC_ENABLED = True
+
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False
 
