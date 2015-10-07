@@ -35,7 +35,10 @@ import time
 import datetime
 from copy import deepcopy
 from ansible import constants as C
-from ansible.cache.base import BaseCacheModule
+try:
+    from ansible.cache.base import BaseCacheModule
+except:
+    from ansible.plugins.cache.base import BaseCacheModule
 
 try:
     import zmq
