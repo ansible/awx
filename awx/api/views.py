@@ -60,7 +60,7 @@ from awx.api.utils.decorators import paginated
 from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.license import feature_enabled, LicenseForbids
+from awx.api.license import feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
@@ -527,6 +527,11 @@ class AuthView(APIView):
         data = SortedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
         for name, backend in load_backends(settings.AUTHENTICATION_BACKENDS).items():
+            if (not feature_exists('enterprise_auth') and
+                not feature_enabled('ldap')) or \
+                (not feature_enabled('enterprise_auth') and
+                 name in ['saml', 'radius']):
+                    continue
             login_url = reverse('social:begin', args=(name,))
             complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
             backend_data = {
