@@ -187,6 +187,9 @@ var tower = angular.module('Tower', [
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
+    .config(function($pendolyticsProvider) {
+        $pendolyticsProvider.doNotAutoStart();
+    })
     .config(['$routeProvider',
         function ($routeProvider) {
             $routeProvider.

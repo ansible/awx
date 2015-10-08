@@ -100,6 +100,7 @@ export default
                         config = response.license_info;
                         config.analytics_status = response.analytics_status;
                         if(config.analytics_status !== 'off'){
+                            $pendolytics.bootstrap();
                             deferred.resolve(config);
                         }
                         else {
@@ -115,6 +116,7 @@ export default
                     });
                 }
                 else if(config.analytics_status !== 'off'){
+                    $pendolytics.bootstrap();
                     deferred.resolve(config);
                 }
                 else {
@@ -128,6 +130,8 @@ export default
                 this.getConfig().then(function(config){
                     var options = that.setPendoOptions(config);
                     that.setRole(options).then(function(options){
+                        $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
+                        $log.debug(options);
                         $pendolytics.identify(options);
                     }, function(reason){
                         // reject function for setRole
