@@ -700,5 +700,10 @@ docker-compose:
 	docker-compose -f tools/docker-compose.yml up --no-recreate
 
 docker-compose-test:
-	cd tools && docker-compose run --service-ports tower /bin/bash
+	cd tools && docker-compose run --rm --service-ports tower /bin/bash
 
+mongo-debug-ui:
+	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
+
+psql-container:
+	docker run -it --link tools_postgres_1:postgres --rm postgres:9.4.1 sh -c 'exec psql -h "$$POSTGRES_PORT_5432_TCP_ADDR" -p "$$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
