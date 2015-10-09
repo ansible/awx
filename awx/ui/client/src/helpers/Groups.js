@@ -47,6 +47,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                  });
                              }
                          }
+                         scope.cloudCredentialRequired = false;
                          scope.$emit('sourceTypeOptionsReady');
                      })
                      .error(function (data, status) {
@@ -243,6 +244,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                 form = params.form,
                 kind, url, callback, invUrl;
 
+                scope.cloudCredentialRequired = false;
+
                 if (!Empty(scope.source)) {
                     if (scope.source.value === 'file') {
                         scope.sourcePathRequired = true;
@@ -313,6 +316,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                             kind = 'aws';
                         } else {
                             kind = scope.source.value;
+                            scope.cloudCredentialRequired = true;
                         }
                         url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
                         LookUpInit({

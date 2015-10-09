@@ -46,8 +46,10 @@ export default
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
-                    addRequired: false,
-                    editRequired: false
+                    awRequiredWhen: {
+                        variable: "cloudCredentialRequired",
+                        init: "false"
+                    }
                 },
                 source_regions: {
                     label: 'Regions',
