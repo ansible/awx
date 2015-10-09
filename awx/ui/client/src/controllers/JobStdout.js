@@ -158,6 +158,8 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         }
     };
 
+    $(".StandardOut").height($("body").height() - 60);
+
     // Note: could be ad_hoc_commands or jobs
     var jobType = $location.path().replace(/^\//, '').split('/')[0];
     Rest.setUrl(GetBasePath(jobType) + job_id + '/');
