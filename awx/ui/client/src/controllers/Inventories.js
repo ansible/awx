@@ -879,7 +879,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
                 allSelectedItems = allSelectedItems.concat($scope.hostsSelectedItems);
             }
             if (allSelectedItems) {
-                host_patterns = _.pluck(allSelectedItems, "name").join(":");
+                host_patterns = _.pluck(allSelectedItems, "name").join(", ");
             }
         }
         $rootScope.hostPatterns = host_patterns;
