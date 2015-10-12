@@ -23,14 +23,24 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'transitionTo', 'CreateDialog', 'Authorization',
-    function ($rootScope, $cookieStore, transitionTo, CreateDialog, Authorization) {
+        'Store',
+    function ($rootScope, $cookieStore, transitionTo, CreateDialog, Authorization,
+        Store) {
         return {
 
             sessionTime: null,
             timeout: null,
 
             getSessionTime: function () {
-                return (this.sessionTime) ? this.sessionTime : $cookieStore.get('sessionTime');
+                // var sessionTime;
+                // if(this.sessionTime){
+                //     return this.sessionTime;
+                // }
+                // else {
+                //     sessionTime = Store('sessionTime').time;
+                //     return sessionTime;
+                // }
+                return (this.sessionTime) ? this.sessionTime : Store('sessionTime');//$cookieStore.get('sessionTime');
             },
 
             isExpired: function () {
@@ -76,10 +86,11 @@ export default
 
             moveForward: function () {
                 var tm, t;
-                tm = ($AnsibleConfig) ? $AnsibleConfig.session_timeout : 1800;
+                tm = ($AnsibleConfig.session_timeout) ? $AnsibleConfig.session_timeout : 1800;
                 t = new Date().getTime() + (tm * 1000);
                 this.sessionTime = t;
-                $cookieStore.put('sessionTime', t);
+                // $cookieStore.put('sessionTime', t);
+                Store('sessionTime', t);
                 $rootScope.sessionExpired = false;
                 $cookieStore.put('sessionExpired', false);
 
@@ -88,7 +99,7 @@ export default
 
             startTimers: function() {
                 var that = this,
-                tm = ($AnsibleConfig) ? $AnsibleConfig.session_timeout : 1800,
+                tm = ($AnsibleConfig.session_timeout) ? $AnsibleConfig.session_timeout : 1800,
                 t = tm - 60;
 
                 this.clearTimers();
