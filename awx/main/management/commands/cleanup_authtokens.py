@@ -2,9 +2,7 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import logging
-from optparse import make_option
 
 # Django
 from django.db import transaction
@@ -22,8 +20,6 @@ class Command(BaseCommand):
     help = 'Cleanup expired auth tokens.'
 
     def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
         self.logger = logging.getLogger('awx.main.commands.cleanup_authtokens')
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(message)s'))
