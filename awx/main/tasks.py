@@ -638,12 +638,17 @@ class RunJob(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
+        plugin_dirs = [plugin_dir]
+        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.append(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
