@@ -192,6 +192,20 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
 
+    def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
+        writer = LicenseWriter( 
+            company_name='AWX',
+            contact_name='AWX Admin',
+            contact_email='awx@example.com',
+            license_date=license_date,
+            instance_count=instance_count,
+            license_type='basic')
+        handle, license_path = tempfile.mkstemp(suffix='.json')
+        os.close(handle)
+        writer.write_file(license_path)
+        self._temp_paths.append(license_path)
+        os.environ['AWX_LICENSE_FILE'] = license_path
+        
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
         if not grace_period:

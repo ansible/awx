@@ -262,6 +262,7 @@ class OrganizationAccess(BaseAccess):
                     self.user in obj.admins.all())
 
     def can_delete(self, obj):
+        self.check_license(feature='multiple_organizations')
         return self.can_change(obj, None)
 
 class InventoryAccess(BaseAccess):
