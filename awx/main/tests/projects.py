@@ -205,11 +205,13 @@ class ProjectsTest(BaseTransactionTest):
         self.get(projects, expect=401)
         self.get(projects, expect=401, auth=self.get_invalid_credentials())
         # super user
+        import pdb
+        pdb.set_trace()
         results = self.get(projects, expect=200, auth=self.get_super_credentials())
         self.assertEquals(results['count'], 10)
         # org admin
         results = self.get(projects, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(results['count'], 10)
+        self.assertEquals(results['count'], 8)
         # user on a team
         results = self.get(projects, expect=200, auth=self.get_other_credentials())
         self.assertEquals(results['count'], 5)
@@ -299,6 +301,17 @@ class ProjectsTest(BaseTransactionTest):
         self.post(proj_orgs, data={'name': 'New Org'}, expect=201, auth=self.get_super_credentials())
         got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 2)
+
+        # Verify that creatorship doesn't imply access if access is removed
+        a_new_proj = self.make_project(created_by=self.other_django_user, playbook_content=TEST_PLAYBOOK)
+        self.organizations[0].admins.add(self.other_django_user)
+        self.organizations[0].projects.add(a_new_proj)
+        proj_detail = reverse('api:project_detail', args=(a_new_proj.pk,))
+        self.patch(proj_detail, data=dict(description="test"), expect=200, auth=self.get_other_credentials())
+        self.organizations[0].admins.remove(self.other_django_user)
+        self.patch(proj_detail, data=dict(description="test_now"), expect=403, auth=self.get_other_credentials())
+        self.delete(proj_detail, expect=403, auth=self.get_other_credentials())
+        a_new_proj.delete()
 
         # =====================================================================
         # TEAMS

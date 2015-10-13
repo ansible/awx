@@ -673,23 +673,20 @@ class ProjectAccess(BaseAccess):
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
        project.
-     - I created it (for now?).
     I can change/delete when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
-     - I created it (for now?).
     '''
 
     model = Project
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'credential', 'current_update', 'last_update')
+        qs = qs.select_related('modified_by', 'credential', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
-        qs = qs.filter(Q(created_by=self.user) |
-                       Q(organizations__admins__in=[self.user], organizations__active=True) |
+        qs = qs.filter(Q(organizations__admins__in=[self.user], organizations__active=True) |
                        Q(organizations__users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
@@ -719,8 +716,6 @@ class ProjectAccess(BaseAccess):
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
-            return True
-        if obj.created_by == self.user:
             return True
         if obj.organizations.filter(active=True, admins__in=[self.user]).exists():
             return True
