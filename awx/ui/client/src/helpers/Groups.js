@@ -286,7 +286,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                     }
                     if(scope.source.value==="custom"){
                         // need to filter the possible custom scripts by the organization defined for the current inventory
-                        invUrl = GetBasePath('inventory_scripts') + '?organization='+scope.$parent.inventory.organization;
+                        invUrl = GetBasePath('inventory_scripts');
                         LookUpInit({
                             url: invUrl,
                             scope: scope,
