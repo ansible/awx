@@ -673,9 +673,11 @@ class ProjectAccess(BaseAccess):
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
        project.
+     - I created the project but it isn't associated with an organization
     I can change/delete when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
+     - I created the project but it isn't associated with an organization
     '''
 
     model = Project
@@ -686,7 +688,8 @@ class ProjectAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
-        qs = qs.filter(Q(organizations__admins__in=[self.user], organizations__active=True) |
+        qs = qs.filter(Q(created_by=self.user, organizations__isnull=True) |
+                       Q(organizations__admins__in=[self.user], organizations__active=True) |
                        Q(organizations__users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
@@ -716,6 +719,8 @@ class ProjectAccess(BaseAccess):
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
+            return True
+        if obj.created_by == self.user and not obj.organizations.filter(active=True).count():
             return True
         if obj.organizations.filter(active=True, admins__in=[self.user]).exists():
             return True

@@ -209,7 +209,7 @@ class ProjectsTest(BaseTransactionTest):
         self.assertEquals(results['count'], 10)
         # org admin
         results = self.get(projects, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(results['count'], 8)
+        self.assertEquals(results['count'], 9)
         # user on a team
         results = self.get(projects, expect=200, auth=self.get_other_credentials())
         self.assertEquals(results['count'], 5)
