@@ -99,7 +99,7 @@ export default
                     promise.then(function (response) {
                         config = response.license_info;
                         config.analytics_status = response.analytics_status;
-                        if(config.analytics_status !== 'off'){
+                        if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
                             $pendolytics.bootstrap();
                             deferred.resolve(config);
                         }
@@ -115,7 +115,7 @@ export default
                         deferred.reject('Could not resolve pendo config.');
                     });
                 }
-                else if(config.analytics_status !== 'off'){
+                else if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
                     $pendolytics.bootstrap();
                     deferred.resolve(config);
                 }
