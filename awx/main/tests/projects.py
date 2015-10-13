@@ -205,8 +205,6 @@ class ProjectsTest(BaseTransactionTest):
         self.get(projects, expect=401)
         self.get(projects, expect=401, auth=self.get_invalid_credentials())
         # super user
-        import pdb
-        pdb.set_trace()
         results = self.get(projects, expect=200, auth=self.get_super_credentials())
         self.assertEquals(results['count'], 10)
         # org admin
