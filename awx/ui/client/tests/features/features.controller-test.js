@@ -19,7 +19,7 @@ describe('featuresController', function() {
         actual = controller.isFeatureEnabled('activity_streams');
         expect(actual).to.be.true;
 
-        actual = controller.isFeatureEnabled('enterprise_auth');
+        actual = controller.isFeatureEnabled('ldap');
         expect(actual).to.be.false;
 
 

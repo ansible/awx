@@ -114,7 +114,7 @@ export default
                     label: 'Created by LDAP',
                     type: 'checkbox',
                     readonly: true,
-                    awFeature: 'enterprise_auth'
+                    awFeature: 'ldap'
                 }
             },
 
