@@ -992,7 +992,7 @@ var tower = angular.module('Tower', [
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $location.path('/login');
                         }
-                    } else if ($rootScope.sessionTimer.isExpired()) {
+                    } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $rootScope.sessionTimer.expireSession('idle');
