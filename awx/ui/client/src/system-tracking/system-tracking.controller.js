@@ -91,7 +91,7 @@ function controller($rootScope,
                     if (_.isEmpty(data[0]) && _.isEmpty(data[1])) {
                         return _.reject({
                                 name: 'NoScanData',
-                                message: 'There was insufficient scan data for both of the dates you selected. Please try selecting a different date or module.',
+                                message: 'There was insufficient scan data for the date you selected. Please try selecting a different date or module.',
                                 dateValues:
                                     {   leftDate: $scope.leftDate.clone(),
                                         rightDate: $scope.rightDate.clone()
