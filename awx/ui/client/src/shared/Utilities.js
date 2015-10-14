@@ -203,11 +203,11 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     $rootScope.sessionTimer.expireSession('idle');
                 }
                 $location.url('/login');
-            } else if (data.non_field_errors) {
+            } else if (data && data.non_field_errors) {
                 Alert('Error!', data.non_field_errors);
-            } else if (data.detail) {
+            } else if (data && data.detail) {
                 Alert(defaultMsg.hdr, defaultMsg.msg + ' ' + data.detail);
-            } else if (data.__all__) {
+            } else if (data && data.__all__) {
                 if (typeof data.__all__ === 'object' && Array.isArray(data.__all__)) {
                     Alert('Error!', data.__all__[0]);
                 }
