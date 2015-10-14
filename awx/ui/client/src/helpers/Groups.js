@@ -1034,6 +1034,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            else if(fld === "inventory_script"){
                                                // the API stores it as 'source_script', we call it inventory_script
                                                data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                                               sources_scope.inventory_script = data.source_script;
+                                               master.inventory_script = sources_scope.inventory_script;
                                            }
 
                                            else if (data[fld] !== undefined) {
@@ -1396,7 +1398,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    if (mode === 'edit' || (mode === 'add' && group_created)) {
                                        Rest.put(data)
                                        .success(function () {
-                                           if (properties_scope.variables) {
+                                           if (properties_scope.variables && properties_scope.variables !== "---") {
                                                modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
                                            }
                                            else {
