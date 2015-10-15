@@ -1037,7 +1037,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                sources_scope.inventory_script = data.source_script;
                                                master.inventory_script = sources_scope.inventory_script;
                                            } else if (fld === "source_regions") {
-                                               sources_scope[fld] = data[fld].split(",");
+                                               if (data[fld] === "") {
+                                                   sources_scope[fld] = data[fld];
+                                                   master[fld] = sources_scope[fld];
+                                               } else {
+                                                   sources_scope[fld] = data[fld].split(",");
+                                                   master[fld] = sources_scope[fld];
+                                               }
                                            } else if (data[fld] !== undefined) {
                                                sources_scope[fld] = data[fld];
                                                master[fld] = sources_scope[fld];
