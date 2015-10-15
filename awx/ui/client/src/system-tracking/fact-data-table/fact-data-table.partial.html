@@ -15,7 +15,8 @@
               <span class="u-unbold">on</span>
           </span>
           <span class="FactDataTableHeading-host" ng-if="!leftDataNoScans">{{leftHostname}}</span>
-          <span class="FactDataTableHeading-date">{{leftScanDate|longDate}}</span>
+          <span class="FactDataTableHeading-date" ng-if="!singleResultView">{{leftScanDate|longDate}}</span>
+          <span class="FactDataTableHeading-date" ng-if="singleResultView">{{rightScanDate|longDate}}</span>
         </h3>
         <h3 class="FactDataTable-column FactDataTableHeading" ng-if="!singleResultView">
           <span ng-if="rightDataNoScans">No scans for {{rightHostname}} on</span>
