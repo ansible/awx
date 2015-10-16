@@ -1022,7 +1022,7 @@ var tower = angular.module('Tower', [
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
-                    if($location.$$url !== '/login'){
+                    if(!_.contains($location.$$url, '/login')){
                         $rootScope.sessionTimer = Timer.init();
                         $rootScope.$emit('OpenSocket');
                         pendoService.issuePendoIdentity();
