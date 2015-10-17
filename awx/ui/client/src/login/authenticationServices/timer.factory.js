@@ -32,7 +32,13 @@ export default
             timeout: null,
 
             getSessionTime: function () {
-                return Store('sessionTime_'+$rootScope.current_user.id);
+                if(Store('sessionTime_'+$rootScope.current_user.id)){
+                    return Store('sessionTime_'+$rootScope.current_user.id);
+                }
+                else {
+                    return 0; 
+                }
+
             },
 
             isExpired: function (increase) {
