@@ -53,6 +53,12 @@ class Organization(CommonModel):
     def __unicode__(self):
         return self.name
 
+    def mark_inactive(self, save=True):
+        for script in self.custom_inventory_scripts.all():
+            script.organization = None
+            script.save()
+        super(Organization, self).mark_inactive(save=save)
+
 
 class Team(CommonModelNameNotUnique):
     '''

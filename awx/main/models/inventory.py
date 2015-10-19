@@ -1281,7 +1281,9 @@ class CustomInventoryScript(CommonModelNameNotUnique):
         'Organization',
         related_name='custom_inventory_scripts',
         help_text=_('Organization owning this inventory script'),
-        on_delete=models.CASCADE,
+        blank=False,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     def get_absolute_url(self):
