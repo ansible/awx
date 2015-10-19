@@ -50,7 +50,10 @@ class TokenAuthentication(authentication.TokenAuthentication):
         auth = TokenAuthentication._get_x_auth_token_header(request).split()
         if not auth or auth[0].lower() != 'token':
             auth = authentication.get_authorization_header(request).split()
-            if not auth or auth[0].lower() != 'token':
+            # Prefer basic auth over cookie token
+            if auth and auth[0].lower() == 'basic':
+                return None
+            elif not auth or auth[0].lower() != 'token':
                 auth = TokenAuthentication._get_auth_token_cookie(request).split()
                 if not auth or auth[0].lower() != 'token':
                     return None
