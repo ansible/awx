@@ -426,6 +426,8 @@ class JobCallbackModule(BaseCallbackModule):
     def v2_playbook_on_stats(self, stats):
         self.playbook_on_stats(stats)
 
+    def v2_playbook_on_include(self, included_file):
+        self._log_event('playbook_on_include', included_file=included_file)
 
 class AdHocCommandCallbackModule(BaseCallbackModule):
     '''
