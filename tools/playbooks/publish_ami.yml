@@ -31,26 +31,35 @@
       with_items: ami_info.results
 
     - name: Copy AMI to desired regions
-      ec2_ami_copy:
-        source_region: '{{ src_region }}'
-        region: '{{ item }}'
-        source_image_id: '{{ ami_info.results[0].ami_id }}'
-        name: '{{ ami_info.results[0].name }}'
-        description: '{{ ami_info.results[0].description }}'
-        tags: '{{ ami_info.results[0].tags }}'
-        wait: true
+      command: 'ec2-copy-image --source-region {{ src_region }} --source-ami-id {{ src_ami_id }} --region {{ item }} --client-token {{ src_ami_id }}-{{ item }}'
       with_items: dst_regions
       register: ami_copy
 
-    - name: Make image publicly available
-      command: 'ec2-modify-image-attribute {{ item.image_id }} --launch-permission -a all'
-      with_items: ami_copy.results
+#       ec2_ami_copy:
+#         source_region: '{{ src_region }}'
+#         region: '{{ item }}'
+#         source_image_id: '{{ ami_info.results[0].ami_id }}'
+#         name: '{{ ami_info.results[0].name }}'
+#         description: '{{ ami_info.results[0].description }}'
+#         tags: '{{ ami_info.results[0].tags }}'
+#         wait: true
+#       with_items: dst_regions
+#       register: ami_copy
 
-    - debug:
-        var: ami_copy.results
+    - name: Wait for AMI's to become available
+      command: 'ec2-describe-images --region {{ item.item }} --filter state=available {{ item.stdout[-12:] }}'
+      until: ami_available.stdout.find("available") != -1
+      retries: 10
+      delay: 120
+      with_items: ami_copy.results
+      register: ami_available
+
+    - name: Make image publicly available
+      command: 'ec2-modify-image-attribute --region {{ item.item }} {{ item.stdout[-12:] }} --launch-permission -a all'
+      with_items: ami_copy.results
 
     - name: Display AMI launch URL
       debug:
-        msg: 'https://console.aws.amazon.com/ec2/home?region={{ item.item }}#launchAmi={{ item.image_id }}'
+        msg: 'https://console.aws.amazon.com/ec2/home?region={{ item.item }}#launchAmi={{ item.stdout[-12:] }}'
       with_items: ami_copy.results
       when: ami_copy is defined

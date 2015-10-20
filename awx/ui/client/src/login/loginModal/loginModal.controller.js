@@ -165,6 +165,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         Authorization.getUser()
             .success(function (data) {
                 Authorization.setUserInfo(data);
+                $rootScope.sessionTimer = Timer.init();
                 $rootScope.user_is_superuser = data.results[0].is_superuser;
                 scope.$emit('AuthorizationGetLicense');
             })
@@ -187,7 +188,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                 .then(function (data) {
                     $('#login-modal').modal('hide');
                     Authorization.setToken(data.data.token, data.data.expires);
-                    $rootScope.sessionTimer = Timer.init();
                     scope.$emit('AuthorizationGetUser');
                 },
                 function (data) {

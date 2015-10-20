@@ -21,3 +21,10 @@ mongo:
   image: mongo:3.0
   # ports:
   #   - 27017:27017
+dockerui:
+  image: dockerui/dockerui
+  ports:
+    - "9000:9000"
+  privileged: true
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock

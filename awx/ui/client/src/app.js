@@ -187,6 +187,9 @@ var tower = angular.module('Tower', [
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
+    .config(['$pendolyticsProvider', function($pendolyticsProvider) {
+        $pendolyticsProvider.doNotAutoStart();
+    }])
     .config(['$routeProvider',
         function ($routeProvider) {
             $routeProvider.
@@ -989,7 +992,7 @@ var tower = angular.module('Tower', [
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $location.path('/login');
                         }
-                    } else if ($rootScope.sessionTimer.isExpired()) {
+                    } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $rootScope.sessionTimer.expireSession('idle');
@@ -1019,7 +1022,7 @@ var tower = angular.module('Tower', [
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
-                    if($location.$$url !== '/login'){
+                    if(!_.contains($location.$$url, '/login')){
                         $rootScope.sessionTimer = Timer.init();
                         $rootScope.$emit('OpenSocket');
                         pendoService.issuePendoIdentity();

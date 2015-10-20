@@ -47,6 +47,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                  });
                              }
                          }
+                         scope.cloudCredentialRequired = false;
                          scope.$emit('sourceTypeOptionsReady');
                      })
                      .error(function (data, status) {
@@ -243,6 +244,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                 form = params.form,
                 kind, url, callback, invUrl;
 
+                scope.cloudCredentialRequired = false;
+
                 if (!Empty(scope.source)) {
                     if (scope.source.value === 'file') {
                         scope.sourcePathRequired = true;
@@ -283,7 +286,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                     }
                     if(scope.source.value==="custom"){
                         // need to filter the possible custom scripts by the organization defined for the current inventory
-                        invUrl = GetBasePath('inventory_scripts') + '?organization='+scope.$parent.inventory.organization;
+                        invUrl = GetBasePath('inventory_scripts');
                         LookUpInit({
                             url: invUrl,
                             scope: scope,
@@ -313,6 +316,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                             kind = 'aws';
                         } else {
                             kind = scope.source.value;
+                            scope.cloudCredentialRequired = true;
                         }
                         url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
                         LookUpInit({
@@ -1030,9 +1034,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            else if(fld === "inventory_script"){
                                                // the API stores it as 'source_script', we call it inventory_script
                                                data.summary_fields['inventory_script'] = data.summary_fields.source_script;
-                                           }
-
-                                           else if (data[fld] !== undefined) {
+                                               sources_scope.inventory_script = data.source_script;
+                                               master.inventory_script = sources_scope.inventory_script;
+                                           } else if (fld === "source_regions") {
+                                               if (data[fld] === "") {
+                                                   sources_scope[fld] = data[fld];
+                                                   master[fld] = sources_scope[fld];
+                                               } else {
+                                                   sources_scope[fld] = data[fld].split(",");
+                                                   master[fld] = sources_scope[fld];
+                                               }
+                                           } else if (data[fld] !== undefined) {
                                                sources_scope[fld] = data[fld];
                                                master[fld] = sources_scope[fld];
                                            }
@@ -1392,7 +1404,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    if (mode === 'edit' || (mode === 'add' && group_created)) {
                                        Rest.put(data)
                                        .success(function () {
-                                           if (properties_scope.variables) {
+                                           if (properties_scope.variables && properties_scope.variables !== "---") {
                                                modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
                                            }
                                            else {

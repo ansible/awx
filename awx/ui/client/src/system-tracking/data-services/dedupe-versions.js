@@ -5,6 +5,12 @@ export default
             return _.pluck(nonEmptyResults, 'versions[0]');
         }
 
+        // if the version that will be displayed on the left is before the
+        // version that will be displayed on the right, flip them
+        if (nonEmptyResults[0].versions[0].timestamp > nonEmptyResults[1].versions[0].timestamp) {
+            nonEmptyResults = nonEmptyResults.reverse();
+        }
+
         var firstTimestamp = nonEmptyResults[0].versions[0].timestamp;
 
         var hostIdsWithDupes =

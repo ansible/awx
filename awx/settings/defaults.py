@@ -448,6 +448,9 @@ AWX_JOB_TEMPLATE_HISTORY = 10
 # The directory in which proot will create new temporary directories for its root
 AWX_PROOT_BASE_PATH = "/tmp"
 
+# User definable ansible callback plugins
+AWX_ANSIBLE_CALLBACK_PLUGINS = ""
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 PENDO_TRACKING_STATE = "off"
 

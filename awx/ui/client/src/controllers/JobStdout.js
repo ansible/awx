@@ -105,16 +105,14 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
                     api_complete = true;
                     $('#pre-container-content').html(data.content);
                     current_range = data.range;
-                    loaded_sections.push({
-                        start: (data.range.start < 0) ? 0 : data.range.start,
-                        end: data.range.end
-                    });
-
-                    //console.log('loaded start: ' + data.range.start + ' end: ' + data.range.end);
-                    //console.log(data.content);
+                    if (data.content !== "Waiting for results...") {
+                        loaded_sections.push({
+                            start: (data.range.start < 0) ? 0 : data.range.start,
+                            end: data.range.end
+                        });
+                    }
 
                     $('#pre-container').scrollTop($('#pre-container').prop("scrollHeight"));
-                    //console.log($('#pre-container-content').prop("scrollHeight"));
                 }
                 else {
                     api_complete = true;
@@ -157,6 +155,8 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
             $scope.isClosed = false;
         }
     };
+
+    $(".StandardOut").height($("body").height() - 60);
 
     // Note: could be ad_hoc_commands or jobs
     var jobType = $location.path().replace(/^\//, '').split('/')[0];

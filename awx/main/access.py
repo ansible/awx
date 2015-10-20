@@ -262,6 +262,7 @@ class OrganizationAccess(BaseAccess):
                     self.user in obj.admins.all())
 
     def can_delete(self, obj):
+        self.check_license(feature='multiple_organizations')
         return self.can_change(obj, None)
 
 class InventoryAccess(BaseAccess):
@@ -672,22 +673,22 @@ class ProjectAccess(BaseAccess):
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
        project.
-     - I created it (for now?).
+     - I created the project but it isn't associated with an organization
     I can change/delete when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
-     - I created it (for now?).
+     - I created the project but it isn't associated with an organization
     '''
 
     model = Project
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'credential', 'current_update', 'last_update')
+        qs = qs.select_related('modified_by', 'credential', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
-        qs = qs.filter(Q(created_by=self.user) |
+        qs = qs.filter(Q(created_by=self.user, organizations__isnull=True) |
                        Q(organizations__admins__in=[self.user], organizations__active=True) |
                        Q(organizations__users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
@@ -719,7 +720,7 @@ class ProjectAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
-        if obj.created_by == self.user:
+        if obj.created_by == self.user and not obj.organizations.filter(active=True).count():
             return True
         if obj.organizations.filter(active=True, admins__in=[self.user]).exists():
             return True
@@ -1605,7 +1606,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     model = CustomInventoryScript
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True, organization__active=True).distinct()
+        qs = self.model.objects.filter(active=True).distinct()
         if not self.user.is_superuser:
             qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
         return qs

@@ -5,7 +5,7 @@
 
 {% block style %}
 {{ block.super }}
-<link href="{{ STATIC_URL }}img/favicon.ico" rel="shortcut icon" />
+<link href="{{ STATIC_URL }}assets/favicon.ico" rel="shortcut icon" />
 <style type="text/css">
 html body {
   background: #ddd;
@@ -183,7 +183,7 @@ html body .dropdown-submenu:hover>a {
 {% endblock %}
 
 {% block branding %}
-  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}img/tower_console_logo.png">{% block branding_title %}{% trans 'REST API' %}{% endblock %}</a>
+  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}assets/tower_console_logo.png">{% block branding_title %}{% trans 'REST API' %}{% endblock %}</a>
 {% endblock %}
 
 {% block userlinks %}
@@ -196,7 +196,7 @@ html body .dropdown-submenu:hover>a {
 
 {% block footer %}
 <div id="footer">
-  <a href="http://www.ansible.com" target="_blank"><img class="towerlogo" src="{{ STATIC_URL }}img/tower_console_bug.png" /></a><br/>
+  <a href="http://www.ansible.com" target="_blank"><img class="towerlogo" src="{{ STATIC_URL }}assets/tower_console_bug.png" /></a><br/>
   Copyright &copy; 2015 <a href="http://www.ansible.com" target="_blank">Ansible, Inc.</a> All rights reserved.
 </div>
 {% endblock %}

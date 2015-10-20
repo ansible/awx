@@ -27,6 +27,14 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 
     scope.plays = [];
 
+    scope.$watch('job_status', function(job_status) {
+        if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
+            var taskObj = JSON.parse(job_status.explanation.substring(job_status.explanation.split(":")[0].length + 1));
+            job_status.explanation = job_status.explanation.split(":")[0] + ". ";
+            job_status.explanation += "<code>" + taskObj.task_type + "-" + taskObj.task_id + " failed for " + taskObj.task_name + "</code>"
+        }
+    }, true);
+
     scope.$watch('plays', function(plays) {
         for (var play in plays) {
             if (plays[play].elapsed) {

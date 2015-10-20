@@ -883,14 +883,14 @@ class Command(NoArgsCommand):
             all_obj = self.inventory
             all_name = 'inventory'
         db_variables = all_obj.variables_dict
-        if self.overwrite_vars or self.overwrite:
+        if self.overwrite_vars:
             db_variables = self.all_group.variables
         else:
             db_variables.update(self.all_group.variables)
         if db_variables != all_obj.variables_dict:
             all_obj.variables = json.dumps(db_variables)
             all_obj.save(update_fields=['variables'])
-            if self.overwrite_vars or self.overwrite:
+            if self.overwrite_vars:
                 self.logger.info('%s variables replaced from "all" group', all_name.capitalize())
             else:
                 self.logger.info('%s variables updated from "all" group', all_name.capitalize())
@@ -920,14 +920,14 @@ class Command(NoArgsCommand):
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
                 db_variables = group.variables_dict
-                if self.overwrite_vars or self.overwrite:
+                if self.overwrite_vars:
                     db_variables = mem_group.variables
                 else:
                     db_variables.update(mem_group.variables)
                 if db_variables != group.variables_dict:
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])
-                    if self.overwrite_vars or self.overwrite:
+                    if self.overwrite_vars:
                         self.logger.info('Group "%s" variables replaced', group.name)
                     else:
                         self.logger.info('Group "%s" variables updated', group.name)
@@ -959,7 +959,7 @@ class Command(NoArgsCommand):
     def _update_db_host_from_mem_host(self, db_host, mem_host):
         # Update host variables.
         db_variables = db_host.variables_dict
-        if self.overwrite_vars or self.overwrite:
+        if self.overwrite_vars:
             db_variables = mem_host.variables
         else:
             db_variables.update(mem_host.variables)
@@ -994,7 +994,7 @@ class Command(NoArgsCommand):
             else:
                 self.logger.info('Host "%s" instance_id added', mem_host.name)
         if 'variables' in update_fields:
-            if self.overwrite_vars or self.overwrite:
+            if self.overwrite_vars:
                 self.logger.info('Host "%s" variables replaced', mem_host.name)
             else:
                 self.logger.info('Host "%s" variables updated', mem_host.name)

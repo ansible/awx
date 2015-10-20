@@ -118,3 +118,10 @@ class Command(BaseCommand):
             self.logger.log(99, "Removed %d items", n_deleted_items)
         else:
             self.logger.log(99, "Would have removed %d items", n_deleted_items)
+
+        tokens_removed = AuthToken.objects.filter(expires__lt=now())
+        if not self.dry_run:
+            self.logger.log(99, "Removed %d expired auth tokens" % tokens_removed.count())
+            tokens_removed.delete()
+        else:
+            self.logger.log(99, "Would have removed %d expired auth tokens" % tokens_removed.count())
