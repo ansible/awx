@@ -191,7 +191,7 @@ def handle_work_error(self, task_id, subtasks=None):
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.job_explanation = 'Previous Task Failed: {"task_type": "%s", "task_name": "%s", "task_id": "%s"}' % \
+                instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
                     (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
