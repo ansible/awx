@@ -170,10 +170,10 @@ def handle_work_error(self, task_id, subtasks=None):
             instance_name = ''
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.project.name
+                instance_name = instance.name
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.inventory_source.inventory.name
+                instance_name = instance.name
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
