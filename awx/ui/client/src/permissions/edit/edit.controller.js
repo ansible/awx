@@ -10,8 +10,8 @@
  * @description This controller for permissions edit
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'permissionsChoices', 'permissionsLabel',
-        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, permissionsChoices, permissionsLabel) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
+        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
 
             ClearScope();
 
@@ -25,13 +25,14 @@ export default
 
             $scope.permission_label = {};
 
-            var permissionsChoice = permissionsChoices({
+            var permissionsChoice = fieldChoices({
                 scope: $scope,
-                url: 'api/v1/' + base + '/' + base_id + '/permissions/'
+                url: 'api/v1/' + base + '/' + base_id + '/permissions/',
+                field: 'permission_type'
             });
 
             permissionsChoice.then(function (choices) {
-                return permissionsLabel({
+                return fieldLabels({
                     choices: choices
                 });
             }).then(function (choices) {

@@ -10,8 +10,8 @@
  * @description This controller for permissions add
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'permissionsChoices', 'permissionsLabel',
-        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, permissionsChoices, permissionsLabel) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
+        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
 
             ClearScope();
 
@@ -22,13 +22,14 @@ export default
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {};
 
-            var permissionsChoice = permissionsChoices({
+            var permissionsChoice = fieldChoices({
                 scope: $scope,
-                url: 'api/v1/' + base + '/' + id + '/permissions/'
+                url: 'api/v1/' + base + '/' + id + '/permissions/',
+                field: 'permission_type'
             });
 
             permissionsChoice.then(function (choices) {
-                return permissionsLabel({
+                return fieldLabels({
                     choices: choices
                 });
             }).then(function (choices) {

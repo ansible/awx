@@ -34,7 +34,22 @@
 
                         <div class="form-group" ng-show="job_status.explanation">
                             <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Explanation</label>
-                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_explanation" ng-bind-html="job_status.explanation"></div>
+                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_explanation"
+                            ng-show="!previousTaskFailed" ng-bind-html="job_status.explanation"></div>
+                            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 job_status_explanation"
+                            ng-show="previousTaskFailed">Previous Task Failed
+                                <a
+                                    href=""
+                                    aw-pop-over="{{ task_detail }}"
+                                    aw-pop-over-watch="task_detail"
+                                    data-placement="right"
+                                    data-container="body" class="help-link" over-title="Failure Detail"
+                                    title=""
+                                    tabindex="-1">
+                                        <i class="fa fa-question-circle">
+                                        </i>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="form-group" ng-show="job_status.traceback">

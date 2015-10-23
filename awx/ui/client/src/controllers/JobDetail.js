@@ -13,7 +13,7 @@
 
 export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels) {
 
     ClearScope();
 
@@ -27,11 +27,33 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 
     scope.plays = [];
 
+    scope.previousTaskFailed = false;
+
     scope.$watch('job_status', function(job_status) {
         if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
+            scope.previousTaskFailed = true;
             var taskObj = JSON.parse(job_status.explanation.substring(job_status.explanation.split(":")[0].length + 1));
-            job_status.explanation = job_status.explanation.split(":")[0] + ". ";
-            job_status.explanation += "<code>" + taskObj.task_type + "-" + taskObj.task_id + " failed for " + taskObj.task_name + "</code>"
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var fieldChoice = fieldChoices({
+                scope: $scope,
+                url: 'api/v1/unified_jobs/',
+                field: 'type'
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            fieldChoice.then(function (choices) {
+                choices =
+                    fieldLabels({
+                        choices: choices
+                    });
+                scope.explanation_fail_type = choices[taskObj.job_type];
+                scope.explanation_fail_name = taskObj.job_name;
+                scope.explanation_fail_id = taskObj.job_id;
+                scope.task_detail = scope.explanation_fail_type + " failed for " + scope.explanation_fail_name + " with id " + scope.explanation_fail_id + ".";
+            });
+        } else {
+            scope.previousTaskFailed = false;
         }
     }, true);
 
@@ -1415,5 +1437,5 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices'
+    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels'
 ];

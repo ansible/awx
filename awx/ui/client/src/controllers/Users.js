@@ -208,7 +208,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
-    Prompt, CheckAccess, ResetForm, Wait, Stream, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
+    Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
 
@@ -224,16 +224,17 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.permission_search_select = [];
 
     // return a promise from the options request with the permission type choices (including adhoc) as a param
-    var permissionsChoice = permissionsChoices({
+    var permissionsChoice = fieldChoices({
         scope: $scope,
-        url: 'api/v1/' + base + '/' + id + '/permissions/'
+        url: 'api/v1/' + base + '/' + id + '/permissions/',
+        field: 'permission_type'
     });
 
     // manipulate the choices from the options request to be set on
     // scope and be usable by the list form
     permissionsChoice.then(function (choices) {
         choices =
-            permissionsLabel({
+            fieldLabels({
                 choices: choices
             });
         _.map(choices, function(n, key) {
@@ -519,5 +520,5 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect'
+    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];
