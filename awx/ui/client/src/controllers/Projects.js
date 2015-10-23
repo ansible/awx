@@ -13,7 +13,7 @@
 
 export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
-    Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip) {
+    Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter) {
 
     ClearScope();
 
@@ -329,8 +329,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
                         msg: 'Call to ' + project.related.current_update + ' failed. GET status: ' + status });
                 });
         } else {
-            Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + name + '. Click the <em>Refresh</em> ' +
-                'button to view the latet status.', 'alert-info');
+            Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
+                'button to view the latet status.', 'alert-info',undefined,undefined,undefined,undefined,true);
         }
     };
 
@@ -384,7 +384,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'ProjectUpdate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
-    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip'
+    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter'
 ];
 
 
