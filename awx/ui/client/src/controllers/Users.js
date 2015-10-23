@@ -242,22 +242,23 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         });
     });
 
+    // manipulate the choices from the options request to be usable
+    // by the search option for permission_type, you can't inject the
+    // list until this is done!
+    permissionsChoice.then(function (choices) {
+        form.related.permissions.fields.permission_type.searchOptions =
+            permissionsSearchSelect({
+                choices: choices
+            });
+        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+        generator.reset();
+        $scope.$emit("loadForm");
+    });
+
     if ($scope.removeFormReady) {
         $scope.removeFormReady();
     }
     $scope.removeFormReady = $scope.$on('formReady', function () {
-        // manipulate the choices from the options request to be usable
-        // by the search option for permission_type, you can't inject the
-        // list until this is done!
-        permissionsChoice.then(function (choices) {
-            form.related.permissions.fields.permission_type.searchOptions =
-                permissionsSearchSelect({
-                    choices: choices
-                });
-            generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-            generator.reset();
-        });
-
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
@@ -471,51 +472,57 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
     // Put form back to its original state
     ResetForm();
 
-
-    if ($scope.removeModifyForm) {
-        $scope.removeModifyForm();
+    if ($scope.removeLoadForm) {
+        $scope.removeLoadForm();
     }
-    $scope.removeModifyForm = $scope.$on('modifyForm', function () {
-        // Modify form based on LDAP settings
-        Rest.setUrl(GetBasePath('config'));
-        Rest.get()
-            .success(function (data) {
-                var i, fld;
-                if (data.user_ldap_fields) {
-                    for (i = 0; i < data.user_ldap_fields.length; i++) {
-                        fld = data.user_ldap_fields[i];
-                        if (form.fields[fld]) {
-                            form.fields[fld].readonly = true;
-                            form.fields[fld].editRequired = false;
-                            if (form.fields[fld].awRequiredWhen) {
-                                delete form.fields[fld].awRequiredWhen;
+    $scope.removeLoadForm = $scope.$on('loadForm', function () {
+
+
+        if ($scope.removeModifyForm) {
+            $scope.removeModifyForm();
+        }
+        $scope.removeModifyForm = $scope.$on('modifyForm', function () {
+            // Modify form based on LDAP settings
+            Rest.setUrl(GetBasePath('config'));
+            Rest.get()
+                .success(function (data) {
+                    var i, fld;
+                    if (data.user_ldap_fields) {
+                        for (i = 0; i < data.user_ldap_fields.length; i++) {
+                            fld = data.user_ldap_fields[i];
+                            if (form.fields[fld]) {
+                                form.fields[fld].readonly = true;
+                                form.fields[fld].editRequired = false;
+                                if (form.fields[fld].awRequiredWhen) {
+                                    delete form.fields[fld].awRequiredWhen;
+                                }
                             }
                         }
                     }
+                    $scope.$emit('formReady');
+                })
+                .error(function (data, status) {
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to retrieve application config. GET status: ' + status });
+                });
+        });
+
+        Wait('start');
+        Rest.setUrl(defaultUrl + id + '/');
+        Rest.get()
+            .success(function (data) {
+                if (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') {
+                    //this is an LDAP user
+                    $scope.$emit('modifyForm');
+                } else {
+                    $scope.$emit('formReady');
                 }
-                $scope.$emit('formReady');
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to retrieve application config. GET status: ' + status });
+                    msg: 'Failed to retrieve user: ' + id + '. GET status: ' + status });
             });
     });
-
-    Wait('start');
-    Rest.setUrl(defaultUrl + id + '/');
-    Rest.get()
-        .success(function (data) {
-            if (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') {
-                //this is an LDAP user
-                $scope.$emit('modifyForm');
-            } else {
-                $scope.$emit('formReady');
-            }
-        })
-        .error(function (data, status) {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                msg: 'Failed to retrieve user: ' + id + '. GET status: ' + status });
-        });
 }
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
