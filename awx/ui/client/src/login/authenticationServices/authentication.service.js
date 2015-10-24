@@ -60,7 +60,8 @@ export default
             logout: function () {
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
-                var scope = angular.element(document.getElementById('main-view')).scope();
+
+                var x, scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 //$rootScope.$destroy();
 
@@ -78,7 +79,10 @@ export default
                     $cookieStore.remove('lastPath');
                     $rootScope.lastPath = '/home';
                 }
-
+                x = Store('sessionTime');
+                x[$rootScope.current_user.id].loggedIn = false;
+                Store('sessionTime', x);
+                
                 $rootScope.lastUser = $cookieStore.get('current_user').id;
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');

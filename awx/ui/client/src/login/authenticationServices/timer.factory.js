@@ -32,13 +32,12 @@ export default
             timeout: null,
 
             getSessionTime: function () {
-                if(Store('sessionTime_'+$rootScope.current_user.id)){
-                    return Store('sessionTime_'+$rootScope.current_user.id);
+                if(Store('sessionTime')){
+                    return Store('sessionTime')[$rootScope.current_user.id].time;
                 }
                 else {
-                    return 0; 
+                    return 0;
                 }
-
             },
 
             isExpired: function (increase) {
@@ -72,6 +71,7 @@ export default
             },
 
             expireSession: function (reason) {
+                var x;
                 if(reason === 'session_limit'){
                     $rootScope.sessionLimitExpired = true;
                     $rootScope.sessionExpired = false;
@@ -87,10 +87,21 @@ export default
             },
 
             moveForward: function () {
-                var tm, t;
+                var tm, t, x, y;
                 tm = ($AnsibleConfig.session_timeout) ? $AnsibleConfig.session_timeout : 1800;
                 t = new Date().getTime() + (tm * 1000);
-                Store('sessionTime_'+$rootScope.current_user.id, t);
+                x = new Object({
+                        time: t,
+                        loggedIn: true
+                });
+                if(Store('sessionTime')){
+                    y = Store('sessionTime');
+                }
+                else {
+                    y = new Object();
+                }
+                y[$rootScope.current_user.id] = x;
+                Store('sessionTime' , y);
                 $rootScope.sessionExpired = false;
                 $cookieStore.put('sessionExpired', false);
                 this.startTimers();
@@ -148,6 +159,9 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                         that.expireSession('idle');
+                    }
+                    if(Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                        that.expireSession();
                     }
 
                 }, 1000);
