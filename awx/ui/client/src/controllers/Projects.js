@@ -330,7 +330,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
                 });
         } else {
             Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
-                'button to view the latet status.', 'alert-info',undefined,undefined,undefined,undefined,true);
+                'button to view the latest status.', 'alert-info',undefined,undefined,undefined,undefined,true);
         }
     };
 
