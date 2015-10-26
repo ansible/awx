@@ -193,7 +193,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                 function (data) {
                     var key;
                     Wait('stop');
-                    if (data.data.non_field_errors && data.data.non_field_errors.length === 0) {
+                    if (data && data.data && data.data.non_field_errors && data.data.non_field_errors.length === 0) {
                         // show field specific errors returned by the API
                         for (key in data.data) {
                             scope[key + 'Error'] = data.data[key][0];
