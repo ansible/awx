@@ -751,9 +751,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            $compile(elem)(modal_scope);
 
                            var form_scope =
-                           generator.inject(GroupForm, { mode: 'edit', id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
+                           generator.inject(GroupForm, { mode: mode, id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
                            var source_form_scope =
-                           generator.inject(SourceForm, { mode: 'edit', id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
+                           generator.inject(SourceForm, { mode: mode, id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
 
                            //generator.reset();
 

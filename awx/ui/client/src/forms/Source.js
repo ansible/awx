@@ -118,8 +118,8 @@ export default
                     sourceModel: 'inventory_script',
                     sourceField: 'name',
                     ngClick: 'lookUpInventory_script()' ,
-                    addRequired: false,
-                    editRequired: false,
+                    addRequired: true,
+                    editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
                 },
                 extra_vars: {
