@@ -71,7 +71,6 @@ export default
             },
 
             expireSession: function (reason) {
-                var x;
                 if(reason === 'session_limit'){
                     $rootScope.sessionLimitExpired = true;
                     $rootScope.sessionExpired = false;
@@ -90,15 +89,15 @@ export default
                 var tm, t, x, y;
                 tm = ($AnsibleConfig.session_timeout) ? $AnsibleConfig.session_timeout : 1800;
                 t = new Date().getTime() + (tm * 1000);
-                x = new Object({
+                x = {
                         time: t,
                         loggedIn: true
-                });
+                };
                 if(Store('sessionTime')){
                     y = Store('sessionTime');
                 }
                 else {
-                    y = new Object();
+                    y = {};
                 }
                 y[$rootScope.current_user.id] = x;
                 Store('sessionTime' , y);
