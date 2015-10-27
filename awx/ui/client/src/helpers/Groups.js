@@ -1465,6 +1465,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 
                            // Change the lookup and regions when the source changes
                            sources_scope.sourceChange = function () {
+                               sources_scope.credential_name = "";
+                               sources_scope.credential = "";
+                               if (sources_scope.credential_name_api_error) {
+                                   delete sources_scope.credential_name_api_error;
+                               }
                                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
                                SourceChange({ scope: sources_scope, form: SourceForm });
                            };
