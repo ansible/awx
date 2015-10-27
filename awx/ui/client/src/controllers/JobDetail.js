@@ -50,7 +50,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                 scope.explanation_fail_type = choices[taskObj.job_type];
                 scope.explanation_fail_name = taskObj.job_name;
                 scope.explanation_fail_id = taskObj.job_id;
-                scope.task_detail = scope.explanation_fail_type + " failed for " + scope.explanation_fail_name + " with id " + scope.explanation_fail_id + ".";
+                scope.task_detail = scope.explanation_fail_type + " failed for " + scope.explanation_fail_name + " with ID " + scope.explanation_fail_id + ".";
             });
         } else {
             scope.previousTaskFailed = false;
