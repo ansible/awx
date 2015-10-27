@@ -309,29 +309,37 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
     });
 
     $scope.cancelUpdate = function (id, name) {
-        // Start the cancel process
-        var i, project, found = false;
-        for (i = 0; i < $scope.projects.length; i++) {
-            if ($scope.projects[i].id === id) {
-                project = $scope.projects[i];
-                found = true;
-                break;
-            }
-        }
-        if (found && project.related.current_update) {
-            Rest.setUrl(project.related.current_update);
-            Rest.get()
-                .success(function (data) {
-                    $scope.$emit('Check_Cancel', data);
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + project.related.current_update + ' failed. GET status: ' + status });
-                });
-        } else {
-            Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
-                'button to view the latest status.', 'alert-info',undefined,undefined,undefined,undefined,true);
-        }
+        // // Start the cancel process
+        // var i, project, found = false;
+        // for (i = 0; i < $scope.projects.length; i++) {
+        //     if ($scope.projects[i].id === id) {
+        //         project = $scope.projects[i];
+        //         found = true;
+        //         break;
+        //     }
+        // }
+        Rest.setUrl(GetBasePath("projects") + id);
+        Rest.get()
+            .success(function (data) {
+                if (data.related.current_update) {
+                    Rest.setUrl(data.related.current_update);
+                    Rest.get()
+                        .success(function (data) {
+                            $scope.$emit('Check_Cancel', data);
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Call to ' + data.related.current_update + ' failed. GET status: ' + status });
+                        });
+                } else {
+                    Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
+                        'button to view the latest status.', 'alert-info',undefined,undefined,undefined,undefined,true);
+                }
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to get project failed. GET status: ' + status });
+            })
     };
 
     $scope.refresh = function () {
