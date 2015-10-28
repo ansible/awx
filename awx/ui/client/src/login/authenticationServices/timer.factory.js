@@ -159,9 +159,11 @@ export default
                         that.expireSession('idle');
                         $location.url('/login');
                     }
-                    if(Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
-                        that.expireSession();
-                        $location.url('/login');
+                    if(Store('sessionTime') &&
+                        Store('sessionTime')[$rootScope.current_user.id] &&
+                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                            that.expireSession();
+                            $location.url('/login');
 
                     }
 
