@@ -57,9 +57,9 @@ angular.module('LoadConfigHelper', ['Utilities'])
         // load config.js
         $log.info('attempting to load config.js');
         $http({ method:'GET', url: $basePath + 'config.js' })
-            .then(function(data) {
+            .then(function(response) {
                 $log.info('loaded config.js');
-                $AnsibleConfig = eval(data);
+                $AnsibleConfig = eval(response.data);
                 Store('AnsibleConfig', $AnsibleConfig);
                 $rootScope.$emit('LoadConfig');
             })
