@@ -23,9 +23,9 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'transitionTo', 'CreateDialog', 'Authorization',
-        'Store', '$interval',
+        'Store', '$interval', '$location', '$q',
     function ($rootScope, $cookieStore, transitionTo, CreateDialog, Authorization,
-        Store, $interval) {
+        Store, $interval, $location, $q) {
         return {
 
             sessionTime: null,
@@ -82,7 +82,6 @@ export default
                 this.sessionTime = 0;
                 this.clearTimers();
                 $cookieStore.put('sessionExpired', true);
-                transitionTo('signOut');
             },
 
             moveForward: function () {
@@ -158,9 +157,14 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                         that.expireSession('idle');
+                        $location.url('/login');
                     }
-                    if(Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
-                        that.expireSession();
+                    if(Store('sessionTime') &&
+                        Store('sessionTime')[$rootScope.current_user.id] &&
+                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                            that.expireSession();
+                            $location.url('/login');
+
                     }
 
                 }, 1000);
@@ -169,11 +173,15 @@ export default
 
             clearTimers: function(){
                 $interval.cancel($rootScope.expireTimer);
+                delete $rootScope.expireTimer;
             },
 
             init: function () {
+                var deferred = $q.defer();
                 this.moveForward();
-                return this;
+                deferred.resolve(this);
+                return deferred.promise;
+
             }
         };
     }

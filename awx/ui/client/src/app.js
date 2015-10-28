@@ -947,7 +947,8 @@ var tower = angular.module('Tower', [
                         control_socket.init();
                         control_socket.on("limit_reached", function(data) {
                             $log.debug(data.reason);
-                            Timer.expireSession('session_limit');
+                            $rootScope.sessionTimer.expireSession('session_limit');
+                            $location.url('/login');
                         });
                     }
                     openSocket();
@@ -1023,9 +1024,11 @@ var tower = angular.module('Tower', [
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
-                        $rootScope.sessionTimer = Timer.init();
-                        $rootScope.$emit('OpenSocket');
-                        pendoService.issuePendoIdentity();
+                        Timer.init().then(function(timer){
+                            $rootScope.sessionTimer = timer;
+                            $rootScope.$emit('OpenSocket');
+                            pendoService.issuePendoIdentity();
+                        });
                     }
                 }
 

@@ -82,7 +82,7 @@ export default
                 x = Store('sessionTime');
                 x[$rootScope.current_user.id].loggedIn = false;
                 Store('sessionTime', x);
-                
+
                 $rootScope.lastUser = $cookieStore.get('current_user').id;
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
@@ -98,7 +98,7 @@ export default
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
-                $rootScope.sessionTimer.expireSession();
+                $rootScope.sessionTimer.clearTimers();
             },
 
             getLicense: function () {
@@ -153,7 +153,6 @@ export default
                 // store the response values in $rootScope so we can get to them later
                 $rootScope.current_user = response.results[0];
                 $cookieStore.put('current_user', response.results[0]); //keep in session cookie in the event of browser refresh
-                $rootScope.$emit('OpenSocket');
             },
 
             restoreUserInfo: function () {

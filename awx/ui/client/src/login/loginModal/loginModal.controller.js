@@ -165,9 +165,12 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         Authorization.getUser()
             .success(function (data) {
                 Authorization.setUserInfo(data);
-                $rootScope.sessionTimer = Timer.init();
-                $rootScope.user_is_superuser = data.results[0].is_superuser;
-                scope.$emit('AuthorizationGetLicense');
+                Timer.init().then(function(timer){
+                    $rootScope.sessionTimer = timer;
+                    $rootScope.$emit('OpenSocket');
+                    $rootScope.user_is_superuser = data.results[0].is_superuser;
+                    scope.$emit('AuthorizationGetLicense');
+                });
             })
             .error(function (data, status) {
                 Authorization.logout();
