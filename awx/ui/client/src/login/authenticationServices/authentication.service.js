@@ -116,6 +116,7 @@ export default
                 var license = data.license_info;
                 license.analytics_status = data.analytics_status;
                 license.version = data.version;
+                license.ansible_version = data.ansible_version; 
                 license.tested = false;
                 Store('license', license);
                 $rootScope.features = Store('license').features;
