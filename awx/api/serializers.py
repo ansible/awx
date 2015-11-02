@@ -2004,11 +2004,12 @@ class ScheduleSerializer(BaseSerializer):
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField('get_changes')
+    object_association = serializers.SerializerMethodField('get_object_association')
 
     class Meta:
         model = ActivityStream
         fields = ('*', '-name', '-description', '-created', '-modified',
-                  'timestamp', 'operation', 'changes', 'object1', 'object2')
+                  'timestamp', 'operation', 'changes', 'object1', 'object2', 'object_association')
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()
@@ -2032,6 +2033,13 @@ class ActivityStreamSerializer(BaseSerializer):
             # TODO: Log
             logger.warn("Error deserializing activity stream json changes")
         return {}
+
+    def get_object_association(self, obj):
+        try:
+            return obj.object_relationship_type.split(".")[-1].split("_")[1]
+        except:
+            pass
+        return ""
 
     def get_related(self, obj):
         rel = {}
