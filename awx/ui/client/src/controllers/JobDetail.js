@@ -671,61 +671,6 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
     });
 
 
-    if (scope.removeGetCredentialNames) {
-        scope.removeGetCredentialNames();
-    }
-    scope.removeGetCredentialNames = scope.$on('GetCredentialNames', function(e, data) {
-        var url;
-        if (data.credential) {
-            url = GetBasePath('credentials') + data.credential + '/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    scope.credential_name = data.name;
-                })
-                .error( function(data, status) {
-                    scope.credential_name = '';
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        if (data.cloud_credential) {
-            url = GetBasePath('credentials') + data.cloud_credential + '/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    scope.cloud_credential_name = data.name;
-                })
-                .error( function(data, status) {
-                    scope.credential_name = '';
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-    });
-
-    if (scope.removeGetCreatedByNames) {
-        scope.removeGetCreatedByNames();
-    }
-    scope.removeGetCreatedByNames = scope.$on('GetCreatedByNames', function(e, data) {
-        var url;
-        data = data.slice(0, data.length-1);
-        data = data.slice(data.lastIndexOf('/')+1, data.length);
-        url = GetBasePath('users') + data + '/';
-        scope.users_url = '/#/users/' + data;
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data) {
-                scope.created_by = data.username;
-            })
-            .error( function(data, status) {
-                scope.credential_name = '';
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
-    });
-
-
     if (scope.removeLoadJob) {
         scope.removeLoadJob();
     }
@@ -760,6 +705,22 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                 scope.verbosity = data.verbosity;
                 scope.job_tags = data.job_tags;
                 scope.variables = ParseVariableString(data.extra_vars);
+                scope.users_url = (data.summary_fields.created_by) ? '/#/users/' + data.summary_fields.created_by.id : '';
+                scope.created_by = (data.summary_fields.created_by) ? data.summary_fields.created_by.username : '';
+
+                if (data.summary_fields.credential) {
+                        scope.credential_name = data.summary_fields.credential.name;
+                        scope.credential_url = data.related.credential;
+                } else {
+                    scope.credential_name = "";
+                }
+
+                if (data.summary_fields.cloud_credential) {
+                        scope.cloud_credential_name = data.summary_fields.cloud_credential.name;
+                        scope.cloud_credential_url = data.related.cloud_credential;
+                } else {
+                    scope.cloud_credential_name = "";
+                }
 
                 for (i=0; i < verbosity_options.length; i++) {
                     if (verbosity_options[i].value === data.verbosity) {
@@ -814,10 +775,6 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                    });
                 //scope.setSearchAll('host');
                 scope.$emit('LoadPlays', data.related.job_events);
-                scope.$emit('GetCreatedByNames', data.related.created_by);
-                if (!scope.credential_name) {
-                    scope.$emit('GetCredentialNames', data);
-                }
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
