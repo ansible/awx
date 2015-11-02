@@ -218,12 +218,12 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = (
     'awx.main.backend.LDAPBackend',
-    'radiusauth.backends.RADIUSBackend',
+    'awx.main.backend.RADIUSBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
     'social.backends.github.GithubTeamOAuth2',
-    'social.backends.saml.SAMLAuth',
+    'awx.main.backend.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 

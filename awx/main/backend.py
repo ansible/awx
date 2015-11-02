@@ -1,16 +1,28 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
+import logging
+
 # Django
 from django.dispatch import receiver
+from django.conf import settings as django_settings
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
 from django_auth_ldap.backend import LDAPBackend as BaseLDAPBackend
 from django_auth_ldap.backend import populate_user
 
+# radiusauth
+from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
+
+# social
+from social.backends.saml import SAMLAuth as BaseSAMLAuth
+
 # Ansible Tower
 from awx.api.license import feature_enabled
+
+logger = logging.getLogger('awx.main.backend')
 
 class LDAPSettings(BaseLDAPSettings):
 
@@ -18,6 +30,7 @@ class LDAPSettings(BaseLDAPSettings):
         'ORGANIZATION_MAP': {},
         'TEAM_MAP': {},
     }.items())
+
 
 class LDAPBackend(BaseLDAPBackend):
     '''
@@ -37,7 +50,10 @@ class LDAPBackend(BaseLDAPBackend):
     settings = property(_get_settings, _set_settings)
 
     def authenticate(self, username, password):
-        if not self.settings.SERVER_URI or not feature_enabled('ldap'):
+        if not self.settings.SERVER_URI:
+            return None
+        if self.settings.SERVER_URI and not feature_enabled('ldap'):
+            logger.error("LDAP authenticate failed for missing license feature")
             return None
         return super(LDAPBackend, self).authenticate(username, password)
 
@@ -59,6 +75,55 @@ class LDAPBackend(BaseLDAPBackend):
 
     def get_group_permissions(self, user, obj=None):
         return set()
+
+class RADIUSBackend(BaseRADIUSBackend):
+    '''
+    Custom Radius backend to verify license status
+    '''
+
+    def authenticate(self, username, password):
+        if not django_settings.RADIUS_SERVER:
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("RADIUS authenticate failed for missing license feature")
+            return None
+        return super(RADIUSBackend, self).authenticate(username, password)
+
+    def get_user(self, user_id):
+        if not django_settings.RADIUS_SERVER:
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("RADIUS get_user failed for missing license feature")
+            return None
+        return super(RADIUSBackend, self).get_user(user_id)
+
+
+class SAMLAuth(BaseSAMLAuth):
+    '''
+    Custom SAMLAuth backend to verify license status
+    '''
+
+    def authenticate(self, username, password):
+        if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
+            django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+            django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+            django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("SAML authenticate failed for missing license feature")
+            return None
+        return super(SAMLAuth, self).authenticate(username, password)
+
+    def get_user(self, user_id):
+        if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
+            django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+            django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+            django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("SAML get_user failed for missing license feature")
+            return None
+        return super(SAMLAuth, self).get_user(user_id)
 
 def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
     '''
