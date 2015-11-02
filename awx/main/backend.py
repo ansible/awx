@@ -52,13 +52,16 @@ class LDAPBackend(BaseLDAPBackend):
     def authenticate(self, username, password):
         if not self.settings.SERVER_URI:
             return None
-        if self.settings.SERVER_URI and not feature_enabled('ldap'):
+        if not feature_enabled('ldap'):
             logger.error("LDAP authenticate failed for missing license feature")
             return None
         return super(LDAPBackend, self).authenticate(username, password)
 
     def get_user(self, user_id):
-        if not self.settings.SERVER_URI or not feature_enabled('ldap'):
+        if not self.settings.SERVER_URI:
+            return None
+        if not feature_enabled('ldap'):
+            logger.error("LDAP get_user failed for missing license feature")
             return None
         return super(LDAPBackend, self).get_user(user_id)
 
