@@ -1,6 +1,6 @@
 -r requirements.txt
 ansible
-django-jenkins
+django-jenkins==0.16.3
 coverage
 pyflakes
 pep8
