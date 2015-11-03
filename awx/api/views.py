@@ -11,6 +11,7 @@ import time
 import socket
 import sys
 import errno
+from base64 import b64encode
 
 # Django
 from django.conf import settings
@@ -2861,8 +2862,10 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-
+        
         if request.accepted_renderer.format in ('html', 'api', 'json'):
+            content_format = request.QUERY_PARAMS.get('content_format', 'html')
+            content_encoding = request.QUERY_PARAMS.get('content_encoding', None)
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
             dark_val = request.QUERY_PARAMS.get('dark', '')
@@ -2883,7 +2886,10 @@ class UnifiedJobStdout(RetrieveAPIView):
             if request.accepted_renderer.format == 'api':
                 return Response(mark_safe(data))
             if request.accepted_renderer.format == 'json':
-                return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
+                if content_encoding == 'base64' and content_format == 'ansi':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content)})
+                elif content_format == 'html':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
