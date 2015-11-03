@@ -710,14 +710,16 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 
                 if (data.summary_fields.credential) {
                         scope.credential_name = data.summary_fields.credential.name;
-                        scope.credential_url = data.related.credential;
+                        scope.credential_url = data.related.credential
+                            .replace('api/v1', '#');
                 } else {
                     scope.credential_name = "";
                 }
 
                 if (data.summary_fields.cloud_credential) {
                         scope.cloud_credential_name = data.summary_fields.cloud_credential.name;
-                        scope.cloud_credential_url = data.related.cloud_credential;
+                        scope.cloud_credential_url = data.related.cloud_credential
+                    .replace('api/v1', '#');
                 } else {
                     scope.cloud_credential_name = "";
                 }
