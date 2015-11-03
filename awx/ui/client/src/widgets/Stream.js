@@ -221,15 +221,68 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
                 obj2_obj.base = obj2;
                 obj2_obj.name = $filter('sanitize')(obj2_obj.name);
-                descr += obj2 + " <a href=\"" + BuildUrl(obj2_obj) + "\">" + obj2_obj.name + '</a>' + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
-                descr_nolink += obj2 + ' ' + obj2_obj.name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
+                descr += obj2 +
+                    " <a href=\"" + BuildUrl(obj2_obj) + "\">" +
+                    obj2_obj.name + '</a>';
+                if (activity.object_association === 'admins') {
+                    if (activity.operation === 'disassociate') {
+                        descr += ' from being an admin of ';
+                    } else {
+                        descr += ' as an admin of ';
+                    }
+                } else {
+                    if (activity.operation === 'disassociate') {
+                        descr += ' from ';
+                    } else {
+                        descr += ' to ';
+                    }
+                }
+                descr_nolink += obj2 + ' ' + obj2_obj.name;
+                if (activity.object_association === 'admins') {
+                    if (activity.operation === 'disassociate') {
+                        descr_nolink += ' from being an admin of ';
+                    } else {
+                        descr_nolink += ' as an admin of ';
+                    }
+                } else {
+                    if (activity.operation === 'disassociate') {
+                        descr_nolink += ' from ';
+                    } else {
+                        descr_nolink += ' to ';
+                    }
+                }
             } else if (obj2) {
                 name = '';
                 if (obj2_obj && obj2_obj.name) {
                     name = ' ' + stripDeleted(obj2_obj.name);
                 }
-                descr += obj2 + name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
-                descr_nolink += obj2 + name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
+                if (activity.object_association === 'admins') {
+                    if (activity.operation === 'disassociate') {
+                        descr += ' from being an admin of ';
+                    } else {
+                        descr += ' as an admin of ';
+                    }
+                } else {
+                    if (activity.operation === 'disassociate') {
+                        descr += ' from ';
+                    } else {
+                        descr += ' to ';
+                    }
+                }
+                descr_nolink += obj2 + ' ' + obj2_obj.name;
+                if (activity.object_association === 'admins') {
+                    if (activity.operation === 'disassociate') {
+                        descr_nolink += ' from being an admin of ';
+                    } else {
+                        descr_nolink += ' as an admin of ';
+                    }
+                } else {
+                    if (activity.operation === 'disassociate') {
+                        descr_nolink += ' from ';
+                    } else {
+                        descr_nolink += ' to ';
+                    }
+                }
             }
             if (obj1_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {
                 obj1_obj.base = obj1;
