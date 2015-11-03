@@ -614,6 +614,21 @@ class RunJob(BaseTask):
                 if credential.ssh_key_data not in (None, ''):
                     private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
 
+        if job.cloud_credential and job.cloud_credential.kind == 'openstack':
+            credential = job.cloud_credential
+            openstack_auth = dict(auth_url=credential.host,
+                                  username=credential.username,
+                                  password=decrypt_field(credential, "password"),
+                                  project_name=credential.project)
+            openstack_data = {
+                'clouds': {
+                    'devstack': {
+                        'auth': openstack_auth,
+                    },
+                },
+            }
+            private_data['cloud_credential'] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+
         return private_data
 
     def build_passwords(self, job, **kwargs):
@@ -689,6 +704,8 @@ class RunJob(BaseTask):
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
+        elif cloud_cred and cloud_cred.kind == 'openstack':
+            env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
