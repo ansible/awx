@@ -148,8 +148,6 @@ ifeq ($(DISTRO),ubuntu)
     SETUP_INSTALL_ARGS += --install-layout=deb
 endif
 
-CFLAGS ?=
-
 .DEFAULT_GOAL := build
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
