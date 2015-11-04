@@ -834,9 +834,9 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
 
 
@@ -1063,8 +1063,8 @@ var tower = angular.module('Tower', [
 
 
             if (!$AnsibleConfig) {
-                // there may be time lag when loading the config file, so temporarily use what's in local storage
-                $AnsibleConfig = Store('AnsibleConfig');
+                // create a promise that will resolve when $AnsibleConfig is loaded
+                $rootScope.loginConfig = $q.defer();
             }
 
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override

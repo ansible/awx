@@ -39,16 +39,19 @@ angular.module('LoadConfigHelper', ['Utilities'])
                     if(angular.isObject(response.data)){
                         $AnsibleConfig = _.extend($AnsibleConfig, response.data);
                         Store('AnsibleConfig', $AnsibleConfig);
+                        $rootScope.loginConfig.resolve('config loaded');
                         $rootScope.$emit('ConfigReady');
                     }
                     else {
                         $log.info('local_settings.json is not a valid object');
+                        $rootScope.loginConfig.resolve('config loaded');
                         $rootScope.$emit('ConfigReady');
                     }
 
                 }, function() {
                     //local_settings.json not found
                     $log.info('local_settings.json not found');
+                    $rootScope.loginConfig.resolve('config loaded');
                     $rootScope.$emit('ConfigReady');
                 });
         });
