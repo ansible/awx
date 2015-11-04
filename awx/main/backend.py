@@ -108,9 +108,9 @@ class SAMLAuth(BaseSAMLAuth):
 
     def authenticate(self, username, password):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
-            django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
-            django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
-            django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+                    django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+                    django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+                    django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
         if not feature_enabled('enterprise_auth'):
             logger.error("SAML authenticate failed for missing license feature")
@@ -119,9 +119,9 @@ class SAMLAuth(BaseSAMLAuth):
 
     def get_user(self, user_id):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
-            django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
-            django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
-            django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+                    django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+                    django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+                    django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
         if not feature_enabled('enterprise_auth'):
             logger.error("SAML get_user failed for missing license feature")
