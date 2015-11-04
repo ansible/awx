@@ -572,13 +572,19 @@ VMWARE_EXCLUDE_EMPTY_GROUPS = True
 # provide a list here.
 # Source: https://developers.google.com/compute/docs/zones
 GCE_REGION_CHOICES = [
+    ('us-east1-b', 'US East (B)'),
+    ('us-east1-c', 'US East (C)'),
+    ('us-east1-d', 'US East (D)'),
     ('us-central1-a', 'US Central (A)'),
     ('us-central1-b', 'US Central (B)'),
+    ('us-central1-c', 'US Central (C)'),
     ('us-central1-f', 'US Central (F)'),
-    ('europe-west1-a', 'Europe West (A)'),
     ('europe-west1-b', 'Europe West (B)'),
+    ('europe-west1-c', 'Europe West (C)'),
+    ('europe-west1-d', 'Europe West (D)'),
     ('asia-east1-a', 'Asia East (A)'),
     ('asia-east1-b', 'Asia East (B)'),
+    ('asia-east1-c', 'Asia East (C)'),
 ]
 GCE_REGIONS_BLACKLIST = []
 
