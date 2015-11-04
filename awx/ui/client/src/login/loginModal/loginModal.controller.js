@@ -111,10 +111,12 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     });
 
 
-    scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
+    $rootScope.loginConfig.promise.then(function () {
+        scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
 
-    scope.customLoginInfo = $AnsibleConfig.custom_login_info;
-    scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
+        scope.customLoginInfo = $AnsibleConfig.custom_login_info;
+        scope.customLoginInfoPresent = ($AnsibleConfig.customLoginInfo) ? true : false;
+    });
 
     // Reset the login form
     //scope.loginForm.login_username.$setPristine();
