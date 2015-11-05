@@ -53,7 +53,7 @@ class LDAPBackend(BaseLDAPBackend):
         if not self.settings.SERVER_URI:
             return None
         if not feature_enabled('ldap'):
-            logger.error("LDAP authenticate failed for missing license feature")
+            logger.error("Unable to authenticate, license does not support LDAP authentication")
             return None
         return super(LDAPBackend, self).authenticate(username, password)
 
@@ -61,7 +61,7 @@ class LDAPBackend(BaseLDAPBackend):
         if not self.settings.SERVER_URI:
             return None
         if not feature_enabled('ldap'):
-            logger.error("LDAP get_user failed for missing license feature")
+            logger.error("Unable to get_user, license does not support LDAP authentication")
             return None
         return super(LDAPBackend, self).get_user(user_id)
 
@@ -88,7 +88,7 @@ class RADIUSBackend(BaseRADIUSBackend):
         if not django_settings.RADIUS_SERVER:
             return None
         if not feature_enabled('enterprise_auth'):
-            logger.error("RADIUS authenticate failed for missing license feature")
+            logger.error("Unable to authenticate, license does not support RADIUS authentication")
             return None
         return super(RADIUSBackend, self).authenticate(username, password)
 
@@ -96,7 +96,7 @@ class RADIUSBackend(BaseRADIUSBackend):
         if not django_settings.RADIUS_SERVER:
             return None
         if not feature_enabled('enterprise_auth'):
-            logger.error("RADIUS get_user failed for missing license feature")
+            logger.error("Unable to get_user, license does not support RADIUS authentication")
             return None
         return super(RADIUSBackend, self).get_user(user_id)
 
@@ -113,7 +113,7 @@ class SAMLAuth(BaseSAMLAuth):
                     django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
         if not feature_enabled('enterprise_auth'):
-            logger.error("SAML authenticate failed for missing license feature")
+            logger.error("Unable to authenticate, license does not support SAML authentication")
             return None
         return super(SAMLAuth, self).authenticate(username, password)
 
@@ -124,7 +124,7 @@ class SAMLAuth(BaseSAMLAuth):
                     django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
             return None
         if not feature_enabled('enterprise_auth'):
-            logger.error("SAML get_user failed for missing license feature")
+            logger.error("Unable to get_user, license does not support SAML authentication")
             return None
         return super(SAMLAuth, self).get_user(user_id)
 
