@@ -721,7 +721,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_warnings.log'),
+            'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -813,7 +813,8 @@ LOGGING = {
             'propagate': False,
         },
         'django_auth_ldap': {
-            'handlers': ['null'],
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
         },
     }
 }
