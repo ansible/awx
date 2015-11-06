@@ -21,6 +21,7 @@ class BaseCommandInstance(BaseCommand):
 
     def __init__(self):
         super(BaseCommandInstance, self).__init__()
+        self.enforce_primary_role = False
         self.enforce_roles = False
         self.enforce_hostname_set = False
         self.enforce_unique_find = False
