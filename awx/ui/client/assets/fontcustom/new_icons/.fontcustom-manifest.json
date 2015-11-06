@@ -1,27 +1,39 @@
 {
   "checksum": {
-    "previous": "037607f2fd8b86abb9de4b13a05fde6090c547d09c5428dac65a185505077e6a",
-    "current": "037607f2fd8b86abb9de4b13a05fde6090c547d09c5428dac65a185505077e6a"
+    "previous": "fbf6cfce71d2c35351b84596defbfd01ac87f29865d8f21d344cf5021e1345b0",
+    "current": "fbf6cfce71d2c35351b84596defbfd01ac87f29865d8f21d344cf5021e1345b0"
   },
   "fonts": [
-    "..//fontcustom_037607f2fd8b86abb9de4b13a05fde60.ttf",
-    "..//fontcustom_037607f2fd8b86abb9de4b13a05fde60.svg",
-    "..//fontcustom_037607f2fd8b86abb9de4b13a05fde60.woff",
-    "..//fontcustom_037607f2fd8b86abb9de4b13a05fde60.eot"
+    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.ttf",
+    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.svg",
+    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.woff",
+    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.eot"
   ],
   "glyphs": {
+    "activity-stream": {
+      "codepoint": 61698,
+      "source": "./activity-stream.svg"
+    },
     "google": {
       "codepoint": 61696,
       "source": "./google.svg"
     },
+    "launch": {
+      "codepoint": 61699,
+      "source": "./launch.svg"
+    },
     "saml-02": {
       "codepoint": 61697,
       "source": "./saml-02.svg"
+    },
+    "user": {
+      "codepoint": 61700,
+      "source": "./user.svg"
     }
   },
   "options": {
     "autowidth": false,
-    "config": "fontcustom.yml",
+    "config": false,
     "css_selector": ".icon-{{glyph}}",
     "debug": false,
     "font_ascent": 448,
@@ -29,7 +41,7 @@
     "font_design_size": 16,
     "font_em": 512,
     "font_name": "fontcustom",
-    "force": false,
+    "force": true,
     "input": {
       "templates": ".",
       "vectors": "."
