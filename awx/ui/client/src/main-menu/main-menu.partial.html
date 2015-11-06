@@ -119,10 +119,10 @@
         data-trigger="hover"
         data-container="body">
         <i class="MainMenu-itemImage MainMenu-itemImage--user icon-user"
-            alt="Logged in as {{::$root.current_user.username}}">
+            alt="Logged in as {{ $root.current_user.username}}">
         </i>
         <span class="MainMenu-itemText MainMenu-itemText--username">
-            {{::$root.current_user.username}}
+            {{ $root.current_user.username}}
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"

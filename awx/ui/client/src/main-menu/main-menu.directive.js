@@ -13,14 +13,14 @@ export default
                     } else {
                         return false;
                     }
-                }
+                };
 
                 // check to see if the current route is the currently
                 // logged in user
                 scope.isCurrentRouteUser = function() {
                     if ($rootScope && $rootScope.current_user) {
                         if ($location.url().split('/')[1] === 'users') {
-                            if ($location.url().split('/')[2] ===                                 ($rootScope.current_user.id + "")) {
+                            if ($location.url().split('/')[2] === ($rootScope.current_user.id + "")) {
                                     return true;
                                 } else {
                                     return false;
@@ -31,7 +31,7 @@ export default
                     } else {
                         return false;
                     }
-                }
+                };
 
                 // set up the user tooltip
                 $rootScope.$on('current_user', function(user) {
@@ -58,7 +58,7 @@ export default
                     } else {
                         scope.isHiddenOnMobile = true;
                     }
-                }
+                };
                 // if the user clicks outside of the mobile menu,
                 // close it if it's open
                 $("body").on('click', function(e) {
