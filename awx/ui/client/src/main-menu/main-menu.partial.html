@@ -1,6 +1,6 @@
-<nav class="MainMenu">
+<nav id="main_menu" class="MainMenu">
     <!-- Menu logo item -->
-    <a id="MainMenuLogo"
+    <a id="main_menu_logo"
         href="/#/"
         class="MainMenu-logo"
         ng-class="{'is-loggedOut' : !$root.current_user.username}">
@@ -9,9 +9,9 @@
     </a>
 
     <!-- Mobile menu items -->
-    <span class="MainMenu-mobileItems" ng-class="{'is-hiddenOnMobile': isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}">
+    <span id="main_menu_mobile_items" class="MainMenu-mobileItems" ng-class="{'is-hiddenOnMobile': isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}">
         <a class="MainMenu-item"
-            id="menu_projects_mobile_link"
+            id="main_menu_projects_mobile_link"
             href="/#/projects"
             ng-class="{'is-currentRoute' : isCurrentRoute('projects')}">
             <span class="MainMenu-itemText">
@@ -19,7 +19,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_inventories_mobile_link"
+            id="main_menu_inventories_mobile_link"
             href="/#/inventories"
             ng-class="{'is-currentRoute' : isCurrentRoute('inventories')}">
             <span class="MainMenu-itemText">
@@ -27,7 +27,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_job_templates_mobile_link"
+            id="main_menu_job_templates_mobile_link"
             href="/#/job_templates"
             ng-class="{'is-currentRoute' : isCurrentRoute('job_templates')}">
             <span class="MainMenu-itemText">
@@ -35,7 +35,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_jobs_mobile_link"
+            id="main_menu_jobs_mobile_link"
             href="/#/jobs"
             ng-class="{'is-currentRoute' : isCurrentRoute('jobs')}">
             <span class="MainMenu-itemText">
@@ -43,7 +43,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_current_user_mobile_link"
+            id="main_menu_current_user_mobile_link"
             ng-href="/#/users/{{ $root.current_user.id }}"
             ng-class="{'is-currentRoute' : isCurrentRouteUser()}">
             <span class="MainMenu-itemText">
@@ -51,7 +51,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_setup_mobile_link"
+            id="main_menu_setup_mobile_link"
             ng-href="/#/setup"
             ng-class="{'is-currentRoute' : isCurrentRoute('setup')}">
             <span class="MainMenu-itemText">
@@ -59,7 +59,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_docs_mobile_link"
+            id="main_menu_docs_mobile_link"
             ng-href="http://docs.ansible.com/ansible-tower/"
             target="_blank">
             <span class="MainMenu-itemText">
@@ -67,7 +67,7 @@
             </span>
         </a>
         <a class="MainMenu-item"
-            id="menu_logout_mobile_link"
+            id="main_menu_logout_mobile_link"
             ng-href="/#/logout"
             ng-class="{'is-currentRoute' : isCurrentRoute('logout')}">
             <span class="MainMenu-itemText">
@@ -78,7 +78,7 @@
 
     <!-- Non-mobile menu items -->
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
-        id="menu_projects_link"
+        id="main_menu_projects_link"
         href="/#/projects"
         ng-class="{'is-currentRoute' : isCurrentRoute('projects'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
@@ -86,7 +86,7 @@
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
-        id="menu_inventories_link"
+        id="main_menu_inventories_link"
         href="/#/inventories"
         ng-class="{'is-currentRoute' : isCurrentRoute('inventories'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
@@ -94,7 +94,7 @@
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
-        id="menu_job_templates_link"
+        id="main_menu_job_templates_link"
         href="/#/job_templates"
         ng-class="{'is-currentRoute' : isCurrentRoute('job_templates'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
@@ -102,7 +102,7 @@
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left MainMenu-item--lastLeft"
-        id="menu_jobs_link"
+        id="main_menu_jobs_link"
         href="/#/jobs"
         ng-class="{'is-currentRoute' : isCurrentRoute('jobs'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
@@ -110,7 +110,7 @@
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--user MainMenu-item--right"
-        id="menu_current_user_link"
+        id="main_menu_current_user_link"
         ng-href="/#/users/{{ $root.current_user.id }}"
         ng-class="{'is-currentRoute' : isCurrentRouteUser(), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="{{currentUserTip}}"
@@ -126,7 +126,7 @@
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
-        id="menu_setup_link"
+        id="main_menu_setup_link"
         ng-href="/#/setup"
         ng-class="{'is-currentRoute' : isCurrentRoute('setup'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Settings"
@@ -138,7 +138,7 @@
         </i>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
-        id="menu_docs_link"
+        id="main_menu_docs_link"
         ng-href="http://docs.ansible.com/ansible-tower/"
         ng-class="{'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="View Documentation"
@@ -151,7 +151,7 @@
         </i>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
-        id="menu_logout_link"
+        id="main_menu_logout_link"
         ng-href="/#/logout"
         ng-class="{'is-currentRoute' : isCurrentRoute('logout'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Log Out"
@@ -166,7 +166,7 @@
 
     <!-- Socket-status item -->
     <button
-        id="socket_status_notification"
+        id="main_menu_socket_status_notification"
         class="MainMenu-socket"
         aw-tool-tip="{{socketTip}}"
         tip-watch="socketTip"
@@ -182,7 +182,7 @@
 
     <!-- Mobile menu toggle item -->
     <button
-        id="mobile_toggle_button"
+        id="main_menu_mobile_toggle_button"
         class="MainMenu-toggle"
         ng-class="{'is-active': !isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}"
         ng-click="toggleMenu()">
