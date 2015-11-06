@@ -2,6 +2,7 @@ PYTHON = python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
+PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
 TESTEM_DEBUG_BROWSER ?= Chrome
@@ -10,7 +11,7 @@ MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
-AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
+GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 CLIENT_TEST_DIR ?= build_test
 
@@ -33,8 +34,10 @@ GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 BUILD = 0.git$(DATE)
 ifeq ($(OFFICIAL),yes)
     RELEASE ?= 1
+    AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
@@ -57,11 +60,9 @@ endif
 ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
-    PACKER_BUILD_OPTS ?= -var-file=vars-release.json
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
-    PACKER_BUILD_OPTS ?= -var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
