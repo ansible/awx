@@ -67,6 +67,7 @@ import './shared/InventoryTree';
 import './shared/Socket';
 import './job-templates/main';
 import './shared/features/main';
+import './footer/main';
 
 
 /*#if DEBUG#*/
@@ -180,7 +181,8 @@ var tower = angular.module('Tower', [
     'AboutAnsibleHelpModal',
     'PortalJobsListDefinition',
     'features',
-    'longDateFilter'
+    'longDateFilter',
+    'footer'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
