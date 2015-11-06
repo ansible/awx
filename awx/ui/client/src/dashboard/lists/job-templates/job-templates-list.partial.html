@@ -1,28 +1,60 @@
-<div class="DashboardJobTemplates" ng-hide="noJobTemplates">
-    <h3 class="DashboardJobTemplates-header">
-        Recently Used Job Templates
-    </h3>
-    <div class="DashboardJobTemplates-container">
-        <div class="DashboardJobTemplates-item"
-            ng-class="{'DashboardJobTemplates-item--snapRows': {{ snapRows }}}"
-            ng-repeat="job_template in job_templates">
-            <i class="fa fa-rocket
-                DashboardJobTemplates-launch"
-                ng-click="launchJobTemplate(job_template.id)"></i>
-            <a href="#/job_templates/{{ job_template.id }}" class="DashboardJobTemplates-nameContainer">
-                <span class="DashboardJobTemplates-name">{{ job_template.name }}</span>
-            </a>
-            <aw-smart-status jobs="job_template.recent_jobs" class="DashboardJobTemplates-smartStatus"></aw-smart-status>
-        </div>
+<div class="DashboardList" ng-hide="noJobTemplates">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENTLY USED JOB TEMPLATES
+        </h3>
+        <a href="/#/job_templates" class="DashboardList-viewAll">
+            VIEW ALL
+        </a>
     </div>
-    <a href="/#/job_templates" class="DashboardJobTemplates-seeMore">
-        See all job templates
-    </a>
+    <div class="DashboardList-container">
+        <table class="DashboardList-table">
+           <tr class="DashboardList-tableHeaderRow">
+                <th class="DashboardList-tableHeader DashboardList-tableHeader--name"
+                    ng-click="sort('job_templates','name')">
+                        Title
+                    <i class="fa fa-sort-up"></i>
+                </th>
+                <th class="DashboardList-tableHeader DashboardList-tableHeader--activity">
+                  Activity
+                </th>
+                <th class="DashboardList-tableHeader DashboardList-tableHeader--actions">
+                  Actions
+                </th>
+           </tr>
+           <tr class="DashboardList-tableRow"
+                ng-class-odd="'DashboardList-tableRow--oddRow'"
+                ng-class-even="'DashboardList-tableRow--evenRow'"
+                ng-repeat = "job_template in job_templates">
+              <td class="DashboardList-nameCell">
+                  <a href="#/job_templates/{{ job_template.id }}" class="DashboardList-nameContainer">
+                      {{ job_template.name }}
+                  </a>
+              </td>
+              <td class="DashboardList-activityCell">
+                  <aw-smart-status jobs="job_template.recent_jobs"></aw-smart-status>
+              </td>
+              <td class="DashboardList-actionButtonCell">
+                  <button class="DashboardList-actionButton DashboardList-actionButton--launch"       ng-click="launchJobTemplate(job_template.id)">
+                      <i class="icon-launch"></i>
+                  </button>
+                  <button class="DashboardList-actionButton DashboardList-actionButton--edit"
+                        ng-click="editJobTemplate(job_template.id)">
+                    <i class="fa fa-pencil"></i>
+                  </button>
+               </td>
+           </tr>
+        </table>
+    </div>
 </div>
-<div class="DashboardJobTemplates DashboardJobTemplates--noJobTemplates" ng-show="noJobTemplates">
-    <h3 class="DashboardJobTemplates-header">
-        Recently Used Job Templates
-    </h3>
-    <p>It doesn't seem like you have used any currently available job templates.<br />
-    You can create a job template <a href="#/job_templates/add">here</a>.</p>
+<div class="DashboardList" ng-show="noJobTemplates">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENTLY USED JOB TEMPLATES
+        </h3>
+    </div>
+    <div class="DashboardList-container">
+        <p class="DashboardList-noJobs">It doesn't seem like you have used any currently available job templates.<br />
+        You can create a job template <a href="#/job_templates/add">here</a>.</p>
+    </div>
 </div>

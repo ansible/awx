@@ -1,8 +1,9 @@
 /* jshint unused: vars */
 export default
-    [   'moment',
+    [   '$filter',
         'templateUrl',
-        function JobsList(moment, templateUrl) {
+        '$location',
+        function JobsList($filter, templateUrl, $location) {
         return {
             restrict: 'E',
             link: link,
@@ -31,7 +32,8 @@ export default
                     detailsUrl: job.url.replace("api/v1", "#"),
                     status: job.status,
                     name: job.name,
-                    time: moment(job.finished).fromNow()
+                    id: job.id,
+                    time: $filter('longDate')(job.finished)
                 }; });
 
                 scope.snapRows = (list.length < 4);
@@ -39,6 +41,10 @@ export default
 
             scope.isSuccessful = function (status) {
                 return (status === "successful");
+            };
+
+            scope.editJob = function (jobId) {
+                $location.path( '/jobs/' + jobId + "/stdout");
             };
         }
 }];

@@ -1,0 +1,20 @@
+<div class="smartStatus-container">
+    <div ng-repeat="job in sparkArray track by $index" class='smartStatus-iconContainer'>
+        <a href="#/jobs/{{ job.jobId }}"
+             aw-tool-tip="
+             JOB ID: {{job.jobId}} <br>STATUS: {{job.smartStatus}} <br>FINISHED: {{job.finished}}"
+             aw-tip-placement="left"
+             data-original-title=""
+             data-trigger="hover"
+             data-container="body"
+             tooltipInnerClass="smartStatus-tooltip"
+             title="">
+                <i class="fa
+                DashboardList-status"
+                ng-class="{'smartStatus--success icon-job-successful': job.value === 1,
+                    'smartStatus--failed icon-job-successful': job.value === -1,
+                    'smartStatus--running icon-job-successful': job.value === 0}">
+                </i>
+        </a>
+    </div>
+</div>

@@ -1,35 +1,53 @@
-<div class="DashboardJobs" ng-hide="noJobs">
-    <h3 class="DashboardJobs-header">
-        Recent Job Runs
-    </h3>
-    <div class="DashboardJobs-container">
-        <div class="DashboardJobs-item"
-            ng-class="{'DashboardJobs-item--snapRows': {{ snapRows }}}"
-            ng-repeat="job in jobs">
-            <a ng-href="{{ job.detailsUrl }}"
-                class="DashboardJobs-itemLink">
-                <i class="fa
-                    DashboardJobs-status"
-                    ng-class="{'DashboardJobs-status--success icon-job-successful': isSuccessful(job.status),
-                        'DashboardJobs-status--failed icon-job-failed': !isSuccessful(job.status)}">
-                </i>
-                <span class="DashboardJobs-nameContainer">
-                    {{job.name}}
-                </span>
-                <div class="DashboardJobs-time">
-                    {{ job.time }}
-                </div>
-            </a>
-        </div>
+<div class="DashboardList" ng-hide="noJobs">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENT JOB RUNS
+        </h3>
+        <a href="/#/jobs" class="DashboardList-viewAll">
+            VIEW ALL
+        </a>
     </div>
-    <a href="/#/jobs" class="DashboardJobs-seeMore">
-        See all job runs
-    </a>
+    <div class="DashboardList-container">
+        <table class="DashboardList-table">
+           <tr>
+              <th class="DashboardList-tableHeader DashboardList-tableHeader--name" ng-click="sort('job_templates','name')">Title <i class="fa fa-sort-up"></i></th>
+              <th class="DashboardList-tableHeader DashboardList-tableHeader--time">Time</th>
+              <th class="DashboardList-tableHeader DashboardList-tableHeader--actions">Actions</th>
+           </tr>
+           <tr class="DashboardList-tableRow"
+                ng-class-odd="'DashboardList-tableRow--oddRow'"
+                ng-class-even="'DashboardList-tableRow--evenRow'"
+                ng-repeat = "job in jobs">
+              <td class="DashboardList-nameCell">
+                    <i class="fa
+                      DashboardList-status"
+                      ng-class="{'DashboardList-status--success icon-job-successful': isSuccessful(job.status),
+                          'DashboardList-status--failed icon-job-successful': !isSuccessful(job.status)}">
+                    </i>
+                    <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
+                        {{ job.name }}
+                    </a>
+              </td>
+              <td class="DashboardList-timeCell">
+                  {{job.time}}
+              </td>
+              <td class="DashboardList-actionButtonCell">
+                  <button class="DashboardList-actionButton DashboardList-actionButton--edit" ng-click="editJob(job.id)">
+                    <i class="fa fa-pencil"></i>
+                  </button>
+              </td>
+           </tr>
+        </table>
+    </div>
 </div>
 
-<div class="DashboardJobs DashboardJobs--noJobs" ng-show="noJobs">
-    <h3 class="DashboardJobs-header">
-        Recent Job Runs
-    </h3>
-    <p>It doesn't seem like you have any recent job runs.</p>
+<div class="DashboardList" ng-show="noJobs">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENT JOB RUNS
+        </h3>
+    </div>
+    <div class="DashboardList-container">
+        <p class="DashboardList-noJobs">It doesn't seem like you have any recent job runs.</p>
+    </div>
 </div>

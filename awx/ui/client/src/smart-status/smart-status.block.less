@@ -1,0 +1,56 @@
+/** @define smartStatus */
+@import "awx/ui/client/legacy-styles/animations.less";
+
+.smartStatus-container{
+    max-width: 165px;
+    display:flex;
+}
+
+.smartStatus-iconContainer{
+    padding: 2px;
+    flex: 0 1 auto;
+}
+
+.smartStatus--success{
+    color: #5bbdbf;
+    margin-bottom: 20px;
+    padding: 0px;
+}
+
+.smartStatus--failed{
+    color: #ff5850;
+    margin-top: 20px;
+    padding: 0px;
+}
+
+.smartStatus--running{
+    color: #5bbdbf;
+    margin-top: 10px;
+    padding: 0px;
+    .pulsate();
+}
+
+.smartStatus-tooltip{
+    text-align: left;
+    max-width: 250px;
+    padding: 10px;
+}
+
+.smartStatus-tooltip--success{
+    color: #5bbdbf;
+    padding-left: 5px;
+    padding-right: 0px;
+}
+
+.smartStatus-tooltip--failed{
+    color: #ff5850;
+    padding-left: 5px;
+    padding-right: 0px;
+}
+
+.smartStatus-tooltip--running{
+    color: #5bbdbf;
+    padding-left: 5px;
+    padding-right: 0px;
+    .pulsate();
+}
