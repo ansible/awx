@@ -494,6 +494,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
                 }
 
+                var template;
+                if (attrs.tooltipInnerClass) {
+                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + attrs.tooltipInnerClass + '"></div></div>';
+                } else {
+                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
+                }
+
                 $(element).on('hidden.bs.tooltip', function( ) {
                     // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
                     // after a tooltip fades away. If not, they lay overtop of other elements and
@@ -510,7 +517,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     title: attrs.awToolTip,
                     container: 'body',
                     trigger: 'hover focus',
-                    template: '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>'
+                    template: template
                 });
 
                 if (attrs.tipWatch) {
