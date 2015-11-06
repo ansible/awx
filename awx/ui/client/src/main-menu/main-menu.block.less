@@ -1,57 +1,268 @@
 /** @define MainMenu */
 
 .MainMenu {
-  @menu-breakpoint: 871px;
-
-  display: flex;
-
-  background-color: white;
-  margin: 0;
-
-  @media screen and (max-width: @menu-breakpoint) {
-    position: relative;
-    transition: height 0.5s ease-out;
-    justify-content: flex-start;
-    flex-direction: column;
-    height: 58px;
-    overflow: hidden;
-
-    &.Menu--open {
-        height: 523px !important;
-        // border-bottom: solid thin black;
-    }
-
-    &--portal.Menu--open {
-        height: 290px !important;
-    }
-
-  }
-
-  @media screen and (min-width: (@menu-breakpoint + 1px)) {
-      padding: 0 20px;
-      padding-right: 23px;
-  }
-
-  &-menuContainer {
-      display: flex;
-  }
-
-  &-toggle {
+    padding: 0;
     display: flex;
-    @media screen and (min-width: (@menu-breakpoint + 1px)) {
-      display: none;
-    }
-    margin-left: auto;
-  }
-
-  &--fixedTop {
-      width: 100%;
-      z-index: 1040;
-      position: fixed;
-      right: 0;
-      left: 0;
-      top: 0;
-  }
-
+    background-color: #167ec4;
+    width: 100%;
+    z-index: 1040;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 0;
 }
 
+.MainMenu-logo,
+.MainMenu-item {
+    color: #fff;
+    background-color: #167ec4;
+}
+
+.MainMenu-logoImage {
+    max-width: 147px;
+    max-height: 50px;
+}
+
+.MainMenu-item {
+    padding: 0 20px;
+}
+
+.MainMenu-itemText,
+.MainMenu-itemImage {
+    flex: initial;
+}
+
+.MainMenu-socket {
+    transition: background-color 0.2s, color 0.2s, border-bottom 0.1s, padding-top 0.1s;
+    color: #fff;
+    background: url(assets/socket_background.png) #167ec4;
+    background-size: 55px 52px;
+    background-repeat: no-repeat;
+    order: 0;
+    flex: initial;
+    padding-top: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    border-left: 1px solid #509ad3;
+    cursor: default;
+}
+
+.MainMenu-socketImage {
+    font-size: 18px;
+    text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+    z-index: 1042;
+}
+
+@menu-breakpoint: 886px;
+
+@media screen and (min-width: (@menu-breakpoint + 1px)) {
+    .MainMenu-mobileItems,
+    .MainMenu-toggle {
+        display: none;
+    }
+
+    .MainMenu {
+        height: 50px;
+        align-items: stretch;
+    }
+
+    .MainMenu-logo {
+        flex: initial;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        border: 0;
+        border-bottom: 0px solid #fff;
+        border-right: 1px solid #509ad3;
+    }
+
+    .MainMenu-item {
+        transition: background-color 0.2s, color 0.2s, border-bottom 0.1s, padding-top 0.1s;
+        flex: initial;
+        padding-top: 0px;
+        border: 0;
+        border-bottom: 0px solid #fff;
+        display: flex;
+        align-items: center;
+    }
+
+    // Set up elements based on if their layout in the menu bar
+    .MainMenu-item--left {
+        border-right: 1px solid #509ad3;
+    }
+
+    .MainMenu-item--left:hover,
+    .MainMenu-item--left.is-currentRoute {
+        margin-left: -1px;
+        padding-left: 21px;
+        padding-right: 21px;
+        border-right: 0px;
+    }
+
+    .MainMenu-item--lastLeft {
+        margin-right: auto;
+    }
+
+    .MainMenu-item--right {
+        border-left: 1px solid #509ad3;
+        order: 1;
+    }
+
+    .MainMenu-item--right:hover,
+    .MainMenu-item--right.is-currentRoute {
+        border-left: 0px;
+        padding-left: 21px;
+        padding-right: 21px;
+        margin-right: -1px;
+    }
+
+    // the user item is a little different based on the icon being
+    // strangely positioned
+    .MainMenu-item--user {
+        margin-top: -3px;
+        padding-left: 25px;
+    }
+
+    .MainMenu-item--user:hover,
+    .MainMenu-item--user.is-currentRoute {
+        padding-left: 26px;
+    }
+
+    .MainMenu-item:hover,
+    .MainMenu-item.is-currentRoute {
+        padding-top: 5px;
+        border-bottom: 5px solid #fff;
+    }
+
+    .MainMenu-itemText--username {
+        padding-left: 13px;
+    }
+
+    .MainMenu-itemImage {
+        font-size: 20px;
+    }
+
+    .MainMenu-itemImage--user {
+        font-size: 21px;
+        margin-top: -9px;
+        margin-right: -9px;
+    }
+
+    .MainMenu-itemImage--docs {
+        font-size: 21px;
+        margin-top: -2px;
+    }
+}
+
+@media screen and (max-width: @menu-breakpoint) {
+    .MainMenu-item--notMobile {
+        display: none;
+    }
+
+    .MainMenu {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .MainMenu-logo {
+        flex: 1;
+        border-bottom: 1px solid #509ad3;
+        order: 0;
+    }
+
+    .MainMenu-mobileItems {
+        display: flex;
+        order: 2;
+        flex-direction: row;
+        flex-wrap: wrap;
+        font-size: 15px;
+        width: 100%;
+        visibility: visible;
+        opacity: 1;
+        height: 416px;
+        transition: 0s visibility, 0.1s height, 0.3s opacity;
+    }
+
+    .MainMenu-mobileItems.is-hiddenOnMobile,
+    .MainMenu-mobileItems.is-loggedOut {
+        visibility: hidden;
+        opacity: 0;
+        height: 0;
+    }
+
+    .MainMenu-item {
+        flex: 0 0 100%;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        order: 1;
+        border-bottom: 1px solid #509ad3;
+    }
+
+    .MainMenu-toggle {
+        transition: background-color 0.2s;
+        color: #fff;
+        background-color: #167ec4;
+        order: 0;
+        flex: initial;
+        padding-top: 3px;
+        padding-left: 15px;
+        padding-right: 15px;
+        font-size: 34px;
+        display: flex;
+        align-items: center;
+        border: 0;
+        border-left: 1px solid #509ad3;
+        border-bottom: 1px solid #509ad3;
+    }
+
+    .MainMenu-socket {
+        border-bottom: 1px solid #509ad3;
+    }
+
+    .MainMenu-toggleImage {
+        width: 36px;
+    }
+}
+
+.MainMenu-toggle:focus,
+.MainMenu-item:focus,
+.MainMenu-logo:focus,
+.MainMenu-toggle:hover,
+.MainMenu-item:hover,
+.MainMenu-logo:hover,
+.MainMenu-item.is-currentRoute {
+    color: #fff;
+}
+
+.MainMenu-toggle:hover,
+.MainMenu-item:hover,
+.MainMenu-logo:hover {
+    background-color: #5bbdbf;
+}
+
+.MainMenu-item.is-currentRoute {
+    background-color: #509ad3;
+}
+
+// item on
+.MainMenu-logo,
+.MainMenu-item,
+.MainMenu-socket,
+.MainMenu-toggle {
+    opacity: 1;
+    transition: opacity .5s, background-color .2s, border-bottom .1s, padding-top .1s;
+}
+
+.MainMenu-logo.is-loggedOut,
+.MainMenu-item.is-loggedOut,
+.MainMenu-socket.is-loggedOut,
+.MainMenu-toggle.is-loggedOut {
+    opacity: 0;
+}
