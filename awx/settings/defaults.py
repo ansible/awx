@@ -387,6 +387,14 @@ SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 
+SOCIAL_AUTH_SAML_ATTRS_PERMANENT_ID = "name_id"
+SOCIAL_AUTH_SAML_ATTRS_MAP = {
+    "first_name": "User.FirstName",
+    "last_name": "User.LastName",
+    "username": "User.email",
+    "email": "User.email",
+}
+
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'

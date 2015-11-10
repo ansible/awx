@@ -22,8 +22,6 @@ from awx.main.models import AuthToken
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
     def process_request(self, request):
-        request.META['SERVER_PORT'] = 80 # FIXME
-
         token_key = request.COOKIES.get('token', '')
         token_key = urllib.quote(urllib.unquote(token_key).strip('"'))
 

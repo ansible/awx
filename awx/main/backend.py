@@ -18,6 +18,7 @@ from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
 
 # social
 from social.backends.saml import SAMLAuth as BaseSAMLAuth
+from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
 from awx.api.license import feature_enabled
@@ -100,13 +101,38 @@ class RADIUSBackend(BaseRADIUSBackend):
             return None
         return super(RADIUSBackend, self).get_user(user_id)
 
+class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
+    '''
+    Custom Identity Provider to make attributes to what we expect
+    '''
+
+    def get_user_permanent_id(self, attributes):
+        return attributes[django_settings.SOCIAL_AUTH_SAML_ATTRS_PERMANENT_ID]
+
+    def get_user_details(self, attributes):
+        """
+        Given the SAML attributes extracted from the SSO response, get
+        the user data like name.
+        """
+        import os
+        attrs = dict()
+        for social_attr in django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP:
+            map_attr = django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP[social_attr]
+            attrs[social_attr] = unicode(attributes[map_attr][0]) if map_attr in attributes else None
+        return attrs
+
 
 class SAMLAuth(BaseSAMLAuth):
     '''
     Custom SAMLAuth backend to verify license status
     '''
 
-    def authenticate(self, username, password):
+    def get_idp(self, idp_name):
+        """Given the name of an IdP, get a SAMLIdentityProvider instance"""
+        idp_config = self.setting('ENABLED_IDPS')[idp_name]
+        return TowerSAMLIdentityProvider(idp_name, **idp_config)
+
+    def authenticate(self, *args, **kwargs):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
                     django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
                     django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
@@ -115,7 +141,7 @@ class SAMLAuth(BaseSAMLAuth):
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to authenticate, license does not support SAML authentication")
             return None
-        return super(SAMLAuth, self).authenticate(username, password)
+        return super(SAMLAuth, self).authenticate(*args, **kwargs)
 
     def get_user(self, user_id):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
