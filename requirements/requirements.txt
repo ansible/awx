@@ -93,7 +93,7 @@ python-neutronclient==2.3.11
 python-novaclient==2.20.0
 python-openid==2.2.5
 python-radius==1.0
-python_social_auth==0.2.13
+git+https://github.com/matburt/python-social-auth.git@master#egg=python-social-auth
 python-saml==2.1.4
 python-swiftclient==2.2.0
 python-troveclient==1.0.9
