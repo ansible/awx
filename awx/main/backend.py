@@ -119,6 +119,8 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         for social_attr in django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP:
             map_attr = django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP[social_attr]
             attrs[social_attr] = unicode(attributes[map_attr][0]) if map_attr in attributes else None
+            if attrs[social_attr] is None:
+                logger.warn("Could not map SAML attribute '%s', update SOCIAL_AUTH_SAML_ATTRS_MAP with the correct value" % social_attr)
         return attrs
 
 
