@@ -1,40 +1,121 @@
 /** @define LoginModal */
+.LoginModal-dialog {
+    max-width: ~"calc(100% - 30px)";
+    margin: 30px auto;
+    margin-top: 135px;
+}
+
+.LoginModal-content {
+    max-width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 0;
+    box-shadow: none;
+    background-color: #fff;
+    border-radius: 4px;
+}
 
 .LoginModal-header {
     text-align: center;
-    background-color: #171717;
+    background-color: #167ec4;
+    border-bottom: 0;
+}
+
+.LoginModal-body {
+    padding-top: 15px;
+    padding-bottom: 0px;
 }
 
 .LoginModal-logoImage {
     max-width: 100%;
 }
 
+.LoginModal-logoImage--notCustom {
+    max-width: 190px;
+    margin-top: -6px;
+    margin-bottom: -6px;
+}
+
 .LoginModal-alert {
-    margin-bottom: 25px;
-    font-size: 14px;
+    margin-bottom: 15px;
+    font-size: 16px;
     font-weight: normal;
-    color: #1778c3;
-    text-align: center;
+    color: #161b1f;
+    transition: opacity 0.2s;
 }
 
 .LoginModal-alert--error {
     color: #ff5850;
+    padding-bottom: 4px;
 }
 
-.LoginModal-labelAsterisk:before {
-    margin-right: -2px;
+.LoginModal-alert {
+    opacity: 1;
+}
+
+.LoginModal-alert.ng-hide {
+    display: none;
+    opacity: 0;
+}
+
+.LoginModal-alert.ng-hide-add {
+    display: none;
+    opacity: 0;
+}
+
+.LoginModal-alert.ng-hide-remove {
+    display: block;
+}
+
+.LoginModal-alertIcon {
+    display: flex;
+    align-items: center;
+    line-height: 19px;
+}
+
+.LoginModal-alertIcon:before {
+    margin-right: 10px;
+}
+
+.LoginModal-formGroup {
+    margin-bottom: 15px;
+}
+
+.LoginModal-label {
+    color: #b7b7b7;
+    font-weight: 400;
 }
 
 .LoginModal-footer {
     display: flex;
+    flex-wrap: wrap-reverse;
     align-items: center;
+    padding: 20px;
+    padding-top: 5px;
+    padding-bottom: 0px;
 }
 
 .LoginModal-footerBlock {
     flex: 1 0 auto;
-    text-align: left;
+    margin-bottom: 20px;
+    display: flex;
+    max-width: 100%;
 }
 
 .LoginModal-footerBlock--submit {
-    text-align: right;
+    flex: initial;
+    margin-left: auto;
+    padding-left: 20px;
+}
+
+.LoginModal-signInButton {
+    transition: background-color 0.2s;
+    background-color: #5bbdbf;
+    color: #fff;
+}
+
+.LoginModal-signInButton:hover,
+.LoginModal-signInButton:focus {
+    color: #fff;
+    background-color: #7bced0;
 }
