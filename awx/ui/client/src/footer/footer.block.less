@@ -29,9 +29,24 @@
     margin-right: 20px;
     margin-top: 10px;
 }
+
 .Footer-link:hover{
     color: #ffffff;
 }
+
 .Footer-link{
     color: #848992;
+}
+
+.Footer-copyright.is-loggedOut,
+.Footer-logo.is-loggedOut {
+    opacity: 0;
+}
+
+@menu-breakpoint: 553px;
+
+@media screen and (max-width: (@menu-breakpoint)) {
+    .Footer-copyright{
+        display: none;
+    }
 }
