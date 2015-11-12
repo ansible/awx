@@ -1,9 +1,9 @@
 <div class="ThirdPartySignOn" ng-if="thirdPartyLoginSupported">
     <div class="ThirdPartySignOn-label">
-        Sign In With
+        SIGN IN WITH
     </div>
     <div ng-repeat="item in loginItems" class="ThirdPartySignOn-item">
-        <button type="button" class="ThirdPartySignOn-button"   
+        <button type="button" class="ThirdPartySignOn-button"
             ng-class="item.button" data-placement="top"
             ng-attr-aw-tool-tip="{{ item.tooltip }}"
             ng-click="goTo(item.link)">

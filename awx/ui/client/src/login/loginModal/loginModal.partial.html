@@ -1,33 +1,36 @@
 <div id="login-modal" class="modal fade LoginModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog LoginModal-dialog">
+        <div class="modal-content LoginModal-content">
             <div class="modal-header LoginModal-header">
-                <img class="LoginModal-logoImage"
+                <img id="login_modal_image" class="LoginModal-logoImage"
+                    ng-class="{'LoginModal-logoImage--notCustom': !customLogoPresent}"
                     ng-src="/static/assets/{{ customLogo }}" >
             </div>
-            <div class="modal-body">
-                <div class="LoginModal-alert" ng-show="!sessionExpired && !sessionLimitExpired">
+            <div class="modal-body LoginModal-body">
+                <div class="LoginModal-alert" ng-show="!sessionExpired && !sessionLimitExpired && !attemptFailed && !thirdPartyAttemptFailed">
                     Welcome to Ansible Tower! &nbsp;Please sign in.
                 </div>
-                <div class="LoginModal-alert" ng-show="sessionExpired">
-                    Your session timed out due to inactivity. Please
-                    sign in.
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="sessionExpired">
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Your session timed out due to inactivity. Please sign in.</i>
                 </div>
-                <div class="LoginModal-alert" ng-show="sessionLimitExpired">
-                    Maximum per-user sessions reached. Please
-                    sign in.
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="sessionLimitExpired">
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Maximum per-user sessions reached. Please sign in.</i>
+                </div>
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="attemptFailed">
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Invalid username and/or password.  Please try again.</i>
+                </div>
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="thirdPartyAttemptFailed">
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">{{ thirdPartyAttemptFailed }}</i>
                 </div>
                 <form id="login-form"
                     name="loginForm"
                     class="form-horizontal"
                     autocomplete="off" novalidate>
-                    <div class="form-group">
-                        <label class="control-label
-                            col-md-2 col-sm-2
-                            col-xs-3 prepend-asterisk
-                            LoginModal-labelAsterisk">Username
+                    <div class="form-group LoginModal-formGroup">
+                        <label class="LoginModal-label
+                            col-md-12">USERNAME
                         </label>
-                        <div class="col-md-10 col-sm-10 col-xs-9">
+                        <div class="col-md-12">
                             <input type="text" name="login_username"
                                 class="form-control"
                                 ng-model="login_username"
@@ -42,13 +45,11 @@
                                 ng-bind="usernameError"></div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label
-                            col-md-2 col-sm-2
-                            col-xs-3 prepend-asterisk
-                            LoginModal-labelAsterisk">Password
+                    <div class="form-group LoginModal-formGroup">
+                        <label class="LoginModal-label
+                            col-md-12">PASSWORD
                         </label>
-                        <div class="col-md-10 col-sm-10 col-xs-9">
+                        <div class="col-md-12">
                             <input type="password"
                                 name="login_password"
                                 id="login-password"
@@ -66,23 +67,18 @@
                         </div>
                     </div>
                 </form>
-                <div class="LoginModal-alert LoginModal-alert--error" ng-show="attemptFailed">
-                    Invalid username and/or password.  Please try again.
-                </div>
-                <div class="LoginModal-alert LoginModal-alert--error" ng-show="thirdPartyAttemptFailed">
-                    {{ thirdPartyAttemptFailed }}
-                </div>
-                <div class="LoginModalNotice" ng-if="customLoginInfoPresent"><div class="LoginModalNotice-title">Notice</div>{{ customLoginInfo | sanitize }}</div>
+                <div id="login_modal_notice" class="LoginModalNotice" ng-if="customLoginInfoPresent"><div class="LoginModalNotice-title">NOTICE</div>{{ customLoginInfo | sanitize }}</div>
             </div>
-            <div class="modal-footer LoginModal-footer">
+            <div class="LoginModal-footer">
                 <div class="LoginModal-footerBlock">
                     <third-party-sign-on></third-party-sign-on>
                 </div>
                 <div class="LoginModal-footerBlock
                     LoginModal-footerBlock--submit">
                     <button ng-click="systemLogin(login_username, login_password)"
-                        id="login-button" class="btn btn-primary">
-                        <i class="fa fa-sign-in"></i> Sign in
+                        id="login-button"
+                        class="btn LoginModal-signInButton">
+                        SIGN IN
                     </button>
                 </div>
             </div>

@@ -2018,9 +2018,17 @@ button.dropdown-toggle,
     border-bottom-color: #848992;
 }
 
+.tooltip.top .tooltip-arrow {
+    border-top-color: #848992;
+}
+
 .tooltip.Tooltip.fade.bottom.in {
     opacity: 1;
     padding-top: 4px;
+}
+
+.tooltip.in {
+    opacity: 1;
 }
 
 .tooltip-inner {
@@ -2029,4 +2037,46 @@ button.dropdown-toggle,
 
 .tooltip-inner--logOut {
     margin-left: -15px !important;
+}
+
+.modal {
+    transition: all 0.3s ease-out !important;
+}
+
+.modal.fade .modal-dialog {
+  transform: translate(0, 0);
+}
+
+.modal-backdrop, .modal-backdrop.fade.in {
+    opacity: .25;
+}
+
+.form-control {
+    border-color: #e1e1e1;
+    background-color: #f6f6f6;
+    color: #161b1f;
+    transition: border-color 0.3s;
+    box-shadow: none;
+}
+
+.form-control:active, .form-control:focus {
+    box-shadow: none;
+    border-color: #167ec4;
+}
+
+.form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
+    box-shadow: none;
+}
+
+.error {
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.error.ng-hide-add {
+    display: none;
+}
+
+.error.ng-hide {
+    opacity: 0;
 }

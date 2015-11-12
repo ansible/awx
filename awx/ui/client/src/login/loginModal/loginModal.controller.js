@@ -111,7 +111,13 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     });
 
 
-    scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
+    if ($AnsibleConfig.custom_logo) {
+        scope.customLogo = "custom_console_logo.png"
+        scope.customLogoPresent = true;
+    } else {
+        scope.customLogo = "login_modal_logo.png";
+        scope.customLogoPresent = false;
+    }
 
     scope.customLoginInfo = $AnsibleConfig.custom_login_info;
     scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
@@ -182,6 +188,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         if (Empty(username) || Empty(password)) {
             scope.reset();
             scope.attemptFailed = true;
+            $('#login-username').focus();
         } else {
             Wait('start');
             Authorization.retrieveToken(username, password)
@@ -201,6 +208,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     } else {
                         scope.reset();
                         scope.attemptFailed = true;
+                        $('#login-username').focus();
                     }
                 });
         }
