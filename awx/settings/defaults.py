@@ -827,5 +827,9 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
         },
+        'social': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
     }
 }
