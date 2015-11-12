@@ -114,7 +114,6 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         Given the SAML attributes extracted from the SSO response, get
         the user data like name.
         """
-        import os
         attrs = dict()
         for social_attr in django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP:
             map_attr = django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP[social_attr]
