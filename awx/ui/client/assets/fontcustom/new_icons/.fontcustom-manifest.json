@@ -1,13 +1,13 @@
 {
   "checksum": {
-    "previous": "fbf6cfce71d2c35351b84596defbfd01ac87f29865d8f21d344cf5021e1345b0",
-    "current": "fbf6cfce71d2c35351b84596defbfd01ac87f29865d8f21d344cf5021e1345b0"
+    "previous": "d77a9996ed04d45b02f5c06874cd36db7f5daa9833b1a6c36bef7029a767a34f",
+    "current": "d77a9996ed04d45b02f5c06874cd36db7f5daa9833b1a6c36bef7029a767a34f"
   },
   "fonts": [
-    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.ttf",
-    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.svg",
-    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.woff",
-    "..//fontcustom_fbf6cfce71d2c35351b84596defbfd01.eot"
+    "..//fontcustom_d77a9996ed04d45b02f5c06874cd36db.ttf",
+    "..//fontcustom_d77a9996ed04d45b02f5c06874cd36db.svg",
+    "..//fontcustom_d77a9996ed04d45b02f5c06874cd36db.woff",
+    "..//fontcustom_d77a9996ed04d45b02f5c06874cd36db.eot"
   ],
   "glyphs": {
     "activity-stream": {
@@ -21,6 +21,18 @@
     "launch": {
       "codepoint": 61699,
       "source": "./launch.svg"
+    },
+    "launch-circle": {
+      "codepoint": 61701,
+      "source": "./launch-circle.svg"
+    },
+    "launch-new": {
+      "codepoint": 61703,
+      "source": "./launch-new.svg"
+    },
+    "launch2": {
+      "codepoint": 61702,
+      "source": "./launch2.svg"
     },
     "saml-02": {
       "codepoint": 61697,
