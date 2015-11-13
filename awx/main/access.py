@@ -146,7 +146,7 @@ class BaseAccess(object):
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)
 
-    def check_license(self, add_host=False, feature=None):
+    def check_license(self, add_host=False, feature=None, check_expiration=True):
         reader = TaskSerializer()
         validation_info = reader.from_file()
         if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
@@ -154,9 +154,9 @@ class BaseAccess(object):
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
 
-        if validation_info.get('time_remaining', None) is None:
+        if check_expiration and validation_info.get('time_remaining', None) is None:
             raise PermissionDenied("license is missing")
-        if validation_info.get("grace_period_remaining") <= 0:
+        if check_expiration and validation_info.get("grace_period_remaining") <= 0:
             raise PermissionDenied("license has expired")
 
         free_instances = validation_info.get('free_instances', 0)
@@ -262,7 +262,7 @@ class OrganizationAccess(BaseAccess):
                     self.user in obj.admins.all())
 
     def can_delete(self, obj):
-        self.check_license(feature='multiple_organizations')
+        self.check_license(feature='multiple_organizations', check_expiration=False)
         return self.can_change(obj, None)
 
 class InventoryAccess(BaseAccess):
