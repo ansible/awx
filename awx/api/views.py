@@ -527,7 +527,10 @@ class AuthView(APIView):
     def get(self, request):
         data = SortedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        for name, backend in load_backends(settings.AUTHENTICATION_BACKENDS).items():
+        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
+        # Return auth backends in consistent order: Google, GitHub, SAML.
+        auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
+        for name, backend in auth_backends:
             if (not feature_exists('enterprise_auth') and
                 not feature_enabled('ldap')) or \
                 (not feature_enabled('enterprise_auth') and
@@ -541,7 +544,7 @@ class AuthView(APIView):
             }
             if name == 'saml':
                 backend_data['metadata_url'] = reverse('sso:saml_metadata')
-                for idp in settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys():
+                for idp in sorted(settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys()):
                     saml_backend_data = dict(backend_data.items())
                     saml_backend_data['login_url'] = '%s?idp=%s' % (login_url, idp)
                     full_backend_name = '%s:%s' % (name, idp)

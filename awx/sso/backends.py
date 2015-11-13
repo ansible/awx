@@ -17,13 +17,15 @@ from django_auth_ldap.backend import populate_user
 from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
 
 # social
+from social.backends.saml import OID_USERID
 from social.backends.saml import SAMLAuth as BaseSAMLAuth
 from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
 from awx.api.license import feature_enabled
 
-logger = logging.getLogger('awx.main.backend')
+logger = logging.getLogger('awx.sso.backends')
+
 
 class LDAPSettings(BaseLDAPSettings):
 
@@ -80,6 +82,7 @@ class LDAPBackend(BaseLDAPBackend):
     def get_group_permissions(self, user, obj=None):
         return set()
 
+
 class RADIUSBackend(BaseRADIUSBackend):
     '''
     Custom Radius backend to verify license status
@@ -101,26 +104,31 @@ class RADIUSBackend(BaseRADIUSBackend):
             return None
         return super(RADIUSBackend, self).get_user(user_id)
 
+
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
     '''
-    Custom Identity Provider to make attributes to what we expect
+    Custom Identity Provider to make attributes to what we expect.
     '''
 
     def get_user_permanent_id(self, attributes):
-        return attributes[django_settings.SOCIAL_AUTH_SAML_ATTRS_PERMANENT_ID]
+        uid = attributes[self.conf.get('attr_user_permanent_id', OID_USERID)]
+        if isinstance(uid, basestring):
+            return uid
+        return uid[0]
 
-    def get_user_details(self, attributes):
+    def get_attr(self, attributes, conf_key, default_attribute):
         """
-        Given the SAML attributes extracted from the SSO response, get
-        the user data like name.
+        Get the attribute 'default_attribute' out of the attributes,
+        unless self.conf[conf_key] overrides the default by specifying
+        another attribute to use.
         """
-        attrs = dict()
-        for social_attr in django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP:
-            map_attr = django_settings.SOCIAL_AUTH_SAML_ATTRS_MAP[social_attr]
-            attrs[social_attr] = unicode(attributes[map_attr][0]) if map_attr in attributes else None
-            if attrs[social_attr] is None:
-                logger.warn("Could not map SAML attribute '%s', update SOCIAL_AUTH_SAML_ATTRS_MAP with the correct value" % social_attr)
-        return attrs
+        key = self.conf.get(conf_key, default_attribute)
+        value = attributes[key][0] if key in attributes else None
+        if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
+            logger.warn("Could not map user detail '%s' from SAML attribute '%s'; "
+                        "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
+                        conf_key[5:], key, self.name, conf_key)
+        return unicode(value) if value is not None else value
 
 
 class SAMLAuth(BaseSAMLAuth):
@@ -129,7 +137,6 @@ class SAMLAuth(BaseSAMLAuth):
     '''
 
     def get_idp(self, idp_name):
-        """Given the name of an IdP, get a SAMLIdentityProvider instance"""
         idp_config = self.setting('ENABLED_IDPS')[idp_name]
         return TowerSAMLIdentityProvider(idp_name, **idp_config)
 
@@ -155,6 +162,7 @@ class SAMLAuth(BaseSAMLAuth):
             return None
         return super(SAMLAuth, self).get_user(user_id)
 
+
 def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
     '''
     Hepler function to update m2m relationship based on LDAP group membership.
@@ -178,6 +186,7 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
         rel.add(user)
     elif remove:
         rel.remove(user)
+
 
 @receiver(populate_user)
 def on_populate_user(sender, **kwargs):

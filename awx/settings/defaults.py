@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import os
+import re  # noqa
 import sys
 import djcelery
 from datetime import timedelta
@@ -217,13 +218,13 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'awx.main.backend.LDAPBackend',
-    'awx.main.backend.RADIUSBackend',
+    'awx.sso.backends.LDAPBackend',
+    'awx.sso.backends.RADIUSBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
     'social.backends.github.GithubTeamOAuth2',
-    'awx.main.backend.SAMLAuth',
+    'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -355,13 +356,15 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_user',
     'social.pipeline.user.get_username',
     'social.pipeline.social_auth.associate_by_email',
-    'social.pipeline.mail.mail_validation',
     'social.pipeline.user.create_user',
+    'awx.sso.pipeline.check_user_found_or_created',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'awx.sso.pipeline.set_is_active_for_new_user',
     'social.pipeline.user.user_details',
     'awx.sso.pipeline.prevent_inactive_login',
+    'awx.sso.pipeline.update_user_orgs',
+    'awx.sso.pipeline.update_user_teams',
 )
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
@@ -390,14 +393,6 @@ SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 
-SOCIAL_AUTH_SAML_ATTRS_PERMANENT_ID = "name_id"
-SOCIAL_AUTH_SAML_ATTRS_MAP = {
-    "first_name": "User.FirstName",
-    "last_name": "User.LastName",
-    "username": "User.email",
-    "email": "User.email",
-}
-
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
@@ -410,6 +405,9 @@ SOCIAL_AUTH_CLEAN_USERNAMES = True
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+SOCIAL_AUTH_ORGANIZATION_MAP = {}
+SOCIAL_AUTH_TEAM_MAP = {}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
