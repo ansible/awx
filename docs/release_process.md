@@ -38,16 +38,16 @@ successful release.
 
 Monitor Jenkins
 ---------------
-Once tagged, one must launch the [Release_Tower](http://50.116.42.103/view/Tower/job/Release_Tower/) with the following parameters:
+Once tagged, one must launch the [Release_Tower](http://jenkins.testing.ansible.com/view/Tower/job/Release_Tower/) with the following parameters:
 * `GIT_BRANCH=origin/tags/<X.Y.Z>`
 * `OFFICIAL=yes`
 
 The following jobs will be triggered:
-* [Build_Tower_TAR](http://50.116.42.103/view/Tower/)
-* [Build_Tower_DEB](http://50.116.42.103/view/Tower/)
-  * [Build_Tower_AMI](http://50.116.42.103/view/Tower/)
-* [Build_Tower_RPM](http://50.116.42.103/view/Tower/)
-* [Build_Tower_Docs](http://50.116.42.103/view/Tower/)
+* [Build_Tower_TAR](http://jenkins.testing.ansible.com/view/Tower/)
+* [Build_Tower_DEB](http://jenkins.testing.ansible.com/view/Tower/)
+  * [Build_Tower_AMI](http://jenkins.testing.ansible.com/view/Tower/)
+* [Build_Tower_RPM](http://jenkins.testing.ansible.com/view/Tower/)
+* [Build_Tower_Docs](http://jenkins.testing.ansible.com/view/Tower/)
 
 Should any build step fail, Jenkins will emit a message in IRC and set the build status to failed.
 
@@ -66,4 +66,4 @@ While OFFICIAL Tower AMI's are created by jenkins, the process for blessing AMI'
 
 Publishing Documentation
 ------------------------
-Tower documentation is available in the [product-docs](https://github.com/ansible/product-docs) repository.  The [Build_Tower_Docs](http://50.116.42.103/view/Tower/) job builds and publishes PDF, and HTML, documentation.
+Tower documentation is available in the [product-docs](https://github.com/ansible/product-docs) repository.  The [Build_Tower_Docs](http://jenkins.testing.ansible.com/view/Tower/) job builds and publishes PDF, and HTML, documentation.
