@@ -1,27 +1,10 @@
-Local versions of third-party packages required by Tower.  Package names and
-versions are listed below, along with notes on which files are included.
+To find packages missing from requirements.txt run the below command and look for packages after the example listed below.
 
-# Questions ...
-#stevedore==1.3.0 (Doesn't seem to be used by us, included in requirements.txt anyway .. may be a dependency)
-#distribute==0.7.3 (no files)
-#rackspace-novaclient==1.4 (no files)
-#pip==1.5.4 (pip/*, excluded bin/pip*)
+`PYTHONPATH=awx/lib/site-packages/ pip freeze -r requirements/requirements.txt`
 
-# Packages that weren't in README and couldn't easily decern the versions
-* pkg_resources
-* winrm
-    * isodate
-
-# Manually added after .. maybe dev stuff ?
-pycrypto
-psycopg2
-pyzmq
-
-
-Note: consider removing python-pip from Dockerfile dev
-
-Note: lib/compat.py seems to be needed .. why ?
-
-
-
-* I put pip and distribute in jenkins instead of the referenced Makefile. Should these also be in prodouction?
+```
+...
+## The following requirements were added by pip freeze:
+functools32==3.2.3.post2
+...
+```
