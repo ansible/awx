@@ -100,8 +100,10 @@ export default
                     Rest.setUrl(url);
                     var promise = Rest.get();
                     promise.then(function (response) {
-                        config = response.license_info;
-                        config.analytics_status = response.analytics_status;
+                        config = response.data.license_info;
+                        config.analytics_status = response.data.analytics_status;
+                        config.version = response.data.version;
+                        config.ansible_version = response.data.ansible_version;
                         if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
                             $pendolytics.bootstrap();
                             deferred.resolve(config);
