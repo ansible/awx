@@ -1,6 +1,5 @@
 /** @define LoginModal */
 .LoginModal-dialog {
-    max-width: ~"calc(100% - 30px)";
     margin: 30px auto;
     margin-top: 135px;
 }
@@ -13,17 +12,28 @@
     box-shadow: none;
     background-color: #fff;
     border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.LoginModal-content.is-loggedOut {
+    opacity: 1;
+    transition: opacity 0.5s;
 }
 
 .LoginModal-header {
     text-align: center;
     background-color: #167ec4;
     border-bottom: 0;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
 }
 
 .LoginModal-body {
     padding-top: 15px;
     padding-bottom: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .LoginModal-logoImage {
@@ -32,8 +42,8 @@
 
 .LoginModal-logoImage--notCustom {
     max-width: 190px;
-    margin-top: -6px;
-    margin-bottom: -6px;
+    margin-top: 6px;
+    margin-bottom: 6px;
 }
 
 .LoginModal-alert {

@@ -1,12 +1,13 @@
-<div id="login-modal" class="modal fade LoginModal">
-    <div class="modal-dialog LoginModal-dialog">
-        <div class="modal-content LoginModal-content">
-            <div class="modal-header LoginModal-header">
+<div id="login-modal" class="LoginModal">
+    <div class="LoginModal-dialog">
+        <div class="LoginModal-content"
+            ng-class="{'is-loggedOut' : !$root.current_user.username}">
+            <div class="LoginModal-header">
                 <img id="login_modal_image" class="LoginModal-logoImage"
                     ng-class="{'LoginModal-logoImage--notCustom': !customLogoPresent}"
                     ng-src="/static/assets/{{ customLogo }}" >
             </div>
-            <div class="modal-body LoginModal-body">
+            <div class="LoginModal-body">
                 <div class="LoginModal-alert" ng-show="!sessionExpired && !sessionLimitExpired && !attemptFailed && !thirdPartyAttemptFailed">
                     Welcome to Ansible Tower! &nbsp;Please sign in.
                 </div>

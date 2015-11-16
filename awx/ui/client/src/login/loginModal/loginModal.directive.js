@@ -15,12 +15,6 @@ export default
                 controller: authenticationController,
                 templateUrl: templateUrl('login/loginModal/loginModal'),
                 link: function(scope, element, attrs) {
-                    // Display the login dialog
-                    $('#login-modal').modal({
-                        show: true,
-                        keyboard: false,
-                        backdrop: 'static'
-                    });
                 }
             };
         }
