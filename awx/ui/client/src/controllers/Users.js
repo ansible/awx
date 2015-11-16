@@ -307,6 +307,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
                 $scope.not_ldap_user = !$scope.ldap_user;
                 master.ldap_user = $scope.ldap_user;
+                $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
 
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
                 RelatedSearchInit({
