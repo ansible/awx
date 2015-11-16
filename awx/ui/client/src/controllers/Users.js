@@ -119,6 +119,7 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $routePa
     $scope.ldap_user = false;
     $scope.not_ldap_user = !$scope.ldap_user;
     $scope.ldap_dn = null;
+    $scope.socialAuthUser = false;
 
     generator.reset();
 
