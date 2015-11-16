@@ -33,8 +33,24 @@
                     <div class="form-horizontal" role="form" id="job-status-form">
 
                         <div class="form-group" ng-show="job_status.explanation">
-                            <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Explanation</label>
-                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_explanation" ng-bind-html="job_status.explanation"></div>
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 col-xs-12">Explanation</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9  job_status_explanation"
+                            ng-show="!previousTaskFailed" ng-bind-html="job_status.explanation"></div>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9 job_status_explanation"
+                            ng-show="previousTaskFailed">Previous Task Failed
+                                <a
+                                    href=""
+                                    id="explanation_help"
+                                    aw-pop-over="{{ task_detail }}"
+                                    aw-pop-over-watch="task_detail"
+                                    data-placement="bottom"
+                                    data-container="body" class="help-link" over-title="Failure Detail"
+                                    title=""
+                                    tabindex="-1">
+                                        <i class="fa fa-question-circle">
+                                        </i>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="form-group" ng-show="job_status.traceback">

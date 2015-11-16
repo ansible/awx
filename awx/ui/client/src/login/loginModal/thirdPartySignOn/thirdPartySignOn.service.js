@@ -25,7 +25,7 @@
                     var options = [],
                         error = "";
 
-                    function parseGoogle(option, key) {
+                    function parseGoogle(option) {
                         var newOption = {};
 
                         newOption.type = "google";

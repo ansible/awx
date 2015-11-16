@@ -39,16 +39,25 @@ angular.module('LoadConfigHelper', ['Utilities'])
                     if(angular.isObject(response.data)){
                         $AnsibleConfig = _.extend($AnsibleConfig, response.data);
                         Store('AnsibleConfig', $AnsibleConfig);
+                        if ($rootScope.loginConfig) {
+                            $rootScope.loginConfig.resolve('config loaded');
+                        }
                         $rootScope.$emit('ConfigReady');
                     }
                     else {
                         $log.info('local_settings.json is not a valid object');
+                        if ($rootScope.loginConfig) {
+                            $rootScope.loginConfig.resolve('config loaded');
+                        }
                         $rootScope.$emit('ConfigReady');
                     }
 
                 }, function() {
                     //local_settings.json not found
                     $log.info('local_settings.json not found');
+                    if ($rootScope.loginConfig) {
+                        $rootScope.loginConfig.resolve('config loaded');
+                    }
                     $rootScope.$emit('ConfigReady');
                 });
         });
@@ -57,15 +66,16 @@ angular.module('LoadConfigHelper', ['Utilities'])
         // load config.js
         $log.info('attempting to load config.js');
         $http({ method:'GET', url: $basePath + 'config.js' })
-            .success(function(data) {
+            .then(function(response) {
                 $log.info('loaded config.js');
-                $AnsibleConfig = eval(data);
+                $AnsibleConfig = eval(response.data);
                 Store('AnsibleConfig', $AnsibleConfig);
                 $rootScope.$emit('LoadConfig');
             })
-            .error(function(data, status) {
-                ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to load ' + $basePath + '/config.js. GET status: ' + status
+            .catch(function(response) {
+                response.data = 'Failed to load ' + $basePath + '/config.js';
+                ProcessErrors($rootScope, response, response.status, null, { hdr: 'Error!',
+                    msg: 'Failed to load ' + $basePath + '/config.js.'
                 });
             });
     };

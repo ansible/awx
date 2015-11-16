@@ -11,6 +11,7 @@ import time
 import socket
 import sys
 import errno
+from base64 import b64encode
 
 # Django
 from django.conf import settings
@@ -526,7 +527,10 @@ class AuthView(APIView):
     def get(self, request):
         data = SortedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        for name, backend in load_backends(settings.AUTHENTICATION_BACKENDS).items():
+        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
+        # Return auth backends in consistent order: Google, GitHub, SAML.
+        auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
+        for name, backend in auth_backends:
             if (not feature_exists('enterprise_auth') and
                 not feature_enabled('ldap')) or \
                 (not feature_enabled('enterprise_auth') and
@@ -540,7 +544,7 @@ class AuthView(APIView):
             }
             if name == 'saml':
                 backend_data['metadata_url'] = reverse('sso:saml_metadata')
-                for idp in settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys():
+                for idp in sorted(settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys()):
                     saml_backend_data = dict(backend_data.items())
                     saml_backend_data['login_url'] = '%s?idp=%s' % (login_url, idp)
                     full_backend_name = '%s:%s' % (name, idp)
@@ -2861,8 +2865,10 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-
+        
         if request.accepted_renderer.format in ('html', 'api', 'json'):
+            content_format = request.QUERY_PARAMS.get('content_format', 'html')
+            content_encoding = request.QUERY_PARAMS.get('content_encoding', None)
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
             dark_val = request.QUERY_PARAMS.get('dark', '')
@@ -2883,7 +2889,10 @@ class UnifiedJobStdout(RetrieveAPIView):
             if request.accepted_renderer.format == 'api':
                 return Response(mark_safe(data))
             if request.accepted_renderer.format == 'json':
-                return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
+                if content_encoding == 'base64' and content_format == 'ansi':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content)})
+                elif content_format == 'html':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)

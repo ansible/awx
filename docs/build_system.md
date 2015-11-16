@@ -122,7 +122,7 @@ Jenkins
 
 ### Server Information ###
 
-The AnsibleWorks Jenkins server can be found at http://50.116.42.103:8080/
+The Ansible Jenkins server can be found at http://jenkins.testing.ansible.com
 
 This is a standard Jenkins installation, with the following additional 
 plugins installed:

@@ -170,10 +170,10 @@ def handle_work_error(self, task_id, subtasks=None):
             instance_name = ''
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.project.name
+                instance_name = instance.name
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.inventory_source.inventory.name
+                instance_name = instance.name
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
@@ -191,7 +191,7 @@ def handle_work_error(self, task_id, subtasks=None):
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.job_explanation = 'Previous Task Failed: {"task_type": "%s", "task_name": "%s", "task_id": "%s"}' % \
+                instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
                     (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
@@ -614,6 +614,21 @@ class RunJob(BaseTask):
                 if credential.ssh_key_data not in (None, ''):
                     private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
 
+        if job.cloud_credential and job.cloud_credential.kind == 'openstack':
+            credential = job.cloud_credential
+            openstack_auth = dict(auth_url=credential.host,
+                                  username=credential.username,
+                                  password=decrypt_field(credential, "password"),
+                                  project_name=credential.project)
+            openstack_data = {
+                'clouds': {
+                    'devstack': {
+                        'auth': openstack_auth,
+                    },
+                },
+            }
+            private_data['cloud_credential'] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+
         return private_data
 
     def build_passwords(self, job, **kwargs):
@@ -689,6 +704,8 @@ class RunJob(BaseTask):
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
+        elif cloud_cred and cloud_cred.kind == 'openstack':
+            env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:

@@ -327,6 +327,12 @@ class Ec2Inventory(object):
         else:
             self.nested_groups = False
 
+        # Replace dash or not in group names
+        if config.has_option('ec2', 'replace_dash_in_groups'):
+            self.replace_dash_in_groups = config.getboolean('ec2', 'replace_dash_in_groups')
+        else:
+            self.replace_dash_in_groups = True
+
         # Configure which groups should be created.
         group_by_options = [
             'group_by_instance_id',
@@ -360,7 +366,7 @@ class Ec2Inventory(object):
                 self.pattern_include = re.compile(pattern_include)
             else:
                 self.pattern_include = None
-        except configparser.NoOptionError as e:
+        except configparser.NoOptionError:
             self.pattern_include = None
 
         # Do we need to exclude hosts that match a pattern?
@@ -370,7 +376,7 @@ class Ec2Inventory(object):
                 self.pattern_exclude = re.compile(pattern_exclude)
             else:
                 self.pattern_exclude = None
-        except configparser.NoOptionError as e:
+        except configparser.NoOptionError:
             self.pattern_exclude = None
 
         # Instance filters (see boto and EC2 API docs). Ignore invalid filters.
@@ -697,7 +703,8 @@ class Ec2Inventory(object):
                 self.push(self.inventory, key, dest)
                 if self.nested_groups:
                     self.push_group(self.inventory, 'tags', self.to_safe("tag_" + k))
-                    self.push_group(self.inventory, self.to_safe("tag_" + k), key)
+                    if v:
+                        self.push_group(self.inventory, self.to_safe("tag_" + k), key)
 
         # Inventory: Group by Route53 domain names if enabled
         if self.route53_enabled and self.group_by_route53_names:
@@ -1285,10 +1292,11 @@ class Ec2Inventory(object):
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', temp).lower()
 
     def to_safe(self, word):
-        ''' Converts 'bad' characters in a string to underscores so they can be
-        used as Ansible groups '''
-
-        return re.sub("[^A-Za-z0-9\_]", "_", word)
+        ''' Converts 'bad' characters in a string to underscores so they can be used as Ansible groups '''
+        regex = "[^A-Za-z0-9\_"
+        if self.replace_dash_in_groups:
+            regex += "\-"
+        return re.sub(regex + "]", "_", word)
 
     def json_format_dict(self, data, pretty=False):
         ''' Converts a dict to a JSON object and dumps it as a formatted
@@ -1302,3 +1310,4 @@ class Ec2Inventory(object):
 
 # Run the script
 Ec2Inventory()
+

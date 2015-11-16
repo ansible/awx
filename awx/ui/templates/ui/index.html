@@ -31,7 +31,8 @@
     window.pendo_options = {
 
         // This is required to be able to load data client side
-        usePendoAgentAPI: true
+        usePendoAgentAPI: true,
+        disableGuides: true
     };
   </script>
 
@@ -55,7 +56,7 @@
 
     <!-- Password Dialog -->
     <div id="password-modal" style="display: none;"></div>
-    <div id="idle-modal" style="display:none">Your session will expire in <span id="remaining_seconds"></span> seconds, would you like to continue?</div>
+    <div id="idle-modal" style="display:none">Your session will expire in <span id="remaining_seconds">60</span> seconds, would you like to continue?</div>
 
     <!-- Generic Form dialog -->
     <div id="form-modal" class="modal fade">
@@ -156,7 +157,7 @@
     <div id="login-modal-dialog" style="display: none;"></div>
     <div id="help-modal-dialog" style="display: none;"></div>
 
-    <div id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}assets/cowsay-about.html ' "></div>
+    <div class="About" id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}assets/cowsay-about.html ' "></div>
 
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">

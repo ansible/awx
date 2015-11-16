@@ -7,10 +7,10 @@
 # settings as needed.
 
 if not AUTH_LDAP_SERVER_URI:
-    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'awx.main.backend.LDAPBackend']
+    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'awx.sso.backends.LDAPBackend']
 
 if not RADIUS_SERVER:
-    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'radiusauth.backends.RADIUSBackend']
+    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'awx.sso.backends.RADIUSBackend']
 
 if not all([SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET]):
     AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'social.backends.google.GoogleOAuth2']
@@ -28,8 +28,7 @@ if not all([SOCIAL_AUTH_SAML_SP_ENTITY_ID, SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
             SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, SOCIAL_AUTH_SAML_ORG_INFO,
             SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
             SOCIAL_AUTH_SAML_ENABLED_IDPS]):
-    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'social.backends.saml.SAMLAuth']
+    AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'awx.sso.backends.SAMLAuth']
 
 if not AUTH_BASIC_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [x for x in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] if x != 'rest_framework.authentication.BasicAuthentication']
-

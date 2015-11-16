@@ -837,9 +837,9 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
 
 
@@ -950,7 +950,8 @@ var tower = angular.module('Tower', [
                         control_socket.init();
                         control_socket.on("limit_reached", function(data) {
                             $log.debug(data.reason);
-                            Timer.expireSession('session_limit');
+                            $rootScope.sessionTimer.expireSession('session_limit');
+                            $location.url('/login');
                         });
                     }
                     openSocket();
@@ -999,7 +1000,7 @@ var tower = angular.module('Tower', [
                       // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
                             $rootScope.sessionTimer.expireSession('idle');
-                            if (sock) {
+                            if (sock&& sock.socket && sock.socket.socket) {
                                 sock.socket.socket.disconnect();
                             }
                             $location.path('/login');
@@ -1026,9 +1027,11 @@ var tower = angular.module('Tower', [
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
-                        $rootScope.sessionTimer = Timer.init();
-                        $rootScope.$emit('OpenSocket');
-                        pendoService.issuePendoIdentity();
+                        Timer.init().then(function(timer){
+                            $rootScope.sessionTimer = timer;
+                            $rootScope.$emit('OpenSocket');
+                            pendoService.issuePendoIdentity();
+                        });
                     }
                 }
 
@@ -1063,8 +1066,8 @@ var tower = angular.module('Tower', [
 
 
             if (!$AnsibleConfig) {
-                // there may be time lag when loading the config file, so temporarily use what's in local storage
-                $AnsibleConfig = Store('AnsibleConfig');
+                // create a promise that will resolve when $AnsibleConfig is loaded
+                $rootScope.loginConfig = $q.defer();
             }
 
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override

@@ -25,9 +25,11 @@ export default
 
     .factory('CheckLicense', ['$rootScope', '$compile', 'CreateDialog', 'Store',
     'LicenseUpdateForm', 'GenerateForm', 'TextareaResize', 'ToJSON', 'GetBasePath',
-    'Rest', 'ProcessErrors', 'Alert', 'IsAdmin', '$location',
+    'Rest', 'ProcessErrors', 'Alert', 'IsAdmin', '$location', 'pendoService',
+    'Authorization', 'Wait',
     function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateForm,
-        TextareaResize, ToJSON, GetBasePath, Rest, ProcessErrors, Alert, IsAdmin, $location) {
+        TextareaResize, ToJSON, GetBasePath, Rest, ProcessErrors, Alert, IsAdmin, $location,
+        pendoService, Authorization, Wait) {
         return {
             getRemainingDays: function(time_remaining) {
                 // assumes time_remaining will be in seconds
@@ -164,21 +166,32 @@ export default
                 if (typeof json_data === 'object' && Object.keys(json_data).length > 0) {
                     Rest.setUrl(url);
                     Rest.post(json_data)
-                        .success(function () {
-                            try {
-                                $('#license-modal-dialog').dialog('close');
-                            }
-                            catch(e) {
-                                // ignore
-                            }
+                        .success(function (response) {
+                            response.license_info = response;
                             Alert('License Accepted', 'The Ansible Tower license was updated. To review or update the license, choose View License from the Setup menu.','alert-info');
                             $rootScope.features = undefined;
-                            $location.path('/home');
+
+                            Authorization.getLicense()
+                                .success(function (data) {
+                                    Authorization.setLicense(data);
+                                    pendoService.issuePendoIdentity();
+                                    Wait("stop");
+                                    $location.path('/home');
+                                })
+                                .error(function () {
+                                    Wait('stop');
+                                    Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger',
+                                        $location.path('/logout'));
+                                });
+
+
+
+
                         })
-                        .error(function (data, status) {
+                        .catch(function (response) {
                             scope.license_json_api_error = "A valid license key in JSON format is required";
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Failed to update license. POST returned: ' + status
+                            ProcessErrors(scope, response.data, response.status, null, { hdr: 'Error!',
+                                msg: 'Failed to update license. POST returned: ' + response.status
                             });
                         });
                 } else {

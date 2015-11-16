@@ -751,9 +751,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            $compile(elem)(modal_scope);
 
                            var form_scope =
-                           generator.inject(GroupForm, { mode: 'edit', id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
+                           generator.inject(GroupForm, { mode: mode, id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
                            var source_form_scope =
-                           generator.inject(SourceForm, { mode: 'edit', id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
+                           generator.inject(SourceForm, { mode: mode, id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
 
                            //generator.reset();
 
@@ -1465,6 +1465,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 
                            // Change the lookup and regions when the source changes
                            sources_scope.sourceChange = function () {
+                               sources_scope.credential_name = "";
+                               sources_scope.credential = "";
+                               if (sources_scope.credential_name_api_error) {
+                                   delete sources_scope.credential_name_api_error;
+                               }
                                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
                                SourceChange({ scope: sources_scope, form: SourceForm });
                            };

@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import os
+import re  # noqa
 import sys
 import djcelery
 from datetime import timedelta
@@ -217,13 +218,13 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'awx.main.backend.LDAPBackend',
-    'radiusauth.backends.RADIUSBackend',
+    'awx.sso.backends.LDAPBackend',
+    'awx.sso.backends.RADIUSBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
     'social.backends.github.GithubTeamOAuth2',
-    'social.backends.saml.SAMLAuth',
+    'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -355,13 +356,15 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_user',
     'social.pipeline.user.get_username',
     'social.pipeline.social_auth.associate_by_email',
-    'social.pipeline.mail.mail_validation',
     'social.pipeline.user.create_user',
+    'awx.sso.pipeline.check_user_found_or_created',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'awx.sso.pipeline.set_is_active_for_new_user',
     'social.pipeline.user.user_details',
     'awx.sso.pipeline.prevent_inactive_login',
+    'awx.sso.pipeline.update_user_orgs',
+    'awx.sso.pipeline.update_user_teams',
 )
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
@@ -370,14 +373,17 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
 
 SOCIAL_AUTH_GITHUB_KEY = ''
 SOCIAL_AUTH_GITHUB_SECRET = ''
+SOCIAL_AUTH_GITHUB_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_GITHUB_ORG_KEY = ''
 SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
 SOCIAL_AUTH_GITHUB_ORG_NAME = ''
+SOCIAL_AUTH_GITHUB_ORG_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
 SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
+SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
 SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
@@ -399,6 +405,9 @@ SOCIAL_AUTH_CLEAN_USERNAMES = True
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+SOCIAL_AUTH_ORGANIZATION_MAP = {}
+SOCIAL_AUTH_TEAM_MAP = {}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
@@ -572,13 +581,19 @@ VMWARE_EXCLUDE_EMPTY_GROUPS = True
 # provide a list here.
 # Source: https://developers.google.com/compute/docs/zones
 GCE_REGION_CHOICES = [
+    ('us-east1-b', 'US East (B)'),
+    ('us-east1-c', 'US East (C)'),
+    ('us-east1-d', 'US East (D)'),
     ('us-central1-a', 'US Central (A)'),
     ('us-central1-b', 'US Central (B)'),
+    ('us-central1-c', 'US Central (C)'),
     ('us-central1-f', 'US Central (F)'),
-    ('europe-west1-a', 'Europe West (A)'),
     ('europe-west1-b', 'Europe West (B)'),
+    ('europe-west1-c', 'Europe West (C)'),
+    ('europe-west1-d', 'Europe West (D)'),
     ('asia-east1-a', 'Asia East (A)'),
     ('asia-east1-b', 'Asia East (B)'),
+    ('asia-east1-c', 'Asia East (C)'),
 ]
 GCE_REGIONS_BLACKLIST = []
 
@@ -715,7 +730,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_warnings.log'),
+            'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -807,7 +822,12 @@ LOGGING = {
             'propagate': False,
         },
         'django_auth_ldap': {
-            'handlers': ['null'],
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
+        'social': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
         },
     }
 }

@@ -12,7 +12,8 @@ export default
         Store, $log) {
        return {
             setPendoOptions: function (config) {
-                var options = {
+                var tower_version = config.version.split('-')[0],
+                options = {
                     visitor: {
                       id: null,
                       role: null,
@@ -23,7 +24,9 @@ export default
                       planLevel: config.license_type,
                       planPrice: config.instance_count,
                       creationDate: config.license_date,
-                      trial: config.trial
+                      trial: config.trial,
+                      tower_version: tower_version,
+                      ansible_version: config.ansible_version
                     }
                 };
                 if(config.analytics_status === 'detailed'){

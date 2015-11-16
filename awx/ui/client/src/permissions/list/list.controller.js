@@ -12,8 +12,8 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect',
-        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
+    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
+        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
             ClearScope();
 
@@ -27,16 +27,17 @@ export default
             $scope.permission_search_select = [];
 
             // return a promise from the options request with the permission type choices (including adhoc) as a param
-            var permissionsChoice = permissionsChoices({
+            var permissionsChoice = fieldChoices({
                 scope: $scope,
-                url: 'api/v1/' + base + '/' + base_id + '/permissions/'
+                url: 'api/v1/' + base + '/' + base_id + '/permissions/',
+                field: 'permission_type'
             });
 
             // manipulate the choices from the options request to be set on
             // scope and be usable by the list form
             permissionsChoice.then(function (choices) {
                 choices =
-                    permissionsLabel({
+                    fieldLabels({
                         choices: choices
                     });
                 _.map(choices, function(n, key) {

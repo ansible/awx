@@ -13,7 +13,7 @@
 
 export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels) {
 
     ClearScope();
 
@@ -27,11 +27,33 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 
     scope.plays = [];
 
+    scope.previousTaskFailed = false;
+
     scope.$watch('job_status', function(job_status) {
         if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
+            scope.previousTaskFailed = true;
             var taskObj = JSON.parse(job_status.explanation.substring(job_status.explanation.split(":")[0].length + 1));
-            job_status.explanation = job_status.explanation.split(":")[0] + ". ";
-            job_status.explanation += "<code>" + taskObj.task_type + "-" + taskObj.task_id + " failed for " + taskObj.task_name + "</code>"
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var fieldChoice = fieldChoices({
+                scope: $scope,
+                url: 'api/v1/unified_jobs/',
+                field: 'type'
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            fieldChoice.then(function (choices) {
+                choices =
+                    fieldLabels({
+                        choices: choices
+                    });
+                scope.explanation_fail_type = choices[taskObj.job_type];
+                scope.explanation_fail_name = taskObj.job_name;
+                scope.explanation_fail_id = taskObj.job_id;
+                scope.task_detail = scope.explanation_fail_type + " failed for " + scope.explanation_fail_name + " with ID " + scope.explanation_fail_id + ".";
+            });
+        } else {
+            scope.previousTaskFailed = false;
         }
     }, true);
 
@@ -649,61 +671,6 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
     });
 
 
-    if (scope.removeGetCredentialNames) {
-        scope.removeGetCredentialNames();
-    }
-    scope.removeGetCredentialNames = scope.$on('GetCredentialNames', function(e, data) {
-        var url;
-        if (data.credential) {
-            url = GetBasePath('credentials') + data.credential + '/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    scope.credential_name = data.name;
-                })
-                .error( function(data, status) {
-                    scope.credential_name = '';
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        if (data.cloud_credential) {
-            url = GetBasePath('credentials') + data.cloud_credential + '/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    scope.cloud_credential_name = data.name;
-                })
-                .error( function(data, status) {
-                    scope.credential_name = '';
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-    });
-
-    if (scope.removeGetCreatedByNames) {
-        scope.removeGetCreatedByNames();
-    }
-    scope.removeGetCreatedByNames = scope.$on('GetCreatedByNames', function(e, data) {
-        var url;
-        data = data.slice(0, data.length-1);
-        data = data.slice(data.lastIndexOf('/')+1, data.length);
-        url = GetBasePath('users') + data + '/';
-        scope.users_url = '/#/users/' + data;
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data) {
-                scope.created_by = data.username;
-            })
-            .error( function(data, status) {
-                scope.credential_name = '';
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
-    });
-
-
     if (scope.removeLoadJob) {
         scope.removeLoadJob();
     }
@@ -738,6 +705,24 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                 scope.verbosity = data.verbosity;
                 scope.job_tags = data.job_tags;
                 scope.variables = ParseVariableString(data.extra_vars);
+                scope.users_url = (data.summary_fields.created_by) ? '/#/users/' + data.summary_fields.created_by.id : '';
+                scope.created_by = (data.summary_fields.created_by) ? data.summary_fields.created_by.username : '';
+
+                if (data.summary_fields.credential) {
+                        scope.credential_name = data.summary_fields.credential.name;
+                        scope.credential_url = data.related.credential
+                            .replace('api/v1', '#');
+                } else {
+                    scope.credential_name = "";
+                }
+
+                if (data.summary_fields.cloud_credential) {
+                        scope.cloud_credential_name = data.summary_fields.cloud_credential.name;
+                        scope.cloud_credential_url = data.related.cloud_credential
+                    .replace('api/v1', '#');
+                } else {
+                    scope.cloud_credential_name = "";
+                }
 
                 for (i=0; i < verbosity_options.length; i++) {
                     if (verbosity_options[i].value === data.verbosity) {
@@ -792,10 +777,6 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                    });
                 //scope.setSearchAll('host');
                 scope.$emit('LoadPlays', data.related.job_events);
-                scope.$emit('GetCreatedByNames', data.related.created_by);
-                if (!scope.credential_name) {
-                    scope.$emit('GetCredentialNames', data);
-                }
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -1415,5 +1396,5 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
 JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices'
+    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels'
 ];

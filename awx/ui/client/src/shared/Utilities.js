@@ -252,15 +252,20 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 if ((!fieldErrors) && defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
-            } else if (typeof data === 'object' && Object.keys(data).length > 0) {
-                keys = Object.keys(data);
-                if (Array.isArray(data[keys[0]])) {
-                    msg = data[keys[0]][0];
+            } else if (typeof data === 'object' && data !== null){
+                if(Object.keys(data).length > 0) {
+                    keys = Object.keys(data);
+                    if (Array.isArray(data[keys[0]])) {
+                        msg = data[keys[0]][0];
+                    }
+                    else {
+                        msg = data[keys[0]];
+                    }
+                    Alert(defaultMsg.hdr, msg);
                 }
                 else {
-                    msg = data[keys[0]];
+                    Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
-                Alert(defaultMsg.hdr, msg);
             } else {
                 Alert(defaultMsg.hdr, defaultMsg.msg);
             }

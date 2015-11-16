@@ -176,7 +176,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 
 export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
-    OrganizationList, Wait, Stream, permissionsChoices, permissionsLabel, permissionsSearchSelect) {
+    OrganizationList, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
 
@@ -192,24 +192,23 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.permission_search_select = [];
 
     // return a promise from the options request with the permission type choices (including adhoc) as a param
-    var permissionsChoice = permissionsChoices({
+    var permissionsChoice = fieldChoices({
         scope: $scope,
-        url: 'api/v1/' + base + '/' + id + '/permissions/'
+        url: 'api/v1/' + base + '/' + id + '/permissions/',
+        field: 'permission_type'
     });
 
     // manipulate the choices from the options request to be set on
     // scope and be usable by the list form
     permissionsChoice.then(function (choices) {
         choices =
-            permissionsLabel({
+            fieldLabels({
                 choices: choices
             });
         _.map(choices, function(n, key) {
             $scope.permission_label[key] = n;
         });
     });
-
-    $scope.team_id = id;
 
     // manipulate the choices from the options request to be usable
     // by the search option for permission_type, you can't inject the
@@ -221,7 +220,10 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
             });
         generator.inject(form, { mode: 'edit', related: true, scope: $scope });
         generator.reset();
+        $scope.$emit('loadTeam');
     });
+
+    $scope.team_id = id;
 
     $scope.PermissionAddAllowed = false;
 
@@ -253,59 +255,65 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         }
     });
 
-    // Retrieve detail record and prepopulate the form
-    Wait('start');
-    Rest.setUrl(defaultUrl + ':id/');
-    Rest.get({
-        params: {
-            id: id
-        }
-    })
-        .success(function (data) {
-            var fld, related, set;
-            $scope.team_name = data.name;
-            for (fld in form.fields) {
-                if (data[fld]) {
-                    $scope[fld] = data[fld];
-                    master[fld] = $scope[fld];
-                }
+    // Retrieve each related set and any lookups
+    if ($scope.loadTeamRemove) {
+        $scope.loadTeamRemove();
+    }
+    $scope.loadTeamRemove = $scope.$on('loadTeam', function () {
+        // Retrieve detail record and prepopulate the form
+        Wait('start');
+        Rest.setUrl(defaultUrl + ':id/');
+        Rest.get({
+            params: {
+                id: id
             }
-            related = data.related;
-            for (set in form.related) {
-                if (related[set]) {
-                    relatedSets[set] = {
-                        url: related[set],
-                        iterator: form.related[set].iterator
-                    };
-                }
-            }
-            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-            RelatedSearchInit({
-                scope: $scope,
-                form: form,
-                relatedSets: relatedSets
-            });
-            RelatedPaginateInit({
-                scope: $scope,
-                relatedSets: relatedSets
-            });
-
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: data.organization,
-                list: OrganizationList,
-                field: 'organization',
-                input_type: 'radio'
-            });
-
-            $scope.organization_url = data.related.organization;
-            $scope.$emit('teamLoaded');
         })
-        .error(function (data, status) {
-            ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
-                '. GET status: ' + status });
-        });
+            .success(function (data) {
+                var fld, related, set;
+                $scope.team_name = data.name;
+                for (fld in form.fields) {
+                    if (data[fld]) {
+                        $scope[fld] = data[fld];
+                        master[fld] = $scope[fld];
+                    }
+                }
+                related = data.related;
+                for (set in form.related) {
+                    if (related[set]) {
+                        relatedSets[set] = {
+                            url: related[set],
+                            iterator: form.related[set].iterator
+                        };
+                    }
+                }
+                // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+                RelatedSearchInit({
+                    scope: $scope,
+                    form: form,
+                    relatedSets: relatedSets
+                });
+                RelatedPaginateInit({
+                    scope: $scope,
+                    relatedSets: relatedSets
+                });
+
+                LookUpInit({
+                    scope: $scope,
+                    form: form,
+                    current_item: data.organization,
+                    list: OrganizationList,
+                    field: 'organization',
+                    input_type: 'radio'
+                });
+
+                $scope.organization_url = data.related.organization;
+                $scope.$emit('teamLoaded');
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
+                    '. GET status: ' + status });
+            });
+    });
 
     $scope.getPermissionText = function () {
         if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
@@ -431,5 +439,5 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'permissionsChoices', 'permissionsLabel', 'permissionsSearchSelect'
+    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];

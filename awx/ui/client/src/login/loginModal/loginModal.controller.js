@@ -110,17 +110,11 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         setLoginFocus();
     });
 
-
-    if ($AnsibleConfig.custom_logo) {
-        scope.customLogo = "custom_console_logo.png"
-        scope.customLogoPresent = true;
-    } else {
-        scope.customLogo = "login_modal_logo.png";
-        scope.customLogoPresent = false;
-    }
-
-    scope.customLoginInfo = $AnsibleConfig.custom_login_info;
-    scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
+    $rootScope.loginConfig.promise.then(function () {
+        scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
+        scope.customLoginInfo = $AnsibleConfig.custom_login_info;
+        scope.customLoginInfoPresent = ($AnsibleConfig.customLoginInfo) ? true : false;
+    });
 
     // Reset the login form
     //scope.loginForm.login_username.$setPristine();
@@ -171,9 +165,12 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         Authorization.getUser()
             .success(function (data) {
                 Authorization.setUserInfo(data);
-                $rootScope.sessionTimer = Timer.init();
-                $rootScope.user_is_superuser = data.results[0].is_superuser;
-                scope.$emit('AuthorizationGetLicense');
+                Timer.init().then(function(timer){
+                    $rootScope.sessionTimer = timer;
+                    $rootScope.$emit('OpenSocket');
+                    $rootScope.user_is_superuser = data.results[0].is_superuser;
+                    scope.$emit('AuthorizationGetLicense');
+                });
             })
             .error(function (data, status) {
                 Authorization.logout();
@@ -200,7 +197,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                 function (data) {
                     var key;
                     Wait('stop');
-                    if (data.data.non_field_errors && data.data.non_field_errors.length === 0) {
+                    if (data && data.data && data.data.non_field_errors && data.data.non_field_errors.length === 0) {
                         // show field specific errors returned by the API
                         for (key in data.data) {
                             scope[key + 'Error'] = data.data[key][0];

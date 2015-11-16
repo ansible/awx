@@ -17,13 +17,13 @@ from social.exceptions import SocialAuthBaseException
 from social.utils import social_logger
 from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
 
+# Ansible Tower
 from awx.main.models import AuthToken
+
 
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
     def process_request(self, request):
-        request.META['SERVER_PORT'] = 80 # FIXME
-
         token_key = request.COOKIES.get('token', '')
         token_key = urllib.quote(urllib.unquote(token_key).strip('"'))
 
@@ -63,7 +63,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
         if strategy is None or self.raise_exception(request, exception):
             return
 
-        if isinstance(exception, SocialAuthBaseException):
+        if isinstance(exception, SocialAuthBaseException) or request.path.startswith('/sso/'):
             backend = getattr(request, 'backend', None)
             backend_name = getattr(backend, 'name', 'unknown-backend')
             full_backend_name = backend_name

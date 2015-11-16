@@ -6,6 +6,8 @@
 
 import restServicesFactory from './restServices.factory';
 import interceptors from './interceptors.service';
+import fieldChoices from './get-choices.factory';
+import fieldLabels from './get-labels.factory';
 
 export default
     angular.module('RestServices', [])
@@ -13,4 +15,6 @@ export default
             $httpProvider.interceptors.push('RestInterceptor');
         }])
         .factory('Rest', restServicesFactory)
-        .service('RestInterceptor', interceptors);
+        .service('RestInterceptor', interceptors)
+        .factory('fieldChoices', fieldChoices)
+        .factory('fieldLabels', fieldLabels);

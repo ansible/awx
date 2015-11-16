@@ -60,7 +60,8 @@ export default
             logout: function () {
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
-                var scope = angular.element(document.getElementById('main-view')).scope();
+
+                var x, scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 //$rootScope.$destroy();
 
@@ -78,6 +79,9 @@ export default
                     $cookieStore.remove('lastPath');
                     $rootScope.lastPath = '/home';
                 }
+                x = Store('sessionTime');
+                x[$rootScope.current_user.id].loggedIn = false;
+                Store('sessionTime', x);
 
                 $rootScope.lastUser = $cookieStore.get('current_user').id;
                 $cookieStore.remove('token_expires');
@@ -94,7 +98,7 @@ export default
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
-                $rootScope.sessionTimer.expireSession();
+                $rootScope.sessionTimer.clearTimers();
             },
 
             getLicense: function () {
@@ -112,6 +116,7 @@ export default
                 var license = data.license_info;
                 license.analytics_status = data.analytics_status;
                 license.version = data.version;
+                license.ansible_version = data.ansible_version; 
                 license.tested = false;
                 Store('license', license);
                 $rootScope.features = Store('license').features;
@@ -149,7 +154,6 @@ export default
                 // store the response values in $rootScope so we can get to them later
                 $rootScope.current_user = response.results[0];
                 $cookieStore.put('current_user', response.results[0]); //keep in session cookie in the event of browser refresh
-                $rootScope.$emit('OpenSocket');
             },
 
             restoreUserInfo: function () {

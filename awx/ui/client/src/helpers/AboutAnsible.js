@@ -75,7 +75,7 @@ export default
                             scope: scope,
                             // buttons: [],
                             width: 710,
-                            height: 400,
+                            height: 450,
                             minWidth: 300,
                             resizable: false,
                             callback: 'DialogReady',

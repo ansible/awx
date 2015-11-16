@@ -23,22 +23,21 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'transitionTo', 'CreateDialog', 'Authorization',
-        'Store', '$interval',
+        'Store', '$interval', '$location', '$q',
     function ($rootScope, $cookieStore, transitionTo, CreateDialog, Authorization,
-        Store, $interval) {
+        Store, $interval, $location, $q) {
         return {
 
             sessionTime: null,
             timeout: null,
 
             getSessionTime: function () {
-                if(Store('sessionTime_'+$rootScope.current_user.id)){
-                    return Store('sessionTime_'+$rootScope.current_user.id);
+                if(Store('sessionTime')){
+                    return Store('sessionTime')[$rootScope.current_user.id].time;
                 }
                 else {
-                    return 0; 
+                    return 0;
                 }
-
             },
 
             isExpired: function (increase) {
@@ -83,14 +82,24 @@ export default
                 this.sessionTime = 0;
                 this.clearTimers();
                 $cookieStore.put('sessionExpired', true);
-                transitionTo('signOut');
             },
 
             moveForward: function () {
-                var tm, t;
+                var tm, t, x, y;
                 tm = ($AnsibleConfig.session_timeout) ? $AnsibleConfig.session_timeout : 1800;
                 t = new Date().getTime() + (tm * 1000);
-                Store('sessionTime_'+$rootScope.current_user.id, t);
+                x = {
+                        time: t,
+                        loggedIn: true
+                };
+                if(Store('sessionTime')){
+                    y = Store('sessionTime');
+                }
+                else {
+                    y = {};
+                }
+                y[$rootScope.current_user.id] = x;
+                Store('sessionTime' , y);
                 $rootScope.sessionExpired = false;
                 $cookieStore.put('sessionExpired', false);
                 this.startTimers();
@@ -148,6 +157,14 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                         that.expireSession('idle');
+                        $location.url('/login');
+                    }
+                    if(Store('sessionTime') &&
+                        Store('sessionTime')[$rootScope.current_user.id] &&
+                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                            that.expireSession();
+                            $location.url('/login');
+
                     }
 
                 }, 1000);
@@ -156,11 +173,15 @@ export default
 
             clearTimers: function(){
                 $interval.cancel($rootScope.expireTimer);
+                delete $rootScope.expireTimer;
             },
 
             init: function () {
+                var deferred = $q.defer();
                 this.moveForward();
-                return this;
+                deferred.resolve(this);
+                return deferred.promise;
+
             }
         };
     }
