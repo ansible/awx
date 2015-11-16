@@ -630,6 +630,12 @@ class UserSerializer(BaseSerializer):
                     new_password = None
             except AttributeError:
                 pass
+        if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
+            new_password = None
         if new_password:
             obj.set_password(new_password)
         if not obj.password:
