@@ -66,9 +66,7 @@ class ActivityStreamMiddleware(threading.local):
                 if user.exists():
                     user = user[0]
                     instance.actor = user
-                else:
-                    instance.actor = AnonymousUser
-                instance.save(update_fields=['actor'])
+                    instance.save(update_fields=['actor'])
             else:
                 if instance.id not in self.instance_ids:
                     self.instance_ids.append(instance.id)
