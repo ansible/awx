@@ -20,13 +20,13 @@ export default ['$scope', '$filter',
 
                 if (job.status === 'successful') {
                     data.value = 1;
-                    data.smartStatus = "<i class=\"fa DashboardList-status smartStatus-tooltip--success icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--success icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
                 } else if (isFailureState(job.status)) {
                     data.value = -1;
-                    data.smartStatus = "<i class=\"fa DashboardList-status smartStatus-tooltip--failed icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--failed icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
                 } else {
                     data.value = 0;
-                    data.smartStatus = "<i class=\"fa DashboardList-status smartStatus-tooltip--running icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--running icon-job-successful\"></i>  " + job.status.charAt(0).toUpperCase() + job.status.slice(1);
                 }
 
                 data.jobId = job.id;

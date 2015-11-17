@@ -33,6 +33,7 @@ export default
                     status: job.status,
                     name: job.name,
                     id: job.id,
+                    templateId: job.job_template,
                     time: $filter('longDate')(job.finished)
                 }; });
 
@@ -43,8 +44,8 @@ export default
                 return (status === "successful");
             };
 
-            scope.editJob = function (jobId) {
-                $location.path( '/jobs/' + jobId + "/stdout");
+            scope.editJobTemplate = function (jobTemplateId) {
+                $location.path( '/job_templates/' + jobTemplateId);
             };
         }
 }];

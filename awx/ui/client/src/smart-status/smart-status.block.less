@@ -1,56 +1,72 @@
-/** @define smartStatus */
+/** @define SmartStatus */
 @import "awx/ui/client/legacy-styles/animations.less";
 
-.smartStatus-container{
+.SmartStatus-container{
     max-width: 165px;
     display:flex;
 }
 
-.smartStatus-iconContainer{
+.SmartStatus-iconContainer{
     padding: 2px;
     flex: 0 1 auto;
 }
 
-.smartStatus--success{
+.SmartStatus--success{
     color: #5bbdbf;
     margin-bottom: 20px;
     padding: 0px;
 }
 
-.smartStatus--failed{
+.SmartStatus--failed{
     color: #ff5850;
     margin-top: 20px;
     padding: 0px;
 }
 
-.smartStatus--running{
-    color: #5bbdbf;
+.SmartStatus--running{
+    color: #b7b7b7;
     margin-top: 10px;
     padding: 0px;
     .pulsate();
 }
 
-.smartStatus-tooltip{
+.SmartStatus-tooltip{
     text-align: left;
     max-width: 250px;
     padding: 10px;
 }
 
-.smartStatus-tooltip--success{
+.SmartStatus-tooltip--success{
     color: #5bbdbf;
     padding-left: 5px;
     padding-right: 0px;
+    text-shadow:
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
+
 }
 
-.smartStatus-tooltip--failed{
+.SmartStatus-tooltip--failed{
     color: #ff5850;
     padding-left: 5px;
     padding-right: 0px;
+    text-shadow:
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
 }
 
-.smartStatus-tooltip--running{
-    color: #5bbdbf;
+.SmartStatus-tooltip--running{
+    color: #b7b7b7;
     padding-left: 5px;
     padding-right: 0px;
+    text-shadow:
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
     .pulsate();
 }
