@@ -281,10 +281,12 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 $scope.organization_url = data.related.organization;
                 $scope.organization_name = data.summary_fields.organization.name;
                 master.organization_name = data.summary_fields.organization.name;
+                Wait('stop');
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
                     '. GET status: ' + status });
+                Wait('stop');
             });
     });
 
