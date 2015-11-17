@@ -34,34 +34,45 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
 
                 scope.$watch('data', function(value) {
                     if (value) {
-                        createGraph(scope.period, scope.jobType, value);
+                        createGraph(scope.period, scope.jobType, value, scope.status);
                     }
                 }, true);
 
-                function recreateGraph(period, jobType) {
-                    graphDataService.get(period, jobType)
+                function recreateGraph(period, jobType, status) {
+                    graphDataService.get(period, jobType, status)
                         .then(function(data) {
                             scope.data = data;
                             scope.period = period;
                             scope.jobType = jobType;
+                            scope.status = status;
                         });
-
                 }
 
-                function createGraph(period, jobtype, data){
+                scope.$on('jobStatusChange', function(event, status){
+                    recreateGraph(scope.period, scope.jobType, status);
+                });
+
+                function createGraph(period, jobtype, data, status){
                     scope.period = period;
                     scope.jobType = jobtype;
+                    scope.status = status;
 
                     var timeFormat, graphData = [
-                        {   "color": "#60D66F",
-                            "key": "Successful",
+                        {   "color": "#5bbdbf",
+                            "key": "SUCCESSFUL",
                             "values": data.jobs.successful
                         },
-                        {   "key" : "Failed" ,
+                        {   "key" : "FAILED" ,
                             "color" : "#ff5850",
                             "values": data.jobs.failed
                         }
                     ];
+
+                    graphData = _.reject(graphData, function(num){
+                        if(status!== undefined && status === num.key.toLowerCase()){
+                            return num;
+                        }
+                    });
 
                     if(period==="day") {
                         timeFormat="%H:%M";
@@ -82,20 +93,22 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     job_status_chart
                     .x(function(d,i) { return i; })
                     .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-                    .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                    .showLegend(false)       //Show the legend, allowing users to turn on/off line series.
                     .showYAxis(true)        //Show the y-axis
                     .showXAxis(true);       //Show the x-axis
 
+                    job_status_chart.interactiveLayer.tooltip.fixedTop(-10); //distance from the top of the chart to tooltip
+                    job_status_chart.interactiveLayer.tooltip.distance(-1); //distance from interactive line to tooltip
 
                     job_status_chart.xAxis
-                    .axisLabel("Time")//.showMaxMin(true)
+                    .axisLabel("TIME")//.showMaxMin(true)
                     .tickFormat(function(d) {
                         var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
                         return dx ? d3.time.format(timeFormat)(new Date(Number(dx+'000'))) : '';
                     });
 
                     job_status_chart.yAxis     //Chart y-axis settings
-                    .axisLabel('Jobs')
+                    .axisLabel('JOBS')
                     .tickFormat(d3.format('.f'));
 
                     d3.select(element.find('svg')[0])
@@ -109,27 +122,25 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     });
 
                     // when the Period drop down filter is used, create a new graph based on the
-                    d3.selectAll(element.find(".n"))
-                    .on("click", function() {
+                    $('.n').on("click", function(){
                         period = this.getAttribute("id");
-                        $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
-
+                        $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        scope.$parent.isFailed = true;
+                        scope.$parent.isSuccessful = true;
                         recreateGraph(period, job_type);
                     });
 
                     //On click, update with new data
-                    d3.selectAll(element.find(".m"))
-                    .on("click", function() {
+                    $('.m').on("click", function(){
                         job_type = this.getAttribute("id");
-                        $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
-
+                        $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        scope.$parent.isFailed = true;
+                        scope.$parent.isSuccessful = true;
                         recreateGraph(period, job_type);
                     });
-
-                    job_status_chart.legend.margin({top: 1, right:0, left:24, bottom: 0});
-
                     adjustGraphSize(job_status_chart, element);
-
                 }
 
                 function onResize() {

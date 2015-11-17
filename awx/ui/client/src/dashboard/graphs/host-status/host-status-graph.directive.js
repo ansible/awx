@@ -24,7 +24,8 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
 
             scope.$watch(attr.data, function(data) {
                 if (data && data.hosts) {
-                    createGraph(data);
+                    scope.data = data;
+                    createGraph();
                 }
             });
 
@@ -52,31 +53,52 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                 $(".DashboardGraphs-graph--hostStatusGraph").removeResize(adjustHostGraphSize);
             });
 
-            function createGraph(data) {
-                if(data.hosts.total+data.hosts.failed>0){
-                    data = [
-                        {   "label": "Successful",
-                            "color": "#60D66F",
-                            "value" : data.hosts.total - data.hosts.failed
-                        } ,
-                        {   "label": "Failed",
+            function createGraph() {
+                var data, colors, color;
+                if(scope.data.hosts.total+scope.data.hosts.failed>0){
+                    if(scope.status === "successful"){
+                        data = [
+                        {   "label": "SUCCESSFUL",
+                            "color": "#5bbdbf",
+                            "value" : scope.data.hosts.total - scope.data.hosts.failed
+                        }];
+                        colors = ['#5bbdbf'];
+                    }
+                    else if (scope.status === "failed"){
+                        data = [{   "label": "FAILED",
                             "color" : "#ff5850",
-                            "value" : data.hosts.failed
-                        }
-                    ];
+                            "value" : scope.data.hosts.failed
+                        }];
+                        colors = ['#ff5850'];
+                    }
+                    else {
+                        data = [
+                            {   "label": "SUCCESSFUL",
+                                "color": "#5bbdbf",
+                                "value" : scope.data.hosts.total - scope.data.hosts.failed
+                            } ,
+                            {   "label": "FAILED",
+                                "color" : "#ff5850",
+                                "value" : scope.data.hosts.failed
+                            }
+                        ];
+                        colors = ['#5bbdbf', '#ff5850'];
+                    }
 
                     host_pie_chart = nv.models.pieChart()
                         .margin({bottom: 15})
-                        .x(function(d) { return d.label; })
+                        .x(function(d) {
+                            return d.label +': '+ Math.round((d.value/scope.data.hosts.total)*100) + "%";
+                        })
                         .y(function(d) { return d.value; })
                         .showLabels(true)
+                        .showLegend(false)
                         .growOnHover(false)
                         .labelThreshold(0.01)
                         .tooltipContent(function(x, y) {
-                            return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
+                            return '<p>'+x+'</p>'+ '<p>' +  Math.floor(y.replace(',','')) + ' HOSTS ' +  '</p>';
                         })
-                        .labelType("percent")
-                        .color(['#60D66F', '#ff5850']);
+                        .color(colors);
 
                     d3.select(element.find('svg')[0])
                         .datum(data)
@@ -86,6 +108,33 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                             "font-family": 'Open Sans',
                             "font-style": "normal",
                             "font-weight":400,
+                            "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                        });
+                    if(scope.status === "failed"){
+                        color = "#ff5850";
+                    }
+                    else{
+                        color = "#5bbdbf";
+                    }
+
+                    d3.select(element.find(".nv-label text")[0])
+                        .attr("class", "DashboardGraphs-hostStatusLabel--successful")
+                        .style({
+                            "font-family": 'Open Sans',
+                            "text-anchor": "start",
+                            "font-size": "16px",
+                            "text-transform" : "uppercase",
+                            "fill" : color,
+                            "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                        });
+                    d3.select(element.find(".nv-label text")[1])
+                        .attr("class", "DashboardGraphs-hostStatusLabel--failed")
+                        .style({
+                            "font-family": 'Open Sans',
+                            "text-anchor" : "end !imporant",
+                            "font-size": "16px",
+                            "text-transform" : "uppercase",
+                            "fill" : "#ff5850",
                             "src": "url(/static/assets/OpenSans-Regular.ttf)"
                         });
 

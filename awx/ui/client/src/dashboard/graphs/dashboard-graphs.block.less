@@ -3,54 +3,76 @@
 @import "../../shared/branding/colors.less";
 
 .DashboardGraphs {
-    margin-top: 15px;
-    border: solid 1px #a9a9a9;
-    border-radius: 4px;
+    margin-top: 20px;
+    border: solid 1px #e1e1e1;
+    border-radius: 5px;
+    background-color: #ffffff;
+    padding-top:20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-.DashboardGraphs-tabSection {
-    flex: 1;
+.DashboardGraphs-headerSection{
     display: flex;
+    // align-items: baseline;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .DashboardGraphs-tab {
-    flex: 1;
-    padding: 10px;
-    border-right: solid 1px @disabled-item-border;
-    border-bottom: solid 1px @disabled-item-border;
+    color: #b7b7b7;
+    background-color: #ffffff;
+    font-size: 12px;
+    border: 1px solid #e1e1e1;
+    height: 30px;
+    border-radius: 5px;
+    margin-right: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
     text-align: center;
-    font-size: 20px;
-    color: @disabled-item-text;
-    background-color: @disabled-item-background;
+    white-space: nowrap;
 }
 
 .DashboardGraphs-tab--firstTab {
-    border-top-left-radius: 4px;
+    width: 90px;
 }
 
 .DashboardGraphs-tab--lastTab {
-    border-top-right-radius: 4px;
-    border-right: 0;
+    width:100px;
+    margin-right: auto;
 }
 
 .DashboardGraphs-tab:hover {
-    color: #000;
+    color: #b7b7b7;
+    background-color: #f6f6f6;
     cursor: pointer;
 }
 
-.DashboardGraphs-tab.is-selected {
-    background-color: @enabled-item-background;
-    color: @enabled-item-text;
-    border-bottom: 0;
+.DashboardGraphs-tab:active {
+    color: #b7b7b7;
+    background-color: #d7d7d7;
+    cursor: pointer;
 }
 
-.DashboardGraphs-tab.is-selected:hover {
-    cursor: default;
+.DashboardGraphs-tab:focus {
+    color: #b7b7b7;
+}
+
+.DashboardGraphs-tab.is-selected {
+    color: #ffffff;
+    background-color: #d7d7d7;
 }
 
 .DashboardGraphs-graphSection {
     display: block;
     flex: 1;
+    padding-top:20px;
 }
 
 .DashboardGraphs-graphContainer {
@@ -63,25 +85,72 @@
     display: block;
 }
 
+.DashboardGraphs-filterLabelIcon{
+    color: #d7d7d7;
+    font-size: 14px;
+    padding-top: 5px;
+}
+
+.DashboardGraphs-filterLabel{
+    color: #d7d7d7;
+    font-size: 12px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    text-transform: uppercase;
+    padding-top:5px;
+}
+
 .DashboardGraphs-graph {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    margin-bottom: 19px;
-    padding: 20px;
+}
+
+.nv-axislabel {
+  font-weight: bold !important;
+  fill: #b7b7b7 !important;
+  font-family: 'Open Sans' !important;
+}
+
+.nv-axis text {
+   fill: #b7b7b7 !important; //rgb(169, 178, 189);
+   font-family: 'Open Sans' !important;
 }
 
 .DashboardGraphs-graphToolbar {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 6px;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
-.DashboardGraphs-filterDropdown {
+.DashboardGraphs-filterDropdownText {
     flex: initial;
+    color: #b7b7b7;
+    background-color: #ffffff;
     font-size: 12px;
-    padding-right: 15px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-right: 10px;
+    padding-left: 10px;
+    height: 20px;
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.DashboardGraphs-filterDropdownText:hover {
+    color: #b7b7b7;
+    background-color: #f6f6f6;
+}
+
+.DashboardGraphs-filterIcon{
+    color: #d7d7d7;
+    font-size: 14px;
+    width: 20px;
+    padding-left:10px;
+    padding-right: 10px;
 }
 
 .DashboardGraphs-filterDropdownItems {
@@ -89,6 +158,15 @@
     left: auto;
     top: auto;
     box-shadow: none;
+    text-transform: uppercase;
+}
+
+.DashboardGraphs-periodDropdown{
+    padding-top:5px;
+}
+
+.DashboardGraphs-jobTypeDropdown{
+    padding-top:5px;
 }
 
 .DashboardGraphs-filterDropdownItems--period {
@@ -97,4 +175,42 @@
 
 .DashboardGraphs-filterDropdownItems--jobType {
     margin-left: -84px;
+}
+
+.DashboardGraphs-statusFilters{
+    padding-top: 5px;
+
+}
+
+.DashboardGraphs-statusFilter{
+    color: #b7b7b7;
+    background-color: #ffffff;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding-right: 10px;
+    padding-left: 10px;
+    height: 20px;
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin-left: 10px;
+    line-height:1;
+}
+
+.DashboardGraphs-statusFilter:hover{
+    cursor: pointer;
+    background-color: #f6f6f6;
+}
+
+.DashboardGraphs-statusFilter.is-selected {
+    color: #ffffff;
+    background-color: #d7d7d7;
+}
+
+.DashboardGraphs-hostStatusLabel--successful{
+    text-anchor: start !important;
+}
+
+.DashboardGraphs-hostStatusLabel--failed{
+    text-anchor: end !important;
 }
