@@ -23,11 +23,11 @@ export default
     'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper', 'LicenseFormDefinition'])
 
 
-    .factory('CheckLicense', ['$rootScope', '$compile', 'CreateDialog', 'Store',
+    .factory('CheckLicense', ['$q', '$rootScope', '$compile', 'CreateDialog', 'Store',
     'LicenseUpdateForm', 'GenerateForm', 'TextareaResize', 'ToJSON', 'GetBasePath',
     'Rest', 'ProcessErrors', 'Alert', 'IsAdmin', '$location', 'pendoService',
     'Authorization', 'Wait',
-    function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateForm,
+    function($q, $rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateForm,
         TextareaResize, ToJSON, GetBasePath, Rest, ProcessErrors, Alert, IsAdmin, $location,
         pendoService, Authorization, Wait) {
         return {
@@ -201,27 +201,49 @@ export default
 
             test: function() {
                 var license = Store('license'),
-                    notify = this.shouldNotify(license),
                     self = this,
                     scope;
 
-                self.scope = $rootScope.$new();
-                scope = self.scope;
+                var getLicense = function() {
+                    var deferred = $q.defer();
 
-                if (license && typeof license === 'object' && Object.keys(license).length > 0) {
-                    if (license.tested) {
-                        return true;
+                    if (license === null) {
+                        Rest.setUrl(GetBasePath('config'));
+                        return Rest.get()
+                            .then(function (data) {
+                                license = data.data.license_info;
+                                deferred.resolve();
+                                return deferred.promise;
+                            }, function () {
+                                deferred.resolve();
+                                return deferred.promise;
+                            });
+                    } else {
+                        deferred.resolve(license);
+                        return deferred.promise;
                     }
-                    license.tested = true;
-                    Store('license',license);  //update with tested flag
                 }
 
-                // Don't do anything when the license is valid
-                if (!notify) {
-                    return true; // if the license is valid it would exit 'test' here, otherwise it moves on to making the modal for the license
-                }
+                var promise = getLicense();
+                promise.then(function() {
+                    self.scope = $rootScope.$new();
+                    scope = self.scope;
 
-                $location.path('/license');
+                    if (license && typeof license === 'object' && Object.keys(license).length > 0) {
+                        if (license.tested) {
+                            return true;
+                        }
+                        license.tested = true;
+                        Store('license',license);  //update with tested flag
+                    }
+
+                    // Don't do anything when the license is valid
+                    if (!self.shouldNotify(license)) {
+                        return true; // if the license is valid it would exit 'test' here, otherwise it moves on to making the modal for the license
+                    }
+
+                    $location.path('/license');
+                });
             },
 
             GetLicense: function(callback, inScope) {
