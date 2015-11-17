@@ -2,7 +2,8 @@
 export default
     [   "PlaybookRun",
         'templateUrl',
-        function JobTemplatesList(PlaybookRun, templateUrl) {
+        '$location',
+        function JobTemplatesList(PlaybookRun, templateUrl, $location) {
             return {
                 restrict: 'E',
                 link: link,
@@ -43,6 +44,10 @@ export default
 
                 scope.launchJobTemplate = function(jobTemplateId){
                     PlaybookRun({ scope: scope, id: jobTemplateId });
+                };
+
+                scope.editJobTemplate = function (jobTemplateId) {
+                    $location.path( '/job_templates/' + jobTemplateId);
                 };
             }
 }];

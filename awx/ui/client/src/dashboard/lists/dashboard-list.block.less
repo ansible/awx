@@ -1,0 +1,184 @@
+/** @define DashboardList */
+
+.DashboardList {
+    flex: 1;
+}
+.DashboardList--noJobTemplates {
+    color: #8d8d8d;
+}
+
+.DashboardList-header {
+    display: flex;
+    border-bottom: 1px solid #e1e1e1;
+    height: 50px;
+}
+
+.DashboardList-headerText {
+    flex: 1;
+    margin: 0px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #b7b7b7;
+    height: 50px;
+    line-height: 50px;
+    white-space: nowrap;
+    padding-left: 20px;
+}
+.DashboardList-viewAll {
+    color: #b7b7b7;
+    background-color: #ffffff;
+    font-size: 12px;
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    margin-right: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    transition: background-color 0.2s;
+}
+
+.DashboardList-viewAll:hover {
+    color: #b7b7b7;
+    background-color: #f6f6f6;
+}
+
+.DashboardList-viewAll:focus {
+    color: #b7b7b7;
+}
+
+.DashboardList-container {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+}
+
+.DashboardList-table{
+    width: 100%;
+    table-layout: fixed;
+}
+
+.DashboardList-tableHeader{
+    height: 30px;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+    color: #ffffff;
+    background-color: #d7d7d7;
+}
+
+.DashboardList-tableHeader--name{
+    border-top-left-radius: 5px;
+    padding-left: 15px;
+}
+
+.DashboardList-tableHeader--activity{
+    width: 205px;
+    padding-left:20px
+}
+
+.DashboardList-tableHeader--time{
+    width: 190px;
+    padding-left:20px;
+    padding-right: 15px;
+    border-top-right-radius: 5px;
+    text-align: right;
+}
+
+.DashboardList-tableHeader--actions{
+    border-top-right-radius: 5px;
+    width: 90px;
+    padding-right: 15px;
+    text-align: right;
+}
+
+.DashboardList-tableRow{
+    height: 50px;
+    font-size: 14px;
+    color: #161b1f;
+}
+
+.DashboardList-tableRow--evenRow{
+    background-color: #f6f6f6;
+}
+
+.DashboardList-status{
+    padding-right: 5px;
+}
+
+.DashboardList-status--success{
+    color: #5bbdbf;
+}
+
+.DashboardList-status--failed{
+    color: #ff5850;
+}
+
+.DashboardList-nameCell {
+    padding-left: 15px;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.DashboardList-nameContainer {
+    color: #1678c4;
+}
+
+.DashboardList-activityCell{
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.DashboardList-timeCell {
+    white-space: nowrap;
+    padding-right: 15px;
+    padding-left: 20px;
+    text-align: right;
+}
+
+.DashboardList-nameContainer:hover {
+    color: #5ca6db;
+    cursor: pointer;
+}
+
+.DashboardList-actionButtonCell{
+    padding-top:10px;
+    padding-right: 15px;
+    display:flex;
+    justify-content: flex-end;
+}
+
+.DashboardList-actionButton{
+    font-size: 16px;
+    height: 30px;
+    width: 30px;
+    color: #b7b7b7;
+    background-color: #ffffff;
+    border: 1px solid #e1e1e1;
+    border-radius: 50%;
+    transition: background-color 0.2s, border-color 0.2s;;
+}
+
+.DashboardList-actionButton:hover{
+    background-color: #1678c4;
+    color: #ffffff;
+    border: none;
+}
+
+.DashboardList-actionButton--launch {
+    margin-right: 10px;
+}
+
+.DashboardList-actionButton--edit:hover {
+    background-color: #1678c4;
+    color: #ffffff;
+    border: 1px solid #1678c4;
+}
+
+.DashboardList-noJobs{
+    color: #b7b7b7;
+}

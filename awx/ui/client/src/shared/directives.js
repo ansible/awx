@@ -494,9 +494,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
                 }
 
-                var template;
-                if (attrs.tooltipInnerClass) {
-                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + attrs.tooltipInnerClass + '"></div></div>';
+                var template, custom_class;
+                if (attrs.tooltipInnerClass || attrs.tooltipinnerclass) {
+                    custom_class = attrs.tooltipInnerClass || attrs.tooltipinnerclass;
+                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + custom_class + '"></div></div>';
                 } else {
                     template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
                 }
