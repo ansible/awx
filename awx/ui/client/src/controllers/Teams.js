@@ -228,34 +228,6 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.PermissionAddAllowed = false;
 
     // Retrieve each related set and any lookups
-    if ($scope.teamLoadedRemove) {
-        $scope.teamLoadedRemove();
-    }
-    $scope.teamLoadedRemove = $scope.$on('teamLoaded', function () {
-        CheckAccess({ scope: $scope });
-        if ($scope.organization_url) {
-            Rest.setUrl($scope.organization_url);
-            Rest.get()
-                .success(function (data) {
-                    $scope.organization_name = data.name;
-                    master.organization_name = data.name;
-                    Wait('stop');
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve organization: ' +
-                        $scope.orgnization_url + '. GET status: ' + status });
-                });
-            for (var set in relatedSets) {
-                $scope.search(relatedSets[set].iterator);
-            }
-        } else {
-            $scope.organization_name = "";
-            master.organization_name = "";
-            Wait('stop');
-        }
-    });
-
-    // Retrieve each related set and any lookups
     if ($scope.loadTeamRemove) {
         $scope.loadTeamRemove();
     }
@@ -307,7 +279,8 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 });
 
                 $scope.organization_url = data.related.organization;
-                $scope.$emit('teamLoaded');
+                $scope.organization_name = data.summary_fields.organization.name;
+                master.organization_name = data.summary_fields.organization.name;
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
