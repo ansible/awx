@@ -12,7 +12,6 @@
            <tr>
               <th class="DashboardList-tableHeader DashboardList-tableHeader--name" ng-click="sort('job_templates','name')">Title <i class="fa fa-sort-up"></i></th>
               <th class="DashboardList-tableHeader DashboardList-tableHeader--time">Time</th>
-              <th class="DashboardList-tableHeader DashboardList-tableHeader--actions">Actions</th>
            </tr>
            <tr class="DashboardList-tableRow"
                 ng-class-odd="'DashboardList-tableRow--oddRow'"
@@ -30,11 +29,6 @@
               </td>
               <td class="DashboardList-timeCell">
                   {{job.time}}
-              </td>
-              <td class="DashboardList-actionButtonCell">
-                  <button class="DashboardList-actionButton DashboardList-actionButton--edit" ng-click="editJobTemplate(job.templateId)">
-                    <i class="fa fa-pencil"></i>
-                  </button>
               </td>
            </tr>
         </table>
