@@ -98,7 +98,7 @@ python-saml==2.1.4
 python-swiftclient==2.2.0
 python-troveclient==1.0.9
 pytz==2014.10
-pywinrm==0.0.3
+pywinrm==0.1.1
 PyYAML==3.11
 pyzmq==14.5.0
 rackspace-auth-openstack==1.3
