@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Teams
@@ -286,6 +286,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 for (var relatedValues in relatedSets) {
                     $scope.search(relatedSets[relatedValues].iterator);
                 }
+                CheckAccess({ scope: $scope }); //Does the user have access to add/edit Permissions?
                 Wait('stop');
             })
             .error(function (data, status) {
