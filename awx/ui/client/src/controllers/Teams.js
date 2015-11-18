@@ -281,6 +281,11 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 $scope.organization_url = data.related.organization;
                 $scope.organization_name = data.summary_fields.organization.name;
                 master.organization_name = data.summary_fields.organization.name;
+
+                // get related object values and populate
+                for (var relatedValues in relatedSets) {
+                    $scope.search(relatedSets[relatedValues].iterator);
+                }
                 Wait('stop');
             })
             .error(function (data, status) {
