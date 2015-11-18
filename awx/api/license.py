@@ -31,4 +31,17 @@ def feature_enabled(name):
         return False
 
     # Return the correct feature flag.
-    return get_license()['features'].get(name, False)
+    return license['features'].get(name, False)
+
+def feature_exists(name):
+    """Return True if the requested feature is enabled, False otherwise.
+    If the feature does not exist, raise KeyError.
+    """
+    license = get_license()
+
+    # Sanity check: If there is no license, the feature is considered
+    # to be off.
+    if 'features' not in license:
+        return False
+
+    return name in license['features']

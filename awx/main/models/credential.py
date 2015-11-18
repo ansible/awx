@@ -46,7 +46,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         #('runas',  _('Runas')),
     ]
 
-    PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
+    PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data', 'ssh_key_unlock',
                        'become_password', 'vault_password')
 
     class Meta:
@@ -100,6 +100,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         verbose_name=_('Password'),
         help_text=_('Password for this credential (or "ASK" to prompt the '
                     'user for machine credentials).'),
+    )
+    security_token = models.CharField(
+        blank=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('Security Token'),
+        help_text=_('Security Token for this credential'),
     )
     project = models.CharField(
         blank=True,

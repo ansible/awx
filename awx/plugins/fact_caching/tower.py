@@ -35,7 +35,10 @@ import time
 import datetime
 from copy import deepcopy
 from ansible import constants as C
-from ansible.cache.base import BaseCacheModule
+try:
+    from ansible.cache.base import BaseCacheModule
+except:
+    from ansible.plugins.cache.base import BaseCacheModule
 
 try:
     import zmq
@@ -46,7 +49,6 @@ except ImportError:
 class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):
-
         # Basic in-memory caching for typical runs
         self._cache = {}
         self._cache_prev = {}
@@ -108,16 +110,15 @@ class CacheModule(BaseCacheModule):
         module = self.identify_new_module(key, value)
         # Assume ansible fact triggered the set if no new module found
         facts = self.filter_ansible_facts(value) if not module else dict({ module : value[module]})
-
-        self._cache_prev = deepcopy(self._cache)
         self._cache[key] = value
-
+        self._cache_prev = deepcopy(self._cache)
         packet = {
             'host': key,
             'inventory_id': os.environ['INVENTORY_ID'],
             'facts': facts,
             'date_key': self.date_key,
         }
+
         # Emit fact data to tower for processing
         self.socket.send_json(packet)
         self.socket.recv()

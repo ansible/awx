@@ -128,8 +128,8 @@ pywinrm,MIT,http://github.com/diyan/pywinrm/,pip
 pyzmq,LGPL+BSD,http://github.com/zeromq/pyzmq,pip
 rackspace-auth-openstack,Apache 2.0,https://github.com/rackerlabs/rackspace-auth-openstack,pip
 rackspace-novaclient,Apache 2.0,https://github.com/rackerlabs/rackspace-novaclient,pip
-rax-default-network-flags-python-novaclient-ext,Apache 2.0,https://github.com/rackerlabs/rax_default_network_flags_python_novaclient_ext,pip
-rax-scheduled-images-python-novaclient-ext,Apache 2.0,https://github.com/rackspace-titan/rax_scheduled_images_python_novaclient_ext,pip
+rax_default_network_flags_python_novaclient_ext,Apache 2.0,https://github.com/rackerlabs/rax_default_network_flags_python_novaclient_ext,pip
+rax_scheduled_images_python_novaclient_ext,Apache 2.0,https://github.com/rackspace-titan/rax_scheduled_images_python_novaclient_ext,pip
 redis,MIT,http://github.com/andymccurdy/redis-py,pip
 requests,Apache 2.0,http://python-requests.org,pip
 rrule,BSD,https://github.com/jakubroztocil/rrule.git,js

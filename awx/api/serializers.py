@@ -601,6 +601,8 @@ class UserSerializer(BaseSerializer):
         ret = super(UserSerializer, self).to_native(obj)
         ret.pop('password', None)
         ret.fields.pop('password', None)
+        if obj:
+            ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
 
     def get_validation_exclusions(self):
@@ -628,6 +630,12 @@ class UserSerializer(BaseSerializer):
                     new_password = None
             except AttributeError:
                 pass
+        if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
+            new_password = None
         if new_password:
             obj.set_password(new_password)
         if not obj.password:
@@ -1349,6 +1357,7 @@ class CredentialSerializer(BaseSerializer):
     # FIXME: may want to make some of these filtered based on user accessing
 
     password = serializers.CharField(required=False, default='')
+    security_token = serializers.CharField(required=False, default='')
     ssh_key_data = serializers.CharField(required=False, default='')
     ssh_key_unlock = serializers.CharField(required=False, default='')
     become_password = serializers.CharField(required=False, default='')
@@ -1357,7 +1366,7 @@ class CredentialSerializer(BaseSerializer):
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
-                  'password', 'project', 'ssh_key_data', 'ssh_key_unlock',
+                  'password', 'security_token', 'project', 'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 
@@ -2001,11 +2010,12 @@ class ScheduleSerializer(BaseSerializer):
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField('get_changes')
+    object_association = serializers.SerializerMethodField('get_object_association')
 
     class Meta:
         model = ActivityStream
         fields = ('*', '-name', '-description', '-created', '-modified',
-                  'timestamp', 'operation', 'changes', 'object1', 'object2')
+                  'timestamp', 'operation', 'changes', 'object1', 'object2', 'object_association')
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()
@@ -2029,6 +2039,13 @@ class ActivityStreamSerializer(BaseSerializer):
             # TODO: Log
             logger.warn("Error deserializing activity stream json changes")
         return {}
+
+    def get_object_association(self, obj):
+        try:
+            return obj.object_relationship_type.split(".")[-1].split("_")[1]
+        except:
+            pass
+        return ""
 
     def get_related(self, obj):
         rel = {}

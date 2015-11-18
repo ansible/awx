@@ -51,7 +51,7 @@ try:
     from azure import WindowsAzureError
     from azure.servicemanagement import ServiceManagementService
 except ImportError as e:
-    print "failed=True msg='`azure` library required for this script'"
+    print("failed=True msg='`azure` library required for this script'")
     sys.exit(1)
 
 
@@ -70,8 +70,8 @@ class AzureInventory(object):
         # Cache setting defaults.
         # These can be overridden in settings (see `read_settings`).
         cache_dir = os.path.expanduser('~')
-        self.cache_path_cache = '%s/.ansible-azure.cache' % cache_dir
-        self.cache_path_index = '%s/.ansible-azure.index' % cache_dir
+        self.cache_path_cache = os.path.join(cache_dir, '.ansible-azure.cache')
+        self.cache_path_index = os.path.join(cache_dir, '.ansible-azure.index')
         self.cache_max_age = 0
 
         # Read settings and parse CLI arguments
@@ -103,15 +103,13 @@ class AzureInventory(object):
                 # Add the `['_meta']['hostvars']` information.
                 hostvars = {}
                 if len(data) > 0:
-                    for host in set(reduce(lambda x, y: x + y,
-                                           [i for i in data.values()])):
-                        if host is not None:
-                            hostvars[host] = self.get_host(host, jsonify=False)
+                    for host in set([h for hosts in data.values() for h in hosts if h]):
+                        hostvars[host] = self.get_host(host, jsonify=False)
                 data['_meta'] = {'hostvars': hostvars}
 
                 # JSONify the data.
                 data_to_print = self.json_format_dict(data, pretty=True)
-        print data_to_print
+        print(data_to_print)
 
     def get_host(self, hostname, jsonify=True):
         """Return information about the given hostname, based on what
@@ -153,9 +151,9 @@ class AzureInventory(object):
 
         # Cache related
         if config.has_option('azure', 'cache_path'):
-            cache_path = os.path.expanduser(config.get('azure', 'cache_path'))
-            self.cache_path_cache = cache_path + '/ansible-azure.cache'
-            self.cache_path_index = cache_path + '/ansible-azure.index'
+            cache_path = os.path.expandvars(os.path.expanduser(config.get('azure', 'cache_path')))
+            self.cache_path_cache = os.path.join(cache_path, 'ansible-azure.cache')
+            self.cache_path_index = os.path.join(cache_path, 'ansible-azure.index')
         if config.has_option('azure', 'cache_max_age'):
             self.cache_max_age = config.getint('azure', 'cache_max_age')
 
@@ -197,9 +195,9 @@ class AzureInventory(object):
             for cloud_service in self.sms.list_hosted_services():
                 self.add_deployments(cloud_service)
         except WindowsAzureError as e:
-            print "Looks like Azure's API is down:"
-            print
-            print e
+            print("Looks like Azure's API is down:")
+            print("")
+            print(e)
             sys.exit(1)
 
     def add_deployments(self, cloud_service):
@@ -209,12 +207,10 @@ class AzureInventory(object):
         try:
             for deployment in self.sms.get_hosted_service_properties(cloud_service.service_name,embed_detail=True).deployments.deployments:
                 self.add_deployment(cloud_service, deployment)
-                #if deployment.deployment_slot == "Production":
-                #    self.add_deployment(cloud_service, deployment)
         except WindowsAzureError as e:
-            print "Looks like Azure's API is down:"
-            print
-            print e
+            print("Looks like Azure's API is down:")
+            print("")
+            print(e)
             sys.exit(1)
 
     def add_deployment(self, cloud_service, deployment):

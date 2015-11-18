@@ -7,3 +7,6 @@ from .run_fact_cache_receiver import * # noqa
 from .commands_monolithic import * # noqa
 from .cleanup_facts import * # noqa
 from .age_deleted import * # noqa
+from .remove_instance import * # noqa
+from .run_socketio_service import * # noqa
+

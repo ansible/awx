@@ -2,12 +2,18 @@ PYTHON = python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
+PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
-BROCCOLI ?= ./node_modules/.bin/broccoli
+TESTEM ?= ./node_modules/.bin/testem
+TESTEM_DEBUG_BROWSER ?= Chrome
+BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
+MOCHA_BIN ?= ./node_modules/.bin/mocha
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
-AW_REPO_URL ?= "http://releases.ansible.com/ansible-tower"
+GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+
+CLIENT_TEST_DIR ?= build_test
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -28,8 +34,10 @@ GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 BUILD = 0.git$(DATE)
 ifeq ($(OFFICIAL),yes)
     RELEASE ?= 1
+    AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
@@ -52,11 +60,9 @@ endif
 ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
-    PACKER_BUILD_OPTS=-var-file=vars-release.json
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
-    PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
@@ -98,14 +104,15 @@ MOCK_BIN ?= mock
 MOCK_CFG ?=
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-# Provide a fallback value for RPM_DIST
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+# Provide a fallback value for RPM_DIST
 ifeq ($(RPM_DIST),)
-RPM_DIST = .el6
+    RPM_DIST = .el6
 endif
 RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
+# Provide a fallback value for RPM_ARCH
 ifeq ($(RPM_ARCH),)
-RPM_ARCH = $(shell uname -m)
+    RPM_ARCH = $(shell uname -m)
 endif
 RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
@@ -147,7 +154,7 @@ endif
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
-	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
+	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
@@ -173,17 +180,20 @@ clean-grunt:
 
 # Remove UI build files
 clean-ui:
-	rm -rf awx/ui/static/dist
+	rm -rf DEBUG
+	rm -rf awx/ui/build_test
+	rm -rf awx/ui/static/
 	rm -rf awx/ui/dist
-	rm -rf awx/ui/static/docs
 
 # Remove packer artifacts
 clean-packer:
 	rm -rf packer_cache
 	rm -rf packaging/packer/packer_cache
 	rm -rf packaging/packer/output-virtualbox-iso/
+	rm -rf packaging/packer/output-vmware-iso
 	rm -f packaging/packer/ansible-tower-*.box
 	rm -rf packaging/packer/ansible-tower*-ova
+	rm -rf packaging/packer/ansible-tower*-vmx
 	rm -f Vagrantfile
 
 clean-bundle:
@@ -192,7 +202,10 @@ clean-bundle:
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
+	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
+	rm -rf tmp
+	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
@@ -295,6 +308,11 @@ server: server_noattach
 servercc: server_noattach
 	tmux -2 -CC attach-session -t tower
 
+# Alternate approach to tmux to run all development tasks specified in
+# Procfile.  https://youtu.be/OPMgaibszjk
+honcho:
+	honcho start
+
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	$(PYTHON) manage.py runserver
@@ -345,17 +363,6 @@ test_coverage:
 coverage_html:
 	coverage html
 
-ui_analysis_report: reports/ui_code node_modules Gruntfile.js
-	$(GRUNT) plato:report
-
-reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	rm -rf reports/ui_code
-	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
-
-# Run UI unit tests
-test_ui: node_modules minjs_ci Gruntfile.js
-	$(GRUNT) karma:ci
-
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
@@ -364,43 +371,89 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
 
-Gruntfile.js: packaging/grunt/Gruntfile.js
+# UI TASKS
+# --------------------------------------
+
+Gruntfile.js: packaging/node/Gruntfile.js
 	cp $< $@
 
-Brocfile.js: packaging/grunt/Brocfile.js
+Brocfile.js: packaging/node/Brocfile.js
 	cp $< $@
 
-bower.json: packaging/grunt/bower.json
+bower.json: packaging/node/bower.json
 	cp $< $@
 
-package.json: packaging/grunt/package.template
+package.json: packaging/node/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
-sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/dist -- --debug
+testem.yml: packaging/node/testem.yml
+	cp $< $@
 
 # Update local npm install
 node_modules: package.json
 	$(NPM_BIN) install
 	touch $@
 
-devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/dist -- --debug
+awx/ui/%: node_modules clean-ui Brocfile.js bower.json
+	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
 
-# Build minified JS/CSS.
-minjs: awx/ui/dist/tower.min.css.gz
-awx/ui/dist/tower.min.css.gz: node_modules Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs --no-sourcemaps
+# Concatenated, non-minified build; contains debug code and sourcemaps; does not include any tests
+devjs: awx/ui/static
 
-minjs_ci: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress --no-docs
+# Concatenated, minified, compressed (production) build with no sourcemaps or tests
+minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
+minjs: awx/ui/static
+
+# Performs build to awx/ui/build_test and runs node tests via mocha
+testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
+testjs: awx/ui/build_test node-tests
+
+# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci
+testjs_ci: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
+testjs_ci: awx/ui/static testem.yml browser-tests-ci
+
+# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci in Chrome
+testjs_debug: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
+testjs_debug: awx/ui/static testem.yml browser-tests-debug
+
+# Runs node tests via mocha without building
+node-tests:
+	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js') $(MOCHA_FLAGS)
+
+# Runs browser tests on PhantomJS.  Outputs the results in a consumable manner for Jenkins.
+browser-tests-ci:
+	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
+
+# Runs browser tests using settings from `testem.yml` you can pass in the browser you'd
+# like to run the tests on (Defaults to Chrome, other options Safari, Firefox, and PhantomJS).
+# If you want to run the tests in Node (which is the quickest, but also more difficult to debug),
+# make sure to run the testjs/node-tests targets
+browser-tests-debug:
+	PATH=./node_modules/.bin:$(PATH) $(TESTEM) --file testem.yml -l $(TESTEM_DEBUG_BROWSER)
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
 	$(GRUNT) $@
 
+# Generate UI code documentation
 ngdocs: devjs Gruntfile.js
 	$(GRUNT) $@
+
+# Launch watcher for build process
+sync_ui: node_modules Brocfile.js testem.yml
+	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
+
+# Build code complexity report for UI code
+ui_analysis_report: reports/ui_code node_modules Gruntfile.js
+	$(GRUNT) plato:report
+
+# Non-concatenated, non-minified build with no tests, no debug code, no sourcemaps for plato reports
+reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
+	rm -rf reports/ui_code
+	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
+
+# END UI TASKS
+# --------------------------------------
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
@@ -438,7 +491,7 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-dist/$(SDIST_TAR_FILE): awx/ui/dist/tower.min.css.gz
+dist/$(SDIST_TAR_FILE): minjs
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: dist/$(SDIST_TAR_FILE)
@@ -598,7 +651,7 @@ reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
 	$(REPREPRO_BIN) $(REPREPRO_OPTS) clearvanished
 	for COMPONENT in non-free $(VERSION); do \
 	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
-	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --keepunreferencedfiles --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
+	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
 	done
 
 
@@ -609,6 +662,7 @@ reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
 amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
+# virtualbox
 virtualbox-ovf: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box
 
 packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
@@ -617,12 +671,22 @@ packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/outpu
 packaging/packer/output-virtualbox-iso/centos-6.ovf:
 	cd packaging/packer && $(PACKER) build packer-centos-6.json
 
-virtualbox-centos-6: packaging/packer/output-virtualbox-iso/centos-6.ovf
-
 packaging/packer/output-virtualbox-iso/centos-7.ovf:
-	cd packaging/packer && $(PACKER) build packer-centos-7.json
+	cd packaging/packer && $(PACKER) build -only virtualbox-iso packer-centos-7.json
 
-virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
+# virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-6.ovf
+virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-7.ovf
+
+# vmware
+packaging/packer/output-vmware-iso/centos-7.vmx:
+	cd packaging/packer && $(PACKER) build -only vmware-iso packer-centos-7.json
+
+vmware-iso: packaging/packer/output-vmware-iso/centos-7.vmx
+
+vmware-vmx: packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx
+
+packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx: packaging/packer/output-vmware-iso/centos-7.vmx
+	cd packaging/packer && $(PACKER) build -only vmware-vmx $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
 # TODO - figure out how to build the front-end and python requirements with
 # 'build'
@@ -635,3 +699,15 @@ install:
 # Docker Compose Development environment
 docker-compose:
 	docker-compose -f tools/docker-compose.yml up --no-recreate
+
+docker-compose-test:
+	cd tools && docker-compose run --rm --service-ports tower /bin/bash
+
+mongo-debug-ui:
+	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
+
+mongo-container:
+	docker run -it --link tools_mongo_1:mongo --rm mongo sh -c 'exec mongo "$MONGO_PORT_27017_TCP_ADDR:$MONGO_PORT_27017_TCP_PORT/system_tracking_dev"'
+
+psql-container:
+	docker run -it --link tools_postgres_1:postgres --rm postgres:9.4.1 sh -c 'exec psql -h "$$POSTGRES_PORT_5432_TCP_ADDR" -p "$$POSTGRES_PORT_5432_TCP_PORT" -U postgres'

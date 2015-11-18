@@ -5,7 +5,7 @@
 import time
 from datetime import datetime
 import mock
-import unittest
+import unittest2 as unittest
 from copy import deepcopy
 from mock import MagicMock
 

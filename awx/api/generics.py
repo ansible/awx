@@ -142,6 +142,8 @@ class APIView(views.APIView):
             'new_in_200': getattr(self, 'new_in_200', False),
             'new_in_210': getattr(self, 'new_in_210', False),
             'new_in_220': getattr(self, 'new_in_220', False),
+            'new_in_230': getattr(self, 'new_in_230', False),
+            'new_in_240': getattr(self, 'new_in_240', False),
         }
 
     def get_description(self, html=False):
@@ -158,7 +160,7 @@ class APIView(views.APIView):
         '''
         ret = super(APIView, self).metadata(request)
         added_in_version = '1.2'
-        for version in ('2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
+        for version in ('2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
             if getattr(self, 'new_in_%s' % version.replace('.', ''), False):
                 added_in_version = version
                 break

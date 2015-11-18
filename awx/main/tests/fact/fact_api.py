@@ -2,7 +2,7 @@
 # All Rights Reserved
 
 # Python
-import unittest
+import unittest2 as unittest
 
 # Django
 from django.core.urlresolvers import reverse

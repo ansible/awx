@@ -146,7 +146,7 @@ class BaseAccess(object):
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)
 
-    def check_license(self, add_host=False, feature=None):
+    def check_license(self, add_host=False, feature=None, check_expiration=True):
         reader = TaskSerializer()
         validation_info = reader.from_file()
         if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
@@ -154,9 +154,9 @@ class BaseAccess(object):
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
 
-        if validation_info.get('time_remaining', None) is None:
+        if check_expiration and validation_info.get('time_remaining', None) is None:
             raise PermissionDenied("license is missing")
-        if validation_info.get("grace_period_remaining") <= 0:
+        if check_expiration and validation_info.get("grace_period_remaining") <= 0:
             raise PermissionDenied("license has expired")
 
         free_instances = validation_info.get('free_instances', 0)
@@ -262,6 +262,7 @@ class OrganizationAccess(BaseAccess):
                     self.user in obj.admins.all())
 
     def can_delete(self, obj):
+        self.check_license(feature='multiple_organizations', check_expiration=False)
         return self.can_change(obj, None)
 
 class InventoryAccess(BaseAccess):
@@ -672,22 +673,22 @@ class ProjectAccess(BaseAccess):
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
        project.
-     - I created it (for now?).
+     - I created the project but it isn't associated with an organization
     I can change/delete when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
-     - I created it (for now?).
+     - I created the project but it isn't associated with an organization
     '''
 
     model = Project
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'credential', 'current_update', 'last_update')
+        qs = qs.select_related('modified_by', 'credential', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
-        qs = qs.filter(Q(created_by=self.user) |
+        qs = qs.filter(Q(created_by=self.user, organizations__isnull=True) |
                        Q(organizations__admins__in=[self.user], organizations__active=True) |
                        Q(organizations__users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
@@ -719,7 +720,7 @@ class ProjectAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
-        if obj.created_by == self.user:
+        if obj.created_by == self.user and not obj.organizations.filter(active=True).count():
             return True
         if obj.organizations.filter(active=True, admins__in=[self.user]).exists():
             return True
@@ -863,52 +864,55 @@ class JobTemplateAccess(BaseAccess):
                                'credential', 'cloud_credential', 'next_schedule')
         if self.user.is_superuser:
             return qs
-        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        credential_ids = self.user.get_queryset(Credential)
+        inventory_ids = self.user.get_queryset(Inventory)
         base_qs = qs.filter(
             Q(credential_id__in=credential_ids) | Q(credential__isnull=True),
             Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
-        org_admin_ids = set(base_qs.filter(
+        org_admin_ids = base_qs.filter(
             Q(project__organizations__admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        ).values_list('id', flat=True))
+        )
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
-        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
+        team_ids = Team.objects.filter(users__in=[self.user])
 
         # TODO: I think the below queries can be combined
-        deploy_permissions_ids = set(Permission.objects.filter(
+        deploy_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             active=True,
             permission_type__in=allowed_deploy,
-        ).values_list('id', flat=True))
-        check_permissions_ids = set(Permission.objects.filter(
+        )
+        check_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             active=True,
             permission_type__in=allowed_check,
-        ).values_list('id', flat=True))
+        )
 
-        perm_deploy_ids = set(base_qs.filter(
+        perm_deploy_ids = base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
             inventory__permissions__in=deploy_permissions_ids,
             project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
             inventory_id__in=inventory_ids,
-        ).values_list('id', flat=True))
+        )
 
-        perm_check_ids = set(base_qs.filter(
+        perm_check_ids = base_qs.filter(
             job_type=PERM_INVENTORY_CHECK,
             inventory__permissions__in=check_permissions_ids,
             project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
             inventory_id__in=inventory_ids,
-        ).values_list('id', flat=True))
+        )
 
-        base_ids = org_admin_ids.union(perm_deploy_ids).union(perm_check_ids)
-        return base_qs.filter(id__in=base_ids)
+        return base_qs.filter(
+            Q(id__in=org_admin_ids) | 
+            Q(id__in=perm_deploy_ids) | 
+            Q(id__in=perm_check_ids)
+        )
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
@@ -1079,47 +1083,50 @@ class JobAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
             return qs
-        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
+        credential_ids = self.user.get_queryset(Credential)
         base_qs = qs.filter(
             credential_id__in=credential_ids,
         )
-        org_admin_ids = set(base_qs.filter(
+        org_admin_ids = base_qs.filter(
             Q(project__organizations__admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        ).values_list('id', flat=True))
+        )
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
+        team_ids = Team.objects.filter(users__in=[self.user])
 
         # TODO: I think the below queries can be combined
-        deploy_permissions_ids = set(Permission.objects.filter(
+        deploy_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             active=True,
             permission_type__in=allowed_deploy,
-        ).values_list('id', flat=True))
-        check_permissions_ids = set(Permission.objects.filter(
+        )
+        check_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             active=True,
             permission_type__in=allowed_check,
-        ).values_list('id', flat=True))
+        )
 
-        perm_deploy_ids = set(base_qs.filter(
+        perm_deploy_ids = base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
             inventory__permissions__in=deploy_permissions_ids,
             project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
-        ).values_list('id', flat=True))
+        )
 
-        perm_check_ids = set(base_qs.filter(
+        perm_check_ids = base_qs.filter(
             job_type=PERM_INVENTORY_CHECK,
             inventory__permissions__in=check_permissions_ids,
             project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
-        ).values_list('id', flat=True))
+        )
 
-        base_ids = org_admin_ids.union(perm_deploy_ids).union(perm_check_ids)
-        return base_qs.filter(id__in=base_ids)
+        return base_qs.filter(
+            Q(id__in=org_admin_ids) | 
+            Q(id__in=perm_deploy_ids) | 
+            Q(id__in=perm_check_ids)
+        )
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
@@ -1599,7 +1606,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     model = CustomInventoryScript
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True, organization__active=True).distinct()
+        qs = self.model.objects.filter(active=True).distinct()
         if not self.user.is_superuser:
             qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
         return qs

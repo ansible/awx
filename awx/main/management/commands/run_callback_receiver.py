@@ -130,6 +130,7 @@ class CallbackReceiver(object):
                                               'playbook_on_task_start',
                                               'playbook_on_no_hosts_matched',
                                               'playbook_on_no_hosts_remaining',
+                                              'playbook_on_include',
                                               'playbook_on_import_for_host',
                                               'playbook_on_not_import_for_host'):
                         parent = job_parent_events.get('playbook_on_play_start', None)

@@ -1,0 +1,96 @@
+# =============================================================================
+# Font Custom Configuration
+#   This file should live in the directory where you run `fontcustom compile`.
+#   For more info, visit <https://github.com/FontCustom/fontcustom>.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Project Info
+# -----------------------------------------------------------------------------
+
+# The font's name. Also determines the file names of generated templates.
+#font_name: icons
+
+# Format of CSS selectors. {{glyph}} is substituted for the glyph name.
+#css_selector: .i-{{glyph}}
+
+# Generate fonts without asset-busting hashes.
+#no_hash: true
+
+# Encode WOFF fonts into the generated CSS.
+#base64: true
+
+# Forces compilation, even if inputs have not changed
+#force: true
+
+# Display (possibly useful) debugging messages.
+#debug: true
+
+# Hide status messages.
+#quiet: true
+
+
+# -----------------------------------------------------------------------------
+# Input / Output Locations
+#   You can save generated fonts, CSS, and other files to different locations
+#   here. Font Custom can also read input vectors and templates from different
+#   places.
+#
+#   NOTE:
+#   - Be sure to preserve the whitespace in these YAML hashes.
+#   - INPUT[:vectors] and OUTPUT[:fonts] are required. Everything else is
+#     optional.
+#   - Specify output locations for custom templates by including their file
+#     names as the key.
+# -----------------------------------------------------------------------------
+
+#input:
+#  vectors: my/vectors
+#  templates: my/templates
+
+#output:
+#  fonts: app/assets/fonts
+#  css: app/assets/stylesheets
+#  preview: app/views/styleguide
+#  my-custom-template.yml: path/to/template/output
+
+
+# -----------------------------------------------------------------------------
+# Templates
+#   A YAML array of templates and files to generate alongside fonts. Custom
+#   templates should be saved in the INPUT[:templates] directory and referenced
+#   by their base file name.
+#
+#   For Rails and Compass templates, set `preprocessor_path` as the relative
+#   path from OUTPUT[:css] to OUTPUT[:fonts]. By default, these are the same
+#   directory.
+#
+#   Included in Font Custom: preview, css, scss, scss-rails
+#   Default: css, preview
+# -----------------------------------------------------------------------------
+
+#templates:
+#- scss-rails
+#- preview
+#- my-custom-template.yml
+
+#preprocessor_path: ../fonts/
+
+
+# -----------------------------------------------------------------------------
+# Font Settings (defaults shown)
+# -----------------------------------------------------------------------------
+
+# Size (in pica points) for which your font is designed.
+#font_design_size: 16
+
+# The em size. Setting this will scale the entire font to the given size.
+#font_em: 512
+
+# The font's ascent and descent. Used to calculate the baseline.
+#font_ascent: 448
+#font_descent: 64
+
+# Horizontally fit glyphs to their individual vector widths.
+#autowidth: false

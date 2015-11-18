@@ -1,9 +1,55 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
+from datetime import timedelta
+
+# Django
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
+from django.contrib.auth.models import User
+from django.utils.timezone import now as tz_now
+
+# AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
+
+__all__ = ['AuthTokenLimitUnitTest', 'OrganizationsTest']
+
+class AuthTokenLimitUnitTest(BaseTest):
+
+    def setUp(self):
+        self.now = tz_now()
+        # Times are relative to now
+        # (key, created on in seconds , expiration in seconds)
+        self.test_data = [
+            # a is implicitly expired
+            ("a", -1000, -10),
+            # b's are invalid due to session limit of 3
+            ("b", -100, 60),
+            ("bb", -100, 60),
+            ("c", -90, 70),
+            ("d", -80, 80),
+            ("e", -70, 90),
+        ]
+        self.user = User.objects.create_superuser('admin', 'foo@bar.com', 'password')
+        for key, t_create, t_expire in self.test_data:
+            AuthToken.objects.create(
+                user=self.user,
+                key=key,
+                request_hash='this_is_a_hash',
+                created=self.now + timedelta(seconds=t_create),
+                expires=self.now + timedelta(seconds=t_expire),
+            )
+        super(AuthTokenLimitUnitTest, self).setUp()
+
+    @override_settings(AUTH_TOKEN_PER_USER=3)
+    def test_get_tokens_over_limit(self):
+        invalid_tokens = AuthToken.get_tokens_over_limit(self.user, now=self.now)
+        invalid_keys = [x.key for x in invalid_tokens]
+        self.assertEqual(len(invalid_keys), 2)
+        self.assertIn('b', invalid_keys)
+        self.assertIn('bb', invalid_keys)
 
 class OrganizationsTest(BaseTest):
 
@@ -221,6 +267,11 @@ class OrganizationsTest(BaseTest):
         # look at what we got back from the post, make sure we added an org
         last_org = Organization.objects.order_by('-pk')[0]
         self.assertTrue(data1['url'].endswith("/%d/" % last_org.pk))
+        
+        # Test that not even super users can create an organization with a basic license
+        self.create_basic_license_file()
+        cant_org = dict(name='silly user org', description='4815162342')
+        self.post(self.collection(), cant_org, expect=402, auth=self.get_super_credentials())
 
     def test_post_item_subobjects_projects(self):
         
@@ -390,6 +441,10 @@ class OrganizationsTest(BaseTest):
 
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
+
+        # Test that not even super users can delete an organization with a basic license
+        self.create_basic_license_file()
+        self.delete(urls[2], expect=402, auth=self.get_super_credentials())
 
     def test_invalid_post_data(self):
         url = reverse('api:organization_list')

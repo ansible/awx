@@ -3,16 +3,25 @@
 
 # Python
 from __future__ import absolute_import
-from django.utils.timezone import now
-from dateutil.relativedelta import relativedelta
+import os
+import json
 
 # Django
+from django.utils.timezone import now
+from dateutil.relativedelta import relativedelta
 
 # AWX
 from awx.fact.models.fact import * # noqa
 from awx.fact.tests.base import BaseFactTest, FactScanBuilder, TEST_FACT_PACKAGES
 
 __all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimelineTest']
+
+# damn you python 2.6
+def timedelta_total_seconds(timedelta):
+    return (
+        timedelta.microseconds + 0.0 +
+        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+
 
 class FactHostTest(BaseFactTest):
     def test_create_host(self):
@@ -56,6 +65,27 @@ class FactTest(BaseFactTest):
         self.assertEqual(v.host.id, host.id)
         self.assertEqual(v.fact.id, f_obj.id)
         self.assertEqual(v.fact.module, 'packages')
+
+    # Note: Take the failure of this with a grain of salt.
+    # The test almost entirely depends on the specs of the system running on.
+    def test_add_fact_performance_4mb_file(self):
+        timestamp = now().replace(microsecond=0)
+        host = FactHost(hostname="hosty", inventory_id=1).save()
+
+        from awx.fact import tests
+        with open('%s/data/file_scan.json' % os.path.dirname(os.path.realpath(tests.__file__))) as f:
+            data = json.load(f)
+
+            t1 = now()
+            (f_obj, v_obj) = Fact.add_fact(host=host, timestamp=timestamp, module='packages', fact=data)
+            t2 = now()
+            diff = timedelta_total_seconds(t2 - t1)
+            print("add_fact save time: %s (s)" % diff)
+            # Note: 20 is realllly high. This should complete in < 2 seconds
+            self.assertLessEqual(diff, 20)
+
+            Fact.objects.get(id=f_obj.id)
+            FactVersion.objects.get(id=v_obj.id)
 
 class FactGetHostVersionTest(BaseFactTest):
     def setUp(self):

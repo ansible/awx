@@ -1,0 +1,19 @@
+{
+  "name": "select2-bootstrap-theme",
+  "version": "0.1.0-beta.4",
+  "main": [
+    "dist/select2-bootstrap.css",
+    "dist/select2-bootstrap.min.css"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "devDependencies": {
+    "bootstrap": "~3.3.5",
+    "bootstrap-sass-official": "~3.3.5",
+    "respond": "~1.4.2",
+    "anchor-js": "~1.1.1"
+  }
+}

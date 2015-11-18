@@ -1,0 +1,12 @@
+<breadcrumbs>
+    <breadcrumb path="/setup" title="Setup"></breadcrumb>
+    <breadcrumb path="/management_jobs" title="{{management_job.name}}"></breadcrumb>
+    <breadcrumb path="/management_jobs/{{management_job.id}}" title="Schedules" current='true'></breadcrumb>
+</breadcrumbs>
+
+<div class="tab-pane" id="management_jobs_schedule">
+  <div ng-cloak id="htmlTemplate"></div>
+</div>
+
+<div ng-include="'/static/partials/logviewer.html'"></div>
+<div ng-include="'/static/partials/schedule_dialog.html'"></div>

@@ -52,8 +52,6 @@ class OpenStackInventory(object):
 
     def __init__(self, private=False, refresh=False):
         config_files = os_client_config.config.CONFIG_FILES
-        if os.environ.get('OPENSTACK_CONFIG_FILE', None):
-            config_files.insert(0, os.environ['OPENSTACK_CONFIG_FILE'])
         config_files.append('/etc/ansible/openstack.yml')
         self.openstack_config = os_client_config.config.OpenStackConfig(
             config_files)
@@ -156,7 +154,8 @@ def main():
         elif args.host:
             inventory.get_host(args.host)
     except shade.OpenStackCloudException as e:
-        sys.exit(e.message)
+        sys.stderr.write('%s\n' % e.message)
+        sys.exit(1)
     sys.exit(0)
 
 

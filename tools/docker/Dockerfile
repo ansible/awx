@@ -5,8 +5,9 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL en_US.UTF-8  
 RUN apt-get update
-RUN apt-get install -y software-properties-common python-software-properties
+RUN apt-get install -y software-properties-common python-software-properties curl
 RUN add-apt-repository -y ppa:chris-lea/redis-server; add-apt-repository -y ppa:chris-lea/zeromq; add-apt-repository -y ppa:chris-lea/node.js; add-apt-repository ppa:ansible/ansible
+RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && apt-key adv --fetch-keys http://www.postgresql.org/media/keys/ACCC4CF8.asc
 RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list && echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" | tee /etc/apt/sources.list.d/postgres-9.4.list
 RUN apt-get update
@@ -23,6 +24,7 @@ RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db
 ADD license /etc/awx/license
 ADD license /etc/tower/license
+RUN pip2 install honcho
 RUN /etc/init.d/postgresql start; cd /tower ; make migrate ; make init ; /etc/init.d/postgresql stop
 ADD start_everything.sh /start_everything.sh
 ADD start_development.sh /start_development.sh

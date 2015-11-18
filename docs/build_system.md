@@ -122,7 +122,7 @@ Jenkins
 
 ### Server Information ###
 
-The AnsibleWorks Jenkins server can be found at http://50.116.42.103:8080/
+The Ansible Jenkins server can be found at http://jenkins.testing.ansible.com
 
 This is a standard Jenkins installation, with the following additional 
 plugins installed:
@@ -239,7 +239,7 @@ Repositories
 The nightly repositories are hosted on the AnsibleWorks Jenkins server, and can
 be found at the following location:
 
-    http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU/
+    http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/devel
 
 There are several sub-folders, including `deb/`, `rpm/`, `docs/` and `setup/`
 
@@ -260,7 +260,7 @@ The `setup/` folder contains the Ansible Tower setup playbook tar.gz file.
 These nightly repositories can be used by the Ansible Tower setup playbook by
 running the `setup.sh` shell script with the following option:
 
-    ./setup.sh -e "aw_repo_url=http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU gpgcheck=0"
+    ./setup.sh -e "aw_repo_url=http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/devel gpgcheck=0"
 
 ### Official Releases ###
 

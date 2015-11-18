@@ -26,7 +26,7 @@ class Command(BaseCommandInstance):
     def __init__(self):
         super(Command, self).__init__()
 
-        self.include_options_roles()
+        self.include_option_primary_role()
         self.include_option_hostname_uuid_find()
 
     @transaction.atomic

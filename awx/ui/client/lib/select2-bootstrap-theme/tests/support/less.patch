@@ -1,0 +1,610 @@
+Index: select2-bootstrap.css
+===================================================================
+--- select2-bootstrap.css
++++ select2-bootstrap.css
+@@ -1,65 +1,79 @@
+ /*! Select2 Bootstrap Theme v0.1.0-beta.4 | MIT License | github.com/select2/select2-bootstrap-theme */
+ .select2-container--bootstrap {
+   display: block;
+   /*------------------------------------*\
++            #COMMON STYLES
++    \*------------------------------------*/
++
+-          #COMMON STYLES
+-  \*------------------------------------*/
+   /**
++     * Search field in the Select2 dropdown.
++     */
++
+-   * Search field in the Select2 dropdown.
+-   */
+   /**
++     * No outline for all search fields - in the dropdown
++     * and inline in multi Select2s.
++     */
++
+-   * No outline for all search fields - in the dropdown
+-   * and inline in multi Select2s.
+-   */
+   /**
++     * Adjust Select2's choices hover and selected styles to match
++     * Bootstrap 3's default dropdown styles.
++     *
++     * @see http://getbootstrap.com/components/#dropdowns
++     */
++
+-   * Adjust Select2's choices hover and selected styles to match
+-   * Bootstrap 3's default dropdown styles.
+-   *
+-   * @see http://getbootstrap.com/components/#dropdowns
+-   */
+   /**
++     * Clear the selection.
++     */
++
+-   * Clear the selection.
+-   */
+   /**
++     * Address disabled Select2 styles.
++     *
++     * @see https://select2.github.io/examples.html#disabled
++     * @see http://getbootstrap.com/css/#forms-control-disabled
++     */
++
+-   * Address disabled Select2 styles.
+-   *
+-   * @see https://select2.github.io/examples.html#disabled
+-   * @see http://getbootstrap.com/css/#forms-control-disabled
+-   */
+   /*------------------------------------*\
++            #DROPDOWN
++    \*------------------------------------*/
++
+-          #DROPDOWN
+-  \*------------------------------------*/
+   /**
++     * Dropdown border color and box-shadow.
++     */
++
+-   * Dropdown border color and box-shadow.
+-   */
+   /**
++     * Limit the dropdown height.
++     */
++
+-   * Limit the dropdown height.
+-   */
+   /*------------------------------------*\
++            #SINGLE SELECT2
++    \*------------------------------------*/
++
+-          #SINGLE SELECT2
+-  \*------------------------------------*/
+   /*------------------------------------*\
++        #MULTIPLE SELECT2
++    \*------------------------------------*/
++
+-      #MULTIPLE SELECT2
+-  \*------------------------------------*/
+   /**
++     * Address Bootstrap control sizing classes
++     *
++     * 1. Reset Bootstrap defaults.
++     * 2. Adjust the dropdown arrow button icon position.
++     *
++     * @see http://getbootstrap.com/css/#forms-control-sizes
++     */
++
+-   * Address Bootstrap control sizing classes
+-   *
+-   * 1. Reset Bootstrap defaults.
+-   * 2. Adjust the dropdown arrow button icon position.
+-   *
+-   * @see http://getbootstrap.com/css/#forms-control-sizes
+-   */
+   /* 1 */
++
+   /*------------------------------------*\
++        #RTL SUPPORT
++    \*------------------------------------*/
++
+-      #RTL SUPPORT
+-  \*------------------------------------*/
+ }
+ .select2-container--bootstrap .select2-selection {
+   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
++  background-color: #ffffff;
++  border: 1px solid #cccccc;
+-  background-color: #fff;
+-  border: 1px solid #ccc;
+   border-radius: 4px;
+   color: #555555;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   font-size: 14px;
+@@ -67,49 +81,54 @@
+ }
+ .select2-container--bootstrap .select2-search--dropdown .select2-search__field {
+   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
++  background-color: #ffffff;
++  border: 1px solid #cccccc;
+-  background-color: #fff;
+-  border: 1px solid #ccc;
+   border-radius: 4px;
+   color: #555555;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   font-size: 14px;
+ }
+ .select2-container--bootstrap .select2-search__field {
+   outline: 0;
+   /* Firefox 18- */
++
+   /**
++         * Firefox 19+
++         *
++         * @see http://stackoverflow.com/questions/24236240/color-for-styled-placeholder-text-is-muted-in-firefox
++         */
++
+-   * Firefox 19+
+-   *
+-   * @see http://stackoverflow.com/questions/24236240/color-for-styled-placeholder-text-is-muted-in-firefox
+-   */
+ }
+ .select2-container--bootstrap .select2-search__field::-webkit-input-placeholder {
++  color: #999999;
+-  color: #999;
+ }
+ .select2-container--bootstrap .select2-search__field:-moz-placeholder {
++  color: #999999;
+-  color: #999;
+ }
+ .select2-container--bootstrap .select2-search__field::-moz-placeholder {
++  color: #999999;
+-  color: #999;
+   opacity: 1;
+ }
+ .select2-container--bootstrap .select2-search__field:-ms-input-placeholder {
++  color: #999999;
+-  color: #999;
+ }
+ .select2-container--bootstrap .select2-results__option {
+   /**
++         * Disabled results.
++         *
++         * @see https://select2.github.io/examples.html#disabled-results
++         */
++
+-   * Disabled results.
+-   *
+-   * @see https://select2.github.io/examples.html#disabled-results
+-   */
+   /**
++         * Hover state.
++         */
++
+-   * Hover state.
+-   */
+   /**
++         * Selected state.
++         */
++
+-   * Selected state.
+-   */
+ }
+ .select2-container--bootstrap .select2-results__option[role=group] {
+   padding: 0;
+ }
+@@ -122,9 +141,9 @@
+   color: #262626;
+ }
+ .select2-container--bootstrap .select2-results__option--highlighted[aria-selected] {
+   background-color: #337ab7;
++  color: #ffffff;
+-  color: #fff;
+ }
+ .select2-container--bootstrap .select2-results__option .select2-results__option {
+   padding: 6px 12px;
+ }
+@@ -158,9 +177,10 @@
+   font-size: 12px;
+   line-height: 1.428571429;
+   white-space: nowrap;
+ }
++.select2-container--bootstrap.select2-container--focus .select2-selection,
++.select2-container--bootstrap.select2-container--open .select2-selection {
+-.select2-container--bootstrap.select2-container--focus .select2-selection, .select2-container--bootstrap.select2-container--open .select2-selection {
+   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+   -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+   -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+@@ -168,16 +188,18 @@
+   border-color: #66afe9;
+ }
+ .select2-container--bootstrap.select2-container--open {
+   /**
++         * Make the dropdown arrow point up while the dropdown is visible.
++         */
++
+-   * Make the dropdown arrow point up while the dropdown is visible.
+-   */
+   /**
++         * Handle border radii of the container when the dropdown is showing.
++         */
++
+-   * Handle border radii of the container when the dropdown is showing.
+-   */
+ }
+ .select2-container--bootstrap.select2-container--open .select2-selection .select2-selection__arrow b {
++  border-color: transparent transparent #999999 transparent;
+-  border-color: transparent transparent #999 transparent;
+   border-width: 0 4px 4px 4px;
+ }
+ .select2-container--bootstrap.select2-container--open.select2-container--below .select2-selection {
+   border-bottom-right-radius: 0;
+@@ -189,9 +211,9 @@
+   border-top-left-radius: 0;
+   border-top-color: transparent;
+ }
+ .select2-container--bootstrap .select2-selection__clear {
++  color: #999999;
+-  color: #999;
+   cursor: pointer;
+   float: right;
+   font-weight: bold;
+   margin-right: 10px;
+@@ -199,9 +221,9 @@
+ .select2-container--bootstrap .select2-selection__clear:hover {
+   color: #333;
+ }
+ .select2-container--bootstrap.select2-container--disabled .select2-selection {
++  border-color: #cccccc;
+-  border-color: #ccc;
+   -webkit-box-shadow: none;
+   box-shadow: none;
+ }
+ .select2-container--bootstrap.select2-container--disabled .select2-selection,
+@@ -234,10 +256,11 @@
+   height: 34px;
+   line-height: 1.428571429;
+   padding: 6px 24px 6px 12px;
+   /**
++         * Adjust the single Select2's dropdown arrow button appearance.
++         */
++
+-   * Adjust the single Select2's dropdown arrow button appearance.
+-   */
+ }
+ .select2-container--bootstrap .select2-selection--single .select2-selection__arrow {
+   position: absolute;
+   bottom: 0;
+@@ -245,9 +268,9 @@
+   top: 0;
+   width: 4px;
+ }
+ .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
++  border-color: #999999 transparent transparent transparent;
+-  border-color: #999 transparent transparent transparent;
+   border-style: solid;
+   border-width: 4px 4px 0 4px;
+   height: 0;
+   left: 0;
+@@ -261,21 +284,24 @@
+   color: #555555;
+   padding: 0;
+ }
+ .select2-container--bootstrap .select2-selection--single .select2-selection__placeholder {
++  color: #999999;
+-  color: #999;
+ }
+ .select2-container--bootstrap .select2-selection--multiple {
+   min-height: 34px;
+   /**
++         * Make Multi Select2's choices match Bootstrap 3's default button styles.
++         */
++
+-   * Make Multi Select2's choices match Bootstrap 3's default button styles.
+-   */
+   /**
++         * Minus 2px borders.
++         */
++
+-   * Minus 2px borders.
+-   */
+   /**
++         * Clear the selection.
++         */
++
+-   * Clear the selection.
+-   */
+ }
+ .select2-container--bootstrap .select2-selection--multiple .select2-selection__rendered {
+   box-sizing: border-box;
+   display: block;
+@@ -288,16 +314,16 @@
+   text-overflow: ellipsis;
+   white-space: nowrap;
+ }
+ .select2-container--bootstrap .select2-selection--multiple .select2-selection__placeholder {
++  color: #999999;
+-  color: #999;
+   float: left;
+   margin-top: 5px;
+ }
+ .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+   color: #555555;
++  background: #ffffff;
++  border: 1px solid #cccccc;
+-  background: #fff;
+-  border: 1px solid #ccc;
+   border-radius: 4px;
+   cursor: default;
+   float: left;
+   margin: 5px 0 0 6px;
+@@ -323,108 +349,141 @@
+ }
+ .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+   margin-top: 6px;
+ }
++.select2-container--bootstrap.input-sm,
++.select2-container--bootstrap.input-lg {
+-.select2-container--bootstrap.input-sm, .select2-container--bootstrap.input-lg {
+   border-radius: 0;
+   font-size: 12px;
+   height: auto;
+   line-height: 1;
+   padding: 0;
+ }
++.select2-container--bootstrap.input-sm .select2-selection--single,
++.input-group-sm .select2-container--bootstrap .select2-selection--single,
++.form-group-sm .select2-container--bootstrap .select2-selection--single {
+-.select2-container--bootstrap.input-sm .select2-selection--single, .input-group-sm .select2-container--bootstrap .select2-selection--single, .form-group-sm .select2-container--bootstrap .select2-selection--single {
+   border-radius: 3px;
+   font-size: 12px;
+   height: 30px;
+   line-height: 1.5;
+   padding: 5px 22px 5px 10px;
+   /* 2 */
++
+ }
++.select2-container--bootstrap.input-sm .select2-selection--single .select2-selection__arrow b,
++.input-group-sm .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b,
++.form-group-sm .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
+-.select2-container--bootstrap.input-sm .select2-selection--single .select2-selection__arrow b, .input-group-sm .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b, .form-group-sm .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
+   margin-left: -5px;
+ }
++.select2-container--bootstrap.input-sm .select2-selection--multiple,
++.input-group-sm .select2-container--bootstrap .select2-selection--multiple,
++.form-group-sm .select2-container--bootstrap .select2-selection--multiple {
+-.select2-container--bootstrap.input-sm .select2-selection--multiple, .input-group-sm .select2-container--bootstrap .select2-selection--multiple, .form-group-sm .select2-container--bootstrap .select2-selection--multiple {
+   min-height: 30px;
+ }
++.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-selection__choice,
++.input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice,
++.form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+-.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-selection__choice, .input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice, .form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+   font-size: 12px;
+   line-height: 1.5;
+   margin: 4px 0 0 5px;
+   padding: 0 5px;
+ }
++.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-search--inline .select2-search__field,
++.input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field,
++.form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field {
+-.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-search--inline .select2-search__field, .input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field, .form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field {
+   padding: 0 10px;
+   font-size: 12px;
+   height: 28px;
+   line-height: 1.5;
+ }
++.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-selection__clear,
++.input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear,
++.form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+-.select2-container--bootstrap.input-sm .select2-selection--multiple .select2-selection__clear, .input-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear, .form-group-sm .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+   margin-top: 5px;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--single,
++.input-group-lg .select2-container--bootstrap .select2-selection--single,
++.form-group-lg .select2-container--bootstrap .select2-selection--single {
+-.select2-container--bootstrap.input-lg .select2-selection--single, .input-group-lg .select2-container--bootstrap .select2-selection--single, .form-group-lg .select2-container--bootstrap .select2-selection--single {
+   border-radius: 6px;
+   font-size: 18px;
+   height: 46px;
+   line-height: 1.3333333;
+   padding: 10px 31px 10px 16px;
+   /* 1 */
++
+ }
++.select2-container--bootstrap.input-lg .select2-selection--single .select2-selection__arrow,
++.input-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow,
++.form-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow {
+-.select2-container--bootstrap.input-lg .select2-selection--single .select2-selection__arrow, .input-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow, .form-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow {
+   width: 5px;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--single .select2-selection__arrow b,
++.input-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b,
++.form-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
+-.select2-container--bootstrap.input-lg .select2-selection--single .select2-selection__arrow b, .input-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b, .form-group-lg .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
+   border-width: 5px 5px 0 5px;
+   margin-left: -5px;
+   margin-left: -10px;
+   margin-top: -2.5px;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--multiple,
++.input-group-lg .select2-container--bootstrap .select2-selection--multiple,
++.form-group-lg .select2-container--bootstrap .select2-selection--multiple {
+-.select2-container--bootstrap.input-lg .select2-selection--multiple, .input-group-lg .select2-container--bootstrap .select2-selection--multiple, .form-group-lg .select2-container--bootstrap .select2-selection--multiple {
+   min-height: 46px;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-selection__choice,
++.input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice,
++.form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+-.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-selection__choice, .input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice, .form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+   font-size: 18px;
+   line-height: 1.3333333;
+   border-radius: 4px;
+   margin: 9px 0 0 8px;
+   padding: 0 10px;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-search--inline .select2-search__field,
++.input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field,
++.form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field {
+-.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-search--inline .select2-search__field, .input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field, .form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field {
+   padding: 0 16px;
+   font-size: 18px;
+   height: 44px;
+   line-height: 1.3333333;
+ }
++.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-selection__clear,
++.input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear,
++.form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+-.select2-container--bootstrap.input-lg .select2-selection--multiple .select2-selection__clear, .input-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear, .form-group-lg .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+   margin-top: 10px;
+ }
+ .select2-container--bootstrap.input-lg.select2-container--open .select2-selection--single {
+   /**
++         * Make the dropdown arrow point up while the dropdown is visible.
++         */
++
+-   * Make the dropdown arrow point up while the dropdown is visible.
+-   */
+ }
+ .select2-container--bootstrap.input-lg.select2-container--open .select2-selection--single .select2-selection__arrow b {
++  border-color: transparent transparent #999999 transparent;
+-  border-color: transparent transparent #999 transparent;
+   border-width: 0 5px 5px 5px;
+ }
+ .input-group-lg .select2-container--bootstrap.select2-container--open .select2-selection--single {
+   /**
++         * Make the dropdown arrow point up while the dropdown is visible.
++         */
++
+-   * Make the dropdown arrow point up while the dropdown is visible.
+-   */
+ }
+ .input-group-lg .select2-container--bootstrap.select2-container--open .select2-selection--single .select2-selection__arrow b {
++  border-color: transparent transparent #999999 transparent;
+-  border-color: transparent transparent #999 transparent;
+   border-width: 0 5px 5px 5px;
+ }
+ .select2-container--bootstrap[dir="rtl"] {
+   /**
++         * Single Select2
++         *
++         * 1. Makes sure that .select2-selection__placeholder is positioned
++         *    correctly.
++         */
++
+-   * Single Select2
+-   *
+-   * 1. Makes sure that .select2-selection__placeholder is positioned
+-   *    correctly.
+-   */
+   /**
++         * Multiple Select2
++         */
++
+-   * Multiple Select2
+-   */
+ }
+ .select2-container--bootstrap[dir="rtl"] .select2-selection--single {
+   padding-left: 24px;
+   padding-right: 12px;
+@@ -433,8 +492,9 @@
+   padding-right: 0;
+   padding-left: 0;
+   text-align: right;
+   /* 1 */
++
+ }
+ .select2-container--bootstrap[dir="rtl"] .select2-selection--single .select2-selection__clear {
+   float: left;
+ }
+@@ -456,9 +516,8 @@
+ .select2-container--bootstrap[dir="rtl"] .select2-selection--multiple .select2-selection__choice__remove {
+   margin-left: 2px;
+   margin-right: auto;
+ }
+-
+ /*------------------------------------*\
+     #ADDITIONAL GOODIES
+ \*------------------------------------*/
+ /**
+@@ -486,9 +545,8 @@
+ }
+ .has-warning.select2-drop-active.select2-drop.select2-drop-above {
+   border-top-color: #66512c;
+ }
+-
+ .has-error .select2-dropdown,
+ .has-error .select2-selection {
+   border-color: #a94442;
+ }
+@@ -503,9 +561,8 @@
+ }
+ .has-error.select2-drop-active.select2-drop.select2-drop-above {
+   border-top-color: #843534;
+ }
+-
+ .has-success .select2-dropdown,
+ .has-success .select2-selection {
+   border-color: #3c763d;
+ }
+@@ -520,9 +577,8 @@
+ }
+ .has-success.select2-drop-active.select2-drop.select2-drop-above {
+   border-top-color: #2b542c;
+ }
+-
+ /**
+  * Select2 widgets in Bootstrap Input Groups
+  *
+  * When Select2 widgets are combined with other elements using Bootstraps
+@@ -548,35 +604,31 @@
+   float: left;
+   width: 100%;
+   margin-bottom: 0;
+ }
+-
+ .input-group.select2-bootstrap-prepend .select2-container--bootstrap .select2-selection {
+   border-bottom-left-radius: 0;
+   border-top-left-radius: 0;
+ }
+-
+ .input-group.select2-bootstrap-append .select2-container--bootstrap .select2-selection {
+   border-bottom-right-radius: 0;
+   border-top-right-radius: 0;
+ }
+-
+ /**
+  * Adjust alignment of Bootstrap buttons in Bootstrap Input Groups to address
+  * Multi Select2's height which - depending on how many elements have been selected -
+  * may grow taller than its initial size.
+  *
+  * @see http://getbootstrap.com/components/#input-groups
+  */
+ .select2-bootstrap-append .select2-container--bootstrap,
++.select2-bootstrap-prepend .select2-container--bootstrap,
+ .select2-bootstrap-append .input-group-btn,
++.select2-bootstrap-prepend .input-group-btn,
+ .select2-bootstrap-append .input-group-btn .btn,
+-.select2-bootstrap-prepend .select2-container--bootstrap,
+-.select2-bootstrap-prepend .input-group-btn,
+ .select2-bootstrap-prepend .input-group-btn .btn {
+   vertical-align: top;
+ }
+-
+ /**
+  * Temporary fix for https://github.com/select2/select2-bootstrap-theme/issues/9
+  *
+  * Provides `!important` for certain properties of the class applied to the
+@@ -588,9 +640,8 @@
+ .form-control.select2-hidden-accessible {
+   position: absolute !important;
+   width: 1px !important;
+ }
+-
+ /**
+  * Display override for inline forms
+ */
+ .form-inline .select2-container--bootstrap {

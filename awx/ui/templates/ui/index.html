@@ -5,11 +5,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Ansible Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.min.css" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/ansible-bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}assets/custom-theme/jquery-ui-1.10.3.custom.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}assets/ansible-bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}assets/fontcustom/fontcustom.css" type="text/css">
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2.css" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2-bootstrap.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2-bootstrap-theme/dist/select2-bootstrap.css" />
 
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
@@ -18,17 +19,27 @@
 
   <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
-  <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico?v={{version}}" />
+  <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
 
   <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
 
+  <script src="//d3accju1t3mngt.cloudfront.net/js/angular/ng-pendo.js"></script>
+  <script>
+    window.pendo_options = {
+
+        // This is required to be able to load data client side
+        usePendoAgentAPI: true,
+        disableGuides: true
+    };
+  </script>
+
 </head>
 <body data-user-agent="{{userAgent}}">
 
-    <include-svg href="{{ STATIC_URL }}img/icons.svg"></include-svg>
+    <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu
           menu-style="portalMode ? 'portal' : 'default'"
@@ -44,15 +55,11 @@
       </div>
     </div>
 
-    <!-- login modal -->
-    <div id="login-modal" class="modal fade">
-       <div class="modal-dialog">
-          <div class="modal-content" id="login-modal-content"></div><!-- modal-content -->
-       </div><!-- modal-dialog -->
-    </div><!-- modal -->
+
 
     <!-- Password Dialog -->
     <div id="password-modal" style="display: none;"></div>
+    <div id="idle-modal" style="display:none">Your session will expire in <span id="remaining_seconds">60</span> seconds, would you like to continue?</div>
 
     <!-- Generic Form dialog -->
     <div id="form-modal" class="modal fade">
@@ -152,41 +159,17 @@
 
     <div id="login-modal-dialog" style="display: none;"></div>
     <div id="help-modal-dialog" style="display: none;"></div>
-    
-    <div id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}partials/cowsay-about.html ' "></div>
-    <div id="custom-script-dialog" style="display:none;" > </div>
-    <div id='configure-tower-dialog' style="display:none" >
-      <div id="configure-jobs" ></div>
-      <div class="tab-pane" id="configure-schedules-tab">
-            <div id="configure-schedules-overlay"></div>
-            <div id="configure-schedules-list"></div>
-            <div id="configure-schedules-form-container">
-                <div id="configure-schedules-title">
-                    <h4 ng-bind="schedulesTitle"></h4>
-                    <button type="button"  class="close pull-right" ng-click="cancelScheduleForm()">x</button>
-                </div>
-                <div id="configure-schedules-form-container-body">
-                    <div id="configure-schedules-form"></div>
-                    <div id="configure-schedules-detail"></div>
-                </div>
-                <div id="configure-schedules-buttons" >
-                    <a id="configure-schedules-flip-link" ng-show="formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-search-plus"></i> View Details</a>
-                    <a id="configure-schedules-flip-link" ng-show="!formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-arrow-circle-left"></i> Back to options</a>
-                    <button type="button" class="btn btn-default btn-sm" id="configure-schedule-delete-button" ng-show="mode==='edit'" ng-click="deleteSystemSchedule($event)"><i class="fa fa-trash-o"></i> Delete</button>
-                    <button type="button" class="btn btn-default btn-sm" id="configure-cancel-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
-                    <!-- <button type="button" class="btn btn-primary btn-sm" id="configure-save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button> -->
-                </div>
-            </div>
-        </div>
-    </div>
+
+    <div class="About" id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}assets/cowsay-about.html ' "></div>
+
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             Set how many days of data should be retained. <br>
-            <input type="number" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer>
-            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">Please enter the number of days you would like to keep this data.</div>
-            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >Please enter a valid number.</div>
-            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMin">Please enter a non-negative number.</div>
-            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMax">Please enter a number smaller than 9999.</div>
+            <input type="integer" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer>
+            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && (prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer ||
+            prompt_for_days_form.days_to_keep.$error.required ||
+            prompt_for_days_form.days_to_keep.$error.min ||
+            prompt_for_days_form.days_to_keep.$error.max)">Please enter an integer<span ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.min"> that is not negative</span><span ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.max"> that is lower than 9999</span>.</div>
       </form>
     </div>
     <div id="prompt-for-days-facts" style="display:none">
@@ -204,16 +187,16 @@
                     </label>
                     <div class="row">
                         <div class="col-xs-4">
-                            <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer></input>
+                            <input type="integer" id="keep_amount" name="keep_amount" ng-model="keep_amount" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer></input>
                         </div>
                         <div class="col-xs-4">
                             <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control"  style="margin-top:10px;"></select>
                         </div>
                     </div>
-                    <div class="error" ng-show="prompt_for_days_facts_form.keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.number || prompt_for_days_facts_form.keep_amount.$error.integer" >Please enter a valid number.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                    <div class="error" ng-show="prompt_for_days_facts_form.keep_amount.$dirty && (prompt_for_days_facts_form.keep_amount.$error.number || prompt_for_days_facts_form.keep_amount.$error.integer ||
+                    prompt_for_days_facts_form.keep_amount.$error.required ||
+                    prompt_for_days_facts_form.keep_amount.$error.min ||
+                    prompt_for_days_facts_form.keep_amount.$error.max)">Please enter an integer<span ng-show="prompt_for_days_facts_form.keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.min"> that is not negative</span><span ng-show="prompt_for_days_facts_form.keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.max"> that is lower than 9999</span>.</div>
                 </div>
                 <div class="form-group ">
                     <label for="description">
@@ -223,16 +206,17 @@
                     </label>
                     <div class="row">
                         <div class="col-xs-4">
-                            <input type="number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" class="form-control" aw-min=0 aw-max=9999 style="margin-top:10px;" integer></input>
+                            <input type="integer" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" ng-required="true" class="form-control" min=0 max=9999 style="margin-top:10px;" integer></input>
                         </div>
                         <div class="col-xs-4">
-                            <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control" style="margin-top:10px;"></select>
+                            <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit"
+                            ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control" style="margin-top:10px;"></select>
                         </div>
                     </div>
-                    <div class="error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$dirty && prompt_for_days_facts_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.number || prompt_for_days_facts_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
-                    <div class="error survey_error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                    <div class="error" ng-show="prompt_for_days_facts_form.granularity_keep_amount.$dirty && (prompt_for_days_facts_form.granularity_keep_amount.$error.number || prompt_for_days_facts_form.granularity_keep_amount.$error.integer ||
+                    prompt_for_days_facts_form.granularity_keep_amount.$error.required ||
+                    prompt_for_days_facts_form.granularity_keep_amount.$error.min ||
+                    prompt_for_days_facts_form.granularity_keep_amount.$error.max)">Please enter an integer<span ng-show="prompt_for_days_facts_form.granularity_keep_amount.$dirty && prompt_for_days_facts_form.granularity_keep_amount.$error.min"> that is not negative</span><span ng-show="prompt_for_days_facts_form.granularity_keep_amount.$dirty && prompt_for_days_facts_form.granularity_keep_amount.$error.max"> that is lower than 9999</span>.</div>
                 </div>
             </div>
         </form>
@@ -271,7 +255,7 @@
         //  config-loading behavior
         var $AnsibleConfig;
 
-        require('tower/app');
+        require('app');
   </script>
 
 </body>

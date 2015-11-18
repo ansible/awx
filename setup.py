@@ -122,7 +122,7 @@ setup(
         ("%s" % webconfig,      ["config/awx-httpd-80.conf",
                                  "config/awx-httpd-443.conf",
                                  "config/awx-munin.conf"]),
-        ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
+        ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % munin_plugin_path, ["tools/munin_monitors/tower_jobs",
                                     "tools/munin_monitors/callbackr_alive",

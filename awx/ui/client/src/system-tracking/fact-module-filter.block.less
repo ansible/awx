@@ -1,0 +1,46 @@
+/** @define FactModuleFilter */
+
+@import "../shared/branding/colors.less";
+
+.FactModuleFilter {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 2.8rem;
+
+    &-module {
+
+        background-color: @disabled-item-background;
+        color: @disabled-item-text;
+        border-color: @disabled-item-border;
+
+        flex: 1 1 20%;
+        @media screen and (max-width: 750px) {
+            flex-basis: 50%;
+        }
+        &:active, &:focus {
+            // copied from bootstrap's .btn:focus
+            background-color: @enabled-item-background;
+            border-color: @enabled-item-border;
+            color: @enabled-item-text;
+            box-shadow: none;
+            z-index: 2;
+        }
+    }
+
+    &-module.is-active {
+        cursor: default;
+        background-color: @enabled-item-background;
+        border-color: @enabled-item-border;
+        color: @enabled-item-text;
+        z-index: 2;
+
+        &:active, &:focus {
+            box-shadow: none;
+        }
+
+        &:hover {
+            background-color: @enabled-item-background;
+        }
+    }
+}

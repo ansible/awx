@@ -5,15 +5,17 @@ import logging
 import threading
 import uuid
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.db.models.signals import post_save
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import curry
+from django.conf import settings
 
 from awx import __version__ as version
 from awx.main.models import ActivityStream, Instance
+from awx.api.authentication import TokenAuthentication
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -60,8 +62,11 @@ class ActivityStreamMiddleware(threading.local):
     def set_actor(self, user, sender, instance, **kwargs):
         if sender == ActivityStream:
             if isinstance(user, User) and instance.actor is None:
-                instance.actor = user
-                instance.save(update_fields=['actor'])
+                user = User.objects.filter(id=user.id)
+                if user.exists():
+                    user = user[0]
+                    instance.actor = user
+                    instance.save(update_fields=['actor'])
             else:
                 if instance.id not in self.instance_ids:
                     self.instance_ids.append(instance.id)
@@ -100,3 +105,18 @@ class HAMiddleware(object):
 
         # Redirect to the base page of the primary instance.
         return HttpResponseRedirect('http://%s%s' % (primary.hostname, request.path))
+
+class AuthTokenTimeoutMiddleware(object):
+    """Presume that when the user includes the auth header, they go through the
+    authentication mechanism. Further, that mechanism is presumed to extend 
+    the users session validity time by AUTH_TOKEN_EXPIRATION.
+
+    If the auth token is not supplied, then don't include the header
+    """
+    def process_response(self, request, response):
+        if not TokenAuthentication._get_x_auth_token_header(request):
+            return response
+
+        response['Auth-Token-Timeout'] = int(settings.AUTH_TOKEN_EXPIRATION)
+        return response
+        

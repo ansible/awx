@@ -471,6 +471,128 @@ TEST_AUTH_LDAP_TEAM_MAP_2_RESULT = {
 }
 
 ###############################################################################
+# RADIUS AUTH SETTINGS
+###############################################################################
+
+RADIUS_SERVER = ''
+RADIUS_PORT = 1812
+RADIUS_SECRET = ''
+
+###############################################################################
+# SOCIAL AUTH SETTINGS
+###############################################################################
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+#SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
+#SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com']
+#SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'hd': 'example.com'}
+
+SOCIAL_AUTH_GITHUB_KEY = ''
+SOCIAL_AUTH_GITHUB_SECRET = ''
+
+SOCIAL_AUTH_GITHUB_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ORG_NAME = ''
+
+SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_TEAM_ID = ''
+
+SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
+SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
+SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
+SOCIAL_AUTH_SAML_ORG_INFO = {
+    'en-US': {
+        'name': 'example',
+        'displayname': 'Example',
+        'url': 'http://www.example.com',
+    },
+}
+SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {
+    'givenName': 'Some User',
+    'emailAddress': 'suser@example.com',
+}
+SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {
+    'givenName': 'Some User',
+    'emailAddress': 'suser@example.com',
+}
+SOCIAL_AUTH_SAML_ENABLED_IDPS = {
+    #'myidp': {
+    #    'entity_id': 'https://idp.example.com',
+    #    'url': 'https://myidp.example.com/sso',
+    #    'x509cert': '',
+    #},
+    #'onelogin': {
+    #    'entity_id': 'https://app.onelogin.com/saml/metadata/123456',
+    #    'url': 'https://example.onelogin.com/trust/saml2/http-post/sso/123456',
+    #    'x509cert': '',
+    #    'attr_user_permanent_id': 'name_id',
+    #    'attr_first_name': 'User.FirstName',
+    #    'attr_last_name': 'User.LastName',
+    #    'attr_username': 'User.email',
+    #    'attr_email': 'User.email',
+    #},
+}
+
+SOCIAL_AUTH_ORGANIZATION_MAP = {
+    # Add all users to the default organization.
+    'Default': {
+        'users': True,
+    },
+    #'Test Org': {
+    #    'admins': ['admin@example.com'],
+    #    'users': True,
+    #},
+    #'Test Org 2': {
+    #    'admins': ['admin@example.com', re.compile(r'^tower-[^@]+*?@.*$],
+    #    'users': re.compile(r'^[^@].*?@example\.com$'),
+    #},
+}
+
+#SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP = {}
+#SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP = {}
+#SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP = {}
+#SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP = {}
+#SOCIAL_AUTH_SAML_ORGANIZATION_MAP = {}
+
+SOCIAL_AUTH_TEAM_MAP = {
+    #'My Team': {
+    #    'organization': 'Test Org',
+    #    'users': ['re.compile(r'^[^@]+?@test\.example\.com$')'],
+    #    'remove': True,
+    #},
+    #'Other Team': {
+    #    'organization': 'Test Org 2',
+    #    'users': re.compile(r'^[^@]+?@test2\.example\.com$'),
+    #    'remove': False,
+    #},
+}
+
+#SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP = {}
+#SOCIAL_AUTH_GITHUB_TEAM_MAP = {}
+#SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP = {}
+#SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP = {}
+#SOCIAL_AUTH_SAML_TEAM_MAP = {}
+
+# Uncomment the line below (i.e. set SOCIAL_AUTH_USER_FIELDS to an empty list)
+# to prevent new user accounts from being created.  Only users who have
+# previously logged in using social auth or have a user account with a matching
+# email address will be able to login.
+
+#SOCIAL_AUTH_USER_FIELDS = []
+
+# It is also possible to add custom functions to the social auth pipeline for
+# more advanced organization and team mapping.  Use at your own risk.
+
+#def custom_social_auth_pipeline_function(backend, details, user=None, *args, **kwargs):
+#    print 'custom:', backend, details, user, args, kwargs
+
+#SOCIAL_AUTH_PIPELINE += (
+#    'awx.settings.development.custom_social_auth_pipeline_function',
+#)
+
+###############################################################################
 # INVENTORY IMPORT TEST SETTINGS
 ###############################################################################
 
@@ -481,6 +603,9 @@ TEST_AUTH_LDAP_TEAM_MAP_2_RESULT = {
 TEST_AWS_ACCESS_KEY_ID = ''
 TEST_AWS_SECRET_ACCESS_KEY = ''
 TEST_AWS_REGIONS = 'all'
+# Check IAM STS credentials
+TEST_AWS_SECURITY_TOKEN = ''
+
 
 # Rackspace credentials
 TEST_RACKSPACE_USERNAME = ''

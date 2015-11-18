@@ -1,0 +1,2 @@
+#!/bin/bash
+ansible-playbook -i "127.0.0.1," tools/git_hooks/pre_commit.yml

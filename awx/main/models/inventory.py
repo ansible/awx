@@ -60,7 +60,7 @@ class Inventory(CommonModel):
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total mumber of hosts in this inventory.'),
+        help_text=_('Total number of hosts in this inventory.'),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
@@ -1281,7 +1281,9 @@ class CustomInventoryScript(CommonModelNameNotUnique):
         'Organization',
         related_name='custom_inventory_scripts',
         help_text=_('Organization owning this inventory script'),
-        on_delete=models.CASCADE,
+        blank=False,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     def get_absolute_url(self):

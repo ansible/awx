@@ -12,18 +12,19 @@ awx/public/media
 awx/public/static
 awx/ui/tests/test-results.xml
 awx/ui/static/js/awx.min.js
-awx/ui/static/js/local_config.js
+awx/ui/static/js/local_settings.json
+awx/ui/client/src/local_settings.json
 awx/ui/static/css/awx.min.css
 awx/main/fixtures
 awx/*.log
 tower/tower_warnings.log
 celerybeat-schedule
-awx/ui/static/docs
-awx/ui/dist
+awx/ui/static
+awx/ui/build_test
 
 # Python & setuptools
 __pycache__
-build
+/build
 /deb-build
 /rpm-build
 /tar-build
@@ -37,12 +38,13 @@ build
 /Brocfile.js
 /bower.json
 /package.json
+/testem.yml
 node_modules/**
 /tmp
 npm-debug.log
 
 # UI build debugging
-/DEBUG-*
+/DEBUG
 
 # Testing
 .coverage
@@ -50,6 +52,8 @@ npm-debug.log
 coverage.xml
 htmlcov
 pep8.txt
+scratch
+testem.log
 
 # Mac OS X
 *.DS_Store

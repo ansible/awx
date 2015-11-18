@@ -162,6 +162,7 @@ def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
     first_task = None
+    first_task_id = None
     first_task_type = ''
     first_task_name = ''
     if subtasks is not None:
@@ -169,10 +170,10 @@ def handle_work_error(self, task_id, subtasks=None):
             instance_name = ''
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.project.name
+                instance_name = instance.name
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.inventory_source.inventory.name
+                instance_name = instance.name
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
@@ -184,13 +185,14 @@ def handle_work_error(self, task_id, subtasks=None):
                 break
             if first_task is None:
                 first_task = instance
+                first_task_id = instance.id
                 first_task_type = each_task['type']
                 first_task_name = instance_name
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.job_explanation = "Previous Task Failed: %s for %s with celery task id: %s" % \
-                    (first_task_type, first_task_name, task_id)
+                instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                    (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
 
@@ -345,6 +347,8 @@ class BaseTask(Task):
         if local_site_packages not in python_paths:
             python_paths.insert(0, local_site_packages)
         env['PYTHONPATH'] = os.pathsep.join(python_paths)
+        if self.should_use_proot:
+            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -423,6 +427,15 @@ class BaseTask(Task):
         '''
         logfile = stdout_handle
         logfile_pos = logfile.tell()
+        if hasattr(instance, "extra_vars_dict") and "PEXPECT_SLEEP" in instance.extra_vars_dict:
+            pexpect_sleep = int(instance.extra_vars_dict['PEXPECT_SLEEP'])
+        elif 'PEXPECT_SLEEP' in os.environ:
+            pexpect_sleep = int(os.environ['PEXPECT_SLEEP'])
+        else:
+            pexpect_sleep = None
+        if pexpect_sleep is not None:
+            logger.info("Suspending Job Execution for QA Work")
+            time.sleep(pexpect_sleep)
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
@@ -601,6 +614,21 @@ class RunJob(BaseTask):
                 if credential.ssh_key_data not in (None, ''):
                     private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
 
+        if job.cloud_credential and job.cloud_credential.kind == 'openstack':
+            credential = job.cloud_credential
+            openstack_auth = dict(auth_url=credential.host,
+                                  username=credential.username,
+                                  password=decrypt_field(credential, "password"),
+                                  project_name=credential.project)
+            openstack_data = {
+                'clouds': {
+                    'devstack': {
+                        'auth': openstack_auth,
+                    },
+                },
+            }
+            private_data['cloud_credential'] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+
         return private_data
 
     def build_passwords(self, job, **kwargs):
@@ -625,12 +653,17 @@ class RunJob(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
+        plugin_dirs = [plugin_dir]
+        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.append(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
@@ -654,6 +687,8 @@ class RunJob(BaseTask):
         if cloud_cred and cloud_cred.kind == 'aws':
             env['AWS_ACCESS_KEY'] = cloud_cred.username
             env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
+            if len(cloud_cred.security_token) > 0:
+                env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
             # FIXME: Add EC2_URL, maybe EC2_REGION!
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
@@ -669,6 +704,8 @@ class RunJob(BaseTask):
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
+        elif cloud_cred and cloud_cred.kind == 'openstack':
+            env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
@@ -1116,7 +1153,7 @@ class RunInventoryUpdate(BaseTask):
         if credential:
             for subkey in ('username', 'host', 'project'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
-            for passkey in ('password', 'ssh_key_data'):
+            for passkey in ('password', 'ssh_key_data', 'security_token'):
                 k = 'source_%s' % passkey
                 passwords[k] = decrypt_field(credential, passkey)
         return passwords
@@ -1149,6 +1186,8 @@ class RunInventoryUpdate(BaseTask):
             if passwords.get('source_username', '') and passwords.get('source_password', ''):
                 env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
                 env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
+                if len(passwords['source_security_token']) > 0:
+                    env['AWS_SECURITY_TOKEN'] = passwords['source_security_token']
             env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = cloud_credential
@@ -1169,7 +1208,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
         elif inventory_update.source == 'openstack':
-            env['OPENSTACK_CONFIG_FILE'] = cloud_credential
+            env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
@@ -1188,7 +1227,7 @@ class RunInventoryUpdate(BaseTask):
         inventory = inventory_source.group.inventory
 
         # Piece together the initial command to run via. the shell.
-        args = ['awx-manage', 'inventory_import']
+        args = ['tower-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
 
         # Add appropriate arguments for overwrite if the inventory_update
@@ -1450,7 +1489,7 @@ class RunSystemJob(BaseTask):
     model = SystemJob
 
     def build_args(self, system_job, **kwargs):
-        args = ['awx-manage', system_job.job_type]
+        args = ['tower-manage', system_job.job_type]
         try:
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':

@@ -28,11 +28,11 @@ from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.backend import LDAPSettings
 from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
+from awx.sso.backends import LDAPSettings
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -56,8 +56,12 @@ class QueueTestMixin(object):
 
     def start_redis(self):
         if not getattr(self, 'redis_process', None):
-            self.redis_process = Popen('redis-server --port 16379 > /dev/null',
-                                       shell=True, executable='/bin/bash')
+            # Centos 6.5 redis is runnable by non-root user but is not in a normal users path by default
+            env = dict(os.environ)
+            env['PATH'] = '%s:/usr/sbin/' % env['PATH']
+            self.redis_process = Popen('echo "port 16379" | redis-server - > /dev/null',
+                                       shell=True, executable='/bin/bash',
+                                       env=env)
 
     def stop_redis(self):
         if getattr(self, 'redis_process', None):
@@ -188,6 +192,20 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
 
+    def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
+        writer = LicenseWriter( 
+            company_name='AWX',
+            contact_name='AWX Admin',
+            contact_email='awx@example.com',
+            license_date=license_date,
+            instance_count=instance_count,
+            license_type='basic')
+        handle, license_path = tempfile.mkstemp(suffix='.json')
+        os.close(handle)
+        writer.write_file(license_path)
+        self._temp_paths.append(license_path)
+        os.environ['AWX_LICENSE_FILE'] = license_path
+        
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
         if not grace_period:
@@ -456,8 +474,8 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         if method_name == 'head':
             self.assertFalse(response.content)
-        #if return_response_object:
-        #    return response
+        if return_response_object:
+            return response
         if response.status_code not in [204, 405] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             if response['Content-Type'].startswith('application/json'):
@@ -700,7 +718,8 @@ class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local')
+                   ANSIBLE_TRANSPORT='local',
+                   DEBUG=True)
 class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
     '''
     Base class for celery task tests.

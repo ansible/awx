@@ -4,7 +4,7 @@ Ansible Tower
 Tower provides a web-based user interface, REST API and task engine built on top of
 Ansible.
 
-The current version under development is 2.1.0.
+The current version under development is 2.2.1.
 
 Development releases always use the 'master' branch.
 
@@ -31,10 +31,14 @@ Release History
 * 2.1.2, March 25, 2015
 * 2.1.3, April 15, 2015
 * 2.1.4, June 12, 2015
+* 2.1.5, June 15, 2015
+* 2.1.6, June 23, 2015
 * 2.2.0, July 14, 2015
 * 2.2.1, August 12, 2015
 * 2.2.2, August 19, 2015
 * 2.3.0, September 22, 2015
+* 2.3.1, October 2, 2015
+* 2.4.0, November 14, 2015
 
 Any fixes should be applied on the appropriate release branch and be cherry-picked to
 master.
@@ -49,3 +53,5 @@ Refer to `setup/README.md` to get started deploying Tower.
 Refer to `docs/build_system.md` for more about Jenkins and installing nightly builds (as opposed to running from source).
 
 Refer to `docs/release_process.md` for information on the steps involved in creating a release.
+
+Refer to http://docs.ansible.com/ansible-tower/index.html for information on installing/upgrading, setup, troubleshooting, and much more.

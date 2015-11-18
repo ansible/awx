@@ -32,6 +32,8 @@ CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
 # Enable PROOT for tower-qa integration tests
 AWX_PROOT_ENABLED = True
 
+PENDO_TRACKING_STATE = "off"
+
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins
@@ -74,10 +76,8 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 # default settings for development.  If not present, we can still run using
 # only the defaults.
 try:
-    include(
-        optional('local_*.py'),
-        scope=locals(),
-    )
+    include(optional('local_*.py'), scope=locals())
+    include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

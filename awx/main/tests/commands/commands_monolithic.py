@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 import urlparse
-import unittest
+import unittest2 as unittest
 
 # Django
 import django
@@ -25,9 +25,6 @@ from django.test.utils import override_settings
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
-
-if not hasattr(unittest, 'skipIf'):
-    import unittest2 as unittest
 
 __all__ = ['CreateDefaultOrgTest', 'DumpDataTest', 'CleanupDeletedTest',
            'CleanupJobsTest', 'CleanupActivityStreamTest',
@@ -831,7 +828,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         host_names = set(new_inv.hosts.filter(active=True).values_list('name', flat=True))
         self.assertEqual(expected_host_names, host_names)
         expected_inv_vars = {'vara': 'A', 'varc': 'C'}
-        if overwrite or overwrite_vars:
+        if overwrite_vars:
             expected_inv_vars.pop('varc')
         self.assertEqual(new_inv.variables_dict, expected_inv_vars)
         for host in new_inv.hosts.filter(active=True):
@@ -849,7 +846,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         for group in new_inv.groups.filter(active=True):
             if group.name == 'servers':
                 expected_vars = {'varb': 'B', 'vard': 'D'}
-                if overwrite or overwrite_vars:
+                if overwrite_vars:
                     expected_vars.pop('vard')
                 self.assertEqual(group.variables_dict, expected_vars)
                 children = set(group.children.filter(active=True).values_list('name', flat=True))

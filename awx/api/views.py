@@ -11,6 +11,7 @@ import time
 import socket
 import sys
 import errno
+from base64 import b64encode
 
 # Django
 from django.conf import settings
@@ -47,23 +48,27 @@ import qsstats
 # ANSIConv
 import ansiconv
 
+# Python Social Auth
+from social.backends.utils import load_backends
+
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
 from awx.main.tasks import mongodb_control
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.api.authentication import TaskAuthentication
+from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.utils.decorators import paginated
 from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.license import feature_enabled, LicenseForbids
+from awx.api.license import feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.fact.models import * # noqa
+from awx.main.utils import emit_websocket_notification
 
 def api_exception_handler(exc):
     '''
@@ -186,12 +191,15 @@ class ApiV1ConfigView(APIView):
         license_reader = TaskSerializer()
         license_data   = license_reader.from_file(show_key=request.user.is_superuser)
 
+        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
             eula=render_to_string("eula.md"),
+            analytics_status=pendo_state
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field
@@ -510,6 +518,45 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     view_name = 'Schedule Jobs List'
     new_in_148 = True
 
+class AuthView(APIView):
+
+    authentication_classes = []
+    permission_classes = (AllowAny,)
+    new_in_240 = True
+
+    def get(self, request):
+        data = SortedDict()
+        err_backend, err_message = request.session.get('social_auth_error', (None, None))
+        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
+        # Return auth backends in consistent order: Google, GitHub, SAML.
+        auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
+        for name, backend in auth_backends:
+            if (not feature_exists('enterprise_auth') and
+                not feature_enabled('ldap')) or \
+                (not feature_enabled('enterprise_auth') and
+                 name in ['saml', 'radius']):
+                    continue
+            login_url = reverse('social:begin', args=(name,))
+            complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
+            backend_data = {
+                'login_url': login_url,
+                'complete_url': complete_url,
+            }
+            if name == 'saml':
+                backend_data['metadata_url'] = reverse('sso:saml_metadata')
+                for idp in sorted(settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys()):
+                    saml_backend_data = dict(backend_data.items())
+                    saml_backend_data['login_url'] = '%s?idp=%s' % (login_url, idp)
+                    full_backend_name = '%s:%s' % (name, idp)
+                    if err_backend == full_backend_name and err_message:
+                        saml_backend_data['error'] = err_message
+                    data[full_backend_name] = saml_backend_data
+            else:
+                if err_backend == name and err_message:
+                    backend_data['error'] = err_message
+                data[name] = backend_data
+        return Response(data)
+
 class AuthTokenView(APIView):
 
     authentication_classes = []
@@ -524,12 +571,30 @@ class AuthTokenView(APIView):
             try:
                 token = AuthToken.objects.filter(user=serializer.object['user'],
                                                  request_hash=request_hash,
-                                                 expires__gt=now())[0]
+                                                 expires__gt=now(),
+                                                 reason='')[0]
                 token.refresh()
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.object['user'],
                                                  request_hash=request_hash)
-            return Response({'token': token.key, 'expires': token.expires})
+                # Get user un-expired tokens that are not invalidated that are 
+                # over the configured limit.
+                # Mark them as invalid and inform the user
+                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.object['user'])
+                for t in invalid_tokens:
+                    # TODO: send socket notification
+                    emit_websocket_notification('/socket.io/control',
+                                                'limit_reached',
+                                                dict(reason=unicode(AuthToken.reason_long('limit_reached'))),
+                                                token_key=t.key)
+                    t.invalidate(reason='limit_reached')
+
+            # Note: This header is normally added in the middleware whenever an
+            # auth token is included in the request header.
+            headers = {
+                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+            }
+            return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationList(ListCreateAPIView):
@@ -2092,12 +2157,6 @@ class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
     relationship = 'schedules'
     parent_key = 'unified_job_template'
 
-    def post(self, request, *args, **kwargs):
-        system_job = self.get_parent_object()
-        if system_job.schedules.filter(active=True).count() > 0:
-            return Response({"error": "Multiple schedules for Systems Jobs is not allowed"}, status=status.HTTP_400_BAD_REQUEST)
-        return super(SystemJobTemplateSchedulesList, self).post(request, *args, **kwargs)
-
 class SystemJobTemplateJobsList(SubListAPIView):
 
     model = SystemJob
@@ -2207,6 +2266,7 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        obj.launch_type = 'relaunch'
         new_job = obj.copy()
         result = new_job.signal_start(**request.DATA)
         if not result:
@@ -2788,6 +2848,7 @@ class UnifiedJobList(ListAPIView):
 
 class UnifiedJobStdout(RetrieveAPIView):
 
+    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,
@@ -2804,8 +2865,10 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-
+        
         if request.accepted_renderer.format in ('html', 'api', 'json'):
+            content_format = request.QUERY_PARAMS.get('content_format', 'html')
+            content_encoding = request.QUERY_PARAMS.get('content_encoding', None)
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
             dark_val = request.QUERY_PARAMS.get('dark', '')
@@ -2826,7 +2889,10 @@ class UnifiedJobStdout(RetrieveAPIView):
             if request.accepted_renderer.format == 'api':
                 return Response(mark_safe(data))
             if request.accepted_renderer.format == 'json':
-                return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
+                if content_encoding == 'base64' and content_format == 'ansi':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content)})
+                elif content_format == 'html':
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)

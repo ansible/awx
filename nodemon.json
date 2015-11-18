@@ -6,9 +6,9 @@
     "awx/ui/static/docs/**/*"
   ],
   "watch": [
-    "awx/ui/static",
-    "awx/ui/tests",
-    "awx/ui/templates/ui/index.html"
+    "tools/ui/timepiece.js",
+    "packaging/node/Brocfile.js",
+    "packaging/node/tower-app.js"
   ],
   "ext": "js json less html"
 }
