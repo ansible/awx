@@ -68,6 +68,7 @@ import './shared/Socket';
 import './job-templates/main';
 import './shared/features/main';
 import pendolytics from './login/authenticationServices/pendo/ng-pendo';
+import footer from './footer/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
