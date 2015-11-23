@@ -1,4 +1,20 @@
 /** @define LoginModal */
+.LoginModal-backDrop {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1041;
+    opacity: 0;
+    transition: 0.5s opacity;
+    background: #000;
+}
+
+.LoginModal-backDrop.is-loggedOut {
+    opacity: 0.2;
+}
+
 .LoginModal-dialog {
     margin: 30px auto;
     margin-top: 135px;
@@ -14,6 +30,8 @@
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.5s;
+    z-index: 1042;
+    position: relative;
 }
 
 .LoginModal-content.is-loggedOut {

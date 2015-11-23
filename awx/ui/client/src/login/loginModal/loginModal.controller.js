@@ -59,13 +59,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty, ClearScope, scope, pendoService) {
 
-    var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain;
-
-    setLoginFocus = function () {
-        // Need to clear out any open dialog windows that might be open when this modal opens.
-        ClearScope();
-        $('#login-username').focus();
-    };
+    var lastPath, lastUser, sessionExpired, loginAgain;
 
     loginAgain = function() {
         setTimeout(function() {
@@ -93,27 +87,17 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     $log.debug('User session expired: ' + sessionExpired);
     $log.debug('Last URL: ' + lastPath());
 
-    // Hide any lingering modal dialogs
-    $('.modal[aria-hidden=false]').each(function () {
-        if ($(this).attr('id') !== 'login-modal') {
-            $(this).modal('hide');
-        }
-    });
-
-    // Just in case, make sure the wait widget is not active
-    // and scroll the window to the top
-    Wait('stop');
-    window.scrollTo(0,0);
-
-    // Set focus to username field
-    $('#login-modal').on('shown.bs.modal', function () {
-        setLoginFocus();
-    });
-
     $rootScope.loginConfig.promise.then(function () {
-        scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
+        if ($AnsibleConfig.custom_logo) {
+            scope.customLogo = "custom_console_logo.png";
+            scope.customLogoPresent = true;
+        } else {
+            scope.customLogo = "login_modal_logo.png";
+            scope.customLogoPresent = false;
+        }
+
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
-        scope.customLoginInfoPresent = ($AnsibleConfig.customLoginInfo) ? true : false;
+        scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
     });
 
     // Reset the login form
@@ -121,19 +105,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     //scope.loginForm.login_password.$setPristine();
     //$rootScope.userLoggedIn = false; //hide the logout link. if you got here, you're logged out.
     //$cookieStore.put('userLoggedIn', false); //gets set back to true by Authorization.setToken().
-
-    $('#login-password').bind('keypress', function (e) {
-        var code = (e.keyCode ? e.keyCode : e.which);
-        if (code === 13) {
-            $('#login-button').click();
-        }
-    });
-
-    scope.reset = function () {
-        $('#login-form input').each(function () {
-            $(this).val('');
-        });
-    };
 
     if (scope.removeAuthorizationGetLicense) {
         scope.removeAuthorizationGetLicense();

@@ -1,4 +1,6 @@
 <div id="login-modal" class="LoginModal">
+    <div class="LoginModal-backDrop"
+        ng-class="{'is-loggedOut' : !$root.current_user.username}"></div>
     <div class="LoginModal-dialog">
         <div class="LoginModal-content"
             ng-class="{'is-loggedOut' : !$root.current_user.username}">

@@ -80,7 +80,9 @@ export default
                     $rootScope.lastPath = '/home';
                 }
                 x = Store('sessionTime');
-                x[$rootScope.current_user.id].loggedIn = false;
+                if ($rootScope.current_user) {
+                    x[$rootScope.current_user.id].loggedIn = false;
+                }
                 Store('sessionTime', x);
 
                 $rootScope.lastUser = $cookieStore.get('current_user').id;
@@ -98,7 +100,9 @@ export default
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
-                $rootScope.sessionTimer.clearTimers();
+                if ($rootScope.sessionTimer) {
+                    $rootScope.sessionTimer.clearTimers();
+                }
             },
 
             getLicense: function () {
@@ -116,7 +120,7 @@ export default
                 var license = data.license_info;
                 license.analytics_status = data.analytics_status;
                 license.version = data.version;
-                license.ansible_version = data.ansible_version; 
+                license.ansible_version = data.ansible_version;
                 license.tested = false;
                 Store('license', license);
                 $rootScope.features = Store('license').features;
