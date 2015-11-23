@@ -67,7 +67,7 @@ import './shared/InventoryTree';
 import './shared/Socket';
 import './job-templates/main';
 import './shared/features/main';
-import pendolytics from './login/authenticationServices/pendo/ng-pendo';
+import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 
 /*#if DEBUG#*/
@@ -95,7 +95,6 @@ var tower = angular.module('Tower', [
     templateUrl.name,
     adhoc.name,
     login.name,
-    pendolytics.name,
     footer.name,
     'templates',
     'Utilities',
@@ -184,6 +183,7 @@ var tower = angular.module('Tower', [
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
+    'pendolytics'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
