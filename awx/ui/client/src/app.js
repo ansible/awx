@@ -77,7 +77,6 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     'ngAnimate',
-    'pendolytics',
     'ngRoute',
     'ngSanitize',
     'ngCookies',
@@ -96,6 +95,8 @@ var tower = angular.module('Tower', [
     templateUrl.name,
     adhoc.name,
     login.name,
+    pendolytics.name,
+    footer.name,
     'templates',
     'Utilities',
     'LicenseHelper',
@@ -183,7 +184,6 @@ var tower = angular.module('Tower', [
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
-    'footer'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
