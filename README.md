@@ -37,6 +37,8 @@ Release History
 * 2.2.1, August 12, 2015
 * 2.2.2, August 19, 2015
 * 2.3.0, September 22, 2015
+* 2.3.1, October 2, 2015
+* 2.4.0, November 14, 2015
 
 Any fixes should be applied on the appropriate release branch and be cherry-picked to
 master.

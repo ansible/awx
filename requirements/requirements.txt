@@ -2,6 +2,7 @@ amqp==1.4.5
 git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
 anyjson==0.3.3
 apache-libcloud==0.15.1
+appdirs==1.4.0
 argparse==1.2.1
 azure==0.9.0
 Babel==1.3
@@ -83,6 +84,7 @@ PyJWT==1.4.0
 pymongo==2.8
 pyOpenSSL==0.15.1
 pyparsing==2.0.3
+pyrad==2.0
 pyrax==1.9.3
 python-cinderclient==1.1.1
 python-dateutil==2.4.0

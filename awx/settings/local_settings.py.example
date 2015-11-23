@@ -575,17 +575,12 @@ SOCIAL_AUTH_TEAM_MAP = {
 #SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP = {}
 #SOCIAL_AUTH_SAML_TEAM_MAP = {}
 
-# Uncomment one or more of the lines below to prevent new user accounts from
-# being created for the selected social auth providers.  Only users who have
+# Uncomment the line below (i.e. set SOCIAL_AUTH_USER_FIELDS to an empty list)
+# to prevent new user accounts from being created.  Only users who have
 # previously logged in using social auth or have a user account with a matching
 # email address will be able to login.
 
 #SOCIAL_AUTH_USER_FIELDS = []
-#SOCIAL_AUTH_GOOGLE_OAUTH2_USER_FIELDS = []
-#SOCIAL_AUTH_GITHUB_USER_FIELDS = []
-#SOCIAL_AUTH_GITHUB_ORG_USER_FIELDS = []
-#SOCIAL_AUTH_GITHUB_TEAM_USER_FIELDS = []
-#SOCIAL_AUTH_SAML_USER_FIELDS = []
 
 # It is also possible to add custom functions to the social auth pipeline for
 # more advanced organization and team mapping.  Use at your own risk.
