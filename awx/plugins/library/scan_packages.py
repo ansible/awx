@@ -70,12 +70,12 @@ def deb_package_list():
 
 def main():
     module = AnsibleModule(
-        argument_spec = dict())
-    ans_dist = get_distribution().strip()
-    if ans_dist in ('Centos', 'Centos linux', 'Red hat enterprise linux server', 'Amazon', 'Suse linux enterprise server', 'Opensuse'):
-        os.system('echo "in rpm_package_list for %s" >> /tmp/foo' % ans_dist)
+        argument_spec = dict(os_family=dict(required=True))
+    )
+    ans_os = module.params['os_family']
+    if ans_os in ('RedHat', 'Suse', 'openSUSE Leap'):
         packages = rpm_package_list()
-    elif ans_dist in ('Ubuntu', 'Debian'):
+    elif ans_os == 'Debian':
         packages = deb_package_list()
     else:
         packages = None

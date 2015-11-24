@@ -4,6 +4,7 @@
     scan_use_recursive: false
   tasks:
     - scan_packages:
+        os_family: '{{ ansible_os_family }}'
     - scan_services:
     - scan_files:
         paths: '{{ scan_file_paths }}'
