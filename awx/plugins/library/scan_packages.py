@@ -71,11 +71,13 @@ def deb_package_list():
 def main():
     module = AnsibleModule(
         argument_spec = dict())
-
-    ans_dist = get_distribution()
-    if ans_dist in ('Centos', 'Centos linux', 'Red hat enterprise linux server', 'Amazon'):
+    import os
+    os.system('echo "%s" > /tmp/foo' % get_distribution())
+    ans_dist = get_distribution().strip()
+    if ans_dist in ('Centos', 'Centos linux', 'Red hat enterprise linux server', 'Amazon', 'Suse linux enterprise server', 'Opensuse'):
+        os.system('echo "in rpm_package_list for %s" >> /tmp/foo' % ans_dist)
         packages = rpm_package_list()
-    elif ans_dist in ('Ubuntu'):
+    elif ans_dist in ('Ubuntu', 'Debian'):
         packages = deb_package_list()
     else:
         packages = None
