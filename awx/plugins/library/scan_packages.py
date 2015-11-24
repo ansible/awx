@@ -72,14 +72,18 @@ def main():
     module = AnsibleModule(
         argument_spec = dict())
 
-    packages = []
-    # TODO: module_utils/basic.py in ansible contains get_distribution() and get_distribution_version()
-    # which can be used here and is accessible by this script instead of this basic detector.
-    if os.path.exists("/etc/redhat-release"):
+    ans_dist = get_distribution()
+    if ans_dist in ('Centos', 'Centos linux', 'Red hat enterprise linux server', 'Amazon'):
         packages = rpm_package_list()
-    elif os.path.exists("/etc/os-release"):
+    elif ans_dist in ('Ubuntu'):
         packages = deb_package_list()
-    results = dict(ansible_facts=dict(packages=packages))
+    else:
+        packages = None
+
+    if packages is not None:
+        results = dict(ansible_facts=dict(packages=packages))
+    else:
+        results = dict(skipped=True, msg="Unsupported Distribution")
     module.exit_json(**results)
 
 main()
