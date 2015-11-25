@@ -1,9 +1,9 @@
 <div id="login-modal" class="LoginModal">
     <div class="LoginModal-backDrop"
-        ng-class="{'is-loggedOut' : !$root.current_user.username}"></div>
+        ng-class="{'is-loggedOut' : !$root || !$root.current_user.username}"></div>
     <div class="LoginModal-dialog">
         <div class="LoginModal-content"
-            ng-class="{'is-loggedOut' : !$root.current_user.username}">
+            ng-class="{'is-loggedOut' : !$root || !$root.current_user.username}">
             <div class="LoginModal-header">
                 <img id="login_modal_image" class="LoginModal-logoImage"
                     ng-class="{'LoginModal-logoImage--notCustom': !customLogoPresent}"
