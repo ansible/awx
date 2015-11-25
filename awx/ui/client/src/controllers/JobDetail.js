@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobDetail
@@ -13,7 +13,7 @@
 
 export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule) {
 
     ClearScope();
 
@@ -705,8 +705,21 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
                 scope.verbosity = data.verbosity;
                 scope.job_tags = data.job_tags;
                 scope.variables = ParseVariableString(data.extra_vars);
-                scope.users_url = (data.summary_fields.created_by) ? '/#/users/' + data.summary_fields.created_by.id : '';
-                scope.created_by = (data.summary_fields.created_by) ? data.summary_fields.created_by.username : '';
+
+                // If we get created_by back from the server then use it.  This means that the job was kicked
+                // off by a user and not a schedule AND that the user still exists in the system.
+                if(data.summary_fields.created_by) {
+                    scope.users_url = '/#/users/' + data.summary_fields.created_by.id;
+                    scope.created_by = data.summary_fields.created_by.username;
+                }
+                else {
+                    if(data.summary_fields.schedule) {
+                        // Build the Launched By link to point to the schedule that kicked it off
+                        scope.scheduled_by = (data.summary_fields.schedule.name) ? data.summary_fields.schedule.name.toString() : '';
+                    }
+                    // If there is no schedule or created_by then we can assume that the job was
+                    // created by a deleted user
+                }
 
                 if (data.summary_fields.credential) {
                         scope.credential_name = data.summary_fields.credential.name;
@@ -1391,10 +1404,39 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
             selected_group_id: null
         });
     };
+
+    scope.editSchedule = function() {
+    	// We need to get the schedule's ID out of the related links
+    	// An example of the related schedule link looks like /api/v1/schedules/5
+    	// where 5 is the ID we are trying to capture
+        var regex = /\/api\/v1\/schedules\/(\d+)\//;
+        var id = scope.job.related.schedule.match(regex)[1];
+        if (id) {
+        	// If we get an ID from the regular expression go ahead and open up the
+        	// modal via the EditSchedule service
+            EditSchedule({
+                scope: scope,
+                id: parseInt(id),
+                callback: 'SchedulesRefresh'
+            });
+        }
+    };
+
+    // SchedulesRefresh is the callback string that we passed to the edit schedule modal
+    // When the modal successfully updates the schedule it will emit this event and pass
+    // the updated schedule object
+    if (scope.removeSchedulesRefresh) {
+        scope.removeSchedulesRefresh();
+    }
+    scope.$on('SchedulesRefresh', function(e, data) {
+        if (data) {
+            scope.scheduled_by = data.name;
+        }
+    });
 }
 
 JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels'
+    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule'
 ];
