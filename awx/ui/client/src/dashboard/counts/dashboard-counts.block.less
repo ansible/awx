@@ -17,7 +17,13 @@
     padding-bottom: 11px;
     padding-left: 15px;
     padding-right: 15px;
-    border-radius: 3px;
+    border-radius: 5px;
+    background-color: #fff;
+    border: 1px solid #e1e1e1;
+    flex: 1 0 auto;
+    max-width: ~"calc(16.6% - 15px)";
+    flex-basis: ~"calc(16.6% - 15px)";
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 @media only screen and (max-width: 710px) {
@@ -26,11 +32,11 @@
     }
 
     .DashboardCounts-buttonStyle {
-        border: 1px solid #aaa;
         margin-bottom: 15px;
         width: 33%;
         flex-basis: ~"calc(33% - 7px)";
         max-width: ~"calc(33% - 7px)";
+        height: 96px;
     }
 }
 
@@ -58,6 +64,7 @@
     font-size: 30px;
     line-height: 26px;
     flex: 1;
+    transition: color 0.2s;
 }
 
 .DashboardCounts-number.is-failure {
@@ -67,5 +74,7 @@
 .DashboardCounts-label {
     flex: 1;
     margin-bottom: 0px;
-    color: #000;
+    color: #848992;
+    text-transform: uppercase;
+    transition: color 0.2s;
 }
