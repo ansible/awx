@@ -183,11 +183,11 @@ export default
                 if (scope.removeScheduleSaved) {
                     scope.removeScheduleSaved();
                 }
-                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function(e, data) {
                     Wait('stop');
                     $('#scheduler-modal-dialog').dialog('close');
                     if (callback) {
-                        scope.$emit(callback);
+                        scope.$emit(callback, data);
                     }
                 });
 
@@ -310,11 +310,11 @@ export default
                 if (scope.removeScheduleSaved) {
                     scope.removeScheduleSaved();
                 }
-                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function(e, data) {
                     Wait('stop');
                     $('#scheduler-modal-dialog').dialog('close');
                     if (callback) {
-                        scope.$emit(callback);
+                        scope.$emit(callback, data);
                     }
                 });
 
@@ -390,7 +390,7 @@ export default
                         Rest.put(schedule)
                             .success(function(){
                                 if (callback) {
-                                    scope.$emit(callback);
+                                    scope.$emit(callback, schedule);
                                 }
                                 else {
                                     Wait('stop');
