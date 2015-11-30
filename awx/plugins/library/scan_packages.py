@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 from ansible.module_utils.basic import * # noqa
 
 DOCUMENTATION = '''
