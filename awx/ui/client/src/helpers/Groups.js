@@ -790,6 +790,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                ParseTypeChange({ scope: properties_scope, field_id: textareaID, onReady: waitStop });
                            }
 
+                           function initSourceChange() {
+                               parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
+                               SourceChange({ scope: sources_scope, form: SourceForm });
+                           }
+
                            // Set modal dimensions based on viewport width
                            ww = $(document).width();
                            wh = $('body').height();
@@ -1058,7 +1063,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            }
                                        }
 
-                                       sources_scope.sourceChange(); //set defaults that rely on source value
+                                       initSourceChange();
 
                                        if (data.source_regions) {
                                            if (data.source === 'ec2' ||
@@ -1470,8 +1475,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                if (sources_scope.credential_name_api_error) {
                                    delete sources_scope.credential_name_api_error;
                                }
-                               parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
-                               SourceChange({ scope: sources_scope, form: SourceForm });
+                               initSourceChange();
                            };
 
                        };
