@@ -1321,6 +1321,28 @@ class ProjectUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=201)
 
+    def test_delete_project_update_as_org_admin(self):
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        projects_url = reverse('api:project_list')
+        project_data = {
+            'name': 'my public git project over https',
+            'scm_type': 'git',
+            'scm_url': scm_url,
+        }
+        org = self.make_organizations(self.super_django_user, 1)[0]
+        org.admins.add(self.normal_django_user)
+        with self.current_user(self.super_django_user):
+            del_proj = self.post(projects_url, project_data, expect=201)
+            del_proj = Project.objects.get(pk=del_proj["id"])
+            org.projects.add(del_proj)
+            pu = self.check_project_update(del_proj)
+        pu_url = reverse('api:project_update_detail', args=(pu.id,))
+        self.delete(pu_url, expect=403, auth=self.get_other_credentials())
+        self.delete(pu_url, expect=204, auth=self.get_normal_credentials())
+
     def test_public_git_project_over_https(self):
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
                           'https://github.com/ansible/ansible.github.com.git')

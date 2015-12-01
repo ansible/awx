@@ -750,6 +750,9 @@ class ProjectUpdateAccess(BaseAccess):
     def can_cancel(self, obj):
         return self.can_change(obj, {}) and obj.can_cancel
 
+    def can_delete(self, obj):
+        return obj and self.user.can_access(Project, 'delete', obj.project)
+
 class PermissionAccess(BaseAccess):
     '''
     I can see a permission when:
