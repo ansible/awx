@@ -293,7 +293,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
             for survey_element in self.survey_spec.get("spec", []):
-                if survey_element['default']:
+                if 'default' in survey_element and survey_element['default']:
                     extra_vars[survey_element['variable']] = survey_element['default']
 
         # transform to dict
