@@ -258,7 +258,8 @@ export default
                         return $http({
                             method: 'OPTIONS',
                             url: this.url,
-                            headers: this.headers
+                            headers: this.headers,
+                            data: ''
                         });
                     } else {
                         return this.createResponse({
