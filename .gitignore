@@ -39,6 +39,8 @@ __pycache__
 /bower.json
 /package.json
 /testem.yml
+/coverage
+/.istanbul.yml
 node_modules/**
 /tmp
 npm-debug.log
@@ -89,4 +91,3 @@ reports
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
 awx/lib/site-packages
-

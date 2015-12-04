@@ -5,9 +5,10 @@ PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 TESTEM ?= ./node_modules/.bin/testem
-TESTEM_DEBUG_BROWSER ?= Chrome
 BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
-MOCHA_BIN ?= ./node_modules/.bin/mocha
+MOCHA_BIN ?= ./node_modules/.bin/_mocha
+ISTANBUL_BIN ?= ./node_modules/.bin/istanbul
+BROWSER_SYNC_BIN ?= ./node_modules/.bin/browser-sync
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
@@ -154,9 +155,13 @@ endif
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
-	receiver test test_coverage coverage_html ui_analysis_report test_jenkins dev_build \
+	receiver test test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	devjs minjs testjs testjs_ci node-tests browser-tests jshint ngdocs sync_ui \
+	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
+	build-ui-for-browser-tests test-ui-debug jshint ngdocs \
+	websocket-proxy browser-sync browser-sync-reload brocolli-watcher \
+	#ui_2.4_deprecated
+	devjs minjs testjs_ci \
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball
@@ -178,13 +183,6 @@ clean-grunt:
 	rm -f package.json Gruntfile.js Brocfile.js bower.json
 	rm -rf node_modules
 
-# Remove UI build files
-clean-ui:
-	rm -rf DEBUG
-	rm -rf awx/ui/build_test
-	rm -rf awx/ui/static/
-	rm -rf awx/ui/dist
-
 # Remove packer artifacts
 clean-packer:
 	rm -rf packer_cache
@@ -199,8 +197,18 @@ clean-packer:
 clean-bundle:
 	rm -rf setup-bundle-build
 
+# remove ui build artifacts
+clean-ui:
+	rm -rf DEBUG
+
+clean-static:
+	rm -rf awx/ui/static/
+
+clean-build-test:
+	rm -rf awx/ui/build_test/
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
@@ -374,6 +382,7 @@ test_jenkins:
 # UI TASKS
 # --------------------------------------
 
+# begin targets that pull ui files from packaging to the root of the app
 Gruntfile.js: packaging/node/Gruntfile.js
 	cp $< $@
 
@@ -389,68 +398,147 @@ package.json: packaging/node/package.template
 testem.yml: packaging/node/testem.yml
 	cp $< $@
 
-# Update local npm install
+.istanbul.yml: packaging/node/.istanbul.yml
+	cp $< $@
+# end targets that pull ui files from packaging to the root of the app
+
+# update package.json and install npm dependencies
 node_modules: package.json
 	$(NPM_BIN) install
 	touch $@
 
-awx/ui/%: node_modules clean-ui Brocfile.js bower.json
-	$(BROCCOLI_BIN) build $@ -- $(UI_FLAGS)
+# helper tasks to run broccoli build process at awx/ui/<destination_dir>,
+# to build the ui, use the build-ui target instead:
+#	UI_FLAGS=<flags as seen in Brocfile.js and
+#		packaging/node/tower-app.js>: additional parameters to pass broccoli
+#		for building
+awx/ui/static: node_modules clean-ui clean-static Brocfile.js bower.json
+	$(BROCCOLI_BIN) build awx/ui/static -- $(UI_FLAGS)
 
-# Concatenated, non-minified build; contains debug code and sourcemaps; does not include any tests
-devjs: awx/ui/static
+awx/ui/build_test: node_modules clean-ui clean-build-test Brocfile.js bower.json
+	$(BROCCOLI_BIN) build awx/ui/build_test -- $(UI_FLAGS)
 
-# Concatenated, minified, compressed (production) build with no sourcemaps or tests
-minjs: UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps $(EXTRA_UI_FLAGS)
-minjs: awx/ui/static
+# build the ui to awx/ui/static:
+#	defaults to standard dev build (concatenated, non-minified, sourcemaps, no
+#		tests)
+#	PROD=true: standard prod build (concatenated, minified, no sourcemaps,
+#		compressed, no tests)
+#	EXTRA_UI_FLAGS=<flags as seen in Brocfile.js and
+#		packaging/node/tower-app.js>: additional parameters to pass broccoli
+#		for building
+PROD ?= false
 
-# Performs build to awx/ui/build_test and runs node tests via mocha
-testjs: UI_FLAGS=--node-tests --no-concat --no-styles $(EXTRA_UI_FLAGS)
-testjs: awx/ui/build_test node-tests
+# TODO: Remove after 2.4 (alias for devjs/minjs)
+devjs: build-ui
+minjs: build-ui
+ifeq ($(MAKECMDGOALS),minjs)
+   PROD = true
+endif
 
-# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci
-testjs_ci: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
-testjs_ci: awx/ui/static testem.yml browser-tests-ci
+ifeq ($(PROD),true)
+    UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps \
+    $(EXTRA_UI_FLAGS)
+else
+    UI_FLAGS=$(EXTRA_UI_FLAGS)
+endif
 
-# Performs nonminified, noncompressed build to awx/ui/static and runs browsers tests with testem ci in Chrome
-testjs_debug: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps $(EXTRA_UI_FLAGS)
-testjs_debug: awx/ui/static testem.yml browser-tests-debug
+build-ui: awx/ui/static
 
-# Runs node tests via mocha without building
-node-tests:
-	NODE_PATH=awx/ui/build_test $(MOCHA_BIN) --full-trace $(shell find  awx/ui/build_test -name '*-test.js') $(MOCHA_FLAGS)
+# launch watcher to continuously build the ui to awx/ui/static and run tests
+#	after changes are made:
+#	WATCHER_FLAGS: options to be utilized by broccoli timepiece
+#	UI_FLAGS=<flags as seen in Brocfile.js and
+#		packaging/node/tower-app.js>: additional parameters to pass broccoli
+#		for building
+# 	DOCKER_MACHINE_NAME=<name of docker-machine tower is running on>: when
+#		passed, not only will brocolli rebuild, but browser-sync will proxy
+#		proxy tower and refresh the ui when a change is made.
+DOCKER_MACHINE_NAME ?= none
+ifeq ($(DOCKER_MACHINE_NAME),none)
+   sync-ui: node_modules brocolli-watcher
+else
+   sync-ui: node_modules
+	   tmux new-session -d -s ui_sync 'exec make brocolli-watcher'
+	   tmux rename-window 'UI Sync'
+	   tmux select-window -t ui_sync:0
+	   tmux split-window -v 'exec make browser-sync'
+	   tmux split-window -h 'exec make websocket-proxy'
+	   tmux select-layout main-vertical
+	   tmux attach-session -t ui_sync
+endif
 
-# Runs browser tests on PhantomJS.  Outputs the results in a consumable manner for Jenkins.
-browser-tests-ci:
-	PATH=./node_modules/.bin:$(PATH) $(TESTEM) ci --file testem.yml -p 7359 -R xunit
+websocket-proxy:
+	docker-machine ssh $(DOCKER_MACHINE_NAME) -L 8080:localhost:8080
 
-# Runs browser tests using settings from `testem.yml` you can pass in the browser you'd
-# like to run the tests on (Defaults to Chrome, other options Safari, Firefox, and PhantomJS).
-# If you want to run the tests in Node (which is the quickest, but also more difficult to debug),
-# make sure to run the testjs/node-tests targets
-browser-tests-debug:
+browser-sync:
+	$(BROWSER_SYNC_BIN) start --proxy $(shell docker-machine ip $(DOCKER_MACHINE_NAME)):8013 --ws
+
+browser-sync-reload:
+	$(BROWSER_SYNC_BIN) reload
+
+brocolli-watcher: Brocfile.js testem.yml
+	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
+
+# run ui unit-tests:
+#	defaults to a useful dev testing run.  Builds the ui to awx/ui/build_test
+#		and runs mocha (node.js) tests with istanbul coverage (and an html
+#		coverage report)
+#	CI=true: Builds the ui to awx/ui/build_test
+#		and runs mocha (node.js) tests with istanbul coverage (and a cobertura
+#		coverage report).  Also builds the ui to awx/ui/static and runs the
+#		testem (phantomjs) tests.  Outputs these to XUNIT format to be consumed
+#		and displayed in jenkins
+#	DEBUG=true: Builds the ui to awx/ui/static and runs testem tests in Chrome
+#		so you can breakpoint the tests and underlying code to figure out why
+#		tests are failing.
+#		TESTEM_DEBUG_BROWSER: the browser to run tests in, default to Chrome
+
+# TODO: deprecated past 2.4
+testjs_ci: test-ui # w var UI_TEST_MODE=CI
+
+UI_TEST_MODE ?= DEV
+ifeq ($(UI_TEST_MODE),CI)
+    # ci testing run
+    # this used to be testjs_ci, sort-of
+    REPORTER = xunit
+    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
+else
+ifeq ($(UI_TEST_MODE),DEV_DEBUG)
+    # debug (breakpoint) dev testing run
+    test-ui: build-ui-for-browser-tests test-ui-debug
+else
+    # default dev testing run
+    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
+endif
+endif
+
+# helper tasks to test ui, don't call directly
+build-ui-for-coverage: UI_FLAGS=--node-tests --no-concat --no-styles
+build-ui-for-coverage: awx/ui/build_test
+
+REPORTER ?= standard
+ifeq ($(REPORTER), xunit)
+   test-ui-for-coverage:
+	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cp coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
+else
+   test-ui-for-coverage:
+	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+endif
+
+build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps
+build-ui-for-browser-tests: awx/ui/static
+
+TESTEM_DEBUG_BROWSER ?= Chrome
+test-ui-debug:
 	PATH=./node_modules/.bin:$(PATH) $(TESTEM) --file testem.yml -l $(TESTEM_DEBUG_BROWSER)
 
-# Check .js files for errors and lint
+# lint .js files
 jshint: node_modules Gruntfile.js
 	$(GRUNT) $@
 
-# Generate UI code documentation
-ngdocs: devjs Gruntfile.js
+# generate ui docs
+ngdocs: build-ui Gruntfile.js
 	$(GRUNT) $@
-
-# Launch watcher for build process
-sync_ui: node_modules Brocfile.js testem.yml
-	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
-
-# Build code complexity report for UI code
-ui_analysis_report: reports/ui_code node_modules Gruntfile.js
-	$(GRUNT) plato:report
-
-# Non-concatenated, non-minified build with no tests, no debug code, no sourcemaps for plato reports
-reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	rm -rf reports/ui_code
-	$(BROCCOLI_BIN) build reports/ui_code -- --no-concat --no-debug --no-styles --no-sourcemaps
 
 # END UI TASKS
 # --------------------------------------
