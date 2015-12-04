@@ -5,7 +5,7 @@ import logging
 import threading
 import uuid
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
