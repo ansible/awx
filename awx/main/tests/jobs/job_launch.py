@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.main.models import * # noqa
 from .base import BaseJobTestMixin
+import yaml
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']
 
@@ -69,6 +70,28 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
             response = self.post(self.launch_url, {}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
+
+    def test_launch_extra_vars_json(self):
+        # Sending extra_vars as a JSON string, implicit credentials
+        with self.current_user(self.user_sue):
+            data = dict(extra_vars = '{\"a\":3}')
+            response = self.post(self.launch_url, data, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            ev_dict = yaml.load(j.extra_vars)
+            self.assertIn('a', ev_dict)
+            if 'a' in ev_dict:
+                self.assertEqual(ev_dict['a'], 3)
+
+    def test_launch_extra_vars_yaml(self):
+        # Sending extra_vars as a JSON string, implicit credentials
+        with self.current_user(self.user_sue):
+            data = dict(extra_vars = 'a: 3')
+            response = self.post(self.launch_url, data, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            ev_dict = yaml.load(j.extra_vars)
+            self.assertIn('a', ev_dict)
+            if 'a' in ev_dict:
+                self.assertEqual(ev_dict['a'], 3)
 
     def test_credential_explicit(self):
         # Explicit, credential
@@ -195,4 +218,3 @@ class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             response = self.post(self.launch_url, {'ssh_password': ''}, expect=400)
             self.assertIn('ssh_password', response['passwords_needed_to_start'])
-
