@@ -681,6 +681,148 @@ FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+TOWER_SETTINGS_MANIFEST = {
+    "PROJECTS_ROOT": {
+        "name": "Projects Root Directory",
+        "description": "Directory to store synced projects in and to look for manual projects",
+        "default": PROJECTS_ROOT,
+        "type": "string",
+        "category": "jobs",
+    },
+    "JOBOUTPUT_ROOT": {
+        "name": "Job Standard Output Directory",
+        "description": "Directory to store job standard output files",
+        "default": JOBOUTPUT_ROOT,
+        "type": "string",
+        "category": "jobs",
+    },
+    "SCHEDULE_MAX_JOBS": {
+        "name": "Maximum Scheduled Jobs",
+        "description": "Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created",
+        "default": SCHEDULE_MAX_JOBS,
+        "type": "int",
+        "category": "jobs",
+    },
+    "STDOUT_MAX_BYTES_DISPLAY": {
+        "name": "Standard Output Maximum Display Size",
+        "description": "Maximum Size of Standard Output in bytes to display before requiring the output be downloaded",
+        "default": STDOUT_MAX_BYTES_DISPLAY,
+        "type": "int",
+        "category": "jobs",
+    },
+    "AUTH_TOKEN_EXPIRATION": {
+        "name": "Idle Time Force Log Out",
+        "description": "Number of seconds that a user is inactive before they will need to login again",
+        "type": "int",
+        "default": AUTH_TOKEN_EXPIRATION,
+        "category": "authentication",
+    },
+    "AUTH_TOKEN_PER_USER": {
+        "name": "Maximum number of simultaneous logins",
+        "description": "Maximum number of simultaneous logins a user may have. To disable enter -1",
+        "type": "int",
+        "default": AUTH_TOKEN_PER_USER,
+        "category": "authentication",
+    },
+    "AUTH_BASIC_ENABLED": {
+        "name": "Enable HTTP Basic Auth",
+        "description": "Enable HTTP Basic Auth for the API Browser",
+        "default": AUTH_BASIC_ENABLED,
+        "type": "bool"
+        "category": "authentication",
+    },
+    "AUTH_LDAP_SERVER_URI": {
+        "name": "LDAP Server URI",
+        "description": "URI Location of the LDAP Server",
+        "default": AUTH_LDAP_SERVER_URI,
+        "type": "string",
+        "category": "authentication",
+    },
+    "RADIUS_SERVER": {
+        "name": "Radius Server Host",
+        "description": "Host to communicate with for Radius Authentication",
+        "default": RADIUS_SERVER,
+        "type": "string",
+        "category": "authentication",
+    },
+    "RADIUS_PORT": {
+        "name": "Radius Server Port",
+        "description": "Port on the Radius host for Radius Authentication"s,
+        "default": RADIUS_PORT,
+        "type": "string",
+        "category": "authentication",
+    },
+    "RADIUS_SECRET": {
+        "name": "Radius Server Secret",
+        "description": "Secret used when negotiating with the Radius server",
+        "default": RADIUS_SECRET,
+        "type": "string",
+        "category": "authentication",
+    },
+    "AWX_PROOT_ENABLED": {
+        "name": "Enable PRoot for Job Execution",
+        "description": "Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information",
+        "default": AWX_PROOT_ENABLED,
+        "type": "bool",
+        "category": "jobs",
+    },
+    "AWX_PROOT_HIDE_PATHS": {
+        "name": "Paths to hide from PRoot jobs",
+        "description": "Extra paths to hide from PRoot isolated processes",
+        "default": AWX_PROOT_HIDE_PATHS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "AWX_PROOT_SHOW_PATHS": {
+        "name": "Paths to expose to PRoot jobs",
+        "description": "Explicit whitelist of paths to expose to PRoot jobs",
+        "default": AWX_PROOT_SHOW_PATHS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "AWX_PROOT_BASE_PATH": {
+        "name": "Base PRoot execution path",
+        "description": "The location that PRoot will create its temporary working directory",
+        "default": AWX_PROOT_BASE_PATH,
+        "type": "string",
+        "category": "jobs",
+    },
+    "AWX_ANSIBLE_CALLBACK_PLUGINS": {
+        "name": "Ansible Callback Plugins",
+        "description": "Extra Callback Plugins to be used when running jobs",
+        "default": AWX_ANSIBLE_CALLBACK_PLUGINS,
+        "type": "string",
+        "category": "jobs",
+    },
+    "PENDO_TRACKING_STATE": {
+        "name": "Analytics Tracking State",
+        "description": "Enable or Disable Analytics Tracking",
+        "default": PENDO_TRACKING_STATE,
+        "type": "string",
+        "category": "ui",
+    },
+    "AD_HOC_COMMANDS": {
+        "name": "Ansible Modules Allowed for Ad Hoc Jobs",
+        "description": "A colon-seperated whitelist of modules allowed to be used by ad-hoc jobs",
+        "default": AD_HOC_COMMANDS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "ACTIVITY_STREAM_ENABLED": {
+        "name": "Enable Activity Stream",
+        "description": "Enable capturing activity for the Tower activity stream",
+        "default": ACTIVITY_STREAM_ENABLED,
+        "type": "bool",
+        "category": "system",
+    },
+    "ORG_ADMINS_CAN_SEE_ALL_USERS": {
+        "name": "All Users Visible to Organization Admins",
+        "description": "Controls whether any Organization Admin can view all users, even those not associated with their Organization",
+        "default": ORG_ADMINS_CAN_SEE_ALL_USERS,
+        "type": "bool",
+        "category": "system",
+    },
+}
 # Logging configuration.
 LOGGING = {
     'version': 1,
