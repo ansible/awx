@@ -23,6 +23,6 @@ def test_mongo_connection():
                      tz_aware=settings.USE_TZ)
         db[settings.MONGO_DB].command('ping')
         return True
-    except ConnectionError, AutoReconnect:
+    except (ConnectionError, AutoReconnect):
         return False
     
