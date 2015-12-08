@@ -482,6 +482,7 @@ brocolli-watcher: Brocfile.js testem.yml
 #	defaults to a useful dev testing run.  Builds the ui to awx/ui/build_test
 #		and runs mocha (node.js) tests with istanbul coverage (and an html
 #		coverage report)
+#	UI_TESTS_TO_RUN=<file>-test.js: Set this to only run a specific test file
 #	CI=true: Builds the ui to awx/ui/build_test
 #		and runs mocha (node.js) tests with istanbul coverage (and a cobertura
 #		coverage report).  Also builds the ui to awx/ui/static and runs the
@@ -516,12 +517,18 @@ build-ui-for-coverage: UI_FLAGS=--node-tests --no-concat --no-styles
 build-ui-for-coverage: awx/ui/build_test
 
 REPORTER ?= standard
+UI_TESTS_TO_RUN ?= all
 ifeq ($(REPORTER), xunit)
    test-ui-for-coverage:
-	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cp coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
+	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cpa coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
 else
+ifeq ($(UI_TESTS_TO_RUN), all)
    test-ui-for-coverage:
-	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
+else
+test-ui-for-coverage:
+	 NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '$(UI_TESTS_TO_RUN)')
+endif
 endif
 
 build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests
