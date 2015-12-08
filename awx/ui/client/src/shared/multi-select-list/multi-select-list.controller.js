@@ -53,7 +53,7 @@ export default ['$scope',
         }
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#registerItem
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -69,7 +69,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#deregisterItem
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -85,7 +85,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#decorateItem
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -104,7 +104,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#selectAll
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -120,7 +120,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#deselectAll
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -138,7 +138,7 @@ export default ['$scope',
 
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#deselectAllExtended
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -152,7 +152,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#selectAllExtended
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -166,7 +166,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#selectItem
          * @methodOf multiSelectList.controller:multiSelectList
          *
@@ -181,7 +181,7 @@ export default ['$scope',
         };
 
         /**
-         * @ngdoc
+         * @ngdoc method
          * @name multiSelectList.controller:multiSelectList#deregisterItem
          * @methodOf multiSelectList.controller:multiSelectList
          *

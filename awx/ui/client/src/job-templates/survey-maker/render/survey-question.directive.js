@@ -2,7 +2,7 @@
 import {templateUrl} from '../../../shared/template-url/template-url.factory';
 
 /**
- * @ngdoc
+ * @ngdoc directive
  * @name jobTemplates.surveyMaker.render.surveyQuestion
  * @description
  *  Directive that will eventually hold all logic
