@@ -929,7 +929,7 @@ class LdapTest(BaseTest):
         if not self.ldap_password:
             self.skipTest('no test LDAP password defined')
         # Set test LDAP settings that are always needed.
-        for name in ('SERVER_URI', 'BIND_DN', 'BIND_PASSWORD', 'USE_TLS'):
+        for name in ('SERVER_URI', 'BIND_DN', 'BIND_PASSWORD', 'USE_TLS', 'CONNECTION_OPTIONS'):
             self.use_test_setting(name)
 
     def check_login(self, username=None, password=None, should_fail=False):
