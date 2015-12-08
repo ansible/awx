@@ -160,7 +160,6 @@ endif
 	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
 	build-ui-for-browser-tests test-ui-debug jshint ngdocs \
 	websocket-proxy browser-sync browser-sync-reload brocolli-watcher \
-	#ui_2.4_deprecated
 	devjs minjs testjs_ci \
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
@@ -525,7 +524,7 @@ else
 	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
 endif
 
-build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests --no-sourcemaps
+build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests
 build-ui-for-browser-tests: awx/ui/static
 
 TESTEM_DEBUG_BROWSER ?= Chrome
