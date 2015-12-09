@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 from ansible.module_utils.basic import * # noqa
 
 DOCUMENTATION = '''
@@ -70,16 +69,20 @@ def deb_package_list():
 
 def main():
     module = AnsibleModule(
-        argument_spec = dict())
-
-    packages = []
-    # TODO: module_utils/basic.py in ansible contains get_distribution() and get_distribution_version()
-    # which can be used here and is accessible by this script instead of this basic detector.
-    if os.path.exists("/etc/redhat-release"):
+        argument_spec = dict(os_family=dict(required=True))
+    )
+    ans_os = module.params['os_family']
+    if ans_os in ('RedHat', 'Suse', 'openSUSE Leap'):
         packages = rpm_package_list()
-    elif os.path.exists("/etc/os-release"):
+    elif ans_os == 'Debian':
         packages = deb_package_list()
-    results = dict(ansible_facts=dict(packages=packages))
+    else:
+        packages = None
+
+    if packages is not None:
+        results = dict(ansible_facts=dict(packages=packages))
+    else:
+        results = dict(skipped=True, msg="Unsupported Distribution")
     module.exit_json(**results)
 
 main()

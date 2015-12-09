@@ -745,7 +745,7 @@ reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
 	$(REPREPRO_BIN) $(REPREPRO_OPTS) clearvanished
 	for COMPONENT in non-free $(VERSION); do \
 	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
-	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
+	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --keepunreferencedfiles --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
 	done
 
 

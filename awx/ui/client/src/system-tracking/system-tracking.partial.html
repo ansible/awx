@@ -54,7 +54,7 @@
                          'is-active': module.isActive,
                       }"
             ng-click="setActiveModule(module.name)"
-            ng-repeat="module in modules | orderBy: 'sortKey'">
+            ng-repeat="module in modules | orderBy: 'sortKey' track by $index">
             {{module.displayName}}
         </button>
     </nav>
