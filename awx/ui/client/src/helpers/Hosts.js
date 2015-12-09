@@ -545,31 +545,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                               //ParseTypeChange({ scope: scope, field_id: 'host_variables', onReady: callback });
                           });
 
-                          if (scope.hostLoadedRemove) {
-                              scope.hostLoadedRemove();
-                          }
-                          scope.hostLoadedRemove = scope.$on('hostLoaded', function() {
-                              // Retrieve host variables
-                              if (scope.variable_url) {
-                                  Rest.setUrl(scope.variable_url);
-                                  Rest.get()
-                                  .success( function(data) {
-                                      scope.variables = ParseVariableString(data);
-                                      scope.$emit('hostVariablesLoaded');
-                                  })
-                                  .error( function(data, status) {
-                                      scope.variables = null;
-                                      ProcessErrors(scope, data, status, form,
-                                                    { hdr: 'Error!', msg: 'Failed to retrieve host variables. GET returned status: ' + status });
-                                  });
-                              }
-                              else {
-                                  scope.variables = "---";
-                                  scope.$emit('hostVariablesLoaded');
-                              }
-                              master.variables = scope.variables;
-                          });
-
                           Wait('start');
 
                           // Retrieve detail record and prepopulate the form
@@ -593,7 +568,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                   }
                                   scope.variable_url = data.related.variable_data;
                                   scope.has_inventory_sources = data.has_inventory_sources;
-                                  scope.$emit('hostLoaded');
+                                  scope.$emit('hostVariablesLoaded');
                               })
                               .error( function(data, status) {
                                   ProcessErrors(parent_scope, data, status, form,
