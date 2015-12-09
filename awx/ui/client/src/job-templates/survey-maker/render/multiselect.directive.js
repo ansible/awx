@@ -1,7 +1,7 @@
 /* jshint unused: vars */
 
 /**
- * @ngdoc
+ * @ngdoc directive
  *
  * @name jobTemplates.surveyMaker.render.multiSelect
  * @description
