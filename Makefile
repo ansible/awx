@@ -520,7 +520,7 @@ REPORTER ?= standard
 UI_TESTS_TO_RUN ?= all
 ifeq ($(REPORTER), xunit)
    test-ui-for-coverage:
-	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cpa coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
+	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cp coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
 else
 ifeq ($(UI_TESTS_TO_RUN), all)
    test-ui-for-coverage:
