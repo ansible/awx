@@ -1505,7 +1505,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         else:
             d['can_copy'] = False
             d['can_edit'] = False
-        d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-started')[:10]]
+        d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-created')[:10]]
         return d
 
     def validate_survey_enabled(self, attrs, source):

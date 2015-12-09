@@ -428,7 +428,7 @@ export default
                 // }, 300);
             });
 
-            if (base === 'jobs' && list.name === 'completed_jobs') {
+            if (base === 'jobs' && list.name === 'all_jobs') {
                 if ($routeParams.id__int) {
                     scope[list.iterator + 'SearchField'] = 'id';
                     scope[list.iterator + 'SearchValue'] = $routeParams.id__int;

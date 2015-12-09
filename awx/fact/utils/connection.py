@@ -4,6 +4,7 @@
 from django.conf import settings
 from mongoengine import connect
 from mongoengine.connection import ConnectionError
+from pymongo.errors import AutoReconnect
 
 def test_mongo_connection():
     # Connect to Mongo
@@ -14,13 +15,14 @@ def test_mongo_connection():
             raise ConnectionError
 
         # Attempt to connect to the MongoDB database.
-        connect(settings.MONGO_DB,
-                host=settings.MONGO_HOST,
-                port=int(settings.MONGO_PORT),
-                username=settings.MONGO_USERNAME,
-                password=settings.MONGO_PASSWORD,
-                tz_aware=settings.USE_TZ)
+        db = connect(settings.MONGO_DB,
+                     host=settings.MONGO_HOST,
+                     port=int(settings.MONGO_PORT),
+                     username=settings.MONGO_USERNAME,
+                     password=settings.MONGO_PASSWORD,
+                     tz_aware=settings.USE_TZ)
+        db[settings.MONGO_DB].command('ping')
         return True
-    except ConnectionError:
+    except (ConnectionError, AutoReconnect):
         return False
     

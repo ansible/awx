@@ -1101,6 +1101,7 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('all_rds_instances', 'False')
             ec2_opts.setdefault('rds', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
+            ec2_opts.setdefault('elasticache', 'False')
             if inventory_update.instance_filters:
                 ec2_opts.setdefault('instance_filters', inventory_update.instance_filters)
             group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
