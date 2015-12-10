@@ -22,7 +22,9 @@ from django.db import connection
 # AWX
 from awx.main.models import * # noqa
 from awx.main.socket import Socket
+from awx.lib.metrics import BaseTimer
 
+fn_timer = BaseTimer(__name__)
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 WORKERS = 4
@@ -98,6 +100,7 @@ class CallbackReceiver(object):
                 break
             time.sleep(0.1)
 
+    @fn_timer
     def write_queue_worker(self, preferred_queue, worker_queues, message):
         queue_order = sorted(range(WORKERS), cmp=lambda x, y: -1 if x==preferred_queue else 0)
         for queue_actual in queue_order:
@@ -161,6 +164,7 @@ class CallbackReceiver(object):
                             sys.exit(1)
                     last_parent_events[message['job_id']] = job_parent_events
 
+    @fn_timer
     @transaction.atomic
     def process_job_event(self, data):
         # Sanity check: Do we need to do anything at all?
@@ -223,6 +227,7 @@ class CallbackReceiver(object):
             logger.error('Database error saving job event: %s', e)
         return None
 
+    @fn_timer
     @transaction.atomic
     def process_ad_hoc_event(self, data):
         # Sanity check: Do we need to do anything at all?

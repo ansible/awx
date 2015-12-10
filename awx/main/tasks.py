@@ -41,6 +41,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # AWX
+from awx.lib.metrics import task_timer
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
@@ -216,6 +217,7 @@ class BaseTask(Task):
     model = None
     abstract = True
 
+    @task_timer
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
         given fields.
@@ -285,6 +287,7 @@ class BaseTask(Task):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         return path
 
+    @task_timer
     def build_private_data_files(self, instance, **kwargs):
         '''
         Create a temporary files containing the private data.
@@ -328,6 +331,7 @@ class BaseTask(Task):
             '': '',
         }
 
+    @task_timer
     def build_env(self, instance, **kwargs):
         '''
         Build environment dictionary for ansible-playbook.
@@ -352,6 +356,7 @@ class BaseTask(Task):
             env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
 
+    @task_timer
     def build_safe_env(self, instance, **kwargs):
         '''
         Build environment dictionary, hiding potentially sensitive information
@@ -420,6 +425,7 @@ class BaseTask(Task):
         '''
         return SortedDict()
 
+    @task_timer
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
                     output_replacements=None):
         '''
@@ -503,6 +509,7 @@ class BaseTask(Task):
         Hook for any steps to run after job/task is complete.
         '''
 
+    @task_timer
     def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
@@ -598,6 +605,7 @@ class RunJob(BaseTask):
     name = 'awx.main.tasks.run_job'
     model = Job
 
+    @task_timer
     def build_private_data(self, job, **kwargs):
         '''
         Returns a dict of the form
@@ -881,7 +889,7 @@ class RunProjectUpdate(BaseTask):
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 
-
+    @task_timer
     def build_private_data(self, project_update, **kwargs):
         '''
         Return SSH private key data needed for this project update.
@@ -1049,6 +1057,7 @@ class RunInventoryUpdate(BaseTask):
     name = 'awx.main.tasks.run_inventory_update'
     model = InventoryUpdate
 
+    @task_timer
     def build_private_data(self, inventory_update, **kwargs):
         """Return private data needed for inventory update.
         If no private data is needed, return None.
@@ -1320,6 +1329,7 @@ class RunAdHocCommand(BaseTask):
     name = 'awx.main.tasks.run_ad_hoc_command'
     model = AdHocCommand
 
+    @task_timer
     def build_private_data(self, ad_hoc_command, **kwargs):
         '''
         Return SSH private key data needed for this ad hoc command (only if

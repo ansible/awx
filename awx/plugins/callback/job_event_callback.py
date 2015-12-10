@@ -47,6 +47,24 @@ import zmq
 
 import psutil
 
+# Only use statsd if there's a statsd host in the environment
+# otherwise just do a noop.
+if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
+    from statsd import StatsClient
+    statsd = StatsClient(host=os.environ['GRAPHITE_PORT_8125_UDP_ADDR'],
+                         port=8125,
+                         prefix='tower.job.event_callback',
+                         maxudpsize=512)
+else:
+    class NoStatsClient(object):
+        def __getattr__(self, item):
+            if item.startswith('__'):
+                return super(NoStatsClient, self).__getattr__(item)
+            else:
+                return lambda *args, **kwargs: None
+    statsd = NoStatsClient()
+
+
 class TokenAuth(requests.auth.AuthBase):
 
     def __init__(self, token):
@@ -186,7 +204,8 @@ class BaseCallbackModule(object):
 
     def _log_event(self, event, **event_data):
         if self.callback_consumer_port:
-            self._post_job_event_queue_msg(event, event_data)
+            with statsd.timer('zmq_post_event_msg.{}'.format(event)):
+                self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)
 
@@ -255,6 +274,7 @@ class BaseCallbackModule(object):
                         task=result._task, diff=diff)
 
     @staticmethod
+    @statsd.timer('terminate_ssh_control_masters')
     def terminate_ssh_control_masters():
         # Determine if control persist is being used and if any open sockets
         # exist after running the playbook.
