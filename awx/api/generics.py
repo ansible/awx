@@ -144,6 +144,7 @@ class APIView(views.APIView):
             'new_in_220': getattr(self, 'new_in_220', False),
             'new_in_230': getattr(self, 'new_in_230', False),
             'new_in_240': getattr(self, 'new_in_240', False),
+            'new_in_300': getattr(self, 'new_in_300', False),
         }
 
     def get_description(self, html=False):

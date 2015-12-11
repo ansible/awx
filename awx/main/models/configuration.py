@@ -6,19 +6,22 @@
 # Django
 from django.conf import settings
 from django.db import models
-
+from django.utils.translation import ugettext_lazy as _
 # Tower
 from awx.main.models.base import CreatedModifiedModel
 
 class TowerSettings(CreatedModifiedModel):
 
+    class Meta:
+        app_label = 'main'
+
     SETTINGS_TYPE_CHOICES = [
-        ('string', "String"),
-        ('int', 'Integer'),
-        ('float', 'Decimal'),
-        ('json', 'JSON'),
-        ('password', 'Password'),
-        ('list', 'List')
+        ('string', _("String")),
+        ('int', _('Integer')),
+        ('float', _('Decimal')),
+        ('json', _('JSON')),
+        ('password', _('Password')),
+        ('list', _('List'))
     ]
 
     key = models.CharField(

@@ -255,11 +255,11 @@ SERVER_EMAIL = 'root@localhost'
 
 # Default email address to use for various automated correspondence from
 # the site managers.
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+DEFAULT_FROM_EMAIL = 'tower@localhost'
 
 # Subject-line prefix for email messages send with django.core.mail.mail_admins
 # or ...mail_managers.  Make sure to include the trailing space.
-EMAIL_SUBJECT_PREFIX = '[AWX] '
+EMAIL_SUBJECT_PREFIX = '[Tower] '
 
 # The email backend to use. For possible shortcuts see django.core.mail.
 # The default is to use the SMTP backend.
@@ -728,7 +728,7 @@ TOWER_SETTINGS_MANIFEST = {
         "name": "Enable HTTP Basic Auth",
         "description": "Enable HTTP Basic Auth for the API Browser",
         "default": AUTH_BASIC_ENABLED,
-        "type": "bool"
+        "type": "bool",
         "category": "authentication",
     },
     "AUTH_LDAP_SERVER_URI": {
@@ -747,7 +747,7 @@ TOWER_SETTINGS_MANIFEST = {
     },
     "RADIUS_PORT": {
         "name": "Radius Server Port",
-        "description": "Port on the Radius host for Radius Authentication"s,
+        "description": "Port on the Radius host for Radius Authentication",
         "default": RADIUS_PORT,
         "type": "string",
         "category": "authentication",

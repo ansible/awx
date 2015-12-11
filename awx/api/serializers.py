@@ -267,7 +267,7 @@ class BaseSerializer(serializers.ModelSerializer):
         return choices
 
     def get_url(self, obj):
-        if obj is None:
+        if obj is None or not hasattr(obj, 'get_absolute_url'):
             return ''
         elif isinstance(obj, User):
             return reverse('api:user_detail', args=(obj.pk,))
@@ -2105,7 +2105,12 @@ class ActivityStreamSerializer(BaseSerializer):
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
+    
+class TowerSettingsSerializer(BaseSerializer):
 
+    class Meta:
+        model = TowerSettings
+        fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
 
 class AuthTokenSerializer(serializers.Serializer):
 

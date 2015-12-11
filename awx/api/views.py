@@ -12,6 +12,7 @@ import socket
 import sys
 import errno
 from base64 import b64encode
+from collections import namedtuple
 
 # Django
 from django.conf import settings
@@ -113,6 +114,7 @@ class ApiV1RootView(APIView):
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
+        data['settings'] = reverse('api:settings_list')
         data['me'] = reverse('api:user_me_list')
         data['dashboard'] = reverse('api:dashboard_view')
         data['organizations'] = reverse('api:organization_list')
@@ -2959,6 +2961,31 @@ class ActivityStreamDetail(RetrieveAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class SettingsList(ListCreateAPIView):
+
+    model = TowerSettings
+    serializer_class = TowerSettingsSerializer
+    new_in_300 = True
+    filter_backends = ()
+
+    def get_queryset(self):
+        SettingsTuple = namedtuple('Settings', ['key', 'description', 'category', 'value', 'value_type', 'user'])
+        # TODO: Filter by what the user can see
+        all_defined_settings = {s.key: SettingsTuple(s.key, s.description, s.category, s.value, s.value_type, s.user) for s in TowerSettings.objects.all()}
+        manifest_settings = settings.TOWER_SETTINGS_MANIFEST
+        settings_actual = []
+        for settings_key in manifest_settings:
+            if settings_key in all_defined_settings:
+                settings_actual.append(all_defined_settings[settings_key])
+            else:
+                m_entry = manifest_settings[settings_key]
+                settings_actual.append(SettingsTuple(settings_key,
+                                                     m_entry['description'],
+                                                     m_entry['category'],
+                                                     m_entry['default'],
+                                                     m_entry['type'],
+                                                     None))
+        return settings_actual
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
