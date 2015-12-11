@@ -961,39 +961,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                setTimeout(function() { textareaResize('group_variables', properties_scope); }, 300);
                            });
 
-
-                           // After the group record is loaded, retrieve related data.
-                           // jt-- i'm changing this to act sequentially: first load properties, then sources, then schedule
-                           // I accomplished this by adding "LoadSourceData" which will run the source retrieval code after the property
-                           // variables are set.
-                           if (modal_scope.groupLoadedRemove) {
-                               modal_scope.groupLoadedRemove();
-                           }
-                           modal_scope.groupLoadedRemove = modal_scope.$on('groupLoaded', function () {
-                               if (properties_scope.variable_url) {
-                                   // get group variables
-                                   Rest.setUrl(properties_scope.variable_url);
-                                   Rest.get()
-                                   .success(function (data) {
-                                       properties_scope.variables = ParseVariableString(data);
-                                       master.variables = properties_scope.variables;
-                                       modal_scope.$emit('LoadSourceData');
-                                       //modal_scope.$emit('groupVariablesLoaded');    jt- this needs to get called after sources are loaded
-                                   })
-                                   .error(function (data, status) {
-                                       properties_scope.variables = null;
-                                       ProcessErrors(modal_scope, data, status, null, { hdr: 'Error!',
-                                                     msg: 'Failed to retrieve group variables. GET returned status: ' + status });
-                                   });
-                               } else {
-                                   properties_scope.variables = "---";
-                                   master.variables = properties_scope.variables;
-                                   modal_scope.$emit('LoadSourceData');
-                                   //properties_scope.$emit('groupVariablesLoaded');
-                               }
-                           });
-
-
                            // JT -- this gets called after the properties & properties variables are loaded, and is emitted from (groupLoaded)
                            if (modal_scope.removeLoadSourceData) {
                                modal_scope.removeLoadSourceData();
@@ -1172,7 +1139,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    schedules_url = data.related.inventory_source + 'schedules/';
                                    properties_scope.variable_url = data.related.variable_data;
                                    sources_scope.source_url = data.related.inventory_source;
-                                   modal_scope.$emit('groupLoaded');
+                                   modal_scope.$emit('LoadSourceData');
                                })
                                .error(function (data, status) {
                                    ProcessErrors(modal_scope, data, status, { hdr: 'Error!',
@@ -1352,22 +1319,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                }
                            });
 
-                           if (modal_scope.removeUpdateVariables) {
-                               modal_scope.removeUpdateVariables();
-                           }
-                           modal_scope.removeUpdateVariables = modal_scope.$on('updateVariables', function(e, data, url) {
-                               Rest.setUrl(url);
-                               Rest.put(data)
-                               .success(function () {
-                                   modal_scope.$emit('formSaveSuccess');
-                               })
-                               .error(function (data, status) {
-                                   $('#group_tabs a:eq(0)').tab('show');
-                                   ProcessErrors(modal_scope, data, status, null, { hdr: 'Error!',
-                                                 msg: 'Failed to update group variables. PUT status: ' + status });
-                               });
-                           });
-
                            // Cancel
                            modal_scope.cancelModal = function () {
                                try {
@@ -1394,13 +1345,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 
                                try {
 
-                                   json_data = ToJSON(properties_scope.parseType, properties_scope.variables);
+                                   json_data = ToJSON(properties_scope.parseType, properties_scope.variables, true);
 
                                    data = {};
                                    for (fld in GroupForm.fields) {
-                                       if (fld !== 'variables') {
-                                           data[fld] = properties_scope[fld];
-                                       }
+                                       data[fld] = properties_scope[fld];
                                    }
 
                                    data.inventory = inventory_id;
@@ -1409,12 +1358,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    if (mode === 'edit' || (mode === 'add' && group_created)) {
                                        Rest.put(data)
                                        .success(function () {
-                                           if (properties_scope.variables && properties_scope.variables !== "---") {
-                                               modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
-                                           }
-                                           else {
-                                               modal_scope.$emit('formSaveSuccess');
-                                           }
+                                           modal_scope.$emit('formSaveSuccess');
                                        })
                                        .error(function (data, status) {
                                            $('#group_tabs a:eq(0)').tab('show');
@@ -1429,12 +1373,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            group_created = true;
                                            group_id = data.id;
                                            sources_scope.source_url = data.related.inventory_source;
-                                           if (properties_scope.variables && properties_scope.variables !== "---") {
-                                               modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
-                                           }
-                                           else {
-                                               modal_scope.$emit('formSaveSuccess');
-                                           }
+                                           modal_scope.$emit('formSaveSuccess');
                                        })
                                        .error(function (data, status) {
                                            $('#group_tabs a:eq(0)').tab('show');
