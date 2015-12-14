@@ -5,23 +5,13 @@ import json
 from django.conf import settings as django_settings
 from awx.main.models.configuration import TowerSettings
 
-class TowerSettings(object):
+class TowerConfiguration(object):
 
     def __getattr__(self, key):
         ts = TowerSettings.objects.filter(key=name)
         if not ts.exists:
             return getattr(django_settings, key)
-        ts = ts[0]
-        if ts.value_type == 'json':
-            converted_type = json.loads(ts.value)
-        elif ts.value_type == 'password':
-            converted_type = ts.value
-        elif ts.value_type == 'list':
-            converted_type = [x.strip() for x in a.split(',')]
-        else:
-            t = getattr(__builtin__, ts.value_type)
-            converted_type = t(ts.value)
-        return converted_type
+        return ts[0].value_converted
 
     def create(key, value):
         settings_manifest = django_settings.TOWER_SETTINGS_MANIFEST

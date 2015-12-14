@@ -70,6 +70,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.fact.models import * # noqa
 from awx.main.utils import emit_websocket_notification
+from awx.main.conf import TowerConfiguration
 
 def api_exception_handler(exc):
     '''
@@ -2971,7 +2972,12 @@ class SettingsList(ListCreateAPIView):
     def get_queryset(self):
         SettingsTuple = namedtuple('Settings', ['key', 'description', 'category', 'value', 'value_type', 'user'])
         # TODO: Filter by what the user can see
-        all_defined_settings = {s.key: SettingsTuple(s.key, s.description, s.category, s.value, s.value_type, s.user) for s in TowerSettings.objects.all()}
+        all_defined_settings = {s.key: SettingsTuple(s.key,
+                                                     s.description,
+                                                     s.category,
+                                                     s.value_converted,
+                                                     s.value_type,
+                                                     s.user) for s in TowerSettings.objects.all()}
         manifest_settings = settings.TOWER_SETTINGS_MANIFEST
         settings_actual = []
         for settings_key in manifest_settings:
@@ -2986,6 +2992,18 @@ class SettingsList(ListCreateAPIView):
                                                      m_entry['type'],
                                                      None))
         return settings_actual
+
+class SettingsReset(APIView):
+
+    view_name = "Reset a settings value"
+    new_in_300 = True
+
+    def post(self, request):
+        # TODO: RBAC
+        setting_key = request.DATA.get('key', None)
+        if setting_key is not None:
+            TowerSettings.objects.filter(key=settings_key).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

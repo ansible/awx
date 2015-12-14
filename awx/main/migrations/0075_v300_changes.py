@@ -22,10 +22,22 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('main', ['TowerSettings'])
 
+        # Adding M2M table for field tower_settings on 'ActivityStream'
+        m2m_table_name = db.shorten_name(u'main_activitystream_tower_settings')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
+            ('towersettings', models.ForeignKey(orm['main.towersettings'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['activitystream_id', 'towersettings_id'])
+
 
     def backwards(self, orm):
         # Deleting model 'TowerSettings'
         db.delete_table(u'main_towersettings')
+
+        # Removing M2M table for field tower_settings on 'ActivityStream'
+        db.delete_table(db.shorten_name(u'main_activitystream_tower_settings'))
 
 
     models = {
@@ -91,6 +103,7 @@ class Migration(SchemaMigration):
             'schedule': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Schedule']", 'symmetrical': 'False', 'blank': 'True'}),
             'team': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Team']", 'symmetrical': 'False', 'blank': 'True'}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'tower_settings': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.TowerSettings']", 'symmetrical': 'False', 'blank': 'True'}),
             'unified_job': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'activity_stream_as_unified_job+'", 'blank': 'True', 'to': "orm['main.UnifiedJob']"}),
             'unified_job_template': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'activity_stream_as_unified_job_template+'", 'blank': 'True', 'to': "orm['main.UnifiedJobTemplate']"}),
             'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.User']", 'symmetrical': 'False', 'blank': 'True'})

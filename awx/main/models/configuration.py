@@ -20,6 +20,7 @@ class TowerSettings(CreatedModifiedModel):
         ('int', _('Integer')),
         ('float', _('Decimal')),
         ('json', _('JSON')),
+        ('bool', _('Boolean')),
         ('password', _('Password')),
         ('list', _('List'))
     ]
@@ -43,3 +44,15 @@ class TowerSettings(CreatedModifiedModel):
         editable=False,
     )
 
+    @property
+    def value_converted(self):
+        if self.value_type == 'json':
+            converted_type = json.loads(self.value)
+        elif self.value_type == 'password':
+            converted_type = self.value
+        elif self.value_type == 'list':
+            converted_type = [x.strip() for x in self.value.split(',')]
+        else:
+            t = __builtins__[self.value_type]
+            converted_type = t(self.value)
+        return converted_type

@@ -221,7 +221,8 @@ activity_stream_urls = patterns('awx.api.views',
 )
 
 settings_urls = patterns('awx.api.views',
-                         url(r'^$',                                          'settings_list'))
+                         url(r'^$',                                          'settings_list'),
+                         url(r'^reset/$',                                    'settings_reset'))
 
 v1_urls = patterns('awx.api.views',
     url(r'^$',                      'api_v1_root_view'),

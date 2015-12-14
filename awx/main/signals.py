@@ -306,6 +306,7 @@ model_serializer_mapping = {
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
+    TowerSettings: TowerSettingsSerializer,
 }
 
 def activity_stream_create(sender, instance, created, **kwargs):

@@ -2111,6 +2111,35 @@ class TowerSettingsSerializer(BaseSerializer):
     class Meta:
         model = TowerSettings
         fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
+        read_only_fields = ('description', 'category', 'value_type', 'user')
+
+    def from_native(self, data, files):
+        if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
+            self._errors = {'key': 'Key {0} is not a valid settings key'.format(data['key'])}
+            return
+        current_val = TowerSettings.objects.filter(key=data['key'])
+        if current_val.exists():
+            current_val.delete()
+        manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
+        data['description'] = manifest_val['description']
+        data['category'] = manifest_val['category']
+        data['value_type'] = manifest_val['type']
+        return super(TowerSettingsSerializer, self).from_native(data, files)
+
+    def validate(self, attrs):
+        manifest = settings.TOWER_SETTINGS_MANIFEST
+        if attrs['key'] not in manifest:
+            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
+        # TODO: Type checking/coercion, contextual validation
+        return attrs
+
+    def save_object(self, obj, **kwargs):
+        print("kwargs {0}".format(kwargs))
+        manifest_val = settings.TOWER_SETTINGS_MANIFEST[obj.key]
+        obj.description = manifest_val['description']
+        obj.category = manifest_val['category']
+        obj.value_type = manifest_val['type']
+        return super(TowerSettingsSerializer, self).save_object(obj, **kwargs)
 
 class AuthTokenSerializer(serializers.Serializer):
 
