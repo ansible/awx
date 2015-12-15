@@ -1563,6 +1563,10 @@ class ActivityStreamAccess(BaseAccess):
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
 
+        # TowerSettings Filter
+        settings_qs = self.user.get_queryset(TowerSettings)
+        qs.filter(tower_settings__in=settings_qs)
+
         # organization_qs = self.user.get_queryset(Organization)
         # user_qs = self.user.get_queryset(User)
         # inventory_qs = self.user.get_queryset(Inventory)
@@ -1633,6 +1637,30 @@ class CustomInventoryScriptAccess(BaseAccess):
             return True
         return False
 
+
+class TowerSettingsAccess(BaseAccess):
+    '''
+    - I can see settings when
+      - I am a super user
+    - I can edit settings when
+      - I am a super user
+    - I can clear settings when
+      - I am a super user
+    '''
+
+    model = TowerSettings
+
+    def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects.all()
+        return self.model.objects.none()
+
+    def can_change(self, obj, data):
+        return self.user.is_superuser
+
+    def can_delete(self, obj):
+        return self.user.is_superuser
+
 register_access(User, UserAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
@@ -1658,3 +1686,4 @@ register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
+register_access(TowerSettings, TowerSettingsAccess)

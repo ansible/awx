@@ -2970,8 +2970,12 @@ class SettingsList(ListCreateAPIView):
     filter_backends = ()
 
     def get_queryset(self):
+        # TODO: docs
+        if not request.user.is_superuser:
+            # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
+            #       we'll need to extend this more in the future when we have user settings
+            return []
         SettingsTuple = namedtuple('Settings', ['key', 'description', 'category', 'value', 'value_type', 'user'])
-        # TODO: Filter by what the user can see
         all_defined_settings = {s.key: SettingsTuple(s.key,
                                                      s.description,
                                                      s.category,
@@ -2993,15 +2997,23 @@ class SettingsList(ListCreateAPIView):
                                                      None))
         return settings_actual
 
+    def delete(self, request, *args, **kwargs):
+        if not request.user.can_access(self.model, 'delete', None):
+            raise PermissionDenied()
+        TowerSettings.objects.all().delete()
+        return Response()
+
 class SettingsReset(APIView):
 
     view_name = "Reset a settings value"
     new_in_300 = True
 
     def post(self, request):
-        # TODO: RBAC
-        setting_key = request.DATA.get('key', None)
-        if setting_key is not None:
+        # NOTE: Extend more with user settings
+        if not request.user.can_access(TowerSettings, 'delete', None):
+            raise PermissionDenied()
+        settings_key = request.DATA.get('key', None)
+        if settings_key is not None:
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
