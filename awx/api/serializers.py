@@ -38,6 +38,7 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
+from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
 
@@ -521,8 +522,9 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
@@ -569,8 +571,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
     def get_types(self):

@@ -52,6 +52,8 @@ class TowerSettings(CreatedModifiedModel):
             converted_type = self.value
         elif self.value_type == 'list':
             converted_type = [x.strip() for x in self.value.split(',')]
+        elif self.value_type == 'bool':
+            converted_type = self.value in [True, "true", "True", 1, "1", "yes"]
         else:
             t = __builtins__[self.value_type]
             converted_type = t(self.value)

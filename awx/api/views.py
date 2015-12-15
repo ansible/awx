@@ -70,7 +70,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.fact.models import * # noqa
 from awx.main.utils import emit_websocket_notification
-from awx.main.conf import TowerConfiguration
+from awx.main.conf import tower_settings
 
 def api_exception_handler(exc):
     '''
@@ -216,7 +216,7 @@ class ApiV1ConfigView(APIView):
 
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
-                project_base_dir = settings.PROJECTS_ROOT,
+                project_base_dir = tower_settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
             ))
 
@@ -2862,8 +2862,9 @@ class UnifiedJobStdout(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
-        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if request.accepted_renderer.format != 'txt_download' and obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                                     tower_settings.STDOUT_MAX_BYTES_DISPLAY)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
@@ -2971,7 +2972,7 @@ class SettingsList(ListCreateAPIView):
 
     def get_queryset(self):
         # TODO: docs
-        if not request.user.is_superuser:
+        if not self.request.user.is_superuser:
             # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
             #       we'll need to extend this more in the future when we have user settings
             return []

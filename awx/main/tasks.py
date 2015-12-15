@@ -44,6 +44,7 @@ from django.utils.timezone import now
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
+from awx.main.conf import tower_settings
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
@@ -536,9 +537,9 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
-            if not os.path.exists(settings.JOBOUTPUT_ROOT):
-                os.makedirs(settings.JOBOUTPUT_ROOT)
-            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
+            if not os.path.exists(tower_settings.JOBOUTPUT_ROOT):
+                os.makedirs(tower_settings.JOBOUTPUT_ROOT)
+            stdout_filename = os.path.join(tower_settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
             stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
@@ -813,7 +814,7 @@ class RunJob(BaseTask):
             return self.get_path_to('..', 'playbooks')
         cwd = job.project.get_project_path()
         if not cwd:
-            root = settings.PROJECTS_ROOT
+            root = tower_settings.PROJECTS_ROOT
             raise RuntimeError('project local_path %s cannot be found in %s' %
                                (job.project.local_path, root))
         return cwd

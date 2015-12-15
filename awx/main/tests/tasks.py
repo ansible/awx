@@ -21,6 +21,7 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.conf import tower_settings
 from awx.main.tests.base import BaseJobExecutionTest
 
 TEST_PLAYBOOK = u'''
@@ -1412,8 +1413,8 @@ class RunJobTest(BaseJobExecutionTest):
         project_path = self.project.local_path
         job_template = self.create_test_job_template()
         extra_vars = {
-            'projects_root': settings.PROJECTS_ROOT,
-            'joboutput_root': settings.JOBOUTPUT_ROOT,
+            'projects_root': tower_settings.PROJECTS_ROOT,
+            'joboutput_root': tower_settings.JOBOUTPUT_ROOT,
             'project_path': project_path,
             'other_project_path': other_project_path,
             'temp_path': temp_path,

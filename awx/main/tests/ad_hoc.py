@@ -20,6 +20,7 @@ from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseJobExecutionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.conf import tower_settings
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
 
@@ -325,13 +326,13 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         if not has_proot:
             self.skipTest('proot is not installed')
         # Enable proot for this test.
-        settings.AWX_PROOT_ENABLED = True
+        tower_settings.AWX_PROOT_ENABLED = True
         # Hide local settings path.
-        settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
+        tower_settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
         # Create list of paths that should not be visible to the command.
         hidden_paths = [
-            os.path.join(settings.PROJECTS_ROOT, '*'),
-            os.path.join(settings.JOBOUTPUT_ROOT, '*'),
+            os.path.join(tower_settings.PROJECTS_ROOT, '*'),
+            os.path.join(tower_settings.JOBOUTPUT_ROOT, '*'),
         ]
         # Create a temp directory that should not be visible to the command.
         temp_path = tempfile.mkdtemp()
