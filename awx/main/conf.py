@@ -8,8 +8,8 @@ from awx.main.models.configuration import TowerSettings
 class TowerConfiguration(object):
 
     def __getattr__(self, key):
-        ts = TowerSettings.objects.filter(key=name)
-        if not ts.exists:
+        ts = TowerSettings.objects.filter(key=key)
+        if not ts.exists():
             return getattr(django_settings, key)
         return ts[0].value_converted
 
@@ -28,3 +28,5 @@ class TowerConfiguration(object):
         else:
             settings_actual['value'] = value
         settings_actual.save()
+
+tower_settings = TowerConfiguration()
