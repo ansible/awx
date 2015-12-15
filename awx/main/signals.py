@@ -22,6 +22,7 @@ from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
+from awx.main.conf import tower_settings
 
 __all__ = []
 
@@ -273,7 +274,7 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
-        self.enabled = getattr(settings, 'ACTIVITY_STREAM_ENABLED', True)
+        self.enabled = getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True)
 
     def __nonzero__(self):
         return bool(self.enabled)

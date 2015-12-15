@@ -19,6 +19,7 @@ from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
+from awx.main.conf import tower_settings
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
@@ -196,7 +197,7 @@ class UserAccess(BaseAccess):
         qs = self.model.objects.filter(is_active=True).distinct()
         if self.user.is_superuser:
             return qs
-        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
+        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |

@@ -21,6 +21,7 @@ from jsonfield import JSONField
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import decrypt_field
+from awx.main.conf import tower_settings
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
@@ -29,8 +30,8 @@ __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 
 class AdHocCommand(UnifiedJob):
 
-    MODULE_NAME_CHOICES = [(x,x) for x in settings.AD_HOC_COMMANDS]
-    MODULE_NAME_DEFAULT = 'command' if 'command' in settings.AD_HOC_COMMANDS else None
+    MODULE_NAME_CHOICES = [(x,x) for x in tower_settings.AD_HOC_COMMANDS]
+    MODULE_NAME_DEFAULT = 'command' if 'command' in tower_settings.AD_HOC_COMMANDS else None
 
     class Meta(object):
         app_label = 'main'
@@ -104,7 +105,7 @@ class AdHocCommand(UnifiedJob):
         if type(self.module_name) not in (str, unicode):
             raise ValidationError("Invalid type for ad hoc command")
         module_name = self.module_name.strip() or 'command'
-        if module_name not in settings.AD_HOC_COMMANDS:
+        if module_name not in tower_settings.AD_HOC_COMMANDS:
             raise ValidationError('Unsupported module for ad hoc commands.')
         return module_name
 

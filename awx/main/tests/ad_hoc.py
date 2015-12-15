@@ -326,9 +326,9 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         if not has_proot:
             self.skipTest('proot is not installed')
         # Enable proot for this test.
-        tower_settings.AWX_PROOT_ENABLED = True
+        settings.AWX_PROOT_ENABLED = True
         # Hide local settings path.
-        tower_settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
+        settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
         # Create list of paths that should not be visible to the command.
         hidden_paths = [
             os.path.join(tower_settings.PROJECTS_ROOT, '*'),

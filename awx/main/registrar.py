@@ -14,7 +14,8 @@ class ActivityStreamRegistrar(object):
         self.models = []
 
     def connect(self, model):
-        if not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True):
+        from awx.main.conf import tower_settings
+        if not getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True):
             return
         from awx.main.signals import activity_stream_create, activity_stream_update, activity_stream_delete, activity_stream_associate
         
