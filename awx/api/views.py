@@ -595,7 +595,7 @@ class AuthTokenView(APIView):
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(tower_settings.AUTH_TOKEN_EXPIRATION)
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

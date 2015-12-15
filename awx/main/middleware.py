@@ -15,6 +15,7 @@ from django.conf import settings
 
 from awx import __version__ as version
 from awx.main.models import ActivityStream, Instance
+from awx.main.comf import tower_settings
 from awx.api.authentication import TokenAuthentication
 
 
@@ -117,6 +118,6 @@ class AuthTokenTimeoutMiddleware(object):
         if not TokenAuthentication._get_x_auth_token_header(request):
             return response
 
-        response['Auth-Token-Timeout'] = int(settings.AUTH_TOKEN_EXPIRATION)
+        response['Auth-Token-Timeout'] = int(tower_settings.AUTH_TOKEN_EXPIRATION)
         return response
         
