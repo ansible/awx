@@ -7,6 +7,7 @@ from awx.main.models.configuration import TowerSettings
 
 class TowerConfiguration(object):
 
+    # TODO: Caching so we don't have to hit the database every time for settings
     def __getattr__(self, key):
         ts = TowerSettings.objects.filter(key=key)
         if not ts.exists():
