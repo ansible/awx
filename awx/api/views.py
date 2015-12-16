@@ -192,7 +192,7 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_file(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
 
         pendo_state = tower_settings.PENDO_TRACKING_STATE if tower_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
@@ -264,9 +264,7 @@ class ApiV1ConfigView(APIView):
 
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
-            fh = open(TASK_FILE, "w")
-            fh.write(data_actual)
-            fh.close()
+            tower_settings.LICENSE = data_actual
 
             # Spawn a task to ensure that MongoDB is started (or stopped)
             # as appropriate, based on whether the license uses it.

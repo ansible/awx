@@ -15,7 +15,7 @@ from django.conf import settings
 
 from awx import __version__ as version
 from awx.main.models import ActivityStream, Instance
-from awx.main.comf import tower_settings
+from awx.main.conf import tower_settings
 from awx.api.authentication import TokenAuthentication
 
 

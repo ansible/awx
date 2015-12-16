@@ -822,6 +822,13 @@ TOWER_SETTINGS_MANIFEST = {
         "type": "bool",
         "category": "system",
     },
+    "LICENSE": {
+        "name": "Tower License",
+        "description": "Controls what features and functionality is enabled in Tower.",
+        "default": "{}",
+        "type": "string",
+        "category": "system",
+    },
 }
 # Logging configuration.
 LOGGING = {
