@@ -4,6 +4,7 @@
 import os
 import re  # noqa
 import sys
+import ldap
 import djcelery
 from datetime import timedelta
 
@@ -230,6 +231,12 @@ AUTHENTICATION_BACKENDS = (
 
 # LDAP server (default to None to skip using LDAP authentication).
 AUTH_LDAP_SERVER_URI = None
+
+# Disable LDAP referrals by default (to prevent certain LDAP queries from
+# hanging with AD).
+AUTH_LDAP_CONNECTION_OPTIONS = {
+    ldap.OPT_REFERRALS: 0,
+}
 
 # Radius server settings (default to empty string to skip using Radius auth).
 RADIUS_SERVER = ''

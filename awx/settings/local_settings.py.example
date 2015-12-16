@@ -165,6 +165,11 @@ LOGGING['handlers']['syslog'] = {
 # Refer to django-auth-ldap docs for more details:
 # http://pythonhosted.org/django-auth-ldap/authentication.html
 
+# Imports needed for LDAP configuration.
+import ldap
+from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+from django_auth_ldap.config import ActiveDirectoryGroupType
+
 # LDAP server URI, such as "ldap://ldap.example.com:389" (non-SSL) or
 # "ldaps://ldap.example.com:636" (SSL).  LDAP authentication is disable if this
 # parameter is empty.
@@ -181,10 +186,11 @@ AUTH_LDAP_BIND_PASSWORD = ''
 # Enable TLS when the connection is not using SSL.
 AUTH_LDAP_START_TLS = False
 
-# Imports needed for remaining LDAP configuration.
-import ldap
-from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
-from django_auth_ldap.config import ActiveDirectoryGroupType
+# Additional options to set for the LDAP connection.  LDAP referrals are
+# disabled by default (to prevent certain LDAP queries from hanging with AD).
+AUTH_LDAP_CONNECTION_OPTIONS = {
+    ldap.OPT_REFERRALS: 0,
+}
 
 # LDAP search query to find users.
 AUTH_LDAP_USER_SEARCH = LDAPSearch(
@@ -332,6 +338,9 @@ TEST_AUTH_LDAP_SERVER_URI = ''
 TEST_AUTH_LDAP_BIND_DN = ''
 TEST_AUTH_LDAP_BIND_PASSWORD = ''
 TEST_AUTH_LDAP_START_TLS = False
+TEST_AUTH_LDAP_CONNECTION_OPTIONS = {
+    ldap.OPT_REFERRALS: 0,
+}
 
 # LDAP username/password for testing authentication.
 TEST_AUTH_LDAP_USERNAME = ''
