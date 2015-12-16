@@ -16,4 +16,5 @@ export default {
         }
         $(".LoginModal-dialog").remove();
     }]
+
 };

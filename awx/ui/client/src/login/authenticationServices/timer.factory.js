@@ -22,9 +22,9 @@
  * @description
  */
 export default
-    ['$rootScope', '$cookieStore', 'transitionTo', 'CreateDialog', 'Authorization',
+    ['$rootScope', '$cookieStore', 'CreateDialog', 'Authorization',
         'Store', '$interval', '$location', '$q',
-    function ($rootScope, $cookieStore, transitionTo, CreateDialog, Authorization,
+    function ($rootScope, $cookieStore, CreateDialog, Authorization,
         Store, $interval, $location, $q) {
         return {
 

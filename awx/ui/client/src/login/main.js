@@ -13,7 +13,7 @@ import logoutRoute from './logout.route';
 export default
     angular.module('login', [authentication.name, loginModal.name])
         .config(['$routeProvider', function($routeProvider) {
-            var url = loginRoute.route;
+            var url = loginRoute.url;
             delete loginRoute.route;
             $routeProvider.when(url, loginRoute);
             url = logoutRoute.route;

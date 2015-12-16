@@ -16,7 +16,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     $routeParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
-    EditInventoryProperties, Find, Empty, LogViewer) {
+    EditInventoryProperties, Find, Empty, LogViewer, $state) {
 
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
@@ -312,7 +312,8 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 
     $scope.addInventory = function () {
-        $location.path($location.path() + '/add');
+        // $location.path($location.path() + '/add');
+        $state.go('inventories.add');
     };
 
     $scope.editInventory = function (id) {
@@ -369,7 +370,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 
 InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer'
+    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
 ];
 
 
@@ -792,14 +793,14 @@ InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 export function InventoriesManage ($log, $scope, $rootScope, $location,
-    $routeParams, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert,
+    $state, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert,
     LoadBreadCrumbs, GetBasePath, ProcessErrors, Breadcrumbs, InventoryGroups,
     InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob,
-    GroupsCopy, HostsCopy, transitionTo) {
+    GroupsCopy, HostsCopy, $stateParams) {
 
     var PreviousSearchParams,
         url,
@@ -1040,7 +1041,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     });
 
     // Load Inventory
-    url = GetBasePath('inventory') + $routeParams.inventory_id + '/';
+    url = GetBasePath('inventory') + $stateParams.inventory_id + '/';
     Rest.setUrl(url);
     Rest.get()
         .success(function (data) {
@@ -1132,7 +1133,13 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     };
 
     $scope.groupSelect = function(id) {
-        var group = Find({ list: $scope.groups, key: 'id', val: id });
+        var groups = [], group = Find({ list: $scope.groups, key: 'id', val: id });
+        if($state.params.groups){
+            groups.push($state.params.groups);
+        }
+        groups.push(group.id);
+        groups = groups.join();
+        $state.transitionTo('inventoriesManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false });
         $scope.group_breadcrumbs.push(group);
         setActiveGroupBreadcrumb();
         loadGroups(group.related.children, group.id);
@@ -1401,7 +1408,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
 
 
 InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
-    '$routeParams', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait',
+    '$state', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait',
     'Rest', 'Alert', 'LoadBreadCrumbs', 'GetBasePath', 'ProcessErrors',
     'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload',
     'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
@@ -1409,5 +1416,5 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
     'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
-    'HostsCopy', 'transitionTo'
+    'HostsCopy', '$stateParams'
 ];
