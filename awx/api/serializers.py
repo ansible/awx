@@ -2137,7 +2137,6 @@ class TowerSettingsSerializer(BaseSerializer):
         return attrs
 
     def save_object(self, obj, **kwargs):
-        print("kwargs {0}".format(kwargs))
         manifest_val = settings.TOWER_SETTINGS_MANIFEST[obj.key]
         obj.description = manifest_val['description']
         obj.category = manifest_val['category']
