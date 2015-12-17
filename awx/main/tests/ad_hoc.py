@@ -331,8 +331,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
         # Create list of paths that should not be visible to the command.
         hidden_paths = [
-            os.path.join(tower_settings.PROJECTS_ROOT, '*'),
-            os.path.join(tower_settings.JOBOUTPUT_ROOT, '*'),
+            os.path.join(settings.PROJECTS_ROOT, '*'),
+            os.path.join(settings.JOBOUTPUT_ROOT, '*'),
         ]
         # Create a temp directory that should not be visible to the command.
         temp_path = tempfile.mkdtemp()

@@ -17,6 +17,7 @@ import contextlib
 import tempfile
 
 # Django REST Framework
+from django.conf import settings
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
@@ -467,8 +468,8 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-v',
                 str(getattr(settings, 'AWX_PROOT_VERBOSITY', '0')), '-r', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
-                  tempfile.gettempdir(), tower_settings.PROJECTS_ROOT,
-                  tower_settings.JOBOUTPUT_ROOT]
+                  tempfile.gettempdir(), settings.PROJECTS_ROOT,
+                  settings.JOBOUTPUT_ROOT]
     hide_paths.extend(getattr(tower_settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):

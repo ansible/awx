@@ -264,14 +264,14 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         if not name:
             name = self.unique_name('Project')
 
-        if not os.path.exists(tower_settings.PROJECTS_ROOT):
-            os.makedirs(tower_settings.PROJECTS_ROOT)
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.makedirs(settings.PROJECTS_ROOT)
         # Create temp project directory.
         if unicode_prefix:
             tmp_prefix = u'\u2620tmp'
         else:
             tmp_prefix = 'tmp'
-        project_dir = tempfile.mkdtemp(prefix=tmp_prefix, dir=tower_settings.PROJECTS_ROOT)
+        project_dir = tempfile.mkdtemp(prefix=tmp_prefix, dir=settings.PROJECTS_ROOT)
         self._temp_paths.append(project_dir)
         # Create temp playbook in project (if playbook content is given).
         if playbook_content:

@@ -151,7 +151,7 @@ class ProjectsTest(BaseTransactionTest):
         url = reverse('api:api_v1_config_view')
         response = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertTrue('project_base_dir' in response)
-        self.assertEqual(response['project_base_dir'], tower_settings.PROJECTS_ROOT)
+        self.assertEqual(response['project_base_dir'], settings.PROJECTS_ROOT)
         self.assertTrue('project_local_paths' in response)
         self.assertEqual(set(response['project_local_paths']),
                          set(Project.get_local_path_choices()))
@@ -219,7 +219,7 @@ class ProjectsTest(BaseTransactionTest):
         self.assertEquals(results['count'], 0)
 
         # can add projects (super user)
-        project_dir = tempfile.mkdtemp(dir=tower_settings.PROJECTS_ROOT)
+        project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
         self._temp_paths.append(project_dir)
         project_data = {
             'name': 'My Test Project',

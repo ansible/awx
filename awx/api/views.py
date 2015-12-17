@@ -216,7 +216,7 @@ class ApiV1ConfigView(APIView):
 
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
-                project_base_dir = tower_settings.PROJECTS_ROOT,
+                project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
             ))
 

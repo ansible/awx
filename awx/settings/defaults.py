@@ -682,20 +682,6 @@ FACT_CACHE_PORT = 6564
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
 TOWER_SETTINGS_MANIFEST = {
-    "PROJECTS_ROOT": {
-        "name": "Projects Root Directory",
-        "description": "Directory to store synced projects in and to look for manual projects",
-        "default": PROJECTS_ROOT,
-        "type": "string",
-        "category": "jobs",
-    },
-    "JOBOUTPUT_ROOT": {
-        "name": "Job Standard Output Directory",
-        "description": "Directory to store job standard output files",
-        "default": JOBOUTPUT_ROOT,
-        "type": "string",
-        "category": "jobs",
-    },
     "SCHEDULE_MAX_JOBS": {
         "name": "Maximum Scheduled Jobs",
         "description": "Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created",

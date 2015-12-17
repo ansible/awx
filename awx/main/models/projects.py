@@ -8,6 +8,7 @@ import re
 import urlparse
 
 # Django
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
@@ -45,9 +46,9 @@ class ProjectOptions(models.Model):
 
     @classmethod
     def get_local_path_choices(cls):
-        if os.path.exists(tower_settings.PROJECTS_ROOT):
-            paths = [x.decode('utf-8') for x in os.listdir(tower_settings.PROJECTS_ROOT)
-                     if (os.path.isdir(os.path.join(tower_settings.PROJECTS_ROOT, x)) and
+        if os.path.exists(settings.PROJECTS_ROOT):
+            paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
+                     if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
             qs = Project.objects.filter(active=True)
             used_paths = qs.values_list('local_path', flat=True)
@@ -143,7 +144,7 @@ class ProjectOptions(models.Model):
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
-            proj_path = os.path.join(tower_settings.PROJECTS_ROOT, local_path)
+            proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
             if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
