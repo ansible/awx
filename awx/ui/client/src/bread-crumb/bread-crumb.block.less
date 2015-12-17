@@ -1,0 +1,52 @@
+/** @define BreadCrumb */
+
+.BreadCrumb {
+    padding: 0;
+    display: flex;
+    background-color: #FFFFFF;
+    width: 100%;
+    z-index: 1039;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 50px;
+    height: 40px;
+    border-bottom: 1px solid #e1e1e1;
+}
+.BreadCrumb.is-loggedOut {
+    opacity: 0;
+}
+.BreadCrumb-menuLink {
+    width: 58px;
+    border-left: 1px solid #e1e1e1;
+    margin-left: auto;
+    color: #d7d7d7;
+    flex: initial;
+    display: flex;
+    align-items: center;
+    padding: 0 19px;
+    cursor: pointer;
+}
+.BreadCrumb-menuLink:hover {
+    background-color: #f6f6f6;
+    color: #d7d7d7;
+}
+.BreadCrumb-menuLink.BreadCrumb-menuLinkActive {
+    color: #1678c4;
+}
+.BreadCrumb-menuLinkImage {
+    font-size: 18px;
+    flex: initial;
+}
+
+@breadcrumb-breakpoint: 900px;
+
+@media screen and (max-width: @breadcrumb-breakpoint) {
+    .BreadCrumb-menuLinkImage {
+        font-size: 24px;
+    }
+    .BreadCrumb-menuLink {
+        width: 67px;
+        padding: 0 21px;
+    }
+}

@@ -1,0 +1,27 @@
+<div id="bread_crumb" class="BreadCrumb" ng-class="{'is-loggedOut' : !$root.current_user.username}">
+    <div class="BreadCrumb-menuLink"
+        id="bread_crumb_activity_stream"
+        aw-tool-tip="View Activity Stream"
+        data-placement="left"
+        data-trigger="hover"
+        data-container="body"
+        ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
+        ng-if="isActive('/home')"
+        ng-click="toggleActivityStreamActive()">
+        <i class="BreadCrumb-menuLinkImage icon-activity-stream"
+            alt="Activity Stream">
+        </i>
+    </div>
+    <a class="BreadCrumb-menuLink"
+        id="bread_crumb_dashboard"
+        ng-href="/#/home"
+        aw-tool-tip="View Dashboard"
+        data-placement="left"
+        data-trigger="hover"
+        data-container="body"
+        ng-if="!isActive('/home')">
+        <i class="BreadCrumb-menuLinkImage fa fa-tachometer"
+            alt="Dashboard">
+        </i>
+    </a>
+</div>
