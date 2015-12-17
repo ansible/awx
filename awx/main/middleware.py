@@ -11,7 +11,6 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import curry
-from django.conf import settings
 
 from awx import __version__ as version
 from awx.main.models import ActivityStream, Instance

@@ -7,7 +7,6 @@ import sys
 import logging
 
 # Django
-from django.conf import settings
 from django.db.models import F, Q
 from django.contrib.auth.models import User
 

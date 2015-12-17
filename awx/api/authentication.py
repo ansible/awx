@@ -6,7 +6,6 @@ import urllib
 
 # Django
 from django.utils.timezone import now as tz_now
-from django.conf import settings
 
 # Django REST Framework
 from rest_framework import authentication

@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc..
 # All Rights Reserved.
 
-import json
 from django.conf import settings as django_settings
 from awx.main.models.configuration import TowerSettings
 

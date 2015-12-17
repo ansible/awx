@@ -3,7 +3,6 @@
 
 import logging
 
-from django.conf import settings
 from django.db.models.signals import pre_save, post_save, post_delete, m2m_changed
 
 logger = logging.getLogger('awx.main.registrar')
