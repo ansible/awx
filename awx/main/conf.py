@@ -5,6 +5,7 @@ import logging
 
 from django.conf import settings as django_settings
 from django.db.utils import ProgrammingError
+from django.db import OperationalError
 from awx.main.models.configuration import TowerSettings
 
 logger = logging.getLogger('awx.main.conf')
@@ -26,7 +27,7 @@ class TowerConfiguration(object):
                     val_actual = default_value
                 return val_actual
             return ts[0].value_converted
-        except ProgrammingError, e:
+        except (ProgrammingError, OperationalError), e:
             # Database is not available yet, usually during migrations so lets use the default
             logger.debug("Database settings not available yet, using defaults ({0})".format(e))
             return default_value
