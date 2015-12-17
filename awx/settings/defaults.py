@@ -775,7 +775,7 @@ TOWER_SETTINGS_MANIFEST = {
     },
     "AWX_ANSIBLE_CALLBACK_PLUGINS": {
         "name": "Ansible Callback Plugins",
-        "description": "Extra Callback Plugins to be used when running jobs",
+        "description": "Colon Seperated Paths for extra callback plugins to be used when running jobs",
         "default": AWX_ANSIBLE_CALLBACK_PLUGINS,
         "type": "string",
         "category": "jobs",
