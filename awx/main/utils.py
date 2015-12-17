@@ -17,7 +17,6 @@ import contextlib
 import tempfile
 
 # Django REST Framework
-from django.conf import settings
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse

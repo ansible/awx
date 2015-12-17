@@ -21,7 +21,6 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
-from awx.main.conf import tower_settings
 from awx.main.tests.base import BaseJobExecutionTest
 
 TEST_PLAYBOOK = u'''

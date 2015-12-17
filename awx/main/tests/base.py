@@ -31,7 +31,6 @@ from awx.main.models import * # noqa
 from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
-from awx.main.conf import tower_settings
 from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings
 

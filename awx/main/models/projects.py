@@ -22,7 +22,6 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
-from awx.main.conf import tower_settings
 
 __all__ = ['Project', 'ProjectUpdate']
 
