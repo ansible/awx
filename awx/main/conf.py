@@ -1,8 +1,13 @@
 # Copyright (c) 2015 Ansible, Inc..
 # All Rights Reserved.
 
+import logging
+
 from django.conf import settings as django_settings
+from django.db.utils import ProgrammingError
 from awx.main.models.configuration import TowerSettings
+
+logger = logging.getLogger('awx.main.conf')
 
 class TowerConfiguration(object):
 
@@ -11,14 +16,20 @@ class TowerConfiguration(object):
         settings_manifest = django_settings.TOWER_SETTINGS_MANIFEST
         if key not in settings_manifest:
             raise AttributeError("Tower Setting with key '{0}' is not defined in the manifest".format(key))
+        default_value = settings_manifest[key]['default']
         ts = TowerSettings.objects.filter(key=key)
-        if not ts.exists():
-            try:
-                val_actual = getattr(django_settings, key)
-            except AttributeError:
-                val_actual = settings_manifest[key]['default']
-            return val_actual
-        return ts[0].value_converted
+        try:
+            if not ts.exists():
+                try:
+                    val_actual = getattr(django_settings, key)
+                except AttributeError:
+                    val_actual = default_value
+                return val_actual
+            return ts[0].value_converted
+        except ProgrammingError, e:
+            # Database is not available yet, usually during migrations so lets use the default
+            logger.debug("Database settings not available yet, using defaults ({0})".format(e))
+            return default_value
 
     def __setattr__(self, key, value):
         settings_manifest = django_settings.TOWER_SETTINGS_MANIFEST
