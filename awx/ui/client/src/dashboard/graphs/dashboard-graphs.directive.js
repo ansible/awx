@@ -12,6 +12,11 @@ export default
                         scope.hostStatusSelected = false;
                     }
 
+                    function clearStatus() {
+                        scope.isSuccessful = true;
+                        scope.isFailed = true;
+                    }
+
                     scope.toggleGraphStatus = function (graphType) {
                         clearGraphs();
                         if (graphType === "jobStatus") {
@@ -22,7 +27,38 @@ export default
                         scope.$broadcast("resizeGraphs");
                     };
 
+                    scope.toggleJobStatusGraph = function (status) {
+                        if (status === "successful") {
+                            scope.isSuccessful = !scope.isSuccessful;
+                            if(!scope.isSuccessful && scope.isFailed){
+                                status = 'successful';  
+                            }
+                            else if(scope.isSuccessful && scope.isFailed){
+                                status = 'both';
+                            }
+                            else if(!scope.isSuccessful && !scope.isFailed){
+                                status = 'successful';
+                                scope.isFailed = true;
+                            }
+                        } else if (status === "failed") {
+                            scope.isFailed = !scope.isFailed;
+                            if(scope.isSuccessful && scope.isFailed){
+                                status = 'both';
+                            }
+                            if(scope.isSuccessful && !scope.isFailed){
+                                status = 'failed';
+                            }
+                            else if(!scope.isSuccessful && !scope.isFailed){
+                                status = 'failed';
+                                scope.isSuccessful = true;
+                            }
+
+                        }
+                        scope.$broadcast("jobStatusChange", status);
+                    };
+
                     // initially toggle jobStatus graph
+                    clearStatus();
                     clearGraphs();
                     scope.toggleGraphStatus("jobStatus");
                 }

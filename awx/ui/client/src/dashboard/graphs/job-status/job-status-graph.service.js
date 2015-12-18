@@ -14,13 +14,16 @@ export default
 
 function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
 
-    function pluck(property, promise) {
+    function pluck(property, promise, status) {
         return promise.then(function(value) {
+            if(status === "successful" || status === "failed"){
+                delete value[property].jobs[status];
+            }
             return value[property];
         });
     }
 
-    function getData(period, jobType) {
+    function getData(period, jobType, status) {
         var url, dash_path = getBasePath('dashboard');
         if(dash_path === '' ){
             processErrors(null,
@@ -48,7 +51,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
             return $q.reject(response);
         });
 
-        return pluck('data', result);
+        return pluck('data', result, status);
     }
 
     return {
@@ -64,12 +67,12 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
                     });
             });
         },
-        get: function(period, jobType) {
+        get: function(period, jobType, status) {
 
             this.destroyWatcher();
             this.setupWatcher(period, jobType);
 
-            return getData(period, jobType);
+            return getData(period, jobType, status);
 
         }
     };

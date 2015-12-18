@@ -62,7 +62,6 @@ export default
                 // if the user clicks outside of the mobile menu,
                 // close it if it's open
                 $("body").on('click', function(e) {
-                    e.stopPropagation();
                     if ($(e.target).parents(".MainMenu").length === 0) {
                         scope.isHiddenOnMobile = true;
                     }
