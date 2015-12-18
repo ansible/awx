@@ -1017,58 +1017,58 @@ var tower = angular.module('Tower', [
                     },2000);
                 });
 
-                // $rootScope.$on("$routeChangeStart", function (event, next, prev) {
-                //     // this line removes the query params attached to a route
-                //     if(prev && prev.$$route &&
-                //         prev.$$route.name === 'systemTracking'){
-                //             $location.replace($location.search('').$$url);
-                //     }
-                //
-                //     // Before navigating away from current tab, make sure the primary view is visible
-                //     if ($('#stream-container').is(':visible')) {
-                //         HideStream();
-                //     }
-                //
-                //     // remove any lingering intervals
-                //     if ($rootScope.jobDetailInterval) {
-                //         window.clearInterval($rootScope.jobDetailInterval);
-                //     }
-                //     if ($rootScope.jobStdOutInterval) {
-                //         window.clearInterval($rootScope.jobStdOutInterval);
-                //     }
-                //
-                //     // On each navigation request, check that the user is logged in
-                //     if (!/^\/(login|logout)/.test($location.path())) {
-                //         // capture most recent URL, excluding login/logout
-                //         $rootScope.lastPath = $location.path();
-                //         $rootScope.enteredPath = $location.path();
-                //         $cookieStore.put('lastPath', $location.path());
-                //     }
-                //
-                //     if (Authorization.isUserLoggedIn() === false) {
-                //         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
-                //             $location.path('/login');
-                //         }
-                //     } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
-                //       // gets here on timeout
-                //         if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
-                //             $rootScope.sessionTimer.expireSession('idle');
-                //             if (sock&& sock.socket && sock.socket.socket) {
-                //                 sock.socket.socket.disconnect();
-                //             }
-                //             $location.path('/login');
-                //         }
-                //     } else {
-                //         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
-                //             Authorization.restoreUserInfo(); //user must have hit browser refresh
-                //         }
-                //         if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
-                //             // if not headed to /login or /logout, then check the license
-                //             CheckLicense.test();
-                //         }
-                //     }
-                //     activateTab();
-                // });
+                $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
+                    // this line removes the query params attached to a route
+                    if(prev && prev.$$route &&
+                        prev.$$route.name === 'systemTracking'){
+                            $location.replace($location.search('').$$url);
+                    }
+
+                    // Before navigating away from current tab, make sure the primary view is visible
+                    if ($('#stream-container').is(':visible')) {
+                        HideStream();
+                    }
+
+                    // remove any lingering intervals
+                    if ($rootScope.jobDetailInterval) {
+                        window.clearInterval($rootScope.jobDetailInterval);
+                    }
+                    if ($rootScope.jobStdOutInterval) {
+                        window.clearInterval($rootScope.jobStdOutInterval);
+                    }
+
+                    // On each navigation request, check that the user is logged in
+                    if (!/^\/(login|logout)/.test($location.path())) {
+                        // capture most recent URL, excluding login/logout
+                        $rootScope.lastPath = $location.path();
+                        $rootScope.enteredPath = $location.path();
+                        $cookieStore.put('lastPath', $location.path());
+                    }
+
+                    if (Authorization.isUserLoggedIn() === false) {
+                        if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
+                            $location.path('/login');
+                        }
+                    } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
+                      // gets here on timeout
+                        if (next.templateUrl !== (urlPrefix + 'login/loginBackDrop.partial.html')) {
+                            $rootScope.sessionTimer.expireSession('idle');
+                            if (sock&& sock.socket && sock.socket.socket) {
+                                sock.socket.socket.disconnect();
+                            }
+                            $location.path('/login');
+                        }
+                    } else {
+                        if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
+                            Authorization.restoreUserInfo(); //user must have hit browser refresh
+                        }
+                        if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test();
+                        }
+                    }
+                    activateTab();
+                });
 
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
