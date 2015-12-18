@@ -199,6 +199,10 @@ def on_populate_user(sender, **kwargs):
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
 
+    # Prefetch user's groups to prevent LDAP queries for each org/team when
+    # checking membership.
+    ldap_user._get_groups().get_group_dns()
+
     # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
