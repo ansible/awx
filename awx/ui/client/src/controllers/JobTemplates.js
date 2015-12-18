@@ -903,7 +903,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
             $scope.search(relatedSets[set].iterator);
         }
 
-        dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? 'false' : 'true';
+        dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
         md5Setup({
             scope: $scope,
             master: master,
