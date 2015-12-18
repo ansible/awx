@@ -194,65 +194,11 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    // .config(['$stateProvider', '$urlRouterProvider',
-    //     function($stateProvider, $urlRouterProvider){
-    //
-    //         $urlRouterProvider.otherwise("/home");
-    //
-    //         $stateProvider
-    //             .state('signIn', {
-    //                 url: '/login',
-    //                 templateUrl: urlPrefix + 'login/loginBackDrop.partial.html',
-    //                 controller: ['$rootScope', 'Authorization', function($rootScope, Authorization) {
-    //                     if (Authorization.isUserLoggedIn()) {
-    //                         Authorization.logout();
-    //                     }
-    //                     $(".LoginModal-dialog").remove();
-    //                 }]
-    //             })
-    //             .state('signOut', {
-    //                 url: '/logout',
-    //                 templateUrl: urlPrefix + 'partials/blank.html',
-    //                 controller: ['Authorization', '$location', function(Authorization, $location) {
-    //                     Authorization.logout();
-    //                     // $state.go('signIn');
-    //                     $location.url('/login');
-    //                 }]
-    //             })
-    //             .state('dashboard', {
-    //               url: "/home",
-    //               templateUrl: urlPrefix +  "partials/home.html",
-    //               controller: Home,
-    //               resolve: {
-    //                   graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-    //                       return $q.all({
-    //                           jobStatus: jobStatusGraphData.get("month", "all"),
-    //                           features: FeaturesService.get()
-    //                       });
-    //                   }]
-    //               }
-    //             })
-    //             .state('inventories', {
-    //               url: "/inventories",
-    //               templateUrl: urlPrefix + "partials/inventories.html",
-    //               controller: InventoriesList
-    //             })
-    //             .state('inventories.add', {
-    //               url: "/add",
-    //               templateUrl: urlPrefix + "partials/inventory-add.html",
-    //               controller: InventoriesAdd
-    //             })
-    //             .state('inventoriesManage', {
-    //               url: "/inventories/:inventory_id/manage?groups",
-    //               templateUrl: urlPrefix + 'partials/inventory-manage.html',
-    //               controller: InventoriesManage
-    //           });
-    //     }
-    // ])
     .config(['$stateProvider', '$urlRouterProvider',
         function ($stateProvider, $urlRouterProvider) {
 
             $urlRouterProvider.otherwise("/home");
+
             $stateProvider.
             state('jobs', {
                 url: '/jobs',
@@ -515,7 +461,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('inventoryManage', {
-                url: '/inventories/:inventory_id/manage',
+                url: '/inventories/:inventory_id/manage?groups',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage,
                 resolve: {
@@ -848,7 +794,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('dashboardHosts', {
-                url: '/home/hosts',
+                url: '/home/hosts?has_active_failures',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeHosts,
                 resolve: {

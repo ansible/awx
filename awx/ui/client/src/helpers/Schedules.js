@@ -236,9 +236,9 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$routeParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
+        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
             'SchedulePost',
-        function($location, $routeParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost) {
+        function($location, $stateParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost) {
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
@@ -246,14 +246,14 @@ export default
                     url =  GetBasePath(base),
                     scheduler;
 
-                if (!Empty($routeParams.template_id)) {
-                    url += $routeParams.template_id + '/schedules/';
+                if (!Empty($stateParams.template_id)) {
+                    url += $stateParams.template_id + '/schedules/';
                 }
-                else if (!Empty($routeParams.id)) {
-                    url += $routeParams.id + '/schedules/';
+                else if (!Empty($stateParams.id)) {
+                    url += $stateParams.id + '/schedules/';
                 }
-                else if (!Empty($routeParams.management_job)) {
-                    url += $routeParams.management_job + '/schedules/';
+                else if (!Empty($stateParams.management_job)) {
+                    url += $stateParams.management_job + '/schedules/';
                     if(scope.management_job.id === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
@@ -690,9 +690,9 @@ export default
          *  Called from a controller to setup the scope for a schedules list
          *
          */
-        .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
+        .factory('LoadSchedulesScope', ['$compile', '$location', '$stateParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
             'SchedulesListInit',
-            function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
+            function($compile, $location, $stateParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
             return function(params) {
                 var parent_scope = params.parent_scope,
                     scope = params.scope,
@@ -746,9 +746,9 @@ export default
                     parent_scope.$emit('listLoaded');
                 });
 
-                if ($routeParams.id__int) {
+                if ($stateParams.id__int) {
                     scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
                     scope[list.iterator + 'SearchFieldLabel'] = 'ID';
                 }
 

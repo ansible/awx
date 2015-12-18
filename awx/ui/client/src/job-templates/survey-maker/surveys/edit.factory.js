@@ -1,5 +1,5 @@
 export default
-    function EditFactory($routeParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,
+    function EditFactory($stateParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,
         Empty, AddSurvey) {
         return function(params) {
             var scope = params.scope,
@@ -66,7 +66,7 @@ export default
 
 
 EditFactory.$inject =
-    [   '$routeParams',
+    [   '$stateParams',
         'SchedulerInit',
         'showSurvey',
         'Wait',

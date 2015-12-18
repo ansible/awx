@@ -707,11 +707,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('GroupsEdit', ['$filter', '$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
+.factory('GroupsEdit', ['$filter', '$rootScope', '$location', '$log', '$stateParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
          'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
          'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
-         function ($filter, $rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
+         function ($filter, $rootScope, $location, $log, $stateParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
                    SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
@@ -1426,9 +1426,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * Set's up the process for deleting a group from an inventory page
  *
  */
-.factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
+.factory('GroupsDelete', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find', 'CreateDialog',
-         function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
+         function ($rootScope, $location, $log, $stateParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, Wait, BuildTree, Find, CreateDialog) {
                        return function (params) {
 
@@ -1994,9 +1994,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
+.factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
-         function ($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
+         function ($rootScope, $location, $log, $stateParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
                    FormatDate, InventoryStatusForm, Wait) {
                        return function (params) {
 

@@ -9,7 +9,7 @@
  * @name controllers.function:Adhoc
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
-function adhocController($q, $scope, $rootScope, $location, $routeParams,
+function adhocController($q, $scope, $rootScope, $location, $stateParams,
     CheckPasswords, PromptForPasswords, CreateLaunchDialog, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
     KindChange, LookUpInit, CredentialList, Empty, Wait) {
@@ -31,7 +31,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
         };
     };
 
-    var id = $routeParams.inventory_id,
+    var id = $stateParams.inventory_id,
         urls = privateFn.setAvailableUrls(),
         hostPattern = $rootScope.hostPatterns || "all";
 
@@ -199,7 +199,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
 
     // launch the job with the provided form data
     $scope.launchJob = function () {
-        var adhocUrl = GetBasePath('inventory') + $routeParams.inventory_id +
+        var adhocUrl = GetBasePath('inventory') + $stateParams.inventory_id +
         '/ad_hoc_commands/', fld, data={}, html;
 
         html = '<form class="ng-valid ng-valid-required" ' +
@@ -243,7 +243,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
                 }
                 // Launch the adhoc job
                 Rest.setUrl(GetBasePath('inventory') +
-                    $routeParams.inventory_id + '/ad_hoc_commands/');
+                    $stateParams.inventory_id + '/ad_hoc_commands/');
                 Rest.post(data)
                     .success(function (data) {
                          Wait('stop');
@@ -310,7 +310,7 @@ function adhocController($q, $scope, $rootScope, $location, $routeParams,
 
 }
 
-export default ['$q', '$scope', '$rootScope', '$location', '$routeParams',
+export default ['$q', '$scope', '$rootScope', '$location', '$stateParams',
     'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'adhocForm',
     'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',

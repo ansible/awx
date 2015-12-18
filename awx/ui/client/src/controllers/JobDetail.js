@@ -11,13 +11,13 @@
 */
 
 
-export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
+export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $stateParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
     UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule) {
 
     ClearScope();
 
-    var job_id = $routeParams.id,
+    var job_id = $stateParams.id,
         scope = $scope,
         api_complete = false,
         refresh_count = 0,
@@ -793,7 +793,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET returned: ' + status });
+                    msg: 'Failed to retrieve job: ' + $stateParams.id + '. GET returned: ' + status });
             });
     });
 
@@ -1435,7 +1435,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
     });
 }
 
-JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
+JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$stateParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
     'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule'

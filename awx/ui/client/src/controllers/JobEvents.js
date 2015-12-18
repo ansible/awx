@@ -11,19 +11,19 @@
 */
 
 
-export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList, GenerateList,
+export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobEventList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
     FormatDate, EventView, Refresh, Wait) {
 
     ClearScope();
 
     var list = JobEventList,
-        defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/', //?parent__isnull=1';
+        defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_events/', //?parent__isnull=1';
         generator = GenerateList,
         page;
 
     list.base = $location.path();
-    $scope.job_id = $routeParams.id;
+    $scope.job_id = $stateParams.id;
     $rootScope.flashMessage = null;
     $scope.selected = [];
     $scope.expand = true; //on load, automatically expand all nodes
@@ -207,7 +207,7 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
         url: defaultUrl
     });
 
-    page = ($routeParams.page) ? parseInt($routeParams.page,10) - 1 : null;
+    page = ($stateParams.page) ? parseInt($stateParams.page,10) - 1 : null;
 
     PaginateInit({
         scope: $scope,
@@ -217,13 +217,13 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
     });
 
     // Called from Inventories tab, host failed events link:
-    if ($routeParams.host) {
+    if ($stateParams.host) {
         $scope[list.iterator + 'SearchField'] = 'host';
-        $scope[list.iterator + 'SearchValue'] = $routeParams.host;
+        $scope[list.iterator + 'SearchValue'] = $stateParams.host;
         $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
     }
 
-    $scope.search(list.iterator, $routeParams.page);
+    $scope.search(list.iterator, $stateParams.page);
 
     $scope.toggle = function (id) {
         ToggleChildren({
@@ -252,19 +252,19 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
     };
 }
 
-JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
+JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobEventList',
     'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
 ];
 
-export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventsForm, GenerateForm,
+export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, JobEventsForm, GenerateForm,
     Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
 
     ClearScope();
 
     var form = JobEventsForm,
         generator = GenerateForm,
-        defaultUrl = GetBasePath('base') + 'job_events/' + $routeParams.event_id + '/';
+        defaultUrl = GetBasePath('base') + 'job_events/' + $stateParams.event_id + '/';
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope});
     generator.reset();
@@ -276,7 +276,7 @@ export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $ro
         .success(function (data) {
             var cDate, fld, n, rows;
             $scope.event_display = data.event_display.replace(/^\u00a0*/g, '');
-            LoadBreadCrumbs({ path: '/jobs/' + $routeParams.job_id + '/job_events/' + $routeParams.event_id, title: $scope.event_display });
+            LoadBreadCrumbs({ path: '/jobs/' + $stateParams.job_id + '/job_events/' + $stateParams.event_id, title: $scope.event_display });
             for (fld in form.fields) {
                 switch (fld) {
                 case 'status':
@@ -335,14 +335,14 @@ export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $ro
             Wait('stop');
         })
         .error(function (data) {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve host: ' + $routeParams.event_id +
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve host: ' + $stateParams.event_id +
                 '. GET status: ' + status });
         });
 
     $scope.navigateBack = function () {
-        var url = '/jobs/' + $routeParams.job_id + '/job_events';
-        if ($routeParams.page) {
-            url += '?page=' + $routeParams.page;
+        var url = '/jobs/' + $stateParams.job_id + '/job_events';
+        if ($stateParams.page) {
+            url += '?page=' + $stateParams.page;
         }
         $location.url(url);
     };
@@ -355,6 +355,6 @@ export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $ro
 
 }
 
-JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventsForm', 'GenerateForm',
+JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobEventsForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'FormatDate', 'EventView', 'Wait'
 ];

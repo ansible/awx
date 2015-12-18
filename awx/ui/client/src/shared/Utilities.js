@@ -274,8 +274,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 ])
 
 
-.factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', 'Empty',
-    function ($rootScope, $routeParams, $location, Empty) {
+.factory('LoadBreadCrumbs', ['$rootScope', '$stateParams', '$location', 'Empty',
+    function ($rootScope, $stateParams, $location, Empty) {
         return function (crumb) {
 
             var title, found, j, i, paths, ppath, parent, child;

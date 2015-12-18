@@ -11,7 +11,7 @@
 */
 
 
-export function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function ScheduleEditController($scope, $compile, $location, $stateParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
 GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
 
     ClearScope();
@@ -61,7 +61,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         // Load the parent object
-        id = $routeParams.id;
+        id = $stateParams.id;
         url = GetBasePath(base) + id + '/';
         Rest.setUrl(url);
         Rest.get()
@@ -94,5 +94,5 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     });
 }
 
-ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
+ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream' ];

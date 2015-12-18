@@ -8,8 +8,8 @@ import {wrapDelegate} from './route-params.decorator';
 
 export default
     [   '$rootScope',
-        '$routeParams',
-        function($rootScope, $routeParams) {
+        '$stateParams',
+        function($rootScope, $stateParams) {
             $rootScope.$on('$routeChangeStart', function(e, newRoute) {
                 wrapDelegate(newRoute);
             });
@@ -22,7 +22,7 @@ export default
                         return model;
                     }, {});
 
-                    $routeParams.model = models;
+                    $stateParams.model = models;
                 }
             });
         }

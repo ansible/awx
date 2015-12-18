@@ -13,9 +13,9 @@
 export default
     angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefinition', 'JobEventsFormDefinition'])
 
-        .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
+        .factory('EventView', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'GenerateForm',
             'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'JobEventDataForm', 'Empty', 'JobEventsForm',
-            function ($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
+            function ($rootScope, $location, $log, $stateParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
             FormatDate, JobEventDataForm, Empty, JobEventsForm) {
             return function (params) {
 

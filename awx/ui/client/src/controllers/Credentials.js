@@ -11,7 +11,7 @@
 */
 
 
-export function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
+export function CredentialsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, CredentialList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream) {
 
@@ -26,12 +26,12 @@ export function CredentialsList($scope, $rootScope, $location, $log, $routeParam
         mode = (base === 'credentials') ? 'edit' : 'select',
         url;
 
-    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.user_id || $routeParams.team_id) ? true : false) });
+    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($stateParams.user_id || $stateParams.team_id) ? true : false) });
 
     $scope.selected = [];
     $scope.credentialLoading = true;
 
-    url = GetBasePath(base) + ( (base === 'users') ? $routeParams.user_id + '/credentials/' : $routeParams.team_id + '/credentials/' );
+    url = GetBasePath(base) + ( (base === 'users') ? $stateParams.user_id + '/credentials/' : $stateParams.team_id + '/credentials/' );
 
     if (mode === 'select') {
         SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
@@ -124,13 +124,13 @@ export function CredentialsList($scope, $rootScope, $location, $log, $routeParam
     };
 }
 
-CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'generateList',
+CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'GetChoices', 'Wait', 'Stream'
 ];
 
 
-export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
+export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
     GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
 
@@ -165,7 +165,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: (!Empty($routeParams.user_id)) ? $routeParams.user_id : null,
+        current_item: (!Empty($stateParams.user_id)) ? $stateParams.user_id : null,
         list: UserList,
         field: 'user',
         input_type: 'radio',
@@ -175,19 +175,19 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: (!Empty($routeParams.team_id)) ? $routeParams.team_id : null,
+        current_item: (!Empty($stateParams.team_id)) ? $stateParams.team_id : null,
         list: TeamList,
         field: 'team',
         input_type: 'radio',
         autopopulateLookup: false
     });
 
-    if (!Empty($routeParams.user_id)) {
+    if (!Empty($stateParams.user_id)) {
         // Get the username based on incoming route
         $scope.owner = 'user';
-        $scope.user = $routeParams.user_id;
+        $scope.user = $stateParams.user_id;
         OwnerChange({ scope: $scope });
-        url = GetBasePath('users') + $routeParams.user_id + '/';
+        url = GetBasePath('users') + $stateParams.user_id + '/';
         Rest.setUrl(url);
         Rest.get()
             .success(function (data) {
@@ -196,12 +196,12 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user. GET status: ' + status });
             });
-    } else if (!Empty($routeParams.team_id)) {
+    } else if (!Empty($stateParams.team_id)) {
         // Get the username based on incoming route
         $scope.owner = 'team';
-        $scope.team = $routeParams.team_id;
+        $scope.team = $stateParams.team_id;
         OwnerChange({ scope: $scope });
-        url = GetBasePath('teams') + $routeParams.team_id + '/';
+        url = GetBasePath('teams') + $stateParams.team_id + '/';
         Rest.setUrl(url);
         Rest.get()
             .success(function (data) {
@@ -293,13 +293,13 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 
 }
 
-CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm',
+CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
     'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'FormSave'
 ];
 
 
-export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
+export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
     KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
 
@@ -310,7 +310,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         form = CredentialForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.credential_id;
+        id = $stateParams.credential_id;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
@@ -473,7 +473,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to retrieve Credential: ' + $routeParams.id + '. GET status: ' + status });
+                    msg: 'Failed to retrieve Credential: ' + $stateParams.id + '. GET status: ' + status });
             });
     });
 
@@ -530,13 +530,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/add');
+        $location.path('/' + base + '/' + $stateParams.id + '/' + set + '/add');
     };
 
     // Related set: Edit button
     $scope.edit = function (set, id) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
+        $location.path('/' + base + '/' + $stateParams.id + '/' + set + '/' + id);
     };
 
     // Related set: Delete button
@@ -611,7 +611,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
 
 }
 
-CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm',
+CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices', 'KindChange', 'UserList', 'TeamList', 'LookUpInit',
     'Empty', 'OwnerChange', 'FormSave', 'Stream', 'Wait'

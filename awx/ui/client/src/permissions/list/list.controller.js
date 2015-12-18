@@ -12,14 +12,14 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
-        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
+    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
+        function ($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
             ClearScope();
 
             var list = permissionsList,
                 base = $location.path().replace(/^\//, '').split('/')[0],
-                base_id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
+                base_id = ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id,
                 defaultUrl = GetBasePath(base),
                 generator = GenerateList;
 
@@ -56,7 +56,7 @@ export default
                 generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
             });
 
-            defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
+            defaultUrl += ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id;
             defaultUrl += '/permissions/';
 
             $scope.selected = [];

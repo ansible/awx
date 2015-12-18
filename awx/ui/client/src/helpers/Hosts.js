@@ -170,9 +170,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
     };
 }])
 
-.factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
+.factory('HostsReload', [ '$stateParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
          'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
-         function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
+         function($stateParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
                   ApplyEllipsis) {
                       return function(params) {
 
@@ -209,9 +209,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                           SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
                           PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
 
-                          if ($routeParams.host_name) {
+                          if ($stateParams.host_name) {
                               scope[list.iterator + 'InputDisable'] = false;
-                              scope[list.iterator + 'SearchValue'] = $routeParams.host_name;
+                              scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
                               scope[list.iterator + 'SearchField'] = 'name';
                               scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
                               scope[list.iterator + 'SearchSelectValue'] = null;
@@ -288,9 +288,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
             };
         }])
 
-.factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'generateList',
+.factory('HostsList', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'HostList', 'generateList',
          'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload', 'SelectionInit',
-         function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,
+         function($rootScope, $location, $log, $stateParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,
                   PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SelectionInit) {
                       return function(params) {
 
@@ -349,9 +349,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                   }])
 
 
-.factory('HostsCreate', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
+.factory('HostsCreate', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'ToJSON',
-       function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
+       function($rootScope, $location, $log, $stateParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
                 GetBasePath, HostsReload, ParseTypeChange, Wait, ToJSON) {
                     return function(params) {
 
@@ -447,10 +447,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                 }])
 
 
-.factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
+.factory('HostsEdit', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
          'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
-         function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
+         function($rootScope, $location, $log, $stateParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
                   GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, ToJSON,
                   ParseVariableString, CreateDialog, TextareaResize) {
                       return function(params) {
@@ -680,8 +680,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                   }])
 
 
-.factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'Wait',
-       function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait) {
+.factory('HostsDelete', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'Wait',
+       function($rootScope, $location, $log, $stateParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait) {
            return function(params) {
                // Remove the selected host from the current group by disassociating
 
@@ -983,9 +983,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                                                                                                 };
                                                                                                             }])
 
-                                                                                                            .factory('EditHostGroups', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 'Prompt',
+                                                                                                            .factory('EditHostGroups', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'GenerateForm', 'Prompt',
                                                                                                                      'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
-                                                                                                                     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath, HostsReload,
+                                                                                                                     function($rootScope, $location, $log, $stateParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath, HostsReload,
                                                                                                                               ParseTypeChange, Wait) {
                                                                                                                                   return function(params) {
 

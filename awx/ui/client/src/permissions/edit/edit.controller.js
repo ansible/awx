@@ -10,15 +10,15 @@
  * @description This controller for permissions edit
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
-        function($scope, $rootScope, $compile, $location, $log, $routeParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
+        function($scope, $rootScope, $compile, $location, $log, $stateParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
 
             ClearScope();
 
             var generator = GenerateForm,
                 form = permissionsForm,
-                base_id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
-                id = $routeParams.permission_id,
+                base_id = ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id,
+                id = $stateParams.permission_id,
                 defaultUrl = GetBasePath('base') + 'permissions/' + id + '/',
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {};
@@ -168,7 +168,7 @@ export default
                     })
                     .error(function (data, status) {
                         ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update Permission: ' +
-                            $routeParams.id + '. PUT status: ' + status });
+                            $stateParams.id + '. PUT status: ' + status });
                     });
             };
 

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc overview
  * @name controllers
@@ -21,14 +21,14 @@
 */
 
 
-export function AdminsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, AdminList, GenerateList, LoadBreadCrumbs,
+export function AdminsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, AdminList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, GetBasePath, SelectionInit) {
 
     var list = AdminList,
-        defaultUrl = GetBasePath('organizations') + $routeParams.organization_id + '/users/',
+        defaultUrl = GetBasePath('organizations') + $stateParams.organization_id + '/users/',
         generator = GenerateList,
         mode = 'select',
-        url = GetBasePath('organizations') + $routeParams.organization_id + '/admins/';
+        url = GetBasePath('organizations') + $stateParams.organization_id + '/admins/';
 
     generator.inject(AdminList, { mode: mode, scope: $scope, breadCrumbs: true });
 
@@ -43,6 +43,6 @@ export function AdminsList($scope, $rootScope, $location, $log, $routeParams, Re
     LoadBreadCrumbs();
 }
 
-AdminsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'AdminList', 'generateList',
+AdminsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'AdminList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'GetBasePath', 'SelectionInit'
 ];

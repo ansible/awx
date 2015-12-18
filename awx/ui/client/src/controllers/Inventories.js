@@ -13,7 +13,7 @@
 import '../job-templates/main';
 
 export function InventoriesList($scope, $rootScope, $location, $log,
-    $routeParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
+    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer, $state) {
@@ -80,42 +80,42 @@ export function InventoriesList($scope, $rootScope, $location, $log,
         url: defaultUrl
     });
 
-    if ($routeParams.name) {
+    if ($stateParams.name) {
         $scope[InventoryList.iterator + 'InputDisable'] = false;
-        $scope[InventoryList.iterator + 'SearchValue'] = $routeParams.name;
+        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.name;
         $scope[InventoryList.iterator + 'SearchField'] = 'name';
         $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.name.label;
         $scope[InventoryList.iterator + 'SearchSelectValue'] = null;
     }
 
-    if ($routeParams.has_active_failures) {
+    if ($stateParams.has_active_failures) {
         $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $routeParams.has_active_failures;
+        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.has_active_failures;
         $scope[InventoryList.iterator + 'SearchField'] = 'has_active_failures';
         $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.has_active_failures.label;
-        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($routeParams.has_active_failures === 'true') ? {
+        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($stateParams.has_active_failures === 'true') ? {
             value: 1
         } : {
             value: 0
         };
     }
 
-    if ($routeParams.has_inventory_sources) {
+    if ($stateParams.has_inventory_sources) {
         $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $routeParams.has_inventory_sources;
+        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.has_inventory_sources;
         $scope[InventoryList.iterator + 'SearchField'] = 'has_inventory_sources';
         $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.has_inventory_sources.label;
-        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($routeParams.has_inventory_sources === 'true') ? {
+        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($stateParams.has_inventory_sources === 'true') ? {
             value: 1
         } : {
             value: 0
         };
     }
 
-    if ($routeParams.inventory_sources_with_failures) {
+    if ($stateParams.inventory_sources_with_failures) {
         // pass a value of true, however this field actually contains an integer value
         $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $routeParams.inventory_sources_with_failures;
+        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.inventory_sources_with_failures;
         $scope[InventoryList.iterator + 'SearchField'] = 'inventory_sources_with_failures';
         $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.inventory_sources_with_failures.label;
         $scope[InventoryList.iterator + 'SearchType'] = 'gtzero';
@@ -368,13 +368,13 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 }
 
-InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
+InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
 ];
 
 
-export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
+export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
 
@@ -405,7 +405,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
     LookUpInit({
         scope:  $scope,
         form: form,
-        current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
+        current_item: ($stateParams.organization_id) ? $stateParams.organization_id : null,
         list: OrganizationList,
         field: 'organization',
         input_type: 'radio'
@@ -453,12 +453,12 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
     };
 }
 
-InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
+InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
 ];
 
-export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
+export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
     Prompt, PlaybookRun, CreateDialog, deleteJobTemplate) {
@@ -469,7 +469,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm(),
         generator = GenerateForm,
-        inventory_id = $routeParams.inventory_id,
+        inventory_id = $stateParams.inventory_id,
         master = {},
         fld, json_data, data,
         relatedSets = {};
@@ -784,7 +784,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
 }
 
-InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
+InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit',
     'Prompt', 'PlaybookRun', 'CreateDialog', 'deleteJobTemplate'
@@ -1049,7 +1049,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
             $scope.$emit('InventoryLoaded');
         })
         .error(function (data, status) {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.inventory_id +
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $stateParams.inventory_id +
                 ' GET returned status: ' + status });
         });
 
@@ -1139,7 +1139,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         }
         groups.push(group.id);
         groups = groups.join();
-        $state.transitionTo('inventoriesManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false });
+        $state.transitionTo('inventoryManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false });
         $scope.group_breadcrumbs.push(group);
         setActiveGroupBreadcrumb();
         loadGroups(group.related.children, group.id);

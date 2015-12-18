@@ -11,7 +11,7 @@
 */
 
 
-export function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
+export function OrganizationsList($stateParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
     GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -28,7 +28,7 @@ export function OrganizationsList($routeParams, $scope, $rootScope, $location, $
     LoadBreadCrumbs();
 
     if (mode === 'select') {
-        url = GetBasePath('projects') + $routeParams.project_id + '/organizations/';
+        url = GetBasePath('projects') + $stateParams.project_id + '/organizations/';
         SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
     }
 
@@ -92,13 +92,13 @@ export function OrganizationsList($routeParams, $scope, $rootScope, $location, $
     };
 }
 
-OrganizationsList.$inject = ['$routeParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
+OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
     'generateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
     'Stream'
 ];
 
 
-export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm,
+export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
     ReturnToCaller, Wait) {
 
@@ -119,7 +119,7 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, 
         generator.clearApiErrors();
         Wait('start');
         var url = GetBasePath(base);
-        url += (base !== 'organizations') ? $routeParams.project_id + '/organizations/' : '';
+        url += (base !== 'organizations') ? $stateParams.project_id + '/organizations/' : '';
         Rest.setUrl(url);
         Rest.post({ name: $scope.name, description: $scope.description })
             .success(function (data) {
@@ -144,12 +144,12 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, 
     };
 }
 
-OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm',
+OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait'
 ];
 
 
-export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, GenerateForm, Rest,
+export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
 
     ClearScope();
@@ -160,7 +160,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         defaultUrl = GetBasePath('organizations'),
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.organization_id,
+        id = $stateParams.organization_id,
         relatedSets = {};
 
     $scope.organization_id = id;
@@ -208,7 +208,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         })
         .error(function (data, status) {
             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+                msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
         });
 
 
@@ -252,7 +252,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.organization_id + '/' + set);
+        $location.path('/' + base + '/' + $stateParams.organization_id + '/' + set);
     };
 
     // Related set: Edit button
@@ -267,7 +267,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
 
         var action = function () {
             Wait('start');
-            var url = defaultUrl + $routeParams.organization_id + '/' + set + '/';
+            var url = defaultUrl + $stateParams.organization_id + '/' + set + '/';
             Rest.setUrl(url);
             Rest.post({ id: itm_id, disassociate: 1 })
                 .success(function () {
@@ -290,7 +290,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     };
 }
 
-OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 'GenerateForm',
+OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath',
     'Wait', 'Stream'
 ];

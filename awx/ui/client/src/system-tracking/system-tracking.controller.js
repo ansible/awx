@@ -11,7 +11,7 @@ import FactTemplate from './compare-facts/fact-template';
 
 function controller($rootScope,
                     $scope,
-                    $routeParams,
+                    $stateParams,
                     $location,
                     $q,
                     moduleOptions,
@@ -20,15 +20,15 @@ function controller($rootScope,
                     moment,
                     _) {
 
-    // var inventoryId = $routeParams.id;
-    var hostIds = $routeParams.hosts.split(',');
-    var hosts = $routeParams.model.hosts;
-    var moduleParam = $routeParams.module || 'packages';
+    // var inventoryId = $stateParams.id;
+    var hostIds = $stateParams.hosts.split(',');
+    var hosts = $stateParams.model.hosts;
+    var moduleParam = $stateParams.module || 'packages';
 
     $scope.compareMode =
         hostIds.length === 1 ? 'single-host' : 'host-to-host';
-    $scope.hostIds = $routeParams.hosts;
-    $scope.inventory = $routeParams.model.inventory;
+    $scope.hostIds = $stateParams.hosts;
+    $scope.inventory = $stateParams.model.inventory;
     $scope.noModuleData = false;
 
     // this means no scans have been run
@@ -314,7 +314,7 @@ function controller($rootScope,
 export default
     [   '$rootScope',
         '$scope',
-        '$routeParams',
+        '$stateParams',
         '$location',
         '$q',
         'moduleOptions',
