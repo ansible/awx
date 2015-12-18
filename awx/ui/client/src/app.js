@@ -77,7 +77,7 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     // 'ngAnimate',
-    // 'ngRoute',
+    'ngRoute',
     'ngSanitize',
     'ngCookies',
     RestServices.name,
@@ -194,709 +194,688 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    .config(['$stateProvider', '$urlRouterProvider',
-        function($stateProvider, $urlRouterProvider){
-
-            $urlRouterProvider.otherwise("/home");
-
-            $stateProvider
-                .state('signIn', {
-                    url: '/login',
-                    templateUrl: urlPrefix + 'login/loginBackDrop.partial.html',
-                    controller: ['$rootScope', 'Authorization', function($rootScope, Authorization) {
-                        if (Authorization.isUserLoggedIn()) {
-                            Authorization.logout();
-                        }
-                        $(".LoginModal-dialog").remove();
-                    }]
-                })
-                .state('signOut', {
-                    url: '/logout',
-                    templateUrl: urlPrefix + 'partials/blank.html',
-                    controller: ['Authorization', '$location', function(Authorization, $location) {
-                        Authorization.logout();
-                        // $state.go('signIn');
-                        $location.url('/login');
-                    }]
-                })
-                .state('dashboard', {
-                  url: "/home",
-                  templateUrl: urlPrefix +  "partials/home.html",
-                  controller: Home,
-                  resolve: {
-                      graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                          return $q.all({
-                              jobStatus: jobStatusGraphData.get("month", "all"),
-                              features: FeaturesService.get()
-                          });
-                      }]
-                  }
-                })
-                .state('inventories', {
-                  url: "/inventories",
-                  templateUrl: urlPrefix + "partials/inventories.html",
-                  controller: InventoriesList
-                })
-                .state('inventories.add', {
-                  url: "/add",
-                  templateUrl: urlPrefix + "partials/inventory-add.html",
-                  controller: InventoriesAdd
-                })
-                .state('inventoriesManage', {
-                  url: "/inventories/:inventory_id/manage?groups",
-                  templateUrl: urlPrefix + 'partials/inventory-manage.html',
-                  controller: InventoriesManage
-              });
-            // .state('state1.list', {
-            //   url: "/list",
-            //   templateUrl: "partials/state1.list.html",
-            //   controller: function($scope) {
-            //     $scope.items = ["A", "List", "Of", "Items"];
-            //   }
-            // })
-            // .state('state2', {
-            //   url: "/state2",
-            //   templateUrl: "partials/state2.html"
-            // })
-            // .state('state2.list', {
-            //   url: "/list",
-            //   templateUrl: "partials/state2.list.html",
-            //   controller: function($scope) {
-            //     $scope.things = ["A", "Set", "Of", "Things"];
-            //   }
-            // });
-        }
-    ])
-    // .config(['$routeProvider',
-    //     function ($routeProvider) {
-    //         $routeProvider.
+    // .config(['$stateProvider', '$urlRouterProvider',
+    //     function($stateProvider, $urlRouterProvider){
     //
-    //         when('/jobs', {
-    //             name: 'jobs',
-    //             templateUrl: urlPrefix + 'partials/jobs.html',
-    //             controller: JobsListController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
+    //         $urlRouterProvider.otherwise("/home");
     //
-    //         when('/portal', {
-    //             name: 'portal',
-    //             templateUrl: urlPrefix + 'partials/portal.html',
-    //             controller: PortalController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/jobs/:id', {
-    //             name: 'jobDetail',
-    //             templateUrl: urlPrefix + 'partials/job_detail.html',
-    //             controller: JobDetailController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }],
-    //                 jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-    //                     if (!$rootScope.event_socket) {
-    //                         $rootScope.event_socket = Socket({
-    //                             scope: $rootScope,
-    //                             endpoint: "job_events"
-    //                         });
-    //                         $rootScope.event_socket.init();
-    //                         return true;
-    //                     } else {
-    //                         return true;
+    //         $stateProvider
+    //             .state('signIn', {
+    //                 url: '/login',
+    //                 templateUrl: urlPrefix + 'login/loginBackDrop.partial.html',
+    //                 controller: ['$rootScope', 'Authorization', function($rootScope, Authorization) {
+    //                     if (Authorization.isUserLoggedIn()) {
+    //                         Authorization.logout();
     //                     }
+    //                     $(".LoginModal-dialog").remove();
     //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/jobs/:id/stdout', {
-    //             name: 'jobsStdout',
-    //             templateUrl: urlPrefix + 'partials/job_stdout.html',
-    //             controller: JobStdoutController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }],
-    //                 jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-    //                     if (!$rootScope.event_socket) {
-    //                         $rootScope.event_socket = Socket({
-    //                             scope: $rootScope,
-    //                             endpoint: "job_events"
-    //                         });
-    //                         $rootScope.event_socket.init();
-    //                         return true;
-    //                     } else {
-    //                         return true;
-    //                     }
+    //             })
+    //             .state('signOut', {
+    //                 url: '/logout',
+    //                 templateUrl: urlPrefix + 'partials/blank.html',
+    //                 controller: ['Authorization', '$location', function(Authorization, $location) {
+    //                     Authorization.logout();
+    //                     // $state.go('signIn');
+    //                     $location.url('/login');
     //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/ad_hoc_commands/:id', {
-    //             name: 'adHocJobStdout',
-    //             templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
-    //             controller: JobStdoutController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }],
-    //                 adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-    //                     if (!$rootScope.adhoc_event_socket) {
-    //                         $rootScope.adhoc_event_socket = Socket({
-    //                             scope: $rootScope,
-    //                             endpoint: "ad_hoc_command_events"
-    //                         });
-    //                         $rootScope.adhoc_event_socket.init();
-    //                         return true;
-    //                     } else {
-    //                         return true;
-    //                     }
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/job_templates', {
-    //             name: 'jobTemplates',
-    //             templateUrl: urlPrefix + 'partials/job_templates.html',
-    //             controller: JobTemplatesList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/job_templates/add', {
-    //             name: 'jobTemplateAdd',
-    //             templateUrl: urlPrefix + 'partials/job_templates.html',
-    //             controller: JobTemplatesAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/job_templates/:template_id', {
-    //             name: 'jobTemplateEdit',
-    //             templateUrl: urlPrefix + 'partials/job_templates.html',
-    //             controller: JobTemplatesEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/job_templates/:id/schedules', {
-    //             name: 'jobTemplateSchedules',
-    //             templateUrl: urlPrefix + 'partials/schedule_detail.html',
-    //             controller: ScheduleEditController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects', {
-    //             name: 'projects',
-    //             templateUrl: urlPrefix + 'partials/projects.html',
-    //             controller: ProjectsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects/add', {
-    //             name: 'projectAdd',
-    //             templateUrl: urlPrefix + 'partials/projects.html',
-    //             controller: ProjectsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects/:id', {
-    //             name: 'projectEdit',
-    //             templateUrl: urlPrefix + 'partials/projects.html',
-    //             controller: ProjectsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects/:id/schedules', {
-    //             name: 'projectSchedules',
-    //             templateUrl: urlPrefix + 'partials/schedule_detail.html',
-    //             controller: ScheduleEditController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects/:project_id/organizations', {
-    //             name: 'projectOrganizations',
-    //             templateUrl: urlPrefix + 'partials/projects.html',
-    //             controller: OrganizationsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/projects/:project_id/organizations/add', {
-    //             name: 'projectOrganizationAdd',
-    //             templateUrl: urlPrefix + 'partials/projects.html',
-    //             controller: OrganizationsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         // when('/inventories', {
-    //         //     name: 'inventories',
-    //         //     templateUrl: urlPrefix + 'partials/inventories.html',
-    //         //     controller: InventoriesList,
-    //         //     resolve: {
-    //         //         features: ['FeaturesService', function(FeaturesService) {
-    //         //             return FeaturesService.get();
-    //         //         }]
-    //         //     }
-    //         // }).
-    //         //
-    //         // when('/inventories/add', {
-    //         //     name: 'inventoryAdd',
-    //         //     templateUrl: urlPrefix + 'partials/inventories.html',
-    //         //     controller: InventoriesAdd,
-    //         //     resolve: {
-    //         //         features: ['FeaturesService', function(FeaturesService) {
-    //         //             return FeaturesService.get();
-    //         //         }]
-    //         //     }
-    //         // }).
-    //
-    //         when('/inventories/:inventory_id', {
-    //             name: 'inventoryEdit',
-    //             templateUrl: urlPrefix + 'partials/inventories.html',
-    //             controller: InventoriesEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/inventories/:inventory_id/job_templates/add', {
-    //             name: 'inventoryJobTemplateAdd',
-    //             templateUrl: urlPrefix + 'partials/job_templates.html',
-    //             controller: JobTemplatesAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/inventories/:inventory_id/job_templates/', {
-    //             redirectTo: '/inventories/:inventory_id'
-    //         }).
-    //
-    //         when('/inventories/:inventory_id/job_templates/:template_id', {
-    //             name: 'inventoryJobTemplateEdit',
-    //             templateUrl: urlPrefix + 'partials/job_templates.html',
-    //             controller: JobTemplatesEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/inventories/:inventory_id/manage', {
-    //             name: 'inventoryManage',
-    //             templateUrl: urlPrefix + 'partials/inventory-manage.html',
-    //             controller: InventoriesManage,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations', {
-    //             name: 'organizations',
-    //             templateUrl: urlPrefix + 'partials/organizations.html',
-    //             controller: OrganizationsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/add', {
-    //             name: 'organizationAdd',
-    //             templateUrl: urlPrefix + 'partials/organizations.html',
-    //             controller: OrganizationsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/:organization_id', {
-    //             name: 'organizationEdit',
-    //             templateUrl: urlPrefix + 'partials/organizations.html',
-    //             controller: OrganizationsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/:organization_id/admins', {
-    //             name: 'organizationAdmins',
-    //             templateUrl: urlPrefix + 'partials/organizations.html',
-    //             controller: AdminsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/:organization_id/users', {
-    //             name: 'organizationUsers',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/:organization_id/users/add', {
-    //             name: 'organizationUserAdd',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/organizations/:organization_id/users/:user_id', {
-    //             name: 'organizationUserEdit',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams', {
-    //             name: 'teams',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: TeamsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/add', {
-    //             name: 'teamsAdd',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: TeamsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id', {
-    //             name: 'teamEdit',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: TeamsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/users', {
-    //             name: 'teamUsers',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: UsersList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/users/:user_id', {
-    //             name: 'teamUserEdit',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: UsersEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/projects', {
-    //             name: 'teamProjects',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: ProjectsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/projects/add', {
-    //             name: 'teamProjectAdd',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: ProjectsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/projects/:project_id', {
-    //             name: 'teamProjectEdit',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: ProjectsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/credentials', {
-    //             name: 'teamCredentials',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: CredentialsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/credentials/add', {
-    //             name: 'teamCredentialAdd',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: CredentialsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:team_id/credentials/:credential_id', {
-    //             name: 'teamCredentialEdit',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: CredentialsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/credentials', {
-    //             name: 'credentials',
-    //             templateUrl: urlPrefix + 'partials/credentials.html',
-    //             controller: CredentialsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/credentials/add', {
-    //             name: 'credentialAdd',
-    //             templateUrl: urlPrefix + 'partials/credentials.html',
-    //             controller: CredentialsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/credentials/:credential_id', {
-    //             name: 'credentialEdit',
-    //             templateUrl: urlPrefix + 'partials/credentials.html',
-    //             controller: CredentialsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/users', {
-    //             name: 'users',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/users/add', {
-    //             name: 'userAdd',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/users/:user_id', {
-    //             name: 'userEdit',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: UsersEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/users/:user_id/credentials', {
-    //             name: 'userCredentials',
-    //             templateUrl: urlPrefix + 'partials/users.html',
-    //             controller: CredentialsList,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/users/:user_id/credentials/add', {
-    //             name: 'userCredentialAdd',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: CredentialsAdd,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/teams/:user_id/credentials/:credential_id', {
-    //             name: 'teamUserCredentialEdit',
-    //             templateUrl: urlPrefix + 'partials/teams.html',
-    //             controller: CredentialsEdit,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/home', {
-    //             name: 'dashboard',
-    //             templateUrl: urlPrefix + 'partials/home.html',
-    //             controller: Home,
-    //             resolve: {
-    //                 graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-    //                     return $q.all({
-    //                         jobStatus: jobStatusGraphData.get("month", "all"),
-    //                         features: FeaturesService.get()
-    //                     });
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/home/groups', {
-    //             name: 'dashboardGroups',
-    //             templateUrl: urlPrefix + 'partials/subhome.html',
-    //             controller: HomeGroups,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/home/hosts', {
-    //             name: 'dashboardHosts',
-    //             templateUrl: urlPrefix + 'partials/subhome.html',
-    //             controller: HomeHosts,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/license', {
-    //             name: 'license',
-    //             templateUrl: urlPrefix + 'partials/license.html',
-    //             controller: LicenseController,
-    //             resolve: {
-    //                 features: ['FeaturesService', function(FeaturesService) {
-    //                     return FeaturesService.get();
-    //                 }]
-    //             }
-    //         }).
-    //
-    //         when('/sockets', {
-    //             name: 'sockets',
-    //             templateUrl: urlPrefix + 'partials/sockets.html',
-    //             controller: SocketsController
-    //         }).
-    //
-    //         otherwise({
-    //             redirectTo: '/home'
-    //         });
+    //             })
+    //             .state('dashboard', {
+    //               url: "/home",
+    //               templateUrl: urlPrefix +  "partials/home.html",
+    //               controller: Home,
+    //               resolve: {
+    //                   graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+    //                       return $q.all({
+    //                           jobStatus: jobStatusGraphData.get("month", "all"),
+    //                           features: FeaturesService.get()
+    //                       });
+    //                   }]
+    //               }
+    //             })
+    //             .state('inventories', {
+    //               url: "/inventories",
+    //               templateUrl: urlPrefix + "partials/inventories.html",
+    //               controller: InventoriesList
+    //             })
+    //             .state('inventories.add', {
+    //               url: "/add",
+    //               templateUrl: urlPrefix + "partials/inventory-add.html",
+    //               controller: InventoriesAdd
+    //             })
+    //             .state('inventoriesManage', {
+    //               url: "/inventories/:inventory_id/manage?groups",
+    //               templateUrl: urlPrefix + 'partials/inventory-manage.html',
+    //               controller: InventoriesManage
+    //           });
     //     }
     // ])
+    .config(['$stateProvider', '$urlRouterProvider',
+        function ($stateProvider, $urlRouterProvider) {
+
+            $urlRouterProvider.otherwise("/home");
+            $stateProvider.
+            state('jobs', {
+                url: '/jobs',
+                templateUrl: urlPrefix + 'partials/jobs.html',
+                controller: JobsListController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('portal', {
+                url: '/portal',
+                templateUrl: urlPrefix + 'partials/portal.html',
+                controller: PortalController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('jobDetail', {
+                url: '/jobs/:id',
+                templateUrl: urlPrefix + 'partials/job_detail.html',
+                controller: JobDetailController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }],
+                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.event_socket) {
+                            $rootScope.event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "job_events"
+                            });
+                            $rootScope.event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
+                    }]
+                }
+            }).
+
+            state('jobsStdout', {
+                url: '/jobs/:id/stdout',
+                templateUrl: urlPrefix + 'partials/job_stdout.html',
+                controller: JobStdoutController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }],
+                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.event_socket) {
+                            $rootScope.event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "job_events"
+                            });
+                            $rootScope.event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
+                    }]
+                }
+            }).
+
+            state('adHocJobStdout', {
+                url: '/ad_hoc_commands/:id',
+                templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
+                controller: JobStdoutController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }],
+                    adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+                        if (!$rootScope.adhoc_event_socket) {
+                            $rootScope.adhoc_event_socket = Socket({
+                                scope: $rootScope,
+                                endpoint: "ad_hoc_command_events"
+                            });
+                            $rootScope.adhoc_event_socket.init();
+                            return true;
+                        } else {
+                            return true;
+                        }
+                    }]
+                }
+            }).
+
+            state('jobTemplates', {
+                url: '/job_templates',
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('jobTemplateAdd', {
+                url: '/job_templates/add',
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('jobTemplateEdit', {
+                url: '/job_templates/:template_id',
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('jobTemplateSchedules', {
+                url: '/job_templates/:id/schedules',
+                templateUrl: urlPrefix + 'partials/schedule_detail.html',
+                controller: ScheduleEditController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projects', {
+                url: '/projects',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projectAdd', {
+                url: '/projects/add',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projectEdit', {
+                url: '/projects/:id',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projectSchedules', {
+                url: '/projects/:id/schedules',
+                templateUrl: urlPrefix + 'partials/schedule_detail.html',
+                controller: ScheduleEditController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projectOrganizations', {
+                url: '/projects/:project_id/organizations',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: OrganizationsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('projectOrganizationAdd', {
+                url: '/projects/:project_id/organizations/add',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: OrganizationsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('inventories', {
+                url: '/inventories',
+                templateUrl: urlPrefix + 'partials/inventories.html',
+                controller: InventoriesList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('inventoryAdd', {
+                url: '/inventories/add',
+                templateUrl: urlPrefix + 'partials/inventories.html',
+                controller: InventoriesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('inventoryEdit', {
+                url: '/inventories/:inventory_id',
+                templateUrl: urlPrefix + 'partials/inventories.html',
+                controller: InventoriesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('inventoryJobTemplateAdd', {
+                url: '/inventories/:inventory_id/job_templates/add',
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            // state('/inventories/:inventory_id/job_templates/', {
+            //     redirectTo: '/inventories/:inventory_id'
+            // }).
+            //
+            state('inventoryJobTemplateEdit', {
+                url: '/inventories/:inventory_id/job_templates/:template_id',
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('inventoryManage', {
+                url: '/inventories/:inventory_id/manage',
+                templateUrl: urlPrefix + 'partials/inventory-manage.html',
+                controller: InventoriesManage,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizations', {
+                url: '/organizations',
+                templateUrl: urlPrefix + 'partials/organizations.html',
+                controller: OrganizationsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationsAdd', {
+                url: '/organization/add',
+                templateUrl: urlPrefix + 'partials/organizations.html',
+                controller: OrganizationsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationEdit', {
+                url: '/organizations/:organization_id',
+                templateUrl: urlPrefix + 'partials/organizations.html',
+                controller: OrganizationsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationAdmins', {
+                url: '/organizations/:organization_id/admins',
+                templateUrl: urlPrefix + 'partials/organizations.html',
+                controller: AdminsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationUsers', {
+                url:'/organizations/:organization_id/users',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationUserAdd', {
+                url: '/organizations/:organization_id/users/add',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('organizationUserEdit', {
+                url: '/organizations/:organization_id/users/:user_id',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teams', {
+                url: '/teams',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamsAdd', {
+                url: '/teams/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamEdit', {
+                url: '/teams/:team_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamUsers', {
+                url: '/teams/:team_id/users',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamUserEdit', {
+                url: '/teams/:team_id/users/:user_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamProjects', {
+                url: '/teams/:team_id/projects',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamProjectAdd', {
+                url: '/teams/:team_id/projects/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamProjectEdit', {
+                url: '/teams/:team_id/projects/:project_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamCredentials', {
+                url: '/teams/:team_id/credentials',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamCredentialAdd', {
+                url: '/teams/:team_id/credentials/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamCredentialEdit', {
+                url: '/teams/:team_id/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('credentials', {
+                url: '/credentials',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('credentialAdd', {
+                url: '/credentials/add',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('credentialEdit', {
+                url: '/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('users', {
+                url: '/users',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('userAdd', {
+                url: '/users/add',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('userEdit', {
+                url: '/users/:user_id',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('userCredentials', {
+                url: '/users/:user_id/credentials',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('userCredentialAdd', {
+                url: '/users/:user_id/credentials/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('teamUserCredentialEdit', {
+                url: '/teams/:user_id/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('dashboard', {
+                url: '/home',
+                templateUrl: urlPrefix + 'partials/home.html',
+                controller: Home,
+                resolve: {
+                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+                        return $q.all({
+                            jobStatus: jobStatusGraphData.get("month", "all"),
+                            features: FeaturesService.get()
+                        });
+                    }]
+                }
+            }).
+
+            state('dashboardGroups', {
+                url: '/home/groups',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeGroups,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('dashboardHosts', {
+                url: '/home/hosts',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeHosts,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('license', {
+                url: '/license',
+                templateUrl: urlPrefix + 'partials/license.html',
+                controller: LicenseController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('sockets', {
+                url: '/sockets',
+                templateUrl: urlPrefix + 'partials/sockets.html',
+                controller: SocketsController
+            });
+        }
+    ])
 
     .config(['$provide', function($provide) {
         $provide.decorator('$log', ['$delegate', function($delegate) {
@@ -1099,7 +1078,7 @@ var tower = angular.module('Tower', [
                 } else {
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
-                    // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
+                    // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
                         Timer.init().then(function(timer){
                             $rootScope.sessionTimer = timer;
@@ -1140,7 +1119,7 @@ var tower = angular.module('Tower', [
 
 
             if (!$AnsibleConfig) {
-                // create a promise that will resolve when $AnsibleConfig is loaded
+                // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
 
