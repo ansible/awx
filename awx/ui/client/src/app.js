@@ -197,8 +197,12 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    .config(['$stateProvider', '$urlRouterProvider',
-        function ($stateProvider, $urlRouterProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider) {
+
+            $breadcrumbProvider.setOptions({
+                templateUrl: urlPrefix + 'partials/breadcrumb.html'
+            });
 
             $urlRouterProvider.otherwise("/home");
 
