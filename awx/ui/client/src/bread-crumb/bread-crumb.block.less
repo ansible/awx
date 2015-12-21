@@ -39,6 +39,29 @@
     flex: initial;
 }
 
+.BreadCrumb > ol {
+      padding: 0px 15px;
+      list-style: none;
+      background-color: #FFFFFF;
+      border-radius: 4px;
+      line-height: 40px;
+}
+
+.BreadCrumb > ol > li {
+    display: inline-block;
+    //   content: "@{breadcrumb-separator}\00a0"; // Unicode space added since inline-block means non-collapsing white-space
+    padding: 0 5px;
+    color: #b7b7b7;
+}
+
+.BreadCrumb > ol > li:before {
+
+}
+
+.BreadCrumb > ol > li > .active {
+    color: #123123;
+}
+
 @breadcrumb-breakpoint: 900px;
 
 @media screen and (max-width: @breadcrumb-breakpoint) {
