@@ -49,13 +49,13 @@
 
 .BreadCrumb > ol > li {
     display: inline-block;
-    //   content: "@{breadcrumb-separator}\00a0"; // Unicode space added since inline-block means non-collapsing white-space
-    padding: 0 5px;
-    color: #b7b7b7;
+    color: #B7B7B7;
 }
 
-.BreadCrumb > ol > li:before {
-
+.BreadCrumb > ol > li + li:before {
+    content: "/";
+    padding: 0 5px;
+    color: #B7B7B7;
 }
 
 .BreadCrumb > ol > li > .active {
