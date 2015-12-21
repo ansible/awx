@@ -774,15 +774,18 @@ var tower = angular.module('Tower', [
             state('dashboard', {
                 url: '/home',
                 templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home
-                // resolve: {
-                //     graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                //         return $q.all({
-                //             jobStatus: jobStatusGraphData.get("month", "all"),
-                //             features: FeaturesService.get()
-                //         });
-                //     }]
-                // }
+                controller: Home,
+                ncyBreadcrumb: {
+                    label: "DASHBOARD"
+                },
+                resolve: {
+                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+                        return $q.all({
+                            jobStatus: jobStatusGraphData.get("month", "all"),
+                            features: FeaturesService.get()
+                        });
+                    }]
+                }
             }).
 
             state('dashboardGroups', {
