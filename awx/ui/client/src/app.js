@@ -38,6 +38,7 @@ import breadcrumbs from './shared/breadcrumbs/main';
 // modules
 import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
+import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
@@ -90,6 +91,7 @@ var tower = angular.module('Tower', [
     managementJobs.name,
     setupMenu.name,
     mainMenu.name,
+    breadCrumb.name,
     dashboard.name,
     moment.name,
     templateUrl.name,
