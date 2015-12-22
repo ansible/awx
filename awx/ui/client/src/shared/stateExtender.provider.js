@@ -7,7 +7,8 @@ export default function($stateProvider){
                     url: state.route,
                     controller: state.controller,
                     templateUrl: state.templateUrl,
-                    resolve: state.resolve
+                    resolve: state.resolve,
+                    ncyBreadcrumb: state.ncyBreadcrumb
                 });
             }
         };

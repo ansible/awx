@@ -13,5 +13,8 @@ export default {
         Authorization.logout();
         $location.path('/login');
     }],
+    ncyBreadcrumb: {
+        skip: true
+    },
     templateUrl: '/static/partials/blank.html'
 };

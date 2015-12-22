@@ -15,6 +15,9 @@ export default {
             Authorization.logout();
         }
         $(".LoginModal-dialog").remove();
-    }]
+    }],
+    ncyBreadcrumb: {
+        skip: true
+    }
 
 };

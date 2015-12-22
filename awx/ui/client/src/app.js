@@ -290,6 +290,10 @@ var tower = angular.module('Tower', [
                 url: '/jobs/:id',
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: JobDetailController,
+                ncyBreadcrumb: {
+                    parent: 'jobs',
+                    label: "{{ job.id }} - {{ job.name }}"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -313,6 +317,10 @@ var tower = angular.module('Tower', [
                 url: '/jobs/:id/stdout',
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
                 controller: JobStdoutController,
+                ncyBreadcrumb: {
+                    parent: 'jobDetail',
+                    label: "STANDARD OUT"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -375,7 +383,7 @@ var tower = angular.module('Tower', [
                 controller: JobTemplatesAdd,
                 ncyBreadcrumb: {
                     parent: "jobTemplates",
-                    label: "ADD"
+                    label: "CREATE JOB TEMPLATE"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -426,7 +434,7 @@ var tower = angular.module('Tower', [
                 controller: ProjectsAdd,
                 ncyBreadcrumb: {
                     parent: "projects",
-                    label: "ADD"
+                    label: "CREATE PROJECT"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -499,7 +507,7 @@ var tower = angular.module('Tower', [
                 controller: InventoriesAdd,
                 ncyBreadcrumb: {
                     parent: "inventories",
-                    label: "ADD"
+                    label: "CREATE INVENTORY"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -560,6 +568,10 @@ var tower = angular.module('Tower', [
                 url: '/organizations',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
+                ncyBreadcrumb: {
+                    parent: "setup",
+                    label: "ORGANIZATIONS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -573,7 +585,7 @@ var tower = angular.module('Tower', [
                 controller: OrganizationsAdd,
                 ncyBreadcrumb: {
                     parent: "organizations",
-                    label: "ADD"
+                    label: "CREATE ORGANIZATION"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -641,6 +653,10 @@ var tower = angular.module('Tower', [
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'TEAMS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -654,7 +670,7 @@ var tower = angular.module('Tower', [
                 controller: TeamsAdd,
                 ncyBreadcrumb: {
                     parent: "teams",
-                    label: "ADD"
+                    label: "CREATE TEAM"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -766,6 +782,10 @@ var tower = angular.module('Tower', [
                 url: '/credentials',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'CREDENTIALS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -779,7 +799,7 @@ var tower = angular.module('Tower', [
                 controller: CredentialsAdd,
                 ncyBreadcrumb: {
                     parent: "credentials",
-                    label: "ADD"
+                    label: "CREATE CREDENTIAL"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -803,6 +823,10 @@ var tower = angular.module('Tower', [
                 url: '/users',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'USERS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -816,7 +840,7 @@ var tower = angular.module('Tower', [
                 controller: UsersAdd,
                 ncyBreadcrumb: {
                     parent: "users",
-                    label: "ADD"
+                    label: "CREATE USER"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -873,6 +897,10 @@ var tower = angular.module('Tower', [
                 url: '/license',
                 templateUrl: urlPrefix + 'partials/license.html',
                 controller: LicenseController,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'LICENSE'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -883,7 +911,10 @@ var tower = angular.module('Tower', [
             state('sockets', {
                 url: '/sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController
+                controller: SocketsController,
+                ncyBreadcrumb: {
+                    label: 'SOCKETS'
+                }
             });
         }
     ])
