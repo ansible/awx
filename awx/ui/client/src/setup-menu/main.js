@@ -6,8 +6,10 @@ export default
                    [    'AboutAnsibleHelpModal',
                         icon.name
                    ])
-        .config(['$routeProvider', function($routeProvider) {
-            var url = route.route;
-            delete route.route;
-            $routeProvider.when(url, route);
+        .run(['$stateExtender', function($stateExtender) {
+            // var// $stateProvider = $injector.get("$state"),
+            // state = route.name;
+            // delete route.name;
+
+            $stateExtender.addState(route);
         }]);

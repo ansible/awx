@@ -12,11 +12,13 @@ import logoutRoute from './logout.route';
 
 export default
     angular.module('login', [authentication.name, loginModal.name])
-        .config(['$routeProvider', function($routeProvider) {
-            var url = loginRoute.url;
-            delete loginRoute.route;
-            $routeProvider.when(url, loginRoute);
-            url = logoutRoute.route;
-            delete logoutRoute.route;
-            $routeProvider.when(url, logoutRoute);
+        .run(['$stateExtender', function($stateExtender) {
+            $stateExtender.addState(loginRoute);
+            $stateExtender.addState(logoutRoute);
+            // var url = loginRoute.url;
+            // delete loginRoute.route;
+            // $routeProvider.when(url, loginRoute);
+            // url = logoutRoute.route;
+            // delete logoutRoute.route;
+            // $routeProvider.when(url, logoutRoute);
         }]);

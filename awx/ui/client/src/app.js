@@ -70,6 +70,7 @@ import './job-templates/main';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
+import uiRouterHelper from './shared/uiRouterHelper/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
@@ -187,7 +188,8 @@ var tower = angular.module('Tower', [
     'longDateFilter',
     'pendolytics',
     'ui.router',
-    'ncy-angular-breadcrumb'
+    'ncy-angular-breadcrumb',
+    uiRouterHelper.name
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -204,9 +206,52 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
-            $urlRouterProvider.otherwise("/home");
+            // $urlRouterProvider.otherwise("/home");
+            $urlRouterProvider.otherwise(function($injector, $location){
+                  var $state = $injector.get("$state");
+                  $state.go('dashboard');
+            });
 
             $stateProvider.
+            state('dashboard', {
+                url: '/home',
+                templateUrl: urlPrefix + 'partials/home.html',
+                controller: Home,
+                ncyBreadcrumb: {
+                    label: "DASHBOARD"
+                },
+                resolve: {
+                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+                        return $q.all({
+                            jobStatus: jobStatusGraphData.get("month", "all"),
+                            features: FeaturesService.get()
+                        });
+                    }]
+                }
+            }).
+
+            state('dashboardGroups', {
+                url: '/home/groups',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeGroups,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('dashboardHosts', {
+                url: '/home/hosts?has_active_failures',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeHosts,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
             state('jobs', {
                 url: '/jobs',
                 templateUrl: urlPrefix + 'partials/jobs.html',
@@ -768,45 +813,6 @@ var tower = angular.module('Tower', [
                 url: '/teams/:user_id/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('dashboard', {
-                url: '/home',
-                templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home,
-                ncyBreadcrumb: {
-                    label: "DASHBOARD"
-                },
-                resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                        return $q.all({
-                            jobStatus: jobStatusGraphData.get("month", "all"),
-                            features: FeaturesService.get()
-                        });
-                    }]
-                }
-            }).
-
-            state('dashboardGroups', {
-                url: '/home/groups',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('dashboardHosts', {
-                url: '/home/hosts?has_active_failures',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeHosts,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
