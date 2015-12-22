@@ -9,13 +9,13 @@ export default
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
         'LookUpInit', 'OrganizationList', 'inventory_script',
-        '$scope', 'transitionTo',
+        '$scope', '$state',
         function(
             Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath,
             GenerateForm, SearchInit, PaginateInit,
             LookUpInit, OrganizationList, inventory_script,
-            $scope, transitionTo
+            $scope, $state
         ) {
             var generator = GenerateForm,
                 id = inventory_script.id,
@@ -80,7 +80,7 @@ export default
                     script: $scope.script
                 })
                     .success(function () {
-                        transitionTo('inventoryScriptsList');
+                        $state.transitionTo('inventoryScriptsList');
                         Wait('stop');
 
                     })

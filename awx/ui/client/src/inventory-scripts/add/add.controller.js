@@ -8,12 +8,12 @@ export default
     [   '$compile','SchedulerInit', 'Rest', 'Wait',
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', '$scope', 'transitionTo',
+        'LookUpInit', 'OrganizationList', '$scope', '$state',
         function(
             $compile, SchedulerInit, Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, $scope, transitionTo
+            LookUpInit, OrganizationList, $scope, $state
         ) {
             var scope = $scope,
                 generator = GenerateForm,
@@ -48,7 +48,7 @@ export default
                     script: scope.script
                 })
                 .success(function () {
-                    transitionTo('inventoryScriptsList');
+                    $state.transitionTo('inventoryScriptsList');
                     Wait('stop');
 
                 })

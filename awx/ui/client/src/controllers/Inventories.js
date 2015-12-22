@@ -862,7 +862,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     });
 
     $scope.systemTracking = function() {
-        transitionTo('systemTracking',
+        $state.transitionTo('systemTracking',
                      {  inventory: $scope.inventory,
                         hosts: $scope.hostsSelectedItems
                      });

@@ -15,10 +15,4 @@ export default
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(loginRoute);
             $stateExtender.addState(logoutRoute);
-            // var url = loginRoute.url;
-            // delete loginRoute.route;
-            // $routeProvider.when(url, loginRoute);
-            // url = logoutRoute.route;
-            // delete logoutRoute.route;
-            // $routeProvider.when(url, logoutRoute);
         }]);

@@ -7,11 +7,11 @@
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', 'transitionTo', 'Stream',
+        'Rest' , 'ProcessErrors', 'Prompt', '$state', 'Stream',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, transitionTo, Stream
+            Rest, ProcessErrors, Prompt, $state, Stream
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -38,8 +38,8 @@ export default
             scope.search(list.iterator);
 
             scope.editCustomInv = function(){
-                transitionTo('inventoryScriptsEdit', {
-                    inventory_script: this.inventory_script
+                $state.transitionTo('inventoryScriptsEdit', {
+                    inventory_script: this.inventory_script.id
                 });
             };
 
@@ -73,7 +73,7 @@ export default
             };
 
             scope.addCustomInv = function(){
-                transitionTo('inventoryScriptsAdd');
+                $state.transitionTo('inventoryScriptsAdd');
             };
 
         }
