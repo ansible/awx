@@ -254,6 +254,9 @@ var tower = angular.module('Tower', [
                 url: '/jobs',
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: JobsListController,
+                ncyBreadcrumb: {
+                    label: "JOBS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -345,6 +348,9 @@ var tower = angular.module('Tower', [
                 url: '/job_templates',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesList,
+                ncyBreadcrumb: {
+                    label: "JOB TEMPLATES"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -389,6 +395,9 @@ var tower = angular.module('Tower', [
                 url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
+                ncyBreadcrumb: {
+                    label: "PROJECTS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -455,6 +464,9 @@ var tower = angular.module('Tower', [
                 url: '/inventories',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesList,
+                ncyBreadcrumb: {
+                    label: "INVENTORIES"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
