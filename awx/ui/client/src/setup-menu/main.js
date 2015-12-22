@@ -7,9 +7,5 @@ export default
                         icon.name
                    ])
         .run(['$stateExtender', function($stateExtender) {
-            // var// $stateProvider = $injector.get("$state"),
-            // state = route.name;
-            // delete route.name;
-
             $stateExtender.addState(route);
         }]);

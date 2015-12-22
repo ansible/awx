@@ -31,7 +31,7 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
-import routeExtensions from './shared/route-extensions/main';
+// import routeExtensions from './shared/route-extensions/main';
 import breadcrumbs from './shared/breadcrumbs/main';
 
 
@@ -70,7 +70,6 @@ import './job-templates/main';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
-import uiRouterHelper from './shared/uiRouterHelper/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
@@ -189,7 +188,6 @@ var tower = angular.module('Tower', [
     'pendolytics',
     'ui.router',
     'ncy-angular-breadcrumb',
-    uiRouterHelper.name
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -207,7 +205,7 @@ var tower = angular.module('Tower', [
             });
 
             // $urlRouterProvider.otherwise("/home");
-            $urlRouterProvider.otherwise(function($injector, $location){
+            $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");
                   $state.go('dashboard');
             });
