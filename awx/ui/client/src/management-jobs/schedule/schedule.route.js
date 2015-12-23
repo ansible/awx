@@ -16,17 +16,17 @@ export default {
             return FeaturesService.get();
         }],
         management_job:
-        [   '$route',
+        [   '$stateParams',
             '$q',
             'Rest',
             'GetBasePath',
             'ProcessErrors',
-            function($route, $q, rest, getBasePath, ProcessErrors) {
-                if ($route.current.hasModelKey('management_job')) {
-                    return $q.when($route.current.params.model.management_job);
-                }
+            function($stateParams, $q, rest, getBasePath, ProcessErrors) {
+                // if ($route.current.hasModelKey('management_job')) {
+                //     return $q.when($route.current.params.model.management_job);
+                // }
 
-                var managementJobId = $route.current.params.management_job;
+                var managementJobId = $stateParams.management_job;
 
                 var url = getBasePath('system_job_templates') + managementJobId + '/';
                 rest.setUrl(url);

@@ -16,17 +16,19 @@ export default {
             return FeaturesService.get();
         }],
         inventory_script:
-        [   '$route',
+        [   '$state',
+            '$stateParams',
             '$q',
             'Rest',
             'GetBasePath',
             'ProcessErrors',
-            function($route, $q, rest, getBasePath, ProcessErrors) {
-                if ($route.current.hasModelKey('inventory_script')) {
-                    return $q.when($route.current.params.model.inventory_script);
-                }
+            function($state, $stateParams, $q, rest, getBasePath, ProcessErrors) {
+                // if ($stateParams.inventory_script) {
+                //     $stateParams.inventory_script = JSON.parse($stateParams.inventory_script);
+                //     return $q.when($stateParams.inventory_script);
+                // }
 
-                var inventoryScriptId = $route.current.params.inventory_script;
+                var inventoryScriptId = $stateParams.inventory_script;
 
                 var url = getBasePath('inventory_scripts') + inventoryScriptId + '/';
                 rest.setUrl(url);
