@@ -17,9 +17,11 @@ export default {
                 [   'getModuleOptions',
                     'lodashAsPromised',
                     'ProcessErrors',
-                    '$route',
-                    function(getModuleOptions, _, ProcessErrors, $route) {
-                    var hostIds = $route.current.params.hosts.split(',');
+                    '$state',
+                    '$stateParams',
+                    function(getModuleOptions, _, ProcessErrors, $state, $stateParams) {
+                    var hostIds = JSON.parse($stateParams.hosts);
+                    //  hostIds = hostIds.split(',');
 
                     var data =
                         getModuleOptions(hostIds[0])
@@ -37,17 +39,18 @@ export default {
                     }
                 ],
             inventory:
-            [   '$route',
+            [   '$state',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 'ProcessErrors',
-                function($route, $q, rest, getBasePath, ProcessErrors) {
-                    if ($route.current.hasModelKey('inventory')) {
-                        return $q.when($route.current.params.model.inventory);
+                function($state, $q, rest, getBasePath, ProcessErrors) {
+
+                    if ($state.current.hasModelKey('inventory')) {
+                        return $q.when($state.current.params.model.inventory);
                     }
 
-                    var inventoryId = $route.current.params.inventory;
+                    var inventoryId = $state.current.params.inventory;
 
                     var url = getBasePath('inventory') + inventoryId + '/';
                     rest.setUrl(url);
@@ -64,17 +67,17 @@ export default {
                 }
             ],
             hosts:
-            [   '$route',
+            [   '$state',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 'ProcessErrors',
-                function($route, $q, rest, getBasePath, ProcessErrors) {
-                    if ($route.current.hasModelKey('hosts')) {
-                        return $q.when($route.current.params.model.hosts);
+                function($state, $q, rest, getBasePath, ProcessErrors) {
+                    if ($state.current.hasModelKey('hosts')) {
+                        return $q.when($state.current.params.model.hosts);
                     }
 
-                    var hostIds = $route.current.params.hosts.split(',');
+                    var hostIds = $state.current.params.hosts.split(',');
 
                     var hosts =
                         hostIds.map(function(hostId) {

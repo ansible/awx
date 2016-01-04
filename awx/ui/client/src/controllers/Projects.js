@@ -343,7 +343,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                     msg: 'Call to get project failed. GET status: ' + status });
-            })
+            });
     };
 
     $scope.refresh = function () {

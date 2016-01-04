@@ -31,7 +31,6 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
-// import routeExtensions from './shared/route-extensions/main';
 import breadcrumbs from './shared/breadcrumbs/main';
 
 
@@ -78,11 +77,9 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     // 'ngAnimate',
-    'ngRoute',
     'ngSanitize',
     'ngCookies',
     RestServices.name,
-    // routeExtensions.name,
     browserData.name,
     breadcrumbs.name,
     systemTracking.name,

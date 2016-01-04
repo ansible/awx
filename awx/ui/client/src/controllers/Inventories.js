@@ -863,7 +863,9 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     });
 
     $scope.systemTracking = function() {
-        $state.transitionTo('systemTracking',
+        $scope.inventory = JSON.stringify($scope.inventory);
+        $scope.hostsSelectedItems = JSON.stringify($scope.hostsSelectedItems);
+        $state.go('systemTracking',
                      {  inventory: $scope.inventory,
                         hosts: $scope.hostsSelectedItems
                      });

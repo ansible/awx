@@ -1,7 +1,7 @@
 /* jshint unused: vars */
 
 export default
-    [   'templateUrl', '$route', function(templateUrl, $route) {
+    [   'templateUrl', '$state', function(templateUrl, $state) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -10,11 +10,11 @@ export default
 
                 scope.toggleActivityStreamActive = function(){
                     scope.activityStreamActive = !scope.activityStreamActive;
-                }
+                };
 
                 scope.isActive = function (path) {
-                    if ($route.current && $route.current.regexp) {
-                        return $route.current.regexp.test(path);
+                    if ($state.current && $state.current.regexp) {
+                        return $state.current.regexp.test(path);
                     }
                     return false;
                 };
