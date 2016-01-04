@@ -317,7 +317,8 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 
     $scope.editInventory = function (id) {
-        $location.path($location.path() + '/' + id);
+        // $location.path($location.path() + '/' + id);
+        $state.go('inventories.edit', {inventory_id: id});
     };
 
     $scope.manageInventory = function(id){

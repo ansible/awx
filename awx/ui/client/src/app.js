@@ -428,9 +428,9 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('projectAdd', {
-                url: '/projects/add',
-                templateUrl: urlPrefix + 'partials/projects.html',
+            state('projects.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/projects.add.html',
                 controller: ProjectsAdd,
                 ncyBreadcrumb: {
                     parent: "projects",
@@ -443,8 +443,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('projectEdit', {
-                url: '/projects/:id',
+            state('projects.edit', {
+                url: '/:id',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsEdit,
                 resolve: {
@@ -501,8 +501,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('inventoryAdd', {
-                url: '/inventories/add',
+            state('inventories.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesAdd,
                 ncyBreadcrumb: {
@@ -516,8 +516,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('inventoryEdit', {
-                url: '/inventories/:inventory_id',
+            state('inventories.edit', {
+                url: '/:inventory_id',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit,
                 resolve: {

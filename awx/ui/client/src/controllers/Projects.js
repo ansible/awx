@@ -11,9 +11,11 @@
 */
 
 
-export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
-    Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter) {
+export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
+    Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit,
+    PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
+    SelectionInit, ProjectUpdate, Refresh, Wait, Stream, GetChoices, Empty,
+    Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
     ClearScope();
 
@@ -197,11 +199,13 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     };
 
     $scope.addProject = function () {
-        $location.path($location.path() + '/add');
+        // $location.path($location.path() + '/add');
+        $state.transitionTo('projects.add');
     };
 
     $scope.editProject = function (id) {
-        $location.path($location.path() + '/' + id);
+        // $location.path($location.path() + '/' + id);
+        $state.transitionTo('projects.edit', {id: id});
     };
 
     if ($scope.removeShowLogViewer) {
@@ -392,7 +396,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'ProjectUpdate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
-    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter'
+    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
 
