@@ -532,10 +532,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            // state('/inventories/:inventory_id/job_templates/', {
-            //     redirectTo: '/inventories/:inventory_id'
-            // }).
-            //
             state('inventoryJobTemplateEdit', {
                 url: '/inventories/:inventory_id/job_templates/:template_id',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
