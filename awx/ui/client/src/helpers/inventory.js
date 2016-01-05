@@ -106,7 +106,6 @@ export default
                         showButtons: false,
                         showActions: false,
                         id: 'inventory-edit-modal-dialog',
-                        breadCrumbs: false,
                         related: false,
                         scope: scope
                     });

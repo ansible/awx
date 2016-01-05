@@ -77,7 +77,7 @@ export default
             }
             scope.removeGenerateForm = scope.$on('GenerateForm', function() {
                 tmpVar = scope.mode;
-                GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
+                GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope });
                 scope.mode = tmpVar;
                 scope.$emit('FillQuestionForm');
             });

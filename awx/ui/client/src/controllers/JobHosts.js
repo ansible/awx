@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobHosts
@@ -12,7 +12,7 @@
 
 
 export function JobHostSummaryList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobHostList, GenerateList,
-    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
+    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
     JobStatusToolTip) {
 
     ClearScope();
@@ -84,15 +84,6 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $statePa
     Rest.get()
         .success(function (data) {
             inventory = data.inventory;
-            LoadBreadCrumbs({
-                path: '/job_host_summaries/' + $scope.job_id,
-                title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-                altPath: '/jobs'
-            });
-            $rootScope.breadcrumbs = [{
-                path: '/jobs',
-                title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-            }];
             $scope.job_status = data.status;
             $scope.$emit('JobReady');
         })
@@ -122,6 +113,6 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $statePa
 }
 
 JobHostSummaryList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobHostList',
-    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Refresh', 'JobStatusToolTip', 'Wait'
 ];

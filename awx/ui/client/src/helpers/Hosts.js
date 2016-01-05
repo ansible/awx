@@ -240,7 +240,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                generator = GenerateList;
 
                // Inject the list html
-               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
+               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'hosts-container', searchSize: 'col-lg-6 col-md-6 col-sm-6' });
 
                // Load data
                HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, pageSize: pageSize });
@@ -308,7 +308,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                           scope = generator.inject(list, {
                               id: 'form-modal-body',
                               mode: 'select',
-                              breadCrumbs: false,
                               selectButton: false
                           });
 
@@ -470,7 +469,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                           buttons, url, form_scope;
 
                           form_scope =
-                          generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
+                          generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', related: false, scope: scope });
                           generator.reset();
 
                           buttons = [{

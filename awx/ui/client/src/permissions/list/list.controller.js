@@ -12,8 +12,8 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
-        function ($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
+    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
+        function ($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, permissionsList, GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
             ClearScope();
 
@@ -53,7 +53,7 @@ export default
                     permissionsSearchSelect({
                         choices: choices
                     });
-                generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+                generator.inject(list, { mode: 'edit', scope: $scope });
             });
 
             defaultUrl += ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id;
@@ -86,8 +86,6 @@ export default
                 url: defaultUrl
             });
             $scope.search(list.iterator);
-
-            LoadBreadCrumbs();
 
             $scope.addPermission = function () {
                 if ($scope.PermissionAddAllowed) {

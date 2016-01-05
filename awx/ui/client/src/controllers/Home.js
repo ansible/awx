@@ -156,7 +156,7 @@ Home.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location',
  * @description This controls the 'home/groups' page that is loaded from the dashboard
  *
 */
-export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
@@ -170,7 +170,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         modal_scope = $scope.$new(),
         opt, PreviousSearchParams;
 
-    generator.inject(list, { mode: 'edit', scope: scope, breadCrumbs: true });
+    generator.inject(list, { mode: 'edit', scope: scope });
 
     function ellipsis(a) {
         if (a.length > 20) {
@@ -333,8 +333,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
     scope.search(list.iterator);
 
     scope.$emit('WatchUpdateStatus');  // Start watching for live updates
-
-    LoadBreadCrumbs();
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
@@ -579,7 +577,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
 
 }
 
-HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
@@ -592,7 +590,7 @@ HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$l
  *
 */
 
-export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -615,7 +613,7 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
             });
         }
 
-        generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+        generator.inject(list, { mode: 'edit', scope: $scope });
 
     });
 
@@ -657,8 +655,6 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
     }
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
     $scope.refreshHosts = function() {
         $scope.search(list.iterator);
@@ -708,7 +704,7 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
 
 }
 
-HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
     'Find', 'ShowJobSummary', 'ViewJob'
 ];

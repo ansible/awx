@@ -12,7 +12,7 @@
 
 
 export function CredentialsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, CredentialList,
-    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
+    GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream) {
 
     ClearScope();
@@ -26,7 +26,7 @@ export function CredentialsList($scope, $rootScope, $location, $log, $stateParam
         mode = (base === 'credentials') ? 'edit' : 'select',
         url;
 
-    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($stateParams.user_id || $stateParams.team_id) ? true : false) });
+    view.inject(list, { mode: mode, scope: $scope });
 
     $scope.selected = [];
     $scope.credentialLoading = true;
@@ -125,13 +125,13 @@ export function CredentialsList($scope, $rootScope, $location, $log, $stateParam
 }
 
 CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'GetChoices', 'Wait', 'Stream'
 ];
 
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
-    ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
+    ProcessErrors, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
     GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
 
     ClearScope();
@@ -294,13 +294,13 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $s
 }
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
     'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'FormSave'
 ];
 
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
-    ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
+    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
     KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
 
     ClearScope();
@@ -612,7 +612,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
 }
 
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices', 'KindChange', 'UserList', 'TeamList', 'LookUpInit',
     'Empty', 'OwnerChange', 'FormSave', 'Stream', 'Wait'
 ];

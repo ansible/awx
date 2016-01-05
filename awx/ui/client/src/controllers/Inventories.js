@@ -14,7 +14,7 @@ import '../job-templates/main';
 
 export function InventoriesList($scope, $rootScope, $location, $log,
     $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
-    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
+    Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer, $state) {
 
@@ -122,8 +122,6 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     }
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
     if ($scope.removePostRefresh) {
         $scope.removePostRefresh();
@@ -370,13 +368,13 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 }
 
 InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
 ];
 
 
 export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
+    Alert, ProcessErrors, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
 
     ClearScope();
@@ -390,10 +388,9 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $s
     form.formLabelSize = null;
     form.formFieldSize = null;
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
 
     generator.reset();
-    LoadBreadCrumbs();
 
     $scope.parseType = 'yaml';
     ParseTypeChange({
@@ -455,12 +452,12 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $s
 }
 
 InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
 ];
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
+    Alert, ProcessErrors, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
     Prompt, PlaybookRun, CreateDialog, deleteJobTemplate) {
 
@@ -479,7 +476,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     form.formLabelSize = null;
     form.formFieldSize = null;
     $scope.inventory_id = inventory_id;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();
 
@@ -533,11 +530,6 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
             RelatedPaginateInit({
                 scope: $scope,
                 relatedSets: relatedSets
-            });
-
-            LoadBreadCrumbs({
-              path: $location.path(),
-              title: $scope.inventory_name
             });
 
             Wait('stop');
@@ -786,7 +778,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit',
     'Prompt', 'PlaybookRun', 'CreateDialog', 'deleteJobTemplate'
 ];
@@ -795,7 +787,7 @@ InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 
 export function InventoriesManage ($log, $scope, $rootScope, $location,
     $state, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert,
-    LoadBreadCrumbs, GetBasePath, ProcessErrors, Breadcrumbs, InventoryGroups,
+    GetBasePath, ProcessErrors, InventoryGroups,
     InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
@@ -808,18 +800,6 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         hostScope = $scope.$new();
 
     ClearScope();
-
-    $scope.group_breadcrumbs = [{
-        name: '',
-        id: 0,
-        description: '',
-        show: true,
-        ngicon: null,
-        has_children: false,
-        related: {},
-        active_class: 'active',
-        show_failures: false
-    }];
 
     // TODO: only display adhoc button if the user has permission to use it.
     // TODO: figure out how to get the action-list partial to update so that
@@ -944,22 +924,10 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
         var e, rows;
 
-        LoadBreadCrumbs({
-            path: $location.path(),
-            title: '{{ inventory.name }}'
-        });
-        $scope.group_breadcrumbs[0].name = $scope.inventory.name;
-
-        // Build page breadcrumbs
-        e = angular.element(document.getElementById('breadcrumbs'));
-        e.html(Breadcrumbs({ list: InventoryGroups, mode: 'edit' }));
-        $compile(e)($scope);
-
         // Add groups view
         generateList.inject(InventoryGroups, {
             mode: 'edit',
             id: 'group-list-container',
-            breadCrumbs: false,
             searchSize: 'col-lg-6 col-md-6 col-sm-6',
             scope: $scope
         });
@@ -1096,15 +1064,6 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         $scope.search(InventoryGroups.iterator, null, true, false, true);
     }
 
-    function setActiveGroupBreadcrumb() {
-        $scope.group_breadcrumbs.forEach(function(crumb, idx) {
-            $scope.group_breadcrumbs[idx].active_class = '';
-        });
-        $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].active_class = 'active';
-        $scope.refreshHostsOnGroupRefresh = true;
-        $scope.selected_group_id = ($scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].id === 0) ? null : $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].id;
-    }
-
     $scope.refreshHosts = function() {
         HostsReload({
             scope: hostScope,
@@ -1143,29 +1102,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         groups.push(group.id);
         groups = groups.join();
         $state.transitionTo('inventoryManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false });
-        $scope.group_breadcrumbs.push(group);
-        setActiveGroupBreadcrumb();
         loadGroups(group.related.children, group.id);
-    };
-
-    $scope.breadcrumbGroupSelect = function(id) {
-        var i, url;
-        $scope.group_breadcrumbs.every(function(crumb, idx) {
-            if (crumb.id === id) {
-                i = idx;
-                return false;
-            }
-            return true;
-        });
-        $scope.group_breadcrumbs = $scope.group_breadcrumbs.slice(0,i + 1);
-        if (id > 0) {
-            url = $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].related.children;
-        }
-        else {
-            url = $scope.inventory.related.root_groups;
-        }
-        setActiveGroupBreadcrumb();
-        loadGroups(url);
     };
 
     $scope.createGroup = function () {
@@ -1314,13 +1251,6 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     $scope.showGroupActivity = function () {
         var url, title, group;
         if ($scope.selected_group_id) {
-            $scope.group_breadcrumbs.every(function(crumb) {
-                if (crumb.id === $scope.selected_group_id) {
-                    group = crumb;
-                    return false;
-                }
-                return true;
-            });
             url = GetBasePath('activity_stream') + '?group__id=' + $scope.selected_group_id;
             title = 'Showing all activities for group ' + group.name;
         } else {
@@ -1412,8 +1342,8 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
 
 InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     '$state', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait',
-    'Rest', 'Alert', 'LoadBreadCrumbs', 'GetBasePath', 'ProcessErrors',
-    'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload',
+    'Rest', 'Alert', 'GetBasePath', 'ProcessErrors',
+    'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload',
     'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
     'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',

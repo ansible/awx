@@ -27,7 +27,6 @@ export default
             generator.inject(form, {
                     mode: 'edit' ,
                     scope:$scope,
-                    breadCrumbs: true,
                     related: false,
                     activityStream: false
                 });

@@ -72,23 +72,6 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
         }
     };
 
-    privateFn.getInventoryNameForBreadcrumbs = function(url) {
-
-        Rest.setUrl(url);
-        var promise = Rest.get();
-        promise.then(function (response) {
-            $scope.inv_name = response.data.name;
-        });
-        promise.catch(function (response) {
-            ProcessErrors($rootScope, response.data, response.status, null, {
-                hdr: 'Error!',
-                msg: 'Failed to get inventory name. GET returned status: ' +
-                response.status });
-            $location.path("/inventories/");
-        });
-        return promise;
-    };
-
     // set the arguments help to watch on change of the module
     privateFn.instantiateArgumentHelp = function() {
         $scope.$watch('module_name', function(val) {
@@ -166,9 +149,6 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
 
         // put the inventory id on scope for the partial to use
         $scope.inv_id = id;
-
-        // get the inventory name
-        privateFn.getInventoryNameForBreadcrumbs(urls.inventoryUrl);
 
         // set the arguments help to watch on change of the module
         privateFn.instantiateArgumentHelp();

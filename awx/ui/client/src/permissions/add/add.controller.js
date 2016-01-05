@@ -10,8 +10,8 @@
  * @description This controller for permissions add
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
-        function($scope, $rootScope, $compile, $location, $log, $stateParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
+        function($scope, $rootScope, $compile, $location, $log, $stateParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
 
             ClearScope();
 
@@ -41,7 +41,6 @@ export default
             generator.inject(form, { mode: 'add', related: false, scope: $scope });
             CheckAccess({ scope: $scope });
             generator.reset();
-            LoadBreadCrumbs();
 
             $scope.inventoryrequired = true;
             $scope.projectrequired = false;

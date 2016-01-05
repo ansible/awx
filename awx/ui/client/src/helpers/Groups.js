@@ -459,7 +459,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                           GenerateList.inject(list, {
                               mode: 'edit',
                               id: 'schedules-list',
-                              breadCrumbs: false,
                               searchSize: 'col-lg-6 col-md-5 col-sm-5 col-xs-5',
                               scope: schedule_scope
                           });
@@ -751,9 +750,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            $compile(elem)(modal_scope);
 
                            var form_scope =
-                           generator.inject(GroupForm, { mode: mode, id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
+                           generator.inject(GroupForm, { mode: mode, id: 'properties-tab', related: false, scope: properties_scope });
                            var source_form_scope =
-                           generator.inject(SourceForm, { mode: mode, id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
+                           generator.inject(SourceForm, { mode: mode, id: 'sources-tab', related: false, scope: sources_scope });
 
                            //generator.reset();
 
@@ -2026,7 +2025,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                scope = generator.inject(form, {
                                    mode: 'edit',
                                    id: 'form-container',
-                                   breadCrumbs: false,
                                    related: false
                                });
 

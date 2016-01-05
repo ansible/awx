@@ -21,7 +21,7 @@
 */
 
 
-export function AdminsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, AdminList, GenerateList, LoadBreadCrumbs,
+export function AdminsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, AdminList, GenerateList,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, GetBasePath, SelectionInit) {
 
     var list = AdminList,
@@ -30,7 +30,7 @@ export function AdminsList($scope, $rootScope, $location, $log, $stateParams, Re
         mode = 'select',
         url = GetBasePath('organizations') + $stateParams.organization_id + '/admins/';
 
-    generator.inject(AdminList, { mode: mode, scope: $scope, breadCrumbs: true });
+    generator.inject(AdminList, { mode: mode, scope: $scope });
 
     SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
 
@@ -39,10 +39,8 @@ export function AdminsList($scope, $rootScope, $location, $log, $stateParams, Re
     PaginateInit({ scope: $scope, list: list, url: defaultUrl });
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 }
 
 AdminsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'AdminList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'GetBasePath', 'SelectionInit'
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'GetBasePath', 'SelectionInit'
 ];

@@ -11,7 +11,7 @@
 */
 
 
-export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $stateParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
+export function JobDetailController ($location, $rootScope, $filter, $scope, $compile, $stateParams, $log, ClearScope, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
     UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule) {
 
@@ -848,7 +848,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
         //$('#tasks-table-detail').mCustomScrollbar("update");
         $('#hosts-table-detail').height(150);
         //$('#hosts-table-detail').mCustomScrollbar("update");
-        height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumb-container').outerHeight() -
+        height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
             $('#job-detail-container').outerHeight() - $('#job-detail-footer').outerHeight() - 20;
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
@@ -1435,7 +1435,7 @@ export function JobDetailController ($location, $rootScope, $filter, $scope, $co
     });
 }
 
-JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$stateParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
+JobDetailController.$inject = [ '$location', '$rootScope', '$filter', '$scope', '$compile', '$stateParams', '$log', 'ClearScope', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
     'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule'

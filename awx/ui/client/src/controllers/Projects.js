@@ -12,7 +12,7 @@
 
 
 export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
-    Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit,
+    Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, ProjectUpdate, Refresh, Wait, Stream, GetChoices, Empty,
     Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter, $state) {
@@ -29,7 +29,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         url = (base === 'teams') ? GetBasePath('teams') + $stateParams.team_id + '/projects/' : defaultUrl,
         choiceCount = 0;
 
-    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($stateParams.team_id) ? true : false)});
+    view.inject(list, { mode: mode, scope: $scope });
 
     $rootScope.flashMessage = null;
     $scope.projectLoading = true;
@@ -191,8 +191,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         variable: 'project_scm_type_options',
         callback: 'choicesReadyProject'
     });
-
-    LoadBreadCrumbs();
 
     $scope.showActivity = function () {
         Stream({ scope: $scope });
@@ -394,14 +392,14 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
 }
 
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'ProjectUpdate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
     'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
 
 export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
+    ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
     CredentialList, GetChoices, DebugForm, Wait) {
 
     ClearScope();
@@ -413,9 +411,8 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stat
         defaultUrl = GetBasePath('projects'),
         master = {};
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
-    LoadBreadCrumbs();
 
     GetProjectPath({ scope: $scope, master: master });
 
@@ -540,14 +537,14 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stat
 }
 
 ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices',
     'DebugForm', 'Wait'
 ];
 
 
 export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
+    GenerateForm, Rest, Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
     Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList, ProjectUpdate) {
 
@@ -566,8 +563,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $sta
     generator.inject(form, {
         mode: 'edit',
         related: true,
-        scope: $scope,
-        breadcrumbs: true
+        scope: $scope
     });
     generator.reset();
 
@@ -645,7 +641,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $sta
         Rest.get({ params: { id: id } })
             .success(function (data) {
                 var fld, i;
-                LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
                 for (fld in form.fields) {
                     if (form.fields[fld].type === 'checkbox_group') {
                         for (i = 0; i < form.fields[fld].fields.length; i++) {
@@ -846,7 +841,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $sta
 }
 
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
+    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
     'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList', 'ProjectUpdate'
 ];

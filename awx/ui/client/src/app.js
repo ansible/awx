@@ -31,8 +31,6 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
-import breadcrumbs from './shared/breadcrumbs/main';
-
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -81,7 +79,6 @@ var tower = angular.module('Tower', [
     'ngCookies',
     RestServices.name,
     browserData.name,
-    breadcrumbs.name,
     systemTracking.name,
     inventoryScripts.name,
     permissions.name,
@@ -975,7 +972,6 @@ var tower = angular.module('Tower', [
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
                 LoadBasePaths();
 
-                $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
 
                 if ($rootScope.removeOpenSocket) {

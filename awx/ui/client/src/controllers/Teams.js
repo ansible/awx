@@ -11,7 +11,7 @@
 */
 
 
-export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
+export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, TeamList, GenerateList,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
     Stream) {
 
@@ -63,8 +63,6 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Res
     });
     $scope.search(list.iterator);
 
-    LoadBreadCrumbs();
-
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
@@ -108,13 +106,13 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Res
 }
 
 TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream'
 ];
 
 
 export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm,
-    Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList,
+    Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GenerateList,
     OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
@@ -127,7 +125,6 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $statePa
 
     $rootScope.flashMessage = null;
     generator.reset();
-    LoadBreadCrumbs();
 
     LookUpInit({
         scope: $scope,
@@ -169,13 +166,13 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $statePa
 }
 
 TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit', 'Wait'
 ];
 
 
 export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
+    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
     OrganizationList, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
@@ -419,6 +416,6 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateP
 }
 
 TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];

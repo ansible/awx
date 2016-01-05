@@ -39,7 +39,6 @@ export function PortalController($scope, $compile, $stateParams, $rootScope, $lo
                 id : 'portal-job-templates',
                 mode: 'edit',
                 scope: $scope,
-                breadCrumbs: false,
                 searchSize: 'col-lg-6 col-md-6'
             });
 

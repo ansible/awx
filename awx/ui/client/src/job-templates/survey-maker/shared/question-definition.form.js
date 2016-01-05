@@ -19,7 +19,6 @@ export default
         name: 'survey_question',
         well: true,
         twoColumns: true,
-        breadcrumbs: false,
 
     fields: {
         question_name: {

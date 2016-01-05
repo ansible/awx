@@ -10,8 +10,8 @@
  * @description This controller for permissions edit
 */
 export default
-    ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
-        function($scope, $rootScope, $compile, $location, $log, $stateParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
+    ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'permissionsForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'permissionsCategoryChange', 'fieldChoices', 'fieldLabels',
+        function($scope, $rootScope, $compile, $location, $log, $stateParams, permissionsForm, GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, permissionsCategoryChange, fieldChoices, fieldLabels) {
 
             ClearScope();
 
@@ -74,7 +74,6 @@ export default
                 Rest.get()
                     .success(function (data) {
                         var fld, sourceModel, sourceField;
-                        LoadBreadCrumbs({ path: '/users/' + base_id + '/permissions/' + id, title: data.name });
                         for (fld in form.fields) {
                             if (data[fld]) {
                                 if (form.fields[fld].sourceModel) {

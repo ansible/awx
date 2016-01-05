@@ -193,7 +193,7 @@ export default
 
                 $('#inventory-modal-container').empty().append(html);
 
-                scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
+                scope = generator.inject(form, { mode: 'edit', id: 'form-container', related: false });
 
                 // Set modal dimensions based on viewport width
                 ww = $(document).width();
@@ -395,7 +395,6 @@ export default
             GenerateList.inject(list, {
                 mode: 'edit',
                 id: id,
-                breadCrumbs: false,
                 scope: scope,
                 showSearch: false
             });

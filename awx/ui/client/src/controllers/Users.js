@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Users
@@ -11,7 +11,7 @@
 */
 
 
-export function UsersList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,
+export function UsersList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, UserList, GenerateList,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -24,7 +24,7 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams, Res
         url = (base === 'organizations') ? GetBasePath('organizations') + $stateParams.organization_id + '/users/' :
             GetBasePath('teams') + $stateParams.team_id + '/users/';
 
-    generator.inject(UserList, { mode: mode, scope: $scope, breadCrumbs:(($stateParams.organization_id || $stateParams.team_id) ? true : false) });
+    generator.inject(UserList, { mode: mode, scope: $scope });
 
     $scope.selected = [];
 
@@ -54,8 +54,6 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams, Res
         url: defaultUrl
     });
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
     $scope.showActivity = function () {
         Stream({ scope: $scope });
@@ -98,13 +96,13 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams, Res
 }
 
 UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'Wait', 'Stream'
 ];
 
 
 export function UsersAdd($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
+    ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
 
     ClearScope();
 
@@ -122,8 +120,6 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $statePa
     $scope.socialAuthUser = false;
 
     generator.reset();
-
-    LoadBreadCrumbs();
 
     // Configure the lookup dialog. If we're adding a user through the Organizations tab,
     // default the Organization value.
@@ -202,13 +198,13 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $statePa
 }
 
 UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
     'OrganizationList', 'ResetForm', 'Wait'
 ];
 
 
 export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert,
-    ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
+    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
     Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
@@ -528,6 +524,6 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateP
 }
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
+    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];

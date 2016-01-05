@@ -1,18 +1,3 @@
-<breadcrumbs>
-    <breadcrumb path="/setup" title="Setup"></breadcrumb>
-    <breadcrumb path="/organizations" title="Organizations"></breadcrumb>
-    <breadcrumb
-        path="/organizations/add"
-        title="Create Organization"
-        ng-if="mode == 'add'">
-    </breadcrumb>
-    <breadcrumb
-      path="/organizations/{{organization_id}}"
-      title="{{organization_name}}"
-      ng-if="organization_id">
-    </breadcrumb>
-</breadcrumbs>
-
 <div class="tab-pane" id="organizations">
   <div ng-cloak id="htmlTemplate"></div>
 </div>

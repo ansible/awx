@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobEvent
@@ -12,7 +12,7 @@
 
 
 export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobEventList, GenerateList,
-    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
+    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
     FormatDate, EventView, Refresh, Wait) {
 
     ClearScope();
@@ -182,15 +182,6 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
             .success(function (data) {
                 $scope.job_status = data.status;
                 $scope.job_name = data.summary_fields.job_template.name;
-                LoadBreadCrumbs({
-                    path: '/job_events/' + $scope.job_id,
-                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-                    altPath: '/jobs'
-                });
-                $rootScope.breadcrumbs = [{
-                    path: '/jobs',
-                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-                }];
                 $scope.$emit('SetHostLinks', data.inventory);
             })
             .error(function (data, status) {
@@ -253,12 +244,12 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
 }
 
 JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobEventList',
-    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
 ];
 
 export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, JobEventsForm, GenerateForm,
-    Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
+    Rest, Alert, ProcessErrors, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
 
     ClearScope();
 
@@ -276,7 +267,6 @@ export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $st
         .success(function (data) {
             var cDate, fld, n, rows;
             $scope.event_display = data.event_display.replace(/^\u00a0*/g, '');
-            LoadBreadCrumbs({ path: '/jobs/' + $stateParams.job_id + '/job_events/' + $stateParams.event_id, title: $scope.event_display });
             for (fld in form.fields) {
                 switch (fld) {
                 case 'status':
@@ -356,5 +346,5 @@ export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $st
 }
 
 JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobEventsForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'FormatDate', 'EventView', 'Wait'
+    'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'FormatDate', 'EventView', 'Wait'
 ];

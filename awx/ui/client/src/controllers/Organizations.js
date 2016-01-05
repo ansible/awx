@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Organizations
@@ -11,7 +11,7 @@
 */
 
 
-export function OrganizationsList($stateParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
+export function OrganizationsList($stateParams, $scope, $rootScope, $location, $log, Rest, Alert, Prompt,
     GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -23,9 +23,8 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location, $
         defaultUrl = GetBasePath('organizations'),
         url;
 
-    generate.inject(OrganizationList, { mode: mode, scope: $scope, breadCrumbs:((mode === 'select') ? true : false) });
+    generate.inject(OrganizationList, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
-    LoadBreadCrumbs();
 
     if (mode === 'select') {
         url = GetBasePath('projects') + $stateParams.project_id + '/organizations/';
@@ -92,14 +91,14 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location, $
     };
 }
 
-OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
+OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'Prompt',
     'generateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
     'Stream'
 ];
 
 
 export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
+    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath,
     ReturnToCaller, Wait) {
 
     ClearScope();
@@ -111,8 +110,6 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, 
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope});
     generator.reset();
-
-    LoadBreadCrumbs();
 
     // Save
     $scope.formSave = function () {
@@ -145,12 +142,12 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, 
 }
 
 OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait'
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait'
 ];
 
 
 export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
+    Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
 
     ClearScope();
 
@@ -291,6 +288,6 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
 }
 
 OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath',
+    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath',
     'Wait', 'Stream'
 ];

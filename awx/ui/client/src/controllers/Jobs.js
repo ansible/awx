@@ -12,7 +12,7 @@
 
 
 export function JobsListController ($rootScope, $log, $scope, $compile, $stateParams,
-    ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
+    ClearScope, LoadSchedulesScope,
     LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait) {
 
     ClearScope();
@@ -22,10 +22,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         listCount = 0,
         api_complete = false,
         max_rows;
-
-    LoadBreadCrumbs();
-
-
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
@@ -186,5 +182,5 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
 }
 
 JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$stateParams',
-'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope',
+'ClearScope', 'LoadSchedulesScope', 'LoadJobsScope',
 'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait'];

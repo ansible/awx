@@ -12,7 +12,7 @@
 
 
 export function JobTemplatesList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobTemplateList,
-    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
+    GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream, CreateDialog, $compile) {
 
     ClearScope();
@@ -55,8 +55,6 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $statePara
     }
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
 
 
@@ -238,13 +236,13 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $statePara
 }
 
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobTemplateList',
-    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
     'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
 ];
 
 export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
+    GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
     CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices) {
 
@@ -263,7 +261,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 
     CallbackHelpInit({ scope: $scope });
     $scope.can_edit = true;
-    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
 
     callback = function() {
         // Make sure the form controller knows there was a change
@@ -277,7 +275,6 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
     $scope.allow_callbacks = false;
 
     generator.reset();
-    LoadBreadCrumbs();
 
     md5Setup({
         scope: $scope,
@@ -660,14 +657,14 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 }
 
 JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices'
 ];
 
 
 export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
+    Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
     GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit){
@@ -688,7 +685,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
     CallbackHelpInit({ scope: $scope });
 
     SchedulesList.well = false;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     $scope.mode = 'edit';
     $scope.parseType = 'yaml';
     $scope.showJobType = false;
@@ -1232,7 +1229,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
 }
 
 JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
