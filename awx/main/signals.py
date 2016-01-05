@@ -321,7 +321,12 @@ def activity_stream_create(sender, instance, created, **kwargs):
             object1=object1,
             changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
         activity_entry.save()
-        getattr(activity_entry, object1).add(instance)
+        print("Instance: {}".format(instance))
+        #TODO: Weird situation where cascade SETNULL doesn't work
+        #      it might actually be a good idea to remove all of these FK references since
+        #      we don't really use them anyway.
+        if type(instance) is not TowerSettings:
+            getattr(activity_entry, object1).add(instance)
 
 def activity_stream_update(sender, instance, **kwargs):
     if instance.id is None:
@@ -348,7 +353,8 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-    getattr(activity_entry, object1).add(instance)
+    if type(instance) is not TowerSettings:
+        getattr(activity_entry, object1).add(instance)
 
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
