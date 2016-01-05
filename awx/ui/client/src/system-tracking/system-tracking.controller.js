@@ -16,20 +16,21 @@ function controller($rootScope,
                     $q,
                     $state,
                     moduleOptions,
+                    inventory,
+                    hosts,
                     getDataForComparison,
                     waitIndicator,
                     moment,
                     _) {
 
     // var inventoryId = $stateParams.id;
-    var hostIds = $stateParams.hosts.split(',');
-    var hosts = $stateParams.model.hosts;
+    var hostIds = $stateParams.hostIds.split(',');
     var moduleParam = $stateParams.module || 'packages';
 
     $scope.compareMode =
         hostIds.length === 1 ? 'single-host' : 'host-to-host';
     $scope.hostIds = $stateParams.hosts;
-    $scope.inventory = $stateParams.model.inventory;
+    $scope.inventory = inventory;
     $scope.noModuleData = false;
 
     // this means no scans have been run
@@ -320,6 +321,8 @@ export default
         '$q',
         '$state',
         'moduleOptions',
+        'inventory',
+        'hosts',
         'getDataForComparison',
         'Wait',
         'moment',

@@ -843,11 +843,14 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     });
 
     $scope.systemTracking = function() {
-        $scope.inventory = JSON.stringify($scope.inventory);
-        $scope.hostsSelectedItems = JSON.stringify($scope.hostsSelectedItems);
-        $state.go('systemTracking',
+        var hostIds =  _.map($scope.hostsSelectedItems, function(x){
+            return x.id;
+        });
+        $state.transitionTo('systemTracking',
                      {  inventory: $scope.inventory,
-                        hosts: $scope.hostsSelectedItems
+                        inventoryId: $scope.inventory.id,
+                        hosts: $scope.hostsSelectedItems,
+                        hostIds: hostIds
                      });
     };
 
@@ -922,7 +925,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         $scope.removeInventoryLoaded();
     }
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
-        var e, rows;
+        var rows;
 
         // Add groups view
         generateList.inject(InventoryGroups, {

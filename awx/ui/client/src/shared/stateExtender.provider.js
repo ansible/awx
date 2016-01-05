@@ -8,6 +8,7 @@ export default function($stateProvider){
                     controller: state.controller,
                     templateUrl: state.templateUrl,
                     resolve: state.resolve,
+                    params: state.params,
                     ncyBreadcrumb: state.ncyBreadcrumb
                 });
             }
