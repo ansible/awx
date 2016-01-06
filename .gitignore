@@ -22,6 +22,10 @@ celerybeat-schedule
 awx/ui/static
 awx/ui/build_test
 
+# Tower setup playbook testing
+setup/test/roles/postgresql
+setup/test/roles/provision_docker
+
 # Python & setuptools
 __pycache__
 /build
