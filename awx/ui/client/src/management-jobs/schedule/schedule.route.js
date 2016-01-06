@@ -8,9 +8,10 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'managementJobsSchedule',
-    route: '/management_jobs/:management_job/schedules',
+    route: '/management_jobs/:management_job_id/schedules',
     templateUrl: templateUrl('management-jobs/schedule/schedule'),
     controller: 'managementJobsScheduleController',
+    params: {management_job: null},
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
@@ -22,11 +23,11 @@ export default {
             'GetBasePath',
             'ProcessErrors',
             function($stateParams, $q, rest, getBasePath, ProcessErrors) {
-                // if ($route.current.hasModelKey('management_job')) {
-                //     return $q.when($route.current.params.model.management_job);
-                // }
+                if ($stateParams.management_job) {
+                    return $q.when($stateParams.management_job);
+                }
 
-                var managementJobId = $stateParams.management_job;
+                var managementJobId = $stateParams.management_job_id;
 
                 var url = getBasePath('system_job_templates') + managementJobId + '/';
                 rest.setUrl(url);

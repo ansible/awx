@@ -310,12 +310,10 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 
     $scope.addInventory = function () {
-        // $location.path($location.path() + '/add');
         $state.go('inventories.add');
     };
 
     $scope.editInventory = function (id) {
-        // $location.path($location.path() + '/' + id);
         $state.go('inventories.edit', {inventory_id: id});
     };
 

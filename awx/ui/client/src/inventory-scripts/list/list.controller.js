@@ -38,9 +38,9 @@ export default
             scope.search(list.iterator);
 
             scope.editCustomInv = function(){
-                // this.inventory_script = JSON.stringify(this.inventory_script);
-                $state.go('inventoryScriptsEdit',{
-                    inventory_script: this.inventory_script.id
+                $state.transitionTo('inventoryScriptsEdit',{
+                    inventory_script_id: this.inventory_script.id,
+                    inventory_script: this.inventory_script
                 });
             };
 
