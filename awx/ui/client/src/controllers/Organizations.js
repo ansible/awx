@@ -11,8 +11,10 @@
 */
 
 
-export function OrganizationsList($stateParams, $scope, $rootScope, $location, $log, Rest, Alert, Prompt,
-    GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
+export function OrganizationsList($stateParams, $scope, $rootScope, $location,
+    $log, Rest, Alert, Prompt, GenerateList, OrganizationList, SearchInit,
+    PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait,
+    Stream, $state) {
 
     ClearScope();
 
@@ -59,11 +61,11 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location, $
     };
 
     $scope.addOrganization = function () {
-        $location.path($location.path() + '/add');
+        $state.transitionTo('organizations.add');
     };
 
     $scope.editOrganization = function (id) {
-        $location.path($location.path() + '/' + id);
+        $state.transitionTo('organizations.edit', {organization_id: id});
     };
 
     $scope.deleteOrganization = function (id, name) {
@@ -91,9 +93,11 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location, $
     };
 }
 
-OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'Prompt',
-    'generateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
-    'Stream'
+OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
+    '$location', '$log', 'Rest', 'Alert', 'Prompt', 'generateList',
+    'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
+    'Stream', '$state'
 ];
 
 

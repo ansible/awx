@@ -38,7 +38,7 @@ export default
             scope.search(list.iterator);
 
             scope.editCustomInv = function(){
-                $state.transitionTo('inventoryScriptsEdit',{
+                $state.transitionTo('inventoryScripts.edit',{
                     inventory_script_id: this.inventory_script.id,
                     inventory_script: this.inventory_script
                 });
@@ -74,7 +74,7 @@ export default
             };
 
             scope.addCustomInv = function(){
-                $state.transitionTo('inventoryScriptsAdd');
+                $state.transitionTo('inventoryScripts.add');
             };
 
         }

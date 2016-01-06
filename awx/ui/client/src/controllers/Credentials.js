@@ -11,9 +11,10 @@
 */
 
 
-export function CredentialsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, CredentialList,
-    GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-    ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream) {
+export function CredentialsList($scope, $rootScope, $location, $log,
+    $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
+    PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
+    SelectionInit, GetChoices, Wait, Stream, $state) {
 
     ClearScope();
 
@@ -93,11 +94,11 @@ export function CredentialsList($scope, $rootScope, $location, $log, $stateParam
     };
 
     $scope.addCredential = function () {
-        $location.path($location.path() + '/add');
+        $state.transitionTo('credentials.add');
     };
 
     $scope.editCredential = function (id) {
-        $location.path($location.path() + '/' + id);
+        $state.transitionTo('credentials.edit', {credential_id: id});
     };
 
     $scope.deleteCredential = function (id, name) {
@@ -124,9 +125,11 @@ export function CredentialsList($scope, $rootScope, $location, $log, $stateParam
     };
 }
 
-CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList',
-    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'SelectionInit', 'GetChoices', 'Wait', 'Stream'
+CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
+    '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
+    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
+    'Stream', '$state'
 ];
 
 

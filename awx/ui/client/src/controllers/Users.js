@@ -11,8 +11,10 @@
 */
 
 
-export function UsersList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, UserList, GenerateList,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
+export function UsersList($scope, $rootScope, $location, $log, $stateParams,
+    Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
+    ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
+    Wait, Stream, $state) {
 
     ClearScope();
 
@@ -60,11 +62,11 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams, Res
     };
 
     $scope.addUser = function () {
-        $location.path($location.path() + '/add');
+        $state.transitionTo('users.add');
     };
 
     $scope.editUser = function (id) {
-        $location.path($location.path() + '/' + id);
+        $state.transitionTo('users.edit', {user_id: id});
     };
 
     $scope.deleteUser = function (id, name) {
@@ -95,9 +97,10 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams, Res
     };
 }
 
-UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList',
-    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'SelectionInit', 'Wait', 'Stream'
+UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
+    '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
+    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream', '$state'
 ];
 
 

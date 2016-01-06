@@ -11,9 +11,10 @@
 */
 
 
-export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, TeamList, GenerateList,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
-    Stream) {
+export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
+    Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
+    ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
+    SelectionInit, Wait, Stream, $state) {
 
     ClearScope();
 
@@ -68,11 +69,11 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Res
     };
 
     $scope.addTeam = function () {
-        $location.path($location.path() + '/add');
+        $state.transitionTo('teams.add');
     };
 
     $scope.editTeam = function (id) {
-        $location.path($location.path() + '/' + id);
+        $state.transitionTo('teams.edit', {team_id: id});
     };
 
     $scope.deleteTeam = function (id, name) {
@@ -105,9 +106,11 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Res
     };
 }
 
-TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList',
-    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream'
+TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
+    '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
+    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
+    'Stream', '$state'
 ];
 
 

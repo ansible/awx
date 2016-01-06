@@ -7,8 +7,8 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'inventoryScriptsAdd',
-    route: '/inventory_scripts/add',
+    name: 'inventoryScripts.add',
+    route: '/add',
     templateUrl: templateUrl('inventory-scripts/add/add'),
     controller: 'inventoryScriptsAddController',
     resolve: {
@@ -17,7 +17,7 @@ export default {
         }]
     },
     ncyBreadcrumb: {
-        parent: 'inventoryScriptsList',
+        parent: 'inventoryScripts',
         label: 'CREATE INVENTORY SCRIPT'
     }
 };

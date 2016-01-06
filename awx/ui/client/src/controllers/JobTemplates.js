@@ -11,9 +11,11 @@
 */
 
 
-export function JobTemplatesList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobTemplateList,
-    GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
-    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream, CreateDialog, $compile) {
+export function JobTemplatesList($scope, $rootScope, $location, $log,
+    $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
+    SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
+    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun,
+    Wait, Stream, CreateDialog, $compile, $state) {
 
     ClearScope();
 
@@ -63,11 +65,11 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $statePara
     };
 
     $scope.addJobTemplate = function () {
-        $location.path($location.path() + '/add');
+        $state.transitionTo('jobTemplates.add');
     };
 
     $scope.editJobTemplate = function (id) {
-        $location.path($location.path() + '/' + id);
+        $state.transitionTo('jobTemplates.edit', {template_id: id});
     };
 
     $scope.deleteJobTemplate = function (id, name) {
@@ -235,10 +237,12 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $statePara
     };
 }
 
-JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobTemplateList',
-    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
-    'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
+JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',
+    '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
+    'LookUpInit', 'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile',
+    '$state'
 ];
 
 export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm,

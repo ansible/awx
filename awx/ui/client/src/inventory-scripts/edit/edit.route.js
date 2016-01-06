@@ -7,8 +7,8 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'inventoryScriptsEdit',
-    route: '/inventory_scripts/:inventory_script_id',
+    name: 'inventoryScripts.edit',
+    route: '/:inventory_script_id',
     templateUrl: templateUrl('inventory-scripts/edit/edit'),
     controller: 'inventoryScriptsEditController',
     params: {inventory_script: null},

@@ -371,8 +371,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('jobTemplateAdd', {
-                url: '/job_templates/add',
+            state('jobTemplates.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd,
                 ncyBreadcrumb: {
@@ -386,8 +386,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('jobTemplateEdit', {
-                url: '/job_templates/:template_id',
+            state('jobTemplates.edit', {
+                url: '/:template_id',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
                 resolve: {
@@ -569,8 +569,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('organizationsAdd', {
-                url: '/organization/add',
+            state('organizations.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsAdd,
                 ncyBreadcrumb: {
@@ -584,8 +584,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('organizationEdit', {
-                url: '/organizations/:organization_id',
+            state('organizations.edit', {
+                url: '/:organization_id',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsEdit,
                 resolve: {
@@ -654,8 +654,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('teamsAdd', {
-                url: '/teams/add',
+            state('teams.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsAdd,
                 ncyBreadcrumb: {
@@ -669,8 +669,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('teamEdit', {
-                url: '/teams/:team_id',
+            state('teams.edit', {
+                url: '/:team_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsEdit,
                 resolve: {
@@ -783,8 +783,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('credentialAdd', {
-                url: '/credentials/add',
+            state('credentials.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsAdd,
                 ncyBreadcrumb: {
@@ -798,8 +798,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('credentialEdit', {
-                url: '/credentials/:credential_id',
+            state('credentials.edit', {
+                url: '/:credential_id',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -824,8 +824,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('userAdd', {
-                url: '/users/add',
+            state('users.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersAdd,
                 ncyBreadcrumb: {
@@ -839,8 +839,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('userEdit', {
-                url: '/users/:user_id',
+            state('users.edit', {
+                url: '/:user_id',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
                 resolve: {
