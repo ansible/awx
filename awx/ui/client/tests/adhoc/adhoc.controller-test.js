@@ -4,13 +4,13 @@ import adhocModule from 'adhoc/main';
 import RestStub from '../support/rest-stub';
 
 describe("adhoc.controller", function() {
-    var $scope, $rootScope, $location, $routeParams,
+    var $scope, $rootScope, $location, $stateParams, $stateExtender,
         CheckPasswords, PromptForPasswords, CreateLaunchDialog, AdhocForm,
         GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
         KindChange, LookUpInit, CredentialList, Empty, Wait;
 
     var $controller, ctrl, generateFormCallback, waitCallback, locationCallback,
-        getBasePath, processErrorsCallback, restCallback;
+        getBasePath, processErrorsCallback, restCallback, stateExtenderCallback;
 
     beforeEach("instantiate the adhoc module", function() {
         angular.mock.module(adhocModule.name);
@@ -29,6 +29,9 @@ describe("adhoc.controller", function() {
         };
         processErrorsCallback = sinon.spy();
         restCallback = new RestStub();
+        stateExtenderCallback = {
+            addState: angular.noop
+        }
     });
 
     beforeEach("mock dependencies", angular.mock.module(['$provide', function(_provide_) {
@@ -50,6 +53,8 @@ describe("adhoc.controller", function() {
         $provide.value('CredentialList', angular.noop);
         $provide.value('Empty', angular.noop);
         $provide.value('Wait', waitCallback);
+        $provide.value('$stateExtender', stateExtenderCallback);
+        $provide.value('$stateParams', angular.noop);
     }]));
 
     beforeEach("put $q in scope", window.inject(['$q', function($q) {
@@ -126,34 +131,6 @@ describe("adhoc.controller", function() {
                 $scope.$emit('adhocFormReady');
                 expect(waitCallback).to.have.been.calledWith("stop");
             });
-    });
-
-    describe("getInventoryNameForBreadcrumbs", function() {
-        it('should set the inventory name on scope', function() {
-            var req = ctrl.privateFn.getInventoryNameForBreadcrumbs("foo");
-            var response = { data: { name: "foo" } };
-
-            restCallback.succeed(response);
-            restCallback.flush();
-
-            return req.then(function() {
-                expect($scope.inv_name).to.equal('foo');
-            });
-        });
-
-        it('should navigate to the inventory manage page when the inventory ' +
-            'can not be found', function() {
-            var req = ctrl.privateFn.getInventoryNameForBreadcrumbs("foo");
-            var response = { "detail": "Not found", status: "bad" };
-
-            restCallback.fail(response);
-            restCallback.flush();
-
-            return req.catch(function() {
-                expect(processErrorsCallback).to.have.been.called;
-                expect(locationCallback.path).to.have.been.calledWith("/inventories/");
-            });
-        });
     });
 
     describe("instantiateArgumentHelp", function() {

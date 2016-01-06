@@ -24,5 +24,6 @@
     require('./setup/lodash');
     require('./setup/local-storage');
     require('./setup/moment');
+    require('./setup/angular-ui-router');
 
 })();
