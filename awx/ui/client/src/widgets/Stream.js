@@ -67,8 +67,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('HideStream', ['LoadBreadCrumbs',
-    function (LoadBreadCrumbs) {
+.factory('HideStream', [
+    function () {
         return function () {
             // Remove the stream widget
 
@@ -92,62 +92,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     'min-height': 0
                 }); //let the parent height go back to normal
             }, 500);
-
-            LoadBreadCrumbs();
-        };
-    }
-])
-
-.factory('StreamBreadCrumbs', ['$rootScope', '$location',
-    function ($rootScope, $location) {
-        return function () {
-            // Load the breadcrumbs array. We have to do things a bit different than Utilities.LoadBreadcrumbs.
-            // Rather than botch that all up, we'll do our own thing here.
-            $rootScope.breadcrumbs = [];
-            var path, title, i, j, paths = $location.path().split('/'),
-                capitalizeTitle = function(title) {
-                    return title.split("_")
-                        .map(function(title) {
-                            return title.charAt(0).toUpperCase() + title.slice(1);
-                        }).join(" ");
-                };
-            paths.splice(0, 1);
-            for (i = 0; i < paths.length; i++) {
-                if (/^\d+/.test(paths[i])) {
-                    path = '';
-                    title = '';
-                    for (j = 0; j <= i; j++) {
-                        path += '/' + paths[j];
-                    }
-                    for (j = 0; j < $rootScope.crumbCache.length; j++) {
-                        if ($rootScope.crumbCache[j].path === path) {
-                            title = $rootScope.crumbCache[j].title;
-                            break;
-                        }
-                    }
-                    if (!title) {
-                        title = paths[i - 1].substr(0, paths[i - 1].length - 1);
-                        title = capitalizeTitle(title);
-                        title = (title === 'Inventorie') ? 'Inventory' : title;
-                    }
-                } else {
-                    path = '';
-                    title = '';
-                    if (i > 0) {
-                        for (j = 0; j <= i; j++) {
-                            path += '/' + paths[j];
-                        }
-                    } else {
-                        path = '/' + paths[i];
-                    }
-                    title = paths[i];
-                    title = capitalizeTitle(title);
-                }
-                $rootScope.breadcrumbs.push({
-                    path: path,
-                    title: title
-                });
-            }
         };
     }
 ])
@@ -393,9 +337,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
 .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit',
     'PaginateInit', 'generateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl',
-    'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight', 'Find', 'Store',
+    'ShowDetail', 'setStreamHeight', 'Find', 'Store',
     function ($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight,
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight,
         Find, Store) {
         return function (params) {
 
@@ -439,16 +383,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
             // Add a container for the stream widget
             $('#main-view').append("<div id=\"stream-container\"><div id=\"stream-content\"></div></div><!-- Stream widget -->");
-
-            StreamBreadCrumbs();
-
-            // Fix inventory name. The way we're doing breadcrumbs doesn't support bind variables.
-            if (inventory_name) {
-                itm = Find({ list: $rootScope.breadcrumbs, key: 'title', val: '{{ inventory.name }}' });
-                if (itm) {
-                    itm.title = inventory_name;
-                }
-            }
 
             ShowStream();
 

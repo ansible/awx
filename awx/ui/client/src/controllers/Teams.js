@@ -11,7 +11,7 @@
 */
 
 
-export function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
+export function TeamsList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, TeamList, GenerateList,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
     Stream) {
 
@@ -63,8 +63,6 @@ export function TeamsList($scope, $rootScope, $location, $log, $routeParams, Res
     });
     $scope.search(list.iterator);
 
-    LoadBreadCrumbs();
-
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
@@ -107,14 +105,14 @@ export function TeamsList($scope, $rootScope, $location, $log, $routeParams, Res
     };
 }
 
-TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream'
 ];
 
 
-export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm,
-    Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList,
+export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm,
+    Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GenerateList,
     OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
@@ -127,7 +125,6 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     $rootScope.flashMessage = null;
     generator.reset();
-    LoadBreadCrumbs();
 
     LookUpInit({
         scope: $scope,
@@ -168,14 +165,14 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routePa
     };
 }
 
-TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList',
+TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit', 'Wait'
 ];
 
 
-export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
+export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
     OrganizationList, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
@@ -185,7 +182,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         form = TeamForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.team_id,
+        id = $stateParams.team_id,
         relatedSets = {};
 
     $scope.permission_label = {};
@@ -290,7 +287,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 Wait('stop');
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $stateParams.team_id +
                     '. GET status: ' + status });
                 Wait('stop');
             });
@@ -315,7 +312,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         generator.clearApiErrors();
         Wait('start');
         $rootScope.flashMessage = null;
-        Rest.setUrl(defaultUrl + $routeParams.team_id + '/');
+        Rest.setUrl(defaultUrl + $stateParams.team_id + '/');
         for (fld in form.fields) {
             data[fld] = $scope[fld];
         }
@@ -334,7 +331,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
             .error(function (data, status) {
                 Wait('stop');
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to update team: ' + $routeParams.team_id + '. PUT status: ' + status });
+                    msg: 'Failed to update team: ' + $stateParams.team_id + '. PUT status: ' + status });
             });
     };
 
@@ -352,12 +349,12 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $rootScope.flashMessage = null;
         if (set === 'permissions') {
             if ($scope.PermissionAddAllowed) {
-                $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
+                $location.path('/' + base + '/' + $stateParams.team_id + '/' + set + '/add');
             } else {
                 Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
             }
         } else {
-            $location.path('/' + base + '/' + $routeParams.team_id + '/' + set);
+            $location.path('/' + base + '/' + $stateParams.team_id + '/' + set);
         }
     };
 
@@ -365,7 +362,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.edit = function (set, id) {
         $rootScope.flashMessage = null;
         if (set === 'permissions') {
-            $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);
+            $location.path('/' + base + '/' + $stateParams.team_id + '/' + set + '/' + id);
         } else {
             $location.path('/' + set + '/' + id);
         }
@@ -395,7 +392,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
                 }
             } else {
-                url = defaultUrl + $routeParams.team_id + '/' + set + '/';
+                url = defaultUrl + $stateParams.team_id + '/' + set + '/';
                 Rest.setUrl(url);
                 Rest.post({ id: itm_id, disassociate: 1 })
                     .success(function () {
@@ -418,7 +415,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
     };
 }
 
-TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];

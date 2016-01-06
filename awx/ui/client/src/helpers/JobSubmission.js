@@ -469,9 +469,9 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
   }])
 
   .factory('PromptForVars', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateLaunchDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
-  'ParseVariableString', 'ToJSON', 'ProcessErrors', '$routeParams' ,
+  'ParseVariableString', 'ToJSON', 'ProcessErrors', '$stateParams' ,
   function($compile, Rest, GetBasePath, TextareaResize,CreateLaunchDialog, GenerateForm, JobVarsPromptForm, Wait,
-    ParseVariableString, ToJSON, ProcessErrors, $routeParams) {
+    ParseVariableString, ToJSON, ProcessErrors, $stateParams) {
       return function(params) {
         var
         // parent_scope = params.scope,
@@ -513,16 +513,16 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
         })
         .error(function (data, status) {
           ProcessErrors(scope, data, status, { hdr: 'Error!',
-          msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+          msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
         });
 
       };
     }])
 
     .factory('PromptForSurvey', ['$filter', '$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'GetBasePath', 'Rest' , 'Empty',
-    'GenerateForm', 'ProcessErrors', '$routeParams' ,
+    'GenerateForm', 'ProcessErrors', '$stateParams' ,
     function($filter, $compile, Wait, Alert, CredentialForm, CreateLaunchDialog, GetBasePath, Rest, Empty,
-      GenerateForm, ProcessErrors, $routeParams) {
+      GenerateForm, ProcessErrors, $stateParams) {
         return function(params) {
           var html = params.html || "",
           id= params.id,
@@ -698,16 +698,16 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
           })
           .error(function (data, status) {
             ProcessErrors(scope, data, status, { hdr: 'Error!',
-            msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+            msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
           });
 
         };
       }])
 
       .factory('CheckPasswords', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateLaunchDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
-      'ParseVariableString', 'ToJSON', 'ProcessErrors', '$routeParams', 'Empty',
+      'ParseVariableString', 'ToJSON', 'ProcessErrors', '$stateParams', 'Empty',
       function($compile, Rest, GetBasePath, TextareaResize,CreateLaunchDialog, GenerateForm, JobVarsPromptForm, Wait,
-        ParseVariableString, ToJSON, ProcessErrors, $routeParams, Empty) {
+        ParseVariableString, ToJSON, ProcessErrors, $stateParams, Empty) {
           return function(params) {
             var scope = params.scope,
             callback = params.callback,
@@ -752,9 +752,9 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
       *
       */
       // Submit request to run a playbook
-      .factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty',
+      .factory('PlaybookRun', ['$location','$stateParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty',
       'PromptForCredential', 'PromptForVars', 'PromptForSurvey' , 'CreateLaunchDialog',
-      function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
+      function ($location, $stateParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
         PromptForCredential, PromptForVars, PromptForSurvey, CreateLaunchDialog) {
           return function (params) {
             var //parent_scope = params.scope,

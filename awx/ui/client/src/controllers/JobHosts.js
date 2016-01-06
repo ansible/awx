@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobHosts
@@ -11,18 +11,18 @@
 */
 
 
-export function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobHostList, GenerateList,
-    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
+export function JobHostSummaryList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobHostList, GenerateList,
+    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
     JobStatusToolTip) {
 
     ClearScope();
 
     var list = JobHostList,
-        defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/',
+        defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_host_summaries/',
         view = GenerateList,
         inventory;
 
-    $scope.job_id = $routeParams.id;
+    $scope.job_id = $stateParams.id;
     $scope.host_id = null;
 
     // After a refresh, populate any needed summary field values on each row
@@ -72,9 +72,9 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $routePa
         });
 
         // Called from Inventories tab, host failed events link:
-        if ($routeParams.host_name) {
+        if ($stateParams.host_name) {
             $scope[list.iterator + 'SearchField'] = 'host';
-            $scope[list.iterator + 'SearchValue'] = $routeParams.host_name;
+            $scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
             $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
         }
         $scope.search(list.iterator);
@@ -84,15 +84,6 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $routePa
     Rest.get()
         .success(function (data) {
             inventory = data.inventory;
-            LoadBreadCrumbs({
-                path: '/job_host_summaries/' + $scope.job_id,
-                title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-                altPath: '/jobs'
-            });
-            $rootScope.breadcrumbs = [{
-                path: '/jobs',
-                title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
-            }];
             $scope.job_status = data.status;
             $scope.$emit('JobReady');
         })
@@ -121,7 +112,7 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $routePa
 
 }
 
-JobHostSummaryList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobHostList',
-    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+JobHostSummaryList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobHostList',
+    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Refresh', 'JobStatusToolTip', 'Wait'
 ];

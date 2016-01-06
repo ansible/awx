@@ -19,7 +19,7 @@
  *
  *
 */
-export function PortalController($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, ClearScope, Stream, Rest, GetBasePath, ProcessErrors,
+export function PortalController($scope, $compile, $stateParams, $rootScope, $location, $log, Wait, ClearScope, Stream, Rest, GetBasePath, ProcessErrors,
     PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
         ClearScope('portal');
@@ -39,7 +39,6 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
                 id : 'portal-job-templates',
                 mode: 'edit',
                 scope: $scope,
-                breadCrumbs: false,
                 searchSize: 'col-lg-6 col-md-6'
             });
 
@@ -138,6 +137,6 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
 
     }
 
-PortalController.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
+PortalController.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
     'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];

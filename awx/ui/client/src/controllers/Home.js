@@ -21,7 +21,7 @@
  *
 */
 
-export function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
+export function Home($scope, $compile, $stateParams, $rootScope, $location, $log, Wait,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, $window, graphData){
 
     ClearScope('home');
@@ -144,7 +144,7 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
     $scope.refresh();
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait',
+Home.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData'
 ];
 
@@ -156,7 +156,7 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
  * @description This controls the 'home/groups' page that is loaded from the dashboard
  *
 */
-export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
@@ -170,7 +170,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         modal_scope = $scope.$new(),
         opt, PreviousSearchParams;
 
-    generator.inject(list, { mode: 'edit', scope: scope, breadCrumbs: true });
+    generator.inject(list, { mode: 'edit', scope: scope });
 
     function ellipsis(a) {
         if (a.length > 20) {
@@ -257,31 +257,31 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
     });
 
     // Process search params
-    if ($routeParams.name) {
+    if ($stateParams.name) {
         scope[list.iterator + 'InputDisable'] = false;
-        scope[list.iterator + 'SearchValue'] = $routeParams.name;
+        scope[list.iterator + 'SearchValue'] = $stateParams.name;
         scope[list.iterator + 'SearchField'] = 'name';
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
         scope[list.iterator + 'SearchSelectValue'] = null;
     }
 
-    if ($routeParams.id) {
+    if ($stateParams.id) {
         scope[list.iterator + 'InputDisable'] = false;
-        scope[list.iterator + 'SearchValue'] = $routeParams.id;
+        scope[list.iterator + 'SearchValue'] = $stateParams.id;
         scope[list.iterator + 'SearchField'] = 'id';
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.id.label;
         scope[list.iterator + 'SearchSelectValue'] = null;
     }
 
-    if ($routeParams.has_active_failures) {
+    if ($stateParams.has_active_failures) {
         scope[list.iterator + 'InputDisable'] = true;
-        scope[list.iterator + 'SearchValue'] = $routeParams.has_active_failures;
+        scope[list.iterator + 'SearchValue'] = $stateParams.has_active_failures;
         scope[list.iterator + 'SearchField'] = 'has_active_failures';
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_active_failures.label;
-        scope[list.iterator + 'SearchSelectValue'] = ($routeParams.has_active_failures === 'true') ? { value: 1 } : { value: 0 };
+        scope[list.iterator + 'SearchSelectValue'] = ($stateParams.has_active_failures === 'true') ? { value: 1 } : { value: 0 };
     }
 
-    if ($routeParams.status && !$routeParams.source) {
+    if ($stateParams.status && !$stateParams.source) {
         scope[list.iterator + 'SearchField'] = 'last_update_failed';
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.last_update_failed.label;
         scope[list.iterator + 'SelectShow'] = false;
@@ -292,31 +292,31 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         //scope[list.iterator + 'SearchSelectOpts'] = list.fields.status.searchOptions;
         //scope[list.iterator + 'SearchFieldLabel'] = list.fields.status.label.replace(/<br\>/g, ' ');
         //for (opt in list.fields.status.searchOptions) {
-        //    if (list.fields.status.searchOptions[opt].value === $routeParams.status) {
+        //    if (list.fields.status.searchOptions[opt].value === $stateParams.status) {
         //        scope[list.iterator + 'SearchSelectValue'] = list.fields.status.searchOptions[opt];
         //        break;
         //    }
         //}
     }
 
-    if ($routeParams.source) {
+    if ($stateParams.source) {
         scope[list.iterator + 'SearchField'] = 'source';
         scope[list.iterator + 'SelectShow'] = true;
         scope[list.iterator + 'SearchSelectOpts'] = list.fields.source.searchOptions;
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.source.label.replace(/<br\>/g, ' ');
         for (opt in list.fields.source.searchOptions) {
-            if (list.fields.source.searchOptions[opt].value === $routeParams.source) {
+            if (list.fields.source.searchOptions[opt].value === $stateParams.source) {
                 scope[list.iterator + 'SearchSelectValue'] = list.fields.source.searchOptions[opt];
                 break;
             }
         }
 
-        if ($routeParams.status) {
-            scope[list.iterator + 'ExtraParms'] = 'inventory_source__status__icontains=' + $routeParams.status;
+        if ($stateParams.status) {
+            scope[list.iterator + 'ExtraParms'] = 'inventory_source__status__icontains=' + $stateParams.status;
         }
     }
 
-    if ($routeParams.has_external_source) {
+    if ($stateParams.has_external_source) {
         scope[list.iterator + 'SearchField'] = 'has_external_source';
         scope[list.iterator + 'SearchValue'] = list.fields.has_external_source.searchValue;
         scope[list.iterator + 'InputDisable'] = true;
@@ -324,17 +324,15 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_external_source.label;
     }
 
-    if ($routeParams.inventory_source__id) {
+    if ($stateParams.inventory_source__id) {
         scope[list.iterator + 'SearchField'] = 'inventory_source';
-        scope[list.iterator + 'SearchValue'] = $routeParams.inventory_source__id;
+        scope[list.iterator + 'SearchValue'] = $stateParams.inventory_source__id;
         scope[list.iterator + 'SearchFieldLabel'] = 'Source ID';
     }
 
     scope.search(list.iterator);
 
     scope.$emit('WatchUpdateStatus');  // Start watching for live updates
-
-    LoadBreadCrumbs();
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
@@ -579,7 +577,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
 
 }
 
-HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
@@ -592,7 +590,7 @@ HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$l
  *
 */
 
-export function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -615,7 +613,7 @@ export function HomeHosts($scope, $location, $routeParams, HomeHostList, Generat
             });
         }
 
-        generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+        generator.inject(list, { mode: 'edit', scope: $scope });
 
     });
 
@@ -633,32 +631,30 @@ export function HomeHosts($scope, $location, $routeParams, HomeHostList, Generat
     });
 
     // Process search params
-    if ($routeParams.name) {
+    if ($stateParams.name) {
         $scope[HomeHostList.iterator + 'InputDisable'] = false;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $routeParams.name;
+        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.name;
         $scope[HomeHostList.iterator + 'SearchField'] = 'name';
         $scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields.name.label;
     }
 
-    if ($routeParams.id) {
+    if ($stateParams.id) {
         $scope[HomeHostList.iterator + 'InputDisable'] = false;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $routeParams.id;
+        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.id;
         $scope[HomeHostList.iterator + 'SearchField'] = 'id';
         $scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields.id.label;
         $scope[HomeHostList.iterator + 'SearchSelectValue'] = null;
     }
 
-    if ($routeParams.has_active_failures) {
+    if ($stateParams.has_active_failures) {
         $scope[HomeHostList.iterator + 'InputDisable'] = true;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $routeParams.has_active_failures;
+        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.has_active_failures;
         $scope[HomeHostList.iterator + 'SearchField'] = 'has_active_failures';
         $scope[HomeHostList.iterator + 'SearchFieldLabel'] = HomeHostList.fields.has_active_failures.label;
-        $scope[HomeHostList.iterator + 'SearchSelectValue'] = ($routeParams.has_active_failures === 'true') ? { value: 1 } : { value: 0 };
+        $scope[HomeHostList.iterator + 'SearchSelectValue'] = ($stateParams.has_active_failures === 'true') ? { value: 1 } : { value: 0 };
     }
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
     $scope.refreshHosts = function() {
         $scope.search(list.iterator);
@@ -708,7 +704,7 @@ export function HomeHosts($scope, $location, $routeParams, HomeHostList, Generat
 
 }
 
-HomeHosts.$inject = ['$scope', '$location', '$routeParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
     'Find', 'ShowJobSummary', 'ViewJob'
 ];

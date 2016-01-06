@@ -63,7 +63,7 @@ export default
 
             scope.addQuestion = function(){
                 var tmpMode = scope.mode;
-                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope: scope, related: false, breadCrumbs: false});
+                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope: scope, related: false});
                 scope.mode = tmpMode;
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
                 scope.text_min = null;

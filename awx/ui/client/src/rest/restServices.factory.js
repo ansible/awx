@@ -35,7 +35,7 @@
  * the respoinse details and initiate action. For example:
  *
  * ```
- *     var url = GetBasePath('inventories') + $routeParams.id + '/';
+ *     var url = GetBasePath('inventories') + $stateParams.id + '/';
  *     Rest.setUrl(url);
  *     Rest.get()
  *          .success(function(data) {

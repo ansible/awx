@@ -18,9 +18,9 @@ angular.module('JobTemplatesHelper', ['Utilities'])
  *
  */
 
-.factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$routeParams', 'LoadBreadCrumbs', 'ProcessErrors', 'ParseTypeChange',
+.factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$stateParams', 'ProcessErrors', 'ParseTypeChange',
          'ParseVariableString', 'Empty', 'LookUpInit', 'InventoryList', 'CredentialList','ProjectList', 'RelatedSearchInit', 'RelatedPaginateInit', 'Wait',
-         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $routeParams, LoadBreadCrumbs, ProcessErrors,ParseTypeChange,
+         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors,ParseTypeChange,
                   ParseVariableString, Empty, LookUpInit, InventoryList, CredentialList, ProjectList, RelatedSearchInit, RelatedPaginateInit, Wait) {
                       return function(params) {
 
@@ -31,7 +31,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $routeParams.template_id,
+                          id = $stateParams.template_id,
                           relatedSets = {};
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
@@ -77,7 +77,6 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               Rest.get()
                               .success(function (data) {
                                   var fld, i;
-                                  LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
                                   for (fld in form.fields) {
                                       if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
                                           if (form.fields[fld].type === 'select') {
@@ -192,7 +191,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {
                                       hdr: 'Error!',
-                                      msg: 'Failed to retrieve job template: ' + $routeParams.template_id + '. GET status: ' + status
+                                      msg: 'Failed to retrieve job template: ' + $stateParams.template_id + '. GET status: ' + status
                                   });
                               });
                           };

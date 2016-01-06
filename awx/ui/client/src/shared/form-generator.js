@@ -29,7 +29,6 @@
  * | id | | The ID attribute value of the DOM elment that will receive the generated HTML. If provided, form generator will inject the HTML it genertates into the DOM element identified by the string value provided. Do not preceed the value with '#' |
  * | mode | Y | 'add', 'edit' or 'modal'. Use add when creating new data - creating a new orgranization, for example. Use edit when modifying existing data. Modal is deprecated. Use the 'id' option to inject a form into a modal dialog. |
  * | scope |  | Reference to $scope object. Will be passed to $compile and associated with any angular directives contained within the generated HTML. |
- * | breadCrumbs | | true or false. If false, breadcrumbs will not be inlcluded in the generated HTML. |
  * | showButtons | | true or false. If false, buttons defined in the buttons object will not be included in the generated HTML. |
  *
  * #Generate HTML Only
@@ -54,8 +53,6 @@
  *
  * | Attribute | Description |
  * | --------- | ----------- |
- * | addTitle | Title to use in breadcrumbs when the form mode is 'add' |
- * | breadCrumbs | true or false. Breadcrumbs are included at the top of the page by default. If set to false, breadcrumbs will not be included at the top of the page. |
  * | collapse | true or false. If true, places the form inside a jQueryUI accordion |
  * | collapseMode | 'add' or 'edit'. If the value of the mode parameter passed into .inject() or .buildHTML() matches collapseMode, the &lt;form&gt; will be placed in an accordion. |
  * | collapseOpen |  true or false. If true, the accordion will be open the first time the user views the form, or if no state information is found in local storage for the accordion. Subsequent views will depend on accordion state found in local storage. Each time user opens/closes an accordion the state is saved in local storage. |
@@ -1412,62 +1409,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             },
 
 
-            breadCrumbs: function (options, navigation) {
-
-                var itm, paths, html = '';
-                html += "<ul class=\"ansible-breadcrumb\">\n";
-                html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title }}</a></li>\n";
-
-                if (navigation) {
-                    paths = $location.path().replace(/^\//, '').split('/');
-                    if (paths.length === 2) {
-                        html += "<li class=\"active\">";
-                        if (options.mode === 'edit') {
-                            html += this.form.editTitle;
-                        } else {
-                            html += this.form.addTitle;
-                        }
-                        html += "</li>\n";
-                    }
-
-                    html += "<li class=\"active\"> </li>\n";
-                    html += "</ul>\n";
-                    html += "<div class=\"dropdown\">\n";
-                    for (itm in navigation) {
-                        if (navigation[itm].active) {
-                            html += "<a href=\"\" class=\"toggle\" ";
-                            html += "data-toggle=\"dropdown\" ";
-                            html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
-                            break;
-                        }
-                    }
-
-                    html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
-                    for (itm in navigation) {
-                        html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
-                            navigation[itm].href + "\" ";
-                        // html += (navigation[itm].active) ? "class=\"active\" " : "";
-                        html += ">";
-                        html += "<i class=\"fa fa-check\" style=\"visibility: ";
-                        html += (navigation[itm].active) ? "visible" : "hidden";
-                        html += "\"></i> ";
-                        html += (navigation[itm].listLabel) ? navigation[itm].listLabel : navigation[itm].label;
-                        html += "</a></li>\n";
-                    }
-                    html += "</ul>\n";
-                    html += "</div><!-- dropdown -->\n";
-                } else {
-                    html += "<li class=\"active\"><a href=\"\">";
-                    if (options.mode === 'edit') {
-                        html += this.form.editTitle;
-                    } else {
-                        html += this.form.addTitle;
-                    }
-                    html += "</a></li>\n</ul> <!-- group-breadcrumbs -->\n";
-                }
-                return html;
-            },
-
             build: function (options) {
                 //
                 // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
@@ -1475,14 +1416,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //
                 var btn, button, fld, field, html = '', i, section, group,
                     tab, sectionShow, offset, width,ngDisabled;
-
-                if (!this.modal && (options.breadcrumbs === true)) {
-                    if (this.form.navigationLinks) {
-                        html += this.breadCrumbs(options, this.form.navigationLinks);
-                    } else {
-                        html += this.breadCrumbs(options);
-                    }
-                }
 
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "<div id=\"" + this.form.name + "-collapse-0\" ";
@@ -1739,7 +1672,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<h3 class=\"" + itm + "_collapse\">" + (collection.title || collection.editTitle) + "</h3>\n";
                     html += "<div>\n";
                     if (collection.generateList) {
-                        html += GenerateList.buildHTML(collection, { mode: 'edit', breadCrumbs: false });
+                        html += GenerateList.buildHTML(collection, { mode: 'edit' });
                     }
                     else {
                         html += this.GenerateColleciton({ form: form, related: itm }, options);

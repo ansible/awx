@@ -1,6 +1,6 @@
 <section id="htmlTemplate" class="Container">
   <nav class="SetupMenu Container-main">
-      <a link-to="credentials" class="SetupItem HoverIcon">
+      <a ui-sref="credentials" class="SetupItem HoverIcon">
         <div class="Media">
           <i class="SetupItem-icon SetupItem-icon--credentials HoverIcon-icon HoverIcon-icon--color Media-figure">
             <aw-icon name="Credentials"></aw-icon>
@@ -13,7 +13,7 @@
           </div>
         </div>
       </a>
-      <a link-to="users" class="SetupItem HoverIcon">
+      <a ui-sref="users" class="SetupItem HoverIcon">
         <div class="Media">
           <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
             <aw-icon name="Users"></aw-icon>
@@ -26,7 +26,7 @@
           </div>
         </div>
       </a>
-      <a link-to="teams" class="SetupItem HoverIcon">
+      <a ui-sref="teams" class="SetupItem HoverIcon">
         <div class="Media">
           <i class="SetupItem-icon HoverIcon-icon HoverIcon-icon--color Media-figure">
             <aw-icon name="Teams"></aw-icon>
@@ -42,7 +42,7 @@
   </nav>
   <aside class="Container-aside">
       <nav class="SetupMenu Menu Menu--vertical">
-        <a link-to="organizations" class="SetupItem SetupItem--aside HoverIcon Media">
+        <a ui-sref="organizations" class="SetupItem SetupItem--aside HoverIcon Media">
           <i class="HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--color Media-figure SetupItem-icon SetupItem-icon--aside ">
             <aw-icon name="Organizations"></aw-icon>
           </i>
@@ -53,7 +53,7 @@
             </p>
           </div>
         </a>
-        <a link-to="managementJobsList" class="SetupItem SetupItem--aside HoverIcon Media" ng-if="user_is_superuser">
+        <a ui-sref="managementJobsList" class="SetupItem SetupItem--aside HoverIcon Media" ng-if="user_is_superuser">
           <i class="HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--color Media-figure SetupItem-icon SetupItem-icon--aside">
             <aw-icon name="ManagementJobs"></aw-icon>
           </i>
@@ -63,7 +63,7 @@
                 Manage the cleanup of old job history, activity streams, data marked for deletion, and system tracking info.
           </div>
         </a>
-        <a link-to="inventoryScriptsList" class="SetupItem SetupItem--aside HoverIcon Media">
+        <a ui-sref="inventoryScriptsList" class="SetupItem SetupItem--aside HoverIcon Media">
           <i class="HoverIcon-icon HoverIcon-icon--opacity HoverIcon-icon--color Media-figure SetupItem-icon SetupItem-icon--aside ">
             <aw-icon name="InventoryScripts"></aw-icon>
           </i>
@@ -73,7 +73,7 @@
             Create and edit scripts to dynamically load hosts from any source.
           </div>
         </a>
-        <a link-to="license" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
+        <a ui-sref="license" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
           <h4 class="SetupItem-title SetupItem-title--aside">View Your License</h4>
         </a>
         <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">

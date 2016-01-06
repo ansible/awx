@@ -193,7 +193,7 @@ export default
 
                 $('#inventory-modal-container').empty().append(html);
 
-                scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
+                scope = generator.inject(form, { mode: 'edit', id: 'form-container', related: false });
 
                 // Set modal dimensions based on viewport width
                 ww = $(document).width();
@@ -369,8 +369,8 @@ export default
      *  Called from JobsList controller to load each section or list on the page
      *
      */
-    .factory('LoadJobsScope', ['$routeParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
-        function($routeParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
+    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
+        function($stateParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
@@ -395,7 +395,6 @@ export default
             GenerateList.inject(list, {
                 mode: 'edit',
                 id: id,
-                breadCrumbs: false,
                 scope: scope,
                 showSearch: false
             });
@@ -429,9 +428,9 @@ export default
             });
 
             if (base === 'jobs' && list.name === 'all_jobs') {
-                if ($routeParams.id__int) {
+                if ($stateParams.id__int) {
                     scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
                     scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
                 }
             }

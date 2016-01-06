@@ -3,19 +3,8 @@
     <div class="StandardOut">
         <div class="row StandardOut-heading">
             <div class="row StandardOut-breadcrumbs">
-                <div id="breadcrumb-container" class="col-md-6"
-                    style="position: relative;">
-                    <ul class="ansible-breadcrumb" id="breadcrumb-list">
-                        <li><a href="/#/jobs">Jobs</a></li>
-                        <li class="active">
-                            <a href="/#/ad_hoc_commands/{{ job.id }}">
-                                {{ job.id }} - {{ job.name }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
                 <div id="home-list-actions"
-                    class="list-actions pull-right col-md-6">
+                    class="list-actions pull-right col-md-12">
                     <button type="button" class="btn btn-xs btn-primary ng-hide"
                         ng-click="refresh()" id="refresh_btn"
                         aw-tool-tip="Refresh the page"

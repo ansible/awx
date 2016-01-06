@@ -5,14 +5,7 @@
         <div class="StandardOut-heading">
 
             <div class="row StandardOut-breadcrumbs">
-                <div id="breadcrumb-container" class="col-md-6" style="position: relative;">
-                    <ul class="ansible-breadcrumb" id="breadcrumb-list">
-                        <li><a href="/#/jobs">Jobs</a></li>
-                        <li><a href="/#/jobs/{{ job.id }}">{{ job.id }} - {{ job.name }}</a></li>
-                        <li class="active"><a href="">Standard Out</a></li>
-                    </ul>
-                </div>
-                <div id="home-list-actions" class="list-actions pull-right col-md-6">
+                <div id="home-list-actions" class="list-actions pull-right col-md-12">
                     <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refresh()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'" data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i> </button></div>
                 </div>
             <div class="row StandardOut-form">

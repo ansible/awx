@@ -31,9 +31,6 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
-import routeExtensions from './shared/route-extensions/main';
-import breadcrumbs from './shared/breadcrumbs/main';
-
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -78,13 +75,10 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     // 'ngAnimate',
-    'ngRoute',
     'ngSanitize',
     'ngCookies',
     RestServices.name,
-    routeExtensions.name,
     browserData.name,
-    breadcrumbs.name,
     systemTracking.name,
     inventoryScripts.name,
     permissions.name,
@@ -185,7 +179,9 @@ var tower = angular.module('Tower', [
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
-    'pendolytics'
+    'pendolytics',
+    'ui.router',
+    'ncy-angular-breadcrumb',
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -195,14 +191,74 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    .config(['$routeProvider',
-        function ($routeProvider) {
-            $routeProvider.
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider) {
 
-            when('/jobs', {
-                name: 'jobs',
+            $breadcrumbProvider.setOptions({
+                templateUrl: urlPrefix + 'partials/breadcrumb.html'
+            });
+
+            // $urlRouterProvider.otherwise("/home");
+            $urlRouterProvider.otherwise(function($injector){
+                  var $state = $injector.get("$state");
+                  $state.go('dashboard');
+            });
+
+            $stateProvider.
+            state('dashboard', {
+                url: '/home',
+                templateUrl: urlPrefix + 'partials/home.html',
+                controller: Home,
+                ncyBreadcrumb: {
+                    label: "DASHBOARD"
+                },
+                resolve: {
+                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+                        return $q.all({
+                            jobStatus: jobStatusGraphData.get("month", "all"),
+                            features: FeaturesService.get()
+                        });
+                    }]
+                }
+            }).
+
+            state('dashboardGroups', {
+                url: '/home/groups',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeGroups,
+                ncyBreadcrumb: {
+                    parent: 'dashboard',
+                    label: "GROUPS"
+                },
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('dashboardHosts', {
+                url: '/home/hosts?has_active_failures',
+                templateUrl: urlPrefix + 'partials/subhome.html',
+                controller: HomeHosts,
+                ncyBreadcrumb: {
+                    parent: 'dashboard',
+                    label: "HOSTS"
+                },
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            }).
+
+            state('jobs', {
+                url: '/jobs',
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: JobsListController,
+                ncyBreadcrumb: {
+                    label: "JOBS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -210,10 +266,13 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/portal', {
-                name: 'portal',
+            state('portal', {
+                url: '/portal',
                 templateUrl: urlPrefix + 'partials/portal.html',
                 controller: PortalController,
+                ncyBreadcrumb: {
+                    label: "PORTAL"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -221,10 +280,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/jobs/:id', {
-                name: 'jobDetail',
+            state('jobDetail', {
+                url: '/jobs/:id',
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: JobDetailController,
+                ncyBreadcrumb: {
+                    parent: 'jobs',
+                    label: "{{ job.id }} - {{ job.name }}"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -244,10 +307,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/jobs/:id/stdout', {
-                name: 'jobsStdout',
+            state('jobsStdout', {
+                url: '/jobs/:id/stdout',
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
                 controller: JobStdoutController,
+                ncyBreadcrumb: {
+                    parent: 'jobDetail',
+                    label: "STANDARD OUT"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -267,8 +334,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/ad_hoc_commands/:id', {
-                name: 'adHocJobStdout',
+            state('adHocJobStdout', {
+                url: '/ad_hoc_commands/:id',
                 templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
                 controller: JobStdoutController,
                 resolve: {
@@ -290,10 +357,13 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/job_templates', {
-                name: 'jobTemplates',
+            state('jobTemplates', {
+                url: '/job_templates',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesList,
+                ncyBreadcrumb: {
+                    label: "JOB TEMPLATES"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -301,10 +371,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/job_templates/add', {
-                name: 'jobTemplateAdd',
+            state('jobTemplateAdd', {
+                url: '/job_templates/add',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd,
+                ncyBreadcrumb: {
+                    parent: "jobTemplates",
+                    label: "CREATE JOB TEMPLATE"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -312,8 +386,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/job_templates/:template_id', {
-                name: 'jobTemplateEdit',
+            state('jobTemplateEdit', {
+                url: '/job_templates/:template_id',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
                 resolve: {
@@ -323,8 +397,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/job_templates/:id/schedules', {
-                name: 'jobTemplateSchedules',
+            state('jobTemplateSchedules', {
+                url: '/job_templates/:id/schedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
                 resolve: {
@@ -334,10 +408,13 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects', {
-                name: 'projects',
+            state('projects', {
+                url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
+                ncyBreadcrumb: {
+                    label: "PROJECTS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -345,10 +422,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects/add', {
-                name: 'projectAdd',
-                templateUrl: urlPrefix + 'partials/projects.html',
+            state('projects.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/projects.add.html',
                 controller: ProjectsAdd,
+                ncyBreadcrumb: {
+                    parent: "projects",
+                    label: "CREATE PROJECT"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -356,8 +437,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects/:id', {
-                name: 'projectEdit',
+            state('projects.edit', {
+                url: '/:id',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsEdit,
                 resolve: {
@@ -367,8 +448,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects/:id/schedules', {
-                name: 'projectSchedules',
+            state('projectSchedules', {
+                url: '/projects/:id/schedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
                 resolve: {
@@ -378,8 +459,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects/:project_id/organizations', {
-                name: 'projectOrganizations',
+            state('projectOrganizations', {
+                url: '/projects/:project_id/organizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsList,
                 resolve: {
@@ -389,8 +470,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/projects/:project_id/organizations/add', {
-                name: 'projectOrganizationAdd',
+            state('projectOrganizationAdd', {
+                url: '/projects/:project_id/organizations/add',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd,
                 resolve: {
@@ -400,10 +481,13 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories', {
-                name: 'inventories',
+            state('inventories', {
+                url: '/inventories',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesList,
+                ncyBreadcrumb: {
+                    label: "INVENTORIES"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -411,10 +495,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories/add', {
-                name: 'inventoryAdd',
+            state('inventories.add', {
+                url: '/add',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesAdd,
+                ncyBreadcrumb: {
+                    parent: "inventories",
+                    label: "CREATE INVENTORY"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -422,8 +510,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories/:inventory_id', {
-                name: 'inventoryEdit',
+            state('inventories.edit', {
+                url: '/:inventory_id',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit,
                 resolve: {
@@ -433,8 +521,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories/:inventory_id/job_templates/add', {
-                name: 'inventoryJobTemplateAdd',
+            state('inventoryJobTemplateAdd', {
+                url: '/inventories/:inventory_id/job_templates/add',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd,
                 resolve: {
@@ -444,12 +532,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories/:inventory_id/job_templates/', {
-                redirectTo: '/inventories/:inventory_id'
-            }).
-
-            when('/inventories/:inventory_id/job_templates/:template_id', {
-                name: 'inventoryJobTemplateEdit',
+            state('inventoryJobTemplateEdit', {
+                url: '/inventories/:inventory_id/job_templates/:template_id',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
                 resolve: {
@@ -459,8 +543,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/inventories/:inventory_id/manage', {
-                name: 'inventoryManage',
+            state('inventoryManage', {
+                url: '/inventories/:inventory_id/manage?groups',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage,
                 resolve: {
@@ -470,10 +554,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations', {
-                name: 'organizations',
+            state('organizations', {
+                url: '/organizations',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
+                ncyBreadcrumb: {
+                    parent: "setup",
+                    label: "ORGANIZATIONS"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -481,10 +569,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/add', {
-                name: 'organizationAdd',
+            state('organizationsAdd', {
+                url: '/organization/add',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsAdd,
+                ncyBreadcrumb: {
+                    parent: "organizations",
+                    label: "CREATE ORGANIZATION"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -492,8 +584,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/:organization_id', {
-                name: 'organizationEdit',
+            state('organizationEdit', {
+                url: '/organizations/:organization_id',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsEdit,
                 resolve: {
@@ -503,8 +595,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/:organization_id/admins', {
-                name: 'organizationAdmins',
+            state('organizationAdmins', {
+                url: '/organizations/:organization_id/admins',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: AdminsList,
                 resolve: {
@@ -514,8 +606,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/:organization_id/users', {
-                name: 'organizationUsers',
+            state('organizationUsers', {
+                url:'/organizations/:organization_id/users',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
                 resolve: {
@@ -525,8 +617,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/:organization_id/users/add', {
-                name: 'organizationUserAdd',
+            state('organizationUserAdd', {
+                url: '/organizations/:organization_id/users/add',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersAdd,
                 resolve: {
@@ -536,8 +628,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/organizations/:organization_id/users/:user_id', {
-                name: 'organizationUserEdit',
+            state('organizationUserEdit', {
+                url: '/organizations/:organization_id/users/:user_id',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
                 resolve: {
@@ -547,10 +639,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams', {
-                name: 'teams',
+            state('teams', {
+                url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'TEAMS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -558,10 +654,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/add', {
-                name: 'teamsAdd',
+            state('teamsAdd', {
+                url: '/teams/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsAdd,
+                ncyBreadcrumb: {
+                    parent: "teams",
+                    label: "CREATE TEAM"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -569,8 +669,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id', {
-                name: 'teamEdit',
+            state('teamEdit', {
+                url: '/teams/:team_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsEdit,
                 resolve: {
@@ -580,8 +680,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/users', {
-                name: 'teamUsers',
+            state('teamUsers', {
+                url: '/teams/:team_id/users',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: UsersList,
                 resolve: {
@@ -591,8 +691,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/users/:user_id', {
-                name: 'teamUserEdit',
+            state('teamUserEdit', {
+                url: '/teams/:team_id/users/:user_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: UsersEdit,
                 resolve: {
@@ -602,8 +702,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/projects', {
-                name: 'teamProjects',
+            state('teamProjects', {
+                url: '/teams/:team_id/projects',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsList,
                 resolve: {
@@ -613,8 +713,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/projects/add', {
-                name: 'teamProjectAdd',
+            state('teamProjectAdd', {
+                url: '/teams/:team_id/projects/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsAdd,
                 resolve: {
@@ -624,8 +724,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/projects/:project_id', {
-                name: 'teamProjectEdit',
+            state('teamProjectEdit', {
+                url: '/teams/:team_id/projects/:project_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: ProjectsEdit,
                 resolve: {
@@ -635,8 +735,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/credentials', {
-                name: 'teamCredentials',
+            state('teamCredentials', {
+                url: '/teams/:team_id/credentials',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsList,
                 resolve: {
@@ -646,8 +746,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/credentials/add', {
-                name: 'teamCredentialAdd',
+            state('teamCredentialAdd', {
+                url: '/teams/:team_id/credentials/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsAdd,
                 resolve: {
@@ -657,8 +757,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:team_id/credentials/:credential_id', {
-                name: 'teamCredentialEdit',
+            state('teamCredentialEdit', {
+                url: '/teams/:team_id/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -668,10 +768,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/credentials', {
-                name: 'credentials',
+            state('credentials', {
+                url: '/credentials',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'CREDENTIALS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -679,10 +783,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/credentials/add', {
-                name: 'credentialAdd',
+            state('credentialAdd', {
+                url: '/credentials/add',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsAdd,
+                ncyBreadcrumb: {
+                    parent: "credentials",
+                    label: "CREATE CREDENTIAL"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -690,8 +798,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/credentials/:credential_id', {
-                name: 'credentialEdit',
+            state('credentialEdit', {
+                url: '/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -701,10 +809,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users', {
-                name: 'users',
+            state('users', {
+                url: '/users',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'USERS'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -712,10 +824,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users/add', {
-                name: 'userAdd',
+            state('userAdd', {
+                url: '/users/add',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersAdd,
+                ncyBreadcrumb: {
+                    parent: "users",
+                    label: "CREATE USER"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -723,8 +839,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users/:user_id', {
-                name: 'userEdit',
+            state('userEdit', {
+                url: '/users/:user_id',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
                 resolve: {
@@ -734,8 +850,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users/:user_id/credentials', {
-                name: 'userCredentials',
+            state('userCredentials', {
+                url: '/users/:user_id/credentials',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: CredentialsList,
                 resolve: {
@@ -745,8 +861,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/users/:user_id/credentials/add', {
-                name: 'userCredentialAdd',
+            state('userCredentialAdd', {
+                url: '/users/:user_id/credentials/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsAdd,
                 resolve: {
@@ -756,8 +872,8 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/teams/:user_id/credentials/:credential_id', {
-                name: 'teamUserCredentialEdit',
+            state('teamUserCredentialEdit', {
+                url: '/teams/:user_id/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: CredentialsEdit,
                 resolve: {
@@ -767,46 +883,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/home', {
-                name: 'dashboard',
-                templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home,
-                resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                        return $q.all({
-                            jobStatus: jobStatusGraphData.get("month", "all"),
-                            features: FeaturesService.get()
-                        });
-                    }]
-                }
-            }).
-
-            when('/home/groups', {
-                name: 'dashboardGroups',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/home/hosts', {
-                name: 'dashboardHosts',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeHosts,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/license', {
-                name: 'license',
+            state('license', {
+                url: '/license',
                 templateUrl: urlPrefix + 'partials/license.html',
                 controller: LicenseController,
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'LICENSE'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -814,14 +898,13 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            when('/sockets', {
-                name: 'sockets',
+            state('sockets', {
+                url: '/sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController
-            }).
-
-            otherwise({
-                redirectTo: '/home'
+                controller: SocketsController,
+                ncyBreadcrumb: {
+                    label: 'SOCKETS'
+                }
             });
         }
     ])
@@ -885,7 +968,6 @@ var tower = angular.module('Tower', [
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
                 LoadBasePaths();
 
-                $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
 
                 if ($rootScope.removeOpenSocket) {
@@ -966,7 +1048,7 @@ var tower = angular.module('Tower', [
                     },2000);
                 });
 
-                $rootScope.$on("$routeChangeStart", function (event, next, prev) {
+                $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
@@ -1027,7 +1109,7 @@ var tower = angular.module('Tower', [
                 } else {
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
-                    // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
+                    // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
                         Timer.init().then(function(timer){
                             $rootScope.sessionTimer = timer;
@@ -1068,7 +1150,7 @@ var tower = angular.module('Tower', [
 
 
             if (!$AnsibleConfig) {
-                // create a promise that will resolve when $AnsibleConfig is loaded
+                // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
 

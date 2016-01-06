@@ -11,12 +11,12 @@ export default
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
-        'transitionTo', 'Stream',
+        '$state', 'Stream',
         function( Wait, $location, $compile, CreateDialog, GenerateList,
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
-            transitionTo, Stream) {
+            $state, Stream) {
 
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
@@ -251,8 +251,9 @@ export default
                 };
 
                 scope.configureSchedule = function() {
-                    transitionTo('managementJobsSchedule', {
-                        management_job: this.configure_job
+                    $state.transitionTo('managementJobsSchedule', {
+                        management_job: this.configure_job, 
+                        management_job_id: this.configure_job.id
                     });
                 };
 

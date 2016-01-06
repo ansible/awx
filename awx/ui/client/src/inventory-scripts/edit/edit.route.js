@@ -8,25 +8,27 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'inventoryScriptsEdit',
-    route: '/inventory_scripts/:inventory_script',
+    route: '/inventory_scripts/:inventory_script_id',
     templateUrl: templateUrl('inventory-scripts/edit/edit'),
     controller: 'inventoryScriptsEditController',
+    params: {inventory_script: null},
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
         inventory_script:
-        [   '$route',
+        [   '$state',
+            '$stateParams',
             '$q',
             'Rest',
             'GetBasePath',
             'ProcessErrors',
-            function($route, $q, rest, getBasePath, ProcessErrors) {
-                if ($route.current.hasModelKey('inventory_script')) {
-                    return $q.when($route.current.params.model.inventory_script);
+            function($state, $stateParams, $q, rest, getBasePath, ProcessErrors) {
+                if ($stateParams.inventory_script) {
+                    return $q.when($stateParams.inventory_script);
                 }
 
-                var inventoryScriptId = $route.current.params.inventory_script;
+                var inventoryScriptId = $stateParams.inventory_script_id;
 
                 var url = getBasePath('inventory_scripts') + inventoryScriptId + '/';
                 rest.setUrl(url);

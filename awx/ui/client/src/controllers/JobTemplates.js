@@ -11,8 +11,8 @@
 */
 
 
-export function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
-    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
+export function JobTemplatesList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobTemplateList,
+    GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream, CreateDialog, $compile) {
 
     ClearScope();
@@ -48,15 +48,13 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $routePara
     });
 
     // Called from Inventories tab, host failed events link:
-    if ($routeParams.name) {
+    if ($stateParams.name) {
         $scope[list.iterator + 'SearchField'] = 'name';
-        $scope[list.iterator + 'SearchValue'] = $routeParams.name;
+        $scope[list.iterator + 'SearchValue'] = $stateParams.name;
         $scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
     }
 
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
 
 
@@ -237,14 +235,14 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $routePara
     };
 }
 
-JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
-    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobTemplateList',
+    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
     'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
 ];
 
-export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
+export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm,
+    GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
     CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices) {
 
@@ -263,7 +261,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 
     CallbackHelpInit({ scope: $scope });
     $scope.can_edit = true;
-    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
 
     callback = function() {
         // Make sure the form controller knows there was a change
@@ -277,7 +275,6 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
     $scope.allow_callbacks = false;
 
     generator.reset();
-    LoadBreadCrumbs();
 
     md5Setup({
         scope: $scope,
@@ -289,7 +286,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: ($routeParams.inventory_id !== undefined) ? $routeParams.inventory_id : null,
+        current_item: ($stateParams.inventory_id !== undefined) ? $stateParams.inventory_id : null,
         list: InventoryList,
         field: 'inventory',
         input_type: "radio"
@@ -353,13 +350,13 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 
             // if you're getting to the form from the scan job section on inventories,
             // set the job type select to be scan
-            if ($routeParams.inventory_id) {
+            if ($stateParams.inventory_id) {
                 // This means that the job template form was accessed via inventory prop's
                 // This also means the job is a scan job.
                 $scope.job_type.value = 'scan';
                 $scope.jobTypeChange();
-                $scope.inventory = $routeParams.inventory_id;
-                Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+                $scope.inventory = $stateParams.inventory_id;
+                Rest.setUrl(GetBasePath('inventory') + $stateParams.inventory_id + '/');
                 Rest.get()
                     .success(function (data) {
                         $scope.inventory_name = data.name;
@@ -659,15 +656,15 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
     };
 }
 
-JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
+JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices'
 ];
 
 
-export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
+export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest,
+    Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
     GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit){
@@ -679,7 +676,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
         form = JobTemplateForm(),
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.template_id,
+        id = $stateParams.template_id,
         relatedSets = {},
         checkSCMStatus, getPlaybooks, callback,
         choicesCount = 0;
@@ -688,7 +685,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
     CallbackHelpInit({ scope: $scope });
 
     SchedulesList.well = false;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     $scope.mode = 'edit';
     $scope.parseType = 'yaml';
     $scope.showJobType = false;
@@ -955,7 +952,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, {
                     hdr: 'Error!',
-                    msg: 'Failed to retrieve job template: ' + $routeParams.template_id + '. GET status: ' + status
+                    msg: 'Failed to retrieve job template: ' + $stateParams.template_id + '. GET status: ' + status
                 });
             });
     });
@@ -1161,7 +1158,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.template_id + '/' + set);
+        $location.path('/' + base + '/' + $stateParams.template_id + '/' + set);
     };
 
     // Related set: Edit button
@@ -1223,7 +1220,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, {
                     hdr: 'Error!',
-                    msg: 'Failed to retrieve save survey_enabled: ' + $routeParams.template_id + '. GET status: ' + status
+                    msg: 'Failed to retrieve save survey_enabled: ' + $stateParams.template_id + '. GET status: ' + status
                 });
             });
     };
@@ -1231,8 +1228,8 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
 
 }
 
-JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
+    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',

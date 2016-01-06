@@ -11,8 +11,8 @@
 */
 
 
-export function JobsListController ($rootScope, $log, $scope, $compile, $routeParams,
-    ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
+export function JobsListController ($rootScope, $log, $scope, $compile, $stateParams,
+    ClearScope, LoadSchedulesScope,
     LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait) {
 
     ClearScope();
@@ -22,10 +22,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         listCount = 0,
         api_complete = false,
         max_rows;
-
-    LoadBreadCrumbs();
-
-
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
@@ -49,14 +45,14 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         if (AllJobsList.fields.type) {
             AllJobsList.fields.type.searchOptions = $scope.type_choices;
         }
-        if ($routeParams.status) {
+        if ($stateParams.status) {
             search_params[AllJobsList.iterator + 'SearchField'] = 'status';
             search_params[AllJobsList.iterator + 'SelectShow'] = true;
             search_params[AllJobsList.iterator + 'SearchSelectOpts'] = AllJobsList.fields.status.searchOptions;
             search_params[AllJobsList.iterator + 'SearchFieldLabel'] = AllJobsList.fields.status.label.replace(/<br\>/g,' ');
             search_params[AllJobsList.iterator + 'SearchType'] = '';
             for (opt in AllJobsList.fields.status.searchOptions) {
-                if (AllJobsList.fields.status.searchOptions[opt].value === $routeParams.status) {
+                if (AllJobsList.fields.status.searchOptions[opt].value === $stateParams.status) {
                     search_params[AllJobsList.iterator + 'SearchSelectValue'] = AllJobsList.fields.status.searchOptions[opt];
                     break;
                 }
@@ -185,6 +181,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
     }
 }
 
-JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$routeParams',
-'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope',
+JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$stateParams',
+'ClearScope', 'LoadSchedulesScope', 'LoadJobsScope',
 'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait'];

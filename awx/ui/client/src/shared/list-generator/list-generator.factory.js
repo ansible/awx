@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  *  @ngdoc function
  *  @name shared.function:list-generator
@@ -17,7 +17,6 @@
  * | Parameter | Required | Description |
  * | --------- | -------- | ----------- |
  * | activityStream | | Used in widgets/stream.js to create the list contained within the activity stream widget. |
- * | breadCrumbs | | true or false. Set to false, if breadcrumbs should not be included in the generated HTML. |
  * | hdr | | Deprecated. Was used when list generator created the lookup dialog. This was moved to helpers/Lookup.js. |
  * | id | | DOM element ID attribute value. Use to inject the list into a custom DOM element. Otherwise, the HTML for a list will be injected into the DOM element with an ID attribute of 'htmlTemplate'. |
  * | listSize  | | Bootstrap size class to apply to the grid column containing the action buttons, which generally appears to the right of the search widget. Defaults to 'col-lg-8 col-md-6 col-sm-4 col-xs-3'. |
@@ -32,7 +31,6 @@
  * ```
  *     var html = GenerateList.buildHTML({
  *         mode: 'edit',
- *         breadCrumbs: false,
  *         showSearch: false
  *     });
  * ```
@@ -102,9 +100,9 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'Breadcrumbs',
+        'Column', 'DropDown', 'NavigationLink', 'SelectIcon',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
-        SelectIcon, Breadcrumbs) {
+        SelectIcon) {
             return {
 
                 setList: function (list) {
@@ -143,8 +141,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     //     hdr: <lookup dialog header>
                     //
                     // Inject into a custom element using options.id: <element id attribute value>
-                    //
-                    // Control breadcrumb creation with options.breadCrumbs: <true | false>
                     var element;
 
                     if (options.id) {
@@ -291,26 +287,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     var html = '',
                         list = this.list,
                         base, size, action, fld, cnt, field_action, fAction, itm;
-
-                    if (options.activityStream) {
-                        // Breadcrumbs for activity stream widget
-                        // Make the links clickable using ng-click function so we can first remove the stream widget
-                        // before navigation
-                        html += "<div>\n";
-                        html += "<ul class=\"ansible-breadcrumb\">\n";
-                        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" " + "ng-click=\"closeStream(crumb.path)\">" +
-                            "{{ crumb.title }}</a></li>\n";
-                        html += "<li class=\"active\"><a href=\"\">";
-                        html += list.editTitle;
-                        html += "</a></li>\n</ul>\n</div>\n";
-                    }
-                    //else if (options.mode !== 'lookup' && (options.breadCrumbs === undefined || options.breadCrumbs)) {
-                    else if (options.breadCrumbs) {
-                        html += Breadcrumbs({
-                            list: list,
-                            mode: options.mode
-                        });
-                    }
 
                     if (options.mode === 'edit' && list.editInstructions) {
                         html += "<div class=\"alert alert-info alert-block\">\n";

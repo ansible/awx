@@ -44,7 +44,7 @@ export function LicenseController(ClearScope, $location, $rootScope, $compile, $
                 delete self.form.fields.time_remaining;
             }
 
-            html = generator.buildHTML(self.form, { mode: 'edit', showButtons: false, breadCrumbs: false });
+            html = generator.buildHTML(self.form, { mode: 'edit', showButtons: false });
             return html;
         };
 

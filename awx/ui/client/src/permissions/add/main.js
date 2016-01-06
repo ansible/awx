@@ -11,11 +11,7 @@ import controller from './add.controller';
 export default
     angular.module('permissionsAdd', [])
         .controller('permissionsAddController', controller)
-        .config(['$routeProvider', function($routeProvider) {
-            var url = userRoute.route;
-            delete userRoute.route;
-            $routeProvider.when(url, userRoute);
-            url = teamRoute.route;
-            delete teamRoute.route;
-            $routeProvider.when(url, teamRoute);
+        .run(['$stateExtender', function($stateExtender) {
+            $stateExtender.addState(userRoute);
+            $stateExtender.addState(teamRoute);
         }]);

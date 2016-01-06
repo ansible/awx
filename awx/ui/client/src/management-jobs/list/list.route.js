@@ -15,5 +15,9 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }]
-    }
+    },
+    ncyBreadcrumb: {
+        parent: 'setup',
+        label: 'MANAGEMENT JOBS'
+    },
 };

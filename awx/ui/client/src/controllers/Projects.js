@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Projects
@@ -11,9 +11,11 @@
 */
 
 
-export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
-    Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter) {
+export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
+    Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
+    PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
+    SelectionInit, ProjectUpdate, Refresh, Wait, Stream, GetChoices, Empty,
+    Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
     ClearScope();
 
@@ -24,10 +26,10 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
         view = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'projects') ? 'edit' : 'select',
-        url = (base === 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl,
+        url = (base === 'teams') ? GetBasePath('teams') + $stateParams.team_id + '/projects/' : defaultUrl,
         choiceCount = 0;
 
-    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.team_id) ? true : false)});
+    view.inject(list, { mode: mode, scope: $scope });
 
     $rootScope.flashMessage = null;
     $scope.projectLoading = true;
@@ -116,9 +118,9 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
         list.fields.scm_type.searchOptions = $scope.project_scm_type_options;
         list.fields.status.searchOptions = $scope.project_status_options;
 
-        if ($routeParams.scm_type && $routeParams.status) {
+        if ($stateParams.scm_type && $stateParams.status) {
             // Request coming from home page. User wants all errors for an scm_type
-            defaultUrl += '?status=' + $routeParams.status;
+            defaultUrl += '?status=' + $stateParams.status;
         }
 
         SearchInit({
@@ -133,27 +135,27 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
             url: defaultUrl
         });
 
-        if ($routeParams.scm_type) {
+        if ($stateParams.scm_type) {
             $scope[list.iterator + 'SearchType'] = '';
             $scope[list.iterator + 'SearchField'] = 'scm_type';
             $scope[list.iterator + 'SelectShow'] = true;
             $scope[list.iterator + 'SearchSelectOpts'] = list.fields.scm_type.searchOptions;
             $scope[list.iterator + 'SearchFieldLabel'] = list.fields.scm_type.label.replace(/<br\>/g, ' ');
             for (opt in list.fields.scm_type.searchOptions) {
-                if (list.fields.scm_type.searchOptions[opt].value === $routeParams.scm_type) {
+                if (list.fields.scm_type.searchOptions[opt].value === $stateParams.scm_type) {
                     $scope[list.iterator + 'SearchSelectValue'] = list.fields.scm_type.searchOptions[opt];
                     break;
                 }
             }
-        } else if ($routeParams.status) {
+        } else if ($stateParams.status) {
             $scope[list.iterator + 'SearchType'] = '';
-            $scope[list.iterator + 'SearchValue'] = $routeParams.status;
+            $scope[list.iterator + 'SearchValue'] = $stateParams.status;
             $scope[list.iterator + 'SearchField'] = 'status';
             $scope[list.iterator + 'SelectShow'] = true;
             $scope[list.iterator + 'SearchFieldLabel'] = list.fields.status.label;
             $scope[list.iterator + 'SearchSelectOpts'] = list.fields.status.searchOptions;
             for (opt in list.fields.status.searchOptions) {
-                if (list.fields.status.searchOptions[opt].value === $routeParams.status) {
+                if (list.fields.status.searchOptions[opt].value === $stateParams.status) {
                     $scope[list.iterator + 'SearchSelectValue'] = list.fields.status.searchOptions[opt];
                     break;
                 }
@@ -190,18 +192,18 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
         callback: 'choicesReadyProject'
     });
 
-    LoadBreadCrumbs();
-
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
 
     $scope.addProject = function () {
-        $location.path($location.path() + '/add');
+        // $location.path($location.path() + '/add');
+        $state.transitionTo('projects.add');
     };
 
     $scope.editProject = function (id) {
-        $location.path($location.path() + '/' + id);
+        // $location.path($location.path() + '/' + id);
+        $state.transitionTo('projects.edit', {id: id});
     };
 
     if ($scope.removeShowLogViewer) {
@@ -339,7 +341,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                     msg: 'Call to get project failed. GET status: ' + status });
-            })
+            });
     };
 
     $scope.refresh = function () {
@@ -389,15 +391,15 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams,
     };
 }
 
-ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'ProjectUpdate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
-    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter'
+    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
 
-export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
+export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
     CredentialList, GetChoices, DebugForm, Wait) {
 
     ClearScope();
@@ -409,9 +411,8 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $rout
         defaultUrl = GetBasePath('projects'),
         master = {};
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
-    LoadBreadCrumbs();
 
     GetProjectPath({ scope: $scope, master: master });
 
@@ -482,7 +483,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $rout
             delete data.local_path;
         }
 
-        url = (base === 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+        url = (base === 'teams') ? GetBasePath('teams') + $stateParams.team_id + '/projects/' : defaultUrl;
         Wait('start');
         Rest.setUrl(url);
         Rest.post(data)
@@ -535,15 +536,15 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $rout
     };
 }
 
-ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
+ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices',
     'DebugForm', 'Wait'
 ];
 
 
-export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
+export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm,
+    GenerateForm, Rest, Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
     Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList, ProjectUpdate) {
 
@@ -552,18 +553,17 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
     // Inject dynamic view
     var form = ProjectsForm(),
         generator = GenerateForm,
-        defaultUrl = GetBasePath('projects') + $routeParams.id + '/',
+        defaultUrl = GetBasePath('projects') + $stateParams.id + '/',
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {}, i,
-        id = $routeParams.id,
+        id = $stateParams.id,
         relatedSets = {};
 
     SchedulesList.well = false;
     generator.inject(form, {
         mode: 'edit',
         related: true,
-        scope: $scope,
-        breadcrumbs: true
+        scope: $scope
     });
     generator.reset();
 
@@ -641,7 +641,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
         Rest.get({ params: { id: id } })
             .success(function (data) {
                 var fld, i;
-                LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
                 for (fld in form.fields) {
                     if (form.fields[fld].type === 'checkbox_group') {
                         for (i = 0; i < form.fields[fld].fields.length; i++) {
@@ -779,7 +778,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+        $location.path('/' + base + '/' + $stateParams.id + '/' + set);
     };
 
     // Related set: Edit button
@@ -841,8 +840,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
     };
 }
 
-ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
+ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
     'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList', 'ProjectUpdate'
 ];

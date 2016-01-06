@@ -10,8 +10,6 @@ import controller from './add.controller';
 export default
     angular.module('inventoryScriptsAdd', [])
         .controller('inventoryScriptsAddController', controller)
-        .config(['$routeProvider', function($routeProvider) {
-            var url = route.route;
-            delete route.route;
-            $routeProvider.when(url, route);
+        .run(['$stateExtender', function($stateExtender) {
+            $stateExtender.addState(route);
         }]);

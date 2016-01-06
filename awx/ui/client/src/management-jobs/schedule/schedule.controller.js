@@ -11,10 +11,10 @@
 */
 
 export default [
-    '$scope', '$location', '$routeParams', 'SchedulesList', 'Rest',
+    '$scope', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'GetBasePath', 'Wait','LoadSchedulesScope', 'GetChoices',
     'Stream', 'management_job', '$rootScope',
-    function($scope, $location, $routeParams, SchedulesList, Rest,
+    function($scope, $location, $stateParams, SchedulesList, Rest,
         ProcessErrors, GetBasePath, Wait, LoadSchedulesScope, GetChoices,
         Stream, management_job, $rootScope) {
             var base, id, url, parentObject;
@@ -58,7 +58,7 @@ export default [
             }
             $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
                 // Load the parent object
-                id = $routeParams.management_job;
+                id = $stateParams.management_job_id;
                 url = GetBasePath('system_job_templates') + id + '/';
                 Rest.setUrl(url);
                 Rest.get()

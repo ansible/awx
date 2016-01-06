@@ -11,11 +11,11 @@
 */
 
 
-export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
 
     ClearScope();
 
-    var job_id = $routeParams.id,
+    var job_id = $stateParams.id,
         api_complete = false,
         stdout_url,
         current_range,
@@ -281,4 +281,4 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 }
 
-JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];

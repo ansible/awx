@@ -1,5 +1,5 @@
 export default
-    function AddFactory($location, $routeParams, ShowSurveyModal, Wait) {
+    function AddFactory($location, $stateParams, ShowSurveyModal, Wait) {
         return function(params) {
             var scope = params.scope;
 
@@ -19,7 +19,7 @@ export default
 
 AddFactory.$inject =
     [   '$location',
-        '$routeParams',
+        '$stateParams',
         'showSurvey',
         'Wait'
     ];

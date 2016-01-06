@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Schedules
@@ -11,8 +11,8 @@
 */
 
 
-export function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
+export function ScheduleEditController($scope, $compile, $location, $stateParams, SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
+GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
 
     ClearScope();
 
@@ -34,15 +34,6 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
         $scope.removeParentLoaded();
     }
     $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
-        // Add breadcrumbs
-        LoadBreadCrumbs({
-            path: $location.path().replace(/\/schedules$/,''),
-            title: parentObject.name
-        });
-        e = angular.element(document.getElementById('breadcrumbs'));
-        e.html(Breadcrumbs({ list: SchedulesList, mode: 'edit' }));
-        $compile(e)($scope);
-
         url += "schedules/";
         SchedulesList.well = true;
         LoadSchedulesScope({
@@ -61,7 +52,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         // Load the parent object
-        id = $routeParams.id;
+        id = $stateParams.id;
         url = GetBasePath(base) + id + '/';
         Rest.setUrl(url);
         Rest.get()
@@ -94,5 +85,5 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     });
 }
 
-ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream' ];
+ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
+    'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream' ];

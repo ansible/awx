@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:Users
@@ -11,7 +11,7 @@
 */
 
 
-export function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,
+export function UsersList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, UserList, GenerateList,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -21,10 +21,10 @@ export function UsersList($scope, $rootScope, $location, $log, $routeParams, Res
         generator = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'users') ? 'edit' : 'select',
-        url = (base === 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
-            GetBasePath('teams') + $routeParams.team_id + '/users/';
+        url = (base === 'organizations') ? GetBasePath('organizations') + $stateParams.organization_id + '/users/' :
+            GetBasePath('teams') + $stateParams.team_id + '/users/';
 
-    generator.inject(UserList, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.organization_id || $routeParams.team_id) ? true : false) });
+    generator.inject(UserList, { mode: mode, scope: $scope });
 
     $scope.selected = [];
 
@@ -54,8 +54,6 @@ export function UsersList($scope, $rootScope, $location, $log, $routeParams, Res
         url: defaultUrl
     });
     $scope.search(list.iterator);
-
-    LoadBreadCrumbs();
 
     $scope.showActivity = function () {
         Stream({ scope: $scope });
@@ -97,14 +95,14 @@ export function UsersList($scope, $rootScope, $location, $log, $routeParams, Res
     };
 }
 
-UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'generateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList',
+    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'Wait', 'Stream'
 ];
 
 
-export function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
-    LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
+export function UsersAdd($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
 
     ClearScope();
 
@@ -123,22 +121,20 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     generator.reset();
 
-    LoadBreadCrumbs();
-
     // Configure the lookup dialog. If we're adding a user through the Organizations tab,
     // default the Organization value.
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: ($routeParams.organization_id !== undefined) ? $routeParams.organization_id : null,
+        current_item: ($stateParams.organization_id !== undefined) ? $stateParams.organization_id : null,
         list: OrganizationList,
         field: 'organization',
         input_type: 'radio'
     });
 
-    if ($routeParams.organization_id) {
-        $scope.organization = $routeParams.organization_id;
-        Rest.setUrl(GetBasePath('organizations') + $routeParams.organization_id + '/');
+    if ($stateParams.organization_id) {
+        $scope.organization = $stateParams.organization_id;
+        Rest.setUrl(GetBasePath('organizations') + $stateParams.organization_id + '/');
         Rest.get()
             .success(function (data) {
                 $scope.organization_name = data.name;
@@ -201,14 +197,14 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $routePa
     };
 }
 
-UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
+UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
     'OrganizationList', 'ResetForm', 'Wait'
 ];
 
 
-export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
-    ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
+export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert,
+    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
     Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
 
     ClearScope();
@@ -218,7 +214,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         form = UserForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.user_id,
+        id = $stateParams.user_id,
         relatedSets = {};
 
     $scope.permission_label = {};
@@ -324,7 +320,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
-                    $routeParams.id + '. GET status: ' + status });
+                    $stateParams.id + '. GET status: ' + status });
             });
 
         $scope.getPermissionText = function () {
@@ -368,7 +364,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         }
                     })
                     .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $stateParams.id +
                             '. PUT status: ' + status });
                     });
             }
@@ -402,12 +398,12 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
             $rootScope.flashMessage = null;
             if (set === 'permissions') {
                 if ($scope.PermissionAddAllowed) {
-                    $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');
+                    $location.path('/' + base + '/' + $stateParams.user_id + '/' + set + '/add');
                 } else {
                     Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
                 }
             } else {
-                $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
+                $location.path('/' + base + '/' + $stateParams.user_id + '/' + set);
             }
         };
 
@@ -415,7 +411,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $scope.edit = function (set, id) {
             $rootScope.flashMessage = null;
             if (set === 'permissions') {
-                $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+                $location.path('/users/' + $stateParams.user_id + '/permissions/' + id);
             } else {
                 $location.path('/' + set + '/' + id);
             }
@@ -445,7 +441,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
                     }
                 } else {
-                    url = defaultUrl + $routeParams.user_id + '/' + set + '/';
+                    url = defaultUrl + $stateParams.user_id + '/' + set + '/';
                     Rest.setUrl(url);
                     Rest.post({
                         id: itm_id,
@@ -527,7 +523,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
     });
 }
 
-UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
+UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
 ];
