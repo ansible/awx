@@ -252,7 +252,8 @@ export default
 
                 scope.configureSchedule = function() {
                     $state.transitionTo('managementJobsSchedule', {
-                        management_job: this.configure_job.id
+                        management_job: this.configure_job, 
+                        management_job_id: this.configure_job.id
                     });
                 };
 

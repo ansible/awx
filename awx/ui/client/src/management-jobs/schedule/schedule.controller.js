@@ -58,7 +58,7 @@ export default [
             }
             $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
                 // Load the parent object
-                id = $stateParams.management_job;
+                id = $stateParams.management_job_id;
                 url = GetBasePath('system_job_templates') + id + '/';
                 Rest.setUrl(url);
                 Rest.get()
