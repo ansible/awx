@@ -1,21 +1,26 @@
+@import "../shared/branding/colors.default.less";
+
 /** @define MainMenu */
 
 .MainMenu {
     padding: 0;
     display: flex;
-    background-color: #167ec4;
+    background-color: @menu-bg;
+    border-bottom: 1px solid @menu-btm;
     width: 100%;
     z-index: 1040;
     position: fixed;
     right: 0;
     left: 0;
     top: 0;
+    height: 60px;
+    align-items: stretch;
 }
 
 .MainMenu-logo,
 .MainMenu-item {
-    color: #fff;
-    background-color: #167ec4;
+    color: @menu-link;
+    background-color: @menu-link-bg;
 }
 
 .MainMenu-logoImage {
@@ -32,10 +37,14 @@
     flex: initial;
 }
 
+.MainMenu-itemImage {
+    color: @menu-link-icon;
+}
+
 .MainMenu-socket {
     transition: background-color 0.2s, color 0.2s, border-bottom 0.1s, padding-top 0.1s;
-    color: #fff;
-    background: url(assets/socket_background.png) #167ec4;
+    color: @menu-link-icon;
+    background: url(assets/socket_background.png) @menu-bg;
     background-size: 55px 52px;
     background-repeat: no-repeat;
     order: 0;
@@ -46,7 +55,7 @@
     display: flex;
     align-items: center;
     border: 0;
-    border-left: 1px solid #509ad3;
+    border-left: 1px solid @menu-link-sides;
     cursor: default;
 }
 
@@ -68,19 +77,14 @@
         display: none;
     }
 
-    .MainMenu {
-        height: 50px;
-        align-items: stretch;
-    }
-
     .MainMenu-logo {
         flex: initial;
         padding: 0;
         display: flex;
         align-items: center;
         border: 0;
-        border-bottom: 0px solid #fff;
-        border-right: 1px solid #509ad3;
+        border-bottom: 0;
+        border-right: 1px solid @menu-link-sides;
     }
 
     .MainMenu-item {
@@ -88,14 +92,14 @@
         flex: initial;
         padding-top: 0px;
         border: 0;
-        border-bottom: 0px solid #fff;
+        border-bottom: 0px solid @menu-link-btm-hov;
         display: flex;
         align-items: center;
     }
 
     // Set up elements based on if their layout in the menu bar
     .MainMenu-item--left {
-        border-right: 1px solid #509ad3;
+        border-right: 1px solid @menu-link-sides;
     }
 
     .MainMenu-item--left:hover,
@@ -111,7 +115,7 @@
     }
 
     .MainMenu-item--right {
-        border-left: 1px solid #509ad3;
+        border-left: 1px solid @menu-link-sides;
         order: 1;
     }
 
@@ -126,29 +130,47 @@
     .MainMenu-item:hover,
     .MainMenu-item.is-currentRoute {
         padding-top: 5px;
-        border-bottom: 5px solid #fff;
+        border-bottom: 5px solid @menu-link-btm-hov;
     }
 
     .MainMenu-itemText--username {
         padding-left: 13px;
+        margin-top: -4px;
     }
 
     .MainMenu-itemImage {
         font-size: 20px;
     }
 
+    .MainMenu-itemImage--settings {
+        margin-top: -1px;
+    }
+
     .MainMenu-itemImage--user {
         font-size: 21px;
         margin-right: -5px;
+        margin-top: -1px;
     }
 
     .MainMenu-itemImage--docs {
         font-size: 21px;
         margin-top: -2px;
     }
+
+    .MainMenu-item.is-currentRoute {
+        background-color: @menu-link-bg-hov;
+    }
 }
 
 @media screen and (max-width: @menu-breakpoint) {
+    .MainMenu-logo {
+        height: 60px;
+    }
+
+    .MainMenu-logoImage {
+        margin-top: 5px;
+    }
+
     .MainMenu-item--notMobile {
         display: none;
     }
@@ -160,7 +182,7 @@
 
     .MainMenu-logo {
         flex: 1;
-        border-bottom: 1px solid #509ad3;
+        border-bottom: 1px solid @menu-link-btm;
         order: 0;
     }
 
@@ -189,13 +211,22 @@
         padding-top: 15px;
         padding-bottom: 15px;
         order: 1;
-        border-bottom: 1px solid #509ad3;
+        border-bottom: 1px solid @menu-link-btm;
+    }
+
+    .MainMenu-item.is-currentRoute {
+        font-weight: bold;
+        background-color: @menu-link-bg;
+    }
+
+    .MainMenu-item:hover {
+        background-color: @menu-link-bg-hov;
     }
 
     .MainMenu-toggle {
         transition: background-color 0.2s;
-        color: #fff;
-        background-color: #167ec4;
+        color: @menu-link-icon;
+        background-color: @menu-link-bg;
         order: 0;
         flex: initial;
         padding-top: 3px;
@@ -205,12 +236,12 @@
         display: flex;
         align-items: center;
         border: 0;
-        border-left: 1px solid #509ad3;
-        border-bottom: 1px solid #509ad3;
+        border-left: 1px solid @menu-link-btm;
+        border-bottom: 1px solid @menu-link-btm;
     }
 
     .MainMenu-socket {
-        border-bottom: 1px solid #509ad3;
+        border-bottom: 1px solid @menu-link-btm;
     }
 
     .MainMenu-toggleImage {
@@ -225,17 +256,7 @@
 .MainMenu-item:hover,
 .MainMenu-logo:hover,
 .MainMenu-item.is-currentRoute {
-    color: #fff;
-}
-
-.MainMenu-item.is-currentRoute {
-    background-color: #509ad3;
-}
-
-.MainMenu-toggle:hover,
-.MainMenu-item:hover,
-.MainMenu-logo:hover {
-    background-color: #5bbdbf;
+    color: @menu-link;
 }
 
 // item on

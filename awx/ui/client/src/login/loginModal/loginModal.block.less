@@ -1,3 +1,5 @@
+@import "../../shared/branding/colors.default.less";
+
 /** @define LoginModal */
 .LoginModal-backDrop {
     width: 100vw;
@@ -8,7 +10,7 @@
     z-index: 1041;
     opacity: 0;
     transition: 0.5s opacity;
-    background: #000;
+    background: @login-backdrop;
 }
 
 .LoginModal-backDrop.is-loggedOut {
@@ -26,7 +28,7 @@
     margin-right: auto;
     border: 0;
     box-shadow: none;
-    background-color: #fff;
+    background-color: @login-bg;
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.5s;
@@ -41,7 +43,7 @@
 
 .LoginModal-header {
     text-align: center;
-    background-color: #167ec4;
+    background-color: @login-header-bg;
     border-bottom: 0;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
@@ -68,12 +70,12 @@
     margin-bottom: 15px;
     font-size: 16px;
     font-weight: normal;
-    color: #161b1f;
+    color: @login-alert;
     transition: opacity 0.2s;
 }
 
 .LoginModal-alert--error {
-    color: #ff5850;
+    color: @login-alert-error;
     padding-bottom: 4px;
 }
 
@@ -110,8 +112,14 @@
 }
 
 .LoginModal-label {
-    color: #b7b7b7;
+    color: @field-label;
     font-weight: 400;
+}
+
+.LoginModal-field {
+    color: @field-input-text;
+    background-color: @field-bg;
+    border: 1px solid @field-border;
 }
 
 .LoginModal-footer {
@@ -138,12 +146,12 @@
 
 .LoginModal-signInButton {
     transition: background-color 0.2s;
-    background-color: #5bbdbf;
-    color: #fff;
+    background-color: @submit-button-bg;
+    color: @submit-button-text;
 }
 
 .LoginModal-signInButton:hover,
 .LoginModal-signInButton:focus {
-    color: #fff;
-    background-color: #7bced0;
+    color: @submit-button-text;
+    background-color: @submit-button-bg-hov;
 }
