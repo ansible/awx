@@ -1,0 +1,1 @@
+require('angular-ui-router');
