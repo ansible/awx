@@ -1,3 +1,5 @@
+@import "../../../shared/branding/colors.default.less";
+
 /** @define ThirdPartySignOn */
 
 .ThirdPartySignOn {
@@ -7,7 +9,7 @@
 
 .ThirdPartySignOn-label {
     flex: initial;
-    color: #b7b7b7;
+    color: @third-party-label;
 }
 
 .ThirdPartySignOn-item {
@@ -20,22 +22,22 @@
     height: 30px;
     width: 30px;
     border-radius: 50%;
-    color: #ccc;
-    background-color: #fff;
+    color: @third-party-btn-text;
+    background-color: @third-party-btn-bg;
     border: 0;
     padding: 0;
 }
 
 .ThirdPartySignOn-button--error {
-    color: #ff5850;
+    color: @third-party-error;
 }
 
 .ThirdPartySignOn-button:hover {
-    color: #e1e1e1;
+    color: @third-party-btn-hov;
 }
 
 .ThirdPartySignOn-button--error:hover {
-    color: #FF1105;
+    color: @third-party-error-hov;
 }
 
 .ThirdPartySignOn-icon {

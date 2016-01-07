@@ -1,15 +1,17 @@
 /** @define DashboardList */
 
+@import "../../shared/branding/colors.default.less";
+
 .DashboardList {
     flex: 1;
 }
 .DashboardList--noJobTemplates {
-    color: #8d8d8d;
+    color: @list-empty-txt;
 }
 
 .DashboardList-header {
     display: flex;
-    border-bottom: 1px solid #e1e1e1;
+    border-bottom: 1px solid @list-header-bord;
     height: 50px;
 }
 
@@ -18,17 +20,22 @@
     margin: 0px;
     font-size: 14px;
     font-weight: bold;
-    color: #b7b7b7;
+    color: @list-header-txt;
     height: 50px;
     line-height: 50px;
     white-space: nowrap;
     padding-left: 20px;
 }
+
+.DashboardList-tableHeaderIcon {
+    color: @list-header-icon;
+}
+
 .DashboardList-viewAll {
-    color: #b7b7b7;
-    background-color: #ffffff;
+    color: @btn-txt;
+    background-color: @btn-bg;
     font-size: 12px;
-    border: 1px solid #e1e1e1;
+    border: 1px solid @btn-bord;
     border-radius: 5px;
     margin-right: 15px;
     margin-top: 10px;
@@ -41,12 +48,12 @@
 }
 
 .DashboardList-viewAll:hover {
-    color: #b7b7b7;
-    background-color: #f6f6f6;
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
 }
 
 .DashboardList-viewAll:focus {
-    color: #b7b7b7;
+    color: @btn-txt;
 }
 
 .DashboardList-container {
@@ -55,31 +62,31 @@
     padding: 20px;
 }
 
-.DashboardList-table{
+.DashboardList-table {
     width: 100%;
     table-layout: fixed;
 }
 
-.DashboardList-tableHeader{
+.DashboardList-tableHeader {
     height: 30px;
     font-size: 14px;
     font-weight: normal;
     text-transform: uppercase;
-    color: #ffffff;
-    background-color: #d7d7d7;
+    color: @list-header-txt;
+    background-color: @list-header-bg;
 }
 
-.DashboardList-tableHeader--name{
+.DashboardList-tableHeader--name {
     border-top-left-radius: 5px;
     padding-left: 15px;
 }
 
-.DashboardList-tableHeader--activity{
+.DashboardList-tableHeader--activity {
     width: 205px;
     padding-left:20px
 }
 
-.DashboardList-tableHeader--time{
+.DashboardList-tableHeader--time {
     width: 190px;
     padding-left:20px;
     padding-right: 15px;
@@ -87,21 +94,21 @@
     text-align: right;
 }
 
-.DashboardList-tableHeader--actions{
+.DashboardList-tableHeader--actions {
     border-top-right-radius: 5px;
     width: 90px;
     padding-right: 15px;
     text-align: right;
 }
 
-.DashboardList-tableRow{
+.DashboardList-tableRow {
     height: 50px;
     font-size: 14px;
-    color: #161b1f;
+    color: @list-item;
 }
 
-.DashboardList-tableRow--evenRow{
-    background-color: #f6f6f6;
+.DashboardList-tableRow--evenRow {
+    background-color: @list-alt-item-bg;
 }
 
 .DashboardList-status{
@@ -109,11 +116,11 @@
 }
 
 .DashboardList-status--success{
-    color: #5bbdbf;
+    color: @default-succ;
 }
 
 .DashboardList-status--failed{
-    color: #ff5850;
+    color: @default-err;
 }
 
 .DashboardList-nameCell {
@@ -125,10 +132,10 @@
 }
 
 .DashboardList-nameContainer {
-    color: #1678c4;
+    color: @default-link;
 }
 
-.DashboardList-activityCell{
+.DashboardList-activityCell {
     padding-right: 20px;
     padding-left: 20px;
 }
@@ -141,31 +148,37 @@
 }
 
 .DashboardList-nameContainer:hover {
-    color: #5ca6db;
+    color: @default-link-hov;
     cursor: pointer;
 }
 
-.DashboardList-actionButtonCell{
+.DashboardList-actionButtonCell {
     padding-top:10px;
     padding-right: 15px;
     display:flex;
     justify-content: flex-end;
 }
 
-.DashboardList-actionButton{
+.DashboardList-actionButton {
     font-size: 16px;
     height: 30px;
     width: 30px;
-    color: #b7b7b7;
-    background-color: #ffffff;
-    border: 1px solid #e1e1e1;
+    color: @list-action-icon;
+    background-color: @list-actn-bg;
+    border: 1px solid @list-actn-bord;
     border-radius: 50%;
-    transition: background-color 0.2s, border-color 0.2s;;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
-.DashboardList-actionButton:hover{
-    background-color: #1678c4;
-    color: #ffffff;
+.DashboardList-tableRow--evenRow > .DashboardList-actionButtonCell > .DashboardList-actionButton {
+    background-color: @list-actn-alt-bg;
+    border: 1px solid @list-actn-alt-bord;
+}
+
+.DashboardList-actionButton:hover {
+    background-color: @list-actn-bg-hov !important;
+    border: 1px solid @list-actn-bord-hov !important;
+    color: @list-actn-icn-hov;
     border: none;
 }
 
@@ -179,6 +192,6 @@
     border: 1px solid #1678c4;
 }
 
-.DashboardList-noJobs{
-    color: #b7b7b7;
+.DashboardList-noJobs {
+    color: @list-empty-txt;
 }

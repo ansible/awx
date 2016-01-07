@@ -59,10 +59,10 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                     if(scope.status === "successful"){
                         data = [
                         {   "label": "SUCCESSFUL",
-                            "color": "#5bbdbf",
+                            "color": "#3CB878",
                             "value" : scope.data.hosts.total - scope.data.hosts.failed
                         }];
-                        colors = ['#5bbdbf'];
+                        colors = ['#3cb878'];
                     }
                     else if (scope.status === "failed"){
                         data = [{   "label": "FAILED",
@@ -74,7 +74,7 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                     else {
                         data = [
                             {   "label": "SUCCESSFUL",
-                                "color": "#5bbdbf",
+                                "color": "#3CB878",
                                 "value" : scope.data.hosts.total - scope.data.hosts.failed
                             } ,
                             {   "label": "FAILED",
@@ -82,7 +82,7 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                                 "value" : scope.data.hosts.failed
                             }
                         ];
-                        colors = ['#5bbdbf', '#ff5850'];
+                        colors = ['#3cb878', '#ff5850'];
                     }
 
                     host_pie_chart = nv.models.pieChart()
@@ -114,7 +114,7 @@ function HostStatusGraph($compile, $window, adjustGraphSize, templateUrl) {
                         color = "#ff5850";
                     }
                     else{
-                        color = "#5bbdbf";
+                        color = "#3CB878";
                     }
 
                     d3.select(element.find(".nv-label text")[0])

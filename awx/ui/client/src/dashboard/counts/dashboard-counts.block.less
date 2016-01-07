@@ -1,3 +1,5 @@
+@import "../../shared/branding/colors.default.less";
+
 /** @define DashboardCounts */
 
 .DashboardCounts {
@@ -18,8 +20,8 @@
     padding-left: 15px;
     padding-right: 15px;
     border-radius: 5px;
-    background-color: #fff;
-    border: 1px solid #e1e1e1;
+    background-color: @db-panel-bg;
+    border: 1px solid @db-panel-border;
     flex: 1 0 auto;
     max-width: ~"calc(16.6% - 15px)";
     flex-basis: ~"calc(16.6% - 15px)";
@@ -41,22 +43,22 @@
 }
 
 .DashboardCounts-buttonStyle:hover {
-    background-color: #1778c3;
-    border-color: #1778c3;
+    background-color: @db-count-succ;
+    border-color: @db-count-succ;
 
     .DashboardCounts-number,
     .DashboardCounts-label {
-        color: #fff;
+        color: @db-count-label-hov;
     }
 }
 
 .DashboardCounts-buttonStyle.is-failure:hover {
-    background-color: #ff5850;
-    border-color: #ff5850;
+    background-color: @db-count-fail;
+    border-color: @db-count-fail;
 
     .DashboardCounts-number,
     .DashboardCounts-label {
-        color: #fff;
+        color: @db-count-label-hov;
     }
 }
 
@@ -68,13 +70,13 @@
 }
 
 .DashboardCounts-number.is-failure {
-    color: #ff5850;
+    color: @db-count-fail;
 }
 
 .DashboardCounts-label {
     flex: 1;
     margin-bottom: 0px;
-    color: #848992;
+    color: @db-count-label;
     text-transform: uppercase;
     transition: color 0.2s;
 }
