@@ -1063,10 +1063,12 @@ var tower = angular.module('Tower', [
                         var list = $location.$$path.split("/")[1];
                         var id = $location.$$path.split("/")[2];
 
-                        delete $rootScope.listBeingEdited
-                        delete $rootScope.rowBeingEdited
+                        delete $rootScope.listBeingEdited;
+                        delete $rootScope.rowBeingEdited;
 
                         $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else {
+                        $rootScope.$broadcast("RemoveIndicator");
                     }
 
                     // this line removes the query params attached to a route

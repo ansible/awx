@@ -175,7 +175,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     this.scope.$on("EditIndicatorChange", function(e, list, id) {
                         e.targetScope.listBeingEdited = list;
                         e.targetScope.rowBeingEdited = id;
-                        console.log(list, id);
+                    });
+
+                    this.scope.$on("RemoveIndicator", function(e) {
+                        delete e.targetScope.listBeingEdited;
+                        delete e.targetScope.rowBeingEdited;
                     });
 
                     this.scope.isHiddenByOptions = function(options) {
