@@ -170,6 +170,18 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     this.scope.list = list;
                     this.scope.mode = options.mode;
 
+                    // respond to changes to the edit indicator from
+                    // the stateChangeStart event in app.js
+                    this.scope.$on("EditIndicatorChange", function(e, list, id) {
+                        e.targetScope.listBeingEdited = list;
+                        e.targetScope.rowBeingEdited = id;
+                    });
+
+                    this.scope.$on("RemoveIndicator", function(e) {
+                        delete e.targetScope.listBeingEdited;
+                        delete e.targetScope.rowBeingEdited;
+                    });
+
                     this.scope.isHiddenByOptions = function(options) {
 
                         // If neither ngHide nor ngShow are specified we
@@ -439,6 +451,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     if (list.multiSelect) {
                         innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
                     }
+                    innerTable += ", rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'editedRow' : ''";
                     innerTable += "]\" ";
                     innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                     innerTable += "class=\"" + list.iterator + "_class\" ";

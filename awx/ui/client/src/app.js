@@ -966,6 +966,14 @@ var tower = angular.module('Tower', [
                 $rootScope.removeConfigReady();
             }
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+                // initially set row edit indicator for crud pages
+                if ($location.$$path.split("/")[2]) {
+                    var list = $location.$$path.split("/")[1];
+                    var id = $location.$$path.split("/")[2];
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
+                }
+
                 LoadBasePaths();
 
                 $rootScope.crumbCache = [];
@@ -1048,7 +1056,21 @@ var tower = angular.module('Tower', [
                     },2000);
                 });
 
+
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
+                    // broadcast event change if editing crud object
+                    if ($location.$$path.split("/")[2]) {
+                        var list = $location.$$path.split("/")[1];
+                        var id = $location.$$path.split("/")[2];
+
+                        delete $rootScope.listBeingEdited;
+                        delete $rootScope.rowBeingEdited;
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else {
+                        $rootScope.$broadcast("RemoveIndicator");
+                    }
+
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
