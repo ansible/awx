@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobTemplatesListDefinition', [])
@@ -30,7 +30,7 @@ export default
             },
             smart_status: {
               label: 'Status',
-              columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-4',
+              columnClass: 'List-tableCell col-lg-1 col-md-2 col-sm-2 col-xs-4',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",

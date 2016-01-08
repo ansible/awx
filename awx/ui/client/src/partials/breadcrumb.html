@@ -1,8 +1,8 @@
-<ol>
-    <li ng-repeat="step in steps | limitTo:(steps.length-1)">
+<ol class="BreadCrumb-list">
+    <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:(steps.length-1)">
         <a href="{{step.ncyBreadcrumbLink}}" ng-bind-html="step.ncyBreadcrumbLabel"></a>
     </li>
-    <li ng-repeat="step in steps | limitTo:-1" class="active">
+    <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:-1" class="active">
         <span ng-bind-html="step.ncyBreadcrumbLabel"></span>
     </li>
 </ol>

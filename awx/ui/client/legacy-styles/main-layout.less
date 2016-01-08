@@ -7,6 +7,8 @@
  *
  */
 
+@import "src/shared/branding/colors.less";
+
 html { height: 100%; }
 
 body {
@@ -79,6 +81,14 @@ body {
 
 .site-footer {
     height: 15px;
+}
+
+.Panel {
+    background-color: @panel-bg;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid @panel-border;
+    margin-top: 20px;
 }
 
 @media (max-width: 1075px) {

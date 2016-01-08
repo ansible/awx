@@ -41,7 +41,7 @@
     flex: initial;
 }
 
-.BreadCrumb > ol {
+.BreadCrumb-list {
       padding: 0px 20px;
       list-style: none;
       background-color: #FFFFFF;
@@ -49,19 +49,15 @@
       line-height: 40px;
 }
 
-.BreadCrumb > ol > li {
+.BreadCrumb-item {
     display: inline-block;
     color: #B7B7B7;
 }
 
-.BreadCrumb > ol > li + li:before {
+.BreadCrumb-item + .BreadCrumb-item:before {
     content: "/";
     padding: 0 5px;
     color: #B7B7B7;
-}
-
-.BreadCrumb > ol > li > .active {
-    color: #123123;
 }
 
 @breadcrumb-breakpoint: 900px;
