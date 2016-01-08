@@ -62,20 +62,6 @@
     padding: 20px;
 }
 
-.DashboardList-table {
-    width: 100%;
-    table-layout: fixed;
-}
-
-.DashboardList-tableHeader {
-    height: 30px;
-    font-size: 14px;
-    font-weight: normal;
-    text-transform: uppercase;
-    color: @list-header-txt;
-    background-color: @list-header-bg;
-}
-
 .DashboardList-tableHeader--name {
     border-top-left-radius: 5px;
     padding-left: 15px;
@@ -99,16 +85,6 @@
     width: 90px;
     padding-right: 15px;
     text-align: right;
-}
-
-.DashboardList-tableRow {
-    height: 50px;
-    font-size: 14px;
-    color: @list-item;
-}
-
-.DashboardList-tableRow--evenRow {
-    background-color: @list-alt-item-bg;
 }
 
 .DashboardList-status{
@@ -159,27 +135,9 @@
     justify-content: flex-end;
 }
 
-.DashboardList-actionButton {
-    font-size: 16px;
-    height: 30px;
-    width: 30px;
-    color: @list-action-icon;
-    background-color: @list-actn-bg;
-    border: 1px solid @list-actn-bord;
-    border-radius: 50%;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
 .DashboardList-tableRow--evenRow > .DashboardList-actionButtonCell > .DashboardList-actionButton {
     background-color: @list-actn-alt-bg;
     border: 1px solid @list-actn-alt-bord;
-}
-
-.DashboardList-actionButton:hover {
-    background-color: @list-actn-bg-hov !important;
-    border: 1px solid @list-actn-bord-hov !important;
-    color: @list-actn-icn-hov;
-    border: none;
 }
 
 .DashboardList-actionButton--launch {

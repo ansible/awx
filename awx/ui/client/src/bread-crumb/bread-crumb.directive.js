@@ -13,10 +13,7 @@ export default
                 };
 
                 scope.isActive = function (path) {
-                    if ($state.current && $state.current.regexp) {
-                        return $state.current.regexp.test(path);
-                    }
-                    return false;
+                    return $state.is(path);
                 };
             }
         };

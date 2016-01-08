@@ -42,7 +42,6 @@
  *
  * | Attribute | Description |
  * | --------- | ----------- |
- * | hover | true or false. If true, 'table-hover' class will be added to the &lt;table&gt; element. |
  * | index | true or false. If false, the index column, which adds a sequential number to each table row starting with 1, will not be added to the table. |
  * | iterator | String containing a descriptive name of a single row in the collection - inventory, organization, credential, etc. Used to generate name and ID attributes in the list HTML. |
  * | name | Name of the collection. Generally matches the endpoint name - inventories, organizations, etc. Will match the $scope variable containing the array of rows comprising the collection. |
@@ -315,7 +314,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
-                        html += "<div class=\"list-well\">\n";
+                        html += "<div class=\"List-well\">\n";
                     }
 
                     if (options.activityStream) {
@@ -416,21 +415,13 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         var extraClasses = list['class'];
                         var multiSelect = list.multiSelect ? 'multi-select-list' : null;
 
-                        if (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode === 'lookup' || options.id)) {
-                            extraClasses += ' table-hover-inverse';
-                        }
-
-                        if (list.hover) {
-                            extraClasses += ' table-hover';
-                        }
-
                         if (options.mode === 'summary') {
                             extraClasses += ' table-summary';
                         }
 
                         return $('<table>')
                                     .attr('id', list.name + '_table')
-                                    .addClass('table table-condensed')
+                                    .addClass('List-table')
                                     .addClass(extraClasses)
                                     .attr('multi-select-list', multiSelect);
 
@@ -454,18 +445,20 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     innerTable += ", rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'editedRow' : ''";
                     innerTable += "]\" ";
                     innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
-                    innerTable += "class=\"" + list.iterator + "_class\" ";
+                    innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
+                    innerTable += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
+                    innerTable += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                     innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
                     innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                     innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                     innerTable += "\">\n";
 
                     if (list.index) {
-                        innerTable += "<td class=\"index-column hidden-xs\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
+                        innerTable += "<td class=\"index-column hidden-xs List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
                     }
 
                     if (list.multiSelect) {
-                        innerTable += '<td class="col-xs-1 select-column"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                        innerTable += '<td class="col-xs-1 select-column List-tableCell"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
                     }
 
                     cnt = 2;
@@ -486,12 +479,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     if (options.mode === 'select' || options.mode === 'lookup') {
                         if(options.input_type==="radio"){ //added by JT so that lookup forms can be either radio inputs or check box inputs
-                            innerTable += "<td><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                            innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                         }
                         else { // its assumed that options.input_type = checkbox
-                            innerTable += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                            innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                         }
@@ -499,7 +492,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         // Row level actions
 
-                        innerTable += "<td class=\"actions\">";
+                        innerTable += "<td class=\"List-actionButtonCell List-tableCell\">";
 
                         for (field_action in list.fieldActions) {
                             if (field_action !== 'columnClass') {
@@ -514,12 +507,15 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     });
                                 } else {
                                     fAction = list.fieldActions[field_action];
-                                    innerTable += "<a id=\"";
+                                    innerTable += "<button id=\"";
                                     innerTable += (fAction.id) ? fAction.id : field_action + "-action";
                                     innerTable += "\" ";
                                     innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                                     innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
-                                    innerTable += (field_action === 'cancel') ? "class=\"cancel red-txt\" " : "";
+                                    innerTable += "class=\"List-actionButton ";
+                                    innerTable += (field_action === 'delete') ? "List-actionButton--delete" : "";
+                                    innerTable += (field_action === 'cancel') ? "cancel red-txt" : "";
+                                    innerTable += "\" ";
                                     innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                                     innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
                                     innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
@@ -540,7 +536,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     }
                                     //html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
                                     //    "</span>" : "";
-                                    innerTable += "</a>";
+                                    innerTable += "</button>";
                                 }
                             }
                         }
@@ -550,12 +546,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     // Message for when a collection is empty
                     innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == false && " + list.name + ".length == 0\">\n";
-                    innerTable += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
+                    innerTable += "<td colspan=\"" + cnt + "\" class=\"List-tableCell\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
                     innerTable += "</tr>\n";
 
                     // Message for loading
                     innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
-                    innerTable += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
+                    innerTable += "<td colspan=\"" + cnt + "\" class=\"List-tableCell\"><div class=\"loading-info\">Loading...</div></td>\n";
                     innerTable += "</tr>\n";
 
                     // End List
@@ -610,7 +606,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     html = "<thead>\n";
-                    html += "<tr>\n";
+                    html += "<tr class=\"List-tableHeaderRow\">\n";
                     if (list.index) {
                         html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs\">#</th>\n";
                     }
@@ -622,7 +618,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
                             !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
-                            html += "<th class=\"list-header";
+                            html += "<th class=\"List-tableHeader list-header";
                             if (options.mode === 'lookup' && list.fields[fld].modalColumnClass) {
                                 html += " " + list.fields[fld].modalColumnClass;
                             }
@@ -635,7 +631,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             html += ">";
                             html += list.fields[fld].label;
                             if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
-                                html += " <i class=\"fa ";
+                                html += "<i class=\"fa ";
                                 if (list.fields[fld].key) {
                                     if (list.fields[fld].desc) {
                                         html += "fa-sort-down";
@@ -651,9 +647,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
                     }
                     if (options.mode === 'select' || options.mode === 'lookup') {
-                        html += "<th class=\"col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
+                        html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
                     } else if (options.mode === 'edit' && list.fieldActions) {
-                        html += "<th class=\"actions-column";
+                        html += "<th class=\"List-tableHeader actions-column";
                         html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                         html += "\">";
                         html += (list.fieldActions.label === undefined || list.fieldActions.label) ? "Actions" : "";

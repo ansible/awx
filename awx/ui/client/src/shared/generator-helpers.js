@@ -463,7 +463,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             } else if (field.type === 'template') {
                 html = Template(field);
             } else {
-                html += "<td class=\"" + fld + "-column";
+                html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
                 if (options.mode === 'lookup' && field.modalColumnClass) {
                     html += " " + field.modalColumnClass;

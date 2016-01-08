@@ -7,29 +7,79 @@
  *
  */
 
- .list-well {
-    margin-top: 20px;
+ @import "src/shared/branding/colors.default.less";
 
-    table >thead >tr >th {
-        font-weight: normal;
-    }
- }
-
-.is-selected-row, .is-selected-row td {
-    background-color: #E4F1FF !important;
+.List-well {
+    margin-top: 25px;
 }
 
-.select-column {
-    text-align: center;
+.List-table{
+    width: 100%;
+    table-layout: fixed;
 }
 
-th.select-column {
-    label {
-        // overrides the default style of
-        // display: inline-block, which allowed
-        // margins to push down the label,
-        // thus breaking the vertical-alignment
-        // of the cell
-        display: inline;
-    }
+.List-tableHeader{
+    height: 30px;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+    color: @list-header-txt;
+    background-color: @list-header-bg;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.List-tableHeader:first-of-type {
+    border-top-left-radius: 5px;
+}
+
+.List-tableHeader:last-of-type {
+    border-top-right-radius: 5px;
+    text-align: right;
+}
+
+.List-tableRow {
+    height: 40px;
+    font-size: 14px;
+    color: @list-item;
+}
+
+.List-tableRow--evenRow {
+    background-color: @list-alt-item-bg;
+}
+
+.List-tableCell {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.List-actionButtonCell {
+    padding-top:5px;
+    padding-right: 15px;
+    display:flex;
+    justify-content: flex-end;
+}
+
+.List-actionButton {
+    font-size: 16px;
+    height: 30px;
+    width: 30px;
+    color: @list-action-icon;
+    background-color: @list-actn-bg;
+    border: none;
+    border-radius: 50%;
+    transition: background-color 0.2s, border-color 0.2s;;
+}
+
+.List-actionButton:hover {
+    background-color: @list-actn-bg-hov !important;
+    color: @list-actn-icn-hov;
+}
+
+.List-actionButton--delete:hover {
+    background-color: @list-actn-del-bg-hov !important;
+}
+
+.List-actionButton + .List-actionButton {
+    margin-left: 15px;
 }
