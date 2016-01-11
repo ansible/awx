@@ -2965,6 +2965,7 @@ class SettingsList(ListCreateAPIView):
 
     model = TowerSettings
     serializer_class = TowerSettingsSerializer
+    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     new_in_300 = True
     filter_backends = ()
 
