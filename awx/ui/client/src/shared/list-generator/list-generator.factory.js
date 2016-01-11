@@ -442,7 +442,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     if (list.multiSelect) {
                         innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
                     }
-                    innerTable += ", rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'editedRow' : ''";
+                    innerTable += ", rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
                     innerTable += "]\" ";
                     innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                     innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";

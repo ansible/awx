@@ -9,6 +9,11 @@
 
  @import "src/shared/branding/colors.default.less";
 
+
+table, tbody {
+    border-collapse: separate !important;
+}
+
 .List-well {
     margin-top: 25px;
 }
@@ -42,6 +47,15 @@
     height: 40px;
     font-size: 14px;
     color: @list-item;
+}
+
+.List-tableRow--selected,
+.List-tableRow--selected > :first-child {
+    border-left: 5px solid @list-row-select-bord;
+}
+
+.List-tableRow--selected > :first-child {
+    padding-left: 10px;
 }
 
 .List-tableRow--evenRow {
