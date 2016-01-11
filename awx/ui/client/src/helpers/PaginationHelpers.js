@@ -147,6 +147,7 @@ export default
                     new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
                         '&page_size=' + scope[iterator + '_page_size'] : '&page_size=' + scope[iterator + 'PageSize'];
                     Wait('start');
+                    scope.getNewPage = true;
                     Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });
                 };
 
