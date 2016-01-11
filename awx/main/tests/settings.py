@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 from awx.main.tests.base import BaseTest
-from awx.main.models import * #noqa
+from awx.main.models import * # noqa
 
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
