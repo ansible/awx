@@ -730,9 +730,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span class=\"label-text\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
                         } else {
-                            html += "\t\t<span class=\"label-text\">\n\t\t\t" + field.label + "\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
@@ -769,7 +769,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
-                    html += "<div class='form-group ";
+                    html += "<div class='form-group Form-formGroup";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
@@ -1241,7 +1241,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += ">";
                         html += buildCheckbox(this.form, field, fld, undefined, false);
                         html += (field.icon) ? Icon(field.icon) : "";
-                        html += '<span class=\"label-text\">' + field.label + "</span>";
+                        html += '<span class=\"Form-inputLabel\">' + field.label + "</span>";
                         html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
@@ -1396,19 +1396,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return html;
             },
 
-            getActions: function (options) {
-                // Use to add things like Activity Stream to a detail page
-                var html = "<div class=\"list-actions\">\n", action;
-                for (action in this.form.actions) {
-                    if (this.form.actions[action].mode === 'all' || this.form.actions[action].mode === options.mode) {
-                        html += this.button({ btn: this.form.actions[action], iconName: action, toolbar: true });
-                    }
-                }
-                html += "</div>\n";
-                return html;
-            },
-
-
             build: function (options) {
                 //
                 // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
@@ -1427,62 +1414,27 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     options.collapseAlreadyStarted = true;
                 }
 
-                // Start the well
-                if (!this.modal && this.form.well) {
-                    if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
-                        html += "<div class=\"aw-form-well\">\n";
-                    }
-                }
 
-                if ((options.showActions === undefined || options.showActions === true) && !this.modal && this.form.actions) {
-                    html += this.getActions(options);
-                }
+                // title and exit button
+                html +=  "<div class=\"Form-header\">";
+                html += "<div class=\"Form-title\">";
+                html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
+                html += "</div>\n";
 
-                // Add a title and optionally a close button (used on Inventory->Groups)
-                /*if ((!options.modal) && this.form.showTitle) {
-                    html += "<div class=\"form-title\">";
-                    html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
-                    if (this.has('titleActions')) {
-                        html += "<div class=\"title-actions pull-right\">\n";
-                        for (btn in this.form.titleActions) {
-                            html += this.button({
-                                btn: this.form.titleActions[btn],
-                                action: btn,
-                                toolbar: true
-                            });
-                        }
-                        html += "</div>\n";
-                    }
-                    html += "</div>\n";
-                    html += "<hr class=\"form-title-hr\">\n";
-                }*/
+                html += "<div class=\"Form-exitHolder\">";
+                html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
+                html += "<i class=\"fa fa-times-circle\"></i>";
+                html += "</button></div>\n";
 
-                html += "<form class=\"";
+                html += "</div>\n"; //end of Form-header
+
+                html += "<form class=\"Form";
                 html += (this.form.horizontal) ? "form-horizontal" : "";
                 html += (this.form['class']) ? ' ' + this.form['class'] : '';
                 html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
                 html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
-                if (this.form.twoColumns) {
-                    html += "<div class=\"row\">\n";
-                    html += "<div class=\"col-lg-6\">\n";
-                    for (fld in this.form.fields) {
-                        field = this.form.fields[fld];
-                        if (field.column === 1) {
-                            html += this.buildField(fld, field, options, this.form);
-                        }
-                    }
-                    html += "</div><!-- column 1 -->\n";
-                    html += "<div class=\"col-lg-6\">\n";
-                    for (fld in this.form.fields) {
-                        field = this.form.fields[fld];
-                        if (field.column === 2) {
-                            html += this.buildField(fld, field, options, this.form);
-                        }
-                    }
-                    html += "</div><!-- column 2 -->\n";
-                    html += "</div>\n";
-                } else if (this.form.tabs) {
+                if (this.form.tabs) {
                     html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
                     for (i = 0; i < this.form.tabs.length; i++) {
                         tab = this.form.tabs[i];
@@ -1548,17 +1500,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                 }
 
+                html += "</form>\n";
+
                 //buttons
                 if ((options.showButtons === undefined || options.showButtons === true) && !this.modal) {
                     if (this.has('buttons')) {
 
-                        if (this.form.twoColumns) {
-                            html += "<div class=\"row\">\n";
-                            html += "<div class=\"col-lg-12\">\n";
-                            html += "<hr />\n";
-                        }
-
-                        html += "<div class=\"buttons\" ";
+                        html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
 
                         html += ">\n";
@@ -1579,11 +1527,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 // Set default color and label for Save and Reset
                                 if (btn === 'save') {
                                     button.label = 'Save';
-                                    button['class'] = 'btn-primary';
+                                    button['class'] = 'Form-saveButton';
                                 }
-                                if (btn === 'reset') {
-                                    button.label = 'Reset';
-                                    button['class'] = 'btn-default';
+                                if (btn === 'cancel') {
+                                    button.label = 'Cancel';
+                                    button['class'] = 'Form-cancelButton';
                                 }
                                 if (btn === 'launch') {
                                     button.label = 'Launch';
@@ -1629,19 +1577,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "</div>\n";
                         }
 
-                        if (this.form.twoColumns) {
-                            html += "</div>\n";
-                            html += "</div>\n";
-                        }
                     }
                 }
-                html += "</form>\n";
-
-                if (!this.modal && this.form.well) {
-                    if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
-                        html += "</div>\n";
-                    }
-                }
+                // html += "</form>\n";
 
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "</div>\n";

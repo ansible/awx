@@ -1,0 +1,120 @@
+/*********************************************
+ *  Copyright (c) 2016 Ansible, Inc.
+ *
+ *  lists.less
+ *
+ *  custom styles for generated lists
+ *
+ */
+
+@import "src/shared/branding/colors.default.less";
+
+.Form{
+    display:flex;
+    flex-wrap:wrap;
+    flex-direction: row;
+}
+
+.Form-header{
+    display: flex;
+}
+
+.Form-title{
+    flex: 1 0 auto;
+    text-transform: uppercase;
+    color: @list-header-txt;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    padding-bottom: 20px;
+}
+
+.Form-exitHolder{
+    justify-content: flex-end;
+    display:flex;
+}
+
+.Form-exit{
+    cursor:pointer;
+    padding:0px;
+    border: none;
+    height:20px;
+    font-size: 20px;
+    background-color:@default-bg;
+    color:@default-second-border;
+    transition: color 0.2s;
+    line-height:1;
+}
+
+.Form-exit:hover{
+    color:@default-icon;
+}
+
+.Form-formGroup {
+    flex: 1 0 auto;
+    margin-bottom: 25px;
+    width: 33%;
+    padding-right: 50px;
+}
+
+.Form-inputLabel{
+    text-transform: uppercase;
+    color: @default-interface-txt;
+    font-weight: normal;
+    font-size: small;
+}
+
+.Form-buttons{
+    height: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.Form-saveButton{
+    background-color: @submit-button-bg;
+    margin-right: 20px;
+    color: @submit-button-text;
+    text-transform: uppercase;
+    transition: background-color 0.2s;
+    padding-left:15px;
+    padding-right: 15px;
+}
+
+.Form-saveButton:hover{
+    background-color: @submit-button-bg-hov;
+    color: @submit-button-text;
+}
+
+.Form-cancelButton{
+    background-color: @default-bg;
+    color: @btn-txt;
+    text-transform: uppercase;
+    border-radius: 5px;
+    border: 1px solid @btn-bord;
+    transition: background-color 0.2s;
+    padding-left:15px;
+    padding-right: 15px;
+}
+
+.Form-cancelButton:hover{
+    background-color: @btn-bg-hov;
+    color: @btn-txt;
+}
+
+@media only screen and (max-width: 650px) {
+    .Form-formGroup {
+        flex: 1 0 auto;
+        margin-bottom: 25px;
+        width: 100%;
+        padding-right: 50px;
+    }
+}
+
+@media (min-width: 651px) and (max-width: 900px) {
+    .Form-formGroup {
+        flex: 1 0 auto;
+        margin-bottom: 25px;
+        width: 50%;
+        padding-right: 50px;
+    }
+}

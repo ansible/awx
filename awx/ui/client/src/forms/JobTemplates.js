@@ -15,35 +15,14 @@ export default
 
         .value ('JobTemplateFormObject', {
 
-            addTitle: 'Create Job Templates',
+            addTitle: 'New Job Template',
             editTitle: '{{ name }}',
             name: 'job_templates',
-            twoColumns: true,
-            well: true,
             base: 'job_templates',
             collapse: true,
             collapseTitle: "Properties",
             collapseMode: 'edit',
             collapseOpenFirst: true,   //Always open first panel
-
-            actions: {
-                // submit: {
-                //     ngClick: 'launch()',
-                //     awToolTip: 'Start a job using this template',
-                //     dataPlacement: 'top',
-                //     mode: 'edit'
-                // },
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
 
             fields: {
                 name: {
@@ -326,9 +305,8 @@ export default
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "job_templates_form.$invalid || can_edit!==true"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true          //Disabled when $pristine
+                cancel: {
+                    ngClick: 'formCancel()'
                 }
             },
 

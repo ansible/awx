@@ -133,9 +133,11 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 ];
 
 
-export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
-    ProcessErrors, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
-    GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
+export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
+    LookUpInit, UserList, TeamList, GetBasePath, GetChoices, Empty, KindChange,
+    OwnerChange, FormSave, $state) {
 
     ClearScope();
 
@@ -248,10 +250,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $s
         OwnerChange({ scope: $scope });
     };
 
-    // Reset defaults
-    $scope.formReset = function () {
-        //DebugForm({ scope: $scope, form: CredentialForm });
-        generator.reset();
+    $scope.formCancel = function () {
+        $state.transitionTo('credentials');
     };
 
     // Password change
@@ -296,15 +296,20 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $s
 
 }
 
-CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
-    'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'FormSave'
+CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
+    'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList',
+    'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
+    'FormSave', '$state'
 ];
 
 
-export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, CredentialForm, GenerateForm, Rest, Alert,
-    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-    KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
+export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
+    $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
+    GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
+    OwnerChange, FormSave, Stream, Wait, $state) {
 
     ClearScope();
 
@@ -519,15 +524,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         KindChange({ scope: $scope, form: form, reset: true });
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
-        setAskCheckboxes();
-        KindChange({ scope: $scope, form: form, reset: false });
-        OwnerChange({ scope: $scope });
+    $scope.formCancel = function () {
+        $state.transitionTo('credentials');
     };
 
     // Related set: Add button
@@ -614,8 +612,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
 
 }
 
-CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'CredentialForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices', 'KindChange', 'UserList', 'TeamList', 'LookUpInit',
-    'Empty', 'OwnerChange', 'FormSave', 'Stream', 'Wait'
+CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
+    'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
+    'FormSave', 'Stream', 'Wait', '$state'
 ];

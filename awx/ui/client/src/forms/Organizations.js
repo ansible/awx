@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Organizations
@@ -14,27 +14,13 @@ export default
     angular.module('OrganizationFormDefinition', [])
         .value('OrganizationForm', {
 
-            addTitle: 'Create Organization', //Title in add mode
+            addTitle: 'New Organization', //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
-            well: true,
             collapse: true,
             collapseTitle: "Properties",
             collapseMode: 'edit',
             collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
 
             fields: {
                 name: {
@@ -57,9 +43,8 @@ export default
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true //Disable when $pristine or $invalid, optional
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
+                cancel: {
+                    ngClick: 'formCancel()'
                 }
             },
 

@@ -245,10 +245,12 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$state'
 ];
 
-export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm,
-    GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GetBasePath,
-    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
-    CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices) {
+export function JobTemplatesAdd($filter, $scope, $rootScope, $compile,
+    $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+    ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, InventoryList,
+    CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait,
+    Empty, ToJSON, CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices,
+    $state) {
 
     ClearScope();
 
@@ -649,29 +651,28 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile, $location
 
     };
 
-    // Reset
-    $scope.formReset = function () {
-        // Defaults
-        generator.reset();
-        //$('#forks-slider').slider("option", "value", $scope.forks);
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
+    $scope.formCancel = function () {
+        $state.transitionTo('jobTemplates');
     };
 }
 
-JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices'
+JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile',
+    '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
+    'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList',
+    'LookUpInit', 'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON',
+    'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state'
 ];
 
 
-export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest,
-    Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
-    CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
-    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit){
+export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
+    $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller,
+    ClearScope, InventoryList, CredentialList, ProjectList, LookUpInit,
+    GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
+    Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
+    JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
+    SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state){
 
     ClearScope();
 
@@ -1148,15 +1149,8 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
         });
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
-        $scope.parseType = 'yaml';
-        ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
-        $('#forks-slider').slider("option", "value", $scope.forks);
+    $scope.formCancel = function () {
+        $state.transitionTo('jobTemplates');
     };
 
     // Related set: Add button
@@ -1232,10 +1226,14 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile, $locatio
 
 }
 
-JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
-    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , 'initSurvey'
+JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile',
+    '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
+    'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit',
+    'RelatedPaginateInit','ReturnToCaller', 'ClearScope', 'InventoryList',
+    'CredentialList', 'ProjectList', 'LookUpInit', 'GetBasePath', 'md5Setup',
+    'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream',
+    'Empty', 'Prompt', 'ParseVariableString', 'ToJSON',
+    'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
+    'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
+    'PlaybookRun' , 'initSurvey', '$state'
 ];

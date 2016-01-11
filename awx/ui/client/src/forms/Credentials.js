@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Credentials
@@ -357,9 +357,8 @@ export default
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true //Disable when $pristine or $invalid, optional
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
+                cancel: {
+                    ngClick: 'formCancel()',
                 }
             },
 

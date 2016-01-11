@@ -104,8 +104,10 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
 ];
 
 
-export function UsersAdd($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
+export function UsersAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList,
+    ResetForm, Wait, $state) {
 
     ClearScope();
 
@@ -185,11 +187,8 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $statePa
         }
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        // Defaults
-        generator.reset();
-        $scope.ldap_user = false;
+    $scope.formCancel = function () {
+        $state.transitionTo('users');
     };
 
     // Password change
@@ -200,15 +199,18 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log, $statePa
     };
 }
 
-UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
-    'OrganizationList', 'ResetForm', 'Wait'
+UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
+    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait', '$state'
 ];
 
 
-export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateParams, UserForm, GenerateForm, Rest, Alert,
-    ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
-    Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
+export function UsersEdit($scope, $rootScope, $compile, $location, $log,
+    $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope,
+    GetBasePath, Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices,
+    fieldLabels, permissionsSearchSelect, $state) {
 
     ClearScope();
 
@@ -377,14 +379,8 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateP
             Stream({ scope: $scope });
         };
 
-        // Cancel
-        $scope.formReset = function () {
-            $rootScope.flashMessage = null;
-            generator.reset();
-            for (var fld in master) {
-                $scope[fld] = master[fld];
-            }
-            $scope.password_confirm = $scope.password;
+        $scope.formCancel = function () {
+            $state.transitionTo('users');
         };
 
         // Password change
@@ -526,7 +522,10 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $stateP
     });
 }
 
-UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Prompt', 'CheckAccess', 'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
+UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess',
+    'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels',
+    'permissionsSearchSelect', '$state'
 ];

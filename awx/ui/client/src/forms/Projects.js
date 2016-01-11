@@ -14,28 +14,14 @@ export default
 angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .value('ProjectsFormObject', {
 
-        addTitle: 'Create Project',
+        addTitle: 'New Project',
         editTitle: '{{ name }}',
         name: 'project',
         forceListeners: true,
-        well: true,
         collapse: true,
         collapseTitle: "Properties",
         collapseMode: 'edit',
         collapseOpen: true,
-
-        actions: {
-            stream: {
-                'class': "btn-primary btn-xs activity-btn",
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                awFeature: 'activity_streams',
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                iconSize: 'large'
-            }
-        },
 
         fields: {
             name: {
@@ -235,9 +221,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngClick: 'formSave()',
                 ngDisabled: true
             },
-            reset: {
-                ngClick: 'formReset()',
-                ngDisabled: true
+            cancel: {
+                ngClick: 'formCancel()'
             }
         },
 

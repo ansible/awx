@@ -89,13 +89,8 @@ export default
                     });
             };
 
-            $scope.formReset = function () {
-                generator.reset();
-                for (var fld in master) {
-                    $scope[fld] = master[fld];
-                }
-                $scope.organization_name = master.organization_name;
-
+            $scope.formCancel = function () {
+                $state.transitionTo('inventoryScripts');
             };
 
         }

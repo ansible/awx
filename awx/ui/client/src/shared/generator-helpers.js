@@ -134,9 +134,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'scm_update':
                 icon = 'fa-cloud-download';
                 break;
-            case 'cancel':
-                icon = 'fa-minus-circle';
-                break;
+            // case 'cancel':
+            //     icon = 'fa-minus-circle';
+            //     break;
             case 'run':
             case 'rerun':
             case 'submit':
@@ -157,7 +157,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'close':
                 icon = 'fa-arrow-left';
                 break;
-            case 'save':
             case 'form_submit':
                 icon = 'fa-check-square-o';
                 break;

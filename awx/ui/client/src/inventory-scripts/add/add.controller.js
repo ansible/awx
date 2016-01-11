@@ -58,9 +58,8 @@ export default
                 });
             };
 
-            // Cancel
-            scope.formReset = function () {
-                generator.reset();
+            scope.formCancel = function () {
+                $state.transitionTo('inventoryScripts');
             };
 
         }
