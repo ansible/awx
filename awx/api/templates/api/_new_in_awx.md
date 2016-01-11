@@ -6,3 +6,4 @@
 {% if new_in_220 %}> _New in Ansible Tower 2.2.0_{% endif %}
 {% if new_in_230 %}> _New in Ansible Tower 2.3.0_{% endif %}
 {% if new_in_240 %}> _New in Ansible Tower 2.4.0_{% endif %}
+{% if new_in_300 %}> _New in Ansible Tower 3.0.0_{% endif %}
