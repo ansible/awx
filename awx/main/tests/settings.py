@@ -43,6 +43,7 @@ class SettingsTest(BaseTest):
 
     def setUp(self):
         super(SettingsTest, self).setUp()
+        self.setup_instances()
         self.setup_users()
 
     def get_settings(self, expected_count=4):
