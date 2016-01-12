@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Teams
@@ -14,27 +14,13 @@ export default
     angular.module('TeamFormDefinition', [])
         .value('TeamForm', {
 
-            addTitle: 'Create Team', //Legend in add mode
+            addTitle: 'New Team', //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
-            well: true,
             collapse: true,
             collapseTitle: "Properties",
             collapseMode: 'edit',
             collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
 
             fields: {
                 name: {
@@ -68,9 +54,8 @@ export default
                     ngClick: 'formSave()',
                     ngDisabled: true
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true
+                cancel: {
+                    ngClick: 'formCancel()'
                 }
             },
 

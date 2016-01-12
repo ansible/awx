@@ -13,8 +13,8 @@
 import '../job-templates/main';
 
 export function InventoriesList($scope, $rootScope, $location, $log,
-    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller,
+    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
+    generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer, $state) {
 
@@ -371,9 +371,11 @@ InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateP
 ];
 
 
-export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
+export function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
+    PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    $state) {
 
     ClearScope();
 
@@ -443,21 +445,24 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $s
 
     };
 
-    // Reset
-    $scope.formReset = function () {
-        generator.reset();
+    $scope.formCancel = function () {
+        $state.transitionTo('inventories');
     };
 }
 
-InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
+InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'InventoryForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
+    'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit',
+    'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', '$state'
 ];
 
-export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $stateParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
-    Prompt, PlaybookRun, CreateDialog, deleteJobTemplate) {
+export function InventoriesEdit($scope, $rootScope, $compile, $location,
+    $log, $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
+    PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
+    Prompt, PlaybookRun, CreateDialog, deleteJobTemplate, $state) {
 
     ClearScope();
 
@@ -588,19 +593,8 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
         Stream({ scope:  $scope });
     };
 
-    // Reset
-    $scope.formReset = function () {
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
-        $scope.parseType = 'yaml';
-        ParseTypeChange({
-            scope: $scope,
-            variable: 'variables',
-            parse_variable: 'parseType',
-            field_id: 'inventory_variables'
-        });
+    $scope.formCancel = function () {
+        $state.transitionTo('inventories');
     };
 
     $scope.addScanJob = function(){
@@ -775,10 +769,13 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
 }
 
-InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'Prompt', 'PlaybookRun', 'CreateDialog', 'deleteJobTemplate'
+InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'InventoryForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
+    'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit',
+    'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString',
+    'Stream', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
+    'PlaybookRun', 'CreateDialog', 'deleteJobTemplate', '$state'
 ];
 
 

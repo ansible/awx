@@ -13,10 +13,9 @@
 export default function() {
     return {
 
-        // addTitle: 'Create Custom Inventory',
-        // editTitle: '{{ name }}',
-        // name: 'custom_inventory',
-        well: true,
+        addTitle: 'New Custom Inventory',
+        editTitle: '{{ name }}',
+        name: 'custom_inventory',
         showActions: true,
 
         fields: {
@@ -66,9 +65,8 @@ export default function() {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
                 ngDisabled: true //Disable when $pristine or $invalid, optional
             },
-            reset: {
-                ngClick: 'formReset()',
-                ngDisabled: true //Disabled when $pristine
+            cancel: {
+                ngClick: 'formCancel()',
             }
         }
     };

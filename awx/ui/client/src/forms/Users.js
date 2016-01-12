@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Users
@@ -14,28 +14,14 @@ export default
     angular.module('UserFormDefinition', [])
         .value('UserForm', {
 
-            addTitle: 'Create User',
+            addTitle: 'New User',
             editTitle: '{{ username }}',
             name: 'user',
-            well: true,
             forceListeners: true,
             collapse: true,
             collapseTitle: "Properties",
             collapseMode: 'edit',
             collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
 
             fields: {
                 first_name: {
@@ -123,9 +109,8 @@ export default
                     ngClick: 'formSave()',
                     ngDisabled: true
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true
+                cancel: {
+                    ngClick: 'formCancel()'
                 }
             },
 

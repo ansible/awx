@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Inventories
@@ -14,27 +14,13 @@ export default
     angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
         .value('InventoryFormObject', {
 
-            addTitle: 'Create Inventory',
+            addTitle: 'New Inventory',
             editTitle: '{{ inventory_name }}',
             name: 'inventory',
-            well: true,
             collapse: true,
             collapseTitle: "Properties",
             collapseMode: 'edit',
             collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
 
             fields: {
                 inventory_name: {
@@ -89,9 +75,8 @@ export default
                     ngClick: 'formSave()',
                     ngDisabled: true
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true
+                cancel: {
+                    ngClick: 'formCancel()'
                 }
             },
 

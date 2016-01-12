@@ -197,12 +197,10 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     };
 
     $scope.addProject = function () {
-        // $location.path($location.path() + '/add');
         $state.transitionTo('projects.add');
     };
 
     $scope.editProject = function (id) {
-        // $location.path($location.path() + '/' + id);
         $state.transitionTo('projects.edit', {id: id});
     };
 
@@ -391,16 +389,19 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     };
 }
 
-ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList',
-    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'SelectionInit', 'ProjectUpdate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
+ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
+    '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList', 'Prompt',
+    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
+    'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
     'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
 
-export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
-    CredentialList, GetChoices, DebugForm, Wait) {
+export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
+    OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state) {
 
     ClearScope();
 
@@ -524,29 +525,25 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $stat
         }
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        var fld;
-        $rootScope.flashMessage = null;
-        generator.reset();
-        for (fld in master) {
-            $scope[fld] = master[fld];
-        }
-        $scope.scmChange();
+    $scope.formCancel = function () {
+        $state.transitionTo('projects');
     };
 }
 
-ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath',
-    'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices',
-    'DebugForm', 'Wait'
+ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller',
+    'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList',
+    'GetChoices', 'DebugForm', 'Wait', '$state'
 ];
 
 
-export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, ProjectsForm,
-    GenerateForm, Rest, Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, Prompt,
-    ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
-    Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList, ProjectUpdate) {
+export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
+    $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
+    ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
+    GetChoices, Empty, DebugForm, Wait, Stream, SchedulesControllerInit,
+    SchedulesListInit, SchedulesList, ProjectUpdate, $state) {
 
     ClearScope('htmlTemplate');
 
@@ -829,19 +826,16 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $sta
         }
     };
 
-    // Reset the form
-    $scope.formReset = function () {
-        $rootScope.flashMessage = null;
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
-        $scope.scmChange();
+    $scope.formCancel = function () {
+        $state.transitionTo('projects');
     };
 }
 
-ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'ProjectsForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
-    'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList', 'ProjectUpdate'
+ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
+    'ClearScope', 'GetBasePath', 'ReturnToCaller', 'GetProjectPath',
+    'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
+    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit',
+    'SchedulesListInit', 'SchedulesList', 'ProjectUpdate', '$state'
 ];

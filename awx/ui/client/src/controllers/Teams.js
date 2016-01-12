@@ -114,9 +114,10 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 ];
 
 
-export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm,
-    Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope, GenerateList,
-    OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) {
+export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit,
+    PaginateInit, GetBasePath, LookUpInit, Wait, $state) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
 
@@ -161,22 +162,24 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $statePa
             });
     };
 
-    // Reset
-    $scope.formReset = function () {
-        // Defaults
-        generator.reset();
+    $scope.formCancel = function () {
+        $state.transitionTo('teams');
     };
 }
 
-TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
-    'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit', 'Wait'
+TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
+    'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath',
+    'LookUpInit', 'Wait', '$state'
 ];
 
 
-export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
-    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
-    OrganizationList, Wait, Stream, fieldChoices, fieldLabels, permissionsSearchSelect) {
+export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
+    $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope,
+    LookUpInit, Prompt, GetBasePath, CheckAccess, OrganizationList, Wait,
+    Stream, fieldChoices, fieldLabels, permissionsSearchSelect, $state) {
 
     ClearScope();
 
@@ -338,13 +341,8 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateP
             });
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        $rootScope.flashMessage = null;
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
+    $scope.formCancel = function () {
+        $state.transitionTo('teams');
     };
 
     // Related set: Add button
@@ -418,7 +416,10 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $stateP
     };
 }
 
-TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'TeamForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect'
+TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath',
+    'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices',
+    'fieldLabels', 'permissionsSearchSelect', '$state'
 ];

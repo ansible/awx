@@ -424,7 +424,7 @@ var tower = angular.module('Tower', [
 
             state('projects.add', {
                 url: '/add',
-                templateUrl: urlPrefix + 'partials/projects.add.html',
+                templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsAdd,
                 ncyBreadcrumb: {
                     parent: "projects",

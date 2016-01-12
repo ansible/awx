@@ -101,9 +101,9 @@ OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
 ];
 
 
-export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath,
-    ReturnToCaller, Wait) {
+export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
+    $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ClearScope, GetBasePath, ReturnToCaller, Wait, $state) {
 
     ClearScope();
 
@@ -138,20 +138,22 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, 
             });
     };
 
-    // Cancel
-    $scope.formReset = function () {
-        $rootScope.flashMessage = null;
-        generator.reset();
+    $scope.formCancel = function () {
+        $state.transitionTo('organizations');
     };
 }
 
-OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait'
+OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait',
+    '$state'
 ];
 
 
-export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, OrganizationForm, GenerateForm, Rest,
-    Alert, ProcessErrors, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
+export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
+    $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
+    Wait, Stream, $state) {
 
     ClearScope();
 
@@ -241,13 +243,8 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         });
     };
 
-    // Reset the form
-    $scope.formReset = function () {
-        $rootScope.flashMessage = null;
-        generator.reset();
-        for (var fld in master) {
-            $scope[fld] = master[fld];
-        }
+    $scope.formCancel = function () {
+        $state.transitionTo('organizations');
     };
 
     // Related set: Add button
@@ -291,7 +288,8 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     };
 }
 
-OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$stateParams', 'OrganizationForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath',
-    'Wait', 'Stream'
+OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
+    'ClearScope', 'GetBasePath', 'Wait', 'Stream', '$state'
 ];
