@@ -66,7 +66,10 @@ class ServiceScanService(BaseService):
                 if len(line_data) < 4:
                     continue # Skipping because we expected more data
                 service_name = " ".join(line_data[3:])
-                service_state = "running" if line_data[1] == "+" else "stopped"
+                if line_data[1] == "+":
+                    service_state = "running"
+                else:
+                    service_state = "stopped"
                 services.append({"name": service_name, "state": service_state, "source": "sysv"})
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")
