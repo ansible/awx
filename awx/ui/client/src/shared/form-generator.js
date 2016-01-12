@@ -1565,9 +1565,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     }
                                 }
                                 html += ">";
-                                html += SelectIcon({
-                                    action: btn
-                                });
                                 html += " " + button.label + "</button>\n";
                             }
                         }
