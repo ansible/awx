@@ -1566,10 +1566,6 @@ class ActivityStreamAccess(BaseAccess):
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
 
-        # TowerSettings Filter
-        settings_qs = self.user.get_queryset(TowerSettings)
-        qs.filter(tower_settings__in=settings_qs)
-
         # organization_qs = self.user.get_queryset(Organization)
         # user_qs = self.user.get_queryset(User)
         # inventory_qs = self.user.get_queryset(Inventory)
