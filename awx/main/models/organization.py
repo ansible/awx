@@ -18,6 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 # AWX
 from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import * # noqa
+from awx.main.conf import tower_settings
 
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 
@@ -242,7 +243,7 @@ class AuthToken(BaseModel):
         if not now:
             now = tz_now()
         if not self.pk or not self.is_expired(now=now):
-            self.expires = now + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
+            self.expires = now + datetime.timedelta(seconds=tower_settings.AUTH_TOKEN_EXPIRATION)
             if save:
                 self.save()
 
@@ -259,12 +260,12 @@ class AuthToken(BaseModel):
         if now is None:
             now = tz_now()
         invalid_tokens = AuthToken.objects.none()
-        if settings.AUTH_TOKEN_PER_USER != -1:
+        if tower_settings.AUTH_TOKEN_PER_USER != -1:
             invalid_tokens = AuthToken.objects.filter(
                 user=user,
                 expires__gt=now,
                 reason='',
-            ).order_by('-created')[settings.AUTH_TOKEN_PER_USER:]
+            ).order_by('-created')[tower_settings.AUTH_TOKEN_PER_USER:]
         return invalid_tokens
 
     def generate_key(self):
@@ -293,7 +294,7 @@ class AuthToken(BaseModel):
         valid_n_tokens_qs = self.user.auth_tokens.filter(
             expires__gt=now,
             reason='',
-        ).order_by('-created')[0:settings.AUTH_TOKEN_PER_USER]
+        ).order_by('-created')[0:tower_settings.AUTH_TOKEN_PER_USER]
         valid_n_tokens = valid_n_tokens_qs.values_list('key', flat=True)
 
         return bool(self.key in valid_n_tokens)

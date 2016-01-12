@@ -44,6 +44,7 @@ from django.utils.timezone import now
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
+from awx.main.conf import tower_settings
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
@@ -348,7 +349,7 @@ class BaseTask(Task):
             python_paths.insert(0, local_site_packages)
         env['PYTHONPATH'] = os.pathsep.join(python_paths)
         if self.should_use_proot:
-            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
+            env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -461,7 +462,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if settings.AWX_PROOT_ENABLED:
+                    if tower_settings.AWX_PROOT_ENABLED:
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
@@ -654,9 +655,9 @@ class RunJob(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         plugin_dirs = [plugin_dir]
-        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.append(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        if hasattr(tower_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         # Set environment variables needed for inventory and job event
@@ -850,7 +851,7 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
 
     def pre_run_hook(self, job, **kwargs):
         if job.job_type == PERM_INVENTORY_SCAN:
@@ -1475,7 +1476,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, ad_hoc_command, **kwargs):
         '''

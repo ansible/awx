@@ -448,8 +448,8 @@ def build_proot_temp_dir():
     '''
     Create a temporary directory for proot to use.
     '''
-    from django.conf import settings
-    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
+    from awx.main.conf import tower_settings
+    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=tower_settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
@@ -462,13 +462,14 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/log/supervisor
      - /tmp (except for own tmp files)
     '''
+    from awx.main.conf import tower_settings
     from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-v',
                 str(getattr(settings, 'AWX_PROOT_VERBOSITY', '0')), '-r', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
                   settings.JOBOUTPUT_ROOT]
-    hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
+    hide_paths.extend(getattr(tower_settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
             continue
@@ -484,7 +485,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    show_paths.extend(getattr(tower_settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue

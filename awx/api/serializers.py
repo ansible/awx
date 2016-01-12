@@ -38,6 +38,7 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
+from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
 
@@ -267,7 +268,7 @@ class BaseSerializer(serializers.ModelSerializer):
         return choices
 
     def get_url(self, obj):
-        if obj is None:
+        if obj is None or not hasattr(obj, 'get_absolute_url'):
             return ''
         elif isinstance(obj, User):
             return reverse('api:user_detail', args=(obj.pk,))
@@ -521,8 +522,9 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
@@ -569,8 +571,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
     def get_types(self):
@@ -2105,7 +2108,40 @@ class ActivityStreamSerializer(BaseSerializer):
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
+    
+class TowerSettingsSerializer(BaseSerializer):
 
+    class Meta:
+        model = TowerSettings
+        fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
+        read_only_fields = ('description', 'category', 'value_type', 'user')
+
+    def from_native(self, data, files):
+        if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
+            self._errors = {'key': 'Key {0} is not a valid settings key'.format(data['key'])}
+            return
+        current_val = TowerSettings.objects.filter(key=data['key'])
+        if current_val.exists():
+            current_val.delete()
+        manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
+        data['description'] = manifest_val['description']
+        data['category'] = manifest_val['category']
+        data['value_type'] = manifest_val['type']
+        return super(TowerSettingsSerializer, self).from_native(data, files)
+
+    def validate(self, attrs):
+        manifest = settings.TOWER_SETTINGS_MANIFEST
+        if attrs['key'] not in manifest:
+            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
+        # TODO: Type checking/coercion, contextual validation
+        return attrs
+
+    def save_object(self, obj, **kwargs):
+        manifest_val = settings.TOWER_SETTINGS_MANIFEST[obj.key]
+        obj.description = manifest_val['description']
+        obj.category = manifest_val['category']
+        obj.value_type = manifest_val['type']
+        return super(TowerSettingsSerializer, self).save_object(obj, **kwargs)
 
 class AuthTokenSerializer(serializers.Serializer):
 

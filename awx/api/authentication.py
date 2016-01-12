@@ -6,7 +6,6 @@ import urllib
 
 # Django
 from django.utils.timezone import now as tz_now
-from django.conf import settings
 
 # Django REST Framework
 from rest_framework import authentication
@@ -15,7 +14,7 @@ from rest_framework import HTTP_HEADER_ENCODING
 
 # AWX
 from awx.main.models import UnifiedJob, AuthToken
-
+from awx.main.conf import tower_settings
 
 class TokenAuthentication(authentication.TokenAuthentication):
     '''
@@ -90,7 +89,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
 
         # Token invalidated due to session limit config being reduced
         # Session limit reached invalidation will also take place on authentication
-        if settings.AUTH_TOKEN_PER_USER != -1:
+        if tower_settings.AUTH_TOKEN_PER_USER != -1:
             if not token.in_valid_tokens(now=now):
                 token.invalidate(reason='limit_reached')
                 raise exceptions.AuthenticationFailed(AuthToken.reason_long('limit_reached'))

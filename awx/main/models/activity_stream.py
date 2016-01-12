@@ -53,6 +53,7 @@ class ActivityStream(models.Model):
     ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)
     schedule = models.ManyToManyField("Schedule", blank=True)
     custom_inventory_script = models.ManyToManyField("CustomInventoryScript", blank=True)
+    tower_settings = models.ManyToManyField("TowerSettings", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))

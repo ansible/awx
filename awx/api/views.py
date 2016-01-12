@@ -12,6 +12,7 @@ import socket
 import sys
 import errno
 from base64 import b64encode
+from collections import namedtuple
 
 # Django
 from django.conf import settings
@@ -69,6 +70,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.fact.models import * # noqa
 from awx.main.utils import emit_websocket_notification
+from awx.main.conf import tower_settings
 
 def api_exception_handler(exc):
     '''
@@ -113,6 +115,7 @@ class ApiV1RootView(APIView):
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
+        data['settings'] = reverse('api:settings_list')
         data['me'] = reverse('api:user_me_list')
         data['dashboard'] = reverse('api:dashboard_view')
         data['organizations'] = reverse('api:organization_list')
@@ -189,9 +192,9 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_file(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
 
-        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+        pendo_state = tower_settings.PENDO_TRACKING_STATE if tower_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
             time_zone=settings.TIME_ZONE,
@@ -261,9 +264,7 @@ class ApiV1ConfigView(APIView):
 
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
-            fh = open(TASK_FILE, "w")
-            fh.write(data_actual)
-            fh.close()
+            tower_settings.LICENSE = data_actual
 
             # Spawn a task to ensure that MongoDB is started (or stopped)
             # as appropriate, based on whether the license uses it.
@@ -592,7 +593,7 @@ class AuthTokenView(APIView):
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(tower_settings.AUTH_TOKEN_EXPIRATION)
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -2859,8 +2860,9 @@ class UnifiedJobStdout(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
-        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if request.accepted_renderer.format != 'txt_download' and obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                                     tower_settings.STDOUT_MAX_BYTES_DISPLAY)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
@@ -2959,6 +2961,61 @@ class ActivityStreamDetail(RetrieveAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class SettingsList(ListCreateAPIView):
+
+    model = TowerSettings
+    serializer_class = TowerSettingsSerializer
+    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    new_in_300 = True
+    filter_backends = ()
+
+    def get_queryset(self):
+        # TODO: docs
+        if not self.request.user.is_superuser:
+            # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
+            #       we'll need to extend this more in the future when we have user settings
+            return []
+        SettingsTuple = namedtuple('Settings', ['key', 'description', 'category', 'value', 'value_type', 'user'])
+        all_defined_settings = {s.key: SettingsTuple(s.key,
+                                                     s.description,
+                                                     s.category,
+                                                     s.value_converted,
+                                                     s.value_type,
+                                                     s.user) for s in TowerSettings.objects.all()}
+        manifest_settings = settings.TOWER_SETTINGS_MANIFEST
+        settings_actual = []
+        for settings_key in manifest_settings:
+            if settings_key in all_defined_settings:
+                settings_actual.append(all_defined_settings[settings_key])
+            else:
+                m_entry = manifest_settings[settings_key]
+                settings_actual.append(SettingsTuple(settings_key,
+                                                     m_entry['description'],
+                                                     m_entry['category'],
+                                                     m_entry['default'],
+                                                     m_entry['type'],
+                                                     None))
+        return settings_actual
+
+    def delete(self, request, *args, **kwargs):
+        if not request.user.can_access(self.model, 'delete', None):
+            raise PermissionDenied()
+        TowerSettings.objects.all().delete()
+        return Response()
+
+class SettingsReset(APIView):
+
+    view_name = "Reset a settings value"
+    new_in_300 = True
+
+    def post(self, request):
+        # NOTE: Extend more with user settings
+        if not request.user.can_access(TowerSettings, 'delete', None):
+            raise PermissionDenied()
+        settings_key = request.DATA.get('key', None)
+        if settings_key is not None:
+            TowerSettings.objects.filter(key=settings_key).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

@@ -7,7 +7,6 @@ import sys
 import logging
 
 # Django
-from django.conf import settings
 from django.db.models import F, Q
 from django.contrib.auth.models import User
 
@@ -19,6 +18,7 @@ from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
+from awx.main.conf import tower_settings
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
@@ -196,7 +196,7 @@ class UserAccess(BaseAccess):
         qs = self.model.objects.filter(is_active=True).distinct()
         if self.user.is_superuser:
             return qs
-        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
+        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |
@@ -1566,6 +1566,10 @@ class ActivityStreamAccess(BaseAccess):
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
 
+        # TowerSettings Filter
+        settings_qs = self.user.get_queryset(TowerSettings)
+        qs.filter(tower_settings__in=settings_qs)
+
         # organization_qs = self.user.get_queryset(Organization)
         # user_qs = self.user.get_queryset(User)
         # inventory_qs = self.user.get_queryset(Inventory)
@@ -1636,6 +1640,30 @@ class CustomInventoryScriptAccess(BaseAccess):
             return True
         return False
 
+
+class TowerSettingsAccess(BaseAccess):
+    '''
+    - I can see settings when
+      - I am a super user
+    - I can edit settings when
+      - I am a super user
+    - I can clear settings when
+      - I am a super user
+    '''
+
+    model = TowerSettings
+
+    def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects.all()
+        return self.model.objects.none()
+
+    def can_change(self, obj, data):
+        return self.user.is_superuser
+
+    def can_delete(self, obj):
+        return self.user.is_superuser
+
 register_access(User, UserAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
@@ -1661,3 +1689,4 @@ register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
+register_access(TowerSettings, TowerSettingsAccess)

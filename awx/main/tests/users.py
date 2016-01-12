@@ -16,6 +16,7 @@ from django.test.utils import override_settings
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
+from awx.main.conf import tower_settings
 
 __all__ = ['AuthTokenTimeoutTest', 'AuthTokenLimitTest', 'AuthTokenProxyTest', 'UsersTest', 'LdapTest']
 
@@ -38,7 +39,7 @@ class AuthTokenTimeoutTest(BaseTest):
 
         response = self._generic_rest(dashboard_url, expect=200, method='get', return_response_object=True, client_kwargs=kwargs)
         self.assertIn('Auth-Token-Timeout', response)
-        self.assertEqual(response['Auth-Token-Timeout'], str(settings.AUTH_TOKEN_EXPIRATION))
+        self.assertEqual(response['Auth-Token-Timeout'], str(tower_settings.AUTH_TOKEN_EXPIRATION))
 
 class AuthTokenLimitTest(BaseTest):
     def setUp(self):
