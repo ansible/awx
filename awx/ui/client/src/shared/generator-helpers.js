@@ -134,9 +134,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'scm_update':
                 icon = 'fa-cloud-download';
                 break;
-            // case 'cancel':
-            //     icon = 'fa-minus-circle';
-            //     break;
             case 'run':
             case 'rerun':
             case 'submit':

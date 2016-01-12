@@ -1579,7 +1579,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     }
                 }
-                // html += "</form>\n";
 
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "</div>\n";
