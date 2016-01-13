@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 export default
     angular.module('InventoryHostsDefinition', [])
     .value('InventoryHosts', {
@@ -11,6 +11,7 @@ export default
         name: 'hosts',
         iterator: 'host',
         editTitle: '{{ selected_group }}',
+        listTitle: 'Hosts',
         showTitle: false,
         well: true,
         index: false,
@@ -92,23 +93,21 @@ export default
                 ngDisabled: 'systemTrackingDisabled',
                 ngShow: 'hostsSelected'
             },
-            create: {
-                mode: 'all',
-                ngClick: "createHost()",
-                awToolTip: "Create a new host"
-            },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshGroups()",
-                ngShow: "socketStatus == 'error'"
+                ngShow: "socketStatus == 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             },
-            stream: {
-                ngClick: "showHostActivity()",
-                awToolTip: "View Activity Stream",
+            create: {
                 mode: 'all',
-                awFeature: 'activity_streams'
-            },
+                ngClick: "createHost()",
+                awToolTip: "Create a new host",
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
+            }
         }
 
     });

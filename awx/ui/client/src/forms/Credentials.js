@@ -21,12 +21,7 @@ export default
             forceListeners: true,
 
             actions: {
-                stream: {
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    mode: 'edit',
-                    awFeature: 'activity_streams'
-                }
+                
             },
 
             fields: {

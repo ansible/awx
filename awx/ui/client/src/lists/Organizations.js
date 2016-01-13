@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('OrganizationListDefinition', [])
@@ -37,13 +37,9 @@ export default
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addOrganization()',
                 awToolTip: 'Create a new organization',
-                awFeature: 'multiple_organizations'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awFeature: 'multiple_organizations',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

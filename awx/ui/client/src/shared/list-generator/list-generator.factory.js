@@ -80,13 +80,13 @@
  *
  * | Attribute | Description |
  * | --------- | ----------- |
+ * | actionclass | Set to a string containing any CSS classes to add to the button. |
  * | awToolTip | Adds the aw-tool-tip directive. Set to the value of the HTML or text to dislay in the tooltip. |
- * | 'class' | Set to a string containing any CSS classes to add to the &lt;a&gt; element. |
+ * | buttonContent | String containing button content.  HTML is accepted in this string. |
  * | dataPlacement | Set to the Bootstrip tooltip placement - right, left, top, bottom, etc. |
  * | dataTipWatch | Set to the $scope variable that contains the text and HTML to display in the tooltip. A $scope.$watch will be added to the variable so that anytime its value changes the tooltip will change. |
- * | iconClass | By default the CSS icon class is set by the SelectIcon() method in js/shared/generator-helpers.js. The icon is based on the action name. Use iconClass to override the default value. |
  * | mode | One of 'all' or 'edit'. Will generally be 'all'. Note that field actions are not displayed when the list is in 'lookup' mode. |
- * | ngClass | Adds the ng-class directive. Set to the JS expressino that ng-class will evaluate. |
+ * | ngClass | Adds the ng-class directive. Set to the JS expression that ng-class will evaluate. |
  * | ngShow | Adds the ng-show directive. Set to the JS expression that ng-show will evaluate. |
  *
  * ##Actions
@@ -299,6 +299,30 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         list = this.list,
                         base, size, action, fld, cnt, field_action, fAction, itm;
 
+                    html += "<div class=\"List-header\">";
+                    html += "<div class=\"List-title\">";
+
+                    if (list.listTitle) {
+
+                        html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
+                        html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
+
+                    }
+
+                    html += "</div>";
+                    html += "<div class=\"List-actions\">";
+                    html += "<div class=\"list-actions\" ng-include=\"'" +
+                        templateUrl('shared/list-generator/list-actions') +
+                        "'\">\n";
+
+                    for (action in list.actions) {
+                        list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                    }
+
+                    html += "</div>\n";
+                    html += "</div>";
+                    html += "</div>";
+
                     if (options.mode === 'edit' && list.editInstructions) {
                         html += "<div class=\"alert alert-info alert-block\">\n";
                         html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
@@ -315,15 +339,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
                         html += "<div class=\"List-well\">\n";
-                    }
-
-                    if (options.activityStream) {
-                        // Add a title row
-                        html += "<div class=\"row\">\n";
-                        html += "<div class=\"col-lg-12\">\n";
-                        html += "<h5>{{ streamTitle }}</h5>\n";
-                        html += "</div>\n";
-                        html += "</div>\n";
                     }
 
                     if (options.showSearch=== undefined || options.showSearch === true) {
@@ -356,45 +371,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                 template: list,
                                 mini: true
                             });
-                        }
-
-                        if (options.mode !== 'lookup') {
-                            //actions
-                            html += "<div class=\"";
-                            if (options.searchSize && !options.listSize) {
-                                // User supplied searchSize, calc the remaining
-                                size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g, ''));
-                                size = (list.searchWidgets) ? list.searchWidgets * size : size;
-                                html += 'col-lg-' + (12 - size);
-                            } else if (options.listSize) {
-                                html += options.listSize;
-                            } else if (options.mode === 'summary') {
-                                html += 'col-lg-6';
-                            } else if (options.id !== undefined) {
-                                html += "col-lg-4";
-                            } else {
-                                html += "col-lg-8 col-md-6 col-sm-4 col-xs-3";
-                            }
-                            html += "\">\n";
-
-
-            html += "<div class=\"list-actions\" ng-include=\"'" +
-                templateUrl('shared/list-generator/list-actions') +
-                "'\">\n";
-
-            for (action in list.actions) {
-                list.actions[action] =
-                    _.defaults(list.actions[action],
-                               {    dataPlacement: "top"
-                               });
-            }
-
-            html += "</div><!-- list-actions -->\n";
-
-                            html += "</div><!-- list-actions-column -->\n";
-                        } else {
-                            //lookup
-                            html += "<div class=\"col-lg-7\"></div>\n";
                         }
                         html += "</div><!-- row -->\n";
                     }
@@ -594,11 +570,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     function buildSelectAll() {
                         return $('<th>')
-                                .addClass('col-xs-1 select-column')
+                                .addClass('col-xs-1 select-column List-tableHeader')
                                 .append(
                                     $('<select-all>')
                                         .attr('selections-empty', 'selectedItems.length === 0')
-                                        .attr('items-length', list.name + '.length'));
+                                        .attr('items-length', list.name + '.length')
+                                        .attr('label', ''));
                     }
 
                     if (options === undefined) {
@@ -608,7 +585,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     html = "<thead>\n";
                     html += "<tr class=\"List-tableHeaderRow\">\n";
                     if (list.index) {
-                        html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs\">#</th>\n";
+                        html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs List-tableHeader\">#</th>\n";
                     }
 
                     if (list.multiSelect) {
@@ -631,7 +608,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             html += ">";
                             html += list.fields[fld].label;
                             if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
-                                html += "<i class=\"fa ";
+                                html += "<i class=\"List-tableHeaderSort fa ";
                                 if (list.fields[fld].key) {
                                     if (list.fields[fld].desc) {
                                         html += "fa-sort-down";

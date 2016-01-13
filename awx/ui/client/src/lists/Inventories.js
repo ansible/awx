@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('InventoriesListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'inventory',
         selectTitle: 'Add Inventories',
         editTitle: 'Inventories',
+        listTitle: 'Inventories',
         selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
             "button to create a new inventory.",
         index: false,
@@ -83,14 +84,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addInventory()',
-                awToolTip: 'Create a new inventory'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new inventory',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

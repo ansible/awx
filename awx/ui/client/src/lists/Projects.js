@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('ProjectsListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'project',
         selectTitle: 'Add Project',
         editTitle: 'Projects',
+        listTitle: 'Projects',
         selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>',
         index: false,
@@ -60,19 +61,17 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
-                awToolTip: 'Create a new project'
+                awToolTip: 'Create a new project',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                ngShow: "socketStatus == 'error'"
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                ngShow: "socketStatus == 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             }
         },
 

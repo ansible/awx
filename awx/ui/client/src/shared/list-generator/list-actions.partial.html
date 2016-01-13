@@ -4,14 +4,12 @@
     <button
         toolbar-button
         mode="options.mode"
-        icon-name="{{name}}"
         aw-tool-tip="{{options.awToolTip}}"
         data-tip-watch="{{options.dataTipWatch}}"
         data-placement="{{options.dataPlacement}}"
         data-container="{{options.dataContainer}}"
-        class="options.class"
+        class="{{options.actionClass}}"
         data-title="{{options.dataTitle}}"
-        icon-size="{{options.iconSize}}"
         ng-disabled="{{options.ngDisabled}}"
         ng-click="$eval(options.ngClick)"
         ng-hide="isHiddenByOptions(options) ||
@@ -19,6 +17,7 @@
                     hiddenInCurrentMode(options.mode)"
         toolbar="true"
         aw-feature="{{options.awFeature}}">
+        <span ng-bind-html="options.buttonContent"></span>
     </button>
 
 </span>
