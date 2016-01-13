@@ -942,17 +942,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.awSurveyQuestion) ? "aw-survey-question" : "";
 
                             if (field.ngDisabled || field.ask) {
-                                var disabled = "";
+                                var _disabled = "";
                                 if (field.ngDisabled) {
-                                    disabled += field.ngDisabled;
+                                    _disabled += field.ngDisabled;
                                 }
                                 if (field.ngDisabled && field.ask) {
-                                    disabled += " || ";
+                                    _disabled += " || ";
                                 }
                                 if (field.ask) {
-                                    disabled += fld + "_ask";
+                                    _disabled += fld + "_ask";
                                 }
-                                html += "ng-disabled='" + disabled + "'";
+                                html += "ng-disabled='" + _disabled + "'";
                             }
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                             html += (field.awRequiredWhen) ? "data-awrequired-init='" + field.awRequiredWhen.init + "' aw-required-when='" +

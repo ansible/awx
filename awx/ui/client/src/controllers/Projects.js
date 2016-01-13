@@ -309,15 +309,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     });
 
     $scope.cancelUpdate = function (id, name) {
-        // // Start the cancel process
-        // var i, project, found = false;
-        // for (i = 0; i < $scope.projects.length; i++) {
-        //     if ($scope.projects[i].id === id) {
-        //         project = $scope.projects[i];
-        //         found = true;
-        //         break;
-        //     }
-        // }
         Rest.setUrl(GetBasePath("projects") + id);
         Rest.get()
             .success(function (data) {
@@ -343,14 +334,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     };
 
     $scope.refresh = function () {
-        /*Wait('start');
-        $scope.projectLoading = false;
-        Refresh({
-            scope: $scope,
-            set: 'projects',
-            iterator: 'project',
-            url: $scope.current_url
-        });*/
         $scope.search(list.iterator);
     };
 
@@ -398,7 +381,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 ];
 
 
-export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
+export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $log,
     $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
     OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state) {
@@ -489,6 +472,15 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         Rest.setUrl(url);
         Rest.post(data)
             .success(function (data) {
+                $scope.addedItem = data.id;
+
+                Refresh({
+                    scope: $scope,
+                    set: 'projects',
+                    iterator: 'project',
+                    url: $scope.current_url
+                });
+
                 var id = data.id,
                     url = GetBasePath('projects') + id + '/organizations/',
                     org = { id: $scope.organization };
@@ -530,7 +522,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
     };
 }
 
-ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
+ProjectsAdd.$inject = ['Refresh', '$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller',
     'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList',

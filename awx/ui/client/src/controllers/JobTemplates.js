@@ -245,7 +245,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$state'
 ];
 
-export function JobTemplatesAdd($filter, $scope, $rootScope, $compile,
+export function JobTemplatesAdd(Refresh, $filter, $scope, $rootScope, $compile,
     $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
     ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, InventoryList,
     CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait,
@@ -583,6 +583,15 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile,
                     .success(function(data) {
                         $scope.$emit('templateSaveSuccess', data);
 
+                        $scope.addedItem = data.id;
+
+                        Refresh({
+                            scope: $scope,
+                            set: 'job_templates',
+                            iterator: 'job_template',
+                            url: $scope.current_url
+                        });
+
                         if(data.survey_enabled===true){
                             //once the job template information is saved we submit the survey info to the correct endpoint
                             var url = data.url+ 'survey_spec/';
@@ -656,7 +665,7 @@ export function JobTemplatesAdd($filter, $scope, $rootScope, $compile,
     };
 }
 
-JobTemplatesAdd.$inject = ['$filter', '$scope', '$rootScope', '$compile',
+JobTemplatesAdd.$inject = ['Refresh', '$filter', '$scope', '$rootScope', '$compile',
     '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList',

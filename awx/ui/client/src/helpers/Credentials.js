@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name helpers.function:Credentials
@@ -190,8 +190,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
-         function ($location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
+.factory('FormSave', ['Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
+         function (Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -254,7 +254,16 @@ angular.module('CredentialsHelper', ['Utilities'])
                              GetBasePath('users') + data.user + '/credentials/';
                          Rest.setUrl(url);
                          Rest.post(data)
-                         .success(function () {
+                         .success(function (data) {
+                             scope.addedItem = data.id;
+
+                             Refresh({
+                                 scope: scope,
+                                 set: 'credentials',
+                                 iterator: 'credential',
+                                 url: url
+                             });
+
                              Wait('stop');
                              var base = $location.path().replace(/^\//, '').split('/')[0];
                                  if (base === 'credentials') {

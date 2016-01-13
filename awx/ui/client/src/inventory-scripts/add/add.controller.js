@@ -5,12 +5,12 @@
  *************************************************/
 
 export default
-    [   '$compile','SchedulerInit', 'Rest', 'Wait',
+    [   '$rootScope', 'pagination', '$compile','SchedulerInit', 'Rest', 'Wait',
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
         'LookUpInit', 'OrganizationList', '$scope', '$state',
         function(
-            $compile, SchedulerInit, Rest, Wait,
+            $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit,
             LookUpInit, OrganizationList, $scope, $state
@@ -38,6 +38,7 @@ export default
 
             // Save
             scope.formSave = function () {
+
                 generator.clearApiErrors();
                 Wait('start');
                 Rest.setUrl(url);
@@ -47,10 +48,10 @@ export default
                     organization: scope.organization,
                     script: scope.script
                 })
-                .success(function () {
-                    $state.transitionTo('inventoryScriptsList');
+                .success(function (data) {
+                    $rootScope.addedItem = data.id;
+                    $state.go('inventoryScripts', {}, {reload: true});
                     Wait('stop');
-
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, { hdr: 'Error!',

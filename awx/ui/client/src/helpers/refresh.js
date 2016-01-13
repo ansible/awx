@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:refresh
@@ -69,7 +69,16 @@ export default
 
             // if you're editing an object, make sure you're on the right
             // page to display the element you are editing
-            if ($location.$$url.split("/")[1] === params.set && $location.$$url.split("/")[2] && !scope.getNewPage) {
+            if (scope.addedItem) {
+                var id = scope.addedItem + "";
+                delete scope.addedItem;
+                var restUrl = params.url.split("?")[0];
+                var pageSize = scope[iterator + '_page_size'];
+                pagination.getInitialPageForList(id, restUrl, pageSize)
+                    .then(function (currentPage) {
+                        scope.getPage(currentPage, set, iterator);
+                    });
+            } else if ($location.$$url.split("/")[1] === params.set && $location.$$url.split("/")[2] && !scope.getNewPage) {
                 var id = $location.$$url.split("/")[2];
                 var restUrl = params.url.split("?")[0];
                 var pageSize = scope[iterator + '_page_size'];
