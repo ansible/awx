@@ -9,6 +9,7 @@
 export default function(){
     return {
         name:  'inventory_scripts' ,
+        listTitle: 'Inventory Scripts',
         iterator: 'inventory_script',
         index: false,
         hover: false,
@@ -39,14 +40,9 @@ export default function(){
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCustomInv()',
-                awToolTip: 'Create a new credential'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new custom inventory',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

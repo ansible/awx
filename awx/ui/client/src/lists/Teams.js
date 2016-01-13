@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('TeamsListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'team',
         selectTitle: 'Add Team',
         editTitle: 'Teams',
+        listTitle: 'Teams',
         selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
             "button to create a new team.",
         index: false,
@@ -44,13 +45,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addTeam()',
-                awToolTip: 'Create a new team'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new team',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

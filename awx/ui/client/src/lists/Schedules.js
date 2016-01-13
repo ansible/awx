@@ -45,21 +45,19 @@ export default
         },
 
         actions: {
-            add: {
-                mode: 'all',
-                ngClick: 'addSchedule()',
-                awToolTip: 'Add a new schedule'
-            },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshSchedules()"
+                ngClick: "refreshSchedules()",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+            add: {
+                mode: 'all',
+                ngClick: 'addSchedule()',
+                awToolTip: 'Add a new schedule',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

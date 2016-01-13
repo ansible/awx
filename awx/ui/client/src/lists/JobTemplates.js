@@ -13,6 +13,7 @@ export default
         iterator: 'job_template',
         selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
+        listTitle: 'Job Templates',
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
             "button to create a new job template.",
         index: false,
@@ -44,15 +45,9 @@ export default
                 ngClick: 'addJobTemplate()',
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
-                ngHide: 'portalMode===true'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                awFeature: 'activity_streams',
-                mode: 'edit',
-                ngHide: 'portalMode===true'
+                ngHide: 'portalMode===true',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

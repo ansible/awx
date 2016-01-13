@@ -288,12 +288,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         mode: 'all',
                         awToolTip: "Refresh the page",
                         ngClick: "refreshSchedules()"
-                    },
-                    stream: {
-                        ngClick: "showActivity()",
-                        awToolTip: "View Activity Stream",
-                        mode: 'edit',
-                        awFeature: 'activity_streams'
                     }
                 },
                 fields: {

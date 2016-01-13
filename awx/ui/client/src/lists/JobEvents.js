@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobEventsListDefinition', [])
@@ -97,7 +97,9 @@ export default
             refresh: {
                 mode: 'all',
                 awToolTip: 'Refresh the page',
-                ngClick: 'refresh()'
+                ngClick: 'refresh()',
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             }
         },
 

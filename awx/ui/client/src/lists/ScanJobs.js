@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('ScanJobsListDefinition', [])
@@ -35,15 +35,9 @@ export default
                 ngClick: 'addScanJobTemplate()',
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
-                ngHide: 'portalMode===true'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
                 ngHide: 'portalMode===true',
-                awFeature: 'activity_streams'
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

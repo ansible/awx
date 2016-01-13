@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 
 
@@ -49,8 +49,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCredential()',
-                "class": 'btn-sm',
-                awToolTip: 'Create a new credential'
+                awToolTip: 'Create a new credential',
+                actionClass: 'btn btn-sm List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

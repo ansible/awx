@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('HomeGroupListDefinition', [])
@@ -161,12 +161,7 @@ export default
         },
 
         actions: {
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'all',
-                awFeature: 'activity_streams'
-            }
+            
         }
 
     });

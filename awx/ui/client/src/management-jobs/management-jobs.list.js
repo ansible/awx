@@ -22,13 +22,7 @@ export default function(){
             }
         },
         actions: {
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
-            }
+            
         },
         fieldActions: {
             submit: {

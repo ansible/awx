@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 export default
     angular.module('InventoryGroupsDefinition', [])
     .value('InventoryGroups', {
@@ -11,6 +11,7 @@ export default
         name: 'groups',
         iterator: 'group',
         editTitle: '{{ inventory.name }}',
+        listTitle: 'Groups',
         showTitle: false,
         well: true,
         index: false,
@@ -82,44 +83,33 @@ export default
         },
 
         actions: {
-            create: {
+            refresh: {
                 mode: 'all',
-                ngClick: "createGroup()",
-                awToolTip: "Create a new group"
-            },
-            properties: {
-                mode: 'all',
-                awToolTip: "Edit inventory properties",
-                ngClick: 'editInventoryProperties()'
+                awToolTip: "Refresh the page",
+                ngClick: "refreshGroups()",
+                ngShow: "socketStatus == 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             },
             launch: {
                 mode: 'all',
                 ngShow: 'inventory.can_run_ad_hoc_commands',
                 ngClick: 'populateAdhocForm()',
-                awToolTip: "Run a command on the selected inventory"
+                awToolTip: "Run a command on the selected inventory",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'RUN COMMANDS'
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
                 // awToolTip: "{{ adhocButtonTipContents }}",
                 // dataTipWatch: "adhocButtonTipContents"
             },
-            refresh: {
+            create: {
                 mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refreshGroups()",
-                ngShow: "socketStatus == 'error'"
-            },
-            stream: {
-                ngClick: "showGroupActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'all',
-                awFeature: 'activity_streams'
-            },
-            help: {
-                mode: 'all',
-                awToolTip: "Get help building your inventory",
-                ngClick: "showGroupHelp()",
-                id: "inventory-summary-help"
+                ngClick: "createGroup()",
+                awToolTip: "Create a new group",
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 

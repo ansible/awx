@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('StreamListDefinition', [])
@@ -255,14 +255,17 @@ export default
             close: {
                 mode: 'all',
                 awToolTip: "Close Activity Stream view",
-                ngClick: "closeStream()"
+                ngClick: "closeStream()",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'CLOSE'
             },
             refresh: {
                 mode: 'all',
                 id: 'activity-stream-refresh-btn',
-                'class': 'btn-xs',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshStream()"
+                ngClick: "refreshStream()",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             }
         },
 
