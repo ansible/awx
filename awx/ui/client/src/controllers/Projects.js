@@ -829,6 +829,10 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     $scope.formCancel = function () {
         $state.transitionTo('projects');
     };
+    $scope.projectSelected = true;
+    $scope.toggleTabs = function(tab){
+        $scope[tab+"Selected"] = true;
+    };
 }
 
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
