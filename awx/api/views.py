@@ -12,7 +12,6 @@ import socket
 import sys
 import errno
 from base64 import b64encode
-from collections import namedtuple
 
 # Django
 from django.conf import settings
@@ -2970,18 +2969,26 @@ class SettingsList(ListCreateAPIView):
     filter_backends = ()
 
     def get_queryset(self):
-        # TODO: docs
+        class SettingsIntermediary(object):
+            def __init__(self, key, description, category, value,
+                         value_type, user):
+                self.key = key
+                self.description = description
+                self.category = category
+                self.value = value
+                self.value_type = value_type
+                self.user = user
+
         if not self.request.user.is_superuser:
             # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
             #       we'll need to extend this more in the future when we have user settings
             return []
-        SettingsTuple = namedtuple('Settings', ['key', 'description', 'category', 'value', 'value_type', 'user'])
-        all_defined_settings = {s.key: SettingsTuple(s.key,
-                                                     s.description,
-                                                     s.category,
-                                                     s.value_converted,
-                                                     s.value_type,
-                                                     s.user) for s in TowerSettings.objects.all()}
+        all_defined_settings = {s.key: SettingsIntermediary(s.key,
+                                                            s.description,
+                                                            s.category,
+                                                            s.value_converted,
+                                                            s.value_type,
+                                                            s.user) for s in TowerSettings.objects.all()}
         manifest_settings = settings.TOWER_SETTINGS_MANIFEST
         settings_actual = []
         for settings_key in manifest_settings:
@@ -2989,12 +2996,12 @@ class SettingsList(ListCreateAPIView):
                 settings_actual.append(all_defined_settings[settings_key])
             else:
                 m_entry = manifest_settings[settings_key]
-                settings_actual.append(SettingsTuple(settings_key,
-                                                     m_entry['description'],
-                                                     m_entry['category'],
-                                                     m_entry['default'],
-                                                     m_entry['type'],
-                                                     None))
+                settings_actual.append(SettingsIntermediary(settings_key,
+                                                            m_entry['description'],
+                                                            m_entry['category'],
+                                                            m_entry['default'],
+                                                            m_entry['type'],
+                                                            None))
         return settings_actual
 
     def delete(self, request, *args, **kwargs):
