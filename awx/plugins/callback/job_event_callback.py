@@ -326,9 +326,9 @@ class JobCallbackModule(BaseCallbackModule):
     def playbook_on_start(self):
         self._log_event('playbook_on_start')
 
-    def v2_playbook_on_start(self):
-        # since there is no task/play info, this is currently identical
-        # to the v1 callback which does the same thing
+    def v2_playbook_on_start(self, playbook):
+        # NOTE: the playbook parameter was added late in Ansible 2.0 development
+        #       so we don't currently utilize but could later.
         self.playbook_on_start()
 
     def playbook_on_notify(self, host, handler):
