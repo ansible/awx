@@ -4,6 +4,7 @@
 # Python
 import hmac
 import json
+import yaml
 import logging
 
 # Django
@@ -305,7 +306,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     kwargs_extra_vars = json.loads(kwargs_extra_vars)
                 except Exception:
                     try:
-                        yaml.safe_load(kwargs_extra_vars)
+                        kwargs_extra_vars = yaml.safe_load(kwargs_extra_vars)
+                        assert type(kwargs_extra_vars) is dict
                     except:
                         kwargs_extra_vars = {}
         else:
