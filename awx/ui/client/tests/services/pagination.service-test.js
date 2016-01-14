@@ -19,8 +19,8 @@ describe("pagination.service", function() {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    describe("should return page given obj is on", function() {
-        it('should return true', function() {
+    describe("getInitialPageForList", function() {
+        it('should return page given obj is on', function() {
             // get the name of the object
             $httpBackend.when('GET', '/url/?id=1')
                 .respond({results: [{name: "foo"}]});
