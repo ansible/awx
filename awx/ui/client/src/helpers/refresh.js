@@ -24,7 +24,7 @@
 
 export default
     angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers'])
-        .factory('Refresh', ['$location', 'ProcessErrors', 'Rest', 'Wait', 'Empty', 'PageRangeSetup', 'pagination', function ($location, ProcessErrors, Rest, Wait, Empty, PageRangeSetup, pagination) {
+        .factory('Refresh', ['$rootScope', '$location', 'ProcessErrors', 'Rest', 'Wait', 'Empty', 'PageRangeSetup', 'pagination', function ($rootScope, $location, ProcessErrors, Rest, Wait, Empty, PageRangeSetup, pagination) {
         return function (params) {
 
             var scope = params.scope,
@@ -72,6 +72,10 @@ export default
             if (scope.addedItem) {
                 var id = scope.addedItem + "";
                 delete scope.addedItem;
+                $rootScope.rowBeingEdited = id;
+                $rootScope.listBeingEdited = set;
+                $rootScope.addedAnItem = true;
+                console.log("add to rootScope");
                 var restUrl = params.url.split("?")[0];
                 var pageSize = scope[iterator + '_page_size'];
                 pagination.getInitialPageForList(id, restUrl, pageSize)
@@ -79,6 +83,8 @@ export default
                         scope.getPage(currentPage, set, iterator);
                     });
             } else if ($location.$$url.split("/")[1] === params.set && $location.$$url.split("/")[2] && $location.$$url.split("/")[2] !== "add" && !scope.getNewPage) {
+                delete $rootScope.rowBeingEdited;
+                delete $rootScope.listBeingEdited;
                 var id = $location.$$url.split("/")[2];
                 var restUrl = params.url.split("?")[0];
                 var pageSize = scope[iterator + '_page_size'];
