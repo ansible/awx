@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$q', '$http', function($q, $http) {
+export default ['$http', function($http) {
     return {
         getInitialPageForList: function(id, url, pageSize) {
             // get the name of the object
