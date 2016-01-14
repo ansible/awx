@@ -1067,6 +1067,8 @@ var tower = angular.module('Tower', [
                         delete $rootScope.rowBeingEdited;
 
                         $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($rootScope.addedAnItem) {
+                        delete $rootScope.addedAnItem;
                     } else {
                         $rootScope.$broadcast("RemoveIndicator");
                     }
