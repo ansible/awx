@@ -75,7 +75,6 @@ export default
                 $rootScope.rowBeingEdited = id;
                 $rootScope.listBeingEdited = set;
                 $rootScope.addedAnItem = true;
-                console.log("add to rootScope");
                 var restUrl = params.url.split("?")[0];
                 var pageSize = scope[iterator + '_page_size'];
                 pagination.getInitialPageForList(id, restUrl, pageSize)
