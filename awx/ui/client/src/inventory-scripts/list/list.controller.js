@@ -29,6 +29,11 @@ export default
                 list: list,
                 url: defaultUrl
             });
+
+            if ($rootScope.addedItem) {
+                scope.addedItem = $rootScope.addedItem;
+                delete $rootScope.addedItem;
+            }
             PaginateInit({
                 scope: scope,
                 list: list,
