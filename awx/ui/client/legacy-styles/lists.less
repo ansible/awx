@@ -211,14 +211,14 @@ table, tbody {
     height: 32px;
     width: 32px;
     border-left: 1px solid @list-srch-inpt-bord;
-    color: #B7B7B7;
+    color: @list-srch-btn-icon;
     float: right;
     position: relative;
     top: -33px;
     left: -1px;
     z-index: 10;
     font-size: 16px;
-    background-color: #FFFFFF;
+    background-color: @list-srch-btn-bg;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,6 +228,6 @@ table, tbody {
 
 .List-searchInputIcon:hover {
     cursor: pointer;
-    background-color: #FAFAFA;
-    color: #B7B7B7;
+    background-color: @list-srch-btn-hov-bg;
+    color: @list-srch-btn-icon;
 }
