@@ -70,7 +70,7 @@ oslo.serialization==1.4.0
 oslo.utils==1.4.0
 os-networksv2-python-novaclient-ext==0.25
 os-virtual-interfacesv2-python-novaclient-ext==0.19
-pbr==0.10.0
+pbr==0.11.1
 pexpect==3.1
 pip==1.5.4
 prettytable==0.7.2
