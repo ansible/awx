@@ -18,10 +18,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         editTitle: '{{ name }}',
         name: 'project',
         forceListeners: true,
-        collapse: true,
-        collapseTitle: "Properties",
-        collapseMode: 'edit',
-        collapseOpen: true,
+        tabs: true,
 
         fields: {
             name: {

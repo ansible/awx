@@ -7,7 +7,7 @@
  *
  */
 
-@import "src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/branding/colors.default.less";
 
 .Form{
     display:flex;
@@ -48,6 +48,71 @@
 
 .Form-exit:hover{
     color:@default-icon;
+}
+
+.Form-tabHolder{
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.Form-tab {
+    color: @btn-txt;
+    background-color: @btn-bg;
+    font-size: 12px;
+    border: 1px solid @btn-bord;
+    height: 30px;
+    border-radius: 5px;
+    margin-right: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.Form-tab:hover {
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
+    cursor: pointer;
+}
+
+.Form-tab:active {
+    color: @btn-txt-sel;
+    background-color: @btn-bg-sel;
+    cursor: pointer;
+}
+
+.Form-tab:focus {
+    color: @btn-txt-sel;
+}
+
+.Form-tab.is-selected {
+    color: @btn-txt-sel;
+    background-color: @btn-bg-sel;
+    border-color: @btn-bord-sel;
+}
+
+.Form-tab--disabled {
+    opacity: 0.4;
+    cursor: not-allowed !important;
+}
+
+.Form-tab--disabled:hover {
+    color: @btn-txt;
+    background-color: @btn-bg;
+}
+
+.Form-tabSection{
+    display: none;
+    width: 0%;
+}
+
+.Form-tabSection.is-selected{
+    width: 100%;
+    display: block;
 }
 
 .Form-formGroup {

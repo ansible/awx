@@ -17,10 +17,7 @@ export default
             addTitle: 'New Inventory',
             editTitle: '{{ inventory_name }}',
             name: 'inventory',
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
+            tabs: true,
 
             fields: {
                 inventory_name: {

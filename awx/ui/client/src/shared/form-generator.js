@@ -202,6 +202,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     this.scope.mode = options.mode;
                 }
 
+                if(options.mode === 'edit' && this.form.tabs){
+                    var tabs = [this.form.name], that = this;
+                    tabs.push(Object.keys(this.form.related));
+                    tabs = _.flatten(tabs);
+                    _.map(tabs, function(itm){
+                        that.scope.$parent[itm+"Selected"] = false;
+                    });
+                    this.scope.$parent[this.form.name+"Selected"] = true;
+
+
+                    this.scope.$parent.toggleFormTabs = function($event){
+                        _.map(tabs, function(itm){
+                            that.scope.$parent[itm+"Selected"] = false;
+                        });
+                        that.scope.$parent[$event.target.id.split('_tab')[0]+"Selected"] = true;
+                    };
+
+                }
+
                 for (fld in form.fields) {
                     this.scope[fld + '_field'] = form.fields[fld];
                     this.scope[fld + '_field'].name = fld;
@@ -1402,18 +1421,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // string to be injected into the current view.
                 //
                 var btn, button, fld, field, html = '', i, section, group,
-                    tab, sectionShow, offset, width,ngDisabled;
-
-                if (this.form.collapse && this.form.collapseMode === options.mode) {
-                    html += "<div id=\"" + this.form.name + "-collapse-0\" ";
-                    html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
-                    html += (this.form.collapseOpenFirst) ? "data-open-first=\"true\" " : "";
-                    html += "class=\"jqui-accordion\">\n";
-                    html += "<h3>" + this.form.collapseTitle + "</h3>\n";
-                    html += "<div>\n";
-                    options.collapseAlreadyStarted = true;
-                }
-
+                    tab, sectionShow, offset, width,ngDisabled, itm;
 
                 // title and exit button
                 html +=  "<div class=\"Form-header\">";
@@ -1428,13 +1436,52 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 html += "</div>\n"; //end of Form-header
 
+                if (this.form.tabs) {
+                    var collection;
+                    html += "<div class=\"Form-tabHolder\">";
+
+                    if(this.mode === "edit"){
+                        html += "<div id=\"" + this.form.name + "_tab\""+
+                            "class=\"Form-tab\" "+
+                            "ng-click=\"toggleFormTabs($event)\"" +
+                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">Details</div>";
+
+                        for (itm in this.form.related) {
+                            collection = this.form.related[itm];
+                            html += "<div id=\"" + itm + "_tab\" "+
+                                "class=\"Form-tab\" "+
+                                "ng-click=\"toggleFormTabs($event)\"" +
+                                "ng-class=\"{'is-selected': " + itm + "Selected }\">" + (collection.title || collection.editTitle) +
+                                "</div>\n";
+                        }
+                    }
+                    else if(this.mode === "add"){
+                        html += "<div id=\"" + this.form.name + "_tab\""+
+                            "class=\"Form-tab is-selected\">Details</div>";
+
+                        for (itm in this.form.related) {
+                            collection = this.form.related[itm];
+                            html += "<div id=\"" + itm + "_tab\" "+
+                                "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
+                                "</div>\n";
+                        }
+                    }
+
+                    html += "</div>";//tabHolder
+                }
+
+                if(this.form.tabs && this.mode === "edit"){
+                    html += "<div class=\"Form-tabSection\" "+
+                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">";
+                }
+
                 html += "<form class=\"Form";
                 html += (this.form.horizontal) ? "form-horizontal" : "";
                 html += (this.form['class']) ? ' ' + this.form['class'] : '';
                 html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
                 html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
-                if (this.form.tabs) {
+                if (this.form.licenseTabs) {
                     html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
                     for (i = 0; i < this.form.tabs.length; i++) {
                         tab = this.form.tabs[i];
@@ -1574,15 +1621,26 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "</div>\n";
                         }
 
+                        if(this.form.tabs && this.mode === "edit"){
+                            var collection1;
+                            html += "</div>\n"; // end of form's Form-tabSection
+
+                            for (itm in this.form.related) {
+                                collection1 = this.form.related[itm];
+
+                                html += "<div class=\"Form-tabSection\" "+
+                                    "ng-class=\"{'is-selected': " + itm + "Selected }\">";
+                                if (collection1.generateList) {
+                                    html += GenerateList.buildHTML(collection1, { mode: 'edit' });
+                                }
+                                else {
+                                    html += this.GenerateColleciton({ form: this.form, related: itm }, options);
+                                }
+                                html += "</div>\n";
+                            }
+                        }
+
                     }
-                }
-
-                if (this.form.collapse && this.form.collapseMode === options.mode) {
-                    html += "</div>\n";
-                }
-
-                if ((!this.modal) && options.related && this.form.related) {
-                    html += this.buildCollections(options);
                 }
 
                 return html;

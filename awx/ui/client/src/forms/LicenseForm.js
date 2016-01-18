@@ -18,7 +18,7 @@ export default
             name: 'license',
             well: false,
 
-            tabs: [{
+            licensetabs: [{
                 name: 'license',
                 label: 'License'
             }, {

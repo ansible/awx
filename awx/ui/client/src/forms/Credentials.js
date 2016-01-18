@@ -17,7 +17,6 @@ export default
             addTitle: 'Create Credential', //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'credential',
-            well: true,
             forceListeners: true,
 
             actions: {
