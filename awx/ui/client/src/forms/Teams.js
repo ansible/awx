@@ -17,10 +17,7 @@ export default
             addTitle: 'New Team', //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
+            tabs: true,
 
             fields: {
                 name: {

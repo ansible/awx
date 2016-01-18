@@ -19,10 +19,7 @@ export default
             editTitle: '{{ name }}',
             name: 'job_templates',
             base: 'job_templates',
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpenFirst: true,   //Always open first panel
+            tabs: true,
 
             fields: {
                 name: {

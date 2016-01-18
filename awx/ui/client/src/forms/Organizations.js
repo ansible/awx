@@ -17,10 +17,7 @@ export default
             addTitle: 'New Organization', //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
+            tabs: true,
 
             fields: {
                 name: {

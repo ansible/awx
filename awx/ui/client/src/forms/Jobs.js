@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Jobs
@@ -19,10 +19,7 @@ export default
             name: 'jobs',
             well: true,
             base: 'jobs',
-            collapse: true,
-            collapseMode: 'edit',
-            collapseTitle: 'Job Status',
-            collapseOpenFirst: true,   //Always open first panel
+            tabs: true,
 
             navigationLinks: {
                 details: {

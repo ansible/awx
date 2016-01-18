@@ -7,7 +7,7 @@
  *
  */
 
-@import "src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/branding/colors.default.less";
 
 .Form{
     display:flex;
@@ -93,6 +93,26 @@
     color: @btn-txt-sel;
     background-color: @btn-bg-sel;
     border-color: @btn-bord-sel;
+}
+
+.Form-tab--disabled {
+    opacity: 0.4;
+    cursor: not-allowed !important;
+}
+
+.Form-tab--disabled:hover {
+    color: @btn-txt;
+    background-color: @btn-bg;
+}
+
+.Form-tabSection{
+    display: none;
+    width: 0%;
+}
+
+.Form-tabSection.is-selected{
+    width: 100%;
+    display: block;
 }
 
 .Form-formGroup {
