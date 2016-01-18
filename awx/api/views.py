@@ -2983,12 +2983,14 @@ class SettingsList(ListCreateAPIView):
             # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
             #       we'll need to extend this more in the future when we have user settings
             return []
-        all_defined_settings = {s.key: SettingsIntermediary(s.key,
-                                                            s.description,
-                                                            s.category,
-                                                            s.value_converted,
-                                                            s.value_type,
-                                                            s.user) for s in TowerSettings.objects.all()}
+        all_defined_settings = {}
+        for s in TowerSettings.objects.all():
+            all_defined_settings[s.key] = SettingsIntermediary(s.key,
+                                                               s.description,
+                                                               s.category,
+                                                               s.value_converted,
+                                                               s.value_type,
+                                                               s.user)
         manifest_settings = settings.TOWER_SETTINGS_MANIFEST
         settings_actual = []
         for settings_key in manifest_settings:
