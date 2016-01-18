@@ -183,3 +183,51 @@ table, tbody {
     background-color: @btn-bg-hov;
     color: @btn-txt;
 }
+
+.List-searchDropdown {
+    border-top-left-radius: 5px!important;
+    border-bottom-left-radius: 5px!important;
+}
+
+.List-searchInput {
+    background-color: @list-srch-inpt-bg!important;
+    font-size: 14px!important;
+    color: @list-srch-inpt-txt!important;
+    border-color: @list-srch-inpt-bord!important;
+    border-radius: 5px!important;
+    padding-left: 15px!important;
+}
+
+.List-searchInput:placeholder-shown {
+    color: @list-srch-inpt-ph-txt!important;
+    text-transform: uppercase;
+}
+
+.List-searchInput:focus {
+    border-color: @list-srch-inpt-focus!important;
+}
+
+.List-searchInputIcon {
+    height: 32px;
+    width: 32px;
+    border-left: 1px solid @list-srch-inpt-bord;
+    color: @list-srch-btn-icon;
+    float: right;
+    position: relative;
+    top: -33px;
+    left: -1px;
+    z-index: 10;
+    font-size: 16px;
+    background-color: @list-srch-btn-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.List-searchInputIcon:hover {
+    cursor: pointer;
+    background-color: @list-srch-btn-hov-bg;
+    color: @list-srch-btn-icon;
+}
