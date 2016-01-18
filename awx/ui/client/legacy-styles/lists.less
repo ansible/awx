@@ -130,6 +130,7 @@ table, tbody {
 
 .List-header {
     display: flex;
+    height: 34px;
 }
 
 .List-title {
@@ -230,4 +231,16 @@ table, tbody {
     cursor: pointer;
     background-color: @list-srch-btn-hov-bg;
     color: @list-srch-btn-icon;
+}
+
+.List-noItems {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 200px;
+    border-radius: 5px;
+    border: 1px solid @list-no-items-bord;
+    background-color: @list-no-items-bg;
+    color: @list-no-items-txt;
 }

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:search
@@ -499,6 +499,14 @@ export default
                     if (load) {
                         scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                     }
+
+                    if(scope[iterator + 'SearchValue' + modifier] && scope[iterator + 'SearchValue' + modifier] != '') {
+                        scope[iterator + '_active_search'] = true;
+                    }
+                    else {
+                        scope[iterator + '_active_search'] = false;
+                    }
+
                     scope.$emit('prepareSearch', iterator, page, load, calcOnly, deferWaitStop, spinner);
                 };
 

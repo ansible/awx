@@ -23,15 +23,15 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
+                columnClass: 'col-lg-4 col-md-5 col-sm-6 col-xs-6'
             },
             description: {
                 label: 'Description',
-                // columnClass: 'col-lg-4 col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-lg-3 col-md-3 hidden-sm hidden-xs'
             },
             smart_status: {
               label: 'Status',
-              columnClass: 'List-tableCell col-lg-1 col-md-2 col-sm-2 col-xs-4',
+              columnClass: 'List-tableCell col-lg-3 col-md-2 col-sm-3 col-xs-3',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
@@ -52,6 +52,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-3',
+
             submit: {
                 label: 'Launch',
                 mode: 'all',

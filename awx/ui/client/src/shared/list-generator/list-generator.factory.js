@@ -341,8 +341,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += "<div class=\"List-well\">\n";
                     }
 
+                    // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
+                    html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
+
                     if (options.showSearch=== undefined || options.showSearch === true) {
-                        html += "<div class=\"row\">\n";
+                        // Only show the search bar if we are loading results or if we have at least 1 base result
+                        html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == true || " + list.iterator + "_active_search == true || (" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows > 0)\">\n";
                         if (options.searchSize) {
                             html += SearchWidget({
                                 iterator: list.iterator,
@@ -373,6 +377,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             });
                         }
                         html += "</div><!-- row -->\n";
+
+                        // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
+                        html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == true && " + list.name + ".length == 0\">\n";
+                        html += "<div class=\"col-lg-12\">No records matched your search.</div>\n";
+                        html += "</div>\n";
                     }
 
                     // Add a title and optionally a close button (used on Inventory->Groups)
@@ -383,7 +392,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     // table header row
-                    html += "<div class=\"list-table-container\"";
+                    html += "<div class=\"list-table-container\" ng-show=\"" + list.iterator + "Loading == true || (" + list.iterator + "Loading == false && " + list.name + ".length > 0)\"";
                     html += (list.awCustomScroll) ? " aw-custom-scroll " : "";
                     html += ">\n";
 
@@ -518,11 +527,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
                         innerTable += "</td>\n";
                     }
-                    innerTable += "</tr>\n";
-
-                    // Message for when a collection is empty
-                    innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == false && " + list.name + ".length == 0\">\n";
-                    innerTable += "<td colspan=\"" + cnt + "\" class=\"List-tableCell\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
                     innerTable += "</tr>\n";
 
                     // Message for loading
