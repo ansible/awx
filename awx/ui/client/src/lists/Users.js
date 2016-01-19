@@ -49,6 +49,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-3 col-sm-3 col-xs-3',
+
             edit: {
                 label: 'Edit',
                 ngClick: "editUser(user.id)",

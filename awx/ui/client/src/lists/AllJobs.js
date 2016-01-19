@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('AllJobsDefinition', ['sanitizeFilter', 'capitalizeFilter'])
@@ -85,6 +85,9 @@ export default
         actions: { },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',

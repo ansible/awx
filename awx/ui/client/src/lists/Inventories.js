@@ -91,6 +91,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-2 col-sm-4 col-xs-4',
+
             edit: {
                 label: 'Edit',
                 ngClick: 'editInventory(inventory.id)', //'editInventoryProperties(inventory.id)',

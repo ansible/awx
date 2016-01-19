@@ -54,6 +54,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-3 col-sm-3 col-xs-3',
+
             edit: {
                 ngClick: "editCredential(credential.id)",
                 icon: 'fa-edit',

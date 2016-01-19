@@ -47,6 +47,9 @@ export default function(){
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
+
             edit: {
                 ngClick: "editCustomInv(inventory_script.id)",
                 icon: 'fa-edit',
