@@ -97,6 +97,13 @@ class ServiceScanService(BaseService):
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
             p = re.compile('(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
             rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
+            # extra flags needed for SLES11
+            if not any(p.match(line) for line in stdout.split('\n')):
+                # If p pattern is not found but p_simple is, we have single-column ouptut
+                p_simple = re.compile('(?P<service>.*?)\s+(?P<rl0>on|off)')
+                if any(p_simple.match(line) for line in stdout.split('\n')):
+                    # Try extra flags " -l --allservices" to output all columns
+                    rc, stdout, stderr = self.module.run_command('%s -l --allservices' % chkconfig_path, use_unsafe_shell=True)
             for line in stdout.split('\n'):
                 m = p.match(line)
                 if m:
