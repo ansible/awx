@@ -91,8 +91,9 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete job template ' + name + '?</div>',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            action: action,
+            actionText: 'DELETE'
         });
     };
 
@@ -635,7 +636,7 @@ export function JobTemplatesAdd(Refresh, $filter, $scope, $rootScope, $compile,
                 };
             Prompt({
                 hdr: 'Incomplete Survey',
-                body: 'Do you want to create a survey before proceeding?',
+                body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
                 action: action
             });
         });
@@ -1128,7 +1129,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
                 };
             Prompt({
                 hdr: 'Incomplete Survey',
-                body: 'Do you want to create a survey before proceeding?',
+                body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
                 action: action
             });
         });
@@ -1190,7 +1191,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
                 };
             Prompt({
                 hdr: 'Incomplete Survey',
-                body: 'Do you want to create a survey before proceeding?',
+                body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
                 action: action
             });
         });

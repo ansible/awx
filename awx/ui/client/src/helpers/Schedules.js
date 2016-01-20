@@ -541,8 +541,9 @@ export default
 
                 Prompt({
                     hdr: hdr,
-                    body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + schedule.name  + "</em> schedule?</div>",
+                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the schedule below?</div><div class="Prompt-bodyTarget">' + schedule.name + '</div>',
                     action: action,
+                    actionText: 'DELETE',
                     backdrop: false
                 });
 

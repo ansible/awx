@@ -100,8 +100,9 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete team ' + name + '?</div>',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            action: action,
+            actionText: 'DELETE'
         });
     };
 }
@@ -410,8 +411,9 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?</div>',
+            action: action,
+            actionText: 'DELETE'
         });
     };
 }

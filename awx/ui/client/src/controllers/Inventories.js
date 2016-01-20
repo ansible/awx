@@ -341,8 +341,9 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete inventory ' + $filter('sanitize')(name) + '?</div>',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            action: action,
+            actionText: 'DELETE'
         });
     };
 
@@ -761,8 +762,9 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete job template ' + this.scan_job_template.name + '?</div>',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + this.scan_job_template.name + '</div>',
+            action: action,
+            actionText: 'DELETE'
         });
 
     };

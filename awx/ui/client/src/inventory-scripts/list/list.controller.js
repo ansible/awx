@@ -70,11 +70,12 @@ export default
                         });
                 };
 
-                var bodyHtml = "<div class=\"alert alert-info\">Are you sure you want to delete " + name + "?</div>";
+                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory script below?</div><div class="Prompt-bodyTarget">' + name + '</div>';
                 Prompt({
                     hdr: 'Delete',
                     body: bodyHtml,
-                    action: action
+                    action: action,
+                    actionText: 'DELETE'
                 });
             };
 
