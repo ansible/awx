@@ -1487,8 +1487,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if (this.form.licenseTabs) {
                     html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
-                    for (i = 0; i < this.form.tabs.length; i++) {
-                        tab = this.form.tabs[i];
+                    for (i = 0; i < this.form.licenseTabs.length; i++) {
+                        tab = this.form.licenseTabs[i];
                         html += "<li";
                         if (i === 0) {
                             html += " class=\"active\"";
@@ -1498,8 +1498,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     html += "</ul>\n";
                     html += "<div class=\"tab-content\">\n";
-                    for (i = 0; i < this.form.tabs.length; i++) {
-                        tab = this.form.tabs[i];
+                    for (i = 0; i < this.form.licenseTabs.length; i++) {
+                        tab = this.form.licenseTabs[i];
                         html += "<div class=\"tab-pane";
                         if (i === 0) {
                             html += " active";
