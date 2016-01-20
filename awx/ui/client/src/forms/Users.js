@@ -18,10 +18,7 @@ export default
             editTitle: '{{ username }}',
             name: 'user',
             forceListeners: true,
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
+            tabs: true,
 
             fields: {
                 first_name: {
