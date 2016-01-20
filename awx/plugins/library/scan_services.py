@@ -97,13 +97,23 @@ class ServiceScanService(BaseService):
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
             p = re.compile('(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
             rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
-            # extra flags needed for SLES11
-            if not any(p.match(line) for line in stdout.split('\n')):
-                # If p pattern is not found but p_simple is, we have single-column ouptut
+            # Check for special cases where stdout does not fit pattern
+            match_any = False
+            for line in stdout.split('\n'):
+                if p.match(line):
+                    match_any = True
+            if not match_any:
                 p_simple = re.compile('(?P<service>.*?)\s+(?P<rl0>on|off)')
-                if any(p_simple.match(line) for line in stdout.split('\n')):
-                    # Try extra flags " -l --allservices" to output all columns
+                match_any = False
+                for line in stdout.split('\n'):
+                    if p_simple.match(line):
+                        match_any = True
+                if match_any:
+                    # Try extra flags " -l --allservices" needed for SLES11
                     rc, stdout, stderr = self.module.run_command('%s -l --allservices' % chkconfig_path, use_unsafe_shell=True)
+                elif '--list' in stderr:
+                    # Extra flag needed for RHEL5
+                    rc, stdout, stderr = self.module.run_command('%s --list' % chkconfig_path, use_unsafe_shell=True)
             for line in stdout.split('\n'):
                 m = p.match(line)
                 if m:
@@ -116,11 +126,12 @@ class ServiceScanService(BaseService):
                             service_state = 'running'
                         #elif rc in (1,3):
                         else:
-                            service_state = 'stopped'
+                            if 'root' in stderr or 'permission' in stderr.lower() or 'not in sudoers' in stderr.lower():
+                                service_state = 'unable to scan, requires root'
+                            else:
+                                service_state = 'stopped'
                     service_data = {"name": service_name, "state": service_state, "source": "sysv"}
                     services.append(service_data)
-            # rc, stdout, stderr = self.module.run_command("%s --list" % chkconfig_path)
-            # Do something with chkconfig status
         return services
 
 class SystemctlScanService(BaseService):
@@ -167,6 +178,8 @@ def main():
         svc = svcmod.gather_services()
         if svc is not None:
             all_services += svc
+    if len(all_services) == 0:
+        module.fail_json(msg="Failed to find any services. Sometimes this solved by running with privilege escalation.")
     results = dict(ansible_facts=dict(services=all_services))
     module.exit_json(**results)
 
