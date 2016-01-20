@@ -9,4 +9,5 @@ from .cleanup_facts import * # noqa
 from .age_deleted import * # noqa
 from .remove_instance import * # noqa
 from .run_socketio_service import * # noqa
+from .update_password import * # noqa
 
