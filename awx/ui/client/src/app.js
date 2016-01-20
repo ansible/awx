@@ -569,9 +569,14 @@ var tower = angular.module('Tower', [
                 }
             }).
 
+            state('organizations.cards', {
+                url: '/foo',
+                templateUrl: urlPrefix + 'organizations/cards.partial.html',
+            }).
+
             state('organizations.add', {
                 url: '/add',
-                templateUrl: urlPrefix + 'partials/organizations.html',
+                templateUrl: urlPrefix + 'partials/organizations.crud.html',
                 controller: OrganizationsAdd,
                 ncyBreadcrumb: {
                     parent: "organizations",
@@ -586,7 +591,7 @@ var tower = angular.module('Tower', [
 
             state('organizations.edit', {
                 url: '/:organization_id',
-                templateUrl: urlPrefix + 'partials/organizations.html',
+                templateUrl: urlPrefix + 'partials/organizations.crud.html',
                 controller: OrganizationsEdit,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {

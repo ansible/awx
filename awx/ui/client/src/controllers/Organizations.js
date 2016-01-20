@@ -12,26 +12,57 @@
 
 
 export function OrganizationsList($stateParams, $scope, $rootScope, $location,
-    $log, Rest, Alert, Prompt, GenerateList, OrganizationList, SearchInit,
-    PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait,
+    $log, Rest, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
     Stream, $state) {
 
     ClearScope();
 
-    var list = OrganizationList,
-        generate = GenerateList,
-        paths = $location.path().replace(/^\//, '').split('/'),
-        mode = (paths[0] === 'organizations') ? 'edit' : 'select',
-        defaultUrl = GetBasePath('organizations'),
-        url;
+    var defaultUrl = GetBasePath('organizations');
 
-    generate.inject(OrganizationList, { mode: mode, scope: $scope });
+    var parseCardData = function (cards) {
+        return cards.map(function (card) {
+            var val = {};
+            val.name = card.name;
+            val.id = card.id;
+            if (card.id + "" === cards.activeCard) {
+                val.isActiveCard = true;
+            }
+            val.description = card.description || undefined;
+            return val;
+        });
+    };
+
+    var getOrganization = function (id) {
+        Rest.setUrl(defaultUrl);
+        Rest.get()
+            .success(function (data) {
+                data.results.activeCard = id;
+                $scope.orgCount = data.count;
+                $scope.orgCards = parseCardData(data.results);
+                Wait("stop");
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status });
+            });
+    };
+
+    $scope.$on("ReloadOrganzationCards", function(e, id) {
+        $scope.activeCard = id;
+        getOrganization(id);
+    });
+
+    $scope.$on("HideOrgListHeader", function() {
+        $scope.hideListHeader = true;
+    });
+
+    $scope.$on("ShowOrgListHeader", function() {
+        $scope.hideListHeader = false;
+    });
+
+    getOrganization();
+
     $rootScope.flashMessage = null;
-
-    if (mode === 'select') {
-        url = GetBasePath('projects') + $stateParams.project_id + '/organizations/';
-        SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
-    }
 
     if ($scope.removePostRefresh) {
         $scope.removePostRefresh();
@@ -42,20 +73,6 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
         $('#prompt-modal').modal('hide');
     });
 
-    // Initialize search and pagination, then load data
-    SearchInit({
-        scope: $scope,
-        set: list.name,
-        list: list,
-        url: defaultUrl
-    });
-    PaginateInit({
-        scope: $scope,
-        list: list,
-        url: defaultUrl
-    });
-    $scope.search(list.iterator);
-
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
@@ -65,6 +82,7 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
     };
 
     $scope.editOrganization = function (id) {
+        $scope.activeCard = id;
         $state.transitionTo('organizations.edit', {organization_id: id});
     };
 
@@ -77,7 +95,10 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
+                    if ($state.current.name !== "organzations") {
+                        $state.transitionTo("organizations");
+                    }
+                    $scope.$emit("ReloadOrganzationCards");
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -94,9 +115,8 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
 }
 
 OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
-    '$location', '$log', 'Rest', 'Alert', 'Prompt', 'generateList',
-    'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
+    '$location', '$log', 'Rest', 'Alert', 'Prompt', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'Wait',
     'Stream', '$state'
 ];
 
@@ -115,6 +135,8 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
     generator.inject(form, { mode: 'add', related: false, scope: $scope});
     generator.reset();
 
+    $scope.$emit("HideOrgListHeader");
+
     // Save
     $scope.formSave = function () {
         generator.clearApiErrors();
@@ -125,6 +147,7 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
         Rest.post({ name: $scope.name, description: $scope.description })
             .success(function (data) {
                 Wait('stop');
+                $scope.$emit("ReloadOrganzationCards", data.id);
                 if (base === 'organizations') {
                     $rootScope.flashMessage = "New organization successfully created!";
                     $location.path('/organizations/' + data.id);
@@ -139,6 +162,8 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
     };
 
     $scope.formCancel = function () {
+        $scope.$emit("ReloadOrganzationCards");
+        $scope.$emit("ShowOrgListHeader");
         $state.transitionTo('organizations');
     };
 }
@@ -165,6 +190,10 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         master = {},
         id = $stateParams.organization_id,
         relatedSets = {};
+
+    $scope.$emit("HideOrgListHeader");
+
+    $scope.$emit("ReloadOrganzationCards", id);
 
     $scope.organization_id = id;
 
@@ -225,11 +254,12 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         }
         Rest.setUrl(defaultUrl + id + '/');
         Rest.put(params)
-            .success(function () {
+            .success(function (data) {
                 Wait('stop');
                 $scope.organization_name = $scope.name;
                 master = params;
                 $rootScope.flashMessage = "Your changes were successfully saved!";
+                $scope.$emit("ReloadOrganzationCards", data.id);
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, OrganizationForm, { hdr: 'Error!',
@@ -244,6 +274,8 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     };
 
     $scope.formCancel = function () {
+        $scope.$emit("ReloadOrganzationCards");
+        $scope.$emit("ShowOrgListHeader");
         $state.transitionTo('organizations');
     };
 
