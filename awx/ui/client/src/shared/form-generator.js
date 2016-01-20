@@ -1427,6 +1427,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html +=  "<div class=\"Form-header\">";
                 html += "<div class=\"Form-title\">";
                 html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
+                if(this.form.name === "user"){
+                    html+= "<span class=\"Form-title--is_superuser\" "+
+                        "ng-if=is_superuser>Admin</span>";
+                }
                 html += "</div>\n";
 
                 html += "<div class=\"Form-exitHolder\">";
