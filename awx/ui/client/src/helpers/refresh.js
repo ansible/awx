@@ -82,8 +82,6 @@ export default
                         scope.getPage(currentPage, set, iterator);
                     });
             } else if ($location.$$url.split("/")[1] === params.set && $location.$$url.split("/")[2] && $location.$$url.split("/")[2] !== "add" && !scope.getNewPage) {
-                delete $rootScope.rowBeingEdited;
-                delete $rootScope.listBeingEdited;
                 var id = $location.$$url.split("/")[2];
                 var restUrl = params.url.split("?")[0];
                 var pageSize = scope[iterator + '_page_size'];

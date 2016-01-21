@@ -559,7 +559,10 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
                 ncyBreadcrumb: {
-                    parent: "setup",
+                    parent: function($scope) {
+                        $scope.$parent.$emit("ReloadOrgListView");
+                        return "setup";
+                    },
                     label: "ORGANIZATIONS"
                 },
                 resolve: {
@@ -571,7 +574,7 @@ var tower = angular.module('Tower', [
 
             state('organizations.add', {
                 url: '/add',
-                templateUrl: urlPrefix + 'partials/organizations.html',
+                templateUrl: urlPrefix + 'partials/organizations.crud.html',
                 controller: OrganizationsAdd,
                 ncyBreadcrumb: {
                     parent: "organizations",
@@ -586,7 +589,7 @@ var tower = angular.module('Tower', [
 
             state('organizations.edit', {
                 url: '/:organization_id',
-                templateUrl: urlPrefix + 'partials/organizations.html',
+                templateUrl: urlPrefix + 'partials/organizations.crud.html',
                 controller: OrganizationsEdit,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
