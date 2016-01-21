@@ -559,7 +559,10 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
                 ncyBreadcrumb: {
-                    parent: "setup",
+                    parent: function($scope) {
+                        $scope.$parent.$emit("ReloadOrgListView");
+                        return "setup";
+                    },
                     label: "ORGANIZATIONS"
                 },
                 resolve: {
@@ -567,11 +570,6 @@ var tower = angular.module('Tower', [
                         return FeaturesService.get();
                     }]
                 }
-            }).
-
-            state('organizations.cards', {
-                url: '/foo',
-                templateUrl: urlPrefix + 'organizations/cards.partial.html',
             }).
 
             state('organizations.add', {

@@ -47,6 +47,19 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
             });
     };
 
+    $scope.$on("ReloadOrgListView", function() {
+        if ($state.$current.self.name === "organizations") {
+            delete $scope.activeCard;
+            if ($scope.orgCards) {
+                $scope.orgCards = $scope.orgCards.map(function (card) {
+                    delete card.isActiveCard;
+                    return card;
+                });
+            }
+            $scope.hideListHeader = false;
+        }
+    });
+
     $scope.$on("ReloadOrganzationCards", function(e, id) {
         $scope.activeCard = id;
         getOrganization(id);
