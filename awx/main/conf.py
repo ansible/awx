@@ -45,7 +45,8 @@ class TowerConfiguration(object):
                                             value=value,
                                             value_type=settings_entry['type'])
         else:
-            settings_actual['value'] = value
+            settings_actual = settings_actual[0]
+            settings_actual.value = value
         settings_actual.save()
 
 tower_settings = TowerConfiguration()
