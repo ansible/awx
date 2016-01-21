@@ -10,6 +10,7 @@ export default function(){
         iterator: 'configure_job',
         index: false,
         hover: true,
+        listTitle: 'Management Jobs',
 
         fields: {
             name: {
@@ -22,7 +23,7 @@ export default function(){
             }
         },
         actions: {
-            
+
         },
         fieldActions: {
             submit: {

@@ -1,103 +1,73 @@
 /** @define SetupItem */
 
 @import '../shared/branding/colors.less';
+@import '../shared/branding/colors.default.less';
 
 .SetupItem {
+    background-color: @panel-bg;
+    border-radius: 5px;
+    border: 1px solid @btn-bord;
+    min-height: 110px;
+    padding: 20px;
+    margin-top: 20px;
+    transition: background-color 0.2s;
+}
 
-    @icon-small-size: 2.4rem;
-    @icon-large-size: 3.4rem;
+.SetupItem:hover {
+    background-color: @btn-bg-hov;
+}
 
-    &--aside {
-      padding-bottom: @vertical-basis / 2;
+.SetupItem-title{
+    font-size: 14px;
+    color: #848992;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.SetupItem-description{
+    font-size: 12px;
+    color: #848992;
+    text-align: center;
+}
+
+@media (min-width: 1179px) {
+    .SetupItem {
+        width: ~"calc(25% - 20px)";
+        margin-right: 20px;
     }
 
-    @vertical-basis: 1.4rem;
+    .SetupItem :nth-child(4n+4) {
+        margin-right: 0px;
+    }
+}
 
-    padding: @vertical-basis 0;
-
-    display: block;
-
-    color: black;
-    transition: background-color 0.15s ease-in-out;
-    background-color: white;
-
-    &:hover, &:focus, &:active {
-        color: black;
-
-        .SetupItem-title {
-            text-decoration: underline;
-        }
+@media (min-width: 901px) and (max-width: 1178px) {
+    .SetupItem {
+        width: ~"calc(33% - 11px)";
+        margin-right: 20px;
     }
 
-    &--hoverable {
-      &:hover {
-        background-color: lighten(@ansible-red, 28%);
-      }
+    .SetupItem:nth-child(3n+3) {
+        margin-right: 0px;
+    }
+}
+
+@media (min-width: 616px) and (max-width: 900px) {
+    .SetupItem {
+        width: ~"calc(50% - 10px)";
+        margin-right: 20px;
     }
 
-    &-icon {
-
-      &--aside {
-        align-self: flex-start;
-        margin-top: 3px;
-      }
-
-      // For some reason, credentials
-      // icon is taking up more space
-      // than it should; need to adjust
-      // it manually to line it up with
-      // others
-      &--credentials {
-        width: 4.3rem;
-        margin-left: -0.8rem;
-      }
-
-      // HACK: IE11 does not respect a fluid height for svg
-      // elements; explicitly setting for now
-      svg {
-        max-height: 33px;
-      }
-
-      flex: none; // do not let the flex container adjust this width!
-      width: @icon-large-size;
-      align-self: center;
+    .SetupItem:nth-child(2n+2) {
+        margin-right: 0px;
     }
+}
 
-    &--noIcon {
-      margin-left: @icon-large-size + 1.4rem; // 1.4rem comes from Media-figure margin
-    }
-
-    &--button {
-      border: 0;
-      text-align: left;
-      outline: none;
-        .SetupItem-icon {
-            // width: 100%;
-        }
-    }
-
-    // flexbox bug in firefox: you can't make a button display:flex
-    // https://github.com/philipwalton/flexbugs#9-button-elements-cant-be-flex-containers
-    &-firefoxFlexButtonFix {
-        display: flex;
-    }
-
-    &-title {
-        &--aside {
-          font-size: 1.9rem;
-          padding-bottom: 5px;
-        }
-        font-size: 2.8rem;
-        padding-bottom: 0.4rem;
-        margin: 0;
-    }
-
-    &-description {
-      &--aside {
-        font-size: 1.2rem;
-      }
-      color: black;
-      font-size: 1.4rem;
-      margin: 0;
+@media (max-width: 615px) {
+    .SetupItem {
+        width: 100%;
+        margin-right: 0px;
     }
 }

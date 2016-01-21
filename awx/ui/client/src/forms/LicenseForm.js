@@ -17,8 +17,9 @@ export default
 
             name: 'license',
             well: false,
+            editTitle: "License",
 
-            licensetabs: [{
+            licenseTabs: [{
                 name: 'license',
                 label: 'License'
             }, {
