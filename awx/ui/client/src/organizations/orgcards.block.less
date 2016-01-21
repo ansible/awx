@@ -8,6 +8,7 @@
 .OrgCards-card {
     background-color: #fff;
     padding: 20px;
+    padding-bottom: 0px;
     border-radius: 5px;
     border: 1px solid #e8e8e8;
     display: flex;
@@ -51,10 +52,30 @@
 }
 
 .OrgCards-description {
-    margin-bottom: 0px;
+    margin-bottom: 20px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.OrgCards-links {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.OrgCards-link {
+    flex: initial;
+    width: ~"calc(50% - 20px)";
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 20px;
+}
+
+.OrgCards-linkBadge {
+    margin-right: 10px;
 }
 
 @media (min-width: 1179px) {
