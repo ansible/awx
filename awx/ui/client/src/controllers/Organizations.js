@@ -87,8 +87,9 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete organization ' + name + '?</div>',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the organization below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            action: action,
+            actionText: 'DELETE'
         });
     };
 }
@@ -281,8 +282,9 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?',
-            action: action
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?</div>',
+            action: action,
+            actionText: 'DELETE'
         });
 
     };

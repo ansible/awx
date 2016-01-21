@@ -127,8 +127,9 @@ export default
                 if ($scope.PermissionAddAllowed) {
                     Prompt({
                         hdr: 'Delete',
-                        body: 'Are you sure you want to delete ' + name + '?',
-                        action: action
+                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the permission below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+                        action: action,
+                        actionText: 'DELETE'
                     });
                 }
             };

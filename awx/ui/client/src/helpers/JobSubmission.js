@@ -272,7 +272,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
       Prompt({
         hdr: 'Machine Credential Required',
-        body: "<div class=\"alert alert-info\">There are no machine credentials defined in Tower. Launching this job requires a machine credential. " +
+        body: "<div class=\"Prompt-bodyQuery\">There are no machine credentials defined in Tower. Launching this job requires a machine credential. " +
         "Create one now?",
         action: action
       });

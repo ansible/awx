@@ -540,8 +540,9 @@ export default
                 body = (action_label === 'cancel' || job.status === 'new') ? "Submit the request to cancel" : "Delete";
                 Prompt({
                     hdr: hdr,
-                    body: "<div class=\"alert alert-info\">" + body + " job #" + id + " " + job.name  + "?</div>",
-                    action: action
+                    body: "<div class=\"Prompt-bodyQuery\">" + body + " job #" + id + " " + job.name  + "?</div>",
+                    action: action,
+                    actionText: (action_label === 'cancel' || job.status === 'new') ? "YES" : "DELETE"
                 });
             });
 
