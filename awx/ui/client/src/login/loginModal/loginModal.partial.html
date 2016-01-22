@@ -14,16 +14,28 @@
                     Welcome to Ansible Tower! &nbsp;Please sign in.
                 </div>
                 <div class="LoginModal-alert LoginModal-alert--error" ng-show="sessionExpired">
-                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Your session timed out due to inactivity. Please sign in.</i>
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
+                    <div class="LoginModal-alertText">
+                        Your session timed out due to inactivity. Please sign in.
+                    </div>
                 </div>
                 <div class="LoginModal-alert LoginModal-alert--error" ng-show="sessionLimitExpired">
-                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Maximum per-user sessions reached. Please sign in.</i>
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
+                    <div class="LoginModal-alertText">
+                        Maximum per-user sessions reached. Please sign in.
+                    </div>
                 </div>
                 <div class="LoginModal-alert LoginModal-alert--error" ng-show="attemptFailed">
-                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">Invalid username and/or password.  Please try again.</i>
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
+                    <div class="LoginModal-alertText">
+                        Invalid username and/or password.  Please try again.
+                    </div>
                 </div>
                 <div class="LoginModal-alert LoginModal-alert--error" ng-show="thirdPartyAttemptFailed">
-                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle">{{ thirdPartyAttemptFailed }}</i>
+                    <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
+                    <div class="LoginModal-alertText">
+                        {{ thirdPartyAttemptFailed }}
+                    </div>
                 </div>
                 <form id="login-form"
                     name="loginForm"
