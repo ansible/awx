@@ -28,6 +28,31 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
                 val.isActiveCard = true;
             }
             val.description = card.description || undefined;
+            val.links = [];
+            val.links.push({
+                href: card.related.users,
+                name: "USERS"
+            });
+            val.links.push({
+                href: card.related.teams,
+                name: "TEAMS"
+            });
+            val.links.push({
+                href: card.related.inventories,
+                name: "INVENTORIES"
+            });
+            val.links.push({
+                href: card.related.projects,
+                name: "PROJECTS"
+            });
+            val.links.push({
+                href: card.related.job_templates,
+                name: "JOB TEMPLATES"
+            });
+            val.links.push({
+                href: card.related.admins,
+                name: "ADMINS"
+            });
             return val;
         });
     };

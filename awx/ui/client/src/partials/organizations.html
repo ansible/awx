@@ -42,6 +42,18 @@
                 </div>
             </div>
             <p class="OrgCards-description">{{ card.description || "Place organization description here" }}</p>
+            <div class="OrgCards-links">
+                <div class="OrgCards-link" ng-repeat="link in card.links">
+                    <span class="badge List-titleBadge
+                        OrgCards-linkBadge">
+                        0
+                    </span>
+                    <a class="OrgCards-linkName"
+                        ng-href="{{ link.href }}">
+                        {{ link.name }}
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
