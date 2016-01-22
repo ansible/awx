@@ -265,6 +265,11 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
+        $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
+            // Cleanup after a delete
+            Wait('stop');
+            $('#prompt-modal').modal('hide');
+        });
 
         $scope.PermissionAddAllowed = false;
 

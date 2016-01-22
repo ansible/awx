@@ -10,10 +10,17 @@ export default ['$http', function($http) {
             // get the name of the object
             return $http.get(url + "?id=" + id)
                 .then(function (data) {
-                    var name = data.data.results[0].name;
+                    var queryValue, queryType;
+                    if (data.data.results[0].type === "user") {
+                        queryValue = data.data.results[0].username;
+                        queryType = "username";
+                    } else {
+                        queryValue = data.data.results[0].name;
+                        queryType = "name";
+                    }
                     // get how many results are less than or equal to
                     // the name
-                    return $http.get(url + "?name__lte=" + name)
+                    return $http.get(url + "?" + queryType + "__lte=" + queryValue)
                         .then(function (data) {
                             // divide by the page size to get what
                             // page the data should be on
