@@ -68,9 +68,10 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('credentials')",
-                            icon: 'icon-plus',
                             label: 'Add',
-                            add: 'Add a new credential'
+                            add: 'Add a new credential',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
@@ -112,10 +113,11 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('permissions')",
-                            icon: 'icon-plus',
                             label: 'Add',
                             awToolTip: 'Add a permission for this user',
-                            ngShow: 'PermissionAddAllowed'
+                            ngShow: 'PermissionAddAllowed',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
@@ -175,8 +177,9 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('projects')",
-                            icon: 'icon-plus',
-                            label: 'Add'
+                            label: 'Add',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
@@ -218,9 +221,10 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('users')",
-                            icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add a user'
+                            awToolTip: 'Add a user',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 

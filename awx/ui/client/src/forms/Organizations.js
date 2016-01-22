@@ -58,8 +58,9 @@ export default
                         add: {
                             ngClick: "add('users')",
                             label: 'Add',
-                            icon: 'icon-plus',
-                            awToolTip: 'Add a new user'
+                            awToolTip: 'Add a new user',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
@@ -104,9 +105,10 @@ export default
                     actions: { // Actions displayed top right of list
                         add: {
                             ngClick: "add('admins')",
-                            icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add new administrator'
+                            awToolTip: 'Add new administrator',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
                     fields: {
