@@ -16,7 +16,7 @@ def get_license(show_key=False):
     place on this Tower instance.
     """
     license_reader = TaskSerializer()
-    return license_reader.from_file(show_key=show_key)
+    return license_reader.from_database(show_key=show_key)
 
 
 def feature_enabled(name):
