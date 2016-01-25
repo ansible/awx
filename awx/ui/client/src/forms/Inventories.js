@@ -88,9 +88,10 @@ export default
                     actions: {
                         add: {
                             ngClick: "addScanJob()",
-                            icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add a scan job template'
+                            awToolTip: 'Add a scan job template',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 

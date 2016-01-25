@@ -123,9 +123,10 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('credentials')",
-                            icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add a credential for this user'
+                            awToolTip: 'Add a credential for this user',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
@@ -167,10 +168,11 @@ export default
                     actions: {
                         add: {
                             ngClick: "add('permissions')",
-                            icon: 'icon-plus',
                             label: 'Add',
                             awToolTip: 'Add a permission for this user',
-                            ngShow: 'PermissionAddAllowed'
+                            ngShow: 'PermissionAddAllowed',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 

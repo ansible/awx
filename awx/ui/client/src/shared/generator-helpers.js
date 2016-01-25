@@ -745,4 +745,32 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             return html;
         };
     }
-]);
+])
+.factory('ActionButton', function () {
+    return function (options) {
+
+        var html = '';
+
+        html += '<button ';
+        html += (options.mode) ? "mode=\"" + options.mode + "\" " : "";
+        html += (options.awToolTip) ? "aw-tool-tip=\"" + options.awToolTip + "\" " : "";
+        html += (options.dataTipWatch) ? "data-tip-watch=\"" + options.dataTipWatch + "\" " : "";
+        html += (options.dataPlacement) ? "data-placement=\"" + options.dataPlacement + "\" " : "";
+        html += (options.dataContainer) ? "data-container=\"" + options.dataContainer + "\" " : "";
+        html += (options.actionClass) ? "class=\"" + options.actionClass + "\" " : "";
+        html += (options.dataTitle) ? "data-title=\"" + options.dataTitle + "\" " : "";
+        html += (options.ngDisabled) ? "ng-disabled=\"" + options.ngDisabled + "\" " : "";
+        html += (options.ngClick) ? "ng-click=\"$eval(" + options.ngClick + ")\" " : "";
+        html += (options.ngShow) ? "ng-show=\"" + options.ngShow + "\" " : "";
+        html += (options.ngHide) ? "ng-hide=\"" + options.ngHide + "\" " : "";
+        html += (options.awFeature) ? "aw-feature=\"" + options.awFeature + "\" " : "";
+        html += '>';
+        html += '<span>';
+        html += (options.buttonContent) ? options.buttonContent : "";
+        html += '</span>';
+        html += '</button>';
+
+        return html;
+
+    };
+});

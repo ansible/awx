@@ -140,9 +140,9 @@ export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList', 'SearchWidget', 'PaginateWidget', 'Attr',
-    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon', 'Store',
+    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon', 'Store', 'ActionButton',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, DropDown, Empty, SelectIcon, Store) {
+        HelpCollapse, DropDown, Empty, SelectIcon, Store, ActionButton) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -586,51 +586,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 if (!this.scope.$$phase) {
                     this.scope.$digest();
                 }
-            },
-
-            button: function(params) {
-                var tagName = "button";
-                var options = params.btn;
-                var tagParts =
-                    [   tagName,
-                        "toolbar-button"
-                    ];
-
-                var attrNames = _.keys(options);
-
-                function isSupportedKey(keyName) {
-                    if (keyName === 'icon') {
-                        //TODO: Let's add a depecrated logger to our logging helper to output the below message
-                        //
-                        // The form action key "icon" is deprecated in favor of using the name of the field as the icon name or the iconClass option.
-                        return false;
-                    }
-
-                    return true;
-                }
-
-                var attrs = attrNames
-                .filter(function(name) {
-
-                    return isSupportedKey(name) &&
-                        !_.isEmpty(options[name]);
-
-                }).map(function(name) {
-                    return Attr(options, name);
-                });
-
-                tagParts =
-                    tagParts
-                        .concat(attrs)
-                        .concat(
-                            Attr(params, 'iconName'),
-                            Attr(params, 'toolbar')
-                        );
-
-                var html = "<" + tagParts.join(" ") + "></" + tagName + ">";
-
-                return html;
-
             },
 
             navigationLink: NavigationLink,
@@ -1638,7 +1593,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     html += GenerateList.buildHTML(collection1, { mode: 'edit' });
                                 }
                                 else {
-                                    html += this.GenerateColleciton({ form: this.form, related: itm }, options);
+                                    html += this.GenerateCollection({ form: this.form, related: itm }, options);
                                 }
                                 html += "</div>\n";
                             }
@@ -1671,7 +1626,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += GenerateList.buildHTML(collection, { mode: 'edit' });
                     }
                     else {
-                        html += this.GenerateColleciton({ form: form, related: itm }, options);
+                        html += this.GenerateCollection({ form: form, related: itm }, options);
                     }
                     html += "</div>\n"; // accordion inner
                 }
@@ -1683,7 +1638,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return html;
             },
 
-            GenerateColleciton: function(params, options) {
+            GenerateCollection: function(params, options) {
                 var html = '',
                     form = params.form,
                     itm = params.related,
@@ -1711,25 +1666,29 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 for (act in collection.actions) {
                     action = collection.actions[act];
-                    html += this.button({
-                        btn: action,
-                        iconName: act,
-                        toolbar: true
-                    });
+                    html += ActionButton(action);
                 }
 
                 html += "</div>\n";
                 html += "</div>\n";
                 html += "</div><!-- row -->\n";
 
+                // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
+                html += "<div class=\"row\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == true && " + itm + ".length == 0\">\n";
+                html += "<div class=\"col-lg-12\">No records matched your search.</div>\n";
+                html += "</div>\n";
+
+                // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
+                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
+
                 // Start the list
-                html += "<div class=\"list-wrapper\">\n";
-                html += "<table id=\"" + itm + "_table" + "\" class=\"" + collection.iterator + " table table-condensed table-hover\">\n";
+                html += "<div class=\"list-wrapper\"  ng-show=\"" + collection.iterator + "Loading == true || (" + collection.iterator + "Loading == false && " + itm + ".length > 0)\">\n";
+                html += "<table id=\"" + itm + "_table" + "\" class=\"" + collection.iterator + " List-table\">\n";
                 html += "<thead>\n";
-                html += "<tr>\n";
+                html += "<tr class=\"List-tableHeaderRow\">\n";
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
-                    html += "<th class=\"list-header\" id=\"" + collection.iterator + '-' + fld + "-header\" " +
+                    html += "<th class=\"List-tableHeader list-header\" id=\"" + collection.iterator + '-' + fld + "-header\" " +
                         "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">" +
                         collection.fields[fld].label;
                     html += " <i class=\"";
@@ -1744,15 +1703,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     html += "\"></i></a></th>\n";
                 }
-                html += "<th>Actions</th>\n";
+                html += "<th class=\"List-tableHeader\">Actions</th>\n";
                 html += "</tr>\n";
                 html += "</thead>";
                 html += "<tbody>\n";
 
-                html += "<tr ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
+                html += "<tr class=\"List-tableHeaderRow\" ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
+                html += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
+                html += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                 html += "id=\"{{ " + collection.iterator + ".id }}\">\n";
                 if (collection.index === undefined || collection.index !== false) {
-                    html += "<td>{{ $index + ((" + collection.iterator + "_page - 1) * " +
+                    html += "<td class=\"List-tableCell\">{{ $index + ((" + collection.iterator + "_page - 1) * " +
                         collection.iterator + "_page_size) + 1 }}.</td>\n";
                 }
                 cnt = 1;
@@ -1769,14 +1730,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 // Row level actions
-                html += "<td class=\"actions\">";
+                html += "<td class=\"List-tableCell List-actionButtonCell actions\">";
                 for (act in collection.fieldActions) {
                     fAction = collection.fieldActions[act];
-                    html += "<a id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                    html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
                     html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                     html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
                     html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
                     html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
+                    html += " class=\"List-actionButton ";
+                    html += (act === 'delete') ? "List-actionButton--delete" : "";
+                    html += "\"";
                     html += ">";
                     if (fAction.iconClass) {
                         html += "<i class=\"" + fAction.iconClass + "\"></i>";
@@ -1787,14 +1751,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     // html += SelectIcon({ action: act });
                     //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
-                    html += "</a>";
+                    html += "</button>";
                 }
                 html += "</td>";
-                html += "</tr>\n";
-
-                // Message for when a related collection is empty
-                html += "<tr class=\"loading-info\" ng-show=\"" + collection.iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
-                html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
                 html += "</tr>\n";
 
                 // Message for loading

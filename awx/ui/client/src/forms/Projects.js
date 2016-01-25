@@ -234,9 +234,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 actions: {
                     add: {
                         ngClick: "add('organizations')",
-                        icon: 'icon-plus',
                         label: 'Add',
-                        awToolTip: 'Add an organization'
+                        awToolTip: 'Add an organization',
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD'
                     }
                 },
 
@@ -276,15 +277,20 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 open: false,
 
                 actions: {
-                    add: {
-                        mode: 'all',
-                        ngClick: 'addSchedule()',
-                        awToolTip: 'Add a new schedule'
-                    },
                     refresh: {
                         mode: 'all',
                         awToolTip: "Refresh the page",
-                        ngClick: "refreshSchedules()"
+                        ngClick: "refreshSchedules()",
+                        actionClass: 'btn List-buttonDefault',
+                        buttonContent: 'REFRESH',
+                        ngHide: 'scheduleLoading == false && schedule_active_search == false && schedule_total_rows < 1'
+                    },
+                    add: {
+                        mode: 'all',
+                        ngClick: 'addSchedule()',
+                        awToolTip: 'Add a new schedule',
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD'
                     }
                 },
                 fields: {
