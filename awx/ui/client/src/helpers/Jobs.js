@@ -396,7 +396,8 @@ export default
                 mode: 'edit',
                 id: id,
                 scope: scope,
-                showSearch: false
+                showSearch: false,
+                title: false
             });
 
             SearchInit({
