@@ -14,7 +14,7 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, Stream, $state) {
+    SelectionInit, Wait, Stream, $state, Refresh) {
 
     ClearScope();
 
@@ -25,7 +25,22 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
         mode = (paths[0] === 'teams') ? 'edit' : 'select',
         url;
 
-    generator.inject(list, { mode: mode, scope: $scope });
+    var injectForm = function() {
+        generator.inject(list, { mode: mode, scope: $scope });
+    };
+
+    injectForm();
+
+    $scope.$on("RefreshTeamsList", function() {
+        injectForm();
+        Refresh({
+            scope: $scope,
+            set: 'teams',
+            iterator: 'team',
+            url: GetBasePath('teams') + "?order_by=name&page_size=" + $scope.team_page_size
+        });
+    });
+
     $scope.selected = [];
 
     url = GetBasePath('base') + $location.path() + '/';
@@ -111,7 +126,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    'Stream', '$state'
+    'Stream', '$state', 'Refresh'
 ];
 
 
@@ -154,6 +169,7 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
             .success(function (data) {
                 Wait('stop');
                 $rootScope.flashMessage = "New team successfully created!";
+                $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
                 $location.path('/teams/' + data.id);
             })
             .error(function (data, status) {
@@ -194,6 +210,8 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
 
     $scope.permission_label = {};
     $scope.permission_search_select = [];
+
+    $scope.$emit("RefreshTeamsList");
 
     // return a promise from the options request with the permission type choices (including adhoc) as a param
     var permissionsChoice = fieldChoices({

@@ -25,7 +25,7 @@ export default ['$http', function($http) {
                             // divide by the page size to get what
                             // page the data should be on
                             var count = data.data.count;
-                            return Math.ceil(count/pageSize);
+                            return Math.ceil(count/parseInt(pageSize));
                         });
                 });
         }
