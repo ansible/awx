@@ -18,7 +18,10 @@ RUN mkdir -p /data/db
 ADD license /etc/awx/license
 ADD license /etc/tower/license
 RUN pip2 install honcho
+RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64.deb
+RUN dpkg -i dumb-init_*.deb
 ADD start_development.sh /start_development.sh
 
 EXPOSE 8013 8080 22
+ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh

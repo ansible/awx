@@ -32,5 +32,5 @@ ADD start_everything.sh /start_everything.sh
 ADD start_development.sh /start_development.sh
 
 EXPOSE 8013 8080 27017 22
-ENTRYPOINT /usr/bin/dumb-init
+ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh
