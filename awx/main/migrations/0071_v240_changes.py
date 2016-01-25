@@ -22,7 +22,7 @@ class Migration(DataMigration):
                 elif stj.name == "Cleanup Activity Stream":
                     sched = orm.Schedule(name="Cleanup Activity Schedule", rrule="DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU" % nowtime,
                                          description="Automatically Generated Schedule", enabled=True, extra_data={"days": "355"})
-                elif stj.name == "Cleanup Fact Details" and feature_enabled('system_tracking'):
+                elif stj.name == "Cleanup Fact Details" and feature_enabled('system_tracking', bypass_database=True):
                     sched = orm.Schedule(name="Cleanup Fact Schedule", rrule="DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1" % nowtime,
                                          description="Automatically Generated Schedule", enabled=True, extra_data={'older_than': '120d', 'granularity': '1w'})
                 else:
