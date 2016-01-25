@@ -299,29 +299,31 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         list = this.list,
                         base, size, action, fld, cnt, field_action, fAction, itm;
 
-                    html += "<div class=\"List-header\">";
-                    html += "<div class=\"List-title\">";
+                    if(options.title !== false){
+                        html += "<div class=\"List-header\">";
+                        html += "<div class=\"List-title\">";
 
-                    if (list.listTitle) {
+                        if (list.listTitle) {
 
-                        html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
-                        html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
+                            html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
+                            html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
 
+                        }
+
+                        html += "</div>";
+                        html += "<div class=\"List-actions\">";
+                        html += "<div class=\"list-actions\" ng-include=\"'" +
+                            templateUrl('shared/list-generator/list-actions') +
+                            "'\">\n";
+
+                        for (action in list.actions) {
+                            list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                        }
+
+                        html += "</div>\n";
+                        html += "</div>";
+                        html += "</div>";
                     }
-
-                    html += "</div>";
-                    html += "<div class=\"List-actions\">";
-                    html += "<div class=\"list-actions\" ng-include=\"'" +
-                        templateUrl('shared/list-generator/list-actions') +
-                        "'\">\n";
-
-                    for (action in list.actions) {
-                        list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
-                    }
-
-                    html += "</div>\n";
-                    html += "</div>";
-                    html += "</div>";
 
                     if (options.mode === 'edit' && list.editInstructions) {
                         html += "<div class=\"alert alert-info alert-block\">\n";

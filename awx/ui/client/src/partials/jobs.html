@@ -10,13 +10,21 @@
             </div>
         </div>
 
-        <div >
-            <ul id="jobs_tabs" class="nav nav-tabs">
-                <li class="active"><a id="active_jobs_link" ng-click="toggleTab($event, 'active_jobs_link', 'jobs_tabs')" href="#active-jobs-tab" data-toggle="tab">Jobs</a></li>
-                <li><a id="scheduled_jobs_link" ng-click="toggleTab($event, 'scheduled_jobs_link', 'job_status_tabs')" href="#scheduled-jobs-tab" data-toggle= "tab">Schedule</a></li>
-            </ul>
-            <div  id="jobs-tab-content" class= "tab-content">
-                <div class="tab-pane active" id= "active-jobs-tab">
+        <div>
+            <div id="jobs_tabs" class="Form-tabHolder">
+                <div class= "Form-tab is-selected" id="active_jobs_link"
+                    ng-class="{'is-selected': jobsSelected }"
+                    ng-click="toggleTab('jobs')">
+                    Jobs
+                </div>
+                <div id="scheduled_jobs_link" class="Form-tab"
+                    ng-class="{'is-selected': schedulesSelected }"
+                    ng-click="toggleTab('scheduled')">
+                    Schedule
+                </div>
+            </div>
+            <div  id="jobs-tab-content" class="Form-tabSection"
+                ng-class="{'is-selected': jobsSelected }">
                     <div class= "row search-row">
                         <div class="col-lg-4 col-md-4 " id="active-jobs-search-container">
                         </div>
@@ -26,7 +34,8 @@
                         </div>
                     </div>
                 </div>
-                <div class= "tab-pane" id="scheduled-jobs-tab">
+                <div class= "Form-tabSection" id="scheduled-jobs-tab"
+                    ng-class="{'is-selected': schedulesSelected }">
                     <div class= "row search-row">
                         <div class="col-lg-4 col-md-4 " id="scheduled-jobs-tab-search-container">
                         </div>

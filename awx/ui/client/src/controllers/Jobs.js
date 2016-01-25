@@ -23,6 +23,8 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         api_complete = false,
         max_rows;
 
+    $scope.jobsSelected = true;
+
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
     }
@@ -89,6 +91,20 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             jobs_scope.search('completed_job');
             scheduled_scope.search('schedule');
         };
+
+        function clearTabs() {
+           $scope.jobsSelected = false;
+           $scope.schedulesSelected = false;
+       }
+
+        $scope.toggleTab = function(tab) {
+           clearTabs();
+           if (tab === "jobs") {
+               $scope.jobsSelected = true;
+           } else if (tab === "scheduled") {
+               $scope.schedulesSelected = true;
+           }
+       };
 
         if ($rootScope.removeJobStatusChange) {
             $rootScope.removeJobStatusChange();

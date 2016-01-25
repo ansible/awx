@@ -710,7 +710,8 @@ export default
                     id: id,
                     scope: scope,
                     searchSize: (searchSize) ? searchSize : 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
-                    showSearch: true
+                    showSearch: true,
+                    title: false
                 });
 
                 SearchInit({
