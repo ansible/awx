@@ -28,6 +28,7 @@
                 <div class="OrgCards-actionItems">
                     <button class="OrgCards-actionItem
                         List-actionButton"
+                        ng-class="{'List-editButton--selected': activeCard === card.id || card.isActiveCard }"
                         ng-click="editOrganization(card.id)">
                         <i class="OrgCards-actionItemIcon fa fa-pencil">
                         </i>

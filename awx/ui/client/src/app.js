@@ -1061,20 +1061,6 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
-                    // broadcast event change if editing crud object
-                    if ($location.$$path.split("/")[2]) {
-                        var list = $location.$$path.split("/")[1];
-                        var id = $location.$$path.split("/")[2];
-
-                        delete $rootScope.listBeingEdited;
-                        delete $rootScope.rowBeingEdited;
-
-                        $rootScope.$broadcast("EditIndicatorChange", list, id);
-                    } else if ($rootScope.addedAnItem) {
-                        delete $rootScope.addedAnItem;
-                    } else {
-                        $rootScope.$broadcast("RemoveIndicator");
-                    }
 
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
@@ -1126,6 +1112,23 @@ var tower = angular.module('Tower', [
                         }
                     }
                     activateTab();
+                });
+
+                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                    // broadcast event change if editing crud object
+                    if ($location.$$path.split("/")[2]) {
+                        var list = $location.$$path.split("/")[1];
+                        var id = $location.$$path.split("/")[2];
+
+                        delete $rootScope.listBeingEdited;
+                        delete $rootScope.rowBeingEdited;
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($rootScope.addedAnItem) {
+                        delete $rootScope.addedAnItem;
+                    } else {
+                        $rootScope.$broadcast("RemoveIndicator");
+                    }
                 });
 
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {

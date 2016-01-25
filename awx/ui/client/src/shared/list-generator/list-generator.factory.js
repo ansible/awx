@@ -501,6 +501,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     innerTable += (field_action === 'delete') ? "List-actionButton--delete" : "";
                                     innerTable += (field_action === 'cancel') ? "cancel red-txt" : "";
                                     innerTable += "\" ";
+                                    // debugger;
+                                    // rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
+                                    innerTable += (field_action === 'edit') ? "ng-class=\"[rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-editButton--selected' : '']\"" : "";
                                     innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                                     innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
                                     innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";

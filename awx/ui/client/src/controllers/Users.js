@@ -14,7 +14,7 @@
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, Stream, $state) {
+    Wait, Stream, $state, Refresh) {
 
     ClearScope();
 
@@ -26,7 +26,21 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
         url = (base === 'organizations') ? GetBasePath('organizations') + $stateParams.organization_id + '/users/' :
             GetBasePath('teams') + $stateParams.team_id + '/users/';
 
-    generator.inject(UserList, { mode: mode, scope: $scope });
+    var injectForm = function() {
+        generator.inject(UserList, { mode: mode, scope: $scope });
+    };
+
+    injectForm();
+
+    $scope.$on("RefreshUsersList", function() {
+        injectForm();
+        Refresh({
+            scope: $scope,
+            set: 'users',
+            iterator: 'user',
+            url: GetBasePath('users') + "?order_by=username&page_size=" + $scope.user_page_size
+        });
+    });
 
     $scope.selected = [];
 
@@ -101,7 +115,8 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
 UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream', '$state'
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream', '$state',
+    'Refresh'
 ];
 
 
@@ -173,6 +188,7 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
                         var base = $location.path().replace(/^\//, '').split('/')[0];
                         if (base === 'users') {
                             $rootScope.flashMessage = 'New user successfully created!';
+                            $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
                             $location.path('/users/' + data.id);
                         }
                         else {
@@ -226,6 +242,8 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
     $scope.permission_label = {};
     $scope.permission_search_select = [];
 
+    $scope.$emit("RefreshUsersList");
+
     // return a promise from the options request with the permission type choices (including adhoc) as a param
     var permissionsChoice = fieldChoices({
         scope: $scope,
@@ -265,6 +283,11 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
+        $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
+            // Cleanup after a delete
+            Wait('stop');
+            $('#prompt-modal').modal('hide');
+        });
 
         $scope.PermissionAddAllowed = false;
 

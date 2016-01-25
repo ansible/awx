@@ -112,7 +112,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     if ($scope.removeChoicesHere) {
         $scope.removeChoicesHere();
     }
-    $scope.removeChoicesHere = $scope.$on('choicesCompleteProject', function () {
+    $scope.removeChoicesHere = $scope.$on('choicesCompleteProjectList', function () {
         var opt;
 
         list.fields.scm_type.searchOptions = $scope.project_scm_type_options;
@@ -164,13 +164,13 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         $scope.search(list.iterator);
     });
 
-    if ($scope.removeChoicesReady) {
-        $scope.removeChoicesReady();
+    if ($scope.removeChoicesReadyList) {
+        $scope.removeChoicesReadyList();
     }
-    $scope.removeChoicesReady = $scope.$on('choicesReadyProject', function () {
+    $scope.removeChoicesReadyList = $scope.$on('choicesReadyProjectList', function () {
         choiceCount++;
         if (choiceCount === 2) {
-            $scope.$emit('choicesCompleteProject');
+            $scope.$emit('choicesCompleteProjectList');
         }
     });
 
@@ -180,7 +180,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         url: defaultUrl,
         field: 'status',
         variable: 'project_status_options',
-        callback: 'choicesReadyProject'
+        callback: 'choicesReadyProjectList'
     });
 
     // Load the list of options for Kind
@@ -189,7 +189,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         url: defaultUrl,
         field: 'scm_type',
         variable: 'project_scm_type_options',
-        callback: 'choicesReadyProject'
+        callback: 'choicesReadyProjectList'
     });
 
     $scope.showActivity = function () {
