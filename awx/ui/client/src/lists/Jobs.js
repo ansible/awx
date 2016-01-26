@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobsListDefinition', [])
@@ -74,6 +74,13 @@ export default
         actions: { },
 
         fieldActions: {
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ job.id }}/stdout',
+                awToolTip: 'View standard output',
+                dataPlacement: 'top',
+                ngShow: "job.type == 'job'"
+            },
             submit: {
                 mode: 'all',
                 icon: 'icon-rocket',
@@ -95,13 +102,6 @@ export default
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top',
                 ngShow: "job.status != 'running'"
-            },
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "job.type == 'job'"
             }
         }
     });

@@ -5,11 +5,15 @@
     flex-wrap:wrap;
     flex-direction: row;
     padding: 15px 20px;
+    -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
+    -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
 }
 
 .Prompt-header {
     display: flex;
     width: 100%;
+    margin-bottom: 25px;
 }
 
 .Prompt-title {
@@ -33,13 +37,12 @@
     height:20px;
     font-size: 20px;
     background-color:@default-bg;
-    color:@default-second-border;
-    transition: color 0.2s;
+    color:@default-icon;
     line-height:1;
 }
 
 .Prompt-exit:hover{
-    color:@default-icon;
+    color:@default-icon-hov;
 }
 
 .Prompt-body {
@@ -47,7 +50,7 @@
 }
 
 .Prompt-bodyQuery {
-    padding: 15px 0px;
+    margin-bottom: 20px;
     color: @default-interface-txt;
 }
 
@@ -58,7 +61,7 @@
 .Prompt-footer {
     display: flex;
     justify-content: flex-end;
-    padding-top: 20px;
+    margin-top: 20px;
     width: 100%;
 }
 
@@ -91,6 +94,10 @@
 .Prompt-errorButton:hover {
     background-color: @default-err-hov;
     color: @btn-txt-sel;
+}
+
+.Prompt-footerButton {
+    padding: 4px 8px;
 }
 
 .Prompt-footerButton + .Prompt-footerButton {

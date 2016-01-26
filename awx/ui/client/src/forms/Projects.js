@@ -261,7 +261,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     },
                     "delete": {
                         label: 'Delete',
-                        ngClick: "delete('organizations', organization.id, organization.name, 'organizations')",
+                        ngClick: "delete('organizations', organization.id, organization.name, 'organization')",
                         icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the organization'

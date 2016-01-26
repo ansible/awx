@@ -60,18 +60,18 @@ export default
                 iconClass: "{{ 'fa icon-job-' + host.active_failures }}",
                 id: 'active-failutes-action'
             },
+            copy: {
+                mode: 'all',
+                ngClick: "copyHost(host.id)",
+                awToolTip: 'Copy or move host to another group',
+                dataPlacement: "top"
+            },
             edit: {
                 //label: 'Edit',
                 ngClick: "editHost(host.id)",
                 icon: 'icon-edit',
                 awToolTip: 'Edit host',
                 dataPlacement: 'top'
-            },
-            copy: {
-                mode: 'all',
-                ngClick: "copyHost(host.id)",
-                awToolTip: 'Copy or move host to another group',
-                dataPlacement: "top"
             },
             "delete": {
                 //label: 'Delete',

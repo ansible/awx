@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
@@ -32,7 +32,7 @@ export default
                 label: 'Next Run',
                 noLink: true,
                 searchable: false,
-                columnClass: "col-lg-2 col-md-2 hidden-xs",
+                columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
                 filter: "longDate",
                 key: true
             },
@@ -55,7 +55,7 @@ export default
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-md-3 col-sm-4 col-xs-4',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule.id)",
@@ -68,6 +68,9 @@ export default
         actions: { },
 
         fieldActions: {
+
+            columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
+
             "play": {
                 mode: "all",
                 ngClick: "toggleSchedule($event, schedule.id)",

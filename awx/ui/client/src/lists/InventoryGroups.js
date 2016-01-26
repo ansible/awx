@@ -154,18 +154,18 @@ export default
                     "|| group.status == 'updating'",
                 dataPlacement: "top"
             },
-            edit: {
-                //label: 'Edit',
-                mode: 'all',
-                ngClick: "editGroup(group.id)",
-                awToolTip: 'Edit group',
-                dataPlacement: "top"
-            },
             copy: {
                 mode: 'all',
                 ngClick: "copyGroup(group.id)",
                 awToolTip: 'Copy or move group',
                 ngShow: "group.id > 0",
+                dataPlacement: "top"
+            },
+            edit: {
+                //label: 'Edit',
+                mode: 'all',
+                ngClick: "editGroup(group.id)",
+                awToolTip: 'Edit group',
                 dataPlacement: "top"
             },
             "delete": {

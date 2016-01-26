@@ -382,7 +382,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                         html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == true && " + list.name + ".length == 0\">\n";
-                        html += "<div class=\"col-lg-12\">No records matched your search.</div>\n";
+                        html += "<div class=\"col-lg-12 List-searchNoResults\">No records matched your search.</div>\n";
                         html += "</div>\n";
                     }
 

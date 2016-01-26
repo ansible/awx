@@ -484,7 +484,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
 
             Prompt({
                 hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to remove ' + name + ' from ' + $scope.username + ' ' + title + '?</div>',
+                body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.username + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
                 action: action,
                 actionText: 'DELETE'
             });

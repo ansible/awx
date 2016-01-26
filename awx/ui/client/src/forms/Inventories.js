@@ -127,6 +127,14 @@ export default
                             awToolTip: 'Schedule future job template runs',
                             dataPlacement: 'top',
                         },
+                        copy: {
+                            label: 'Copy',
+                            ngClick: "copyScanJobTemplate()",
+                            "class": 'btn-danger btn-xs',
+                            awToolTip: 'Copy template',
+                            dataPlacement: 'top',
+                            ngHide: 'job_template.summary_fields.can_copy === false'
+                        },
                         edit: {
                             label: 'Edit',
                             ngClick: "editScanJob()",
@@ -140,14 +148,6 @@ export default
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the scan job template'
-                        },
-                        copy: {
-                            label: 'Copy',
-                            ngClick: "copyScanJobTemplate()",
-                            "class": 'btn-danger btn-xs',
-                            awToolTip: 'Copy template',
-                            dataPlacement: 'top',
-                            ngHide: 'job_template.summary_fields.can_copy === false'
                         }
                     }
                 }
