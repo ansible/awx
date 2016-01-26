@@ -69,6 +69,14 @@ export default
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
             },
+            copy: {
+                label: 'Copy',
+                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
+                "class": 'btn-danger btn-xs',
+                awToolTip: 'Copy template',
+                dataPlacement: 'top',
+                ngHide: 'job_template.summary_fields.can_copy===false'
+            },
             edit: {
                 label: 'Edit',
                 ngClick: "editJobTemplate(job_template.id)",
@@ -82,14 +90,6 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top',
-            },
-            copy: {
-                label: 'Copy',
-                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
-                "class": 'btn-danger btn-xs',
-                awToolTip: 'Copy template',
-                dataPlacement: 'top',
-                ngHide: 'job_template.summary_fields.can_copy===false'
             }
         }
     });

@@ -1675,7 +1675,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                 html += "<div class=\"row\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == true && " + itm + ".length == 0\">\n";
-                html += "<div class=\"col-lg-12\">No records matched your search.</div>\n";
+                html += "<div class=\"col-lg-12 List-searchNoResults\">No records matched your search.</div>\n";
                 html += "</div>\n";
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results

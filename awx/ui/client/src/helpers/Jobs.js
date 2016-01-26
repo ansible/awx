@@ -476,11 +476,11 @@ export default
             if (job.status === 'pending' || job.status === 'running' || job.status === 'waiting') {
                 url = job.related.cancel;
                 action_label = 'cancel';
-                hdr = 'Cancel Job';
+                hdr = 'Cancel';
             } else {
                 url = job.url;
                 action_label = 'delete';
-                hdr = 'Delete Job';
+                hdr = 'Delete';
             }
 
             action = function () {
@@ -537,11 +537,11 @@ export default
                 scope.removeCancelJob();
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
-                var body;
-                body = (action_label === 'cancel' || job.status === 'new') ? "Submit the request to cancel" : "Delete";
+                var cancelBody = "<div class=\"Prompt-bodyQuery\">Submit the request to cancel?</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">Are you sure you want to delete the job below?</div><div class=\"Prompt-bodyTarget\">#" + id + " " + job.name  + "</div>";
                 Prompt({
                     hdr: hdr,
-                    body: "<div class=\"Prompt-bodyQuery\">" + body + " job #" + id + " " + job.name  + "?</div>",
+                    body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
                     action: action,
                     actionText: (action_label === 'cancel' || job.status === 'new') ? "YES" : "DELETE"
                 });

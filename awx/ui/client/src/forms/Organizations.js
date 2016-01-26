@@ -87,7 +87,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('users', user.id, user.username, 'users')",
+                            ngClick: "delete('users', user.id, user.username, 'user')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Remove user'
@@ -133,7 +133,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('admins', admin.id, admin.username, 'administrators')",
+                            ngClick: "delete('admins', admin.id, admin.username, 'administrator')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Remove administrator'

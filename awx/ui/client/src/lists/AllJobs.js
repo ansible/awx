@@ -27,7 +27,7 @@ export default
             },
             status: {
                 label: 'Status',
-                columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
                 awToolTip: "{{ all_job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ all_job.status_popover_title }}",
@@ -50,7 +50,7 @@ export default
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                columnClass: "col-lg-2 col-md-2 hidden-xs",
+                columnClass: "col-lg-2 col-md-2 col-sm-2 hidden-xs",
                 key: true,
                 desc: true
             },
@@ -66,7 +66,7 @@ export default
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-md-3 col-sm-4 col-xs-4',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
                 ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
                 defaultSearchField: true,
                 awToolTip: "{{ all_job.name | sanitize }}",
@@ -86,8 +86,15 @@ export default
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+            columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
 
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ all_job.id }}/stdout',
+                awToolTip: 'View standard output',
+                dataPlacement: 'top',
+                ngShow: "all_job.type == 'job'"
+            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
@@ -109,13 +116,6 @@ export default
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top',
                 ngShow: "all_job.status !== 'running' && all_job.status !== 'waiting' && all_job.status !== 'pending'"
-            },
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ all_job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "all_job.type == 'job'"
             }
         }
     });

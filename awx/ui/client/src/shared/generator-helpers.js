@@ -705,8 +705,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 set = params.set,
                 html = '';
             html += "<!-- Paginate Widget -->\n";
-            html += "<div id=\"" + iterator + "-pagination\" class=\"List-pagination row page-row\">\n";
-            html += "<div class=\"col-lg-8 col-md-8\">\n";
+            html += "<div id=\"" + iterator + "-pagination\" class=\"List-pagination page-row\">\n";
+            html += "<div class=\"List-paginationPagerHolder\">";
             html += "<div class=\"List-paginationPager\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">";
             html += "<ul id=\"pagination-links\" class=\"pagination\">\n";
             html += "<li class=\"List-paginationPager--item\" ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
@@ -729,8 +729,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "</ul>\n";
             html += "<span class=\"List-paginationPager--pageof\">Page <span id=\"current-page\">{{ " + iterator + "_page }}</span> of <span id=\"total-pages\">{{ " + iterator + "_num_pages }}</span></span>";
             html += "</div>";
-            html += "</div>\n";
-            html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
+            html += "</div>";
             html += "<div id=\"pagination-labels\" class=\"page-label\" ng-hide=\"(" + iterator + "_total_rows | number:0) < 1\">\n";
             html += "<span id=\"total-items\">ITEMS&nbsp;";
             html += "<span>{{ (" + iterator + "_total_rows | number:0) < 1 ? 0 : (" + iterator + "_page-1)*" + iterator + "_page_size+1}}</span>";
@@ -738,7 +737,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "<span>&nbsp;OF&nbsp;</span>";
             html += "<span>{{ " + iterator + "_total_rows | number:0 }}</span>";
             html += "</span>";
-            html += "</div>\n";
             html += "</div>\n";
             html += "</div>\n";
 

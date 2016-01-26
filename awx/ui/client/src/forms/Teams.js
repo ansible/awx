@@ -95,7 +95,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('credentials', credential.id, credential.name, 'credentials')",
+                            ngClick: "delete('credentials', credential.id, credential.name, 'credential')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Remove the credential'
@@ -157,7 +157,7 @@ export default
 
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('permissions', permission.id, permission.name, 'permissions')",
+                            ngClick: "delete('permissions', permission.id, permission.name, 'permission')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the permission',
@@ -203,7 +203,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('projects', project.id, project.name, 'projects')",
+                            ngClick: "delete('projects', project.id, project.name, 'project')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Remove the project'
@@ -251,7 +251,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('users', user.id, user.username, 'users')",
+                            ngClick: "delete('users', user.id, user.username, 'user')",
                             icon: 'icon-terash',
                             "class": 'btn-danger',
                             awToolTip: 'Remove user'

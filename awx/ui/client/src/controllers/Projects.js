@@ -796,7 +796,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.name + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
             actionText: 'DELETE'
         });

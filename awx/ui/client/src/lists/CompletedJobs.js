@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 
 
@@ -86,6 +86,13 @@ export default
         actions: { },
 
         fieldActions: {
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ completed_job.id }}/stdout',
+                awToolTip: 'View standard output',
+                dataPlacement: 'top',
+                ngShow: "completed_job.type == 'job'"
+            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
@@ -99,19 +106,12 @@ export default
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top'
-            },
+            }
             // job_details: {
             //     mode: 'all',
             //     ngClick: "viewJobLog(completed_job.id)",
             //     awToolTip: 'View job details',
             //     dataPlacement: 'top'
-            // },
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ completed_job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "completed_job.type == 'job'"
-            }
+            // }
         }
     });

@@ -150,7 +150,7 @@ export default
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('credentials', credential.id, credential.name, 'credentials')",
+                            ngClick: "delete('credentials', credential.id, credential.name, 'credential')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the credential'
@@ -212,7 +212,7 @@ export default
 
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('permissions', permission.id, permission.name, 'permissions')",
+                            ngClick: "delete('permissions', permission.id, permission.name, 'permission')",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the permission',
