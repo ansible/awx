@@ -1180,7 +1180,7 @@ class Command(NoArgsCommand):
 
     def check_license(self):
         reader = LicenseReader()
-        license_info = reader.from_file()
+        license_info = reader.from_database()
         if not license_info or len(license_info) == 0:
             self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No Tower license found!')

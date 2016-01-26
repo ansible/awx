@@ -148,7 +148,7 @@ class BaseAccess(object):
 
     def check_license(self, add_host=False, feature=None, check_expiration=True):
         reader = TaskSerializer()
-        validation_info = reader.from_file()
+        validation_info = reader.from_database()
         if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999
