@@ -1194,6 +1194,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = cloud_credential
             env['RAX_REGION'] = inventory_update.source_regions or 'all'
+            env['RAX_CACHE_MAX_AGE'] = "0"
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
