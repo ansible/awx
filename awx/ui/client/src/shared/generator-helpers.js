@@ -662,8 +662,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             modifier = (i === 1) ? '' : i;
 
             if (includeSize) {
-                html += "<div class=\"";
-                html += (size) ? size : "col-lg-4 col-md-6 col-sm-8 col-xs-9";
+                html += "<div class=\"List-searchWidget ";
+                html += (size) ? size : "col-lg-4 col-md-8 col-sm-12 col-xs-12";
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
             }
 
