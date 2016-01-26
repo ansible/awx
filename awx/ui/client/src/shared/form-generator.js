@@ -710,6 +710,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
+                        // Variable editing
+                        if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
+                            html += "<div class=\"parse-selection\" id=\"" + form.name + "_" + fld + "_parse_type\">" +
+                                "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
+                            html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
+                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
+                            html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
+                            html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
+                            html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
+                            html += "</div>\n";
+                        }
                         html += "\n\t</label>\n";
                     }
                     return html;
@@ -743,7 +754,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
-                    html += "<div class='form-group Form-formGroup";
+                    html += "<div class='form-group Form-formGroup ";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
@@ -1025,17 +1036,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        // Variable editing
-                        if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
-                            html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
-                                "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
-                            html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
-                            html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
-                            html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
-                            html += "</div>\n";
-                        }
+                        // // Variable editing
+                        // if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
+                        //     html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
+                        //         "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
+                        //     html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
+                        //     html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
+                        //     html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
+                        //     html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
+                        //     html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
+                        //     html += "</div>\n";
+                        // }
 
                         html += "<textarea ";
                         html += (field.rows) ? this.attr(field, 'rows') : "";

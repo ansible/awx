@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:Parse
@@ -47,7 +47,15 @@ export default
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
                     scope.codeMirror = AngularCodeMirror();
                     scope.codeMirror.addModes($AnsibleConfig.variable_edit_modes);
-                    scope.codeMirror.showTextArea({ scope: scope, model: fld, element: field_id, mode: scope[pfld], onReady: onReady, onChange: onChange });
+                    scope.codeMirror.showTextArea({
+                        scope: scope,
+                        model: fld,
+                        element: field_id,
+                        lineNumbers: true,
+                        mode: scope[pfld],
+                        onReady: onReady,
+                        onChange: onChange
+                    });
                 }
 
                 // Hide the textarea and show a CodeMirror editor

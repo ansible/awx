@@ -519,10 +519,6 @@ td.actions {
   border-color: #ccc;
 }
 
-.ssh-key-field, .mono-space {
-  font-family: Fixed, monospace;
-}
-
 /* Make a div or any element behave like pre. Use in conjunction with .mono-space */
 .pre {
   white-space: pre;
@@ -1519,6 +1515,12 @@ a.btn-disabled:hover {
 
   .parse-select .parse-label {
       margin-left: 3px;
+      color: @field-input-text;
+  }
+
+  .parse-label {
+      color: @field-input-text;
+      font-weight: normal;
   }
 
   .external-editor-link {

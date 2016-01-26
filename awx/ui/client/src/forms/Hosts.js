@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Hosts
@@ -62,7 +62,7 @@ export default
                     addRequired: false,
                     editRequird: false,
                     rows: 6,
-                    "class": "modal-input-xlarge",
+                    "class": "modal-input-xlarge Form-textArea",
                     "default": "---",
                     awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
