@@ -28,13 +28,15 @@ export default
                 searchable: false,
                 nosort: true
             },
-            next_run: {
-                label: 'Next Run',
-                noLink: true,
-                searchable: false,
-                columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
-                filter: "longDate",
-                key: true
+            name: {
+                label: 'Name',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
+                sourceModel: 'unified_job_template',
+                sourceField: 'name',
+                ngClick: "editSchedule(schedule.id)",
+                awToolTip: "{{ schedule.nameTip | sanitize}}",
+                dataPlacement: "top",
+                defaultSearchField: true
             },
             type: {
                 label: 'Type',
@@ -53,16 +55,14 @@ export default
                     { value: 'project', name: 'SCM Update' }
                 ]
             },
-            name: {
-                label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
-                sourceModel: 'unified_job_template',
-                sourceField: 'name',
-                ngClick: "editSchedule(schedule.id)",
-                awToolTip: "{{ schedule.nameTip | sanitize}}",
-                dataPlacement: "top",
-                defaultSearchField: true
-            }
+            next_run: {
+                label: 'Next Run',
+                noLink: true,
+                searchable: false,
+                columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
+                filter: "longDate",
+                key: true
+            },
         },
 
         actions: { },
