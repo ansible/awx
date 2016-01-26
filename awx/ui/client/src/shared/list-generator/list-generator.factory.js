@@ -348,7 +348,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         // Only show the search bar if we are loading results or if we have at least 1 base result
-                        html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == true || " + list.iterator + "_active_search == true || (" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows > 0)\">\n";
+                        html += "<div class=\"row List-searchRow\" ng-show=\"" + list.iterator + "Loading == true || " + list.iterator + "_active_search == true || (" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows > 0)\">\n";
                         if (options.searchSize) {
                             html += SearchWidget({
                                 iterator: list.iterator,

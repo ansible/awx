@@ -1653,7 +1653,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 //html += "<div class=\"well\">\n";
-                html += "<div class=\"row\">\n";
+                html += "<div class=\"row List-searchRow\">\n";
 
                 html += SearchWidget({
                     iterator: collection.iterator,
