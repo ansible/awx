@@ -40,6 +40,13 @@ export default
                 columnClass: "col-lg-5 col-md-4 col-sm-6 col-xs-6",
                 modalColumnClass: 'col-md-8'
             },
+            scm_type: {
+                label: 'Type',
+                searchType: 'select',
+                searchOptions: [], // will be set by Options call to projects resource
+                excludeModal: true,
+                columnClass: 'col-lg-2 col-md-2 hidden-sm hidden-xs'
+            },
             last_updated: {
                 label: 'Last Updated',
                 filter: "longDate",
@@ -47,13 +54,6 @@ export default
                 excludeModal: true,
                 searchable: false,
                 nosort: true
-            },
-            scm_type: {
-                label: 'Type',
-                searchType: 'select',
-                searchOptions: [], // will be set by Options call to projects resource
-                excludeModal: true,
-                columnClass: 'col-lg-2 col-md-2 hidden-sm hidden-xs'
             }
         },
 

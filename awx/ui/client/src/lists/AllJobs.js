@@ -25,6 +25,14 @@ export default
                 awToolTip: "{{ all_job.status_tip }}",
                 dataPlacement: 'top'
             },
+            name: {
+                label: 'Name',
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
+                ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
+                defaultSearchField: true,
+                awToolTip: "{{ all_job.name | sanitize }}",
+                dataPlacement: 'top'
+            },
             status: {
                 label: 'Status',
                 columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
@@ -45,15 +53,6 @@ export default
                     { name: "Canceled", value: "canceled" }
                 ]
             },
-            finished: {
-                label: 'Finished',
-                noLink: true,
-                searchable: false,
-                filter: "longDate",
-                columnClass: "col-lg-2 col-md-2 col-sm-2 hidden-xs",
-                key: true,
-                desc: true
-            },
             type: {
                 label: 'Type',
                 ngBind: 'all_job.type_label',
@@ -64,13 +63,14 @@ export default
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
             },
-            name: {
-                label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
-                ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
-                defaultSearchField: true,
-                awToolTip: "{{ all_job.name | sanitize }}",
-                dataPlacement: 'top'
+            finished: {
+                label: 'Finished',
+                noLink: true,
+                searchable: false,
+                filter: "longDate",
+                columnClass: "col-lg-2 col-md-2 col-sm-2 hidden-xs",
+                key: true,
+                desc: true
             },
             failed: {
                 label: 'Job failed?',
