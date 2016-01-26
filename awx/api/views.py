@@ -290,6 +290,8 @@ class ApiV1ConfigView(APIView):
                     has_error = e.errno
                     break
 
+        TowerSettings.objects.filter(key="LICENSE").delete()
+
         # Only stop mongod if license removal succeeded
         if has_error is None:
             mongodb_control.delay('stop')
