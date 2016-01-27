@@ -7,7 +7,6 @@ import logging
 # Django
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import FieldError
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -55,7 +54,7 @@ class Role(CommonModelNameNotUnique):
                 rh = RoleHierarchy(role=self, ancestor=Role.objects.get(id=id))
                 rh.save()
             for child in self.children.all():
-                child.rebuild_role_hierarchy_cache();
+                child.rebuild_role_hierarchy_cache()
 
 
 class RoleHierarchy(CreatedModifiedModel):
@@ -108,7 +107,7 @@ class Resource(CommonModelNameNotUnique):
                 rh = ResourceHierarchy(resource=self, ancestor=Resource.objects.get(id=id))
                 rh.save()
             for child in self.children.all():
-                child.rebuild_resource_hierarchy_cache();
+                child.rebuild_resource_hierarchy_cache()
 
 
 

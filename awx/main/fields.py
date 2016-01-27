@@ -4,8 +4,11 @@
 # Django
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
-from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
+from django.core.exceptions import FieldError
+
+# AWX
+from awx.main.models.rbac import Resource, RolePermission, Role
 
 
 __all__ = ['AutoOneToOneField', 'ImplicitResourceField', 'ImplicitRoleField']
@@ -62,7 +65,7 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
         resource.save()
         setattr(instance, self.field.name, resource)
         instance.save(update_fields=[self.field.name,])
-        return resource;
+        return resource
 
 
 class ImplicitResourceField(models.ForeignKey):
@@ -76,7 +79,7 @@ class ImplicitResourceField(models.ForeignKey):
         super(ImplicitResourceField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
-        super(ImplicitResourceField, self).contribute_to_class(cls, name);
+        super(ImplicitResourceField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, ResourceFieldDescriptor(self.parent_resource, self))
 
 
@@ -119,7 +122,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
             setattr(permissions, k, v)
         permissions.save()
 
-        return role;
+        return role
 
 
 class ImplicitRoleField(models.ForeignKey):
@@ -137,7 +140,7 @@ class ImplicitRoleField(models.ForeignKey):
         super(ImplicitRoleField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
-        super(ImplicitRoleField, self).contribute_to_class(cls, name);
+        super(ImplicitRoleField, self).contribute_to_class(cls, name)
         setattr(cls, 
                 self.name, 
                 ImplicitRoleDescriptor(
@@ -147,5 +150,5 @@ class ImplicitRoleField(models.ForeignKey):
                     self.parent_role, 
                     self
                 )
-            )
+                )
 
