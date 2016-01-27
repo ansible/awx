@@ -3,7 +3,7 @@ import textwrap
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.tests.base import BaseTest, URI
+from .base import BaseTest, URI
 
 __all__ = ['UriCleanTests']
 

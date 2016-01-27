@@ -10,9 +10,9 @@ import mock
 from django.core.management.base import CommandError
 
 # AWX
-from awx.main.tests.base import BaseTest
+from ..base import BaseTest
 from awx.fact.tests.base import MongoDBRequired, FactScanBuilder, TEST_FACT_PACKAGES, TEST_FACT_ANSIBLE, TEST_FACT_SERVICES
-from awx.main.tests.commands.base import BaseCommandMixin
+from .base import BaseCommandMixin
 from awx.main.management.commands.cleanup_facts import Command, CleanupFacts
 from awx.fact.models.fact import * # noqa
 
@@ -45,7 +45,7 @@ class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequi
     def test_invoke_params_required(self):
         result, stdout, stderr = self.run_command('cleanup_facts')
         self.assertIsInstance(result, CommandError)
-        self.assertEqual(str(result), 'Both --granularity and --older_than are required.') 
+        self.assertEqual(str(result), 'Both --granularity and --older_than are required.')
 
     def test_module(self):
         self.builder.add_fact('packages', TEST_FACT_PACKAGES)

@@ -2,8 +2,8 @@
 from django.core.urlresolvers import reverse
 
 # Reuse Test code
-from awx.main.tests.base import BaseLiveServerTest, QueueStartStopTestMixin
-from awx.main.tests.base import URI
+from .base import BaseLiveServerTest, QueueStartStopTestMixin
+from .base import URI
 from awx.main.models.projects import * # noqa
 
 __all__ = ['UnifiedJobStdoutRedactedTests']

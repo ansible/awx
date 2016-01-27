@@ -2,8 +2,8 @@
 # All Rights Reserved
 
 # AWX
-from awx.main.tests.base import BaseTest
-from awx.main.tests.commands.base import BaseCommandMixin
+from ..base import BaseTest
+from .base import BaseCommandMixin
 
 __all__ = ['AgeDeletedCommandFunctionalTest']
 

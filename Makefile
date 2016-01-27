@@ -362,6 +362,9 @@ check: flake8 pep8 # pyflakes pylint
 test:
 	$(PYTHON) manage.py test -v2 awx.main.tests
 
+test_unit:
+	$(PYTHON) -m py.test awx/main/tests/unit
+
 # Run all API unit tests with coverage enabled.
 test_coverage:
 	coverage run manage.py test -v2 awx.main.tests

@@ -24,7 +24,7 @@ from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest, BaseLiveServerTest
+from ..base import BaseTest, BaseLiveServerTest
 
 __all__ = ['CreateDefaultOrgTest', 'DumpDataTest', 'CleanupDeletedTest',
            'CleanupJobsTest', 'CleanupActivityStreamTest',
@@ -471,7 +471,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.assertEqual(ad_hoc_command.status, 'successful')
-        
+
         # With days=1, no jobs will be deleted.
         jobs_before = Job.objects.all().count()
         self.assertTrue(jobs_before)
@@ -690,7 +690,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue('required' in str(result))
         # Inventory ID, with invalid source.
         invalid_source = ''.join([os.path.splitext(self.ini_path)[0] + '-invalid',
-                                  os.path.splitext(self.ini_path)[1]]) 
+                                  os.path.splitext(self.ini_path)[1]])
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=inventory_id,
                                                   source=invalid_source)
@@ -766,7 +766,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(group.children.count(), 0)
                 hosts = set(group.hosts.values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
-                self.assertEqual(hosts, host_names)                
+                self.assertEqual(hosts, host_names)
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
                 self.assertEqual(group.children.count(), 0)
@@ -860,7 +860,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(group.children.filter(active=True).count(), 0)
                 hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
-                self.assertEqual(hosts, host_names)                
+                self.assertEqual(hosts, host_names)
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
                 self.assertEqual(group.children.filter(active=True).count(), 0)
@@ -1013,7 +1013,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         rest_api_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                             parts.query, parts.fragment])
         os.environ.setdefault('REST_API_URL', rest_api_url)
-        os.environ['INVENTORY_ID'] = str(old_inv.pk)        
+        os.environ['INVENTORY_ID'] = str(old_inv.pk)
         source = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'plugins',
                               'inventory', 'awxrest.py')
         result, stdout, stderr = self.run_command('inventory_import',

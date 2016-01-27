@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest, QueueStartStopTestMixin
+from ..base import BaseTest, QueueStartStopTestMixin
 
 __all__ = ['SurveyPasswordRedactedTest']
 
@@ -87,7 +87,7 @@ TEST_COMPLEX_SURVEY = '''
 
 
 TEST_SINGLE_PASSWORDS = [
-    { 
+    {
         'description': 'Single instance with a . after',
         'text' : 'See spot. See spot run. See spot run %s. That is a fast run.' % PASSWORD,
         'passwords': [PASSWORD],
@@ -233,5 +233,5 @@ class SurveyPasswordRedactedTest(SurveyPasswordBaseTest):
     # should redact values in extra_vars
     def test_redact_job_extra_vars(self):
         for test in self.tests['simple']:
-            response = self._get_url_job_details(test['job']) 
+            response = self._get_url_job_details(test['job'])
             self.check_extra_vars_redacted(test, response)

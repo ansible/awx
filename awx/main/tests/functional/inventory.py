@@ -18,7 +18,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest, BaseTransactionTest
+from .base import BaseTest, BaseTransactionTest
 
 __all__ = ['InventoryTest', 'InventoryUpdatesTest', 'InventoryCredentialTest']
 

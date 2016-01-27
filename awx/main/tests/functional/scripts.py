@@ -10,7 +10,7 @@ import urlparse
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseLiveServerTest
+from .base import BaseLiveServerTest
 
 __all__ = ['InventoryScriptTest']
 

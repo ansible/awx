@@ -3,7 +3,7 @@ import uuid
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTestMixin
+from ..base import BaseTestMixin
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
@@ -128,7 +128,7 @@ class BaseJobTestMixin(BaseTestMixin):
         # He works with Randall
         self.user_billybob = self.make_user('billybob')
         self.org_ops.users.add(self.user_billybob)
-        
+
         # Jim is the newest intern. He can login, but can't do anything quite yet
         # except make everyone else fresh coffee.
         self.user_jim = self.make_user('jim')
@@ -256,7 +256,7 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_testers.users.add(self.user_billybob)
 
         # Each user has his/her own set of credentials.
-        from awx.main.tests.tasks import (TEST_SSH_KEY_DATA,
+        from ..tasks import (TEST_SSH_KEY_DATA,
                                           TEST_SSH_KEY_DATA_LOCKED,
                                           TEST_SSH_KEY_DATA_UNLOCK)
         self.cred_sue = self.user_sue.credentials.create(
@@ -429,7 +429,7 @@ class BaseJobTestMixin(BaseTestMixin):
         #self.permission1 = Permission.objects.create(
         #    inventory       = self.inventory,
         #    project         = self.project,
-        #    team            = self.team, 
+        #    team            = self.team,
         #    permission_type = PERM_INVENTORY_DEPLOY,
         #    created_by      = self.normal_django_user
         #)
@@ -441,7 +441,7 @@ class BaseJobTestMixin(BaseTestMixin):
         #    permission_type = PERM_INVENTORY_CHECK,
         #    created_by      = self.normal_django_user
         #)
- 
+
         # Engineering has job templates to check/run the dev project onto
         # their own inventory.
         self.jt_eng_check = JobTemplate.objects.create(

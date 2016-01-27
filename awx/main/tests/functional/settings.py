@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-from awx.main.tests.base import BaseTest
+from .base import BaseTest
 from awx.main.models import * # noqa
 
 from django.core.urlresolvers import reverse

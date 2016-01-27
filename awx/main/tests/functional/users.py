@@ -15,7 +15,7 @@ from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest
+from .base import BaseTest
 from awx.main.conf import tower_settings
 
 __all__ = ['AuthTokenTimeoutTest', 'AuthTokenLimitTest', 'AuthTokenProxyTest', 'UsersTest', 'LdapTest']

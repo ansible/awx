@@ -21,7 +21,7 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseJobExecutionTest
+from .base import BaseJobExecutionTest
 
 TEST_PLAYBOOK = u'''
 - name: test success

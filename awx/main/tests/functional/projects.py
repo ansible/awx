@@ -20,8 +20,8 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTransactionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK, TEST_OPENSSH_KEY_DATA, TEST_OPENSSH_KEY_DATA_LOCKED
+from .base import BaseTransactionTest
+from .tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK, TEST_OPENSSH_KEY_DATA, TEST_OPENSSH_KEY_DATA_LOCKED
 from awx.main.utils import decrypt_field, update_scm_url
 
 TEST_PLAYBOOK = '''- hosts: mygroup

@@ -12,7 +12,7 @@ from django.utils.timezone import now as tz_now
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest
+from .base import BaseTest
 
 __all__ = ['AuthTokenLimitUnitTest', 'OrganizationsTest']
 

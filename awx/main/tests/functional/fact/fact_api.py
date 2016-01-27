@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.main.utils import timestamp_apiformat
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseLiveServerTest
+from ..base import BaseLiveServerTest
 from awx.fact.models import * # noqa
 from awx.fact.tests.base import BaseFactTestMixin, FactScanBuilder, TEST_FACT_ANSIBLE, TEST_FACT_PACKAGES, TEST_FACT_SERVICES
 from awx.main.utils import build_url
@@ -181,7 +181,7 @@ class FactViewApiTest(FactApiBaseTest):
     def test_view_time_filter(self):
         self.setup_facts(6)
         ts = self.builder.get_timestamp(3)
-        self.get_fact(Fact.objects.filter(host=self.fact_host, module='ansible', timestamp__lte=ts).order_by('-timestamp')[0], 
+        self.get_fact(Fact.objects.filter(host=self.fact_host, module='ansible', timestamp__lte=ts).order_by('-timestamp')[0],
                       dict(datetime=ts))
 
 

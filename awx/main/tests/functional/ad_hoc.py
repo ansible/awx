@@ -18,8 +18,8 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseJobExecutionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from .base import BaseJobExecutionTest
+from .tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
 

@@ -6,7 +6,7 @@ import os
 import tempfile
 
 from awx.main.models import Host, Inventory, Organization
-from awx.main.tests.base import BaseTest
+from .base import BaseTest
 import awx.main.task_engine
 from awx.main.task_engine import * # noqa
 
