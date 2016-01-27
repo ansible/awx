@@ -236,6 +236,10 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     $scope.submitJob = function (id) {
         PlaybookRun({ scope: $scope, id: id });
     };
+
+    $scope.scheduleJob = function (id) {
+        $state.transitionTo('jobTemplateSchedules', {id: id});
+    }
 }
 
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',

@@ -13,7 +13,7 @@ export default
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        well: false,
+        listTitle: 'Schedules',
         index: false,
         hover: true,
 

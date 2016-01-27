@@ -65,7 +65,7 @@ export default
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                ngHref: '#/job_templates/{{ job_template.id }}/schedules',
+                ngClick: 'scheduleJob(job_template.id)',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
             },
