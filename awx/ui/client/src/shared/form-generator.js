@@ -1658,7 +1658,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += SearchWidget({
                     iterator: collection.iterator,
                     template: collection,
-                    mini: true
+                    mini: true,
+                    ngShow: collection.iterator + "Loading == true || " + collection.iterator + "_active_search == true || (" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows > 0)"
                 });
 
                 html += "<div class=\"col-lg-8\">\n";
