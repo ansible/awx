@@ -1,6 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
+import re
+
 # Django
 from django.db import models
 from django.utils.translation import ugettext_lazy as _

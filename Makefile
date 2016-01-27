@@ -357,17 +357,17 @@ pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
-
+	
 # Run all API unit tests.
 test:
-	$(PYTHON) manage.py test -v2 awx.main.tests
+	$(PYTHON) -m py.test awx/main/tests
 
 test_unit:
 	$(PYTHON) -m py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	coverage run manage.py test -v2 awx.main.tests
+	$(PYTHON) -m py.test --cov=awx awx/main/tests
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:

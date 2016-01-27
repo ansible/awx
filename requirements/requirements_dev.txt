@@ -4,3 +4,7 @@ django-debug-toolbar==1.3.2
 unittest2
 pep8
 flake8
+pytest
+pytest-cov
+pytest-django
+pytest-pythonpath
