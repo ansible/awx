@@ -632,6 +632,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             form = params.template,
             size = params.size,
             includeSize = (params.includeSize === undefined) ? true : params.includeSize,
+            ngShow = (params.ngShow) ? params.ngShow : false,
             i, html = '',
             modifier,
             searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1,
@@ -667,6 +668,10 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
             }
 
+            if(ngShow) {
+                html += "<div ng-show=\"" + ngShow + "\">";
+            }
+
             html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow" + modifier + " || " +
                 iterator + "InputHide" + modifier + "\" " +
                 "class=\"form-control List-searchInput\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
@@ -687,6 +692,10 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 "><i class=\"fa fa-search\"></i></a>\n";
 
             html += "<div id=\"search-widget-spacer\" ng-show=\"" + iterator + "SelectShow" + modifier + "\"></div>\n";
+
+            if(ngShow) {
+                html += "</div>";
+            }
 
             if (includeSize) {
                 html += "</div>\n";
