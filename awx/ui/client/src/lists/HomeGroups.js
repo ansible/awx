@@ -18,7 +18,7 @@ export default
 
         fields: {
             status: {
-                label: 'Status',
+                label: '',
                 columnClass: 'List-staticColumn--mediumStatus',
                 searchable: false,
                 nosort: true,
