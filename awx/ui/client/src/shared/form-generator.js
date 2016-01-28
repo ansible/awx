@@ -1036,18 +1036,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        // // Variable editing
-                        // if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
-                        //     html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
-                        //         "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
-                        //     html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                        //     html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
-                        //     html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
-                        //     html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                        //     html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
-                        //     html += "</div>\n";
-                        // }
-
                         html += "<textarea ";
                         html += (field.rows) ? this.attr(field, 'rows') : "";
                         html += "ng-model=\"" + fld + '" ';
