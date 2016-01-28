@@ -19,23 +19,22 @@ export default
 
         fields: {
             status: {
-                label: "Status",
+                label: "",
                 iconOnly: true,
                 icon: "{{ 'icon-job-' + host.active_failures }}",
                 awToolTip: "{{ host.badgeToolTip }}",
-                awTipPlacement: "top",
+                awTipPlacement: "right",
                 dataPlacement: "right",
                 awPopOver: "{{ host.job_status_html }}",
-                dataTitle: "{{ host.job_status_title }}",
                 ngClick:"bob",
-                columnClass: "col-md-1 col-sm-2 col-xs-3",
+                columnClass: "List-staticColumn--smallStatus",
                 searchable: false,
                 nosort: true
             },
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-7 ellipsis',
+                columnClass: 'col-lg-5 col-md-5 col-sm-5 col-xs-8 ellipsis List-staticColumnAdjacent',
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 ngClick: "editHost(host.id)"
             },
@@ -43,7 +42,7 @@ export default
                 label: 'Inventory',
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
+                columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
                 linkTo: "{{ '/#/inventories/' + host.inventory }}"
             },
             enabled: {
@@ -74,6 +73,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-3 col-sm-3 col-xs-4',
+
             /*active_failures: {
                 //label: 'Job Status',
                 //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
@@ -94,7 +96,7 @@ export default
         },
 
         actions: {
-            
+
         }
 
     });
