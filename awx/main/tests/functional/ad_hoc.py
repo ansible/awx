@@ -18,8 +18,8 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
-from .base import BaseJobExecutionTest
-from .tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.tests.base import BaseJobExecutionTest
+from tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
 
@@ -568,7 +568,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command(become_enabled=True)
             self.assertEqual(response['become_enabled'], True)
-        
+
         # Try to run with expired license.
         self.create_expired_license_file()
         with self.current_user('admin'):
@@ -1199,7 +1199,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
-        # Test the ad hoc command events list for a host.  Should return the 
+        # Test the ad hoc command events list for a host.  Should return the
         # events only for that particular host.
         url = reverse('api:host_ad_hoc_command_events_list', args=(self.host.pk,))
         with self.current_user('admin'):

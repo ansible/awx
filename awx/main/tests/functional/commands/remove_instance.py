@@ -5,8 +5,8 @@
 import uuid
 
 # AWX
-from ..base import BaseTest
-from .base import BaseCommandMixin
+from awx.main.tests.base import BaseTest
+from command_base import BaseCommandMixin
 from awx.main.models import * # noqa
 
 __all__ = ['RemoveInstanceCommandFunctionalTest']

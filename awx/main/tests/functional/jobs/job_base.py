@@ -3,7 +3,7 @@ import uuid
 
 # AWX
 from awx.main.models import * # noqa
-from ..base import BaseTestMixin
+from awx.main.tests.base import BaseTestMixin
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
@@ -256,7 +256,7 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_testers.users.add(self.user_billybob)
 
         # Each user has his/her own set of credentials.
-        from ..tasks import (TEST_SSH_KEY_DATA,
+        from awx.main.tests.data.ssh import (TEST_SSH_KEY_DATA,
                                           TEST_SSH_KEY_DATA_LOCKED,
                                           TEST_SSH_KEY_DATA_UNLOCK)
         self.cred_sue = self.user_sue.credentials.create(

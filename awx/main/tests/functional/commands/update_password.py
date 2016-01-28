@@ -2,8 +2,8 @@
 # All Rights Reserved
 
 # AWX
-from ..base import BaseTest
-from .base import BaseCommandMixin
+from awx.main.tests.base import BaseTest
+from command_base import BaseCommandMixin
 
 # Django
 from django.core.management.base import CommandError

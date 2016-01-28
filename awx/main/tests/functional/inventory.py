@@ -18,7 +18,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # noqa
-from .base import BaseTest, BaseTransactionTest
+from awx.main.tests.base import BaseTest, BaseTransactionTest
 
 __all__ = ['InventoryTest', 'InventoryUpdatesTest', 'InventoryCredentialTest']
 
@@ -151,11 +151,11 @@ class InventoryTest(BaseTest):
     def test_put_inventory_detail(self):
         url_a = reverse('api:inventory_detail', args=(self.inventory_a.pk,))
         url_b = reverse('api:inventory_detail', args=(self.inventory_b.pk,))
-        
+
         # Check put to detail view with invalid authentication.
         self.check_invalid_auth(url_a, methods=('put',))
         self.check_invalid_auth(url_b, methods=('put',))
-        
+
         # a super user can update inventory records
         with self.current_user(self.super_django_user):
             data = self.get(url_a, expect=200)
@@ -200,7 +200,7 @@ class InventoryTest(BaseTest):
             self.put(url_a, data, expect=403)
 
         # Via AC-376:
-        # Create an inventory. Leave the description empty. 
+        # Create an inventory. Leave the description empty.
         # Edit the new inventory, change the Name, click Save.
         list_url = reverse('api:inventory_list')
         new_data = dict(name='inventory-c', description='',
@@ -220,13 +220,13 @@ class InventoryTest(BaseTest):
     def test_delete_inventory_detail(self):
         url_a = reverse('api:inventory_detail', args=(self.inventory_a.pk,))
         url_b = reverse('api:inventory_detail', args=(self.inventory_b.pk,))
-        
+
         # Create test hosts and groups within each inventory.
         self.inventory_a.hosts.create(name='host-a')
         self.inventory_a.groups.create(name='group-a')
         self.inventory_b.hosts.create(name='host-b')
         self.inventory_b.groups.create(name='group-b')
-        
+
         # Check put to detail view with invalid authentication.
         self.check_invalid_auth(url_a, methods=('delete',))
         self.check_invalid_auth(url_b, methods=('delete',))
@@ -487,7 +487,7 @@ class InventoryTest(BaseTest):
         self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 5)
-        
+
         # side check: see if root groups URL is operational.  These are groups without parents.
         root_groups = self.get(root_groups, expect=200, auth=self.get_super_credentials())
         self.assertEquals(root_groups['count'], 2)
@@ -497,7 +497,7 @@ class InventoryTest(BaseTest):
         self.post(url5, data=remove_me, expect=204, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 4)
-        
+
         ###################################################
         # VARIABLES
 
@@ -507,31 +507,31 @@ class InventoryTest(BaseTest):
 
         # attempting to get a variable object creates it, even though it does not already exist
         vdata_url = reverse('api:host_variable_data', args=(added_by_collection_a['id'],))
-        
+
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got, {})
 
         # super user can create variable objects
         # an org admin can create variable objects (defers to inventory permissions)
         got = self.put(vdata_url, data=vars_a, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(got, vars_a) 
+        self.assertEquals(got, vars_a)
 
-        # verify that we can update things and get them back    
+        # verify that we can update things and get them back
         got = self.put(vdata_url, data=vars_c, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(got, vars_c)    
+        self.assertEquals(got, vars_c)
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(got, vars_c)    
+        self.assertEquals(got, vars_c)
 
         # a normal user cannot edit variable objects
         self.put(vdata_url, data=vars_a, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory write permissions can edit variable objects...
         got = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(got, vars_b)        
+        self.assertEquals(got, vars_b)
 
         ###################################################
         # VARIABLES -> GROUPS
-        
+
         vars_a = dict(asdf=7777, dog='droopy',   cat='battlecat', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
         vars_b = dict(asdf=8888, dog='snoopy',   cat='cheshire',  unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
@@ -547,7 +547,7 @@ class InventoryTest(BaseTest):
 
         # an org admin can associate variable objects with groups
         put = self.put(vdata1_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
- 
+
         # a normal user cannot associate variable objects with groups
         put = self.put(vdata1_url, data=vars_b, expect=403, auth=self.get_nobody_credentials())
 
@@ -557,11 +557,11 @@ class InventoryTest(BaseTest):
 
         ###################################################
         # VARIABLES -> INVENTORY
-        
+
         vars_a = dict(asdf=9873, dog='lassie',  cat='heathcliff', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
         vars_b = dict(asdf=2736, dog='benji',   cat='garfield',   unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=7692, dog='buck',    cat='sylvester',  unstructured=dict(a=[3,3,3],b=dict(z=5)))
-         
+
         vdata_url = reverse('api:inventory_variable_data', args=(self.inventory_a.pk,))
 
         # a super user can associate variable objects with inventory
@@ -700,7 +700,7 @@ class InventoryTest(BaseTest):
         new_data = dict(inventory=inv.pk, name='completely new', description='blarg?')
         kids = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(kids['count'], 1)
-        posted2 = self.post(subgroups_url2, data=new_data, expect=201, auth=self.get_normal_credentials()) 
+        posted2 = self.post(subgroups_url2, data=new_data, expect=201, auth=self.get_normal_credentials())
 
         # a group can't be it's own grandparent
         subsub = posted2['related']['children']
@@ -715,16 +715,16 @@ class InventoryTest(BaseTest):
 
         # double post causes conflict error (actually, should it? -- just got a 204, already associated)
         # self.post(subgroups_url2, data=got, expect=409, auth=self.get_normal_credentials())
-        checked = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials()) 
+        checked = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
 
         # a normal user cannot set subgroups
         self.post(subgroups_url3, data=got, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions can associate subgroups (but not when they belong to different inventories!)
         #self.post(subgroups_url3, data=got, expect=204, auth=self.get_other_credentials())
-        #checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
+        #checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials())
         #self.assertEqual(checked['count'], 1)
-        
+
         # slight detour
         # can see all hosts under a group, even if it has subgroups
         # this URL is NOT postable
@@ -739,7 +739,7 @@ class InventoryTest(BaseTest):
         result = checked['results'][0]
         result['disassociate'] = 1
         self.post(subgroups_url3, data=result, expect=204, auth=self.get_other_credentials())
-        checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
+        checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(checked['count'], 0)
         # try to double disassociate to see what happens (should no-op)
         self.post(subgroups_url3, data=result, expect=204, auth=self.get_other_credentials())
@@ -803,7 +803,7 @@ class InventoryTest(BaseTest):
         # FIXME: RELATED FIELDS
 
         #  on an inventory resource, I can see related resources for hosts and groups and permissions
-        #  and these work 
+        #  and these work
         #  on a host resource, I can see related resources variables and inventories
         #  and these work
         #  on a group resource, I can see related resources for variables, inventories, and children
@@ -884,11 +884,11 @@ class InventoryTest(BaseTest):
         g_d = self.inventory_a.groups.create(name='D')
         g_d.inventory_source
         g_d.parents.add(g_c)
-        
+
         url = reverse('api:inventory_tree_view', args=(self.inventory_a.pk,))
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
-        
+
         self.assertTrue(isinstance(response, list))
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]['id'], g_a.pk)

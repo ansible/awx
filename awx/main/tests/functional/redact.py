@@ -3,7 +3,7 @@ import textwrap
 
 # AWX
 from awx.main.redact import UriCleaner
-from .base import BaseTest, URI
+from awx.main.tests.base import BaseTest, URI
 
 __all__ = ['UriCleanTests']
 
@@ -38,15 +38,15 @@ uri = URI(scheme="https", username="myusername", password="mypasswordwith%40", h
 TEST_CLEARTEXT.append({
     'uri' : uri,
     'text' : textwrap.dedent("""\
-        PLAY [all] ******************************************************************** 
+        PLAY [all] ********************************************************************
 
-        TASK: [delete project directory before update] ******************************** 
+        TASK: [delete project directory before update] ********************************
         skipping: [localhost]
 
-        TASK: [update project using git and accept hostkey] *************************** 
+        TASK: [update project using git and accept hostkey] ***************************
         skipping: [localhost]
 
-        TASK: [update project using git] ********************************************** 
+        TASK: [update project using git] **********************************************
         failed: [localhost] => {"cmd": "/usr/bin/git ls-remote https://%s:%s -h refs/heads/HEAD", "failed": true, "rc": 128}
         stderr: fatal: unable to access '%s': Could not resolve host: nonexistant.ansible.com
 
@@ -54,10 +54,10 @@ TEST_CLEARTEXT.append({
 
         FATAL: all hosts have already failed -- aborting
 
-        PLAY RECAP ******************************************************************** 
+        PLAY RECAP ********************************************************************
                    to retry, use: --limit @/root/project_update.retry
 
-        localhost                  : ok=0    changed=0    unreachable=0    failed=1   
+        localhost                  : ok=0    changed=0    unreachable=0    failed=1
 
         """ % (uri.username, uri.password, str(uri), str(uri))),
     'host_occurrences' : 2
@@ -69,11 +69,11 @@ TEST_CLEARTEXT.append({
     'text' : textwrap.dedent("""\
         TASK: [update project using git] **
                     failed: [localhost] => {"cmd": "/usr/bin/git ls-remote https://REDACTED:********", "failed": true, "rc": 128}
-                    stderr: error: Couldn't resolve host '@%s' while accessing %s 
+                    stderr: error: Couldn't resolve host '@%s' while accessing %s
 
                     fatal: HTTP request failed
 
-                    msg: error: Couldn't resolve host '@%s' while accessing %s 
+                    msg: error: Couldn't resolve host '@%s' while accessing %s
 
                     fatal: HTTP request failed
         """ % (uri.host, str(uri), uri.host, str(uri))),

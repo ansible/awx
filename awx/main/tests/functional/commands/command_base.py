@@ -11,7 +11,7 @@ from django.core.management import call_command
 
 # AWX
 from awx.main.models import * # noqa
-from ..base import BaseTestMixin
+from awx.main.tests.base import BaseTestMixin
 
 class BaseCommandMixin(BaseTestMixin):
     def create_test_inventories(self):

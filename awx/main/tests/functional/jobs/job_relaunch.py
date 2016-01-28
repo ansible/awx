@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import * # noqa
-from ..base import BaseLiveServerTest
-from .base import BaseJobTestMixin
+from awx.main.tests.base import BaseLiveServerTest
+from job_base import BaseJobTestMixin
 
 __all__ = ['JobRelaunchTest',]
 

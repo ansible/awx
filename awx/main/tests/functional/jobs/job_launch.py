@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import * # noqa
-from .base import BaseJobTestMixin
+from job_base import BaseJobTestMixin
 import yaml
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']

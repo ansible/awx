@@ -6,7 +6,7 @@ import os
 import tempfile
 
 from awx.main.models import Host, Inventory, Organization
-from .base import BaseTest
+from awx.main.tests.base import BaseTest
 import awx.main.task_engine
 from awx.main.task_engine import * # noqa
 
@@ -46,7 +46,7 @@ class LicenseTests(BaseTest):
 
     def test_license_writer(self):
 
-        writer = TaskEngager( 
+        writer = TaskEngager(
             company_name='acmecorp',
             contact_name='Michael DeHaan',
             contact_email='michael@ansibleworks.com',
@@ -58,7 +58,7 @@ class LicenseTests(BaseTest):
         assert data['instance_count'] == 500
         assert data['contact_name'] == 'Michael DeHaan'
         assert data['contact_email'] == 'michael@ansibleworks.com'
-        assert data['license_date'] == 25000 
+        assert data['license_date'] == 25000
         assert data['license_key'] == "11bae31f31c6a6cdcb483a278cdbe98bd8ac5761acd7163a50090b0f098b3a13"
 
         strdata = writer.get_string()

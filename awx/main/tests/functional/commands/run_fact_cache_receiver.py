@@ -10,9 +10,9 @@ from copy import deepcopy
 from mock import MagicMock
 
 # AWX
-from ..base import BaseTest
+from awx.main.tests.base import BaseTest
 from awx.fact.tests.base import MongoDBRequired
-from .base import BaseCommandMixin
+from command_base import BaseCommandMixin
 from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver
 from awx.fact.models.fact import * # noqa
 

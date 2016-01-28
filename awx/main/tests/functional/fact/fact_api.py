@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.main.utils import timestamp_apiformat
 from awx.main.models import * # noqa
-from ..base import BaseLiveServerTest
+from awx.main.tests.base import BaseLiveServerTest
 from awx.fact.models import * # noqa
 from awx.fact.tests.base import BaseFactTestMixin, FactScanBuilder, TEST_FACT_ANSIBLE, TEST_FACT_PACKAGES, TEST_FACT_SERVICES
 from awx.main.utils import build_url

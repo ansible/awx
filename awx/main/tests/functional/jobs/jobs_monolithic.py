@@ -22,7 +22,7 @@ import requests
 
 # AWX
 from awx.main.models import * # noqa
-from base import BaseJobTestMixin
+from job_base import BaseJobTestMixin
 
 __all__ = ['JobTemplateTest', 'JobTest', 'JobTemplateCallbackTest', 'JobTransactionTest', 'JobTemplateSurveyTest']
 
@@ -218,7 +218,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             resp = self.get(url, expect=200)
             print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 3)
-            
+
         # Chuck has permission to see all Eng Job Templates as Lead Engineer
         # Note: Since chuck is an org admin he can also see the support scan template
         with self.current_user(self.user_chuck):
@@ -270,7 +270,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             resp = self.get(url, expect=200)
             print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 6)
-        
+
 
     def test_credentials_list(self):
         url = reverse('api:credential_list')
@@ -331,7 +331,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             d['job_type'] = 'world domination'
             response = self.post(url, d, expect=400)
             self.assertTrue('job_type' in response)
-    
+
         # Test playbook not in list of project playbooks.
         with self.current_user(self.user_sue):
             d = dict(data.items())
@@ -603,11 +603,11 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         data = self.get('/api/v1/job_templates/', expect=401)
         data = self.get('/api/v1/job_templates/', expect=200, auth=self.get_normal_credentials())
         self.assertTrue(data['count'], 2)
-        
+
         rec = dict(
-            name         = 'job-foo', 
-            credential   = self.credential.pk, 
-            inventory    = self.inventory.pk, 
+            name         = 'job-foo',
+            credential   = self.credential.pk,
+            inventory    = self.inventory.pk,
             project      = self.project.pk,
             job_type     = PERM_INVENTORY_DEPLOY
         )
@@ -617,7 +617,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         self.assertEquals(posted['url'], '/api/v1/job_templates/3/')
 
         # other_django_user is on a team that can deploy, so can create both deploy and check type jobs
-        rec['name'] = 'job-foo2' 
+        rec['name'] = 'job-foo2'
         posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other_credentials())
         rec['name'] = 'job-foo3'
         rec['job_type'] = PERM_INVENTORY_CHECK
@@ -732,7 +732,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             raise socket.herror('unknown test host')
         raddr = '.'.join(list(reversed(ip.split('.'))) + ['in-addr', 'arpa'])
         return (host, [raddr], [ip])
-         
+
     def getaddrinfo(self, host, port, family=0, socktype=0, proto=0, flags=0):
         if family or socktype or proto or flags:
             return self._original_getaddrinfo(host, port, family, socktype,
@@ -765,7 +765,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                     host_vars['ansible_ssh_host'] = ip
                     host.variables = json.dumps(host_vars)
                     host.save()
-        
+
         # Find a valid job template to use to test the callback.
         job_template = None
         qs = JobTemplate.objects.filter(job_type='run',
@@ -1095,7 +1095,7 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
         jt_url = reverse('api:job_template_detail', args=(response['id'],))
         with self.current_user(self.user_sue):
             self.patch(jt_url, dict(survey_enabled=True), expect=402)
-        
+
     def test_post_job_template_survey(self):
         url = reverse('api:job_template_list')
         data = dict(
@@ -1220,11 +1220,11 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
             self.get(url, expect=200)
 
         with self.current_user(self.user_chuck):
-            self.get(url, expect=200)    
+            self.get(url, expect=200)
 
         # Doug and Juan can't
         with self.current_user(self.user_doug):
             self.get(url, expect=403)
-            
+
         with self.current_user(self.user_juan):
-            self.get(url, expect=403)    
+            self.get(url, expect=403)

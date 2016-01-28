@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import * # noqa
-from ..base import BaseTest, QueueStartStopTestMixin
+from awx.main.tests.base import BaseTest, QueueStartStopTestMixin
 
 __all__ = ['SurveyPasswordRedactedTest']
 

@@ -24,7 +24,7 @@ from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
-from ..base import BaseTest, BaseLiveServerTest
+from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
 __all__ = ['CreateDefaultOrgTest', 'DumpDataTest', 'CleanupDeletedTest',
            'CleanupJobsTest', 'CleanupActivityStreamTest',

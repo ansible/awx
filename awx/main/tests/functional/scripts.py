@@ -10,7 +10,7 @@ import urlparse
 
 # AWX
 from awx.main.models import * # noqa
-from .base import BaseLiveServerTest
+from awx.main.tests.base import BaseLiveServerTest
 
 __all__ = ['InventoryScriptTest']
 
@@ -93,7 +93,7 @@ class InventoryScriptTest(BaseScriptTest):
 
             # add localhost just to make sure it's thrown into all (Ansible github bug)
             local = inventory.hosts.create(name='localhost', inventory=inventory, variables={})
-            hosts.append(local)    
+            hosts.append(local)
 
             self.hosts.extend(hosts)
             groups = []

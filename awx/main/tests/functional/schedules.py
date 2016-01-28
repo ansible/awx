@@ -10,7 +10,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # noqa
-from .base import BaseTest
+from awx.main.tests.base import BaseTest
 
 __all__ = ['ScheduleTest']
 
