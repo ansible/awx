@@ -38,6 +38,7 @@ import os
 import pwd
 import urlparse
 import re
+from copy import deepcopy
 
 # Requests
 import requests
@@ -46,6 +47,42 @@ import requests
 import zmq
 
 import psutil
+
+
+CENSOR_FIELD_WHITELIST=[
+    'msg',
+    'failed',
+    'changed',
+    'results',
+    'start',
+    'end',
+    'delta',
+    'cmd',
+    '_ansible_no_log',
+    'cmd',
+    'rc',
+    'failed_when_result',
+    'skip_reason',
+]
+
+def censor(obj):
+    if obj.get('_ansible_no_log', False):
+        new_obj = {}
+        for k in CENSOR_FIELD_WHITELIST:
+            if k in obj:
+                new_obj[k] = obj[k]
+            if k == 'cmd' and k in obj:
+                if re.search(r'\s', obj['cmd']):
+                    new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
+                                            r'\1 <censored>',
+                                            obj['cmd'])
+        new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        obj = new_obj
+    if 'results' in obj:
+        for i in xrange(len(obj['results'])):
+            obj['results'][i] = censor(obj['results'][i])
+    return obj
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -127,31 +164,6 @@ class BaseCallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
-                if 'res' in event_data \
-                        and event_data['res'].get('_ansible_no_log', False):
-                    res = event_data['res']
-                    if 'stdout' in res and res['stdout']:
-                        res['stdout'] = '<censored>'
-                    if 'stdout_lines' in res and res['stdout_lines']:
-                        res['stdout_lines'] = ['<censored>']
-                    if 'stderr' in res and res['stderr']:
-                        res['stderr'] = '<censored>'
-                    if 'stderr_lines' in res and res['stderr_lines']:
-                        res['stderr_lines'] = ['<censored>']
-                    if res.get('cmd', None) and re.search(r'\s', res['cmd']):
-                        res['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$', 
-                                            r'\1 <censored>',
-                                            res['cmd'])
-                    if 'invocation' in res \
-                        and 'module_args' in res['invocation'] \
-                        and '_raw_params' in res['invocation']['module_args'] \
-                        and re.search(r'\s',
-                                      res['invocation']['module_args']['_raw_params']):
-                        res['invocation']['module_args']['_raw_params'] = \
-                            re.sub(r'^(([^\s\\]|\\\s)+).*$',
-                                   r'\1 <censored>',
-                                   res['invocation']['module_args']['_raw_params'])
-                    msg['event_data']['res'] = res
 
                 self.socket.send_json(msg)
                 self.socket.recv()
@@ -185,6 +197,9 @@ class BaseCallbackModule(object):
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
+        if 'res' in event_data:
+            event_data['res'] = censor(deepcopy(event_data['res']))
+
         if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)
         else:
