@@ -153,11 +153,11 @@ class RolePermission(CreatedModifiedModel):
         on_delete=models.CASCADE,
         related_name='permissions',
     )
-    create     = models.BooleanField(default = False)
-    read       = models.BooleanField(default = False)
-    write      = models.BooleanField(default = False)
-    update     = models.BooleanField(default = False)
-    delete     = models.BooleanField(default = False)
-    scm_update = models.BooleanField(default = False)
+    create     = models.IntegerField(default = 0)
+    read       = models.IntegerField(default = 0)
+    write      = models.IntegerField(default = 0)
+    update     = models.IntegerField(default = 0)
+    delete     = models.IntegerField(default = 0)
+    scm_update = models.IntegerField(default = 0)
 
 
