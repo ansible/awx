@@ -20,7 +20,7 @@ export default
             forceListeners: true,
 
             actions: {
-                
+
             },
 
             fields: {
@@ -263,11 +263,11 @@ export default
                         variable: 'key_required',
                         init: true
                     },
+                    class: 'Form-textArea',
                     hintText: "{{ key_hint }}",
                     addRequired: false,
                     editRequired: false,
                     awDropFile: true,
-                    'class': 'ssh-key-field',
                     rows: 10,
                     awPopOver: "SSH key description",
                     awPopOverWatch:   "key_description",

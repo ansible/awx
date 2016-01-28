@@ -1,6 +1,6 @@
 /**********************************************
  * AngularCodeMirror.css
- * 
+ *
  * CodeMirror.css overrides
  *
  * Copyright (c) 2014 Chris Houseknecht
@@ -30,14 +30,14 @@
   .CodeMirror {
       height: auto;
   }
-  
+
   .CodeMirror-activeline-background {
       background-color: #f7f7f7;
   }
-  
 
 
-/* Modal dialog overrides to make jqueryui dialog blend in with Twitter. 
+
+/* Modal dialog overrides to make jqueryui dialog blend in with Twitter.
    Why? Twitter's modal is not draggable or resizable, which is not very
    useful for a code editor */
 
@@ -71,7 +71,7 @@
       border-color: #ffffff;
       color: #A9A9A9;
   }
-  
+
   .ui-dialog .ui-resizable-se {
       right: 5px;
       bottom: 5px;
@@ -108,4 +108,3 @@
   .CodeMirror-lint-tooltip {
       z-index: 2060;
   }
-
