@@ -21,8 +21,8 @@ export default
 
         fields: {
             status: {
-                label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                label: '',
+                columnClass: 'List-staticColumn--mediumStatus',
                 searchable: false,
                 nosort: true,
                 ngClick: "null",
@@ -31,13 +31,13 @@ export default
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
-                    awTipPlacement: "top",
+                    awTipPlacement: "right",
                     ngClick: "showGroupSummary($event, inventory.id)",
                     ngClass: "inventory.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: "{{ inventory.hostsTip }}",
-                    awTipPlacement: "top",
+                    awTipPlacement: "right",
                     ngClick: "showHostSummary($event, inventory.id)",
                     ngClass: ""
                 }]
@@ -45,7 +45,7 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-4 col-sm-6 col-xs-6',
+                columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-8',
                 linkTo: '/#/inventories/{{inventory.id}}/manage'
             },
@@ -56,7 +56,7 @@ export default
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-4 hidden-sm hidden-xs'
+                columnClass: 'col-md-5 col-sm-3 hidden-xs'
             },
             has_inventory_sources: {
                 label: 'Cloud sourced?',

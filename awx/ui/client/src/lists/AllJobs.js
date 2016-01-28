@@ -17,30 +17,13 @@ export default
         well: false,
 
         fields: {
-            id: {
-                label: 'ID',
-                ngClick:"viewJobLog(all_job.id)",
-                searchType: 'int',
-                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
-                awToolTip: "{{ all_job.status_tip }}",
-                dataPlacement: 'top'
-            },
-            name: {
-                label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
-                ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
-                defaultSearchField: true,
-                awToolTip: "{{ all_job.name | sanitize }}",
-                dataPlacement: 'top'
-            },
             status: {
-                label: 'Status',
-                columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
+                label: '',
+                columnClass: 'List-staticColumn--smallStatus',
                 awToolTip: "{{ all_job.status_tip }}",
-                awTipPlacement: "top",
+                awTipPlacement: "right",
                 dataTitle: "{{ all_job.status_popover_title }}",
                 icon: 'icon-job-{{ all_job.status }}',
-                alt_text: "{{all_job.status_label}}",
                 iconOnly: true,
                 ngClick:"viewJobLog(all_job.id)",
                 searchable: true,
@@ -53,11 +36,27 @@ export default
                     { name: "Canceled", value: "canceled" }
                 ]
             },
+            id: {
+                label: 'ID',
+                ngClick:"viewJobLog(all_job.id)",
+                searchType: 'int',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
+                awToolTip: "{{ all_job.status_tip }}",
+                dataPlacement: 'top'
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
+                ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
+                defaultSearchField: true,
+                awToolTip: "{{ all_job.name | sanitize }}",
+                dataPlacement: 'top'
+            },
             type: {
                 label: 'Type',
                 ngBind: 'all_job.type_label',
                 link: false,
-                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-3 col-md-3 hidden-sm hidden-xs",
                 columnShow: "showJobType",
                 searchable: true,
                 searchType: 'select',
@@ -68,7 +67,7 @@ export default
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                columnClass: "col-lg-2 col-md-2 col-sm-2 hidden-xs",
+                columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
                 key: true,
                 desc: true
             },

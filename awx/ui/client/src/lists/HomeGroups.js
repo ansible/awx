@@ -19,7 +19,7 @@ export default
         fields: {
             status: {
                 label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                columnClass: 'List-staticColumn--mediumStatus',
                 searchable: false,
                 nosort: true,
                 ngClick: "null",
@@ -28,13 +28,13 @@ export default
                     icon: "{{ 'icon-cloud-' + group.status_class }}",
                     awToolTip: "{{ group.status_tooltip }}",
                     dataTipWatch: "group.launch_tooltip",
-                    awTipPlacement: "top",
+                    awTipPlacement: "right",
                     ngClick: "viewUpdateStatus(group.id)",
                     ngClass: "group.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + group.hosts_status_class }}",
                     awToolTip: "{{ group.hosts_status_tip }}",
-                    awTipPlacement: "top",
+                    awTipPlacement: "right",
                     ngClick: "showHostSummary($event, group.id)",
                     ngClass: ""
                 }]
@@ -43,13 +43,13 @@ export default
                 key: true,
                 label: 'Group',
                 ngClick: "editGroup(group.id, group.inventory)",
-                columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-6 ellipsis'
+                columnClass: 'col-lg-6 col-md-5 col-sm-5 col-xs-8 ellipsis List-staticColumnAdjacent'
             },
             inventory_name: {
                 label: 'Inventory',
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
+                columnClass: 'col-lg-4 col-md-5 col-sm-3 hidden-xs elllipsis',
                 linkTo: "{{ '/#/inventories/' + group.inventory + '/' }}"
             },
             source: {
@@ -117,6 +117,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-4',
+
             /*
             sync_status: {
                 mode: 'all',
@@ -161,7 +164,7 @@ export default
         },
 
         actions: {
-            
+
         }
 
     });

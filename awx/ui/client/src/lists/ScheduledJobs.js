@@ -18,10 +18,10 @@ export default
 
         fields: {
             status: {
-                label: 'Status',
-                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
+                label: '',
+                columnClass: 'List-staticColumn--smallStatus',
                 awToolTip: "{{ schedule.status_tip }}",
-                awTipPlacement: "top",
+                awTipPlacement: "right",
                 icon: 'icon-job-{{ schedule.status }}',
                 iconOnly: true,
                 ngClick: "toggleSchedule($event, schedule.id)",
@@ -30,7 +30,7 @@ export default
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
+                columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule.id)",
