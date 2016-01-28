@@ -22,7 +22,7 @@ import requests
 
 # AWX
 from awx.main.models import * # noqa
-from job_base import BaseJobTestMixin
+from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobTemplateTest', 'JobTest', 'JobTemplateCallbackTest', 'JobTransactionTest', 'JobTemplateSurveyTest']
 

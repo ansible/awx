@@ -20,7 +20,6 @@ import tempfile
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
 
 # PyCrypto
 from Crypto.Cipher import AES

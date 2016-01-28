@@ -257,8 +257,8 @@ class BaseJobTestMixin(BaseTestMixin):
 
         # Each user has his/her own set of credentials.
         from awx.main.tests.data.ssh import (TEST_SSH_KEY_DATA,
-                                          TEST_SSH_KEY_DATA_LOCKED,
-                                          TEST_SSH_KEY_DATA_UNLOCK)
+                                             TEST_SSH_KEY_DATA_LOCKED,
+                                             TEST_SSH_KEY_DATA_UNLOCK)
         self.cred_sue = self.user_sue.credentials.create(
             username='sue',
             password=TEST_SSH_KEY_DATA,

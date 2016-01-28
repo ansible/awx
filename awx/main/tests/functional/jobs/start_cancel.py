@@ -11,7 +11,7 @@ from django.conf import settings
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
-from job_base import BaseJobTestMixin
+from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobStartCancelTest',]
 

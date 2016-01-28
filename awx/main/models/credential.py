@@ -470,3 +470,4 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             if 'cloud' not in update_fields:
                 update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
+

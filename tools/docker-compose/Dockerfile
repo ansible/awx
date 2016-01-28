@@ -12,10 +12,7 @@ RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-or
 RUN apt-get update
 RUN apt-get install -y openssh-server ansible mg vim tmux git mercurial subversion python-dev python-psycopg2 make postgresql-client libpq-dev nodejs python-psutil libxml2-dev libxslt-dev lib32z1-dev libsasl2-dev libldap2-dev libffi-dev libzmq-dev proot python-pip libxmlsec1-dev swig redis-server && rm -rf /var/lib/apt/lists/*
 RUN pip install flake8
-RUN pip install pytest
-RUN pip install pytest-pythonpath
-RUN pip install pytest-django
-RUN pip install pytest-cov
+RUN pip install pytest pytest-pythonpath pytest-django pytest-cov
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db

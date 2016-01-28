@@ -5,7 +5,7 @@ from django.conf import settings
 from django.test import LiveServerTestCase
 from django.test.utils import override_settings
 
-from awx.main.tests.jobs import BaseJobTestMixin
+from awx.main.tests.job_base import BaseJobTestMixin
 
 
 @override_settings(CELERY_ALWAYS_EAGER=True,

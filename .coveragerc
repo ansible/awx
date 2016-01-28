@@ -25,3 +25,5 @@ exclude_lines =
 
 ignore_errors = True
 
+[xml]
+output = ./reports/coverage.xml
