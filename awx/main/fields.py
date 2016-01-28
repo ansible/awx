@@ -45,7 +45,8 @@ class AutoOneToOneField(models.OneToOneField):
 
 def resolve_field(obj, field):
     for f in field.split('.'):
-        obj = getattr(obj, f)
+        if obj:
+            obj = getattr(obj, f)
     return obj
 
 class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
@@ -61,7 +62,16 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
             return resource
         resource = Resource._default_manager.create()
         if self.parent_resource:
-            resource.parent = resolve_field(instance, self.parent_resource)
+            # Take first non null parent resource
+            parent = None
+            if type(self.parent_resource) is list:
+                for path in self.parent_resource: 
+                    parent = resolve_field(instance, path)
+                    if parent:
+                        break
+            else:
+                parent = resolve_field(instance, self.parent_resource)
+            resource.parent = parent
         resource.save()
         setattr(instance, self.field.name, resource)
         instance.save(update_fields=[self.field.name,])
@@ -102,25 +112,43 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 
         if not self.role_name:
             raise FieldError('Implicit role missing `role_name`')
-        if not self.resource_field:
-            raise FieldError('Implicit role missing `resource_field` specification')
-        if not self.permissions:
-            raise FieldError('Implicit role missing `permissions`')
 
         role = Role._default_manager.create(name=self.role_name)
         role.save()
         if self.parent_role:
-            role.parents.add(resolve_field(instance, self.parent_role))
+            # Add all non-null parent roles as parents
+            if type(self.parent_role) is list:
+                for path in self.parent_role: 
+                    parent = resolve_field(instance, path)
+                    if parent:
+                        role.parents.add(parent)
+            else:
+                parent = resolve_field(instance, self.parent_role)
+                if parent:
+                    role.parents.add(parent)
         setattr(instance, self.field.name, role)
         instance.save(update_fields=[self.field.name,])
 
-        permissions = RolePermission(
-            role=role, 
-            resource=getattr(instance, self.resource_field)
-        )
-        for k,v in self.permissions.items():
-            setattr(permissions, k, v)
-        permissions.save()
+        if self.resource_field and self.permissions:
+            permissions = RolePermission(
+                role=role, 
+                resource=getattr(instance, self.resource_field)
+            )
+
+            if 'all' in self.permissions and self.permissions['all']:
+                del self.permissions['all']
+                self.permissions['create']     = True
+                self.permissions['read']       = True
+                self.permissions['write']      = True
+                self.permissions['update']     = True
+                self.permissions['delete']     = True
+                self.permissions['scm_update'] = True
+                self.permissions['use']        = True
+                self.permissions['execute']    = True
+
+            for k,v in self.permissions.items():
+                setattr(permissions, k, v)
+            permissions.save()
 
         return role
 

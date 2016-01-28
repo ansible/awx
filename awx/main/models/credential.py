@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 
 # AWX
+from awx.main.fields import ImplicitResourceField, ImplicitRoleField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
 from awx.main.models.base import * # noqa
@@ -152,6 +153,27 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
+    )
+    resource = ImplicitResourceField(
+        parent_resource=[
+            'user.resource',
+            'team.resource'
+        ]
+    )
+    owner_role = ImplicitRoleField(
+        role_name='Credential Owner', 
+        parent_role=[
+            'user.user_role',
+            'team.admin_role'
+        ],
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    usage_role = ImplicitRoleField(
+        role_name='Credential User', 
+        resource_field='resource',
+        parent_role= 'team.member_role',
+        permissions = { 'usage': True }
     )
 
     @property

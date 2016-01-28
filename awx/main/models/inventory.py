@@ -18,7 +18,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.fields import AutoOneToOneField
+from awx.main.fields import AutoOneToOneField, ImplicitResourceField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
@@ -91,6 +91,21 @@ class Inventory(CommonModel):
         default=0,
         editable=False,
         help_text=_('Number of external inventory sources in this inventory with failures.'),
+    )
+    resource = ImplicitResourceField(
+        parent_resource='organization.resource'
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Inventory Administrator', 
+        parent_role='organization.admin_role',
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Inventory Auditor', 
+        parent_role='organization.auditor_role',
+        resource_field='resource',
+        permissions = { 'read': True }
     )
 
     def get_absolute_url(self):
@@ -522,6 +537,21 @@ class Group(CommonModelNameNotUnique):
         related_name='groups',
         editable=False,
         help_text=_('Inventory source(s) that created or modified this group.'),
+    )
+    resource = ImplicitResourceField(
+        parent_resource='inventory.resource'
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Inventory Group Administrator', 
+        parent_role='inventory.admin_role',
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Inventory Group Auditor', 
+        parent_role='inventory.auditor_role',
+        resource_field='resource',
+        permissions = { 'read': True }
     )
 
     def __unicode__(self):
@@ -1092,6 +1122,30 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     )
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
+    )
+    resource = ImplicitResourceField(
+        parent_resource=[
+            'group.resource',
+            'inventory.resource'
+        ]
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Inventory Group Administrator', 
+        parent_role=[
+            'group.admin_role',
+            'inventory.admin_role',
+        ],
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Inventory Group Auditor', 
+        parent_role=[
+            'group.auditor_role',
+            'inventory.auditor_role',
+        ],
+        resource_field='resource',
+        permissions = { 'read': True }
     )
 
     @classmethod

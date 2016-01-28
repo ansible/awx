@@ -16,7 +16,7 @@ from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
-from awx.main.fields import AutoOneToOneField
+from awx.main.fields import AutoOneToOneField, ImplicitResourceField, ImplicitRoleField
 from awx.main.models.base import * # noqa
 from awx.main.conf import tower_settings
 
@@ -42,11 +42,27 @@ class Organization(CommonModel):
         blank=True,
         related_name='admin_of_organizations',
     )
+
+    # TODO: This field is deprecated. In 3.0 all projects will have exactly one
+    # organization parent, the foreign key field representing that has been
+    # moved to the Project model.
     projects = models.ManyToManyField(
         'Project',
         blank=True,
         related_name='organizations',
     )
+    resource = ImplicitResourceField()
+    admin_role = ImplicitRoleField(
+        role_name='Organization Administrator', 
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Organization Auditor', 
+        resource_field='resource',
+        permissions = { 'read': True }
+    )
+
 
     def get_absolute_url(self):
         return reverse('api:organization_detail', args=(self.pk,))
@@ -88,6 +104,23 @@ class Team(CommonModelNameNotUnique):
         blank=True,
         related_name='teams',
     )
+    resource = ImplicitResourceField()
+    admin_role = ImplicitRoleField(
+        role_name='Team Administrator', 
+        parent_role='organization.admin_role',
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Team Auditor', 
+        parent_role='organization.auditor_role',
+        resource_field='resource',
+        permissions = { 'read': True }
+    )
+    member_role = ImplicitRoleField(
+        role_name='Team Member', 
+        parent_role='admin_role',
+    )
 
     def get_absolute_url(self):
         return reverse('api:team_detail', args=(self.pk,))
@@ -103,6 +136,10 @@ class Team(CommonModelNameNotUnique):
 class Permission(CommonModelNameNotUnique):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.
+
+    NOTE: This class is deprecated, permissions and access is to be handled by
+    our new RBAC system. This class should be able to be safely removed after a 3.0.0
+    migration. - anoek 2016-01-28
     '''
 
     class Meta:

@@ -22,6 +22,7 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
+from awx.main.fields import ImplicitResourceField, ImplicitRoleField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -194,6 +195,14 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         app_label = 'main'
         ordering = ('id',)
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=False,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='project_list', # TODO: this should eventually be refactored
+                                     # back to 'projects' - anoek 2016-01-28
+    )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
         editable=False,
@@ -204,6 +213,31 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
+    )
+    resource = ImplicitResourceField()
+    admin_role = ImplicitRoleField(
+        role_name='Project Administrator', 
+        parent_role='organization.admin_role',
+        resource_field='resource',
+        permissions = { 'all': True }
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Project Auditor', 
+        parent_role='organization.auditor_role',
+        resource_field='resource',
+        permissions = { 'read': True }
+    )
+    member_role = ImplicitRoleField(
+        role_name='Project Member', 
+        parent_role='admin',
+        resource_field='resource',
+        permissions = { 'usage': True }
+    )
+    scm_update_role = ImplicitRoleField(
+        role_name='Project Updater', 
+        parent_role='admin',
+        resource_field='resource',
+        permissions = { 'scm_update': True }
     )
 
     @classmethod

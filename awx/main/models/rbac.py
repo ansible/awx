@@ -11,7 +11,6 @@ from django.db.models.signals import pre_save, post_save, pre_delete, post_delet
 
 # AWX
 from awx.main.models.base import * # noqa
-from awx.main.fields import * # noqa
 
 __all__ = ['Role', 'RolePermission', 'Resource', 'RoleHierarchy', 'ResourceHierarchy']
 
@@ -158,6 +157,8 @@ class RolePermission(CreatedModifiedModel):
     write      = models.IntegerField(default = 0)
     update     = models.IntegerField(default = 0)
     delete     = models.IntegerField(default = 0)
+    execute    = models.IntegerField(default = 0)
     scm_update = models.IntegerField(default = 0)
+    use        = models.IntegerField(default = 0)
 
 
