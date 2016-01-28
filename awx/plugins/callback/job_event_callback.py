@@ -62,6 +62,7 @@ CENSOR_FIELD_WHITELIST=[
     'cmd',
     'rc',
     'failed_when_result',
+    'skipped',
     'skip_reason',
 ]
 
