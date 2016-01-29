@@ -81,9 +81,11 @@ psphere==0.5.2
 psutil==3.1.1
 psycopg2
 pyasn1==0.1.9
+pycrypto==2.6.1
 pycparser==2.14
 PyJWT==1.4.0
 pymongo==2.8
+pyOpenSSL==0.15.1
 pyparsing==2.0.7
 pyrad==2.0
 pyrax==1.9.7
