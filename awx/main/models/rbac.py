@@ -59,6 +59,27 @@ class Role(CommonModelNameNotUnique):
             for child in self.children.all():
                 child.rebuild_role_hierarchy_cache()
 
+    def grant(self, resource, permissions):
+        # take either the raw Resource or something that includes the ResourceMixin
+        resource = resource if type(resource) is Resource else resource.resource
+
+        if 'all' in permissions and permissions['all']:
+            del permissions['all']
+            permissions['create']     = True
+            permissions['read']       = True
+            permissions['write']      = True
+            permissions['update']     = True
+            permissions['delete']     = True
+            permissions['scm_update'] = True
+            permissions['use']        = True
+            permissions['execute']    = True
+
+        permission = RolePermission(role=self, resource=resource)
+        for k in permissions:
+            setattr(permission, k, int(permissions[k]))
+        permission.save()
+
+
 m2m_changed.connect(rebuild_role_hierarchy_cache, Role.parents.through)
 
 
@@ -160,5 +181,4 @@ class RolePermission(CreatedModifiedModel):
     execute    = models.IntegerField(default = 0)
     scm_update = models.IntegerField(default = 0)
     use        = models.IntegerField(default = 0)
-
 
