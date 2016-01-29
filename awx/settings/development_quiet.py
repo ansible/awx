@@ -13,4 +13,7 @@ from development import *  # NOQA
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
+
+# Statistics Gathering
 STATSD_CLIENT = 'django_statsd.clients.null'
+STATSD_HOST = 'localhost'
