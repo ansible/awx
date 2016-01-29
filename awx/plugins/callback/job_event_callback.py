@@ -57,6 +57,7 @@ if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
                          maxudpsize=512)
 else:
     from statsd import StatsClientBase
+
     class NoStatsClient(StatsClientBase):
         def __init__(self, *args, **kwargs):
             pass
