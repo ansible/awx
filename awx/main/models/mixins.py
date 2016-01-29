@@ -29,15 +29,23 @@ class ResourceMixin(models.Model):
         `myresource.get_permissions(user)`.
         '''
 
-        perm_clause = ''
+        aggregate_where_clause = ''
         aggregates = ''
-        for perm in permissions:
-            if not perm_clause: 
-                perm_clause = 'WHERE '
-            else:
-                perm_clause += ' AND '
-            perm_clause += '"%s" = %d' % (perm, int(permissions[perm]))
-            aggregates += ', MAX("%s") as "%s"' % (perm, perm)
+        group_clause = ''
+        where_clause = ''
+
+        if len(permissions) > 1:
+            group_clause = 'GROUP BY %s.resource_id' % RolePermission._meta.db_table
+            for perm in permissions:
+                if not aggregate_where_clause: 
+                    aggregate_where_clause = 'WHERE '
+                else:
+                    aggregate_where_clause += ' AND '
+                aggregate_where_clause += '"%s" = %d' % (perm, int(permissions[perm]))
+                aggregates += ', MAX("%s") as "%s"' % (perm, perm)
+        if len(permissions) == 1:
+            perm = list(permissions.keys())[0]
+            where_clause = 'AND "%s" = %d' % (perm, int(permissions[perm]))
 
         return cls.objects.extra(
             where=[
@@ -51,23 +59,27 @@ class ResourceMixin(models.Model):
                             LEFT JOIN %(rbac_permission)s 
                                  ON (%(rbac_permission)s.role_id = %(rbac_role_hierachy)s.role_id)
                            WHERE %(rbac_role)s_members.user_id=%(user_id)d
-                          GROUP BY %(rbac_permission)s.resource_id 
+                                 %(where_clause)s
+                           %(group_clause)s
                       ) summarized_permissions
-                      %(perm_clause)s
+                      %(aggregate_where_clause)s
                     )
                 '''
                 % 
                 {
-                    'table_name': cls._meta.db_table,
-                    'aggregates': aggregates,
-                    'user_id': user.id,
-                    'perm_clause': perm_clause,
-                    'rbac_role': Role._meta.db_table,
-                    'rbac_permission': RolePermission._meta.db_table,
-                    'rbac_role_hierachy': RoleHierarchy._meta.db_table
+                    'table_name'             : cls._meta.db_table,
+                    'aggregates'             : aggregates,
+                    'user_id'                : user.id,
+                    'aggregate_where_clause' : aggregate_where_clause,
+                    'group_clause'           : group_clause,
+                    'where_clause'           : where_clause,
+                    'rbac_role'              : Role._meta.db_table,
+                    'rbac_permission'        : RolePermission._meta.db_table,
+                    'rbac_role_hierachy'     : RoleHierarchy._meta.db_table
                 }
             ]
         )
+
 
     def get_permissions(self, user):
         '''
