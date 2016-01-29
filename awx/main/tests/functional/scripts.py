@@ -130,7 +130,7 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ.setdefault('REST_API_URL', rest_api_url)
         #os.environ.setdefault('REST_API_TOKEN',
         #                      self.super_django_user.auth_token.key)
-        name = os.path.join(os.path.dirname(__file__), '..', '..', 'plugins',
+        name = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'plugins',
                             'inventory', 'awxrest.py')
         return self.run_script(name, *args, **options)
 
