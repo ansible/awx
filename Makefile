@@ -1,4 +1,5 @@
 PYTHON = python
+PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print get_python_version()")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
@@ -234,7 +235,11 @@ requirements requirements_dev requirements_jenkins: %: real-%
 #  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
 #  * --target implies --ignore-installed
 real-requirements:
-	pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
+	@if [ "$(PYTHON_VERSION)" == "2.6" ]; then \
+	  pip install -r requirements/requirements_python26.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python" \
+	else \
+	  pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python" \
+	fi
 
 real-requirements_dev:
 	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
