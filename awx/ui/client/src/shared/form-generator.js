@@ -1318,12 +1318,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"input-group\">\n";
                         html += "<span class=\"input-group-btn\">\n";
-                        html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick');
+                        html += "<button type=\"button\" class=\" Form-lookupButton btn btn-default\" " + this.attr(field, 'ngClick');
                         html += (field.readonly || field.showonly) ? " disabled " : "";
                         html += (field.ngDisabled) ? this.attr(field, "ngDisabled"): "";
                         html += "id=\"" + fld + "-lookup-btn\"><i class=\"fa fa-search\"></i></button>\n";
                         html += "</span>\n";
-                        html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
+                        html += "<input type=\"text\" class=\"form-control Form-textInput input-medium lookup\" ";
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "class=\"form-control\" ";
