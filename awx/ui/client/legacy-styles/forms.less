@@ -144,11 +144,23 @@
     width:100%;
 }
 
+.Form-textInput{
+    height: 30px;
+    background-color: @field-secondary-bg;
+    border-radius: 5px;
+    border:1px solid @field-border;
+    color: @field-input-text;
+}
+
+.Form-textInput:active{
+    border:1px solid @field-border-sel;
+}
+
 .CodeMirror{
     border-radius: 5px;
     font-family: 'Open Sans';
     font-style: normal;
-    color: @default-data-txt;
+    color: @field-input-text;
 }
 
 .CodeMirror-gutters{

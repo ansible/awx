@@ -779,7 +779,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                             html += buildId(field, fld, this.form);
                             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
-                            html += "class=\"form-control";
+                            html += "class=\"form-control Form-textInput ";
                             html += (field['class']) ? " " + this.attr(field, 'class') : "";
                             html += "\" ";
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
