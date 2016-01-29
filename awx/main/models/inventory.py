@@ -105,6 +105,12 @@ class Inventory(CommonModel, ResourceMixin):
         resource_field='resource',
         permissions = { 'read': True }
     )
+    updater_role = ImplicitRoleField(
+        role_name='Inventory Updater', 
+    )
+    executor_role = ImplicitRoleField(
+        role_name='Inventory Executor', 
+    )
 
     def get_absolute_url(self):
         return reverse('api:inventory_detail', args=(self.pk,))
@@ -330,7 +336,7 @@ class Inventory(CommonModel, ResourceMixin):
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
 
-class Host(CommonModelNameNotUnique):
+class Host(CommonModelNameNotUnique, ResourceMixin):
     '''
     A managed node
     '''
@@ -547,6 +553,14 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         parent_role='inventory.auditor_role',
         resource_field='resource',
         permissions = { 'read': True }
+    )
+    updater_role = ImplicitRoleField(
+        role_name='Inventory Group Updater', 
+        parent_role='inventory.updater_role'
+    )
+    executor_role = ImplicitRoleField(
+        role_name='Inventory Group Executor', 
+        parent_role='inventory.executor_role'
     )
 
     def __unicode__(self):
@@ -1117,24 +1131,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
     )
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
-    )
-    admin_role = ImplicitRoleField(
-        role_name='Inventory Group Administrator', 
-        parent_role=[
-            'group.admin_role',
-            'inventory.admin_role',
-        ],
-        resource_field='resource',
-        permissions = { 'all': True }
-    )
-    auditor_role = ImplicitRoleField(
-        role_name='Inventory Group Auditor', 
-        parent_role=[
-            'group.auditor_role',
-            'inventory.auditor_role',
-        ],
-        resource_field='resource',
-        permissions = { 'read': True }
     )
 
     @classmethod
