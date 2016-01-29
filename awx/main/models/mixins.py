@@ -113,7 +113,7 @@ class ResourceMixin(models.Model):
                       FROM %(rbac_permission)s 
                       LEFT JOIN %(rbac_role_hierachy)s 
                            ON (%(rbac_permission)s.role_id = %(rbac_role_hierachy)s.role_id)
-                      LEFT JOIN %(rbac_role)s_members 
+                     INNER JOIN %(rbac_role)s_members 
                            ON (
                                  %(rbac_role)s_members.role_id = %(rbac_role_hierachy)s.ancestor_id
                                  AND %(rbac_role)s_members.user_id = %(user_id)d
@@ -142,6 +142,8 @@ class ResourceMixin(models.Model):
         '''
 
         perms = self.get_permissions(user)
+        if not perms:
+            return False
         for k in permissions:
             if k not in perms or perms[k] < permissions[k]:
                 return False

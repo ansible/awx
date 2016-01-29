@@ -26,6 +26,7 @@ class Role(CommonModelNameNotUnique):
         verbose_name_plural = _('roles')
         db_table = 'main_rbac_roles'
 
+    singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
     parents = models.ManyToManyField('Role', related_name='children')
     members = models.ManyToManyField('auth.User', related_name='roles')
 
@@ -73,6 +74,16 @@ class Role(CommonModelNameNotUnique):
         for k in permissions:
             setattr(permission, k, int(permissions[k]))
         permission.save()
+
+    @staticmethod
+    def singleton(name):
+        try:
+            return Role.objects.get(singleton_name=name)
+        except Role.DoesNotExist:
+            ret = Role(singleton_name=name)
+            ret.save()
+            return ret;
+
 
 
 class RoleHierarchy(CreatedModifiedModel):

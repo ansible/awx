@@ -119,11 +119,17 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
             # Add all non-null parent roles as parents
             if type(self.parent_role) is list:
                 for path in self.parent_role: 
-                    parent = resolve_field(instance, path)
+                    if path.startswith("singleton:"):
+                        parent = Role.singleton(path[10:])
+                    else:
+                        parent = resolve_field(instance, path)
                     if parent:
                         role.parents.add(parent)
             else:
-                parent = resolve_field(instance, self.parent_role)
+                if self.parent_role.startswith("singleton:"):
+                    parent = Role.singleton(self.parent_role[10:])
+                else:
+                    parent = resolve_field(instance, self.parent_role)
                 if parent:
                     role.parents.add(parent)
         setattr(instance, self.field.name, role)
