@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Django
+from django.db.models.signals import post_save, post_init
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
@@ -91,7 +92,11 @@ class ImplicitResourceField(models.ForeignKey):
     def contribute_to_class(self, cls, name):
         super(ImplicitResourceField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, ResourceFieldDescriptor(self.parent_resource, self))
+        post_save.connect(self._save, cls, True)
 
+    def _save(self, instance, *args, **kwargs):
+        # Ensure that our field gets initialized after our first save
+        getattr(instance, self.name)
 
 
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
@@ -185,4 +190,8 @@ class ImplicitRoleField(models.ForeignKey):
                     self
                 )
                 )
+        post_save.connect(self._save, cls, True)
 
+    def _save(self, instance, *args, **kwargs):
+        # Ensure that our field gets initialized after our first save
+        getattr(instance, self.name)
