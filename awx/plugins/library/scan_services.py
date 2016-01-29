@@ -47,6 +47,7 @@ class BaseService(object):
 
     def __init__(self, module):
         self.module = module
+        self.incomplete_warning = False
 
 class ServiceScanService(BaseService):
 
@@ -127,7 +128,8 @@ class ServiceScanService(BaseService):
                         #elif rc in (1,3):
                         else:
                             if 'root' in stderr or 'permission' in stderr.lower() or 'not in sudoers' in stderr.lower():
-                                service_state = 'unable to scan, requires root'
+                                self.incomplete_warning = True
+                                continue
                             else:
                                 service_state = 'stopped'
                     service_data = {"name": service_name, "state": service_state, "source": "sysv"}
@@ -173,14 +175,19 @@ def main():
     module = AnsibleModule(argument_spec = dict())
     service_modules = (ServiceScanService, SystemctlScanService)
     all_services = []
+    incomplete_warning = False
     for svc_module in service_modules:
         svcmod = svc_module(module)
         svc = svcmod.gather_services()
         if svc is not None:
             all_services += svc
+            if svcmod.incomplete_warning:
+                incomplete_warning = True
     if len(all_services) == 0:
-        module.fail_json(msg="Failed to find any services. Sometimes this solved by running with privilege escalation.")
+        module.fail_json(msg="Failed to find any services. Sometimes this is due to insufficient privileges.")
     results = dict(ansible_facts=dict(services=all_services))
+    if incomplete_warning:
+        results['msg'] = "WARNING: Could not find status for all services. Sometimes this is due to insufficient privileges."
     module.exit_json(**results)
 
 main()
