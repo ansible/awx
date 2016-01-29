@@ -56,12 +56,13 @@ if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
                          prefix='tower.job.event_callback',
                          maxudpsize=512)
 else:
-    class NoStatsClient(object):
-        def __getattr__(self, item):
-            if item.startswith('__'):
-                return super(NoStatsClient, self).__getattr__(item)
-            else:
-                return lambda *args, **kwargs: None
+    from statsd import StatsClientBase
+    class NoStatsClient(StatsClientBase):
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def _send(self, *args, **kwargs):
+            pass
     statsd = NoStatsClient()
 
 
