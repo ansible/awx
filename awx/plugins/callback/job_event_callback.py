@@ -56,7 +56,7 @@ if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
                          prefix='tower.job.event_callback',
                          maxudpsize=512)
 else:
-    from statsd import StatsClientBase
+    from statsd.client import StatsClientBase
 
     class NoStatsClient(StatsClientBase):
         def __init__(self, *args, **kwargs):
