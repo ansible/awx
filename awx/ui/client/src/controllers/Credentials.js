@@ -133,7 +133,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
     LookUpInit, UserList, TeamList, GetBasePath, GetChoices, Empty, KindChange,
-    OwnerChange, FormSave, $state) {
+    OwnerChange, FormSave, $state, CreateSelect2) {
 
     ClearScope();
 
@@ -161,6 +161,16 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         url: defaultUrl,
         field: 'become_method',
         variable: 'become_options'
+    });
+
+    CreateSelect2({
+        element: '#credential_become_method',
+        multiple: false
+    });
+
+    CreateSelect2({
+        element: '#credential_kind',
+        multiple: false
     });
 
     LookUpInit({
@@ -297,7 +307,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList',
     'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
-    'FormSave', '$state'
+    'FormSave', '$state', 'CreateSelect2'
 ];
 
 
@@ -305,7 +315,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
-    OwnerChange, FormSave, Wait, $state) {
+    OwnerChange, FormSave, Wait, $state, CreateSelect2) {
 
     ClearScope();
 
@@ -448,6 +458,16 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                     }
                 }
                 master.kind = $scope.kind;
+
+                CreateSelect2({
+                    element: '#credential_become_method',
+                    multiple: false
+                });
+
+                CreateSelect2({
+                    element: '#credential_kind',
+                    multiple: false
+                });
 
                 switch (data.kind) {
                 case 'aws':
@@ -611,5 +631,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
-    'FormSave', 'Wait', '$state'
+    'FormSave', 'Wait', '$state', 'CreateSelect2'
 ];
