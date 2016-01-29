@@ -13,3 +13,4 @@ from development import *  # NOQA
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
+STATSD_CLIENT = 'django_statsd.clients.null'

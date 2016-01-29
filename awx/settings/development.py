@@ -66,6 +66,12 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+STATSD_CLIENT = 'django_statsd.clients.normal'
+STATSD_HOST = 'graphite'
+STATSD_PORT = 8125
+STATSD_PREFIX = 'tower'
+STATSD_MAXUDPSIZE = 512
+
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())

@@ -24,6 +24,7 @@ django-polymorphic==0.5.3
 django-radius==1.0.0
 djangorestframework==2.3.13
 django-split-settings==0.1.1
+django-statsd-mozilla==0.3.16
 django-taggit==0.11.2
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.cache==0.5.6
@@ -113,6 +114,7 @@ requests-oauthlib==0.5.0
 simplejson==3.6.0
 six==1.9.0
 South==1.0.2
+statsd==3.2.1
 stevedore==1.3.0
 suds==0.4
 warlock==1.1.0

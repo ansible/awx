@@ -7,6 +7,7 @@ tower:
     - postgres
     - redis
     - mongo
+    - graphite
   volumes:
     - ../:/tower_devel
 postgres:
@@ -28,3 +29,10 @@ dockerui:
   privileged: true
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
+graphite:
+  image: hopsoft/graphite-statsd
+  ports:
+    - "8001:80"
+    - "2003:2003"
+    - "8125:8125/udp"
+    - "8126:8126"
