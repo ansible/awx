@@ -26,8 +26,11 @@ ADD license /etc/awx/license
 ADD license /etc/tower/license
 RUN pip2 install honcho
 RUN /etc/init.d/postgresql start; cd /tower ; make migrate ; make init ; /etc/init.d/postgresql stop
+RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64.deb
+RUN dpkg -i dumb-init_*.deb
 ADD start_everything.sh /start_everything.sh
 ADD start_development.sh /start_development.sh
 
 EXPOSE 8013 8080 27017 22
+ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh
