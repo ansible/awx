@@ -11,15 +11,16 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 
 # AWX
-from awx.main.fields import ImplicitResourceField, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
 from awx.main.models.base import * # noqa
+from awx.main.models.mixins import ResourceMixin
 
 __all__ = ['Credential']
 
 
-class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
+class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     '''
     A credential contains information about how to talk to a remote resource
     Usually this is a SSH key location, and possibly an unlock password.
@@ -153,12 +154,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
-    )
-    resource = ImplicitResourceField(
-        parent_resource=[
-            'user.resource',
-            'team.resource'
-        ]
     )
     owner_role = ImplicitRoleField(
         role_name='Credential Owner', 

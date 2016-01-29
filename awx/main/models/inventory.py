@@ -18,11 +18,12 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.fields import AutoOneToOneField, ImplicitResourceField, ImplicitRoleField
+from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import ignore_inventory_computed_fields, _inventory_updates
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
@@ -30,7 +31,7 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', '
 logger = logging.getLogger('awx.main.models.inventory')
 
 
-class Inventory(CommonModel):
+class Inventory(CommonModel, ResourceMixin):
     '''
     an inventory source contains lists and hosts.
     '''
@@ -91,9 +92,6 @@ class Inventory(CommonModel):
         default=0,
         editable=False,
         help_text=_('Number of external inventory sources in this inventory with failures.'),
-    )
-    resource = ImplicitResourceField(
-        parent_resource='organization.resource'
     )
     admin_role = ImplicitRoleField(
         role_name='Inventory Administrator', 
@@ -468,7 +466,7 @@ class Host(CommonModelNameNotUnique):
     # Use .job_events.all() to get events affecting this host.
 
 
-class Group(CommonModelNameNotUnique):
+class Group(CommonModelNameNotUnique, ResourceMixin):
     '''
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
@@ -537,9 +535,6 @@ class Group(CommonModelNameNotUnique):
         related_name='groups',
         editable=False,
         help_text=_('Inventory source(s) that created or modified this group.'),
-    )
-    resource = ImplicitResourceField(
-        parent_resource='inventory.resource'
     )
     admin_role = ImplicitRoleField(
         role_name='Inventory Group Administrator', 
@@ -1096,7 +1091,7 @@ class InventorySourceOptions(BaseModel):
         return ','.join(choices)
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin):
 
     class Meta:
         app_label = 'main'
@@ -1122,12 +1117,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     )
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
-    )
-    resource = ImplicitResourceField(
-        parent_resource=[
-            'group.resource',
-            'inventory.resource'
-        ]
     )
     admin_role = ImplicitRoleField(
         role_name='Inventory Group Administrator', 

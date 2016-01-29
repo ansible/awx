@@ -16,14 +16,15 @@ from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
-from awx.main.fields import AutoOneToOneField, ImplicitResourceField, ImplicitRoleField
+from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.conf import tower_settings
 
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 
 
-class Organization(CommonModel):
+class Organization(CommonModel, ResourceMixin):
     '''
     An organization is the basic unit of multi-tenancy divisions
     '''
@@ -51,7 +52,6 @@ class Organization(CommonModel):
         blank=True,
         related_name='organizations',
     )
-    resource = ImplicitResourceField()
     admin_role = ImplicitRoleField(
         role_name='Organization Administrator', 
         resource_field='resource',
@@ -77,7 +77,7 @@ class Organization(CommonModel):
         super(Organization, self).mark_inactive(save=save)
 
 
-class Team(CommonModelNameNotUnique):
+class Team(CommonModelNameNotUnique, ResourceMixin):
     '''
     A team is a group of users that work on common projects.
     '''
@@ -104,7 +104,6 @@ class Team(CommonModelNameNotUnique):
         blank=True,
         related_name='teams',
     )
-    resource = ImplicitResourceField()
     admin_role = ImplicitRoleField(
         role_name='Team Administrator', 
         parent_role='organization.admin_role',

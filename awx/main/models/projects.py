@@ -21,8 +21,9 @@ from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
-from awx.main.fields import ImplicitResourceField, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -186,7 +187,7 @@ class ProjectOptions(models.Model):
         return sorted(results, key=lambda x: smart_str(x).lower())
 
 
-class Project(UnifiedJobTemplate, ProjectOptions):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
@@ -214,7 +215,6 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         default=0,
         blank=True,
     )
-    resource = ImplicitResourceField()
     admin_role = ImplicitRoleField(
         role_name='Project Administrator', 
         parent_role='organization.admin_role',

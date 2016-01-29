@@ -26,7 +26,9 @@ from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
 from awx.main.conf import tower_settings
-from awx.main.fields import ImplicitResourceField, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
+from awx.main.models.mixins import ResourceMixin
+
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -150,7 +152,7 @@ class JobOptions(BaseModel):
         else:
             return []
 
-class JobTemplate(UnifiedJobTemplate, JobOptions):
+class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -179,7 +181,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default={},
     )
-    resource = ImplicitResourceField()
     admin_role = ImplicitRoleField(
         role_name='Job Template Administrator', 
         parent_role='project.admin_role',
