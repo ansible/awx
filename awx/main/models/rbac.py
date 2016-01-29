@@ -7,7 +7,6 @@ import logging
 # Django
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -16,10 +15,6 @@ __all__ = ['Role', 'RolePermission', 'Resource', 'RoleHierarchy', 'ResourceHiera
 
 logger = logging.getLogger('awx.main.models.rbac')
 
-
-
-def rebuild_role_hierarchy_cache(sender, **kwargs):
-    kwargs['instance'].rebuild_role_hierarchy_cache()
 
 class Role(CommonModelNameNotUnique):
     '''
@@ -78,9 +73,6 @@ class Role(CommonModelNameNotUnique):
         for k in permissions:
             setattr(permission, k, int(permissions[k]))
         permission.save()
-
-
-m2m_changed.connect(rebuild_role_hierarchy_cache, Role.parents.through)
 
 
 class RoleHierarchy(CreatedModifiedModel):

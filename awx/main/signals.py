@@ -115,6 +115,9 @@ def store_initial_active_state(sender, **kwargs):
     else:
         instance._saved_active_state = True
 
+def rebuild_role_hierarchy_cache(sender, **kwargs):
+    kwargs['instance'].rebuild_role_hierarchy_cache()
+
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -133,6 +136,8 @@ post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
+m2m_changed.connect(rebuild_role_hierarchy_cache, Role.parents.through)
+
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
