@@ -62,6 +62,12 @@ else:
         def __init__(self, *args, **kwargs):
             pass
 
+        def _prepare(self, stat, value, rate):
+            pass
+
+        def _send_stat(self, stat, value, rate):
+            pass
+
         def _send(self, *args, **kwargs):
             pass
     statsd = NoStatsClient()
