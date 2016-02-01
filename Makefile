@@ -797,6 +797,15 @@ docker-compose:
 docker-compose-test:
 	cd tools && docker-compose run --rm --service-ports tower /bin/bash
 
+MACHINE?=default
+docker-refresh:
+	rm -f awx/lib/.deps_built
+	eval $$(docker-machine env $(MACHINE))
+	docker stop $$(docker ps -a -q)
+	docker rm $$(docker ps -f name=tools_tower -a -q)
+	docker rmi tools_tower
+	docker-compose -f tools/docker-compose.yml up
+
 mongo-debug-ui:
 	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
 
