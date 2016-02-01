@@ -3,6 +3,7 @@
 
 # Python
 import mock
+from mock import Mock
 from StringIO import StringIO
 from django.utils.timezone import now
 
@@ -23,7 +24,7 @@ class UnifiedJobsUnitTest(SimpleTestCase):
         unified_job = UnifiedJob()
         unified_job.result_stdout_file = 'dummy'
 
-        with mock.patch('os.stat', st_size=1):
+        with mock.patch('os.stat', return_value=Mock(st_size=1)):
             result = unified_job.result_stdout_raw_handle()
 
         self.assertEqual(result, 'my_file_handler')
