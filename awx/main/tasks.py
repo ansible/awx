@@ -52,7 +52,8 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
 from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -160,7 +161,13 @@ def mongodb_control(cmd):
         p.wait()
 
 @task(bind=True)
+def handle_work_success(self, result, task_actual):
+    # TODO: Perform Notification tasks
+    pass
+
+@task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
+    # TODO: Perform Notification tasks
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
     first_task = None

@@ -717,7 +717,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             tasks that might preclude creating one'''
         return []
 
-    def start(self, error_callback, **kwargs):
+    def start(self, error_callback, success_callback, **kwargs):
         '''
         Start the task running via Celery.
         '''
@@ -743,7 +743,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         #                   if field not in needed])
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
-        task_class().apply_async((self.pk,), opts, link_error=error_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
         return True
 
     def signal_start(self, **kwargs):
@@ -765,7 +765,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, **kwargs)
+            return self.start(None, None, **kwargs)
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
