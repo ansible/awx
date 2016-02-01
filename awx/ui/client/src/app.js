@@ -42,6 +42,7 @@ import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
 import adhoc from './adhoc/main';
 import login from './login/main';
+import activityStream from './activity-stream/main';
 import {JobDetailController} from './controllers/JobDetail';
 import {JobStdoutController} from './controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
@@ -91,6 +92,7 @@ var tower = angular.module('Tower', [
     templateUrl.name,
     adhoc.name,
     login.name,
+    activityStream.name,
     footer.name,
     'templates',
     'Utilities',
@@ -209,6 +211,9 @@ var tower = angular.module('Tower', [
                 url: '/home',
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
+                data: {
+                    activityStream: true
+                },
                 ncyBreadcrumb: {
                     label: "DASHBOARD"
                 },
@@ -241,6 +246,10 @@ var tower = angular.module('Tower', [
                 url: '/home/hosts?has_active_failures',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeHosts,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'host'
+                },
                 ncyBreadcrumb: {
                     parent: 'dashboard',
                     label: "HOSTS"
@@ -361,6 +370,10 @@ var tower = angular.module('Tower', [
                 url: '/job_templates',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'job_template'
+                },
                 ncyBreadcrumb: {
                     label: "JOB TEMPLATES"
                 },
@@ -390,6 +403,9 @@ var tower = angular.module('Tower', [
                 url: '/:template_id',
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesEdit,
+                data: {
+                    activityStreamId: 'template_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -401,6 +417,10 @@ var tower = angular.module('Tower', [
                 url: '/job_templates/:id/schedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'schedule'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -412,6 +432,10 @@ var tower = angular.module('Tower', [
                 url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'project'
+                },
                 ncyBreadcrumb: {
                     label: "PROJECTS"
                 },
@@ -441,6 +465,9 @@ var tower = angular.module('Tower', [
                 url: '/:id',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsEdit,
+                data: {
+                    activityStreamId: 'id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -452,6 +479,10 @@ var tower = angular.module('Tower', [
                 url: '/projects/:id/schedules',
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: ScheduleEditController,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'schedule'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -485,6 +516,10 @@ var tower = angular.module('Tower', [
                 url: '/inventories',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'inventory'
+                },
                 ncyBreadcrumb: {
                     label: "INVENTORIES"
                 },
@@ -514,6 +549,9 @@ var tower = angular.module('Tower', [
                 url: '/:inventory_id',
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit,
+                data: {
+                    activityStreamId: 'inventory_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -558,6 +596,10 @@ var tower = angular.module('Tower', [
                 url: '/organizations',
                 templateUrl: urlPrefix + 'partials/organizations.html',
                 controller: OrganizationsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'organization'
+                },
                 ncyBreadcrumb: {
                     parent: function($scope) {
                         $scope.$parent.$emit("ReloadOrgListView");
@@ -591,6 +633,9 @@ var tower = angular.module('Tower', [
                 url: '/:organization_id',
                 templateUrl: urlPrefix + 'partials/organizations.crud.html',
                 controller: OrganizationsEdit,
+                data: {
+                    activityStreamId: 'organization_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -646,6 +691,10 @@ var tower = angular.module('Tower', [
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'team'
+                },
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'TEAMS'
@@ -676,6 +725,9 @@ var tower = angular.module('Tower', [
                 url: '/:team_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
                 controller: TeamsEdit,
+                data: {
+                    activityStreamId: 'team_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -775,6 +827,10 @@ var tower = angular.module('Tower', [
                 url: '/credentials',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'credential'
+                },
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'CREDENTIALS'
@@ -805,6 +861,9 @@ var tower = angular.module('Tower', [
                 url: '/:credential_id',
                 templateUrl: urlPrefix + 'partials/credentials.html',
                 controller: CredentialsEdit,
+                data: {
+                    activityStreamId: 'credential_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -816,6 +875,10 @@ var tower = angular.module('Tower', [
                 url: '/users',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'user'
+                },
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'USERS'
@@ -846,6 +909,9 @@ var tower = angular.module('Tower', [
                 url: '/:user_id',
                 templateUrl: urlPrefix + 'partials/users.html',
                 controller: UsersEdit,
+                data: {
+                    activityStreamId: 'user_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
@@ -925,9 +991,9 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
 
 
@@ -1066,11 +1132,6 @@ var tower = angular.module('Tower', [
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
                             $location.replace($location.search('').$$url);
-                    }
-
-                    // Before navigating away from current tab, make sure the primary view is visible
-                    if ($('#stream-container').is(':visible')) {
-                        HideStream();
                     }
 
                     // remove any lingering intervals

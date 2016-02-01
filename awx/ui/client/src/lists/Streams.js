@@ -12,6 +12,7 @@ export default
         name: 'activities',
         iterator: 'activity',
         editTitle: 'Activity Stream',
+        listTitle: 'Activity Stream',
         selectInstructions: '',
         index: false,
         hover: true,
@@ -252,13 +253,6 @@ export default
         },
 
         actions: {
-            close: {
-                mode: 'all',
-                awToolTip: "Close Activity Stream view",
-                ngClick: "closeStream()",
-                actionClass: 'btn List-buttonDefault',
-                buttonContent: 'CLOSE'
-            },
             refresh: {
                 mode: 'all',
                 id: 'activity-stream-refresh-btn',

@@ -9,6 +9,7 @@ export default function($stateProvider){
                     templateUrl: state.templateUrl,
                     resolve: state.resolve,
                     params: state.params,
+                    data: state.data,
                     ncyBreadcrumb: state.ncyBreadcrumb
                 });
             }
