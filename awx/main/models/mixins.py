@@ -133,7 +133,7 @@ class ResourceMixin(models.Model):
             )
             row = cursor.fetchone()
             if row:
-                return dict(zip([x.name for x in cursor.description], row))
+                return dict(zip([x[0] for x in cursor.description], row))
         return None
 
     def accessible_by(self, user, permissions):

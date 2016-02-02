@@ -83,7 +83,7 @@ class Organization(CommonModel, ResourceMixin):
             migrated_users.append(admin)
         for user in self.users.all():
             self.auditor_role.members.add(user)
-            migrated_user.append(user)
+            migrated_users.append(user)
         return migrated_users
 
 

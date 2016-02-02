@@ -1,29 +1,51 @@
 import pytest
 
-from awx.main.models.organization import Organization
+from awx.main.access import OrganizationAccess
 from django.contrib.auth.models import User
 
 def make_user(name, admin=False):
-    email = '%s@example.org' % name
-    if admin == True:
-        return User.objects.create_superuser(name, email, name)
-    else:
-        return User.objects.create_user(name, email, name)
-
-@pytest.fixture
-def organization():
-    return Organization.objects.create(name="test-org", description="test-org-desc")
+    try:
+        user = User.objects.get(username=name)
+    except User.DoesNotExist:
+        user = User(username=name, is_superuser=admin, password=name)
+        user.save()
+    return user
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("username,admin", [
     ("admin", True),
     ("user", False),
 ])
-def test_organization_migration(organization, username, admin):
+def test_organization_migration(organization, permissions, username, admin):
     user = make_user(username, admin)
-    organization.admins.add(user)
+    if admin:
+        organization.admins.add(user)
+    else:
+        organization.users.add(user)
 
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
     assert migrated_users[0] == user
+
+    if admin:
+        assert organization.accessible_by(user, permissions['admin']) == True
+    else:
+        assert organization.accessible_by(user, permissions['auditor']) == True
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("username,admin", [
+    ("admin", True),
+    ("user-admin", False),
+    ("user", False)
+])
+def test_organization_access(organization, username, admin):
+    user = make_user(username, admin)
+    access = OrganizationAccess(user)
+    if admin:
+        assert access.can_change(organization, None) == True
+    elif username == "user-admin":
+        organization.admins.add(user)
+        assert access.can_change(organization, None) == True
+    else:
+        assert access.can_change(organization, None) == False
 
