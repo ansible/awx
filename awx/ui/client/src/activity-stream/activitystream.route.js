@@ -8,7 +8,7 @@
 
 export default {
     name: 'activityStream',
-    route: '/activitystream?target&id',
+    route: '/activity_stream?target&id',
     templateUrl: templateUrl('activity-stream/activitystream'),
     controller: 'activityStreamController',
     ncyBreadcrumb: {
