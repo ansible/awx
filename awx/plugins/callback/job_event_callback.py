@@ -212,7 +212,7 @@ class BaseCallbackModule(object):
 
     def _log_event(self, event, **event_data):
         if self.callback_consumer_port:
-            with statsd.timer('zmq_post_event_msg.{}'.format(event)):
+            with statsd.timer('zmq_post_event_msg.{0}'.format(event)):
                 self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)
