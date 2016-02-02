@@ -50,6 +50,7 @@ export default
                 awToolTip: "Refresh the page",
                 ngClick: "refreshSchedules()",
                 actionClass: 'btn List-buttonDefault',
+                ngShow: "socketStatus == 'error'",
                 buttonContent: 'REFRESH'
             },
             add: {

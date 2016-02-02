@@ -238,7 +238,7 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     };
 
     $scope.scheduleJob = function (id) {
-        $state.transitionTo('jobTemplateSchedules', {id: id});
+        $state.go('jobTemplateSchedules', {id: id});
     }
 }
 

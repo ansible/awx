@@ -68,6 +68,7 @@ import './job-templates/main';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
+import scheduler from './scheduler/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
@@ -184,6 +185,7 @@ var tower = angular.module('Tower', [
     'pendolytics',
     'ui.router',
     'ncy-angular-breadcrumb',
+    'scheduler'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -412,22 +414,6 @@ var tower = angular.module('Tower', [
                     }]
                 }
             }).
-
-            state('jobTemplateSchedules', {
-                url: '/job_templates/:id/schedules',
-                templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'schedule'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             state('projects', {
                 url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
@@ -474,22 +460,6 @@ var tower = angular.module('Tower', [
                     }]
                 }
             }).
-
-            state('projectSchedules', {
-                url: '/projects/:id/schedules',
-                templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'schedule'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             state('projectOrganizations', {
                 url: '/projects/:project_id/organizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
