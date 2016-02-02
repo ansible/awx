@@ -149,7 +149,7 @@ class BaseAccess(object):
     def check_license(self, add_host=False, feature=None, check_expiration=True):
         reader = TaskSerializer()
         validation_info = reader.from_database()
-        if ('test' in sys.argv or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
+        if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
@@ -912,8 +912,8 @@ class JobTemplateAccess(BaseAccess):
         )
 
         return base_qs.filter(
-            Q(id__in=org_admin_ids) | 
-            Q(id__in=perm_deploy_ids) | 
+            Q(id__in=org_admin_ids) |
+            Q(id__in=perm_deploy_ids) |
             Q(id__in=perm_check_ids)
         )
 
@@ -926,7 +926,7 @@ class JobTemplateAccess(BaseAccess):
         a user can create a job template if they are a superuser, an org admin
         of any org that the project is a member, or if they have user or team
         based permissions tying the project to the inventory source for the
-        given action as well as the 'create' deploy permission. 
+        given action as well as the 'create' deploy permission.
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data or '_method' in data:  # So the browseable API will work?
@@ -1126,8 +1126,8 @@ class JobAccess(BaseAccess):
         )
 
         return base_qs.filter(
-            Q(id__in=org_admin_ids) | 
-            Q(id__in=perm_deploy_ids) | 
+            Q(id__in=org_admin_ids) |
+            Q(id__in=perm_deploy_ids) |
             Q(id__in=perm_check_ids)
         )
 
@@ -1367,9 +1367,9 @@ class UnifiedJobTemplateAccess(BaseAccess):
     projects without SCM configured or inventory sources without a cloud
     source.
     '''
-    
+
     model = UnifiedJobTemplate
-    
+
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
         project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])

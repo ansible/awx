@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
-from .base import BaseJobTestMixin
+from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobRelaunchTest',]
 
@@ -63,7 +63,7 @@ class JobRelaunchTest(BaseJobTestMixin, BaseLiveServerTest):
 
             self.jt_ops_east_run.extra_vars = jt_extra_vars
             self.jt_ops_east_run.save()
-            
+
             response = self.post(url, {}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'successful')

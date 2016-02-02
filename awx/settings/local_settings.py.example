@@ -30,10 +30,17 @@ DATABASES = {
     }
 }
 
+def is_testing(argv):
+    if "py.test" in argv[0] or "py/test.py" in argv[0]:
+        return True
+    elif argv[1] == "test":
+        return True
+    return False
+
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
-if len(sys.argv) >= 2 and sys.argv[1] == 'test':
+if len(sys.argv) >= 2 and is_testing(sys.argv):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

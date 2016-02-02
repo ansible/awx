@@ -471,7 +471,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         self.assertEqual(ad_hoc_command.status, 'successful')
-        
+
         # With days=1, no jobs will be deleted.
         jobs_before = Job.objects.all().count()
         self.assertTrue(jobs_before)
@@ -690,7 +690,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue('required' in str(result))
         # Inventory ID, with invalid source.
         invalid_source = ''.join([os.path.splitext(self.ini_path)[0] + '-invalid',
-                                  os.path.splitext(self.ini_path)[1]]) 
+                                  os.path.splitext(self.ini_path)[1]])
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=inventory_id,
                                                   source=invalid_source)
@@ -766,7 +766,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(group.children.count(), 0)
                 hosts = set(group.hosts.values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
-                self.assertEqual(hosts, host_names)                
+                self.assertEqual(hosts, host_names)
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
                 self.assertEqual(group.children.count(), 0)
@@ -860,7 +860,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(group.children.filter(active=True).count(), 0)
                 hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
-                self.assertEqual(hosts, host_names)                
+                self.assertEqual(hosts, host_names)
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
                 self.assertEqual(group.children.filter(active=True).count(), 0)
@@ -1013,8 +1013,8 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         rest_api_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                             parts.query, parts.fragment])
         os.environ.setdefault('REST_API_URL', rest_api_url)
-        os.environ['INVENTORY_ID'] = str(old_inv.pk)        
-        source = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'plugins',
+        os.environ['INVENTORY_ID'] = str(old_inv.pk)
+        source = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'plugins',
                               'inventory', 'awxrest.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -1051,7 +1051,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='newec2')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'data'))
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
         inv_file = 'large_ec2_inventory.py'
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -1072,7 +1072,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='splunk')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        inv_file = os.path.join(os.path.dirname(__file__), '..', 'data',
+        inv_file = os.path.join(os.path.dirname(__file__), '..', '..', 'data',
                                 'splunk_inventory.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -1095,7 +1095,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def _check_largeinv_import(self, new_inv, nhosts, nhosts_inactive=0):
         self._start_time = time.time()
-        inv_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'largeinv.py')
+        inv_file = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'largeinv.py')
         ngroups = self._get_ngroups_for_nhosts(nhosts)
         os.environ['NHOSTS'] = str(nhosts)
         result, stdout, stderr = self.run_command('inventory_import',

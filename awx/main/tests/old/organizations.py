@@ -62,7 +62,7 @@ class OrganizationsTest(BaseTest):
         # TODO: Test non-enterprise license
         self.create_test_license_file()
         self.setup_users()
- 
+
         self.organizations = self.make_organizations(self.super_django_user, 10)
         self.projects      = self.make_projects(self.normal_django_user, 10)
 
@@ -71,7 +71,7 @@ class OrganizationsTest(BaseTest):
             self.organizations[0].projects.add(project)
         for project in self.projects[3:8]:
             self.organizations[1].projects.add(project)
-        for project in self.projects[9:10]: 
+        for project in self.projects[9:10]:
             self.organizations[2].projects.add(project)
         self.organizations[0].projects.add(self.projects[-1])
         self.organizations[9].projects.add(self.projects[-2])
@@ -91,7 +91,7 @@ class OrganizationsTest(BaseTest):
             x.admins.add(self.super_django_user)
             x.users.add(self.super_django_user)
             x.users.add(self.other_django_user)
- 
+
         self.organizations[0].users.add(self.normal_django_user)
         self.organizations[1].admins.add(self.normal_django_user)
 
@@ -251,11 +251,11 @@ class OrganizationsTest(BaseTest):
     def test_post_item(self):
 
         new_org = dict(name='magic test org', description='8675309')
-        
+
         # need to be a valid user
         self.post(self.collection(), new_org, expect=401, auth=None)
         self.post(self.collection(), new_org, expect=401, auth=self.get_invalid_credentials())
-        
+
         # only super users can create organizations
         self.post(self.collection(), new_org, expect=403, auth=self.get_normal_credentials())
         self.post(self.collection(), new_org, expect=403, auth=self.get_other_credentials())
@@ -267,22 +267,22 @@ class OrganizationsTest(BaseTest):
         # look at what we got back from the post, make sure we added an org
         last_org = Organization.objects.order_by('-pk')[0]
         self.assertTrue(data1['url'].endswith("/%d/" % last_org.pk))
-        
+
         # Test that not even super users can create an organization with a basic license
         self.create_basic_license_file()
         cant_org = dict(name='silly user org', description='4815162342')
         self.post(self.collection(), cant_org, expect=402, auth=self.get_super_credentials())
 
     def test_post_item_subobjects_projects(self):
-        
+
         # first get all the orgs
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
-        
+
         # find projects attached to the first org
         projects0_url = orgs['results'][0]['related']['projects']
         projects1_url = orgs['results'][1]['related']['projects']
         projects2_url = orgs['results'][2]['related']['projects']
-        
+
         # get all the projects on the first org
         projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
         a_project = projects0['results'][-1]
@@ -303,7 +303,7 @@ class OrganizationsTest(BaseTest):
         self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 5)
-       
+
         a_project = projects1['results'][-1]
         a_project['disassociate'] = 1
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
@@ -324,7 +324,7 @@ class OrganizationsTest(BaseTest):
 
         # and can't do post a project he can read to an organization he cannot
         self.post(projects2_url, dict(id=new_project_a.pk), expect=403, auth=self.get_normal_credentials())
-          
+
 
     def test_post_item_subobjects_users(self):
 
@@ -411,8 +411,8 @@ class OrganizationsTest(BaseTest):
 
         # any attempt to put a subobject should be a 405, edit the actual resource or POST with 'disassociate' to delete
         # this is against a collection URL anyway, so we really need not repeat this test for other object types
-        # as a PUT against a collection doesn't make much sense.  
- 
+        # as a PUT against a collection doesn't make much sense.
+
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         projects0_url = orgs['results'][0]['related']['projects']
         sub_projects = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
@@ -425,14 +425,14 @@ class OrganizationsTest(BaseTest):
         # first get some urls
         urls = self.get_urls(self.collection(), auth=self.get_super_credentials())
         urldata1 = self.get(urls[1], auth=self.get_super_credentials())
-        
+
         # check authentication -- admins of the org and superusers can delete objects only
         self.delete(urls[0], expect=401, auth=None)
         self.delete(urls[0], expect=401, auth=self.get_invalid_credentials())
         self.delete(urls[8], expect=403, auth=self.get_normal_credentials())
         self.delete(urls[1], expect=204, auth=self.get_normal_credentials())
         self.delete(urls[0], expect=204, auth=self.get_super_credentials())
-      
+
         # check that when we have deleted an object it comes back 404 via GET
         # but that it's still in the database as inactive
         self.get(urls[1], expect=404, auth=self.get_normal_credentials())

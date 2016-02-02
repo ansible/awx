@@ -155,7 +155,7 @@ endif
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
-	receiver test test_coverage coverage_html test_jenkins dev_build \
+	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
 	build-ui-for-browser-tests test-ui-debug jshint ngdocs \
@@ -357,14 +357,17 @@ pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
-
+	
 # Run all API unit tests.
 test:
-	$(PYTHON) manage.py test -v2 awx.main.tests
+	py.test awx/main/tests awx/api/tests awx/fact/tests
+
+test_unit:
+	py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	coverage run manage.py test -v2 awx.main.tests
+	py.test --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests awx/fact/tests
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
@@ -375,8 +378,8 @@ test_tox:
 	tox -v
 
 # Run unit tests to produce output for Jenkins.
-test_jenkins:
-	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
+# Alias existing make target so old versions run against Jekins the same way
+test_jenkins : test_coverage
 
 # UI TASKS
 # --------------------------------------

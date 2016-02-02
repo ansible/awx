@@ -181,7 +181,7 @@ class FactViewApiTest(FactApiBaseTest):
     def test_view_time_filter(self):
         self.setup_facts(6)
         ts = self.builder.get_timestamp(3)
-        self.get_fact(Fact.objects.filter(host=self.fact_host, module='ansible', timestamp__lte=ts).order_by('-timestamp')[0], 
+        self.get_fact(Fact.objects.filter(host=self.fact_host, module='ansible', timestamp__lte=ts).order_by('-timestamp')[0],
                       dict(datetime=ts))
 
 

@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-# Python
 import base64
 import re
 
@@ -471,3 +470,4 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             if 'cloud' not in update_fields:
                 update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
+

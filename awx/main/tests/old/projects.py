@@ -21,7 +21,13 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTransactionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK, TEST_OPENSSH_KEY_DATA, TEST_OPENSSH_KEY_DATA_LOCKED
+from awx.main.tests.data.ssh import (
+    TEST_SSH_KEY_DATA,
+    TEST_SSH_KEY_DATA_LOCKED,
+    TEST_SSH_KEY_DATA_UNLOCK,
+    TEST_OPENSSH_KEY_DATA,
+    TEST_OPENSSH_KEY_DATA_LOCKED,
+)
 from awx.main.utils import decrypt_field, update_scm_url
 
 TEST_PLAYBOOK = '''- hosts: mygroup
@@ -238,7 +244,7 @@ class ProjectsTest(BaseTransactionTest):
                                 auth=self.get_super_credentials())
         response = self.put(project_detail, project_data, expect=200,
                             auth=self.get_super_credentials())
-        
+
         # cannot update using local_path from another project.
         project_data['local_path'] = self.projects[2].local_path
         response = self.put(project_detail, project_data, expect=400,
@@ -391,14 +397,14 @@ class ProjectsTest(BaseTransactionTest):
 
         # =====================================================================
         # TEAM PROJECTS
- 
+
         team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
         team_projects = reverse('api:team_projects_list', args=(team.pk,))
-      
+
         p1 = self.projects[0]
         team.projects.add(p1)
         team.save()
- 
+
         got = self.get(team_projects, expect=200, auth=self.get_super_credentials())
 
         # FIXME: project postablility tests somewhat incomplete.
@@ -430,7 +436,7 @@ class ProjectsTest(BaseTransactionTest):
             self.post(team_users, data=dict(x, is_superuser=False),
                       expect=204, auth=self.get_normal_credentials())
         # The normal admin user can't create a super user vicariously through the team/project
-        self.post(team_users, data=dict(username='attempted_superuser_create', password='thepassword', 
+        self.post(team_users, data=dict(username='attempted_superuser_create', password='thepassword',
                   is_superuser=True), expect=403, auth=self.get_normal_credentials())
         # ... but a superuser can
         self.post(team_users, data=dict(username='attempted_superuser_create', password='thepassword',
@@ -682,7 +688,7 @@ class ProjectsTest(BaseTransactionTest):
         team         = Team.objects.order_by('pk')[0]
         organization = Organization.objects.order_by('pk')[0]
         inventory    = Inventory.objects.create(
-            name         = 'test inventory', 
+            name         = 'test inventory',
             organization = organization,
             created_by   = self.super_django_user
         )
@@ -691,10 +697,10 @@ class ProjectsTest(BaseTransactionTest):
         # can add permissions to a user
 
         user_permission = dict(
-            name='user can deploy a certain project to a certain inventory', 
+            name='user can deploy a certain project to a certain inventory',
             # user=user.pk, # no need to specify, this will be automatically filled in
-            inventory=inventory.pk, 
-            project=project.pk, 
+            inventory=inventory.pk,
+            project=project.pk,
             permission_type=PERM_INVENTORY_DEPLOY
         )
         team_permission = dict(
@@ -993,7 +999,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             new_url = new_url or url
             new_url_u = new_url_u or url
             new_url_up = new_url_up or url
-            
+
             # Check existing URL as-is.
             if is_exception(new_url):
                 self.assertRaises(new_url, update_scm_url, scm_type, url)
@@ -1130,7 +1136,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                 after = file(path, 'rb').read()
                 return path, before, after
         self.fail('no file found to change!')
-    
+
     def check_project_scm(self, project):
         project = Project.objects.get(pk=project.pk)
         project_path = project.get_project_path(check_if_exists=False)

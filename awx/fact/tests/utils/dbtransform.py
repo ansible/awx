@@ -1,15 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
+from django.test import TestCase
+
 # AWX
-from awx.main.tests.base import BaseTest
 from awx.fact.models.fact import * # noqa
 from awx.fact.utils.dbtransform import KeyTransform
 
 #__all__ = ['DBTransformTest', 'KeyTransformUnitTest']
 __all__ = ['KeyTransformUnitTest']
 
-class KeyTransformUnitTest(BaseTest):
+class KeyTransformUnitTest(TestCase):
     def setUp(self):
         super(KeyTransformUnitTest, self).setUp()
         self.key_transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
@@ -82,7 +83,7 @@ class KeyTransformUnitTest(BaseTest):
 
         data = self.key_transform.transform_incoming(value, None)
         self.assertEqual(data, value_transformed)
-        
+
         data = self.key_transform.transform_outgoing(value_transformed, None)
         self.assertEqual(data, value)
 
@@ -103,7 +104,7 @@ class KeyTransformUnitTest(BaseTest):
         }
         data = self.key_transform.transform_incoming(value, None)
         self.assertEqual(data, value_transformed)
-        
+
         data = self.key_transform.transform_outgoing(value_transformed, None)
         self.assertEqual(data, value)
 

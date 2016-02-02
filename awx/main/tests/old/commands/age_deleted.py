@@ -3,7 +3,7 @@
 
 # AWX
 from awx.main.tests.base import BaseTest
-from awx.main.tests.commands.base import BaseCommandMixin
+from command_base import BaseCommandMixin
 
 __all__ = ['AgeDeletedCommandFunctionalTest']
 

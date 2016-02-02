@@ -61,7 +61,7 @@ class AuthTokenLimitTest(BaseTest):
             'token': response['token']
         }
         self.get(user_me_url, expect=200, auth=auth_token1)
-        
+
         mock_get_request_hash.return_value = "session_2"
         response = self.post(auth_token_url, data, expect=200, auth=None)
         auth_token2 = {
@@ -133,7 +133,7 @@ class AuthTokenProxyTest(BaseTest):
         remote_addr = '192.168.75.1'
 
         auth_token = self._request_auth_token(remote_addr)
-        
+
         # Verify we can access our own user information, from the remote address specified via HTTP_X_FORWARDED_FOR
         client_kwargs = {'HTTP_X_FORWARDED_FOR': remote_addr}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
@@ -183,7 +183,7 @@ class UsersTest(BaseTest):
         url = reverse('api:user_list')
         new_user = dict(username='blippy')
         self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
- 
+
     def test_only_super_user_or_org_admin_can_add_users(self):
         url = reverse('api:user_list')
         new_user = dict(username='blippy', password='hippy')
@@ -269,7 +269,7 @@ class UsersTest(BaseTest):
         # auth method was used in the request.
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Token')
-        
+
         # Request a new auth token from the new remote address.
         data = dict(zip(('username', 'password'), self.get_normal_credentials()))
         response = self.post(auth_token_url, data, expect=200, auth=None,
@@ -298,7 +298,7 @@ class UsersTest(BaseTest):
         response = self.get(user_me_url, expect=401)
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Basic')
-        
+
         # A request that attempts Basic auth should request Basic auth again.
         response = self.get(user_me_url, expect=401,
                             auth=('invalid', 'password'))
@@ -431,7 +431,7 @@ class UsersTest(BaseTest):
         self.get(url, expect=404, auth=self.get_super_credentials())
         obj = User.objects.get(pk=user_pk)
         self.assertEquals(obj.is_active, False)
- 
+
     def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
         url1 = reverse('api:user_detail', args=(self.super_django_user.pk,))
         url2 = reverse('api:user_detail', args=(self.normal_django_user.pk,))
@@ -471,11 +471,11 @@ class UsersTest(BaseTest):
         url = reverse('api:user_organizations_list',
                       args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data['count'], 1) 
+        self.assertEquals(data['count'], 1)
         # also accessible via superuser
         data = self.get(url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(data['count'], 1) 
-        # and also by other user... 
+        self.assertEquals(data['count'], 1)
+        # and also by other user...
         data = self.get(url, expect=200, auth=self.get_other_credentials())
         # but not by nobody user
         data = self.get(url, expect=403, auth=self.get_nobody_credentials())
@@ -492,7 +492,7 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=200, auth=self.get_other_credentials())
         # but not by nobody user
         data = self.get(url, expect=403, auth=self.get_nobody_credentials())
- 
+
         # teams the user is on, should be 0
         url = reverse('api:user_teams_list', args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -566,7 +566,7 @@ class UsersTest(BaseTest):
         qs = base_qs.filter(username__exact='normal')
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
-        
+
         # Filter by username with __iexact suffix.
         url = '%s?username__iexact=NORMAL' % base_url
         qs = base_qs.filter(username__iexact='NORMAL')
@@ -707,7 +707,7 @@ class UsersTest(BaseTest):
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 
-        # Filter by is_staff (field not exposed via API).  FIXME: Should 
+        # Filter by is_staff (field not exposed via API).  FIXME: Should
         # eventually not be allowed!
         url = '%s?is_staff=true' % base_url
         qs = base_qs.filter(is_staff=True)
@@ -792,7 +792,7 @@ class UsersTest(BaseTest):
         qs = base_qs.filter(organizations__admins__username__startswith='norm')
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
-        
+
         # Filter by username with __in list.
         url = '%s?username__in=normal,admin' % base_url
         qs = base_qs.filter(username__in=('normal', 'admin'))

@@ -522,4 +522,3 @@ def timedelta_total_seconds(timedelta):
         timedelta.microseconds + 0.0 +
         (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
 
-

@@ -11,7 +11,7 @@ from django.conf import settings
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
-from .base import BaseJobTestMixin
+from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobStartCancelTest',]
 
@@ -92,7 +92,7 @@ class JobStartCancelTest(BaseJobTestMixin, BaseLiveServerTest):
             # self.assertEqual(job.status, 'failed')
 
         # Test with a job that prompts for SSH unlock key, given the right key.
-        from awx.main.tests.tasks import TEST_SSH_KEY_DATA_UNLOCK
+        from awx.main.tests.data.ssh import TEST_SSH_KEY_DATA_UNLOCK
         # job = self.jt_ops_west_run.create_job(
         #     credential=self.cred_greg,
         #     created_by=self.user_sue,
