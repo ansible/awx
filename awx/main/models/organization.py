@@ -53,12 +53,12 @@ class Organization(CommonModel, ResourceMixin):
         related_name='organizations',
     )
     admin_role = ImplicitRoleField(
-        role_name='Organization Administrator', 
+        role_name='Organization Administrator',
         resource_field='resource',
         permissions = { 'all': True }
     )
     auditor_role = ImplicitRoleField(
-        role_name='Organization Auditor', 
+        role_name='Organization Auditor',
         resource_field='resource',
         permissions = { 'read': True }
     )
@@ -75,6 +75,16 @@ class Organization(CommonModel, ResourceMixin):
             script.organization = None
             script.save()
         super(Organization, self).mark_inactive(save=save)
+
+    def migrate_to_rbac(self):
+        migrated_users = []
+        for admin in self.admins.all():
+            self.admin_role.members.add(admin)
+            migrated_users.append(admin)
+        for user in self.users.all():
+            self.auditor_role.members.add(user)
+            migrated_user.append(user)
+        return migrated_users
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):
@@ -105,19 +115,19 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         related_name='teams',
     )
     admin_role = ImplicitRoleField(
-        role_name='Team Administrator', 
+        role_name='Team Administrator',
         parent_role='organization.admin_role',
         resource_field='resource',
         permissions = { 'all': True }
     )
     auditor_role = ImplicitRoleField(
-        role_name='Team Auditor', 
+        role_name='Team Auditor',
         parent_role='organization.auditor_role',
         resource_field='resource',
         permissions = { 'read': True }
     )
     member_role = ImplicitRoleField(
-        role_name='Team Member', 
+        role_name='Team Member',
         parent_role='admin_role',
     )
 
@@ -210,7 +220,7 @@ class Profile(CreatedModifiedModel):
     )
 
 """
-Since expiration and session expiration is event driven a token could be 
+Since expiration and session expiration is event driven a token could be
 invalidated for both reasons. Further, we only support a single reason for a
 session token being invalid. For this case, mark the token as expired.
 
@@ -234,7 +244,7 @@ class AuthToken(BaseModel):
 
     class Meta:
         app_label = 'main'
-    
+
     key = models.CharField(max_length=40, primary_key=True)
     user = models.ForeignKey('auth.User', related_name='auth_tokens',
                              on_delete=models.CASCADE)
@@ -351,7 +361,7 @@ def user_mark_inactive(user, save=True):
         user.is_active = False
         if save:
             user.save()
-            
+
 User.add_to_class('mark_inactive', user_mark_inactive)
 
 
