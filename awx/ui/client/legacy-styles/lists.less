@@ -141,12 +141,14 @@ table, tbody {
 .List-header {
     display: flex;
     height: 34px;
+    align-items: center;
 }
 
 .List-title {
     align-items: center;
     flex: 1 0 auto;
     display: flex;
+    margin-top: -2px;
 }
 
 .List-titleBadge {
@@ -170,6 +172,7 @@ table, tbody {
 .List-actions {
     justify-content: flex-end;
     display: flex;
+    margin-top: -10px;
 }
 
 .List-buttonSubmit {
@@ -284,4 +287,20 @@ table, tbody {
 
 .List-staticColumnAdjacent {
     padding-left: 10px!important;
+}
+
+.List-titleLockup {
+    margin-left: 4px;
+    margin-right: 6px;
+    display: inline-block;
+    margin-top: 0px;
+    padding-bottom: 2px;
+    vertical-align: bottom;
+}
+
+.List-titleLockup:before {
+    content: "\007C";
+    color: #d7d7d7;
+    display: block;
+    font-size: 13px;
 }
