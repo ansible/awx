@@ -18,6 +18,7 @@ from crum import impersonate
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.conf import tower_settings
 from awx.main.tests.base import BaseJobExecutionTest
 from awx.main.tests.data.ssh import (
     TEST_SSH_KEY_DATA,
@@ -746,11 +747,15 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
 
         # Try to relaunch ad hoc command when module has been removed from
         # allowed list of modules.
-        with self.settings(AD_HOC_COMMANDS=[]):
+        try:
+            ad_hoc_commands = tower_settings.AD_HOC_COMMANDS
+            tower_settings.AD_HOC_COMMANDS = []
             with self.current_user('admin'):
                 response = self.get(url, expect=200)
                 self.assertEqual(response['passwords_needed_to_start'], [])
                 response = self.post(url, {}, expect=400)
+        finally:
+            tower_settings.AD_HOC_COMMANDS = ad_hoc_commands
 
         # Try to relaunch after the inventory has been marked inactive.
         self.inventory.mark_inactive()

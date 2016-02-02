@@ -18,6 +18,15 @@ for setting in dir(global_settings):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+def is_testing(argv=None):
+    '''Return True if running django or py.test unit tests.'''
+    argv = sys.argv if argv is None else argv
+    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
+        return True
+    elif len(argv) >= 2 and argv[1] == 'test':
+        return True
+    return False
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
@@ -32,9 +41,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
-        # Test database cannot be :memory: for celery/inventory tests to work.
-        'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
         'ATOMIC_REQUESTS': True,
+        'TEST': {
+            # Test database cannot be :memory: for celery/inventory tests.
+            'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
+        },
     }
 }
 
@@ -170,7 +181,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'south',
     'rest_framework',
     'django_extensions',
     'djcelery',
@@ -188,9 +198,8 @@ INSTALLED_APPS = (
 INTERNAL_IPS = ('127.0.0.1',)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'awx.api.pagination.PaginationSerializer',
-    'PAGINATE_BY': 25,
-    'PAGINATE_BY_PARAM': 'page_size',
+    'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
+    'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'awx.api.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -213,6 +222,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'awx.api.renderers.BrowsableAPIRenderer',
     ),
+    'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
     'EXCEPTION_HANDLER': 'awx.api.views.api_exception_handler',
     'VIEW_NAME_FUNCTION': 'awx.api.generics.get_view_name',
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
@@ -309,8 +319,9 @@ DEBUG_TOOLBAR_CONFIG = {
 
 # Use Django-devserver if installed.
 try:
-    import devserver
-    INSTALLED_APPS += (devserver.__name__,)
+    import devserver # noqa
+    # FIXME: devserver has issues with Django 1.8?
+    # INSTALLED_APPS += (devserver.__name__,)
 except ImportError:
     pass
 
@@ -328,9 +339,6 @@ DEVSERVER_MODULES = (
 
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
-
-# Skip migrations when running tests.
-SOUTH_TESTS_MIGRATE = False
 
 # Initialize Django-Celery.
 djcelery.setup_loader()

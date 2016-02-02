@@ -1,0 +1,207 @@
+/*************************************************
+ * Copyright (c) 2016 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  color: #171717;
+  background-color: #f6f6f6;
+  padding-top: 50px;
+  min-height: 100%;
+  position: relative;
+}
+
+body .navbar {
+  background-color: #FFFFFF;
+  border-color: #E8E8E8;
+}
+body .navbar .navbar-brand {
+  color: #707070;
+  padding: 0;
+  font-size: 14px;
+}
+body .navbar .navbar-brand:focus,
+body .navbar .navbar-brand:hover {
+  color: #707070;
+}
+body .navbar .navbar-brand img {
+  display: inline-block;
+  max-width: 150px;
+  max-height: 50px;
+}
+body .navbar .navbar-brand > span {
+  display: inline-block;
+  line-height: 50px;
+  vertical-align: middle;
+  margin-left: -10px;
+}
+body .navbar .navbar-title {
+  float: left;
+  height: 50px;
+  color: #707070;
+  padding: 0;
+  font-size: 14px;
+  display: none;
+}
+body .navbar .navbar-title > span {
+  display: inline-block;
+  line-height: 50px;
+  vertical-align: middle;
+}
+body.show-title .navbar .navbar-title {
+  display: inline-block;
+}
+body .navbar .navbar-nav > li > a {
+  color: #848992;
+}
+body .navbar .navbar-nav > li > a:focus,
+body .navbar .navbar-nav > li > a:hover {
+  color: #848992;
+}
+
+body .page-header {
+  margin-top: 20px;
+}
+body .page-header h1 {
+  font-size: 30px;
+  line-height: 33px;
+}
+body .page-header .toggle-description span.glyphicon {
+  font-size: 14px;
+  vertical-align: top;
+  padding: 2px;
+}
+body ul.breadcrumb,
+body .description,
+body .request-info .prettyprint,
+body .response-info .prettyprint,
+body .well {
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  padding: 10px;
+  border: 1px solid #E8E8E8;
+  margin-top: 20px;
+  box-shadow: none;
+}
+body .description {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 0;
+  display: none;
+}
+body .request-info .prettyprint {
+  margin-top: 0;
+}
+body .resource-description,
+body .response-info {
+  margin-bottom: 0;
+}
+body .well.tab-content {
+  padding: 20px;
+}
+body .tab-content > .tab-pane {
+  display: block;
+}
+body .well.tab-content .form-actions {
+  float: right;
+}
+body .form-group {
+  margin-bottom: 10px;
+}
+body .form-actions button {
+  margin-left: 5px;
+}
+
+body .wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -40px;
+}
+body #push {
+  height: 40px;
+}
+body #footer {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 0;
+  height: 40px;
+  color: #848992;
+}
+body #footer .footer-logo {
+  text-align: left;
+}
+body #footer .footer-logo a {
+  display: inline-block;
+}
+body #footer .footer-logo img {
+  height: 40px;
+  width: 250px;
+}
+body #footer .footer-copyright {
+  text-align: right;
+  font-size: 12px;
+  padding-right: 35px;
+  padding-top: 10px;
+}
+body #footer .footer-copyright a {
+  color: #848992;
+}
+
+@media screen and (min-width: 768px) {
+  body .navbar-right {
+    margin-right: 0;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  body .navbar .container .navbar-header,
+  body .navbar .container-fluid .navbar-header {
+    margin-left: -20px;
+  }
+  body.show-title .navbar .navbar-title {
+    display: none;
+}
+  body .navbar .navbar-toggle {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+  }
+  body .navbar .navbar-toggle:active,
+  body .navbar .navbar-toggle:hover {
+    background-color: #286090;
+    border-color: #204d74;
+  }
+  body .navbar .navbar-toggle .icon-bar {
+    background-color: #fff;
+  }
+  body .navbar .tooltip {
+    visibility: hidden;
+  }
+  body .page-header h1 {
+    font-size: 24px;
+  }
+  body .wrapper {
+    margin: 0 auto -65px;
+  }
+  body #push {
+    height: 65px;
+  }
+  body #footer {
+    height: 65px;
+  }
+  body #footer .footer-logo {
+    text-align: center;
+  }
+  body #footer .footer-copyright {
+    text-align: center;
+    padding-right: 15px;
+    padding-top: 0;
+  }
+}

@@ -12,6 +12,7 @@ import socket
 import sys
 import errno
 from base64 import b64encode
+from collections import OrderedDict
 
 # Django
 from django.conf import settings
@@ -21,7 +22,7 @@ from django.core.exceptions import FieldError
 from django.db.models import Q, Count
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from django.utils.datastructures import SortedDict
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
@@ -31,13 +32,15 @@ from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
-from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
+
+# Django REST Framework YAML
+from rest_framework_yaml.parsers import YAMLParser
+from rest_framework_yaml.renderers import YAMLRenderer
 
 # MongoEngine
 import mongoengine
@@ -71,7 +74,7 @@ from awx.fact.models import * # noqa
 from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
 
-def api_exception_handler(exc):
+def api_exception_handler(exc, context):
     '''
     Override default API exception handler to catch IntegrityError exceptions.
     '''
@@ -79,8 +82,7 @@ def api_exception_handler(exc):
         exc = ParseError(exc.args[0])
     if isinstance(exc, FieldError):
         exc = ParseError(exc.args[0])
-    return exception_handler(exc)
-
+    return exception_handler(exc, context)
 
 class ApiRootView(APIView):
 
@@ -110,7 +112,7 @@ class ApiV1RootView(APIView):
     def get(self, request, format=None):
         ''' list top level resources '''
 
-        data = SortedDict()
+        data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
@@ -224,20 +226,20 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        if not type(request.DATA) == dict:
+        if not type(request.data) == dict:
             return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
-        if "eula_accepted" not in request.DATA:
+        if "eula_accepted" not in request.data:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            eula_accepted = to_python_boolean(request.DATA["eula_accepted"])
+            eula_accepted = to_python_boolean(request.data["eula_accepted"])
         except ValueError:
             return Response({"error": "'eula_accepted' value is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not eula_accepted:
             return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
-        request.DATA.pop("eula_accepted")
+        request.data.pop("eula_accepted")
         try:
-            data_actual = json.dumps(request.DATA)
+            data_actual = json.dumps(request.data)
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
@@ -306,7 +308,7 @@ class DashboardView(APIView):
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
-        data = SortedDict()
+        data = OrderedDict()
         data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view'),
                            'inventory_graph': reverse('api:dashboard_inventory_graph_view')}
         user_inventory = get_user_queryset(request.user, Inventory)
@@ -411,8 +413,8 @@ class DashboardJobsGraphView(APIView):
     new_in_200 = True
 
     def get(self, request, format=None):
-        period = request.QUERY_PARAMS.get('period', 'month')
-        job_type = request.QUERY_PARAMS.get('job_type', 'all')
+        period = request.query_params.get('period', 'month')
+        job_type = request.query_params.get('job_type', 'all')
 
         user_unified_jobs = get_user_queryset(request.user, UnifiedJob)
 
@@ -460,7 +462,7 @@ class DashboardInventoryGraphView(APIView):
     new_in_200 = True
 
     def get(self, request, format=None):
-        period = request.QUERY_PARAMS.get('period', 'month')
+        period = request.query_params.get('period', 'month')
 
         end_date = now()
         if period == 'month':
@@ -476,7 +478,7 @@ class DashboardInventoryGraphView(APIView):
             start_date = start_date.replace(minute=0, second=0, microsecond=0)
             delta = dateutil.relativedelta.relativedelta(hours=1)
         else:
-            raise ParseError(u'Unknown period "%s"' % unicode(period))
+            raise ParseError(u'Unknown period "%s"' % force_text(period))
 
         host_stats = []
         date = start_date
@@ -527,7 +529,7 @@ class AuthView(APIView):
     new_in_240 = True
 
     def get(self, request):
-        data = SortedDict()
+        data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
         auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
         # Return auth backends in consistent order: Google, GitHub, SAML.
@@ -567,27 +569,27 @@ class AuthTokenView(APIView):
     model = AuthToken
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.DATA)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             request_hash = AuthToken.get_request_hash(self.request)
             try:
-                token = AuthToken.objects.filter(user=serializer.object['user'],
+                token = AuthToken.objects.filter(user=serializer.validated_data['user'],
                                                  request_hash=request_hash,
                                                  expires__gt=now(),
                                                  reason='')[0]
                 token.refresh()
             except IndexError:
-                token = AuthToken.objects.create(user=serializer.object['user'],
+                token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
                 # Get user un-expired tokens that are not invalidated that are 
                 # over the configured limit.
                 # Mark them as invalid and inform the user
-                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.object['user'])
+                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
                 for t in invalid_tokens:
                     # TODO: send socket notification
                     emit_websocket_notification('/socket.io/control',
                                                 'limit_reached',
-                                                dict(reason=unicode(AuthToken.reason_long('limit_reached'))),
+                                                dict(reason=force_text(AuthToken.reason_long('limit_reached'))),
                                                 token_key=t.key)
                     t.invalidate(reason='limit_reached')
 
@@ -769,7 +771,7 @@ class ProjectList(ListCreateAPIView):
         # Not optimal, but make sure the project status and last_updated fields
         # are up to date here...
         projects_qs = Project.objects.filter(active=True)
-        projects_qs = projects_qs.select_related('current_update', 'last_updated')
+        projects_qs = projects_qs.select_related('current_job', 'last_job')
         for project in projects_qs:
             project._set_status_and_last_job_run()
         return super(ProjectList, self).get(request, *args, **kwargs)
@@ -994,15 +996,15 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = self.get_object()
-        can_change = request.user.can_access(User, 'change', obj, request.DATA)
-        can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
+        can_change = request.user.can_access(User, 'change', obj, request.data)
+        can_admin = request.user.can_access(User, 'admin', obj, request.data)
         if can_change and not can_admin:
             admin_only_edit_fields = ('last_name', 'first_name', 'username',
                                       'is_active', 'is_superuser')
             changed = {}
             for field in admin_only_edit_fields:
                 left = getattr(obj, field, None)
-                right = request.DATA.get(field, None)
+                right = request.data.get(field, None)
                 if left is not None and right is not None and left != right:
                     changed[field] = (left, right)
             if changed:
@@ -1061,11 +1063,11 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = CustomInventoryScriptSerializer
 
     def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(self.model, 'delete', obj)
+        instance = self.get_object()
+        can_delete = request.user.can_access(self.model, 'delete', instance)
         if not can_delete:
             raise PermissionDenied("Cannot delete inventory script")
-        for inv_src in InventorySource.objects.filter(source_script=obj):
+        for inv_src in InventorySource.objects.filter(source_script=instance):
             inv_src.source_script = None
             inv_src.save()
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
@@ -1137,10 +1139,10 @@ class InventorySingleFactView(MongoAPIView):
             raise LicenseForbids('Your license does not permit use '
                                  'of system tracking.')
 
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
+        fact_key = request.query_params.get("fact_key", None)
+        fact_value = request.query_params.get("fact_value", None)
+        datetime_spec = request.query_params.get("timestamp", None)
+        module_spec = request.query_params.get("module", None)
 
         if fact_key is None or fact_value is None or module_spec is None:
             return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1231,9 +1233,9 @@ class HostFactVersionsList(MongoListAPIView):
     filter_backends = (MongoFilterBackend,)
 
     def get_queryset(self):
-        from_spec = self.request.QUERY_PARAMS.get('from', None)
-        to_spec = self.request.QUERY_PARAMS.get('to', None)
-        module_spec = self.request.QUERY_PARAMS.get('module', None)
+        from_spec = self.request.query_params.get('from', None)
+        to_spec = self.request.query_params.get('to', None)
+        module_spec = self.request.query_params.get('module', None)
 
         if not feature_enabled("system_tracking"):
             raise LicenseForbids("Your license does not permit use "
@@ -1285,10 +1287,10 @@ class HostSingleFactView(MongoAPIView):
             raise LicenseForbids('Your license does not permit use '
                                  'of system tracking.')
 
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
+        fact_key = request.query_params.get("fact_key", None)
+        fact_value = request.query_params.get("fact_value", None)
+        datetime_spec = request.query_params.get("timestamp", None)
+        module_spec = request.query_params.get("module", None)
 
         if fact_key is None or fact_value is None or module_spec is None:
             return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1310,8 +1312,8 @@ class HostFactCompareView(MongoAPIView):
             raise LicenseForbids('Your license does not permit use '
                                  'of system tracking.')
 
-        datetime_spec = request.QUERY_PARAMS.get('datetime', None)
-        module_spec = request.QUERY_PARAMS.get('module', "ansible")
+        datetime_spec = request.query_params.get('datetime', None)
+        module_spec = request.query_params.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
 
         host_obj = self.get_parent_object()
@@ -1333,7 +1335,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
     relationship = 'children'
 
     def unattach(self, request, *args, **kwargs):
-        sub_id = request.DATA.get('id', None)
+        sub_id = request.data.get('id', None)
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
@@ -1345,7 +1347,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         Special case for disassociating a child group from the parent. If the
         child group has no more parents, then automatically mark it inactive.
         '''
-        sub_id = request.DATA.get('id', None)
+        sub_id = request.data.get('id', None)
         if not sub_id:
             data = dict(msg='"id" is required to disassociate')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -1394,12 +1396,12 @@ class GroupHostsList(SubListCreateAttachDetachAPIView):
 
     def create(self, request, *args, **kwargs):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
-        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.DATA['name'])
-        if existing_hosts.count() > 0 and ('variables' not in request.DATA or
-                                           request.DATA['variables'] == '' or
-                                           request.DATA['variables'] == '{}' or
-                                           request.DATA['variables'] == '---'):
-            request.DATA['id'] = existing_hosts[0].id
+        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data['name'])
+        if existing_hosts.count() > 0 and ('variables' not in request.data or
+                                           request.data['variables'] == '' or
+                                           request.data['variables'] == '{}' or
+                                           request.data['variables'] == '---'):
+            request.data['id'] = existing_hosts[0].id
             return self.attach(request, *args, **kwargs)
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
@@ -1483,10 +1485,10 @@ class GroupSingleFactView(MongoAPIView):
             raise LicenseForbids('Your license does not permit use '
                                  'of system tracking.')
 
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
+        fact_key = request.query_params.get("fact_key", None)
+        fact_value = request.query_params.get("fact_value", None)
+        datetime_spec = request.query_params.get("timestamp", None)
+        module_spec = request.query_params.get("module", None)
 
         if fact_key is None or fact_value is None or module_spec is None:
             return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1547,33 +1549,33 @@ class InventoryScriptView(RetrieveAPIView):
     filter_backends = ()
 
     def retrieve(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        hostname = request.QUERY_PARAMS.get('host', '')
-        hostvars = bool(request.QUERY_PARAMS.get('hostvars', ''))
-        show_all = bool(request.QUERY_PARAMS.get('all', ''))
+        obj = self.get_object()
+        hostname = request.query_params.get('host', '')
+        hostvars = bool(request.query_params.get('hostvars', ''))
+        show_all = bool(request.query_params.get('all', ''))
         if show_all:
             hosts_q = dict(active=True)
         else:
             hosts_q = dict(active=True, enabled=True)
         if hostname:
-            host = get_object_or_404(self.object.hosts, name=hostname, **hosts_q)
+            host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
         else:
-            data = SortedDict()
-            if self.object.variables_dict:
-                all_group = data.setdefault('all', SortedDict())
-                all_group['vars'] = self.object.variables_dict
+            data = OrderedDict()
+            if obj.variables_dict:
+                all_group = data.setdefault('all', OrderedDict())
+                all_group['vars'] = obj.variables_dict
 
             # Add hosts without a group to the all group.
-            groupless_hosts_qs = self.object.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+            groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
             groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
             if groupless_hosts:
-                all_group = data.setdefault('all', SortedDict())
+                all_group = data.setdefault('all', OrderedDict())
                 all_group['hosts'] = groupless_hosts
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=self.object.id, group__active=True,
-                                  host__inventory_id=self.object.id, host__active=True)
+            group_hosts_kw = dict(group__inventory_id=obj.id, group__active=True,
+                                  host__inventory_id=obj.id, host__active=True)
             if 'enabled' in hosts_q:
                 group_hosts_kw['host__enabled'] = hosts_q['enabled']
             group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
@@ -1586,8 +1588,8 @@ class InventoryScriptView(RetrieveAPIView):
 
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=self.object.id, from_group__active=True,
-                to_group__inventory_id=self.object.id, to_group__active=True,
+                from_group__inventory_id=obj.id, from_group__active=True,
+                to_group__inventory_id=obj.id, to_group__active=True,
             )
             group_parents_qs = group_parents_qs.order_by('from_group__name')
             group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
@@ -1597,28 +1599,27 @@ class InventoryScriptView(RetrieveAPIView):
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in self.object.groups.filter(active=True):
-                group_info = SortedDict()
+            for group in obj.groups.filter(active=True):
+                group_info = OrderedDict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
                 group_info['vars'] = group.variables_dict
                 data[group.name] = group_info
 
             if hostvars:
-                data.setdefault('_meta', SortedDict())
-                data['_meta'].setdefault('hostvars', SortedDict())
-                for host in self.object.hosts.filter(**hosts_q):
+                data.setdefault('_meta', OrderedDict())
+                data['_meta'].setdefault('hostvars', OrderedDict())
+                for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
 
             # workaround for Ansible inventory bug (github #3687), localhost
             # must be explicitly listed in the all group for dynamic inventory
             # scripts to pick it up.
             localhost_names = ('localhost', '127.0.0.1', '::1')
-            localhosts_qs = self.object.hosts.filter(name__in=localhost_names,
-                                                     **hosts_q)
+            localhosts_qs = obj.hosts.filter(name__in=localhost_names, **hosts_q)
             localhosts = list(localhosts_qs.values_list('name', flat=True))
             if localhosts:
-                all_group = data.setdefault('all', SortedDict())
+                all_group = data.setdefault('all', OrderedDict())
                 all_group_hosts = all_group.get('hosts', [])
                 all_group_hosts.extend(localhosts)
                 all_group['hosts'] = sorted(set(all_group_hosts))
@@ -1656,13 +1657,6 @@ class InventoryTreeView(RetrieveAPIView):
             self._populate_group_children(group_data, all_group_data_map,
                                           group_children_map)
         return Response(tree_data)
-
-    def get_description_context(self):
-        d = super(InventoryTreeView, self).get_description_context()
-        d.update({
-            'serializer_fields': GroupTreeSerializer().metadata(),
-        })
-        return d
 
 class InventoryInventorySourcesList(SubListAPIView):
 
@@ -1828,23 +1822,23 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        if 'credential' not in request.DATA and 'credential_id' in request.DATA:
-            request.DATA['credential'] = request.DATA['credential_id']
+        if 'credential' not in request.data and 'credential_id' in request.data:
+            request.data['credential'] = request.data['credential_id']
 
         passwords = {}
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA, 'passwords': passwords})
+        serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # At this point, a credential is gauranteed to exist at serializer.object.credential
-        if not request.user.can_access(Credential, 'read', serializer.object.credential):
+        # At this point, a credential is gauranteed to exist at serializer.instance.credential
+        if not request.user.can_access(Credential, 'read', serializer.instance.credential):
             raise PermissionDenied()
 
         kv = {
-            'credential': serializer.object.credential.pk,
+            'credential': serializer.instance.credential.pk,
         }
-        if 'extra_vars' in request.DATA:
-            kv['extra_vars'] = request.DATA['extra_vars']
+        if 'extra_vars' in request.data:
+            kv['extra_vars'] = request.data['extra_vars']
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
@@ -1892,7 +1886,7 @@ class JobTemplateSurveySpec(GenericAPIView):
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
-            obj.survey_spec = json.dumps(request.DATA)
+            obj.survey_spec = json.dumps(request.data)
         except ValueError:
             # TODO: Log
             return Response(dict(error="Invalid JSON when parsing survey spec"), status=status.HTTP_400_BAD_REQUEST)
@@ -2040,7 +2034,7 @@ class JobTemplateCallback(GenericAPIView):
     def post(self, request, *args, **kwargs):
         extra_vars = None
         if request.content_type == "application/json":
-            extra_vars = request.DATA.get("extra_vars", None)
+            extra_vars = request.data.get("extra_vars", None)
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
@@ -2144,8 +2138,8 @@ class SystemJobTemplateLaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        new_job = obj.create_unified_job(**request.DATA)
-        new_job.signal_start(**request.DATA)
+        new_job = obj.create_unified_job(**request.data)
+        new_job.signal_start(**request.data)
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
@@ -2223,7 +2217,7 @@ class JobStart(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
         if obj.can_start:
-            result = obj.signal_start(**request.DATA)
+            result = obj.signal_start(**request.data)
             if not result:
                 data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2262,15 +2256,15 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        # Note: is_valid() may modify request.DATA
+        # Note: is_valid() may modify request.data
         # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
+        serializer = self.serializer_class(data=request.data, context={'obj': obj, 'data': request.data})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         obj.launch_type = 'relaunch'
         new_job = obj.copy()
-        result = new_job.signal_start(**request.DATA)
+        result = new_job.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2357,13 +2351,11 @@ class JobJobEventsList(BaseJobEventsList):
     # Post allowed for job event callback only.
     def post(self, request, *args, **kwargs):
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.DATA.copy()
+        data = request.data.copy()
         data['job'] = parent_obj.pk
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            self.pre_save(serializer.object)
-            self.object = serializer.save(force_insert=True)
-            self.post_save(self.object, created=True)
+            self.instance = serializer.save()
             headers = {'Location': serializer.data['url']}
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
@@ -2392,16 +2384,16 @@ class JobJobPlaysList(BaseJobEventsList):
         # doing this here for the moment until/unless we need to implement more
         # complex filtering (since we aren't under a serializer)
 
-        if "id__in" in request.QUERY_PARAMS:
-            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
-        elif "id__gt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
-        elif "id__lt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
-        if "failed" in request.QUERY_PARAMS:
-            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
-        if "play__icontains" in request.QUERY_PARAMS:
-            qs = qs.filter(play__icontains=request.QUERY_PARAMS['play__icontains'])
+        if "id__in" in request.query_params:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.query_params["id__in"].split(",")])
+        elif "id__gt" in request.query_params:
+            qs = qs.filter(id__gt=request.query_params['id__gt'])
+        elif "id__lt" in request.query_params:
+            qs = qs.filter(id__lt=request.query_params['id__lt'])
+        if "failed" in request.query_params:
+            qs = qs.filter(failed=(request.query_params['failed'].lower() == 'true'))
+        if "play__icontains" in request.query_params:
+            qs = qs.filter(play__icontains=request.query_params['play__icontains'])
 
         count = qs.count()
 
@@ -2465,10 +2457,10 @@ class JobJobTasksList(BaseJobEventsList):
             return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
-        if 'event_id' not in request.QUERY_PARAMS:
+        if 'event_id' not in request.query_params:
             return ({'detail': '"event_id" not provided'}, -1, status.HTTP_400_BAD_REQUEST)
 
-        parent_task = job.job_events.filter(pk=int(request.QUERY_PARAMS.get('event_id', -1)))
+        parent_task = job.job_events.filter(pk=int(request.query_params.get('event_id', -1)))
         if not parent_task.exists():
             return ({'detail': 'parent event not found'}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
@@ -2507,16 +2499,16 @@ class JobJobTasksList(BaseJobEventsList):
         # doing this here for the moment until/unless we need to implement more
         # complex filtering (since we aren't under a serializer)
 
-        if "id__in" in request.QUERY_PARAMS:
-            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
-        elif "id__gt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
-        elif "id__lt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
-        if "failed" in request.QUERY_PARAMS:
-            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
-        if "task__icontains" in request.QUERY_PARAMS:
-            qs = qs.filter(task__icontains=request.QUERY_PARAMS['task__icontains'])
+        if "id__in" in request.query_params:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.query_params["id__in"].split(",")])
+        elif "id__gt" in request.query_params:
+            qs = qs.filter(id__gt=request.query_params['id__gt'])
+        elif "id__lt" in request.query_params:
+            qs = qs.filter(id__lt=request.query_params['id__lt'])
+        if "failed" in request.query_params:
+            qs = qs.filter(failed=(request.query_params['failed'].lower() == 'true'))
+        if "task__icontains" in request.query_params:
+            qs = qs.filter(task__icontains=request.query_params['task__icontains'])
 
         if ordering is not None:
             qs = qs.order_by(ordering)
@@ -2594,7 +2586,7 @@ class AdHocCommandList(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         # Inject inventory ID and limit if parent objects is a host/group.
         if hasattr(self, 'get_parent_object') and not getattr(self, 'parent_key', None):
-            data = request.DATA
+            data = request.data
             # HACK: Make request data mutable.
             if getattr(data, '_mutable', None) is False:
                 data._mutable = True
@@ -2604,11 +2596,11 @@ class AdHocCommandList(ListCreateAPIView):
                 data['limit'] = parent_obj.name
 
         # Check for passwords needed before creating ad hoc command.
-        credential_pk = get_pk_from_dict(request.DATA, 'credential')
+        credential_pk = get_pk_from_dict(request.data, 'credential')
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
             needed = credential.passwords_needed
-            provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+            provided = dict([(field, request.data.get(field, '')) for field in needed])
             if not all(provided.values()):
                 data = dict(passwords_needed_to_start=needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2619,7 +2611,7 @@ class AdHocCommandList(ListCreateAPIView):
 
         # Start ad hoc command running when created.
         ad_hoc_command = get_object_or_400(self.model, pk=response.data['id'])
-        result = ad_hoc_command.signal_start(**request.DATA)
+        result = ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2702,21 +2694,21 @@ class AdHocCommandRelaunch(GenericAPIView):
                 data[field[:-3]] = getattr(obj, field)
             else:
                 data[field] = getattr(obj, field)
-        serializer = self.get_serializer(data=data)
+        serializer = AdHocCommandSerializer(data=data, context=self.get_serializer_context())
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Check for passwords needed before copying ad hoc command.
         needed = obj.passwords_needed_to_start
-        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+        provided = dict([(field, request.data.get(field, '')) for field in needed])
         if not all(provided.values()):
             data = dict(passwords_needed_to_start=needed)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Copy and start the new ad hoc command.
         new_ad_hoc_command = obj.copy()
-        result = new_ad_hoc_command.signal_start(**request.DATA)
+        result = new_ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2773,13 +2765,11 @@ class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
         if request.user:
             raise PermissionDenied()
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.DATA.copy()
-        data['ad_hoc_command'] = parent_obj.pk
+        data = request.data.copy()
+        data['ad_hoc_command'] = parent_obj
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            self.pre_save(serializer.object)
-            self.object = serializer.save(force_insert=True)
-            self.post_save(self.object, created=True)
+            self.instance = serializer.save()
             headers = {'Location': serializer.data['url']}
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
@@ -2870,11 +2860,11 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response(response_message)
         
         if request.accepted_renderer.format in ('html', 'api', 'json'):
-            content_format = request.QUERY_PARAMS.get('content_format', 'html')
-            content_encoding = request.QUERY_PARAMS.get('content_encoding', None)
-            start_line = request.QUERY_PARAMS.get('start_line', 0)
-            end_line = request.QUERY_PARAMS.get('end_line', None)
-            dark_val = request.QUERY_PARAMS.get('dark', '')
+            content_format = request.query_params.get('content_format', 'html')
+            content_encoding = request.query_params.get('content_encoding', None)
+            start_line = request.query_params.get('start_line', 0)
+            end_line = request.query_params.get('end_line', None)
+            dark_val = request.query_params.get('dark', '')
             dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
             content_only = bool(request.accepted_renderer.format in ('api', 'json'))
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
@@ -2973,7 +2963,7 @@ class SettingsList(ListCreateAPIView):
     def get_queryset(self):
         class SettingsIntermediary(object):
             def __init__(self, key, description, category, value,
-                         value_type, user):
+                         value_type, user=None):
                 self.key = key
                 self.description = description
                 self.category = category
@@ -3004,8 +2994,7 @@ class SettingsList(ListCreateAPIView):
                                                             m_entry['description'],
                                                             m_entry['category'],
                                                             m_entry['default'],
-                                                            m_entry['type'],
-                                                            None))
+                                                            m_entry['type']))
         return settings_actual
 
     def delete(self, request, *args, **kwargs):
@@ -3023,7 +3012,7 @@ class SettingsReset(APIView):
         # NOTE: Extend more with user settings
         if not request.user.can_access(TowerSettings, 'delete', None):
             raise PermissionDenied()
-        settings_key = request.DATA.get('key', None)
+        settings_key = request.data.get('key', None)
         if settings_key is not None:
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

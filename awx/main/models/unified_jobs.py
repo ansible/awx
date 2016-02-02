@@ -8,13 +8,13 @@ import logging
 import re
 import os
 import os.path
+from collections import OrderedDict
 from StringIO import StringIO
 
 # Django
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -77,7 +77,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         ('updating', _('Updating')),            # Same as running.
     ]
 
-    ALL_STATUS_CHOICES = SortedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
+    ALL_STATUS_CHOICES = OrderedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
 
     class Meta:
         app_label = 'main'

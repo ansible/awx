@@ -31,6 +31,7 @@ class ActivityStreamTest(BaseTest):
             self.options(url, expect=200)
             self.head(url, expect=200)
             response = self.get(url, expect=200)
+            print response
             self.check_pagination_and_size(response, 1, previous=None, next=None)
 
     def test_basic_fields(self):

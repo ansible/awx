@@ -83,7 +83,8 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 # only the defaults.
 try:
     include(optional('local_*.py'), scope=locals())
-    include('postprocess.py', scope=locals())
+    if not is_testing(sys.argv):
+        include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

@@ -539,7 +539,7 @@ class Group(CommonModelNameNotUnique):
         def mark_actual():
             all_group_hosts = Group.hosts.through.objects.select_related("host", "group").filter(group__inventory=self.inventory)
             group_hosts = {'groups': {}, 'hosts': {}}
-            all_group_parents = Group.parents.through.objects.select_related("parent", "group").filter(from_group__inventory=self.inventory)
+            all_group_parents = Group.parents.through.objects.select_related("from_group", "to_group").filter(from_group__inventory=self.inventory)
             group_children = {}
             group_parents = {}
             marked_hosts = []

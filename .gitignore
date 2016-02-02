@@ -53,6 +53,7 @@ npm-debug.log
 /DEBUG
 
 # Testing
+.cache
 .coverage
 .tox
 coverage.xml
@@ -60,6 +61,7 @@ htmlcov
 pep8.txt
 scratch
 testem.log
+awx/awx_test.sqlite3-journal
 
 # Mac OS X
 *.DS_Store

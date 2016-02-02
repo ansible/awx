@@ -1,254 +1,69 @@
 {% extends 'rest_framework/base.html' %}
-{% load i18n %}
+{% load i18n staticfiles %}
 
 {% block title %}{{ name }} &middot; {% trans 'Ansible Tower REST API' %}{% endblock %}
 
+{% block bootstrap_theme %}
+  <link rel="stylesheet" type="text/css" href="{% static 'rest_framework/css/bootstrap.min.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'api/api.css' %}?v={{tower_version}}" />
+{% endblock %}
+
 {% block style %}
+<link href="{% static 'assets/favicon.ico' %}?v={{tower_version}}" rel="shortcut icon" />
 {{ block.super }}
-<link href="{{ STATIC_URL }}assets/favicon.ico" rel="shortcut icon" />
-<style type="text/css">
-html body {
-  background: #ddd;
-}
-html body .navbar .navbar-inner {
-  border-top: none;
-  height: 54px;
-}
-html body .navbar-inverse .navbar-inner {
-    background-color: #171717;
-    background-image: -moz-linear-gradient(top, #171717, #171717);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#171717), to(#171717));
-    background-image: -webkit-linear-gradient(top, #171717, #171717);
-    background-image: -o-linear-gradient(top, #171717, #171717);
-    background-image: linear-gradient(to bottom, #171717, #171717);
-    background-repeat: repeat-x;
-    border-color: #171717;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#171717', endColorstr='#171717', GradientType=0);
-}
-html body .navbar-inverse .nav > li > a {
-    color: #A9A9A9;
-}
-html body .navbar-inverse .nav > li > a:hover,
-html body .navbar-inverse .nav > li > a:focus {
-   color: #4e9998;
-}
-html body .navbar .brand img {
-    width: 200px;
-    margin-top: -2px;
-    margin-right: 0.75em;
-}
-html body .navbar-inverse .nav li.dropdown.open > .dropdown-toggle,
-html body .navbar-inverse .nav li.dropdown.active > .dropdown-toggle,
-html body .navbar-inverse .nav li.dropdown.open.active > .dropdown-toggle {
-  background-color: #1a3333;
-}
-html body .navbar-inverse .brand {
-  font-size: 1.2em;
-  color: #fff;
-  padding-top: 18px;
-  padding-left: 20px;
-}
-html body .navbar-inverse .nav.pull-right {
-  margin-top: 8px;
-  margin-right: -8px;
-}
-html body ul.breadcrumb {
-  margin-top: 72px;
-}
-span.powered-by .version {
-  color: #ddd;
-}
-span.powered-by {
-  font-size: 75%;
-  color: #ddd;
-}
-html body .navbar .navbar-inner .dropdown-menu li a,
-html body .navbar .navbar-inner .dropdown-menu li,
-html body .hero-unit h2,
-html body .hero-unit h1,
-html body a,
-html body a {
- color: #4e9998; 
-}
-html body .navbar .navbar-inner .dropdown-menu li a:hover,
-html body a:hover {
-  color: #4e9998;
-}
-html body ul.breadcrumb,
-html body .prettyprint,
-html body .well.tab-content {
-  border: 1px solid #ccc;
-}
-html body .prettyprint {
-  background: #f5f5f5;
-}
-html body .str,
-html body .atv,
-html body code {
-  color: #1a3333;
-}
-html body .kwd,
-html body .ta,
-html body .lit {
-  color: #346665;
-}
-html body .str a {
-  text-decoration: underline;
-}
-html body .page-header {
-  margin-bottom: 0;
-}
-html body .description {
-  padding-bottom: 0;
-  display: none;
-}
-#footer {
-  font-size: 0.8em;
-  text-align: center;
-  padding-bottom: 1em;
-  line-height: 1.6em;
-}
-#footer a,
-#footer a:hover {
-  color: #333;
-}
-img.towerlogo {
-  margin-bottom: 0.5em;
-}
-html body .wrapper {
-  min-height: 1%;
-  height: auto !important;
-  margin: 0 auto 0;
-}
-html body #footer {
-  height: auto !important;
-}
-html body #push {
-	height: 0;
-}
-html body .btn-success,
-html body .btn-primary {
-  color: #ffffff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-  background-color: #55a6a4; /* 66c8c7 l=6fd9d7 d=55a6a4 */
-  background-image: -moz-linear-gradient(top, #6fd9d7, #55a6a4);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#6fd9d7), to(#55a6a4));
-  background-image: -webkit-linear-gradient(top, #6fd9d7, #55a6a4);
-  background-image: -o-linear-gradient(top, #6fd9d7, #55a6a4);
-  background-image: linear-gradient(to bottom, #6fd9d7, #55a6a4);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff6fd9d7', endColorstr='#ff55a6a4', GradientType=0);
-  border-color: #55a6a4 #55a6a4 #41807e;
-  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-}
-html body .btn-success:hover,
-html body .btn-success:active,
-html body .btn-success.active,
-html body .btn-success.disabled,
-html body .btn-success[disabled],
-html body .btn-primary:hover,
-html body .btn-primary:active,
-html body .btn-primary.active,
-html body .btn-primary.disabled,
-html body .btn-primary[disabled] {
-  color: #ffffff;
-  background-color: #55a6a4;
-}
-html body .btn-group.open .btn-success.dropdown-toggle,
-html body .btn-group.open .btn-primary.dropdown-toggle {
-  background-color: #55a6a4;
-}
-html body .btn-success:active,
-html body .btn-success.active,
-html body .btn-primary:active,
-html body .btn-primary.active {
-  background-color:#41807e \9;
-}
-html body .dropdown-menu li>a:hover,
-html body .dropdown-menu li>a:focus,
-html body .dropdown-submenu:hover>a {
-  text-decoration: none;
-  color: #ffffff;
-  background-color: #55a6a4;
-  background-image: -moz-linear-gradient(top, #55a6a4, #41807e);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#55a6a4), to(#41807e));
-  background-image: -webkit-linear-gradient(top, #55a6a4, #41807e);
-  background-image: -o-linear-gradient(top, #55a6a4, #41807e);
-  background-image: linear-gradient(to bottom, #55a6a4, #41807e);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff55a6a4', endColorstr='#ff41807e', GradientType=0);
-}
-</style>
 {% endblock %}
 
-{% block branding %}
-  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}assets/tower_console_logo.png">{% block branding_title %}{% trans 'REST API' %}{% endblock %}</a>
-{% endblock %}
-
-{% block userlinks %}
-  {% if user.is_authenticated %}
-  <li>
-    <a href="/api/v1/me/">{{ user }}</a>
-  </li>
-  {% endif %}
-{% endblock %}
-
-{% block footer %}
-<div id="footer">
-  <a href="http://www.ansible.com" target="_blank"><img class="towerlogo" src="{{ STATIC_URL }}assets/tower_console_bug.png" /></a><br/>
-  Copyright &copy; 2015 <a href="http://www.ansible.com" target="_blank">Ansible, Inc.</a> All rights reserved.
-</div>
+{% block navbar %}
+  <div class="navbar navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{% url 'api:api_root_view' %}">
+          <img class="logo" src="{% static 'assets/main_menu_logo.png' %}">
+          <span>{% trans 'REST API' %}</span>
+        </a>
+        <a class="navbar-title" href="{{ request.get_full_path }}">
+          <span>&nbsp;&mdash; {{name}}</span>
+        </a>
+      </div>
+      <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'api:user_me_list' %}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Logged in as {{ user }}{% if user.get_full_name %} ({{ user.get_full_name }}){% endif %}"><span class="glyphicon glyphicon-user"></span> <span class="visible-xs-inline">Logged in as </span>{{ user }}{% if user.get_full_name %}<span class="visible-xs-inline"> ({{ user.get_full_name }})</span>{% endif %}</a></li>
+          {% endif %}
+          <li><a href="//docs.ansible.com/ansible-tower/latest/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Ansible Tower API Guide"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline"> Ansible Tower API Guide</span></a></li>
+          <li><a href="/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Back to Ansible Tower"><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="visible-xs-inline"> Back to Ansible Tower</span></a></li>
+          <li class="hidden-xs"><a href="#" class="resize" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Resize"><span class="glyphicon glyphicon-resize-full"></span></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block script %}
+<div id="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 footer-logo">
+        <a href="http://www.ansible.com" target="_blank">
+          <img alt="Red Hat, Inc. | Ansible, Inc." src="{% static 'assets/footer-logo.png' %}" />
+        </a>
+      </div>
+      <div class="col-sm-6 footer-copyright">
+        Copyright &copy; 2016 <a href="http://www.redhat.com" target="_blank">Red Hat</a>, Inc. All Rights Reserved.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hidden">
+  <a class="hide-description pull-right js-tooltip" href="#" title="Hide Description"><span class="glyphicon glyphicon-remove"></span></a>
+  <a class="toggle-description js-tooltip" href="#" title="Show/Hide Description"><span class="glyphicon glyphicon-question-sign"></span></a>
+</div>
 {{ block.super }}
-<script type="text/javascript">
-$(function() {
-  // Make links from relative URLs to resources.
-  $('span.str').each(function() {
-    var s = $(this).html();
-    if (s.match(/^\"\/.+\/\"$/) || s.match(/^\"\/.+\/\?.*\"$/)) {
-      $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
-    }
-  });
-  // Make links for all inventory script hosts.
-  $('.request-info .pln').filter(function() {
-    return $(this).text() === 'script';
-  }).each(function() {
-    $('.response-info span.str').filter(function() {
-      return $(this).text() === '"hosts"';
-    }).each(function() {
-      $(this).nextUntil('span.pun:contains("]")').filter('span.str').each(function() {
-        if ($(this).text().match(/^\".+\"$/)) {
-          var s = $(this).text().replace(/\"/g, '');
-          $(this).html('"<a href="' + '?host=' + s + '">' + s + '</a>"');
-        }
-        else if ($(this).text() !== '"') {
-          var s = $(this).text();
-          $(this).html('<a href="' + '?host=' + s + '">' + s + '</a>');
-        }
-      });
-    });
-  });
-  // Add classes/icons for dynamically showing/hiding help.
-  if ($('.description').html()) {
-    $('.description').addClass('well').addClass('well-small').addClass('prettyprint');
-    $('.description').prepend('<a class="hide-description pull-right" href="#" title="Hide Description"><i class="icon-remove"></i></a>');
-    $('a.hide-description').click(function() {
-      $('.description').slideUp('fast');
-      return false;
-    });
-    $('.page-header h1').append('<a class="toggle-description" href="#" title="Show/Hide Description"><i class="icon-question-sign"></i></a>');
-    $('a.toggle-description').click(function() {
-      $('.description').slideToggle('fast');
-      return false;
-    });
-    if (window.location.hash == '#showhelp') {
-      $('.description').slideDown('fast');
-    }
-  }
-  $('.btn-primary').removeClass('btn-primary').addClass('btn-success');
-});
-</script>
+<script src="{% static 'api/api.js' %}?v={{tower_version}}"></script>
 {% endblock %}

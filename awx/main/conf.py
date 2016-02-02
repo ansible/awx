@@ -37,16 +37,14 @@ class TowerConfiguration(object):
         if key not in settings_manifest:
             raise AttributeError("Tower Setting with key '{0}' does not exist".format(key))
         settings_entry = settings_manifest[key]
-        settings_actual = TowerSettings.objects.filter(key=key)
-        if not settings_actual.exists():
+        try:
+            settings_actual = TowerSettings.objects.get(key=key)
+        except TowerSettings.DoesNotExist:
             settings_actual = TowerSettings(key=key,
                                             description=settings_entry['description'],
                                             category=settings_entry['category'],
-                                            value=value,
                                             value_type=settings_entry['type'])
-        else:
-            settings_actual = settings_actual[0]
-            settings_actual.value = value
+        settings_actual.value_converted = value
         settings_actual.save()
 
 tower_settings = TowerConfiguration()

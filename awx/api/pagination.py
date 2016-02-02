@@ -2,36 +2,26 @@
 # All Rights Reserved.
 
 # Django REST Framework
-from rest_framework import serializers, pagination
-from rest_framework.templatetags.rest_framework import replace_query_param
+from rest_framework import pagination
+from rest_framework.utils.urls import remove_query_param, replace_query_param
 
-class NextPageField(pagination.NextPageField):
-    '''Pagination field to output URL path.'''
 
-    def to_native(self, value):
-        if not value.has_next():
+class Pagination(pagination.PageNumberPagination):
+
+    page_size_query_param = 'page_size'
+
+    def get_next_link(self):
+        if not self.page.has_next():
             return None
-        page = value.next_page_number()
-        request = self.context.get('request')
-        url = request and request.get_full_path() or ''
-        return replace_query_param(url, self.page_field, page)
+        url = self.request and self.request.get_full_path() or ''
+        page_number = self.page.next_page_number()
+        return replace_query_param(url, self.page_query_param, page_number)
 
-class PreviousPageField(pagination.NextPageField):
-    '''Pagination field to output URL path.'''
-
-    def to_native(self, value):
-        if not value.has_previous():
+    def get_previous_link(self):
+        if not self.page.has_previous():
             return None
-        page = value.previous_page_number()
-        request = self.context.get('request')
-        url = request and request.get_full_path() or ''
-        return replace_query_param(url, self.page_field, page)
-
-class PaginationSerializer(pagination.BasePaginationSerializer):
-    '''
-    Custom pagination serializer to output only URL path (without host/port).
-    '''
-
-    count = serializers.Field(source='paginator.count')
-    next = NextPageField(source='*')
-    previous = PreviousPageField(source='*')
+        url = self.request and self.request.get_full_path() or ''
+        page_number = self.page.previous_page_number()
+        if page_number == 1:
+            return remove_query_param(url, self.page_query_param)
+        return replace_query_param(url, self.page_query_param, page_number)

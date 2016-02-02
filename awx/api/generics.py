@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db import connection
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
 # Django REST Framework
@@ -19,7 +20,6 @@ from rest_framework.authentication import get_authorization_header
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.request import clone_request
 from rest_framework import status
 from rest_framework import views
 
@@ -155,18 +155,6 @@ class APIView(views.APIView):
         context = self.get_description_context()
         return render_to_string(template_list, context)
 
-    def metadata(self, request):
-        '''
-        Add version number where view was added to Tower.
-        '''
-        ret = super(APIView, self).metadata(request)
-        added_in_version = '1.2'
-        for version in ('3.0.0', '2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
-            if getattr(self, 'new_in_%s' % version.replace('.', ''), False):
-                added_in_version = version
-                break
-        ret['added_in_version'] = added_in_version
-        return ret
 
 class GenericAPIView(generics.GenericAPIView, APIView):
     # Base class for all model-based views.
@@ -188,8 +176,12 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     def get_queryset(self):
         #if hasattr(self.request.user, 'get_queryset'):
         #    return self.request.user.get_queryset(self.model)
-        #else:
-        return super(GenericAPIView, self).get_queryset()
+        if self.queryset is not None:
+            return self.queryset._clone()
+        elif self.model is not None:
+            return self.model._default_manager.all()
+        else:
+            return super(GenericAPIView, self).get_queryset()
 
     def get_description_context(self):
         # Set instance attributes needed to get serializer metadata.
@@ -201,69 +193,13 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         if hasattr(self.model, "_meta"):
             if hasattr(self.model._meta, "verbose_name"):
                 d.update({
-                    'model_verbose_name': unicode(self.model._meta.verbose_name),
-                    'model_verbose_name_plural': unicode(self.model._meta.verbose_name_plural),
+                    'model_verbose_name': smart_text(self.model._meta.verbose_name),
+                    'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
                 })
-            d.update({'serializer_fields': self.get_serializer().metadata()})
+            d['serializer_fields'] = self.metadata_class().get_serializer_info(self.get_serializer())
         d['settings'] = settings
         return d
 
-    def metadata(self, request):
-        '''
-        Add field information for GET requests (so field names/labels are
-        available even when we can't POST/PUT).
-        '''
-        ret = super(GenericAPIView, self).metadata(request)
-        actions = ret.get('actions', {})
-        # Remove read only fields from PUT/POST data.
-        for method in ('POST', 'PUT'):
-            fields = actions.get(method, {})
-            for field, meta in fields.items():
-                if not isinstance(meta, dict):
-                    continue
-                if meta.pop('read_only', False):
-                    fields.pop(field)
-        if 'GET' in self.allowed_methods:
-            cloned_request = clone_request(request, 'GET')
-            try:
-                # Test global permissions
-                self.check_permissions(cloned_request)
-                # Test object permissions
-                if hasattr(self, 'retrieve'):
-                    try:
-                        self.get_object()
-                    except Http404:
-                        # Http404 should be acceptable and the serializer
-                        # metadata should be populated. Except this so the
-                        # outer "else" clause of the try-except-else block
-                        # will be executed.
-                        pass
-            except (exceptions.APIException, PermissionDenied):
-                pass
-            else:
-                # If user has appropriate permissions for the view, include
-                # appropriate metadata about the fields that should be supplied.
-                serializer = self.get_serializer()
-                actions['GET'] = serializer.metadata()
-                if hasattr(serializer, 'get_types'):
-                    ret['types'] = serializer.get_types()
-                # Remove fields labeled as write_only, remove field attributes
-                # that aren't relevant for retrieving data.
-                for field, meta in actions['GET'].items():
-                    if not isinstance(meta, dict):
-                        continue
-                    meta.pop('required', None)
-                    meta.pop('read_only', None)
-                    meta.pop('default', None)
-                    meta.pop('min_length', None)
-                    meta.pop('max_length', None)
-                    if meta.pop('write_only', False):
-                        actions['GET'].pop(field)
-        if actions:
-            ret['actions'] = actions
-        if getattr(self, 'search_fields', None):
-            ret['search_fields'] = self.search_fields
-        return ret
 
 class MongoAPIView(GenericAPIView):
 
@@ -337,8 +273,8 @@ class SubListAPIView(ListAPIView):
     def get_description_context(self):
         d = super(SubListAPIView, self).get_description_context()
         d.update({
-            'parent_model_verbose_name': unicode(self.parent_model._meta.verbose_name),
-            'parent_model_verbose_name_plural': unicode(self.parent_model._meta.verbose_name_plural),
+            'parent_model_verbose_name': smart_text(self.parent_model._meta.verbose_name),
+            'parent_model_verbose_name_plural': smart_text(self.parent_model._meta.verbose_name_plural),
         })
         return d
 
@@ -388,10 +324,10 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
 
         # Make a copy of the data provided (since it's readonly) in order to
         # inject additional data.
-        if hasattr(request.DATA, 'dict'):
-            data = request.DATA.dict()
+        if hasattr(request.data, 'dict'):
+            data = request.data.dict()
         else:
-            data = request.DATA
+            data = request.data
 
         # add the parent key to the post data using the pk from the URL
         parent_key = getattr(self, 'parent_key', None)
@@ -405,7 +341,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Verify we have permission to add the object as given.
-        if not request.user.can_access(self.model, 'add', serializer.init_data):
+        if not request.user.can_access(self.model, 'add', serializer.initial_data):
             raise PermissionDenied()
 
         # save the object through the serializer, reload and returned the saved
@@ -424,8 +360,8 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         created = False
         parent = self.get_parent_object()
         relationship = getattr(parent, self.relationship)
-        sub_id = request.DATA.get('id', None)
-        data = request.DATA
+        sub_id = request.data.get('id', None)
+        data = request.data
 
         # Create the sub object if an ID is not provided.
         if not sub_id:
@@ -462,7 +398,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def unattach(self, request, *args, **kwargs):
-        sub_id = request.DATA.get('id', None)
+        sub_id = request.data.get('id', None)
         if not sub_id:
             data = dict(msg='"id" is required to disassociate')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -486,10 +422,10 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def post(self, request, *args, **kwargs):
-        if not isinstance(request.DATA, dict):
+        if not isinstance(request.data, dict):
             return Response('invalid type for post data',
                             status=status.HTTP_400_BAD_REQUEST)
-        if 'disassociate' in request.DATA:
+        if 'disassociate' in request.data:
             return self.unattach(request, *args, **kwargs)
         else:
             return self.attach(request, *args, **kwargs)
@@ -498,9 +434,6 @@ class RetrieveAPIView(generics.RetrieveAPIView, GenericAPIView):
     pass
 
 class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
-
-    def pre_save(self, obj):
-        super(RetrieveUpdateAPIView, self).pre_save(obj)
 
     def update(self, request, *args, **kwargs):
         self.update_filter(request, *args, **kwargs)

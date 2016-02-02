@@ -3,6 +3,7 @@
 
 # Python
 import codecs
+from collections import OrderedDict
 import ConfigParser
 import cStringIO
 import json
@@ -37,7 +38,6 @@ from celery import Task, task
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError
-from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # AWX
@@ -423,7 +423,7 @@ class BaseTask(Task):
         prompts, and values are password lookup keys (keys that are returned
         from build_passwords).
         '''
-        return SortedDict()
+        return OrderedDict()
 
     @task_timer
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,

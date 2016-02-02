@@ -15,7 +15,7 @@ import django.test
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_text
 
 # Requests
 import requests
@@ -216,26 +216,26 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         #       due to being an org admin for that project and no credential assigned to that template
         with self.current_user(self.user_bob):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 3)
 
         # Chuck has permission to see all Eng Job Templates as Lead Engineer
         # Note: Since chuck is an org admin he can also see the support scan template
         with self.current_user(self.user_chuck):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 3)
 
         # Doug is in engineering but can only run scan jobs so he can only see the one Job Template
         with self.current_user(self.user_doug):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 1)
 
         # Juan can't see any job templates in Engineering because he lacks the inventory read permission
         with self.current_user(self.user_juan):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 0)
 
         # We give Juan inventory permission and he can see both Job Templates because he already has deploy permission
@@ -248,19 +248,19 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         )
         with self.current_user(self.user_juan):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 2)
 
         # Randall is on the ops testers team that has permission to run a single check playbook on ops west
         with self.current_user(self.user_randall):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 1)
 
         # Holly is on the ops east team and can see all of that team's job templates
         with self.current_user(self.user_holly):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 3)
 
         # Chuck is temporarily assigned to ops east team to help them running some playbooks
@@ -268,7 +268,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         self.team_ops_east.users.add(self.user_chuck)
         with self.current_user(self.user_chuck):
             resp = self.get(url, expect=200)
-            print [x['name'] for x in resp['results']]
+            #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 6)
 
 
@@ -313,7 +313,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         self.assertEqual(jt.inventory.pk, data['inventory'])
         self.assertEqual(jt.credential, None)
         self.assertEqual(jt.project.pk, data['project'])
-        self.assertEqual(smart_str(jt.playbook), data['playbook'])
+        self.assertEqual(smart_text(jt.playbook), data['playbook'])
 
         # Test that all required fields are really required.
         data['name'] = 'another new job template'
@@ -903,8 +903,10 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Set a limit on the job template to verify the callback job limit is
         # set to the intersection of this limit and the host name.
-        job_template.limit = 'bakers:slicers:packagers'
-        job_template.save(update_fields=['limit'])
+        # job_template.limit = 'bakers:slicers:packagers'
+        # job_template.save(update_fields=['limit'])
+        JobTemplate.objects.filter(pk=job_template.pk).update(limit='bakers:slicers:packagers')
+        job_template = JobTemplate.objects.get(pk=job_template.pk)
 
         # Try when hostname is also an IP address, even if a different one is
         # specified via ansible_ssh_host.
