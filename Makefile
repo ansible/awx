@@ -235,7 +235,7 @@ requirements requirements_dev requirements_jenkins: %: real-%
 #  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
 #  * --target implies --ignore-installed
 real-requirements:
-	@if [ "$(PYTHON_VERSION)" == "2.6" ]; then \
+	@if [ "$(PYTHON_VERSION)" = "2.6" ]; then \
 	  pip install -r requirements/requirements_python26.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
 	else \
 	  pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
