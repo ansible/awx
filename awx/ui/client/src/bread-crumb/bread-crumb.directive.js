@@ -6,15 +6,39 @@ export default
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
             link: function(scope, element, attrs) {
-                scope.activityStreamActive = 0;
 
-                scope.toggleActivityStreamActive = function(){
-                    scope.activityStreamActive = !scope.activityStreamActive;
-                };
+                var streamConfig = {};
 
-                scope.isActive = function (path) {
-                    return $state.is(path);
-                };
+                scope.showActivityStreamButton = false;
+
+                scope.openActivityStream = function() {
+
+                    var stateGoParams = {};
+
+                    if(streamConfig && streamConfig.activityStream) {
+                        if(streamConfig.activityStreamTarget) {
+                            stateGoParams['target'] = streamConfig.activityStreamTarget;
+                        }
+                        if(streamConfig.activityStreamId) {
+                            stateGoParams['id'] = $state.params[streamConfig.activityStreamId];
+                        }
+                    }
+
+                    $state.go('activityStream', stateGoParams);
+                }
+
+                scope.$on("$stateChangeSuccess", function updateActivityStreamButton(event, toState) {
+
+                    streamConfig = (toState && toState.data) ? toState.data : {};
+
+                    if(streamConfig && streamConfig.activityStream) {
+                        scope.showActivityStreamButton = true;
+                    }
+                    else {
+                        scope.showActivityStreamButton = false;
+                    }
+                });
+
             }
         };
     }];

@@ -11,6 +11,10 @@ export default {
     route: '/management_jobs',
     templateUrl: templateUrl('management-jobs/list/list'),
     controller: 'managementJobsListController',
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'management_job'
+    },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

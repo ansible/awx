@@ -7,8 +7,8 @@
         data-trigger="hover"
         data-container="body"
         ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
-        ng-if="isActive('dashboard')"
-        ng-click="toggleActivityStreamActive()">
+        ng-if="showActivityStreamButton"
+        ng-click="openActivityStream()">
         <i class="BreadCrumb-menuLinkImage icon-activity-stream"
             alt="Activity Stream">
         </i>
@@ -20,7 +20,7 @@
         data-placement="left"
         data-trigger="hover"
         data-container="body"
-        ng-if="!isActive('dashboard')">
+        ng-if="!showActivityStreamButton">
         <i class="BreadCrumb-menuLinkImage fa fa-tachometer"
             alt="Dashboard">
         </i>

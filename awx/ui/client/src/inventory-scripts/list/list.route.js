@@ -11,6 +11,10 @@ export default {
     route: '/inventory_scripts',
     templateUrl: templateUrl('inventory-scripts/list/list'),
     controller: 'inventoryScriptsListController',
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'inventory_script'
+    },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

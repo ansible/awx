@@ -37,65 +37,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('ShowStream', ['setStreamHeight', 'Authorization',
-    function (setStreamHeight) {
-        return function () {
-            // Slide in the Stream widget
-
-            // Make some style/position adjustments adjustments
-            var stream = $('#stream-container');
-            stream.css({
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                'min-height': '100%',
-                'background-color': '#FFF'
-            });
-
-            setStreamHeight();
-
-            // Slide in stream
-            stream.show('slide', {
-                'direction': 'left'
-            }, {
-                'duration': 500,
-                'queue': false
-            });
-
-        };
-    }
-])
-
-.factory('HideStream', [
-    function () {
-        return function () {
-            // Remove the stream widget
-
-            var stream = $('#stream-container');
-            stream.hide('slide', {
-                'direction': 'left'
-            }, {
-                'duration': 500,
-                'queue': false
-            });
-
-            // Completely destroy the container so we don't experience random flashes of it later.
-            // There was some sort of weirdness with the tab 'show' causing the stream to slide in when
-            // a tab was clicked, after the stream had been hidden. Seemed like timing- wait long enough
-            // before clicking a tab, and it would not happen.
-            setTimeout(function () {
-                stream.detach();
-                stream.empty();
-                stream.unbind();
-                $('#main-view').css({
-                    'min-height': 0
-                }); //let the parent height go back to normal
-            }, 500);
-        };
-    }
-])
-
 .factory('FixUrl', [
     function () {
         return function (u) {
@@ -335,11 +276,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit',
-    'PaginateInit', 'generateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl',
+.factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit',
+    'PaginateInit', 'generateList', 'FormatDate', 'BuildDescription', 'FixUrl', 'BuildUrl',
     'ShowDetail', 'setStreamHeight', 'Find', 'Store',
-    function ($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight,
+    function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
+        FormatDate, BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight,
         Find, Store) {
         return function (params) {
 
@@ -361,62 +302,24 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             if (url) {
                 defaultUrl = url;
             } else {
-                if ($location.path() !== '/home') {
-                    // Restrict what we're looking at based on the path
-                    type = (base === 'inventories') ? 'inventory' : base.replace(/s$/, '');
-                    paths = $location.path().split('/');
-                    paths.splice(0, 1);
-                    if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
-                        type = paths[paths.length - 2];
-                        type = (type === 'inventories') ? 'inventory' : type.replace(/s$/, '');
-                        //defaultUrl += '?object1=' + type + '&object1__id=' +
-                        defaultUrl += '?' + type + '__id=' + paths[paths.length - 1];
-                    } else if (paths.length > 1) {
-                        type = paths[paths.length - 1];
-                        type = (type === 'inventories') ? 'inventory' : type.replace(/s$/, '');
-                        defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
-                    } else {
-                        defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
+
+                if($state.params && $state.params.target) {
+                    if($state.params.id) {
+                        // We have a type and an ID
+                        defaultUrl += '?' + $state.params.target + '__id=' + $state.params.id;
+                    }
+                    else {
+                        // We just have a type
+                        defaultUrl += '?or__object1=' + $state.params.target + '&or__object2=' + $state.params.target;
                     }
                 }
             }
-
-            // Add a container for the stream widget
-            $('#main-view').append("<div id=\"stream-container\"><div id=\"stream-content\"></div></div><!-- Stream widget -->");
-
-            ShowStream();
 
             // Generate the list
             view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-3', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;
-
-            scope.closeStream = function (inUrl) {
-                HideStream();
-                if (scope.searchCleanup) {
-                    scope.searchCleanup();
-                }
-                // Restore prior search state
-                if (PreviousSearchParams) {
-                    SearchInit({
-                        scope: parent_scope,
-                        set: PreviousSearchParams.set,
-                        list: PreviousSearchParams.list,
-                        url: PreviousSearchParams.defaultUrl,
-                        iterator: PreviousSearchParams.iterator,
-                        sort_order: PreviousSearchParams.sort_order,
-                        setWidgets: false
-                    });
-                }
-                if (inUrl) {
-                    $location.path(inUrl);
-                }
-                else if (onClose) {
-                    parent_scope.$emit(onClose);
-                }
-                scope.$destroy();
-            };
 
             scope.refreshStream = function () {
                 scope.search(list.iterator);

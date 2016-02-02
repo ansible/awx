@@ -11,6 +11,10 @@ export default {
     route: '/management_jobs/:management_job_id/schedules',
     templateUrl: templateUrl('management-jobs/schedule/schedule'),
     controller: 'managementJobsScheduleController',
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'schedule'
+    },
     params: {management_job: null},
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
