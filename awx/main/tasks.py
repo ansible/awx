@@ -843,7 +843,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
@@ -1219,7 +1219,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
-            env['GCE_ZONE'] = inventory_source.source_regions
+            env['GCE_ZONE'] = inventory_update.source_regions
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
@@ -1473,7 +1473,7 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d
