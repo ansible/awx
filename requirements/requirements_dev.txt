@@ -1,5 +1,4 @@
 -r requirements.txt
-django-devserver
 django-debug-toolbar==1.4
 unittest2
 pep8
