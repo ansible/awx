@@ -203,5 +203,6 @@ body #footer .footer-copyright a {
     text-align: center;
     padding-right: 15px;
     padding-top: 0;
+    white-space: nowrap;
   }
 }

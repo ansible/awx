@@ -1,28 +1,31 @@
 {% extends "rest_framework/api.html" %}
-{% load i18n %}
+{% load i18n staticfiles %}
+
+{% block title %}{{ name }} &middot; {% trans 'Ansible Tower' %}{% endblock %}
 
 {% block style %}
 {{ block.super }}
 <style type="text/css">
-ul.breadcrumb {
-  visibility: hidden;
-  margin-top: 10px !important;
-}
-pre.err {
-  margin-bottom: 2em;
-}
-div.request-info, div.response-info {
+div.request-info,
+div.response-info span.meta {
   display: none;
 }
 </style>
 {% endblock %}
 
-{% block branding_title %}{% endblock %}
-
-{% block breadcrumbs %}
-<ul class="breadcrumb">
-    <li>
-        <a href="{{ request.get_full_path }}" class="active">{{ name }}</a>
-    </li>
-</ul>
+{% block navbar %}
+  <div class="navbar navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">
+          <img class="logo" src="{% static 'assets/main_menu_logo.png' %}">
+        </a>
+        <a class="navbar-title" href="{{ request.get_full_path }}">
+          <span>&nbsp;&mdash; {{name}}</span>
+        </a>
+      </div>
+    </div>
+  </div>
 {% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
