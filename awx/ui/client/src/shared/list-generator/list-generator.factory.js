@@ -306,7 +306,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         if (list.listTitle) {
 
                             html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
-                            html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
+                            // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
+                            list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge == false) ? false : true;
+                            if(list.listTitleBadge) {
+                                html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
+                            }
 
                         }
 

@@ -13,6 +13,7 @@ export default
         iterator: 'activity',
         editTitle: 'Activity Stream',
         listTitle: 'Activity Stream',
+        listTitleBadge: false,
         selectInstructions: '',
         index: false,
         hover: true,
@@ -26,7 +27,8 @@ export default
                 desc: true,
                 noLink: true,
                 searchable: false,
-                filter: "longDate"
+                filter: "longDate",
+                columnClass: 'col-lg-3 col-md-2 col-sm-3 col-xs-3'
             },
             user: {
                 label: 'Initiated by',
@@ -36,14 +38,15 @@ export default
                 //awToolTip: "\{\{ userToolTip \}\}",
                 //dataPlacement: 'top',
                 searchPlaceholder: 'Username',
-                searchWidget: 1
+                searchWidget: 1,
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
             },
             description: {
                 label: 'Action',
                 ngBindHtml: 'activity.description',
                 nosort: true,
                 searchable: false,
-                columnClass: 'col-lg-7'
+                columnClass: 'col-lg-5 col-md-6 col-sm-4 col-xs-4'
             },
             actor: {
                 label: 'System event',
@@ -264,6 +267,9 @@ export default
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
+
             view: {
                 label: 'View',
                 ngClick: "showDetail(activity.id)",
