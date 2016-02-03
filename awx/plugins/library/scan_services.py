@@ -72,22 +72,18 @@ class ServiceScanService(BaseService):
                 else:
                     service_state = "stopped"
                 services.append({"name": service_name, "state": service_state, "source": "sysv"})
+            p = re.compile('^\s?(?P<name>.*)\s(?P<goal>\w+)\/(?P<state>\w+)(\,\sprocess\s(?P<pid>[0-9]+))?\s*$')
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")
             for line in real_stdout.split("\n"):
-                line_data = line.split()
-                if len(line_data) < 2:
+                m = p.match(line)
+                if not m:
                     continue
-                service_name = line_data[0]
-                if line_data[1].find("/") == -1: # we expect this to look like: start/running
-                    continue
-                service_goal = line_data[1].split("/")[0]
-                service_state = line_data[1].split("/")[1].replace(",","")
-                if len(line_data) > 3: # If there's a pid associated with the service it'll be on the end of this string "process 418"
-                    if line_data[2] == 'process':
-                        pid = line_data[3]
-                    else:
-                        pid = None
+                service_name = m.group('name')
+                service_goal = m.group('goal')
+                service_state = m.group('state')
+                if m.group('pid'):
+                    pid = m.group('pid')
                 else:
                     pid = None  # NOQA
                 payload = {"name": service_name, "state": service_state, "goal": service_goal, "source": "upstart"}
