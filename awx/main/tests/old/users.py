@@ -947,8 +947,8 @@ class LdapTest(BaseTest):
             return user
 
     def test_ldap_auth(self):
-        self.use_test_setting('USER_SEARCH')
-        self.use_test_setting('ALWAYS_UPDATE_USER')
+        for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'GROUP_TYPE', 'GROUP_SEARCH'):
+            self.use_test_setting(name)
         self.assertEqual(User.objects.filter(username=self.ldap_username).count(), 0)
         # Test logging in, user should be created with no flags or fields set.
         user = self.check_login()

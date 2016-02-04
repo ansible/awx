@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction, DatabaseError
 from django.utils.dateparse import parse_datetime
-from django.utils.tzinfo import FixedOffset
+from django.utils.timezone import FixedOffset
 from django.db import connection
 
 # AWX

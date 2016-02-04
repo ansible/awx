@@ -25,6 +25,7 @@ from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test.utils import override_settings
+from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
@@ -132,6 +133,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         if settings.CALLBACK_CONSUMER_PORT:
             callback_port = random.randint(55700, 55799)
             settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
+            os.environ['CALLBACK_CONSUMER_PORT'] = settings.CALLBACK_CONSUMER_PORT
             callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
             self._temp_paths.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
@@ -425,8 +427,6 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
                       return_response_object=False, client_kwargs=None):
         assert method is not None
         method_name = method.lower()
-        #if method_name not in ('options', 'head', 'get', 'delete'):
-        #    assert data is not None
         client_kwargs = client_kwargs or {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
@@ -457,7 +457,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         client = Client(**client_kwargs)
         method = getattr(client, method_name)
         response = None
-        if data is not None:
+        if method_name not in ('options', 'head', 'get', 'delete'):
             data_type = data_type or 'json'
             if data_type == 'json':
                 response = method(url, json.dumps(data), 'application/json')
@@ -469,9 +469,9 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             response = method(url)
 
         self.assertFalse(response.status_code == 500 and expect != 500,
-                         'Failed (500): %s' % response.content)
+                         'Failed (500): %s' % force_text(response.content))
         if expect is not None:
-            assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
+            assert response.status_code == expect, u"expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, force_text(response.content))
         if method_name == 'head':
             self.assertFalse(response.content)
         if return_response_object:
@@ -479,16 +479,16 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         if response.status_code not in [204, 405] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             if response['Content-Type'].startswith('application/json'):
-                obj = json.loads(response.content)
+                obj = json.loads(force_text(response.content))
             elif response['Content-Type'].startswith('application/yaml'):
-                obj = yaml.safe_load(response.content)
+                obj = yaml.safe_load(force_text(response.content))
             elif response['Content-Type'].startswith('text/plain'):
                 obj = {
-                    'content': response.content
+                    'content': force_text(response.content)
                 }
             elif response['Content-Type'].startswith('text/html'):
                 obj = {
-                    'content': response.content
+                    'content': force_text(response.content)
                 }
             else:
                 self.fail('Unsupport response content type %s' % response['Content-Type'])

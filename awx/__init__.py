@@ -75,9 +75,25 @@ def prepare_env():
             settings.DATABASES['default'][opt] = os.environ['AWX_TEST_DATABASE_%s' % opt]
     # Disable capturing all SQL queries in memory when in DEBUG mode.
     if settings.DEBUG and not getattr(settings, 'SQL_DEBUG', True):
-        from django.db.backends import BaseDatabaseWrapper
-        from django.db.backends.util import CursorWrapper
+        from django.db.backends.base.base import BaseDatabaseWrapper
+        from django.db.backends.utils import CursorWrapper
         BaseDatabaseWrapper.make_debug_cursor = lambda self, cursor: CursorWrapper(cursor, self)
+
+    # Use the default devserver addr/port defined in settings for runserver.
+    default_addr = getattr(settings, 'DEVSERVER_DEFAULT_ADDR', '127.0.0.1')
+    default_port = getattr(settings, 'DEVSERVER_DEFAULT_PORT', 8000)
+    from django.core.management.commands import runserver as core_runserver
+    original_handle = core_runserver.Command.handle
+
+    def handle(self, *args, **options):
+        if not options.get('addrport'):
+            options['addrport'] = '%s:%d' % (default_addr, int(default_port))
+        elif options.get('addrport').isdigit():
+            options['addrport'] = '%s:%d' % (default_addr, int(options['addrport']))
+        return original_handle(self, *args, **options)
+
+    core_runserver.Command.handle = handle
+
 
 def manage():
     # Prepare the AWX environment.

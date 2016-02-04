@@ -1110,13 +1110,14 @@ class Command(NoArgsCommand):
             for db_group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[db_group.name]
                 group_group_count += len(mem_group.children)
-                child_names = set([g.name for g in mem_group.children])
-                db_children_qs = self.inventory.groups.filter(name__in=child_names)
-                # FIXME: May fail unit tests when len(child_names) > 1000.
-                for db_child in db_children_qs.filter(children__id=db_group.id):
-                    self.logger.info('Group "%s" already child of group "%s"', db_child.name, db_group.name)
-                for db_child in db_children_qs.exclude(children__id=db_group.id):
-                    self._batch_add_m2m(db_group.children, db_child)
+                all_child_names = sorted([g.name for g in mem_group.children])
+                for offset2 in xrange(0, len(all_child_names), self._batch_size):
+                    child_names = all_child_names[offset2:(offset2 + self._batch_size)]
+                    db_children_qs = self.inventory.groups.filter(name__in=child_names)
+                    for db_child in db_children_qs.filter(children__id=db_group.id):
+                        self.logger.info('Group "%s" already child of group "%s"', db_child.name, db_group.name)
+                    for db_child in db_children_qs.exclude(children__id=db_group.id):
+                        self._batch_add_m2m(db_group.children, db_child)
                     self.logger.info('Group "%s" added as child of "%s"', db_child.name, db_group.name)
                 self._batch_add_m2m(db_group.children, flush=True)
         if settings.SQL_DEBUG:

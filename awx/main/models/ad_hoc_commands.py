@@ -30,9 +30,6 @@ __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 
 class AdHocCommand(UnifiedJob):
 
-    MODULE_NAME_CHOICES = [(x,x) for x in tower_settings.AD_HOC_COMMANDS]
-    MODULE_NAME_DEFAULT = 'command' if 'command' in tower_settings.AD_HOC_COMMANDS else None
-
     class Meta(object):
         app_label = 'main'
 
@@ -61,9 +58,8 @@ class AdHocCommand(UnifiedJob):
     )
     module_name = models.CharField(
         max_length=1024,
-        default=MODULE_NAME_DEFAULT,
-        choices=MODULE_NAME_CHOICES,
-        blank=bool(MODULE_NAME_DEFAULT),
+        default='',
+        blank=True,
     )
     module_args = models.TextField(
         blank=True,
@@ -87,6 +83,12 @@ class AdHocCommand(UnifiedJob):
         editable=False,
         through='AdHocCommandEvent',
     )
+
+    def clean_inventory(self):
+        inv = self.inventory
+        if not inv or not inv.active:
+            raise ValidationError('Inventory is no longer available.')
+        return inv
 
     def clean_credential(self):
         cred = self.credential

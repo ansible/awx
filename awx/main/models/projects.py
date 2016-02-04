@@ -11,7 +11,7 @@ import urlparse
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, smart_text
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -181,7 +181,7 @@ class ProjectOptions(models.Model):
                     # Filter files in a tasks subdirectory.
                     if 'tasks' in playbook.split(os.sep):
                         continue
-                    results.append(playbook)
+                    results.append(smart_text(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
 

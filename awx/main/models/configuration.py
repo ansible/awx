@@ -6,9 +6,12 @@ import json
 
 # Django
 from django.db import models
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
+
 # Tower
 from awx.main.models.base import CreatedModifiedModel
+
 
 class TowerSettings(CreatedModifiedModel):
 
@@ -53,10 +56,21 @@ class TowerSettings(CreatedModifiedModel):
         elif self.value_type == 'list':
             converted_type = [x.strip() for x in self.value.split(',')]
         elif self.value_type == 'bool':
-            converted_type = self.value in [True, "true", "True", 1, "1", "yes"]
+            converted_type = smart_text(self.value).lower() in ('true', 'yes', '1')
         elif self.value_type == 'string':
             converted_type = self.value
         else:
             t = __builtins__[self.value_type]
             converted_type = t(self.value)
         return converted_type
+
+    @value_converted.setter
+    def value_converted(self, value):
+        if self.value_type == 'json':
+            self.value = json.dumps(value)
+        elif self.value_type == 'list':
+            self.value = ','.join(value)
+        elif self.value_type == 'bool':
+            self.value = smart_text(bool(value))
+        else:
+            self.value = smart_text(value)

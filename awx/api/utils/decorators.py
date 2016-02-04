@@ -1,7 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-from ordereddict import OrderedDict
+from collections import OrderedDict
 import copy
 import functools
 
@@ -23,21 +23,22 @@ def paginated(method):
     def func(self, request, *args, **kwargs):
         # Manually spin up pagination.
         # How many results do we show?
-        limit = api_settings.PAGINATE_BY
-        if request.QUERY_PARAMS.get(api_settings.PAGINATE_BY_PARAM, False):
-            limit = request.QUERY_PARAMS[api_settings.PAGINATE_BY_PARAM]
-        if api_settings.MAX_PAGINATE_BY:
-            limit = min(api_settings.MAX_PAGINATE_BY, limit)
+        paginator_class = api_settings.DEFAULT_PAGINATION_CLASS
+        limit = paginator_class.page_size
+        if request.query_params.get(paginator_class.page_size_query_param, False):
+            limit = request.query_params[paginator_class.page_size_query_param]
+        if paginator_class.max_page_size:
+            limit = min(paginator_class.max_page_size, limit)
         limit = int(limit)
 
         # Get the order parameter if it's given
-        if request.QUERY_PARAMS.get("ordering", False):
-            ordering = request.QUERY_PARAMS["ordering"]
+        if request.query_params.get("ordering", False):
+            ordering = request.query_params["ordering"]
         else:
             ordering = None
 
         # What page are we on?
-        page = int(request.QUERY_PARAMS.get('page', 1))
+        page = int(request.query_params.get('page', 1))
         offset = (page - 1) * limit
 
         # Add the limit, offset, page, and order variables to the keyword arguments

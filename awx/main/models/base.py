@@ -9,7 +9,6 @@ import shlex
 import yaml
 
 # Django
-from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -59,14 +58,14 @@ PERMISSION_TYPE_CHOICES = [
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'openstack', 'custom']
 
-VERBOSITY_CHOICES = getattr(settings, 'VERBOSITY_CHOICES', [
+VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),
     (1, '1 (Verbose)'),
     (2, '2 (More Verbose)'),
     (3, '3 (Debug)'),
     (4, '4 (Connection Debug)'),
     (5, '5 (WinRM Debug)'),
-])
+]
 
 
 class VarsDictProperty(object):
@@ -157,16 +156,6 @@ class BaseModel(models.Model):
             self.save(update_fields=update_fields)
         return update_fields
 
-    def save(self, *args, **kwargs):
-        # For compatibility with Django 1.4.x, attempt to handle any calls to
-        # save that pass update_fields.
-        try:
-            super(BaseModel, self).save(*args, **kwargs)
-        except TypeError:
-            if 'update_fields' not in kwargs:
-                raise
-            kwargs.pop('update_fields')
-            super(BaseModel, self).save(*args, **kwargs)
 
 class CreatedModifiedModel(BaseModel):
     '''

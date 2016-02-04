@@ -317,3 +317,10 @@ def user_mark_inactive(user, save=True):
             user.save()
             
 User.add_to_class('mark_inactive', user_mark_inactive)
+
+
+# Add get_absolute_url method to User model if not present.
+if not hasattr(User, 'get_absolute_url'):
+    def user_get_absolute_url(user):
+        return reverse('api:user_detail', args=(user.pk,))
+    User.add_to_class('get_absolute_url', user_get_absolute_url)

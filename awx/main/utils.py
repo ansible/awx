@@ -354,8 +354,7 @@ def get_type_for_model(model):
     '''
     Return type name for a given model class.
     '''
-    from rest_framework.compat import get_concrete_model
-    opts = get_concrete_model(model)._meta
+    opts = model._meta.concrete_model._meta
     return camelcase_to_underscore(opts.object_name)
 
 

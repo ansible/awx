@@ -2,14 +2,15 @@
 # All Rights Reserved.
 
 # Python
-import functools
+import copy
 import json
 import re
 import logging
+from collections import OrderedDict
 from dateutil import rrule
 from ast import literal_eval
 
-from rest_framework_mongoengine.serializers import MongoEngineModelSerializer, MongoEngineModelSerializerOptions
+from rest_framework_mongoengine.serializers import DocumentSerializer
 
 # PyYAML
 import yaml
@@ -19,16 +20,16 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.fields import BLANK_CHOICE_DASH
-from django.utils.datastructures import SortedDict
+from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
+from django.db import models
 # from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
+from django.utils.encoding import force_text, smart_text
 
 # Django REST Framework
-from rest_framework.compat import get_concrete_model
+from rest_framework.exceptions import ValidationError
 from rest_framework import fields
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnList
 
 # Django-Polymorphic
 from polymorphic import PolymorphicModel
@@ -90,48 +91,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
 }
 
-# Monkeypatch REST framework to include default value and write_only flag in
-# field metadata.
-def add_metadata_default(f):
-    @functools.wraps(f)
-    def _add_metadata_default(self, *args, **kwargs):
-        metadata = f(self, *args, **kwargs)
-        if hasattr(self, 'get_default_value'):
-            default = self.get_default_value()
-            if default is None and metadata.get('type', '') != 'field':
-                default = getattr(self, 'empty', None)
-            if default or not getattr(self, 'required', False):
-                metadata['default'] = default
-        if getattr(self, 'write_only', False):
-            metadata['write_only'] = True
-        return metadata
-    return _add_metadata_default
-
-fields.Field.metadata = add_metadata_default(fields.Field.metadata)
-
-class ChoiceField(fields.ChoiceField):
-
-    def __init__(self, *args, **kwargs):
-        super(ChoiceField, self).__init__(*args, **kwargs)
-        if not self.required:
-            # Remove extra blank option if one is already present (for writable
-            # field) or if present at all for read-only fields.
-            if ([x[0] for x in self.choices].count(u'') > 1 or self.get_default_value() != u'' or self.read_only) \
-               and BLANK_CHOICE_DASH[0] in self.choices:
-                self.choices = [x for x in self.choices
-                                if x != BLANK_CHOICE_DASH[0]]
-
-    def metadata(self):
-        metadata = super(ChoiceField, self).metadata()
-        metadata['choices'] = self.choices or []
-        if not self.choices:
-            metadata.pop('default', None)
-        return metadata
-
-# Monkeypatch REST framework to replace default ChoiceField used by
-# ModelSerializer.
-serializers.ChoiceField = ChoiceField
-
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
@@ -154,17 +113,46 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
             # Define fields as 'foo' and 'bar'; ignore base class fields.
             fields = ('foo', 'bar')
 
+            # Extra field kwargs dicts are also merged from base classes.
+            extra_kwargs = {
+                'foo': {'required': True},
+                'bar': {'read_only': True},
+            }
+
+            # If a subclass were to define extra_kwargs as:
+            extra_kwargs = {
+                'foo': {'required': False, 'default': ''},
+                'bar': {'label': 'New Label for Bar'},
+            }
+            
+            # The resulting value of extra_kwargs would be:
+            extra_kwargs = {
+                'foo': {'required': False, 'default': ''},
+                'bar': {'read_only': True, 'label': 'New Label for Bar'},
+            }
+
+            # Extra field kwargs cannot be removed in subclasses, only replaced.
+
     '''
+
+    @staticmethod
+    def _is_list_of_strings(x):
+        return isinstance(x, (list, tuple)) and all([isinstance(y, basestring) for y in x])
+
+    @staticmethod
+    def _is_extra_kwargs(x):
+        return isinstance(x, dict) and all([isinstance(k, basestring) and isinstance(v, dict) for k,v in x.items()])
 
     @classmethod
     def _update_meta(cls, base, meta, other=None):
         for attr in dir(other):
             if attr.startswith('_'):
                 continue
-            meta_val = getattr(meta, attr, [])
-            val = getattr(other, attr, [])
-            # Special handling for lists of strings (field names).
-            if isinstance(val, (list, tuple)) and all([isinstance(x, basestring) for x in val]):
+            val = getattr(other, attr)
+            meta_val = getattr(meta, attr, None)
+            # Special handling for lists/tuples of strings (field names).
+            if cls._is_list_of_strings(val) and cls._is_list_of_strings(meta_val or []):
+                meta_val = meta_val or []
                 new_vals = []
                 except_vals = []
                 if base: # Merge values from all bases.
@@ -180,6 +168,20 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
                 for v in new_vals:
                     if v not in except_vals and v not in val:
                         val.append(v)
+                val = tuple(val)
+            # Merge extra_kwargs dicts from base classes.
+            elif cls._is_extra_kwargs(val) and cls._is_extra_kwargs(meta_val or {}):
+                meta_val = meta_val or {}
+                new_val = {}
+                if base:
+                    for k,v in meta_val.items():
+                        new_val[k] = copy.deepcopy(v)
+                for k,v in val.items():
+                    new_val.setdefault(k, {}).update(copy.deepcopy(v))
+                val = new_val
+            # Any other values are copied in case they are mutable objects.
+            else:
+                val = copy.deepcopy(val)
             setattr(meta, attr, val)
 
     def __new__(cls, name, bases, attrs):
@@ -191,64 +193,34 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
         return super(BaseSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 
-class BaseSerializerOptions(serializers.ModelSerializerOptions):
-
-    def __init__(self, meta):
-        super(BaseSerializerOptions, self).__init__(meta)
-        self.summary_fields = getattr(meta, 'summary_fields', ())
-        self.summarizable_fields = getattr(meta, 'summarizable_fields', ())
-
-
 class BaseSerializer(serializers.ModelSerializer):
 
     __metaclass__ = BaseSerializerMetaclass
-    _options_class = BaseSerializerOptions
 
     class Meta:
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'name', 'description')
         summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
         summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
+        extra_kwargs = {
+            'description': {
+                'allow_null': True,
+            },
+        }
 
     # add the URL and related resources
-    type           = serializers.SerializerMethodField('get_type')
-    url            = serializers.SerializerMethodField('get_url')
+    type           = serializers.SerializerMethodField()
+    url            = serializers.SerializerMethodField()
     related        = serializers.SerializerMethodField('_get_related')
     summary_fields = serializers.SerializerMethodField('_get_summary_fields')
 
     # make certain fields read only
-    created       = serializers.SerializerMethodField('get_created')
-    modified      = serializers.SerializerMethodField('get_modified')
-    active        = serializers.SerializerMethodField('get_active')
-
-    def get_fields(self):
-        opts = get_concrete_model(self.opts.model)._meta
-        ret = super(BaseSerializer, self).get_fields()
-        for key, field in ret.items():
-            if key == 'id' and not getattr(field, 'help_text', None):
-                field.help_text = 'Database ID for this %s.' % unicode(opts.verbose_name)
-            elif key == 'type':
-                field.help_text = 'Data type for this %s.' % unicode(opts.verbose_name)
-                field.type_label = 'multiple choice'
-            elif key == 'url':
-                field.help_text = 'URL for this %s.' % unicode(opts.verbose_name)
-                field.type_label = 'string'
-            elif key == 'related':
-                field.help_text = 'Data structure with URLs of related resources.'
-                field.type_label = 'object'
-            elif key == 'summary_fields':
-                field.help_text = 'Data structure with name/description for related resources.'
-                field.type_label = 'object'
-            elif key == 'created':
-                field.help_text = 'Timestamp when this %s was created.' % unicode(opts.verbose_name)
-                field.type_label = 'datetime'
-            elif key == 'modified':
-                field.help_text = 'Timestamp when this %s was last modified.' % unicode(opts.verbose_name)
-                field.type_label = 'datetime'
-        return ret
+    created       = serializers.SerializerMethodField()
+    modified      = serializers.SerializerMethodField()
+    active        = serializers.SerializerMethodField()
 
     def get_type(self, obj):
-        return get_type_for_model(self.opts.model)
+        return get_type_for_model(self.Meta.model)
 
     def get_types(self):
         return [self.get_type(None)]
@@ -263,7 +235,7 @@ class BaseSerializer(serializers.ModelSerializer):
         }
         choices = []
         for t in self.get_types():
-            name = type_name_map.get(t, unicode(get_model_for_type(t)._meta.verbose_name).title())
+            name = type_name_map.get(t, force_text(get_model_for_type(t)._meta.verbose_name).title())
             choices.append((t, name))
         return choices
 
@@ -279,7 +251,7 @@ class BaseSerializer(serializers.ModelSerializer):
         return {} if obj is None else self.get_related(obj)
 
     def get_related(self, obj):
-        res = SortedDict()
+        res = OrderedDict()
         if getattr(obj, 'created_by', None) and obj.created_by.is_active:
             res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
@@ -292,7 +264,7 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_summary_fields(self, obj):
         # Return values for certain fields on related objects, to simplify
         # displaying lists of items without additional API requests.
-        summary_fields = SortedDict()
+        summary_fields = OrderedDict()
         for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
                 # A few special cases where we don't want to access the field
@@ -311,7 +283,7 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 if hasattr(fkval, 'is_active') and not fkval.is_active:
                     continue
-                summary_fields[fk] = SortedDict()
+                summary_fields[fk] = OrderedDict()
                 for field in related_fields:
                     fval = getattr(fkval, field, None)
                     if fval is None and field == 'type':
@@ -327,11 +299,11 @@ class BaseSerializer(serializers.ModelSerializer):
             except ObjectDoesNotExist:
                 pass
         if getattr(obj, 'created_by', None) and obj.created_by.is_active:
-            summary_fields['created_by'] = SortedDict()
+            summary_fields['created_by'] = OrderedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['created_by'][field] = getattr(obj.created_by, field)
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
-            summary_fields['modified_by'] = SortedDict()
+            summary_fields['modified_by'] = OrderedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
         return summary_fields
@@ -360,12 +332,63 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
-    def get_validation_exclusions(self, instance=None):
-        # Override base class method to continue to use model validation for
-        # fields (including optional ones), appears this was broken by DRF
-        # 2.3.13 update.
-        cls = self.opts.model
-        opts = get_concrete_model(cls)._meta
+    def build_standard_field(self, field_name, model_field):
+        field_class, field_kwargs = super(BaseSerializer, self).build_standard_field(field_name, model_field)
+
+        # Update help text for common fields.
+        opts = self.Meta.model._meta.concrete_model._meta
+        if field_name == 'id':
+            field_kwargs.setdefault('help_text', 'Database ID for this %s.' % smart_text(opts.verbose_name))
+        elif field_name == 'name':
+            field_kwargs['help_text'] = 'Name of this %s.' % smart_text(opts.verbose_name)
+        elif field_name == 'description':
+            field_kwargs['help_text'] = 'Optional description of this %s.' % smart_text(opts.verbose_name)
+        elif field_name == 'type':
+            field_kwargs['help_text'] = 'Data type for this %s.' % smart_text(opts.verbose_name)
+        elif field_name == 'url':
+            field_kwargs['help_text'] = 'URL for this %s.' % smart_text(opts.verbose_name)
+        elif field_name == 'related':
+            field_kwargs['help_text'] = 'Data structure with URLs of related resources.'
+        elif field_name == 'summary_fields':
+            field_kwargs['help_text'] = 'Data structure with name/description for related resources.'
+        elif field_name == 'created':
+            field_kwargs['help_text'] = 'Timestamp when this %s was created.' % smart_text(opts.verbose_name)
+        elif field_name == 'modified':
+            field_kwargs['help_text'] = 'Timestamp when this %s was last modified.' % smart_text(opts.verbose_name)
+
+        # Pass model field default onto the serializer field if field is not read-only.
+        if model_field.has_default() and not field_kwargs.get('read_only', False):
+            field_kwargs['default'] = model_field.get_default()
+        # Enforce minimum value of 0 for PositiveIntegerFields.
+        if isinstance(model_field, (models.PositiveIntegerField, models.PositiveSmallIntegerField)) and 'choices' not in field_kwargs:
+            field_kwargs['min_value'] = 0
+        # Update verbosity choices from settings (for job templates, jobs, ad hoc commands).
+        if field_name == 'verbosity' and 'choices' in field_kwargs:
+            field_kwargs['choices'] = getattr(settings, 'VERBOSITY_CHOICES', field_kwargs['choices'])
+        return field_class, field_kwargs
+
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(BaseSerializer, self).build_relational_field(field_name, relation_info)
+        # Don't include choicse for foreign key fields.
+        field_kwargs.pop('choices', None)
+        return field_class, field_kwargs
+
+    def validate_description(self, value):
+        # Description should always be empty string, never null.
+        return value or u''
+
+    def run_validation(self, data=fields.empty):
+        try:
+            return super(BaseSerializer, self).run_validation(data)
+        except ValidationError as exc:
+            # Avoid bug? in DRF if exc.detail happens to be a list instead of a dict.
+            raise ValidationError(detail=serializers.get_validation_error_detail(exc))
+
+    def get_validation_exclusions(self, obj=None):
+        # Borrowed from DRF 2.x - return model fields that should be excluded
+        # from model validation.
+        cls = self.Meta.model
+        opts = cls._meta.concrete_model._meta
         exclusions = [field.name for field in opts.fields + opts.many_to_many]
         for field_name, field in self.fields.items():
             field_name = field.source or field_name
@@ -378,49 +401,72 @@ class BaseSerializer(serializers.ModelSerializer):
             exclusions.remove(field_name)
         return exclusions
 
-    def to_native(self, obj):
+    def validate(self, attrs):
+        attrs = super(BaseSerializer, self).validate(attrs)
+        try:
+            # Create/update a model instance and run it's full_clean() method to
+            # do any validation implemented on the model class.
+            exclusions = self.get_validation_exclusions(self.instance)
+            obj = self.instance or self.Meta.model()
+            for k,v in attrs.items():
+                if k not in exclusions:
+                    setattr(obj, k, v)
+            obj.full_clean(exclude=exclusions)
+            # full_clean may modify values on the instance; copy those changes
+            # back to attrs so they are saved.
+            for k in attrs.keys():
+                if k not in exclusions:
+                    attrs[k] = getattr(obj, k)
+        except DjangoValidationError as exc:
+            # DjangoValidationError may contain a list or dict; normalize into a
+            # dict where the keys are the field name and the values are a list
+            # of error messages, then raise as a DRF ValidationError.  DRF would
+            # normally convert any DjangoValidationError to a non-field specific
+            # error message; here we preserve field-specific errors raised from
+            # the model's full_clean method.
+            d = exc.update_error_dict({})
+            for k,v in d.items():
+                v = v if isinstance(v, list) else [v]
+                v2 = []
+                for e in v:
+                    if isinstance(e, DjangoValidationError):
+                        v2.extend(list(e))
+                    elif isinstance(e, list):
+                        v2.extend(e)
+                    else:
+                        v2.append(e)
+                d[k] = map(force_text, v2)
+            raise ValidationError(d)
+        return attrs
+
+    def to_representation(self, obj):
+        # FIXME: Doesn't get called anymore for an new raw data form!
         # When rendering the raw data form, create an instance of the model so
         # that the model defaults will be filled in.
         view = self.context.get('view', None)
         parent_key = getattr(view, 'parent_key', None)
         if not obj and hasattr(view, '_raw_data_form_marker'):
-            obj = self.opts.model()
+            obj = self.Meta.model()
             # FIXME: Would be nice to include any posted data for the raw data
             # form, so that a submission with errors can be modified in place
             # and resubmitted.
-        ret = super(BaseSerializer, self).to_native(obj)
+        ret = super(BaseSerializer, self).to_representation(obj)
         # Remove parent key from raw form data, since it will be automatically
         # set by the sub list create view.
         if parent_key and hasattr(view, '_raw_data_form_marker'):
             ret.pop(parent_key, None)
         return ret
 
-    def metadata(self):
-        fields = super(BaseSerializer, self).metadata()
-        for field, meta in fields.items():
-            if not isinstance(meta, dict):
-                continue
-            if field == 'type':
-                meta['choices'] = self.get_type_choices()
-            #if meta.get('type', '') == 'field':
-            #    meta['type'] = 'id'
-        return fields
 
+class BaseFactSerializer(DocumentSerializer):
 
-class BaseFactSerializerOptions(MongoEngineModelSerializerOptions):
-    def __init__(self, meta):
-        super(BaseFactSerializerOptions, self).__init__(meta)
-
-
-class BaseFactSerializer(MongoEngineModelSerializer):
-    _options_class = BaseFactSerializerOptions
     __metaclass__ = BaseSerializerMetaclass
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
         if 'module' in ret and feature_enabled('system_tracking'):
             choices = [(o, o.title()) for o in FactVersion.objects.all().only('module').distinct('module')]
-            ret['module'] = ChoiceField(source='module', choices=choices, read_only=True, required=False)
+            ret['module'] = serializers.ChoiceField(source='module', choices=choices, read_only=True, required=False)
         return ret
 
 
@@ -447,7 +493,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         else:
             return super(UnifiedJobTemplateSerializer, self).get_types()
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobTemplateSerializer:
             if isinstance(obj, Project):
@@ -458,16 +504,14 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = JobTemplateSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj)
-            return serializer.to_native(obj)
+            return serializer.to_representation(obj)
         else:
-            return super(UnifiedJobTemplateSerializer, self).to_native(obj)
+            return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
 
 
 class UnifiedJobSerializer(BaseSerializer):
 
-    result_stdout = serializers.SerializerMethodField('get_result_stdout')
-    unified_job_template = serializers.Field(source='unified_job_template_id', label='unified job template')
-    job_env = serializers.CharField(source='job_env', label='job env', read_only=True)
+    result_stdout = serializers.SerializerMethodField()
 
     class Meta:
         model = UnifiedJob
@@ -475,6 +519,16 @@ class UnifiedJobSerializer(BaseSerializer):
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
                   'result_traceback')
+        extra_kwargs = {
+            'unified_job_template': {
+                'source': 'unified_job_template_id',
+                'label': 'unified job template',
+            },
+            'job_env': {
+                'read_only': True,
+                'label': 'job_env',
+            }
+        }
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:
@@ -498,7 +552,7 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
         return res
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobSerializer:
             if isinstance(obj, ProjectUpdate):
@@ -513,9 +567,9 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = SystemJobSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj)
-            ret = serializer.to_native(obj)
+            ret = serializer.to_representation(obj)
         else:
-            ret = super(UnifiedJobSerializer, self).to_native(obj)
+            ret = super(UnifiedJobSerializer, self).to_representation(obj)
         if 'elapsed' in ret:
             ret['elapsed'] = float(ret['elapsed'])
         return ret
@@ -527,11 +581,11 @@ class UnifiedJobSerializer(BaseSerializer):
                                                                                                                          tower_settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
+
 class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     class Meta:
-        exclude = ('*', 'job_args', 'job_cwd', 'job_env', 'result_traceback',
-                   'result_stdout')
+        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-result_stdout')
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
@@ -539,7 +593,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
         else:
             return super(UnifiedJobListSerializer, self).get_types()
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobListSerializer:
             if isinstance(obj, ProjectUpdate):
@@ -554,9 +608,9 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = SystemJobListSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj)
-            ret = serializer.to_native(obj)
+            ret = serializer.to_representation(obj)
         else:
-            ret = super(UnifiedJobListSerializer, self).to_native(obj)
+            ret = super(UnifiedJobListSerializer, self).to_representation(obj)
         if 'elapsed' in ret:
             ret['elapsed'] = float(ret['elapsed'])
         return ret
@@ -564,7 +618,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
 class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
-    result_stdout = serializers.SerializerMethodField('get_result_stdout')
+    result_stdout = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('result_stdout',)
@@ -583,8 +637,8 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
             return super(UnifiedJobStdoutSerializer, self).get_types()
 
     # TODO: Needed?
-    #def to_native(self, obj):
-    #    ret = super(UnifiedJobStdoutSerializer, self).to_native(obj)
+    #def to_representation(self, obj):
+    #    ret = super(UnifiedJobStdoutSerializer, self).to_representation(obj)
     #    return ret.get('result_stdout', '')
 
 
@@ -599,32 +653,26 @@ class UserSerializer(BaseSerializer):
         fields = ('*', '-name', '-description', '-modified',
                   '-summary_fields', 'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'password', 'ldap_dn')
+        
 
-    def to_native(self, obj):
-        ret = super(UserSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(UserSerializer, self).to_representation(obj)
         ret.pop('password', None)
-        ret.fields.pop('password', None)
         if obj:
             ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
 
-    def get_validation_exclusions(self):
-        ret = super(UserSerializer, self).get_validation_exclusions()
+    def get_validation_exclusions(self, obj=None):
+        ret = super(UserSerializer, self).get_validation_exclusions(obj)
         ret.append('password')
         return ret
 
-    def restore_object(self, attrs, instance=None):
-        new_password = attrs.pop('password', None)
-        # first time creating, password required
-        if instance is None and new_password in (None, ''):
-            self._errors = {'password': ['Password required for new User']}
-            return
-        instance = super(UserSerializer, self).restore_object(attrs, instance)
-        instance._new_password = new_password
-        return instance
+    def validate_password(self, value):
+        if not self.instance and value in (None, ''):
+            raise serializers.ValidationError('Password required for new User')
+        return value
 
-    def save_object(self, obj, **kwargs):
-        new_password = getattr(obj, '_new_password', None)
+    def _update_password(self, obj, new_password):
         # For now we're not raising an error, just not saving password for
         # users managed by LDAP who already have an unusable password set.
         if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
@@ -641,9 +689,22 @@ class UserSerializer(BaseSerializer):
             new_password = None
         if new_password:
             obj.set_password(new_password)
-        if not obj.password:
+            obj.save(update_fields=['password'])
+        elif not obj.password:
             obj.set_unusable_password()
-        return super(UserSerializer, self).save_object(obj, **kwargs)
+            obj.save(update_fields=['password'])
+
+    def create(self, validated_data):
+        new_password = validated_data.pop('password', None)
+        obj = super(UserSerializer, self).create(validated_data)
+        self._update_password(obj, new_password)
+        return obj
+
+    def update(self, obj, validated_data):
+        new_password = validated_data.pop('password', None)
+        obj = super(UserSerializer, self).update(obj, validated_data)
+        self._update_password(obj, new_password)
+        return obj
 
     def get_related(self, obj):
         res = super(UserSerializer, self).get_related(obj)
@@ -658,36 +719,36 @@ class UserSerializer(BaseSerializer):
         ))
         return res
 
-    def _validate_ldap_managed_field(self, attrs, source):
+    def _validate_ldap_managed_field(self, value, field_name):
         if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None) or not feature_enabled('ldap'):
-            return attrs
+            return value
         try:
-            is_ldap_user = bool(self.object.profile.ldap_dn)
+            is_ldap_user = bool(self.instance and self.instance.profile.ldap_dn)
         except AttributeError:
             is_ldap_user = False
         if is_ldap_user:
             ldap_managed_fields = ['username']
             ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
             ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            if source in ldap_managed_fields and source in attrs:
-                if attrs[source] != getattr(self.object, source):
-                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP' % source)
-        return attrs
+            if field_name in ldap_managed_fields:
+                if value != getattr(self.instance, field_name):
+                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP' % field_name)
+        return value
 
-    def validate_username(self, attrs, source):
-        return self._validate_ldap_managed_field(attrs, source)
+    def validate_username(self, value):
+        return self._validate_ldap_managed_field(value, 'username')
 
-    def validate_first_name(self, attrs, source):
-        return self._validate_ldap_managed_field(attrs, source)
+    def validate_first_name(self, value):
+        return self._validate_ldap_managed_field(value, 'first_name')
 
-    def validate_last_name(self, attrs, source):
-        return self._validate_ldap_managed_field(attrs, source)
+    def validate_last_name(self, value):
+        return self._validate_ldap_managed_field(value, 'last_name')
 
-    def validate_email(self, attrs, source):
-        return self._validate_ldap_managed_field(attrs, source)
+    def validate_email(self, value):
+        return self._validate_ldap_managed_field(value, 'email')
 
-    def validate_is_superuser(self, attrs, source):
-        return self._validate_ldap_managed_field(attrs, source)
+    def validate_is_superuser(self, value):
+        return self._validate_ldap_managed_field(value, 'is_superuser')
 
 
 class OrganizationSerializer(BaseSerializer):
@@ -714,6 +775,11 @@ class ProjectOptionsSerializer(BaseSerializer):
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
                   'scm_clean', 'scm_delete_on_update', 'credential')
+        extra_kwargs = {
+            'scm_type': {
+                'allow_null': True
+            }
+        }
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
@@ -722,24 +788,33 @@ class ProjectOptionsSerializer(BaseSerializer):
                                         args=(obj.credential.pk,))
         return res
 
-    def validate_local_path(self, attrs, source):
+    def validate_scm_type(self, value):
+        return value or u''
+
+    def validate(self, attrs):
+        errors = {}
+
         # Don't allow assigning a local_path used by another project.
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type) or u''
+        if self.instance:
+            scm_type = attrs.get('scm_type', self.instance.scm_type) or u''
         else:
             scm_type = attrs.get('scm_type', u'') or u''
-        if self.object and not scm_type:
-            valid_local_paths.append(self.object.local_path)
+        if self.instance and not scm_type:
+            valid_local_paths.append(self.instance.local_path)
         if scm_type:
-            attrs.pop(source, None)
-        if source in attrs and attrs[source] not in valid_local_paths:
-            raise serializers.ValidationError('Invalid path choice')
-        return attrs
+            attrs.pop('local_path', None)
+        if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
+            errors['local_path'] = 'Invalid path choice'
 
-    def to_native(self, obj):
-        ret = super(ProjectOptionsSerializer, self).to_native(obj)
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return super(ProjectOptionsSerializer, self).validate(attrs)
+
+    def to_representation(self, obj):
+        ret = super(ProjectOptionsSerializer, self).to_representation(obj)
         if obj is not None and 'credential' in ret and (not obj.credential or not obj.credential.active):
             ret['credential'] = None
         return ret
@@ -747,17 +822,18 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
-    playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
-    scm_delete_on_next_update = serializers.BooleanField(source='scm_delete_on_next_update', read_only=True)
-    status = ChoiceField(source='status', choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
-    last_update_failed = serializers.BooleanField(source='last_update_failed', read_only=True)
-    last_updated = serializers.DateTimeField(source='last_updated', read_only=True)
+    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
+    scm_delete_on_next_update = serializers.BooleanField(read_only=True)
+    status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
+    last_update_failed = serializers.BooleanField(read_only=True)
+    last_updated = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Project
-        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'playbooks', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
+        
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -786,14 +862,16 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         model = Project
         fields = ('playbooks',)
 
-    def to_native(self, obj):
-        ret = super(ProjectPlaybooksSerializer, self).to_native(obj)
-        return ret.get('playbooks', [])
+    @property
+    def data(self):
+        ret = super(ProjectPlaybooksSerializer, self).data
+        ret = ret.get('playbooks', [])
+        return ReturnList(ret, serializer=self)
 
 
 class ProjectUpdateViewSerializer(ProjectSerializer):
 
-    can_update = serializers.BooleanField(source='can_update', read_only=True)
+    can_update = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_update',)
@@ -821,7 +899,7 @@ class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSeriali
 
 class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
 
-    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+    can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
@@ -829,15 +907,15 @@ class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
 
 class BaseSerializerWithVariables(BaseSerializer):
 
-    def validate_variables(self, attrs, source):
+    def validate_variables(self, value):
         try:
-            json.loads(attrs.get(source, '').strip() or '{}')
+            json.loads(value.strip() or '{}')
         except ValueError:
             try:
-                yaml.safe_load(attrs[source])
+                yaml.safe_load(value)
             except yaml.YAMLError:
                 raise serializers.ValidationError('Must be valid JSON or YAML')
-        return attrs
+        return value
 
 
 class InventorySerializer(BaseSerializerWithVariables):
@@ -868,8 +946,8 @@ class InventorySerializer(BaseSerializerWithVariables):
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
-    def to_native(self, obj):
-        ret = super(InventorySerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(InventorySerializer, self).to_representation(obj)
         if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
             ret['organization'] = None
         return ret
@@ -880,7 +958,7 @@ class InventoryDetailSerializer(InventorySerializer):
     class Meta:
         fields = ('*', 'can_run_ad_hoc_commands')
 
-    can_run_ad_hoc_commands = serializers.SerializerMethodField('get_can_run_ad_hoc_commands')
+    can_run_ad_hoc_commands = serializers.SerializerMethodField()
 
     def get_can_run_ad_hoc_commands(self, obj):
         view = self.context.get('view', None)
@@ -890,8 +968,7 @@ class InventoryDetailSerializer(InventorySerializer):
 class InventoryScriptSerializer(InventorySerializer):
 
     class Meta:
-        fields = ('id',)
-        exclude = ('id',)
+        fields = ()
 
 
 class HostSerializer(BaseSerializerWithVariables):
@@ -901,7 +978,7 @@ class HostSerializer(BaseSerializerWithVariables):
         fields = ('*', 'inventory', 'enabled', 'instance_id', 'variables',
                   'has_active_failures', 'has_inventory_sources', 'last_job',
                   'last_job_host_summary')
-        readonly_fields = ('last_job', 'last_job_host_summary')
+        read_only_fields = ('last_job', 'last_job_host_summary')
 
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
@@ -951,25 +1028,25 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(u'Invalid port specification: %s' % unicode(port))
+                raise serializers.ValidationError(u'Invalid port specification: %s' % force_text(port))
         return name, port
 
-    def validate_name(self, attrs, source):
-        name = unicode(attrs.get(source, ''))
+    def validate_name(self, value):
+        name = force_text(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
-        return attrs
+        return value
 
     def validate(self, attrs):
-        name = unicode(attrs.get('name', ''))
+        name = force_text(attrs.get('name', ''))
         host, port = self._get_host_port_from_name(name)
 
         if port:
             attrs['name'] = host
-            if self.object:
-                variables = unicode(attrs.get('variables', self.object.variables) or '')
+            if self.instance:
+                variables = force_text(attrs.get('variables', self.instance.variables) or '')
             else:
-                variables = unicode(attrs.get('variables', ''))
+                variables = force_text(attrs.get('variables', ''))
             try:
                 vars_dict = json.loads(variables.strip() or '{}')
                 vars_dict['ansible_ssh_port'] = port
@@ -984,10 +1061,10 @@ class HostSerializer(BaseSerializerWithVariables):
                 except (yaml.YAMLError, TypeError):
                     raise serializers.ValidationError('Must be valid JSON or YAML')
 
-        return attrs
+        return super(HostSerializer, self).validate(attrs)
 
-    def to_native(self, obj):
-        ret = super(HostSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(HostSerializer, self).to_representation(obj)
         if not obj:
             return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
@@ -1028,14 +1105,13 @@ class GroupSerializer(BaseSerializerWithVariables):
             res['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,))
         return res
 
-    def validate_name(self, attrs, source):
-        name = attrs.get(source, '')
-        if name in ('all', '_meta'):
+    def validate_name(self, value):
+        if value in ('all', '_meta'):
             raise serializers.ValidationError('Invalid group name')
-        return attrs
+        return value
 
-    def to_native(self, obj):
-        ret = super(GroupSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(GroupSerializer, self).to_representation(obj)
         if obj is not None and 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         return ret
@@ -1063,18 +1139,18 @@ class BaseVariableDataSerializer(BaseSerializer):
     class Meta:
         fields = ('variables',)
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         if obj is None:
             return {}
-        ret = super(BaseVariableDataSerializer, self).to_native(obj)
+        ret = super(BaseVariableDataSerializer, self).to_representation(obj)
         try:
             return json.loads(ret.get('variables', '') or '{}')
         except ValueError:
             return yaml.safe_load(ret.get('variables', ''))
 
-    def from_native(self, data, files):
+    def to_internal_value(self, data):
         data = {'variables': json.dumps(data)}
-        return super(BaseVariableDataSerializer, self).from_native(data, files)
+        return super(BaseVariableDataSerializer, self).to_internal_value(data)
 
 
 class InventoryVariableDataSerializer(BaseVariableDataSerializer):
@@ -1100,14 +1176,13 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         model = CustomInventoryScript
         fields = ('*', "script", "organization")
 
-    def validate_script(self, attrs, source):
-        script_contents = attrs.get(source, '')
-        if not script_contents.startswith("#!"):
+    def validate_script(self, value):
+        if not value.startswith("#!"):
             raise serializers.ValidationError('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python')
-        return attrs
+        return value
 
-    def to_native(self, obj):
-        ret = super(CustomInventoryScriptSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(CustomInventoryScriptSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         request = self.context.get('request', None)
@@ -1128,6 +1203,14 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
                   'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars')
+        extra_kwargs = {
+            'instance_filters': {
+                'allow_null': True,
+            },
+            'group_by': {
+                'allow_null': True,
+            },
+        }
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -1138,58 +1221,44 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
         return res
 
-    def validate_source(self, attrs, source):
-        # TODO: Validate
-        # src = attrs.get(source, '')
-        # obj = self.object
-        return attrs
-
-    def validate_source_script(self, attrs, source):
-        src = attrs.get(source, None)
-        if 'source' in attrs and attrs.get('source', '') == 'custom':
-            if src is None or src == '':
-                raise serializers.ValidationError("source_script must be provided")
-            try:
-                if src.organization != self.object.inventory.organization:
-                    raise serializers.ValidationError("source_script does not belong to the same organization as the inventory")
-            except Exception:
-                # TODO: Log
-                raise serializers.ValidationError("source_script doesn't exist")
-        return attrs
-
-    def validate_source_vars(self, attrs, source):
+    def validate_source_vars(self, value):
         # source_env must be blank, a valid JSON or YAML dict, or ...
         # FIXME: support key=value pairs.
         try:
-            json.loads(attrs.get(source, '').strip() or '{}')
-            return attrs
+            json.loads((value or '').strip() or '{}')
+            return value
         except ValueError:
             pass
         try:
-            yaml.safe_load(attrs[source])
-            return attrs
+            yaml.safe_load(value)
+            return value
         except yaml.YAMLError:
             pass
         raise serializers.ValidationError('Must be valid JSON or YAML')
 
-    def validate_source_regions(self, attrs, source):
-        # FIXME
-        return attrs
+    def validate(self, attrs):
+        # TODO: Validate source, validate source_regions
+        errors = {}
 
-    def metadata(self):
-        metadata = super(InventorySourceOptionsSerializer, self).metadata()
-        field_opts = metadata.get('source_regions', {})
-        for cp in ('azure', 'ec2', 'gce', 'rax'):
-            get_regions = getattr(self.opts.model, 'get_%s_region_choices' % cp)
-            field_opts['%s_region_choices' % cp] = get_regions()
-        field_opts = metadata.get('group_by', {})
-        for cp in ('ec2',):
-            get_group_by_choices = getattr(self.opts.model, 'get_%s_group_by_choices' % cp)
-            field_opts['%s_group_by_choices' % cp] = get_group_by_choices()
-        return metadata
+        source_script = attrs.get('source_script', None)
+        if 'source' in attrs and attrs.get('source', '') == 'custom':
+            if source_script is None or source_script == '':
+                errors['source_script'] = 'source_script must be provided'
+            else:
+                try:
+                    if source_script.organization != self.instance.inventory.organization:
+                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory'
+                except Exception:
+                    # TODO: Log
+                    errors['source_script'] = 'source_script doesn\'t exist'
 
-    def to_native(self, obj):
-        ret = super(InventorySourceOptionsSerializer, self).to_native(obj)
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return super(InventorySourceOptionsSerializer, self).validate(attrs)
+
+    def to_representation(self, obj):
+        ret = super(InventorySourceOptionsSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         if 'credential' in ret and (not obj.credential or not obj.credential.active):
@@ -1199,9 +1268,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
 
-    status = ChoiceField(source='status', choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True, required=False)
-    last_update_failed = serializers.BooleanField(source='last_update_failed', read_only=True)
-    last_updated = serializers.DateTimeField(source='last_updated', read_only=True)
+    status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True, required=False)
+    last_update_failed = serializers.BooleanField(read_only=True)
+    last_updated = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = InventorySource
@@ -1233,8 +1302,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
                                          args=(obj.last_update.pk,))
         return res
 
-    def to_native(self, obj):
-        ret = super(InventorySourceSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
@@ -1246,7 +1315,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
 
-    can_update = serializers.BooleanField(source='can_update', read_only=True)
+    can_update = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_update',)
@@ -1274,7 +1343,7 @@ class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSer
 
 class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
 
-    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+    can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
@@ -1299,8 +1368,8 @@ class TeamSerializer(BaseSerializer):
             res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
 
-    def to_native(self, obj):
-        ret = super(TeamSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(TeamSerializer, self).to_representation(obj)
         if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
             ret['organization'] = None
         return ret
@@ -1338,10 +1407,11 @@ class PermissionSerializer(BaseSerializer):
         if attrs.get('permission_type', None) in ('run', 'check') and not attrs.get('project', None):
             raise serializers.ValidationError('project is required when '
                                               'assigning deployment permissions')
-        return attrs
 
-    def to_native(self, obj):
-        ret = super(PermissionSerializer, self).to_native(obj)
+        return super(PermissionSerializer, self).validate(attrs)
+
+    def to_representation(self, obj):
+        ret = super(PermissionSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         if 'user' in ret and (not obj.user or not obj.user.is_active):
@@ -1373,22 +1443,22 @@ class CredentialSerializer(BaseSerializer):
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 
-    def to_native(self, obj):
-        ret = super(CredentialSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(CredentialSerializer, self).to_representation(obj)
         if obj is not None and 'user' in ret and (not obj.user or not obj.user.is_active):
             ret['user'] = None
         if obj is not None and 'team' in ret and (not obj.team or not obj.team.active):
             ret['team'] = None
         # Replace the actual encrypted value with the string $encrypted$.
         for field in Credential.PASSWORD_FIELDS:
-            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+            if field in ret and force_text(ret[field]).startswith('$encrypted$'):
                 ret[field] = '$encrypted$'
         return ret
 
-    def restore_object(self, attrs, instance=None):
+    def validate(self, attrs):
         # If the value sent to the API startswith $encrypted$, ignore it.
         for field in Credential.PASSWORD_FIELDS:
-            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+            if force_text(attrs.get(field, '')).startswith('$encrypted$'):
                 attrs.pop(field, None)
 
         # If creating a credential from a view that automatically sets the
@@ -1400,8 +1470,7 @@ class CredentialSerializer(BaseSerializer):
         if parent_key == 'team':
             attrs['user'] = None
 
-        instance = super(CredentialSerializer, self).restore_object(attrs, instance)
-        return instance
+        return super(CredentialSerializer, self).validate(attrs)
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
@@ -1436,8 +1505,8 @@ class JobOptionsSerializer(BaseSerializer):
                                               args=(obj.cloud_credential.pk,))
         return res
 
-    def to_native(self, obj):
-        ret = super(JobOptionsSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(JobOptionsSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
@@ -1452,25 +1521,23 @@ class JobOptionsSerializer(BaseSerializer):
             ret['cloud_credential'] = None
         return ret
 
-    def validate_project(self, attrs, source):
-        project = attrs.get('project', None)
-        if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError("This field is required.")
-        return attrs
+    def validate(self, attrs):
+        if 'project' in self.fields and 'playbook' in self.fields:
+            project = attrs.get('project', None)
+            playbook = attrs.get('playbook', '')
+            if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
+                raise serializers.ValidationError({'project': 'This field is required.'})
+            if project and playbook and force_text(playbook) not in project.playbooks:
+                raise serializers.ValidationError({'playbook': 'Playbook not found for project'})
+            if project and not playbook:
+                raise serializers.ValidationError({'playbook': 'Must select playbook for project'})
 
-    def validate_playbook(self, attrs, source):
-        project = attrs.get('project', None)
-        playbook = attrs.get('playbook', '')
-        if project and playbook and smart_str(playbook) not in project.playbooks:
-            raise serializers.ValidationError('Playbook not found for project')
-        if project and not playbook:
-            raise serializers.ValidationError('Must select playbook for project')
-        return attrs
+        return super(JobOptionsSerializer, self).validate(attrs)
 
 
 class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
-    status = ChoiceField(source='status', choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
+    status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
     class Meta:
         model = JobTemplate
@@ -1511,17 +1578,19 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-created')[:10]]
         return d
 
-    def validate_survey_enabled(self, attrs, source):
-        survey_enabled = attrs[source] if source in attrs else False
-        job_type = attrs['job_type'] if 'job_type' in attrs else None
+    def validate(self, attrs):
+        survey_enabled = attrs.get('survey_enabled', False)
+        job_type = attrs.get('job_type', None)
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError("Survey Enabled can not be used with scan jobs")
-        return attrs
+            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs'})
+
+        return super(JobTemplateSerializer, self).validate(attrs)
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
-    ask_variables_on_launch = serializers.Field(source='ask_variables_on_launch')
+    passwords_needed_to_start = serializers.ReadOnlyField()
+    ask_variables_on_launch = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
@@ -1546,10 +1615,10 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
 
-    def from_native(self, data, files):
+    def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
         # fields not provided in data from the job template.
-        if not self.object and isinstance(data, dict) and 'job_template' in data:
+        if not self.instance and isinstance(data, dict) and 'job_template' in data:
             try:
                 job_template = JobTemplate.objects.get(pk=data['job_template'])
             except JobTemplate.DoesNotExist:
@@ -1575,10 +1644,10 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             data.setdefault('force_handlers', job_template.force_handlers)
             data.setdefault('skip_tags', job_template.skip_tags)
             data.setdefault('start_at_task', job_template.start_at_task)
-        return super(JobSerializer, self).from_native(data, files)
+        return super(JobSerializer, self).to_internal_value(data)
 
-    def to_native(self, obj):
-        ret = super(JobSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        ret = super(JobSerializer, self).to_representation(obj)
         if obj is None:
             return ret
         if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
@@ -1599,7 +1668,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
 class JobCancelSerializer(JobSerializer):
 
-    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+    can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
@@ -1607,13 +1676,20 @@ class JobCancelSerializer(JobSerializer):
 
 class JobRelaunchSerializer(JobSerializer):
 
-    passwords_needed_to_start = serializers.SerializerMethodField('get_passwords_needed_to_start')
+    passwords_needed_to_start = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('passwords_needed_to_start',)
 
-    def to_native(self, obj):
-        res = super(JobRelaunchSerializer, self).to_native(obj)
+    def to_internal_value(self, data):
+        obj = self.context.get('obj')
+        all_data = self.to_representation(obj)
+        all_data.update(data)
+        ret = super(JobRelaunchSerializer, self).to_internal_value(all_data)
+        return ret
+
+    def to_representation(self, obj):
+        res = super(JobRelaunchSerializer, self).to_representation(obj)
         view = self.context.get('view', None)
         if hasattr(view, '_raw_data_form_marker'):
             password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
@@ -1625,7 +1701,7 @@ class JobRelaunchSerializer(JobSerializer):
             return obj.passwords_needed_to_start
         return ''
 
-    def validate_passwords_needed_to_start(self, attrs, source):
+    def validate_passwords_needed_to_start(self, value):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
@@ -1634,7 +1710,7 @@ class JobRelaunchSerializer(JobSerializer):
         provided = dict([(field, data.get(field, '')) for field in needed])
         if not all(provided.values()):
             raise serializers.ValidationError(needed)
-        return attrs
+        return value
 
     def validate(self, attrs):
         obj = self.context.get('obj')
@@ -1644,19 +1720,35 @@ class JobRelaunchSerializer(JobSerializer):
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
         if obj.inventory is None or not obj.inventory.active:
             raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+        attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
-
-    name = serializers.CharField(source='name', read_only=True)
-    module_name = ChoiceField(source='module_name', label='module name', required=bool(not AdHocCommand.MODULE_NAME_DEFAULT), choices=AdHocCommand.MODULE_NAME_CHOICES, default=AdHocCommand.MODULE_NAME_DEFAULT)
 
     class Meta:
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity',
-                  'become_enabled')
-        exclude = ('unified_job_template', 'description')
+                  'become_enabled', '-unified_job_template', '-description')
+        extra_kwargs = {
+            'name': {
+                'read_only': True,
+            },
+        }
+
+    def build_standard_field(self, field_name, model_field):
+        field_class, field_kwargs = super(AdHocCommandSerializer, self).build_standard_field(field_name, model_field)
+        # Load module name choices dynamically from DB settings.
+        if field_name == 'module_name':
+            field_class = serializers.ChoiceField
+            module_name_choices = [(x, x) for x in tower_settings.AD_HOC_COMMANDS]
+            module_name_default = 'command' if 'command' in [x[0] for x in module_name_choices] else ''
+            field_kwargs['choices'] = module_name_choices
+            field_kwargs['required'] = bool(not module_name_default)
+            field_kwargs['default'] = module_name_default or serializers.empty
+            field_kwargs['allow_blank'] = bool(module_name_default)
+            field_kwargs.pop('max_length', None)
+        return field_class, field_kwargs
 
     def get_related(self, obj):
         res = super(AdHocCommandSerializer, self).get_related(obj)
@@ -1672,14 +1764,14 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         res['relaunch'] = reverse('api:ad_hoc_command_relaunch', args=(obj.pk,))
         return res
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         # In raw data form, populate limit field from host/group name.
         view = self.context.get('view', None)
         parent_model = getattr(view, 'parent_model', None)
         if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
             if not obj:
-                obj = self.opts.model()
-        ret = super(AdHocCommandSerializer, self).to_native(obj)
+                obj = self.Meta.model()
+        ret = super(AdHocCommandSerializer, self).to_representation(obj)
         # Hide inventory and limit fields from raw data, since they will be set
         # automatically by sub list create view.
         if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
@@ -1699,7 +1791,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
 class AdHocCommandCancelSerializer(AdHocCommandSerializer):
 
-    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+    can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
@@ -1710,7 +1802,7 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
     class Meta:
         fields = ()
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         if obj:
             return dict([(p, u'') for p in obj.passwords_needed_to_start])
         else:
@@ -1749,7 +1841,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
 class SystemJobCancelSerializer(SystemJobSerializer):
 
-    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+    can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
@@ -1793,7 +1885,7 @@ class JobHostSummarySerializer(BaseSerializer):
 class JobEventSerializer(BaseSerializer):
 
     event_display = serializers.CharField(source='get_event_display2', read_only=True)
-    event_level = serializers.IntegerField(source='event_level', read_only=True)
+    event_level = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = JobEvent
@@ -1837,6 +1929,15 @@ class AdHocCommandEventSerializer(BaseSerializer):
                   'counter', 'event_display', 'event_data', 'failed',
                   'changed', 'host', 'host_name')
 
+    def to_internal_value(self, data):
+        ret = super(AdHocCommandEventSerializer, self).to_internal_value(data)
+        # AdHocCommandAdHocCommandEventsList should be the only view creating
+        # AdHocCommandEvent instances, so keep the ad_hoc_command it sets, even
+        # though ad_hoc_command is a read-only field.
+        if 'ad_hoc_command' in data:
+            ret['ad_hoc_command'] = data['ad_hoc_command']
+        return ret
+
     def get_related(self, obj):
         res = super(AdHocCommandEventSerializer, self).get_related(obj)
         res.update(dict(
@@ -1846,13 +1947,14 @@ class AdHocCommandEventSerializer(BaseSerializer):
             res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         return res
 
+
 class JobLaunchSerializer(BaseSerializer):
 
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
-    can_start_without_user_input = serializers.BooleanField(source='can_start_without_user_input', read_only=True)
-    variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
-    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
-    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
+    passwords_needed_to_start = serializers.ReadOnlyField()
+    can_start_without_user_input = serializers.BooleanField(read_only=True)
+    variables_needed_to_start = serializers.ReadOnlyField()
+    credential_needed_to_start = serializers.SerializerMethodField()
+    survey_enabled = serializers.SerializerMethodField()
 
     class Meta:
         model = JobTemplate
@@ -1860,10 +1962,10 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential', 'credential_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch',)
-        write_only_fields = ('credential','extra_vars',)
+        write_only_fields = ('credential', 'extra_vars',)
 
-    def to_native(self, obj):
-        res = super(JobLaunchSerializer, self).to_native(obj)
+    def to_representation(self, obj):
+        res = super(JobLaunchSerializer, self).to_representation(obj)
         view = self.context.get('view', None)
         if obj and hasattr(view, '_raw_data_form_marker'):
             if obj.passwords_needed_to_start:
@@ -1881,32 +1983,25 @@ class JobLaunchSerializer(BaseSerializer):
             return obj.survey_enabled and 'spec' in obj.survey_spec
         return False
 
-    def validate_credential(self, attrs, source):
+    def validate(self, attrs):
+        errors = {}
         obj = self.context.get('obj')
-        credential = attrs.get(source, None) or (obj and obj.credential)
-        if not credential or not credential.active:
-            raise serializers.ValidationError('Credential not provided')
-        attrs[source] = credential
-        return attrs
-
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        passwords = self.context.get('passwords')
         data = self.context.get('data')
 
-        credential = attrs.get('credential', None) or obj.credential
+        credential = attrs.get('credential', None) or (obj and obj.credential)
+        if not credential or not credential.active:
+            errors['credential'] = 'Credential not provided'
+
         # fill passwords dict with request data passwords
         if credential and credential.passwords_needed:
+            passwords = self.context.get('passwords')
             try:
                 for p in credential.passwords_needed:
                     passwords[p] = data[p]
             except KeyError:
-                raise serializers.ValidationError(credential.passwords_needed)
-        return attrs
+                errors['passwords_needed_to_start'] = credential.passwords_needed
 
-    def validate(self, attrs):
-        obj = self.context.get('obj')
-        extra_vars = attrs.get('extra_vars', {})
+        extra_vars = force_text(attrs.get('extra_vars', {}))
         try:
             extra_vars = literal_eval(extra_vars)
             extra_vars = json.dumps(extra_vars)
@@ -1919,7 +2014,7 @@ class JobLaunchSerializer(BaseSerializer):
             try:
                 extra_vars = yaml.safe_load(extra_vars)
             except (yaml.YAMLError, TypeError, AttributeError):
-                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
+                errors['extra_vars'] = 'Must be valid JSON or YAML'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
@@ -1927,14 +2022,19 @@ class JobLaunchSerializer(BaseSerializer):
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)
             if validation_errors:
-                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
+                errors['variables_needed_to_start'] = validation_errors
 
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+            errors['project'] = 'Job Template Project is missing or undefined'
         if obj.inventory is None or not obj.inventory.active:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+            errors['inventory'] = 'Job Template Inventory is missing or undefined'
 
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        attrs = super(JobLaunchSerializer, self).validate(attrs)
         return attrs
+
 
 class ScheduleSerializer(BaseSerializer):
 
@@ -1951,11 +2051,10 @@ class ScheduleSerializer(BaseSerializer):
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
-    def validate_unified_job_template(self, attrs, source):
-        ujt = attrs[source]
-        if type(ujt) == InventorySource and ujt.source not in SCHEDULEABLE_PROVIDERS:
+    def validate_unified_job_template(self, value):
+        if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
             raise serializers.ValidationError('Inventory Source must be a cloud resource')
-        return attrs
+        return value
 
     # We reject rrules if:
     # - DTSTART is not include
@@ -1967,8 +2066,8 @@ class ScheduleSerializer(BaseSerializer):
     # - BYWEEKNO
     # - Multiple DTSTART or RRULE elements
     # - COUNT > 999
-    def validate_rrule(self, attrs, source):
-        rrule_value = attrs[source]
+    def validate_rrule(self, value):
+        rrule_value = value
         multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
         multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
         by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
@@ -2008,12 +2107,12 @@ class ScheduleSerializer(BaseSerializer):
         except Exception:
             # TODO: Log
             raise serializers.ValidationError("rrule parsing failed validation")
-        return attrs
+        return value
 
 class ActivityStreamSerializer(BaseSerializer):
 
-    changes = serializers.SerializerMethodField('get_changes')
-    object_association = serializers.SerializerMethodField('get_object_association')
+    changes = serializers.SerializerMethodField()
+    object_association = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityStream
@@ -2067,7 +2166,7 @@ class ActivityStreamSerializer(BaseSerializer):
         return rel
 
     def get_summary_fields(self, obj):
-        summary_fields = SortedDict()
+        summary_fields = OrderedDict()
         for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
                 if not hasattr(obj, fk):
@@ -2108,7 +2207,8 @@ class ActivityStreamSerializer(BaseSerializer):
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
-    
+
+
 class TowerSettingsSerializer(BaseSerializer):
 
     class Meta:
@@ -2116,32 +2216,43 @@ class TowerSettingsSerializer(BaseSerializer):
         fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
         read_only_fields = ('description', 'category', 'value_type', 'user')
 
-    def from_native(self, data, files):
+    def __init__(self, instance=None, data=serializers.empty, **kwargs):
+        if instance is None and data is not serializers.empty and 'key' in data:
+            try:
+                instance = TowerSettings.objects.get(key=data['key'])
+            except TowerSettings.DoesNotExist:
+                pass
+        super(TowerSettingsSerializer, self).__init__(instance, data, **kwargs)
+
+    def to_representation(self, obj):
+        ret = super(TowerSettingsSerializer, self).to_representation(obj)
+        ret['value'] = getattr(obj, 'value_converted', obj.value)
+        return ret
+
+    def to_internal_value(self, data):
         if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
             self._errors = {'key': 'Key {0} is not a valid settings key'.format(data['key'])}
             return
-        current_val = TowerSettings.objects.filter(key=data['key'])
-        if current_val.exists():
-            current_val.delete()
+        ret = super(TowerSettingsSerializer, self).to_internal_value(data)
         manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
-        data['description'] = manifest_val['description']
-        data['category'] = manifest_val['category']
-        data['value_type'] = manifest_val['type']
-        return super(TowerSettingsSerializer, self).from_native(data, files)
+        ret['description'] = manifest_val['description']
+        ret['category'] = manifest_val['category']
+        ret['value_type'] = manifest_val['type']
+        return ret
 
     def validate(self, attrs):
         manifest = settings.TOWER_SETTINGS_MANIFEST
         if attrs['key'] not in manifest:
             raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
         # TODO: Type checking/coercion, contextual validation
-        return attrs
+        return super(TowerSettingsSerializer, self).validate(attrs)
 
-    def save_object(self, obj, **kwargs):
-        manifest_val = settings.TOWER_SETTINGS_MANIFEST[obj.key]
-        obj.description = manifest_val['description']
-        obj.category = manifest_val['category']
-        obj.value_type = manifest_val['type']
-        return super(TowerSettingsSerializer, self).save_object(obj, **kwargs)
+    def _create(self, validated_data):
+        current_val = TowerSettings.objects.filter(key=validated_data['key'])
+        if current_val.exists():
+            return self.update(current_val[0], validated_data)
+        return super(TowerSettingsSerializer, self).create(validated_data)
+
 
 class AuthTokenSerializer(serializers.Serializer):
 

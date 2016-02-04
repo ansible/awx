@@ -154,7 +154,7 @@ endif
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
 	real-requirements real-requirements_dev real-requirements_jenkins \
-	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
+	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
 	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
@@ -280,13 +280,9 @@ refresh: clean requirements_dev version_file develop migrate
 adduser:
 	$(PYTHON) manage.py createsuperuser
 
-# Create initial database tables (excluding migrations).
-syncdb:
-	$(PYTHON) manage.py syncdb --noinput
-
 # Create database tables and apply any new migrations.
-migrate: syncdb
-	$(PYTHON) manage.py migrate --noinput
+migrate:
+	$(PYTHON) manage.py migrate --noinput --fake-initial
 
 # Run after making changes to the models to create a new migration.
 dbchange:

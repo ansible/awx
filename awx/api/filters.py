@@ -8,9 +8,10 @@ import re
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.related import RelatedObject
 from django.db.models.fields import FieldDoesNotExist
+from django.db.models.fields.related import ForeignObjectRel
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import force_text
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError
@@ -46,7 +47,7 @@ class TypeFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         try:
             types = None
-            for key, value in request.QUERY_PARAMS.items():
+            for key, value in request.query_params.items():
                 if key == 'type':
                     if ',' in value:
                         types = value.split(',')
@@ -107,23 +108,21 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
+            new_parts.append(name)
+
             if name == 'pk':
                 field = model._meta.pk
             else:
                 field = model._meta.get_field_by_name(name)[0]
-            if n < (len(parts) - 2):
-                if getattr(field, 'rel', None):
-                    model = field.rel.to
-                else:
-                    model = field.model
-            new_parts.append(name)
+            model = getattr(field, 'related_model', None) or field.model
+
         if parts:
             new_parts.append(parts[-1])
         new_lookup = '__'.join(new_parts)
         return field, new_lookup
 
     def to_python_related(self, value):
-        value = unicode(value)
+        value = force_text(value)
         if value.lower() in ('none', 'null'):
             return None
         else:
@@ -134,7 +133,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
-        elif isinstance(field, RelatedObject):
+        elif isinstance(field, ForeignObjectRel):
             return self.to_python_related(value)
         else:
             return field.to_python(value)
@@ -159,12 +158,12 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         try:
-            # Apply filters specified via QUERY_PARAMS. Each entry in the lists
+            # Apply filters specified via query_params. Each entry in the lists
             # below is (negate, field, value).
             and_filters = []
             or_filters = []
             chain_filters = []
-            for key, values in request.QUERY_PARAMS.lists():
+            for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
                 
@@ -246,7 +245,7 @@ class OrderByBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         try:
             order_by = None
-            for key, value in request.QUERY_PARAMS.items():
+            for key, value in request.query_params.items():
                 if key in ('order', 'order_by'):
                     order_by = value
                     if ',' in value:

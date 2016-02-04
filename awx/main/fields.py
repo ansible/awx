@@ -5,9 +5,6 @@
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
 
-# South
-from south.modelsinspector import add_introspection_rules
-
 __all__ = ['AutoOneToOneField']
 
 # Based on AutoOneToOneField from django-annoying:
@@ -20,8 +17,8 @@ class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
         try:
             return super(AutoSingleRelatedObjectDescriptor,
                          self).__get__(instance, instance_type)
-        except self.related.model.DoesNotExist:
-            obj = self.related.model(**{self.related.field.name: instance})
+        except self.related.related_model.DoesNotExist:
+            obj = self.related.related_model(**{self.related.field.name: instance})
             if self.related.field.rel.parent_link:
                 raise NotImplementedError('not supported with polymorphic!')
                 for f in instance._meta.local_fields:
@@ -35,6 +32,3 @@ class AutoOneToOneField(models.OneToOneField):
     def contribute_to_related_class(self, cls, related):
         setattr(cls, related.get_accessor_name(),
                 AutoSingleRelatedObjectDescriptor(related))
-
-add_introspection_rules([([AutoOneToOneField], [], {})],
-                        [r'^awx\.main\.fields\.AutoOneToOneField'])

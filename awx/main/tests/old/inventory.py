@@ -535,7 +535,7 @@ class InventoryTest(BaseTest):
         vars_a = dict(asdf=7777, dog='droopy',   cat='battlecat', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
         vars_b = dict(asdf=8888, dog='snoopy',   cat='cheshire',  unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
-        group = Group.objects.get(id=1)
+        group = Group.objects.order_by('pk')[0]
 
         vdata1_url = reverse('api:group_variable_data', args=(group.pk,))
 
@@ -1330,6 +1330,18 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.delete(inv_up_url, expect=204)
             self.get(inv_up_url, expect=404)
 
+    def print_group_tree(self, group, depth=0):
+        print ('  ' * depth) + '+ ' + group.name
+        for host in group.hosts.order_by('name'):
+            print ('  ' * depth) + '  - ' + host.name
+        for child in group.children.order_by('name'):
+            self.print_group_tree(child, depth + 1)
+
+    def print_inventory_tree(self, inventory):
+        # Print out group/host tree for debugging.
+        for group in inventory.root_groups.order_by('name'):
+            self.print_group_tree(group)
+
     def test_put_inventory_source_detail_with_regions(self):
         creds_url = reverse('api:credential_list')
         inv_src_url1 = reverse('api:inventory_source_detail',
@@ -1749,6 +1761,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
         # Verify that returned groups are nested:
+        #self.print_inventory_tree(self.inventory)
         child_names = self.group.children.values_list('name', flat=True)
         for name in child_names:
             self.assertFalse(name.startswith('us-'))
@@ -1766,7 +1779,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue('tags' in child_names)
         self.assertTrue('images' in child_names)
         self.assertFalse('tag_none' in child_names)
-        self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
+        # Only check for tag_none as a child of tags if there is a tag_none group;
+        # the test inventory *may* have tags set for all hosts.
+        if self.inventory.groups.filter(name='tag_none').exists():
+            self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
         self.assertFalse('instances' in child_names)
         # Make sure we clean up the cache path when finished (when one is not
         # provided explicitly via source_vars).
@@ -1816,7 +1832,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue(self.group.children.get(name='security_groups').children.filter(active=True).count())
         self.assertTrue('tags' in child_names)
         self.assertTrue(self.group.children.get(name='tags').children.filter(active=True).count())
-        self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
+        # Only check for tag_none as a child of tags if there is a tag_none group;
+        # the test inventory *may* have tags set for all hosts.
+        if self.inventory.groups.filter(name='tag_none').exists():
+            self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
         self.assertTrue('images' in child_names)
         self.assertTrue(self.group.children.get(name='images').children.filter(active=True).count())
         self.assertTrue('instances' in child_names)
@@ -1840,21 +1859,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Replacement text should not be left in inventory source name.
         self.assertFalse(InventorySource.objects.filter(name__icontains='__replace_').exists())
         # Inventory update name should be based on inventory/group names and need not have the inventory source pk.
-        print InventoryUpdate.objects.values_list('name', 'inventory_source__name')
+        #print InventoryUpdate.objects.values_list('name', 'inventory_source__name')
         for inventory_update in InventoryUpdate.objects.all():
             self.assertFalse(inventory_update.name.endswith(inventory_update.inventory_source.name), inventory_update.name)
-        return
-        # Print out group/host tree for debugging.
-        print
-
-        def draw_tree(g, d=0):
-            print ('  ' * d) + '+ ' + g.name
-            for h in g.hosts.order_by('name'):
-                print ('  ' * d) + '  - ' + h.name
-            for c in g.children.order_by('name'):
-                draw_tree(c, d + 1)
-        for g in self.inventory.root_groups.order_by('name'):
-            draw_tree(g)
 
     def test_update_from_rax(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')

@@ -14,7 +14,6 @@ import urlparse
 import unittest2 as unittest
 
 # Django
-import django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
@@ -1066,8 +1065,6 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.total_groups, 0)
         self.assertElapsedLessThan(30)
 
-    @unittest.skipIf(hasattr(django.db.backend, 'sqlite3'),
-                     'Skip this test if we are on sqlite')
     def test_splunk_inventory(self):
         new_inv = self.organizations[0].inventories.create(name='splunk')
         self.assertEqual(new_inv.hosts.count(), 0)
