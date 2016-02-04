@@ -2035,6 +2035,21 @@ class JobLaunchSerializer(BaseSerializer):
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         return attrs
 
+class NotificationTemplateSerializer(BaseSerializer):
+
+    class Meta:
+        model = NotificationTemplate
+        fields = ('*', 'notification_type', 'notification_configuration')
+
+    def validate(self, attrs):
+        notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
+        missing_fields = []
+        for field in notification_class.init_parameters:
+            if field not in attrs['notification_configuration']:
+                missing_fields.append(field)
+        if missing_fields:
+            raise serializers.ValidationError("Missing required fields for Notification Configuration: {}".format(missing_fields))
+        return attrs
 
 class ScheduleSerializer(BaseSerializer):
 
