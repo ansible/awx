@@ -10,7 +10,7 @@ logger = logging.getLogger('awx.main.notifications.slack_backend')
 
 class SlackBackend(BaseEmailBackend):
 
-    init_parameters = ('token',)
+    init_parameters = {"token": {"label": "Token", "type": "password"}}
 
     def __init__(self, token, fail_silently=False, **kwargs):
         super(SlackBackend, self).__init__(fail_silently=fail_silently)

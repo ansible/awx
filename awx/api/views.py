@@ -135,6 +135,7 @@ class ApiV1RootView(APIView):
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
+        data['notification_templates'] = reverse('api:notification_template_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
@@ -2918,6 +2919,18 @@ class AdHocCommandStdout(UnifiedJobStdout):
 
     model = AdHocCommand
     new_in_220 = True
+
+class NotificationTemplateList(ListCreateAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    new_in_300 = True
+
+class NotificationTemplateDetail(RetrieveDestroyAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    new_in_300 = True
 
 class ActivityStreamList(SimpleListAPIView):
 

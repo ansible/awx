@@ -1484,6 +1484,18 @@ class ScheduleAccess(BaseAccess):
         else:
             return False
 
+class NotificationTemplateAccess(BaseAccess):
+    '''
+    I can see/use a notification template if I have permission to
+    '''
+    model = NotificationTemplate
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        if self.user.is_superuser:
+            return qs
+        return qs
+
 class ActivityStreamAccess(BaseAccess):
     '''
     I can see activity stream events only when I have permission on all objects included in the event
@@ -1683,3 +1695,4 @@ register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
+register_access(NotificationTemplate, NotificationTemplateAccess)

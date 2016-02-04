@@ -11,7 +11,9 @@ logger = logging.getLogger('awx.main.notifications.twilio_backend')
 
 class TwilioBackend(BaseEmailBackend):
 
-    init_parameters = ('account_sid', 'account_token', 'from_phone',)
+    init_parameters = {"account_sid": {"label": "Account SID", "type": "string"},
+                       "account_token": {"label": "Account Token", "type": "password"},
+                       "from_phone": {"label": "Source Phone Number", "type": "string"}}
 
     def __init__(self, account_sid, account_token, from_phone, fail_silently=False, **kwargs):
         super(TwilioBackend, self).__init__(fail_silently=fail_silently)

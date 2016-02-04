@@ -209,6 +209,11 @@ system_job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'system_job_cancel'),
 )
 
+notification_template_urls = patterns('awx.api.views',
+    url(r'^$',                                          'notification_template_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'notification_template_detail'),
+)
+
 schedule_urls = patterns('awx.api.views',
     url(r'^$',                                          'schedule_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'schedule_detail'),
@@ -257,6 +262,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^ad_hoc_command_events/', include(ad_hoc_command_event_urls)),
     url(r'^system_job_templates/',  include(system_job_template_urls)),
     url(r'^system_jobs/',           include(system_job_urls)),
+    url(r'^notification_templates/', include(notification_template_urls)),
     url(r'^unified_job_templates/$', 'unified_job_template_list'),
     url(r'^unified_jobs/$',         'unified_job_list'),
     url(r'^activity_stream/',       include(activity_stream_urls)),

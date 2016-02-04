@@ -4,6 +4,9 @@
 import logging
 
 from django.db import models
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
+
 from awx.main.models.base import * # noqa
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
@@ -13,6 +16,8 @@ from awx.main.notifications.twilio_backend import TwilioBackend
 from jsonfield import JSONField
 
 logger = logging.getLogger('awx.main.models.notifications')
+
+__all__ = ['NotificationTemplate']
 
 class NotificationTemplate(CommonModel):
 
@@ -31,6 +36,9 @@ class NotificationTemplate(CommonModel):
     )
 
     notification_configuration = JSONField(blank=False)
+
+    def get_absolute_url(self):
+        return reverse('api:notification_template_detail', args=(self.pk,))
 
     @property
     def notification_class(self):
