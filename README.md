@@ -1,3 +1,4 @@
+[![Build Status](http://jenkins.testing.ansible.com/buildStatus/icon?job=Test_Tower_Unittest)](http://jenkins.testing.ansible.com/job/Test_Tower_Unittest)
 [![Requirements Status](https://requires.io/github/ansible/ansible-tower/requirements.svg?branch=devel)](https://requires.io/github/ansible/ansible-tower/requirements/?branch=devel)
 
 Ansible Tower
