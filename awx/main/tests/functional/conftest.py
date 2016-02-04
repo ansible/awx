@@ -1,6 +1,18 @@
 import pytest
 
 from awx.main.models.organization import Organization
+from django.contrib.auth.models import User
+
+@pytest.fixture
+def user():
+    def u(name, is_superuser=False):
+        try:
+            user = User.objects.get(username=name)
+        except User.DoesNotExist:
+            user = User(username=name, is_superuser=is_superuser, password=name)
+            user.save()
+        return user
+    return u
 
 @pytest.fixture
 def organization():
