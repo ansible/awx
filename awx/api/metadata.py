@@ -128,9 +128,10 @@ class Metadata(metadata.SimpleMetadata):
         metadata['added_in_version'] = added_in_version
 
         # Add type(s) handled by this view/serializer.
-        serializer = view.get_serializer()
-        if hasattr(serializer, 'get_types'):
-            metadata['types'] = serializer.get_types()
+        if hasattr(view, 'get_serializer'):
+            serializer = view.get_serializer()
+            if hasattr(serializer, 'get_types'):
+                metadata['types'] = serializer.get_types()
 
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):
