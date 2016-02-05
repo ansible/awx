@@ -84,6 +84,9 @@ class Role(CommonModelNameNotUnique):
             ret.save()
             return ret
 
+    def is_ancestor_of(self, role):
+        return RoleHierarchy.objects.filter(role_id=role.id, ancestor_id=self.id).count() > 0
+
 
 
 class RoleHierarchy(CreatedModifiedModel):
