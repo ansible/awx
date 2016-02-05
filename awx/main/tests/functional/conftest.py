@@ -1,8 +1,10 @@
 import pytest
 
 from awx.main.models.credential import Credential
+from awx.main.models.inventory import Inventory
 from awx.main.models.organization import (
     Organization,
+    Permission,
     Team,
 )
 from django.contrib.auth.models import User
@@ -29,6 +31,10 @@ def organization():
 @pytest.fixture
 def credential():
     return Credential.objects.create(kind='aws', name='test-cred')
+
+@pytest.fixture
+def inventory(organization):
+    return Inventory.objects.create(name="test-inventory", organization=organization)
 
 @pytest.fixture
 def permissions():
