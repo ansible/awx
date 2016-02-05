@@ -21,7 +21,7 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     credential.team = team
 
     # No permissions pre-migration
-    assert credential.accessible_by(u, permissions['admin']) == False
+    assert not credential.accessible_by(u, permissions['admin'])
 
     migrated = credential.migrate_to_rbac()
     # Admin permissions post migration
@@ -35,7 +35,7 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
     credential.team = team
 
     # No permissions pre-migration
-    assert credential.accessible_by(u, permissions['usage']) == False
+    assert not credential.accessible_by(u, permissions['usage'])
 
     # Usage permissions post migration
     migrated = credential.migrate_to_rbac()

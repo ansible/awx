@@ -182,22 +182,22 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         default={},
     )
     admin_role = ImplicitRoleField(
-        role_name='Job Template Administrator', 
+        role_name='Job Template Administrator',
         parent_role='project.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
-        role_name='Job Template Auditor', 
+        role_name='Job Template Auditor',
         parent_role='project.auditor_role',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
     executor_role = ImplicitRoleField(
-        role_name='Job Template Executor', 
+        role_name='Job Template Executor',
         parent_role='project.auditor_role',
         resource_field='resource',
-        permissions = { 'execute': True }
+        permissions = {'execute': True}
     )
 
     @classmethod

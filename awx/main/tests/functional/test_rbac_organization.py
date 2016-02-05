@@ -7,7 +7,7 @@ def test_organization_migration_admin(organization, permissions, user):
     u = user('admin', True)
     organization.admins.add(u)
 
-    assert organization.accessible_by(u, permissions['admin']) == False
+    assert not organization.accessible_by(u, permissions['admin'])
 
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
@@ -18,7 +18,7 @@ def test_organization_migration_user(organization, permissions, user):
     u = user('user', False)
     organization.users.add(u)
 
-    assert organization.accessible_by(u, permissions['auditor']) == False
+    assert not organization.accessible_by(u, permissions['auditor'])
 
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
@@ -27,7 +27,7 @@ def test_organization_migration_user(organization, permissions, user):
 @pytest.mark.django_db
 def test_organization_access_superuser(organization, user):
     access = OrganizationAccess(user('admin', True))
-    assert access.can_change(organization, None) == True
+    assert access.can_change(organization, None)
 
 @pytest.mark.django_db
 def test_organization_access_admin(organization, user):
@@ -35,9 +35,9 @@ def test_organization_access_admin(organization, user):
     organization.admins.add(u)
 
     access = OrganizationAccess(u)
-    assert access.can_change(organization, None) == True
+    assert access.can_change(organization, None)
 
 @pytest.mark.django_db
 def test_organization_access_user(organization, user):
     access = OrganizationAccess(user('user', False))
-    assert access.can_change(organization, None) == False
+    assert not access.can_change(organization, None)

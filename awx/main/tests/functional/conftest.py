@@ -40,6 +40,6 @@ def permissions():
                    'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':False,},
 
         'usage':{'read':False, 'create':False, 'write':False,
-               'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
+                 'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
 

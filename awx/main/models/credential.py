@@ -159,13 +159,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         role_name='Credential Owner',
         parent_role='team.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     usage_role = ImplicitRoleField(
         role_name='Credential User',
         resource_field='resource',
         parent_role= 'team.member_role',
-        permissions = { 'use': True }
+        permissions = {'use': True}
     )
 
     @property

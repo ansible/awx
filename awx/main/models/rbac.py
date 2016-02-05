@@ -18,7 +18,7 @@ logger = logging.getLogger('awx.main.models.rbac')
 
 class Role(CommonModelNameNotUnique):
     '''
-    Role model 
+    Role model
     '''
 
     class Meta:
@@ -82,7 +82,7 @@ class Role(CommonModelNameNotUnique):
         except Role.DoesNotExist:
             ret = Role(singleton_name=name)
             ret.save()
-            return ret;
+            return ret
 
 
 
@@ -102,7 +102,7 @@ class RoleHierarchy(CreatedModifiedModel):
 
 class Resource(CommonModelNameNotUnique):
     '''
-    Role model 
+    Role model
     '''
 
     class Meta:

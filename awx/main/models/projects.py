@@ -216,28 +216,28 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         blank=True,
     )
     admin_role = ImplicitRoleField(
-        role_name='Project Administrator', 
+        role_name='Project Administrator',
         parent_role='organization.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
-        role_name='Project Auditor', 
+        role_name='Project Auditor',
         parent_role='organization.auditor_role',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
-        role_name='Project Member', 
+        role_name='Project Member',
         parent_role='admin',
         resource_field='resource',
-        permissions = { 'usage': True }
+        permissions = {'usage': True}
     )
     scm_update_role = ImplicitRoleField(
-        role_name='Project Updater', 
+        role_name='Project Updater',
         parent_role='admin',
         resource_field='resource',
-        permissions = { 'scm_update': True }
+        permissions = {'scm_update': True}
     )
 
     @classmethod
@@ -333,7 +333,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) > now():
             return True
         return False
-    
+
     @property
     def needs_update_on_launch(self):
         if self.active and self.scm_type and self.scm_update_on_launch:
