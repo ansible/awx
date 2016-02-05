@@ -119,7 +119,6 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
             raise FieldError('Implicit role missing `role_name`')
 
         role = Role._default_manager.create(name=self.role_name)
-        role.save()
         if self.parent_role:
             # Add all non-null parent roles as parents
             if type(self.parent_role) is list:
