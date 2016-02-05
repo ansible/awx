@@ -115,8 +115,12 @@ def store_initial_active_state(sender, **kwargs):
     else:
         instance._saved_active_state = True
 
-def rebuild_role_hierarchy_cache(sender, **kwargs):
-    kwargs['instance'].rebuild_role_hierarchy_cache()
+def rebuild_role_hierarchy_cache(sender, reverse, model, pk_set, **kwargs):
+    if reverse:
+        for id in pk_set:
+            model.objects.get(id=id).rebuild_role_hierarchy_cache()
+    else:
+        kwargs['instance'].rebuild_role_hierarchy_cache()
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
