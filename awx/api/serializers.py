@@ -1736,6 +1736,12 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
             },
         }
 
+    def get_field_names(self, declared_fields, info):
+        field_names = super(AdHocCommandSerializer, self).get_field_names(declared_fields, info)
+        # Meta inheritance and -field_name options don't seem to be taking
+        # effect above, so remove the undesired fields here.
+        return tuple(x for x in field_names if x not in ('unified_job_template', 'description'))
+
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(AdHocCommandSerializer, self).build_standard_field(field_name, model_field)
         # Load module name choices dynamically from DB settings.
