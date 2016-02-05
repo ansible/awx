@@ -55,12 +55,12 @@ class Organization(CommonModel, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Organization Administrator',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Organization Auditor',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
 
 
@@ -118,17 +118,19 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         role_name='Team Administrator',
         parent_role='organization.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Team Auditor',
         parent_role='organization.auditor_role',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Team Member',
         parent_role='admin_role',
+        resource_field='resource',
+        permissions = {'read':True},
     )
 
     def get_absolute_url(self):
@@ -141,6 +143,13 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         for cred in self.credentials.all():
             cred.mark_inactive()
         super(Team, self).mark_inactive(save=save)
+
+    def migrate_to_rbac(self):
+        migrated = []
+        for user in self.users.all():
+            self.member_role.members.add(user)
+            migrated.append(user)
+        return migrated
 
 class Permission(CommonModelNameNotUnique):
     '''

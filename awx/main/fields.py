@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Django
-from django.db.models.signals import post_save, post_init
+from django.db.models.signals import post_save
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
@@ -66,7 +66,7 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
             # Take first non null parent resource
             parent = None
             if type(self.parent_resource) is list:
-                for path in self.parent_resource: 
+                for path in self.parent_resource:
                     parent = resolve_field(instance, path)
                     if parent:
                         break
@@ -123,7 +123,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         if self.parent_role:
             # Add all non-null parent roles as parents
             if type(self.parent_role) is list:
-                for path in self.parent_role: 
+                for path in self.parent_role:
                     if path.startswith("singleton:"):
                         parent = Role.singleton(path[10:])
                     else:
@@ -142,7 +142,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 
         if self.resource_field and self.permissions:
             permissions = RolePermission(
-                role=role, 
+                role=role,
                 resource=getattr(instance, self.resource_field)
             )
 
@@ -180,13 +180,13 @@ class ImplicitRoleField(models.ForeignKey):
 
     def contribute_to_class(self, cls, name):
         super(ImplicitRoleField, self).contribute_to_class(cls, name)
-        setattr(cls, 
-                self.name, 
+        setattr(cls,
+                self.name,
                 ImplicitRoleDescriptor(
-                    self.role_name, 
-                    self.resource_field, 
-                    self.permissions, 
-                    self.parent_role, 
+                    self.role_name,
+                    self.resource_field,
+                    self.permissions,
+                    self.parent_role,
                     self
                 )
                 )

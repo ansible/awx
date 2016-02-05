@@ -94,22 +94,22 @@ class Inventory(CommonModel, ResourceMixin):
         help_text=_('Number of external inventory sources in this inventory with failures.'),
     )
     admin_role = ImplicitRoleField(
-        role_name='Inventory Administrator', 
+        role_name='Inventory Administrator',
         parent_role='organization.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
-        role_name='Inventory Auditor', 
+        role_name='Inventory Auditor',
         parent_role='organization.auditor_role',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
-        role_name='Inventory Updater', 
+        role_name='Inventory Updater',
     )
     executor_role = ImplicitRoleField(
-        role_name='Inventory Executor', 
+        role_name='Inventory Executor',
     )
 
     def get_absolute_url(self):
@@ -543,23 +543,23 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         help_text=_('Inventory source(s) that created or modified this group.'),
     )
     admin_role = ImplicitRoleField(
-        role_name='Inventory Group Administrator', 
+        role_name='Inventory Group Administrator',
         parent_role='inventory.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
-        role_name='Inventory Group Auditor', 
+        role_name='Inventory Group Auditor',
         parent_role='inventory.auditor_role',
         resource_field='resource',
-        permissions = { 'read': True }
+        permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
-        role_name='Inventory Group Updater', 
+        role_name='Inventory Group Updater',
         parent_role='inventory.updater_role'
     )
     executor_role = ImplicitRoleField(
-        role_name='Inventory Group Executor', 
+        role_name='Inventory Group Executor',
         parent_role='inventory.executor_role'
     )
 
@@ -1186,7 +1186,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
                 return 'never updated'
             # inherit the child job status
             else:
-                return self.last_job.status 
+                return self.last_job.status
         else:
             return 'none'
 

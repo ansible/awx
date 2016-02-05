@@ -1,51 +1,43 @@
 import pytest
 
 from awx.main.access import OrganizationAccess
-from django.contrib.auth.models import User
-
-def make_user(name, admin=False):
-    try:
-        user = User.objects.get(username=name)
-    except User.DoesNotExist:
-        user = User(username=name, is_superuser=admin, password=name)
-        user.save()
-    return user
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("username,admin", [
-    ("admin", True),
-    ("user", False),
-])
-def test_organization_migration(organization, permissions, username, admin):
-    user = make_user(username, admin)
-    if admin:
-        organization.admins.add(user)
-    else:
-        organization.users.add(user)
+def test_organization_migration_admin(organization, permissions, user):
+    u = user('admin', True)
+    organization.admins.add(u)
+
+    assert not organization.accessible_by(u, permissions['admin'])
 
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
-    assert migrated_users[0] == user
-
-    if admin:
-        assert organization.accessible_by(user, permissions['admin']) == True
-    else:
-        assert organization.accessible_by(user, permissions['auditor']) == True
+    assert organization.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("username,admin", [
-    ("admin", True),
-    ("user-admin", False),
-    ("user", False)
-])
-def test_organization_access(organization, username, admin):
-    user = make_user(username, admin)
-    access = OrganizationAccess(user)
-    if admin:
-        assert access.can_change(organization, None) == True
-    elif username == "user-admin":
-        organization.admins.add(user)
-        assert access.can_change(organization, None) == True
-    else:
-        assert access.can_change(organization, None) == False
+def test_organization_migration_user(organization, permissions, user):
+    u = user('user', False)
+    organization.users.add(u)
 
+    assert not organization.accessible_by(u, permissions['auditor'])
+
+    migrated_users = organization.migrate_to_rbac()
+    assert len(migrated_users) == 1
+    assert organization.accessible_by(u, permissions['auditor'])
+
+@pytest.mark.django_db
+def test_organization_access_superuser(organization, user):
+    access = OrganizationAccess(user('admin', True))
+    assert access.can_change(organization, None)
+
+@pytest.mark.django_db
+def test_organization_access_admin(organization, user):
+    u = user('admin', False)
+    organization.admins.add(u)
+
+    access = OrganizationAccess(u)
+    assert access.can_change(organization, None)
+
+@pytest.mark.django_db
+def test_organization_access_user(organization, user):
+    access = OrganizationAccess(user('user', False))
+    assert not access.can_change(organization, None)

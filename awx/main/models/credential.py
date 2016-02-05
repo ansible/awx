@@ -156,19 +156,16 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         help_text=_('Vault password (or "ASK" to prompt the user).'),
     )
     owner_role = ImplicitRoleField(
-        role_name='Credential Owner', 
-        parent_role=[
-            'user.user_role',
-            'team.admin_role'
-        ],
+        role_name='Credential Owner',
+        parent_role='team.admin_role',
         resource_field='resource',
-        permissions = { 'all': True }
+        permissions = {'all': True}
     )
     usage_role = ImplicitRoleField(
-        role_name='Credential User', 
+        role_name='Credential User',
         resource_field='resource',
         parent_role= 'team.member_role',
-        permissions = { 'usage': True }
+        permissions = {'use': True}
     )
 
     @property
@@ -365,6 +362,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             if 'cloud' not in update_fields:
                 update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
+
+    def migrate_to_rbac(self):
+        if self.user:
+            self.owner_role.members.add(self.user)
+            return [self.user]
+        elif self.team:
+            self.owner_role.parents.add(self.team.admin_role)
+            self.usage_role.parents.add(self.team.member_role)
+            return [self.team]
 
 def validate_ssh_private_key(data):
     """Validate that the given SSH private key or certificate is,
