@@ -21,6 +21,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
+from awx.main.models.organization import Permission # for rbac migration
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
@@ -111,6 +112,48 @@ class Inventory(CommonModel, ResourceMixin):
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
     )
+
+    def migrate_to_rbac(self):
+        migrated_users = []
+        migrated_teams = []
+
+        for perm in Permission.objects.filter(inventory=self):
+            role = None
+            execrole = None
+            if perm.permission_type == 'admin':
+                role = self.admin_role
+                pass
+            elif perm.permission_type == 'read':
+                role = self.auditor_role
+                pass
+            elif perm.permission_type == 'write':
+                role = self.updater_role
+                pass
+            else:
+                raise Exception('Unhandled permission type for inventory: %s' % perm.permission_type)
+            if perm.run_ad_hoc_commands:
+                execrole = self.executor_role
+
+            if perm.team:
+                if role:
+                    perm.team.member_role.children.add(role)
+                if execrole:
+                    perm.team.member_role.children.add(execrole)
+
+                migrated_teams.append(perm.team)
+
+            if perm.user:
+                if role:
+                    role.members.add(perm.user)
+                if execrole:
+                    execrole.members.add(perm.user)
+                migrated_users.append(perm.user)
+
+        return {
+            'migrated_users': migrated_users,
+            'migrated_teams': migrated_teams,
+        }
+
 
     def get_absolute_url(self):
         return reverse('api:inventory_detail', args=(self.pk,))
