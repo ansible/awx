@@ -1379,14 +1379,15 @@ class UnifiedJobTemplateAccess(BaseAccess):
         qs = qs.select_related(
             'created_by',
             'modified_by',
-            'project',
-            'inventory',
-            'credential',
-            'cloud_credential',
+            #'project',
+            #'inventory',
+            #'credential',
+            #'cloud_credential',
             'next_schedule',
             'last_job',
             'current_job',
         )
+        # FIXME: Figure out how to do select/prefetch on related project/inventory/credential/cloud_credential.
         return qs
 
 class UnifiedJobAccess(BaseAccess):
@@ -1412,18 +1413,19 @@ class UnifiedJobAccess(BaseAccess):
         qs = qs.select_related(
             'created_by',
             'modified_by',
-            'project',
-            'inventory',
-            'credential',
-            'project___credential',
-            'inventory_source___credential',
-            'inventory_source___inventory',
-            'job_template___inventory',
-            'job_template___project',
-            'job_template___credential',
-            'job_template___cloud_credential',
+            #'project',
+            #'inventory',
+            #'credential',
+            #'project___credential',
+            #'inventory_source___credential',
+            #'inventory_source___inventory',
+            #'job_template___inventory',
+            #'job_template___project',
+            #'job_template___credential',
+            #'job_template___cloud_credential',
         )
         qs = qs.prefetch_related('unified_job_template')
+        # FIXME: Figure out how to do select/prefetch on related project/inventory/credential/cloud_credential.
         return qs
 
 class ScheduleAccess(BaseAccess):
