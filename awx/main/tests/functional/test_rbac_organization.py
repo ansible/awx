@@ -7,18 +7,22 @@ def test_organization_migration_admin(organization, permissions, user):
     u = user('admin', True)
     organization.admins.add(u)
 
+    assert organization.accessible_by(u, permissions['admin']) == False
+
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
-    assert organization.accessible_by(u, permissions['admin']) == True
+    assert organization.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
 def test_organization_migration_user(organization, permissions, user):
     u = user('user', False)
     organization.users.add(u)
 
+    assert organization.accessible_by(u, permissions['auditor']) == False
+
     migrated_users = organization.migrate_to_rbac()
     assert len(migrated_users) == 1
-    assert organization.accessible_by(u, permissions['auditor']) == True
+    assert organization.accessible_by(u, permissions['auditor'])
 
 @pytest.mark.django_db
 def test_organization_access_superuser(organization, user):
