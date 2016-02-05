@@ -822,7 +822,6 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
-    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.BooleanField(read_only=True)
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
     last_update_failed = serializers.BooleanField(read_only=True)
@@ -830,7 +829,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'playbooks', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         
@@ -857,6 +856,8 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
+
+    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
 
     class Meta:
         model = Project
