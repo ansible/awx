@@ -10,10 +10,10 @@ from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
 from django.core.urlresolvers import reverse
 
-def mock_feature_enabled():
+def mock_feature_enabled(feature, bypass_database=None):
     return True
 
-@mock.patch('awx.api.license.feature_enabled', new=mock_feature_enabled)
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_get_activity_stream_list(monkeypatch, organization, get, user):
     url = reverse('api:activity_stream_list')
@@ -21,7 +21,7 @@ def test_get_activity_stream_list(monkeypatch, organization, get, user):
 
     assert response.status_code == 200
 
-@mock.patch('awx.api.license.feature_enabled', new=mock_feature_enabled)
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_basic_fields(monkeypatch, organization, get, user):
     u = user('admin', True)
@@ -40,7 +40,7 @@ def test_basic_fields(monkeypatch, organization, get, user):
     assert 'organization' in response.data['summary_fields']
     assert response.data['summary_fields']['organization'][0]['name'] == 'test-org'
 
-@mock.patch('awx.api.license.feature_enabled', new=mock_feature_enabled)
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_middleware_actor_added(monkeypatch, post, get, user):
     u = user('admin-poster', True)
