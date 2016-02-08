@@ -21,7 +21,6 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
-from awx.main.models.organization import Permission # for rbac migration
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
