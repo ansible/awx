@@ -12,10 +12,10 @@ def test_inventory_admin_user(inventory, permissions, user):
 
     assert inventory.accessible_by(u, permissions['admin']) is False
 
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
-    assert len(migrations['migrated_users']) == 1
-    assert len(migrations['migrated_teams']) == 0
+    assert len(migrations[inventory.name]['users']) == 1
+    assert len(migrations[inventory.name]['teams']) == 0
     assert inventory.accessible_by(u, permissions['admin'])
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
     assert inventory.updater_role.members.filter(id=u.id).exists() is False
@@ -29,10 +29,10 @@ def test_inventory_auditor_user(inventory, permissions, user):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
-    assert len(migrations['migrated_users']) == 1
-    assert len(migrations['migrated_teams']) == 0
+    assert len(migrations[inventory.name]['users']) == 1
+    assert len(migrations[inventory.name]['teams']) == 0
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is True
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
@@ -47,10 +47,10 @@ def test_inventory_updater_user(inventory, permissions, user):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
-    assert len(migrations['migrated_users']) == 1
-    assert len(migrations['migrated_teams']) == 0
+    assert len(migrations[inventory.name]['users']) == 1
+    assert len(migrations[inventory.name]['teams']) == 0
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
     assert inventory.updater_role.members.filter(id=u.id).exists()
@@ -64,10 +64,10 @@ def test_inventory_executor_user(inventory, permissions, user):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
-    assert len(migrations['migrated_users']) == 1
-    assert len(migrations['migrated_teams']) == 0
+    assert len(migrations[inventory.name]['users']) == 1
+    assert len(migrations[inventory.name]['teams']) == 0
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is True
     assert inventory.executor_role.members.filter(id=u.id).exists()
@@ -85,12 +85,12 @@ def test_inventory_admin_team(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['admin']) is False
 
     team_migrations = rbac.migrate_team(apps, None)
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
     assert len(team_migrations) == 1
     assert team.member_role.members.count() == 1
-    assert len(migrations['migrated_users']) == 0
-    assert len(migrations['migrated_teams']) == 1
+    assert len(migrations[inventory.name]['users']) == 0
+    assert len(migrations[inventory.name]['teams']) == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
@@ -110,12 +110,12 @@ def test_inventory_auditor(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
     team_migrations = rbac.migrate_team(apps,None)
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
     assert len(team_migrations) == 1
     assert team.member_role.members.count() == 1
-    assert len(migrations['migrated_users']) == 0
-    assert len(migrations['migrated_teams']) == 1
+    assert len(migrations[inventory.name]['users']) == 0
+    assert len(migrations[inventory.name]['teams']) == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
@@ -134,12 +134,12 @@ def test_inventory_updater(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
     team_migrations = rbac.migrate_team(apps,None)
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
     assert len(team_migrations) == 1
     assert team.member_role.members.count() == 1
-    assert len(migrations['migrated_users']) == 0
-    assert len(migrations['migrated_teams']) == 1
+    assert len(migrations[inventory.name]['users']) == 0
+    assert len(migrations[inventory.name]['teams']) == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
     assert inventory.executor_role.members.filter(id=u.id).exists() is False
@@ -159,12 +159,12 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
     team_migrations = rbac.migrate_team(apps, None)
-    migrations = inventory.migrate_to_rbac()
+    migrations = rbac.migrate_inventory(apps, None)
 
     assert len(team_migrations) == 1
     assert team.member_role.members.count() == 1
-    assert len(migrations['migrated_users']) == 0
-    assert len(migrations['migrated_teams']) == 1
+    assert len(migrations[inventory.name]['users']) == 0
+    assert len(migrations[inventory.name]['teams']) == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
     assert inventory.executor_role.members.filter(id=u.id).exists() is False

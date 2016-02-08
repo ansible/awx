@@ -15,4 +15,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(rbac.migrate_organization),
         migrations.RunPython(rbac.migrate_credential),
         migrations.RunPython(rbac.migrate_team),
+        migrations.RunPython(rbac.migrate_inventory),
     ]

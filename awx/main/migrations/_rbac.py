@@ -33,3 +33,46 @@ def migrate_credential(apps, schema_editor):
             cred.usage_role.parents.add(cred.team.member_role)
             migrations[cred.name].append(cred.team)
     return migrations
+
+def migrate_inventory(apps, schema_editor):
+    migrations = defaultdict(dict)
+
+    Inventory = apps.get_model('main', 'Inventory')
+    Permission = apps.get_model('main', 'Permission')
+
+    for inventory in Inventory.objects.all():
+        teams, users = [], []
+        for perm in Permission.objects.filter(inventory=inventory):
+            role = None
+            execrole = None
+            if perm.permission_type == 'admin':
+                role = inventory.admin_role
+                pass
+            elif perm.permission_type == 'read':
+                role = inventory.auditor_role
+                pass
+            elif perm.permission_type == 'write':
+                role = inventory.updater_role
+                pass
+            else:
+                raise Exception('Unhandled permission type for inventory: %s' % perm.permission_type)
+            if perm.run_ad_hoc_commands:
+                execrole = inventory.executor_role
+
+            if perm.team:
+                if role:
+                    perm.team.member_role.children.add(role)
+                if execrole:
+                    perm.team.member_role.children.add(execrole)
+
+                teams.append(perm.team)
+
+            if perm.user:
+                if role:
+                    role.members.add(perm.user)
+                if execrole:
+                    execrole.members.add(perm.user)
+                users.append(perm.user)
+        migrations[inventory.name]['teams'] = teams
+        migrations[inventory.name]['users'] = users
+    return migrations
