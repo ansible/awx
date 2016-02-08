@@ -4,7 +4,6 @@ from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
 from awx.main.models.organization import (
     Organization,
-    Permission,
     Team,
 )
 from django.contrib.auth.models import User
