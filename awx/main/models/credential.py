@@ -363,14 +363,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
 
-    def migrate_to_rbac(self):
-        if self.user:
-            self.owner_role.members.add(self.user)
-            return [self.user]
-        elif self.team:
-            self.owner_role.parents.add(self.team.admin_role)
-            self.usage_role.parents.add(self.team.member_role)
-            return [self.team]
 
 def validate_ssh_private_key(data):
     """Validate that the given SSH private key or certificate is,

@@ -76,16 +76,6 @@ class Organization(CommonModel, ResourceMixin):
             script.save()
         super(Organization, self).mark_inactive(save=save)
 
-    def migrate_to_rbac(self):
-        migrated_users = []
-        for admin in self.admins.all():
-            self.admin_role.members.add(admin)
-            migrated_users.append(admin)
-        for user in self.users.all():
-            self.auditor_role.members.add(user)
-            migrated_users.append(user)
-        return migrated_users
-
 
 class Team(CommonModelNameNotUnique, ResourceMixin):
     '''
@@ -144,12 +134,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
             cred.mark_inactive()
         super(Team, self).mark_inactive(save=save)
 
-    def migrate_to_rbac(self):
-        migrated = []
-        for user in self.users.all():
-            self.member_role.members.add(user)
-            migrated.append(user)
-        return migrated
 
 class Permission(CommonModelNameNotUnique):
     '''
