@@ -19,6 +19,8 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
         Wait('stop');
     });
 
+    $scope.isEdit = true;
+
     $scope.hideForm = true;
 
     $scope.formCancel = function() {
