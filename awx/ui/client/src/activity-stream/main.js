@@ -7,7 +7,9 @@
 import activityStreamRoute from './activitystream.route';
 import activityStreamController from './activitystream.controller';
 
-export default angular.module('activityStream', [])
+import streamDetailModal from './streamDetailModal/main';
+
+export default angular.module('activityStream', [streamDetailModal.name])
     .controller('activityStreamController', activityStreamController)
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(activityStreamRoute);

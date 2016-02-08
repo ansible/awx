@@ -1,0 +1,29 @@
+<div id="stream-detail-modal" class="modal fade">
+   <div class="modal-dialog">
+      <div class="Modal-content modal-content">
+          <div class="Modal-header">
+              <div class="Modal-title" id="detail-header" ng-bind-html="header"></div>
+              <div class="Modal-exitHolder">
+                  <button class="close Modal-exit" data-target="#stream-detail-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
+              </div>
+          </div>
+          <div class="Modal-body" id="detail-body">
+              <div ng-show="user" class="Detail-inlineRow">
+                  <div class="Detail-rowTitle Detail-inlineRowTitle">INITIATED BY</div>
+                  <div class="Detail-inlineRowData" ng-bind="user"></div>
+              </div>
+              <div ng-show="operation" class="Detail-inlineRow">
+                  <div class="Detail-rowTitle Detail-inlineRowTitle">ACTION</div>
+                  <div class="Detail-inlineRowData" ng-bind="operation"></div>
+              </div>
+              <div ng-show="changes">
+                  <div class="Detail-rowTitle Detail-changesRowTitle">CHANGES</div>
+                  <pre class="Detail-changes">{{ changes | json : spacing}}</pre>
+              </div>
+          </div>
+          <div class="Modal-footer">
+              <a href="#" data-target="#stream-detail-modal" data-dismiss="modal" id="action_cancel_btn" class="btn Modal-defaultButton Modal-footerButton Detail-actionButton">OK</a>
+          </div>
+      </div>
+   </div>
+</div>
