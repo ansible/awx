@@ -1,6 +1,9 @@
 import pytest
 
+from awx.main.migrations import _rbac as rbac
 from awx.main.access import OrganizationAccess
+from django.apps import apps
+
 
 @pytest.mark.django_db
 def test_organization_migration_admin(organization, permissions, user):
@@ -9,8 +12,9 @@ def test_organization_migration_admin(organization, permissions, user):
 
     assert not organization.accessible_by(u, permissions['admin'])
 
-    migrated_users = organization.migrate_to_rbac()
-    assert len(migrated_users) == 1
+    migrations = rbac.migrate_organization(apps, None)
+
+    assert len(migrations) == 1
     assert organization.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
@@ -20,8 +24,9 @@ def test_organization_migration_user(organization, permissions, user):
 
     assert not organization.accessible_by(u, permissions['auditor'])
 
-    migrated_users = organization.migrate_to_rbac()
-    assert len(migrated_users) == 1
+    migrations = rbac.migrate_organization(apps, None)
+
+    assert len(migrations) == 1
     assert organization.accessible_by(u, permissions['auditor'])
 
 @pytest.mark.django_db
