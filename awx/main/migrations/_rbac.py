@@ -13,5 +13,15 @@ def migrate_organization(apps, schema_editor):
     return migrations
 
 
-def unmigrate_organization(apps, schema_editor):
-    pass
+def migrate_credential(apps, schema_editor):
+    migrations = defaultdict(list)
+    credential = apps.get_model('main', "Credential")
+    for cred in credential.objects.all():
+        if cred.user:
+            cred.owner_role.members.add(cred.user)
+            migrations[cred.name].append(cred.user)
+        elif cred.team:
+            cred.owner_role.parents.add(cred.team.admin_role)
+            cred.usage_role.parents.add(cred.team.member_role)
+            migrations[cred.name].append(cred.team)
+    return migrations

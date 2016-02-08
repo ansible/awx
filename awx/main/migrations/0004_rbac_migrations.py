@@ -12,5 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(rbac.migrate_organization, rbac.unmigrate_organization),
+        migrations.RunPython(rbac.migrate_organization),
+        migrations.RunPython(rbac.migrate_credential),
     ]
