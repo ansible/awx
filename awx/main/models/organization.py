@@ -62,6 +62,11 @@ class Organization(CommonModel, ResourceMixin):
         resource_field='resource',
         permissions = {'read': True}
     )
+    member_role = ImplicitRoleField(
+        role_name='Organization Member',
+        resource_field='resource',
+        permissions = {'read': True}
+    )
 
 
     def get_absolute_url(self):
