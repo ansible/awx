@@ -1,6 +1,8 @@
 import pytest
 
+from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
+from django.apps import apps
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
@@ -82,7 +84,7 @@ def test_inventory_admin_team(inventory, permissions, user, team):
 
     assert inventory.accessible_by(u, permissions['admin']) is False
 
-    team_migrations = team.migrate_to_rbac()
+    team_migrations = rbac.migrate_team(apps, None)
     migrations = inventory.migrate_to_rbac()
 
     assert len(team_migrations) == 1
@@ -107,7 +109,7 @@ def test_inventory_auditor(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    team_migrations = team.migrate_to_rbac()
+    team_migrations = rbac.migrate_team(apps,None)
     migrations = inventory.migrate_to_rbac()
 
     assert len(team_migrations) == 1
@@ -131,7 +133,7 @@ def test_inventory_updater(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    team_migrations = team.migrate_to_rbac()
+    team_migrations = rbac.migrate_team(apps,None)
     migrations = inventory.migrate_to_rbac()
 
     assert len(team_migrations) == 1
@@ -156,7 +158,7 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
 
-    team_migrations = team.migrate_to_rbac()
+    team_migrations = rbac.migrate_team(apps, None)
     migrations = inventory.migrate_to_rbac()
 
     assert len(team_migrations) == 1

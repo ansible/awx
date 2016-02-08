@@ -12,6 +12,14 @@ def migrate_organization(apps, schema_editor):
             migrations[org.name].append(user)
     return migrations
 
+def migrate_team(apps, schema_editor):
+    migrations = defaultdict(list)
+    team = apps.get_model('main', 'Team')
+    for t in team.objects.all():
+        for user in t.users.all():
+            t.member_role.members.add(user)
+            migrations[t.name].append(user)
+    return migrations
 
 def migrate_credential(apps, schema_editor):
     migrations = defaultdict(list)

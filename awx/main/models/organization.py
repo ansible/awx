@@ -134,12 +134,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
             cred.mark_inactive()
         super(Team, self).mark_inactive(save=save)
 
-    def migrate_to_rbac(self):
-        migrated = []
-        for user in self.users.all():
-            self.member_role.members.add(user)
-            migrated.append(user)
-        return migrated
 
 class Permission(CommonModelNameNotUnique):
     '''
