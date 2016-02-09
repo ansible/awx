@@ -1,5 +1,15 @@
 from collections import defaultdict
 
+def migrate_users(apps, schema_editor):
+    migrations = list()
+    User = apps.get_model('auth', "User")
+    Role = apps.get_model('main', "Role")
+    for user in User.objects.all():
+        if user.is_superuser:
+            Role.singleton('System Administrator').members.add(user)
+            migrations.append(user)
+    return migrations
+
 def migrate_organization(apps, schema_editor):
     migrations = defaultdict(list)
     organization = apps.get_model('main', "Organization")
