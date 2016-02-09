@@ -315,6 +315,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
 
                         html += "</div>";
+                        if(list.toolbarAuxAction) {
+                            html += "<div class=\"List-auxAction\">";
+                            html += list.toolbarAuxAction;
+                            html += "</div>";
+                        }
                         html += "<div class=\"List-actions\">";
                         html += "<div class=\"list-actions\" ng-include=\"'" +
                             templateUrl('shared/list-generator/list-actions') +
