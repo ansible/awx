@@ -86,3 +86,49 @@ def migrate_inventory(apps, schema_editor):
         migrations[inventory.name]['teams'] = teams
         migrations[inventory.name]['users'] = users
     return migrations
+
+def migrate_projects(apps, schema_editor):
+    '''
+    I can see projects when:
+     X I am a superuser.
+     X I am an admin in an organization associated with the project.
+     X I am a user in an organization associated with the project.
+     X I am on a team associated with the project.
+     X I have been explicitly granted permission to run/check jobs using the
+       project.
+     X I created the project but it isn't associated with an organization
+    I can change/delete when:
+     X I am a superuser.
+     X I am an admin in an organization associated with the project.
+     X I created the project but it isn't associated with an organization
+    '''
+    migrations = defaultdict(lambda: defaultdict(set))
+
+    Project = apps.get_model('main', 'Project')
+    Permission = apps.get_model('main', 'Permission')
+
+    for project in Project.objects.all():
+        if project.organization is None and project.created_by is not None:
+            project.admin_role.members.add(project.created_by)
+            migrations[project.name]['users'].add(project.created_by)
+
+        for team in project.teams.all():
+            team.member_role.children.add(project.member_role)
+            migrations[project.name]['teams'].add(team)
+
+        if project.organization is not None:
+            for user in project.organization.users.all():
+                project.member_role.members.add(user)
+                migrations[project.name]['users'].add(user)
+
+        for perm in Permission.objects.filter(project=project):
+            # All perms at this level just imply a user or team can read
+            if perm.team:
+                team.member_role.children.add(project.member_role)
+                migrations[project.name]['teams'].add(team)
+
+            if perm.user:
+                project.member_role.members.add(perm.user)
+                migrations[project.name]['users'].add(perm.user)
+
+    return migrations

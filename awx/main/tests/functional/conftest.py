@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
+from awx.main.models.projects import Project
 from awx.main.models.organization import (
     Organization,
     Team,
@@ -22,6 +23,15 @@ def user():
 @pytest.fixture
 def team(organization):
     return Team.objects.create(organization=organization, name='test-team')
+
+@pytest.fixture
+def project(organization):
+    return Project.objects.create(name="test-project", organization=organization, description="test-project-desc")
+
+@pytest.fixture
+def user_project(user):
+    owner = user('owner')
+    return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
 
 @pytest.fixture
 def organization():
