@@ -119,7 +119,7 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
 
                 $('#prompt-modal').off('hidden.bs.modal');
                 $('#prompt-modal').modal({
-                    backdrop: 'local_backdrop',
+                    backdrop: 'static',
                     keyboard: true,
                     show: true
                 });

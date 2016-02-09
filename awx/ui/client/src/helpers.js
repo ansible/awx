@@ -41,6 +41,8 @@ import RelatedSearch from "./helpers/related-search";
 import Search from "./helpers/search";
 import Teams from "./helpers/teams";
 import AdhocHelper from "./helpers/Adhoc";
+import ApiModelHelper from "./helpers/ApiModel";
+import ActivityStreamHelper from "./helpers/ActivityStream";
 
 export
     {   AboutAnsible,
@@ -76,5 +78,7 @@ export
         RelatedSearch,
         Search,
         Teams,
-        AdhocHelper
+        AdhocHelper,
+        ApiModelHelper,
+        ActivityStreamHelper
     };
