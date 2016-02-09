@@ -353,7 +353,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                    html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
+                    html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">";
+                    html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                    html += "</div>";
 
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         // Only show the search bar if we are loading results or if we have at least 1 base result
