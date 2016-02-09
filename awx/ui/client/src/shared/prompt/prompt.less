@@ -1,54 +1,5 @@
 @import "awx/ui/client/src/shared/branding/colors.default.less";
 
-.Prompt-content {
-    display:flex;
-    flex-wrap:wrap;
-    flex-direction: row;
-    padding: 15px 20px;
-    -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
-    -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.25);
-}
-
-.Prompt-header {
-    display: flex;
-    width: 100%;
-    margin-bottom: 25px;
-}
-
-.Prompt-title {
-    flex: 1 0 auto;
-    text-transform: uppercase;
-    color: @list-header-txt;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.Prompt-exitHolder{
-    justify-content: flex-end;
-    display:flex;
-}
-
-.Prompt-exit{
-    cursor:pointer;
-    padding:0px;
-    border: none;
-    height:20px;
-    font-size: 20px;
-    background-color:@default-bg;
-    color:@default-icon;
-    line-height:1;
-}
-
-.Prompt-exit:hover{
-    color:@default-icon-hov;
-}
-
-.Prompt-body {
-    width: 100%;
-}
-
 .Prompt-bodyQuery {
     margin-bottom: 20px;
     color: @default-interface-txt;
@@ -56,50 +7,4 @@
 
 .Prompt-bodyTarget {
     color: @default-data-txt;
-}
-
-.Prompt-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    width: 100%;
-}
-
-.Prompt-defaultButton {
-    background-color: @default-bg;
-    color: @btn-txt;
-    text-transform: uppercase;
-    border-radius: 5px;
-    border: 1px solid @btn-bord;
-    transition: background-color 0.2s;
-    padding-left:15px;
-    padding-right: 15px;
-}
-
-.Prompt-defaultButton:hover {
-    background-color: @btn-bg-hov;
-    color: @btn-txt;
-}
-
-.Prompt-errorButton {
-    background-color: @default-err;
-    color: @btn-txt-sel;
-    text-transform: uppercase;
-    border-radius: 5px;
-    transition: background-color 0.2s;
-    padding-left:15px;
-    padding-right: 15px;
-}
-
-.Prompt-errorButton:hover {
-    background-color: @default-err-hov;
-    color: @btn-txt-sel;
-}
-
-.Prompt-footerButton {
-    padding: 4px 8px;
-}
-
-.Prompt-footerButton + .Prompt-footerButton {
-    margin-left: 20px;
 }

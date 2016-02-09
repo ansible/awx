@@ -231,42 +231,29 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
             var activity_id = params.activity_id,
                 parent_scope = params.scope,
-                generator = GenerateForm,
-                form = ActivityDetailForm,
                 activity = Find({ list: parent_scope.activities, key: 'id', val: activity_id }),
-                n, rows, scope;
+                scope, element;
 
             if (activity) {
-                // Setup changes field
-                activity.changes_stringified = JSON.stringify(activity.changes, null, '\t');
-                n = activity.changes_stringified.match(/\n/g);
-                rows = (n) ? n.length : 1;
-                rows = (rows < 1) ? 3 : 10;
-                form.fields.changes.rows = 10;
 
-                // Load the form
-                scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
-                scope.changes = activity.changes_stringified;
+                // Grab our element out of the dom
+                element = angular.element(document.getElementById('stream-detail-modal'));
+
+                // Grab the modal's scope so that we can set a few variables
+                scope = element.scope();
+
+                scope.changes = activity.changes;
                 scope.user = ((activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system') +
-                    ' on ' + $filter('longDate')(activity.timestamp);
+                     ' on ' + $filter('longDate')(activity.timestamp);
                 scope.operation = activity.description_nolink;
+                scope.header = "Event " + activity.id;
 
-                scope.formModalAction = function () {
-                    $('#form-modal').modal("hide");
-                };
-
-                $('#form-modal').on('show.bs.modal', function () {
-                    $('#form-modal-body').css({
-                        width: 'auto', //probably not needed
-                        height: 'auto', //probably not needed
-                        'max-height': '100%'
-                    });
+                // Open the modal
+                $('#stream-detail-modal').modal({
+                    show: true,
+                    backdrop: 'static',
+                    keyboard: true
                 });
-
-                scope.formModalActionLabel = 'OK';
-                scope.formModalCancelShow = false;
-                scope.formModalInfo = false;
-                scope.formModalHeader = "Event " + activity.id;
 
                 if (!scope.$$phase) {
                     scope.$digest();
