@@ -32,17 +32,39 @@ def test_organization_migration_user(organization, permissions, user):
 @pytest.mark.django_db
 def test_organization_access_superuser(organization, user):
     access = OrganizationAccess(user('admin', True))
+    organization.users.add(user('user', False))
+
     assert access.can_change(organization, None)
+    assert access.can_delete(organization)
+
+    org = access.get_queryset()[0]
+    assert len(org.admins.all()) == 0
+    assert len(org.users.all()) == 1
+
 
 @pytest.mark.django_db
 def test_organization_access_admin(organization, user):
-    u = user('admin', False)
-    organization.admins.add(u)
+    '''can_change because I am an admin of that org'''
+    a = user('admin', False)
+    organization.admins.add(a)
+    organization.users.add(user('user', False))
 
-    access = OrganizationAccess(u)
+    access = OrganizationAccess(a)
     assert access.can_change(organization, None)
+    assert access.can_delete(organization)
+
+    org = access.get_queryset()[0]
+    assert len(org.admins.all()) == 1
+    assert len(org.users.all()) == 1
 
 @pytest.mark.django_db
 def test_organization_access_user(organization, user):
     access = OrganizationAccess(user('user', False))
+    organization.users.add(user('user', False))
+
     assert not access.can_change(organization, None)
+    assert not access.can_delete(organization)
+
+    org = access.get_queryset()[0]
+    assert len(org.admins.all()) == 0
+    assert len(org.users.all()) == 1
