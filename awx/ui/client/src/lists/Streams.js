@@ -12,7 +12,7 @@ export default
         name: 'activities',
         iterator: 'activity',
         editTitle: 'Activity Stream',
-        listTitle: 'Activity Stream',
+        listTitle: 'Activity Stream<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
         listTitleBadge: false,
         selectInstructions: '',
         index: false,
