@@ -1,5 +1,5 @@
 recursive-include awx *.py
-recursive-include awx/static *.ico
+recursive-include awx/static *
 recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md *.html
 recursive-include awx/ui/templates *.html

@@ -772,13 +772,16 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectOptionsSerializer(BaseSerializer):
 
+    scm_clean = serializers.NullBooleanField(default=False)
+    scm_delete_on_update = serializers.NullBooleanField(default=False)
+
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
                   'scm_clean', 'scm_delete_on_update', 'credential')
         extra_kwargs = {
             'scm_type': {
-                'allow_null': True
-            }
+                'allow_null': True,
+            },
         }
 
     def get_related(self, obj):
@@ -790,6 +793,12 @@ class ProjectOptionsSerializer(BaseSerializer):
 
     def validate_scm_type(self, value):
         return value or u''
+
+    def validate_scm_clean(self, value):
+        return bool(value)
+
+    def validate_scm_delete_on_update(self, value):
+        return bool(value)
 
     def validate(self, attrs):
         errors = {}
@@ -822,18 +831,20 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
-    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.BooleanField(read_only=True)
+    scm_update_on_launch = serializers.NullBooleanField(default=False)
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Project
-        fields = ('*', 'playbooks', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
-        
+
+    def clean_scm_update_on_launch(self, value):
+        return bool(value)
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -857,6 +868,8 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
+
+    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
 
     class Meta:
         model = Project
@@ -1735,6 +1748,12 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
                 'read_only': True,
             },
         }
+
+    def get_field_names(self, declared_fields, info):
+        field_names = super(AdHocCommandSerializer, self).get_field_names(declared_fields, info)
+        # Meta inheritance and -field_name options don't seem to be taking
+        # effect above, so remove the undesired fields here.
+        return tuple(x for x in field_names if x not in ('unified_job_template', 'description'))
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(AdHocCommandSerializer, self).build_standard_field(field_name, model_field)
