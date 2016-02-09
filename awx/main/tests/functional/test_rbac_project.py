@@ -1,0 +1,79 @@
+import pytest
+
+from awx.main.migrations import _rbac as rbac
+from awx.main.models import Permission
+from django.apps import apps
+
+@pytest.mark.django_db
+def test_project_user_project(user_project, project, user):
+    u = user('owner')
+    assert user_project.accessible_by(u, {'read': True}) is False
+    assert project.accessible_by(u, {'read': True}) is False
+    migrations = rbac.migrate_projects(apps, None)
+    assert len(migrations[user_project.name]['users']) == 1
+    assert len(migrations[user_project.name]['teams']) == 0
+    assert user_project.accessible_by(u, {'read': True}) is True
+    assert project.accessible_by(u, {'read': True}) is False
+
+@pytest.mark.django_db
+def test_project_accessible_by_sa(user, project):
+    u = user('systemadmin', is_superuser=True)
+
+    assert project.accessible_by(u, {'read': True}) is False
+    su_migrations = rbac.migrate_users(apps, None)
+    migrations = rbac.migrate_projects(apps, None)
+    assert len(su_migrations) == 1
+    assert len(migrations[project.name]['users']) == 0
+    assert len(migrations[project.name]['teams']) == 0
+    assert project.accessible_by(u, {'read': True, 'write': True}) is True
+
+@pytest.mark.django_db
+def test_project_org_members(user, organization, project):
+    admin = user('orgadmin')
+    member = user('orgmember')
+
+    assert project.accessible_by(admin, {'read': True}) is False
+    assert project.accessible_by(member, {'read': True}) is False
+
+    organization.admin_role.members.add(admin)
+    organization.member_role.members.add(member)
+
+    rbac.migrate_organization(apps, None)
+    migrations = rbac.migrate_projects(apps, None)
+
+    assert len(migrations[project.name]['users']) == 0
+    assert len(migrations[project.name]['teams']) == 0
+    assert project.accessible_by(admin, {'read': True, 'write': True}) is True
+    assert project.accessible_by(member, {'read': True}) is False
+
+@pytest.mark.django_db
+def test_project_team(user, team, project):
+    nonmember = user('nonmember')
+    member = user('member')
+
+    team.users.add(member)
+    project.teams.add(team)
+
+    assert project.accessible_by(nonmember, {'read': True}) is False
+    assert project.accessible_by(member, {'read': True}) is False
+
+    rbac.migrate_team(apps, None)
+    migrations = rbac.migrate_projects(apps, None)
+
+    assert len(migrations[project.name]['users']) == 0
+    assert len(migrations[project.name]['teams']) == 1
+    assert project.accessible_by(member, {'read': True}) is True
+    assert project.accessible_by(nonmember, {'read': True}) is False
+
+@pytest.mark.django_db
+def test_project_explicit_permission(user, team, project):
+    u = user('user')
+    p = Permission(user=u, project=project, permission_type='check')
+    p.save()
+
+    assert project.accessible_by(u, {'read': True}) is False
+
+    migrations = rbac.migrate_projects(apps, None)
+
+    assert len(migrations[project.name]['users']) == 1
+    assert project.accessible_by(u, {'read': True}) is True

@@ -209,6 +209,11 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
         migrations.AddField(
+            model_name='organization',
+            name='member_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
             model_name='project',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
