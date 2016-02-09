@@ -19,6 +19,7 @@ export default
         hover: true,
         "class": "table-condensed",
         searchWidgets: 3,
+        toolbarAuxAction: "<stream-dropdown-nav></stream-dropdown-nav>",
 
         fields: {
             timestamp: {
