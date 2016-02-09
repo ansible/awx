@@ -231,12 +231,19 @@ class ProjectsTest(BaseTransactionTest):
             'description': 'Does amazing things',
             'local_path': os.path.basename(project_dir),
             'scm_type': None,
+            'scm_update_on_launch': '',
+            'scm_delete_on_update': None,
+            'scm_clean': False,
         }
         # Adding a project with scm_type=None should work, but scm_type will be
-        # changed to an empty string.
+        # changed to an empty string.  Other boolean fields should accept null
+        # or an empty string for False, but save the value as a boolean.
         response = self.post(projects, project_data, expect=201,
                              auth=self.get_super_credentials())
         self.assertEqual(response['scm_type'], u'')
+        self.assertEqual(response['scm_update_on_launch'], False)
+        self.assertEqual(response['scm_delete_on_update'], False)
+        self.assertEqual(response['scm_clean'], False)
 
         # can edit project using same local path.
         project_detail = reverse('api:project_detail', args=(response['id'],))
@@ -494,7 +501,9 @@ class ProjectsTest(BaseTransactionTest):
             ssh_key_data = TEST_SSH_KEY_DATA_LOCKED,
             ssh_key_unlock = TEST_SSH_KEY_DATA_UNLOCK,
             ssh_password = 'narf',
-            sudo_password = 'troz'
+            sudo_password = 'troz',
+            security_token = '',
+            vault_password = None,
         )
 
         # can add credentials to a user (if user or org admin or super user)
@@ -561,13 +570,17 @@ class ProjectsTest(BaseTransactionTest):
         # Repeating the same POST should violate a unique constraint.
         with self.current_user(self.super_django_user):
             data = dict(name='xyz', user=self.super_django_user.pk)
-            self.post(url, data, expect=400)
+            response = self.post(url, data, expect=400)
+            self.assertTrue('__all__' in response, response)
+            self.assertTrue('already exists' in response['__all__'][0], response)
 
-        # Test with null where we expect a string value.
+        # Test with null where we expect a string value.  Value will be coerced
+        # to an empty string.
         with self.current_user(self.super_django_user):
             data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
                         become_username=None)
-            self.post(url, data, expect=400)
+            response = self.post(url, data, expect=201)
+            self.assertEqual(response['become_username'], '')
 
         # Test with encrypted ssh key and no unlock password.
         with self.current_user(self.super_django_user):
@@ -698,14 +711,15 @@ class ProjectsTest(BaseTransactionTest):
             # user=user.pk, # no need to specify, this will be automatically filled in
             inventory=inventory.pk,
             project=project.pk,
-            permission_type=PERM_INVENTORY_DEPLOY
+            permission_type=PERM_INVENTORY_DEPLOY,
+            run_ad_hoc_commands=None,
         )
         team_permission = dict(
             name='team can deploy a certain project to a certain inventory',
             # team=team.pk, # no need to specify, this will be automatically filled in
             inventory=inventory.pk,
             project=project.pk,
-            permission_type=PERM_INVENTORY_DEPLOY
+            permission_type=PERM_INVENTORY_DEPLOY,
         )
 
         url = reverse('api:user_permissions_list', args=(user.pk,))

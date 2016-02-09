@@ -24,11 +24,13 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError as Django
 from django.db import models
 # from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text, smart_text
+from django.utils.text import capfirst
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
 from rest_framework import fields
 from rest_framework import serializers
+from rest_framework import validators
 from rest_framework.utils.serializer_helpers import ReturnList
 
 # Django-Polymorphic
@@ -42,6 +44,7 @@ from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
+from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField
 
 from awx.fact.models import * # noqa
 
@@ -202,11 +205,6 @@ class BaseSerializer(serializers.ModelSerializer):
                   'modified', 'name', 'description')
         summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
         summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
-        extra_kwargs = {
-            'description': {
-                'allow_null': True,
-            },
-        }
 
     # add the URL and related resources
     type           = serializers.SerializerMethodField()
@@ -358,24 +356,50 @@ class BaseSerializer(serializers.ModelSerializer):
 
         # Pass model field default onto the serializer field if field is not read-only.
         if model_field.has_default() and not field_kwargs.get('read_only', False):
-            field_kwargs['default'] = model_field.get_default()
+            field_kwargs['default'] = field_kwargs['initial'] = model_field.get_default()
+
         # Enforce minimum value of 0 for PositiveIntegerFields.
         if isinstance(model_field, (models.PositiveIntegerField, models.PositiveSmallIntegerField)) and 'choices' not in field_kwargs:
             field_kwargs['min_value'] = 0
+
+        # Use custom boolean field that allows null and empty string as False values.
+        if isinstance(model_field, models.BooleanField) and not field_kwargs.get('read_only', False):
+            field_class = BooleanNullField
+
+        # Use custom char or choice field that coerces null to an empty string.
+        if isinstance(model_field, (models.CharField, models.TextField)) and not field_kwargs.get('read_only', False):
+            if 'choices' in field_kwargs:
+                field_class = ChoiceNullField
+            else:
+                field_class = CharNullField
+
         # Update verbosity choices from settings (for job templates, jobs, ad hoc commands).
         if field_name == 'verbosity' and 'choices' in field_kwargs:
             field_kwargs['choices'] = getattr(settings, 'VERBOSITY_CHOICES', field_kwargs['choices'])
+
+        # Update the message used for the unique validator to use capitalized
+        # verbose name; keeps unique message the same as with DRF 2.x.
+        for validator in field_kwargs.get('validators', []):
+            if isinstance(validator, validators.UniqueValidator):
+                unique_error_message = model_field.error_messages.get('unique', None)
+                if unique_error_message:
+                    unique_error_message = unique_error_message % {
+                        'model_name': capfirst(opts.verbose_name),
+                        'field_label': capfirst(model_field.verbose_name),
+                    }
+                    validator.message = unique_error_message
+
         return field_class, field_kwargs
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(BaseSerializer, self).build_relational_field(field_name, relation_info)
-        # Don't include choicse for foreign key fields.
+        # Don't include choices for foreign key fields.
         field_kwargs.pop('choices', None)
         return field_class, field_kwargs
 
-    def validate_description(self, value):
-        # Description should always be empty string, never null.
-        return value or u''
+    def get_unique_together_validators(self):
+        # Allow the model's full_clean method to handle the unique together validation.
+        return []
 
     def run_validation(self, data=fields.empty):
         try:
@@ -653,7 +677,6 @@ class UserSerializer(BaseSerializer):
         fields = ('*', '-name', '-description', '-modified',
                   '-summary_fields', 'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'password', 'ldap_dn')
-        
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
@@ -772,17 +795,9 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectOptionsSerializer(BaseSerializer):
 
-    scm_clean = serializers.NullBooleanField(default=False)
-    scm_delete_on_update = serializers.NullBooleanField(default=False)
-
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
                   'scm_clean', 'scm_delete_on_update', 'credential')
-        extra_kwargs = {
-            'scm_type': {
-                'allow_null': True,
-            },
-        }
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
@@ -790,15 +805,6 @@ class ProjectOptionsSerializer(BaseSerializer):
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         return res
-
-    def validate_scm_type(self, value):
-        return value or u''
-
-    def validate_scm_clean(self, value):
-        return bool(value)
-
-    def validate_scm_delete_on_update(self, value):
-        return bool(value)
 
     def validate(self, attrs):
         errors = {}
@@ -831,9 +837,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
-    scm_delete_on_next_update = serializers.BooleanField(read_only=True)
-    scm_update_on_launch = serializers.NullBooleanField(default=False)
-    status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
+    status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
 
@@ -842,9 +846,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
-
-    def clean_scm_update_on_launch(self, value):
-        return bool(value)
+        read_only_fields = ('scm_delete_on_next_update',)
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -1216,14 +1218,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
                   'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars')
-        extra_kwargs = {
-            'instance_filters': {
-                'allow_null': True,
-            },
-            'group_by': {
-                'allow_null': True,
-            },
-        }
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -1281,7 +1275,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
 
-    status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True, required=False)
+    status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
 
@@ -1440,14 +1434,7 @@ class PermissionSerializer(BaseSerializer):
 
 class CredentialSerializer(BaseSerializer):
 
-    # FIXME: may want to make some of these filtered based on user accessing
-
-    password = serializers.CharField(required=False, default='')
-    security_token = serializers.CharField(required=False, default='')
-    ssh_key_data = serializers.CharField(required=False, default='')
-    ssh_key_unlock = serializers.CharField(required=False, default='')
-    become_password = serializers.CharField(required=False, default='')
-    vault_password = serializers.CharField(required=False, default='')
+    # FIXME: may want to make some fields filtered based on user accessing
 
     class Meta:
         model = Credential
@@ -1456,24 +1443,23 @@ class CredentialSerializer(BaseSerializer):
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 
+    def build_standard_field(self, field_name, model_field):
+        field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)
+        if field_name in Credential.PASSWORD_FIELDS:
+            field_class = EncryptedPasswordField
+            field_kwargs['required'] = False
+            field_kwargs['default'] = ''
+        return field_class, field_kwargs
+
     def to_representation(self, obj):
         ret = super(CredentialSerializer, self).to_representation(obj)
         if obj is not None and 'user' in ret and (not obj.user or not obj.user.is_active):
             ret['user'] = None
         if obj is not None and 'team' in ret and (not obj.team or not obj.team.active):
             ret['team'] = None
-        # Replace the actual encrypted value with the string $encrypted$.
-        for field in Credential.PASSWORD_FIELDS:
-            if field in ret and force_text(ret[field]).startswith('$encrypted$'):
-                ret[field] = '$encrypted$'
         return ret
 
     def validate(self, attrs):
-        # If the value sent to the API startswith $encrypted$, ignore it.
-        for field in Credential.PASSWORD_FIELDS:
-            if force_text(attrs.get(field, '')).startswith('$encrypted$'):
-                attrs.pop(field, None)
-
         # If creating a credential from a view that automatically sets the
         # parent_key (user or team), set the other value to None.
         view = self.context.get('view', None)

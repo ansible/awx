@@ -207,6 +207,8 @@ class UsersTest(BaseTest):
         self.post(url, expect=403, data=new_super_user, auth=self.get_other_credentials())
         self.post(url, expect=403, data=new_super_user, auth=self.get_normal_credentials())
         self.post(url, expect=201, data=new_super_user, auth=self.get_super_credentials())
+        new_super_user2 = dict(username='nommy2', password='cookie', is_superuser=None)
+        self.post(url, expect=201, data=new_super_user2, auth=self.get_super_credentials())
 
     def test_auth_token_login(self):
         auth_token_url = reverse('api:auth_token_view')
