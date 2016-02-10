@@ -10,7 +10,7 @@ export default {
     name: 'managementJobsList',
     route: '/management_jobs',
     templateUrl: templateUrl('management-jobs/card/card'),
-    controller: 'managementJobsListController',
+    controller: 'managementJobsCardController',
     data: {
         activityStream: true,
         activityStreamTarget: 'management_job'

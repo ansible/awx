@@ -4,13 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
-import managementJobsList from './list/main';
+import managementJobsCard from './card/main';
 import managementJobsSchedule from './schedule/main';
 import list from './management-jobs.list';
 
 export default
     angular.module('managementJobs', [
-        managementJobsList.name,
+        managementJobsCard.name,
         managementJobsSchedule.name
     ])
     .factory('managementJobsListObject', list);

@@ -1,0 +1,24 @@
+<div class="tab-pane" id="management_jobs">
+	<div class="MgmtCards">
+		<div class="MgmtCards-card"
+			ng-repeat="card in mgmtCards track by card.id">
+			<!-- Begin Card Header -->
+			<div class="MgmtCards-header">
+				<h3 class="MgmtCards-label"> {{ card.name }}</h3>
+				<div class="MgmtCards-actionItems">
+					<button class="MgmtCards-actionItem List-actionButton"
+						ng-click='submitCleanupJob(card.id, card.name)'>
+						<i class="MgmtCards-actionItemIcon fa fa-rocket"></i>
+					</button>
+					<button class="MgmtCards-actionItem List-actionButton"
+						ng-click='configureSchedule()'>
+						<i class="MgmtCards-actionItemIcon fa fa-calendar"></i>
+					</button>
+				</div>
+			</div>
+			<!-- End Card Header -->
+			<!-- Begin Card Body -->
+			<p>{{card.description || "Place organization description here"}}</p>
+			<!-- End Card Body -->
+		</div>
+</div>
