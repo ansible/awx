@@ -11,12 +11,12 @@ export default
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
-        '$state', 'Stream', '$scope',
+        '$state','$scope',
         function( Wait, $location, $compile, CreateDialog, 
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
-            $state, Stream, $scope) {
+            $state, $scope) {
                 
                 var defaultUrl = GetBasePath('system_job_templates');
 
@@ -38,24 +38,6 @@ export default
                     list = managementJobsListObject;
                 scope.cleanupJob = true;
 
-                SearchInit({
-                    scope: scope,
-                    set: 'configure_jobs',
-                    list: list,
-                    url: defaultUrl
-                });
-
-                PaginateInit({
-                    scope: scope,
-                    list: list,
-                    url: defaultUrl
-                });
-
-                scope.search(list.iterator);
-
-                scope.showActivity = function () {
-                    Stream({ scope: scope });
-                };
 
                  // Cancel
                 scope.cancelConfigure = function () {
