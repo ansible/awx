@@ -113,8 +113,6 @@ class Resource(CommonModelNameNotUnique):
         verbose_name_plural = _('resources')
         db_table = 'main_rbac_resources'
 
-    parent = models.ForeignKey('Resource', related_name='children', null=True, default=None)
-
 
 class RolePermission(CreatedModifiedModel):
     '''

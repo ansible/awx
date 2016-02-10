@@ -55,8 +55,7 @@ def resolve_field(obj, field):
 class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
     """Descriptor for access to the object from its related class."""
 
-    def __init__(self, parent_resource, *args, **kwargs):
-        self.parent_resource = parent_resource
+    def __init__(self, *args, **kwargs):
         super(ResourceFieldDescriptor, self).__init__(*args, **kwargs)
 
     def __get__(self, instance, instance_type=None):
@@ -64,18 +63,6 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
         if resource:
             return resource
         resource = Resource._default_manager.create()
-        if self.parent_resource:
-            # Take first non null parent resource
-            parent = None
-            if type(self.parent_resource) is list:
-                for path in self.parent_resource:
-                    parent = resolve_field(instance, path)
-                    if parent:
-                        break
-            else:
-                parent = resolve_field(instance, self.parent_resource)
-            resource.parent = parent
-        resource.save()
         setattr(instance, self.field.name, resource)
         instance.save(update_fields=[self.field.name,])
         return resource
@@ -84,8 +71,7 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitResourceField(models.ForeignKey):
     """Creates an associated resource object if one doesn't already exist"""
 
-    def __init__(self, parent_resource=None, *args, **kwargs):
-        self.parent_resource = parent_resource
+    def __init__(self, *args, **kwargs):
         kwargs.setdefault('to', 'Resource')
         kwargs.setdefault('related_name', '+')
         kwargs.setdefault('null', 'True')
