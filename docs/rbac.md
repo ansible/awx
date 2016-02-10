@@ -42,9 +42,9 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 ## Fields
 
-`ImplicitRoleField`
+### `ImplicitRoleField`
 
-`ImplicitResourceField`
+### `ImplicitResourceField`
 
 ## Mixins
 
@@ -82,7 +82,7 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
 ```
 ## Usage
 
-After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unintrisive and natural.
+After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unobtrusive and natural.
 
 ```python
     # make your model a Resource
