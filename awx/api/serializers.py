@@ -457,6 +457,8 @@ class BaseSerializer(serializers.ModelSerializer):
             ret.pop(parent_key, None)
         return ret
 
+class EmptySerializer(serializers.Serializer):
+    pass
 
 class BaseFactSerializer(DocumentSerializer):
 
@@ -765,7 +767,11 @@ class OrganizationSerializer(BaseSerializer):
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
-            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,))
+            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
+            notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:organization_notifications_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:organization_notifications_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:organization_notifications_error_list', args=(obj.pk,)),
         ))
         return res
 
@@ -845,6 +851,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
             schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:project_notifications_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:project_notifications_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:project_notifications_error_list', args=(obj.pk,)),
         ))
         # Backwards compatibility.
         if obj.current_update:
@@ -888,6 +897,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
         res.update(dict(
             project = reverse('api:project_detail', args=(obj.project.pk,)),
             cancel = reverse('api:project_update_cancel', args=(obj.pk,)),
+            notifications = reverse('api:project_update_notifications_list', args=(obj.pk,)),
         ))
         return res
 
@@ -1288,6 +1298,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:inventory_source_notifications_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:inventory_source_notifications_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:inventory_source_notifications_error_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1332,6 +1345,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         res.update(dict(
             inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
             cancel = reverse('api:inventory_update_cancel', args=(obj.pk,)),
+            notifications = reverse('api:inventory_update_notifications_list', args=(obj.pk,)),
         ))
         return res
 
@@ -1550,6 +1564,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
             launch = reverse('api:job_template_launch', args=(obj.pk,)),
+            notifiers_any = reverse('api:job_template_notifications_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:job_template_notifications_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:job_template_notifications_error_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1604,6 +1621,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             job_tasks = reverse('api:job_job_tasks_list', args=(obj.pk,)),
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
+            notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
         ))
         if obj.job_template and obj.job_template.active:
             res['job_template'] = reverse('api:job_template_detail',
@@ -2039,7 +2057,15 @@ class NotificationTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = NotificationTemplate
-        fields = ('*', 'notification_type', 'notification_configuration')
+        fields = ('*', 'organization', 'notification_type', 'notification_configuration')
+
+    def get_related(self, obj):
+        res = super(NotificationTemplateSerializer, self).get_related(obj)
+        res.update(dict(
+            test = reverse('api:notification_template_test', args=(obj.pk,)),
+            notifications = reverse('api:notification_template_notification_list', args=(obj.pk,)),
+        ))
+        return res
 
     def validate(self, attrs):
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
@@ -2047,9 +2073,24 @@ class NotificationTemplateSerializer(BaseSerializer):
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
                 missing_fields.append(field)
+            # TODO: Type checks
         if missing_fields:
             raise serializers.ValidationError("Missing required fields for Notification Configuration: {}".format(missing_fields))
         return attrs
+
+class NotificationSerializer(BaseSerializer):
+
+    class Meta:
+        model = Notification
+        fields = ('*', '-name', '-description', 'notifier', 'error', 'status', 'notifications_sent',
+                  'notification_type', 'recipients', 'subject', 'body')
+
+    def get_related(self, obj):
+        res = super(NotificationSerializer, self).get_related(obj)
+        res.update(dict(
+            notification_template = reverse('api:notification_template_detail', args=(obj.notifier.pk,)),
+        ))
+        return res
 
 class ScheduleSerializer(BaseSerializer):
 

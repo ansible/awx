@@ -10,7 +10,10 @@ logger = logging.getLogger('awx.main.notifications.slack_backend')
 
 class SlackBackend(BaseEmailBackend):
 
-    init_parameters = {"token": {"label": "Token", "type": "password"}}
+    init_parameters = {"token": {"label": "Token", "type": "password"},
+                       "channels": {"label": "Destination Channels", "type": "list"}}
+    recipient_parameter = "channels"
+    sender_parameter = None
 
     def __init__(self, token, fail_silently=False, **kwargs):
         super(SlackBackend, self).__init__(fail_silently=fail_silently)
@@ -37,8 +40,9 @@ class SlackBackend(BaseEmailBackend):
         sent_messages = 0
         for m in messages:
             try:
-                self.connection.rtm_send_message(m.to, m.body)
-                sent_messages += 1
+                for r in m.recipients():
+                    self.connection.rtm_send_message(r, m.body)
+                    sent_messages += 1
             except Exception as e:
                 if not self.fail_silently:
                     raise

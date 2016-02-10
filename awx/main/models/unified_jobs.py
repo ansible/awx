@@ -30,6 +30,7 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
+from awx.main.models.notifications import Notification
 from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
 from awx.main.redact import UriCleaner
 
@@ -40,7 +41,7 @@ logger = logging.getLogger('awx.main.models.unified_jobs')
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 
 
-class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
+class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
     '''
     Concrete base class for unified job templates.
     '''
@@ -297,6 +298,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         return kwargs   # Override if needed in subclass.
 
+    @property
+    def notifiers(self):
+        '''
+        Return notifiers relevant to this Unified Job Template
+        '''
+        # NOTE: Derived classes should implement
+        return NotificationTemplate.objects.none()
+
     def create_unified_job(self, **kwargs):
         '''
         Create a new unified job based on this unified job template.
@@ -384,6 +393,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         'self',
         editable=False,
         related_name='%(class)s_blocked_jobs+',
+    )
+    notifications = models.ManyToManyField(
+        'Notification',
+        editable=False,
+        related_name='%(class)s_notifications',
     )
     cancel_flag = models.BooleanField(
         blank=True,

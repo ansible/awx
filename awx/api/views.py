@@ -56,7 +56,7 @@ from social.backends.utils import load_backends
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
-from awx.main.tasks import mongodb_control
+from awx.main.tasks import mongodb_control, send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
@@ -136,6 +136,7 @@ class ApiV1RootView(APIView):
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
         data['notification_templates'] = reverse('api:notification_template_list')
+        data['notifications'] = reverse('api:notification_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
@@ -684,6 +685,35 @@ class OrganizationActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class OrganizationNotifiersList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_templates'
+    parent_key = 'organization'
+
+class OrganizationNotificationsAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_any'
+
+class OrganizationNotificationsErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_erros'
+
+class OrganizationNotificationsSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_success'
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -849,6 +879,26 @@ class ProjectActivityStreamList(SubListAPIView):
             return qs.filter(project=parent)
         return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
 
+class ProjectNotificationsAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_any'
+
+class ProjectNotificationsErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_errors'
+
+class ProjectNotificationsSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_success'
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -899,6 +949,12 @@ class ProjectUpdateCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class ProjectUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Project
+    relationship = 'notifications'
 
 class UserList(ListCreateAPIView):
 
@@ -1725,6 +1781,27 @@ class InventorySourceActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class InventorySourceNotificationsAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = InventorySource
+    relationship = 'notification_any'
+
+class InventorySourceNotificationsErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = InventorySource
+    relationship = 'notification_errors'
+
+class InventorySourceNotificationsSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = InventorySource
+    relationship = 'notification_success'
+
 class InventorySourceHostsList(SubListAPIView):
 
     model = Host
@@ -1788,6 +1865,13 @@ class InventoryUpdateCancel(RetrieveAPIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class InventoryUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = InventoryUpdate
+    relationship = 'notifications'
 
 class JobTemplateList(ListCreateAPIView):
 
@@ -1942,6 +2026,27 @@ class JobTemplateActivityStreamList(SubListAPIView):
 
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
+
+class JobTemplateNotificationsAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_any'
+
+class JobTemplateNotificationsErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_errors'
+
+class JobTemplateNotificationsSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_success'
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -2129,7 +2234,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -2275,6 +2380,13 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url()}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+class JobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Job
+    relationship = 'notifications'
 
 class BaseJobHostSummariesList(SubListAPIView):
 
@@ -2926,10 +3038,49 @@ class NotificationTemplateList(ListCreateAPIView):
     serializer_class = NotificationTemplateSerializer
     new_in_300 = True
 
-class NotificationTemplateDetail(RetrieveDestroyAPIView):
+class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
+    new_in_300 = True
+
+class NotificationTemplateTest(GenericAPIView):
+
+    view_name = 'Notification Template Test'
+    model = NotificationTemplate
+    serializer_class = EmptySerializer
+    new_in_300 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        notification = obj.generate_notification("Tower Notification Test", "Ansible Tower Test Notification")
+        if not notification:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            send_notifications.delay([notification.id])
+            headers = {'Location': notification.get_absolute_url()}
+            return Response({"notification": notification.id},
+                            headers=headers,
+                            status=status.HTTP_202_ACCEPTED)
+
+class NotificationTemplateNotificationList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = NotificationTemplate
+    relationship = 'notifications'
+    parent_key = 'notifier'
+
+class NotificationList(ListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    new_in_300 = True
+
+class NotificationDetail(RetrieveAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationSerializer
     new_in_300 = True
 
 class ActivityStreamList(SimpleListAPIView):

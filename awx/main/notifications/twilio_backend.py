@@ -13,7 +13,10 @@ class TwilioBackend(BaseEmailBackend):
 
     init_parameters = {"account_sid": {"label": "Account SID", "type": "string"},
                        "account_token": {"label": "Account Token", "type": "password"},
-                       "from_phone": {"label": "Source Phone Number", "type": "string"}}
+                       "from_number": {"label": "Source Phone Number", "type": "string"},
+                       "to_numbers": {"label": "Destination SMS Numbers", "type": "list"}}
+    recipient_parameter = "to_numbers"
+    sender_parameter = "from_number"
 
     def __init__(self, account_sid, account_token, from_phone, fail_silently=False, **kwargs):
         super(TwilioBackend, self).__init__(fail_silently=fail_silently)
@@ -34,7 +37,7 @@ class TwilioBackend(BaseEmailBackend):
             try:
                 connection.messages.create(
                     to=m.to,
-                    from_=self.from_phone,
+                    from_=m.from_email,
                     body=m.body)
                 sent_messages += 1
             except Exception as e:

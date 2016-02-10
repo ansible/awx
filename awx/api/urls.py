@@ -20,6 +20,10 @@ organization_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/projects/$',                  'organization_projects_list'),
     url(r'^(?P<pk>[0-9]+)/teams/$',                     'organization_teams_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'organization_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers/$',                 'organization_notifiers_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_any/$',         'organization_notifications_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_error/$',         'organization_notifications_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_success/$',         'organization_notifications_success_list'),
 )
 
 user_urls = patterns('awx.api.views',
@@ -44,12 +48,16 @@ project_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/project_updates/$',           'project_updates_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'project_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'project_schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_any/$',         'project_notifications_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_error/$',         'project_notifications_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_success/$',         'project_notifications_success_list'),
 )
 
 project_update_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'project_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'project_update_cancel'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'project_update_stdout'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'project_update_notifications_list'),
 )
 
 team_urls = patterns('awx.api.views',
@@ -120,12 +128,16 @@ inventory_source_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'inventory_source_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_any/$',         'inventory_source_notifications_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_error/$',         'inventory_source_notifications_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_success/$',         'inventory_source_notifications_success_list'),
 )
 
 inventory_update_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'inventory_update_cancel'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'inventory_update_stdout'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'inventory_update_notifications_list'),
 )
 
 inventory_script_urls = patterns('awx.api.views',
@@ -153,6 +165,9 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/survey_spec/$',               'job_template_survey_spec'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_template_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_any/$',         'job_template_notifications_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_error/$',         'job_template_notifications_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications_success/$',         'job_template_notifications_success_list'),
 )
 
 job_urls = patterns('awx.api.views',
@@ -167,6 +182,7 @@ job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_tasks/$',                 'job_job_tasks_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'job_stdout'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'job_notifications_list'),
 )
 
 job_host_summary_urls = patterns('awx.api.views',
@@ -212,6 +228,13 @@ system_job_urls = patterns('awx.api.views',
 notification_template_urls = patterns('awx.api.views',
     url(r'^$',                                          'notification_template_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'notification_template_detail'),
+    url(r'^(?P<pk>[0-9]+)/test/$',                           'notification_template_test'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'notification_template_notification_list'),
+)
+
+notification_urls = patterns('awx.api.views',
+    url(r'^$',                                          'notification_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'notification_detail'),
 )
 
 schedule_urls = patterns('awx.api.views',
@@ -263,6 +286,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^system_job_templates/',  include(system_job_template_urls)),
     url(r'^system_jobs/',           include(system_job_urls)),
     url(r'^notification_templates/', include(notification_template_urls)),
+    url(r'^notifications/',         include(notification_urls)),
     url(r'^unified_job_templates/$', 'unified_job_template_list'),
     url(r'^unified_jobs/$',         'unified_job_list'),
     url(r'^activity_stream/',       include(activity_stream_urls)),

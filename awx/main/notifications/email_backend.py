@@ -12,5 +12,9 @@ class CustomEmailBackend(EmailBackend):
                        "username": {"label": "Username", "type": "string"},
                        "password": {"label": "Password", "type": "password"},
                        "use_tls": {"label": "Use TLS", "type": "bool"},
-                       "use_ssl": {"label": "Use SSL", "type": "bool"}}
+                       "use_ssl": {"label": "Use SSL", "type": "bool"},
+                       "sender": {"label": "Sender Email", "type": "string"},
+                       "recipients": {"label": "Recipient List", "type": "list"}}
+    recipient_parameter = "recipients"
+    sender_parameter = "sender"
 

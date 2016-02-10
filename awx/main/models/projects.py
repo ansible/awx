@@ -10,6 +10,7 @@ import urlparse
 # Django
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, smart_text
 from django.core.exceptions import ValidationError
@@ -20,6 +21,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
 
@@ -308,6 +310,23 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
                 return True
         return False
+
+    @property
+    def notifiers(self):
+        # Return all notifiers defined on the Project, and on the Organization for each trigger type
+        # TODO: Currently there is no org fk on project so this will need to be added back once that is
+        #       available after the rbac pr
+        base_notifiers = NotificationTemplate.objects.filter(active=True)
+        # error_notifiers = list(base_notifiers.filter(Q(project_notifications_for_errors__in=self) |
+        #                                              Q(organization_notifications_for_errors__in=self.organization)))
+        # success_notifiers = list(base_notifiers.filter(Q(project_notifications_for_success__in=self) |
+        #                                                Q(organization_notifications_for_success__in=self.organization)))
+        # any_notifiers = list(base_notifiers.filter(Q(project_notifications_for_any__in=self) |
+        #                                            Q(organization_notifications_for_any__in=self.organization)))
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_errors=self))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_success=self))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_any=self))
+        return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))

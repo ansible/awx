@@ -22,6 +22,7 @@ from jsonfield import JSONField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
@@ -330,6 +331,16 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     def _can_update(self):
         return self.can_start_without_user_input()
 
+    @property
+    def notifiers(self):
+        # Return all notifiers defined on the Job Template, on the Project, and on the Organization for each trigger type
+        # TODO: Currently there is no org fk on project so this will need to be added once that is
+        #       available after the rbac pr
+        base_notifiers = NotificationTemplate.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_errors__in=[self, self.project]))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_success__in=[self, self.project]))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifications_for_any__in=[self, self.project]))
+        return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
 
 class Job(UnifiedJob, JobOptions):
     '''
