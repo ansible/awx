@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-import route from './list.route';
-import controller from './list.controller';
+import route from './card.route';
+import controller from './card.controller';
 
 export default
-    angular.module('managementJobsList', [])
-        .controller('managementJobsListController', controller)
+    angular.module('managementJobsCard', [])
+        .controller('managementJobsCardController', controller)
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route);
         }]);

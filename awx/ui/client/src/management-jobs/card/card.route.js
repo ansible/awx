@@ -9,8 +9,8 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 export default {
     name: 'managementJobsList',
     route: '/management_jobs',
-    templateUrl: templateUrl('management-jobs/list/list'),
-    controller: 'managementJobsListController',
+    templateUrl: templateUrl('management-jobs/card/card'),
+    controller: 'managementJobsCardController',
     data: {
         activityStream: true,
         activityStreamTarget: 'management_job'

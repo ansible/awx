@@ -7,49 +7,37 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$location' , '$compile',  'CreateDialog', 'generateList',
+    [   'Wait', '$location' , '$compile',  'CreateDialog',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
-        '$state', 'Stream',
-        function( Wait, $location, $compile, CreateDialog, GenerateList,
+        '$state','$scope',
+        function( Wait, $location, $compile, CreateDialog, 
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
-            $state, Stream) {
+            $state, $scope) {
+                
+                var defaultUrl = GetBasePath('system_job_templates');
 
+                var getManagementJobs = function(){
+                    Rest.setUrl(defaultUrl);
+                    Rest.get()
+                        .success(function(data){
+                            $scope.mgmtCards = data.results;
+                            Wait('stop');
+                        })
+                        .error(function(data, status){
+                            ProcessErrors($scope, data, status, null, {hdr: 'Error!',
+                            msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
+                        });
+                };
+                getManagementJobs(); 
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
-                    defaultUrl = GetBasePath('system_job_templates'),
-                    list = managementJobsListObject,
-                    view = GenerateList;
-
+                    list = managementJobsListObject;
                 scope.cleanupJob = true;
 
-                view.inject( list, {
-                    mode: 'edit',
-                    scope: scope,
-                    showSearch: true
-                });
-
-                SearchInit({
-                    scope: scope,
-                    set: 'configure_jobs',
-                    list: list,
-                    url: defaultUrl
-                });
-
-                PaginateInit({
-                    scope: scope,
-                    list: list,
-                    url: defaultUrl
-                });
-
-                scope.search(list.iterator);
-
-                scope.showActivity = function () {
-                    Stream({ scope: scope });
-                };
 
                  // Cancel
                 scope.cancelConfigure = function () {
@@ -71,7 +59,7 @@ export default
                     }
                 };
 
-                scope.submitCleanupJob = function(id, name){
+                $scope.submitCleanupJob = function(id, name){
                     defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
                     CreateDialog({
                         id: 'prompt-for-days-facts',
@@ -174,7 +162,7 @@ export default
                     });
                 };
 
-                scope.submitJob = function (id, name) {
+                $scope.submitJob = function (id, name) {
                     Wait('start');
                     if(this.configure_job.job_type === "cleanup_facts"){
                         scope.submitCleanupJob(id, name);
@@ -250,10 +238,10 @@ export default
                     }
                 };
 
-                scope.configureSchedule = function() {
+                $scope.configureSchedule = function() {
                     $state.transitionTo('managementJobsSchedule', {
-                        management_job: this.configure_job, 
-                        management_job_id: this.configure_job.id
+                        management_job: this.job_type, 
+                        management_job_id: this.card.id
                     });
                 };
 
