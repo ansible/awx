@@ -13,10 +13,10 @@
 export default [
     '$scope', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'GetBasePath', 'Wait','LoadSchedulesScope', 'GetChoices',
-    'Stream', 'management_job', '$rootScope',
+    'management_job', '$rootScope',
     function($scope, $location, $stateParams, SchedulesList, Rest,
         ProcessErrors, GetBasePath, Wait, LoadSchedulesScope, GetChoices,
-        Stream, management_job, $rootScope) {
+        management_job, $rootScope) {
             var base, id, url, parentObject;
             $scope.management_job = management_job;
             base =  $location.path().replace(/^\//, '').split('/')[0];
@@ -74,10 +74,6 @@ export default [
 
             $scope.refreshJobs = function() {
                 $scope.search(SchedulesList.iterator);
-            };
-
-            $scope.showActivity = function () {
-                Stream({ scope: $scope });
             };
 
             Wait('start');

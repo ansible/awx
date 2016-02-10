@@ -11,12 +11,12 @@ export default
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
-        '$state', 'Stream',
+        '$state',
         function( Wait, $location, $compile, CreateDialog, GenerateList,
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
-            $state, Stream) {
+            $state) {
 
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
@@ -46,10 +46,6 @@ export default
                 });
 
                 scope.search(list.iterator);
-
-                scope.showActivity = function () {
-                    Stream({ scope: scope });
-                };
 
                  // Cancel
                 scope.cancelConfigure = function () {
@@ -252,7 +248,7 @@ export default
 
                 scope.configureSchedule = function() {
                     $state.transitionTo('managementJobsSchedule', {
-                        management_job: this.configure_job, 
+                        management_job: this.configure_job,
                         management_job_id: this.configure_job.id
                     });
                 };

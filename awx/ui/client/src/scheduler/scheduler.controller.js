@@ -13,11 +13,10 @@
 
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-        'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream',
+        'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices,
-    Stream) {
+    GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
 
         ClearScope();
 
@@ -77,10 +76,6 @@ export default [
 
         $scope.refreshJobs = function() {
             $scope.search(SchedulesList.iterator);
-        };
-
-        $scope.showActivity = function () {
-            Stream({ scope: $scope });
         };
 
         Wait('start');

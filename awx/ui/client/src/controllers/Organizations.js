@@ -13,7 +13,7 @@
 
 export function OrganizationsList($stateParams, $scope, $rootScope, $location,
     $log, Rest, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
-    Stream, $state) {
+    $state) {
 
     ClearScope();
 
@@ -111,10 +111,6 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
         $('#prompt-modal').modal('hide');
     });
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     $scope.addOrganization = function () {
         $state.transitionTo('organizations.add');
     };
@@ -156,7 +152,7 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
 OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
     '$location', '$log', 'Rest', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    'Stream', '$state'
+    '$state'
 ];
 
 
@@ -217,7 +213,7 @@ OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
-    Wait, Stream, $state) {
+    Wait, $state) {
 
     ClearScope();
 
@@ -306,12 +302,6 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
             });
     };
 
-    $scope.showActivity = function () {
-        Stream({
-            scope: $scope
-        });
-    };
-
     $scope.formCancel = function () {
         $scope.$emit("ReloadOrganzationCards");
         $scope.$emit("ShowOrgListHeader");
@@ -363,5 +353,5 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
 OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
-    'ClearScope', 'GetBasePath', 'Wait', 'Stream', '$state'
+    'ClearScope', 'GetBasePath', 'Wait', '$state'
 ];

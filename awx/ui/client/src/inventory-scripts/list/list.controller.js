@@ -7,11 +7,11 @@
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', '$state', 'Stream',
+        'Rest' , 'ProcessErrors', 'Prompt', '$state',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, $state, Stream
+            Rest, ProcessErrors, Prompt, $state
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -47,10 +47,6 @@ export default
                     inventory_script_id: this.inventory_script.id,
                     inventory_script: this.inventory_script
                 });
-            };
-
-            scope.showActivity = function () {
-                Stream({ scope: scope });
             };
 
             scope.deleteCustomInv =  function(id, name){
