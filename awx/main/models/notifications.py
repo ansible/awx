@@ -15,6 +15,7 @@ from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
 from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
+from awx.main.notifications.webhook_backend import WebhookBackend
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -29,7 +30,8 @@ class NotificationTemplate(CommonModel):
                           ('slack', _('Slack'), SlackBackend),
                           ('twilio', _('Twilio'), TwilioBackend),
                           ('pagerduty', _('Pagerduty'), PagerDutyBackend),
-                          ('hipchat', _('HipChat'), HipChatBackend)]
+                          ('hipchat', _('HipChat'), HipChatBackend),
+                          ('webhook', _('Webhook'), WebhookBackend)]
     NOTIFICATION_TYPE_CHOICES = [(x[0], x[1]) for x in NOTIFICATION_TYPES]
     CLASS_FOR_NOTIFICATION_TYPE = dict([(x[0], x[2]) for x in NOTIFICATION_TYPES])
 
