@@ -46,8 +46,10 @@ class AutoOneToOneField(models.OneToOneField):
 
 def resolve_field(obj, field):
     for f in field.split('.'):
-        if obj:
+        if hasattr(obj, f):
             obj = getattr(obj, f)
+        else:
+            obj = None
     return obj
 
 class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):

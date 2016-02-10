@@ -1,7 +1,10 @@
 import pytest
 
 from awx.main.models.credential import Credential
-from awx.main.models.inventory import Inventory
+from awx.main.models.inventory import (
+    Inventory,
+    Group,
+)
 from awx.main.models.projects import Project
 from awx.main.models.organization import (
     Organization,
@@ -44,6 +47,12 @@ def credential():
 @pytest.fixture
 def inventory(organization):
     return Inventory.objects.create(name="test-inventory", organization=organization)
+
+@pytest.fixture
+def group(inventory):
+    def g(name):
+        return Group.objects.create(inventory=inventory, name=name)
+    return g
 
 @pytest.fixture
 def permissions():

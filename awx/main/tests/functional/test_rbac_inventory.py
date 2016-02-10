@@ -172,3 +172,26 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert team.member_role.is_ancestor_of(inventory.updater_role) is False
     assert team.member_role.is_ancestor_of(inventory.executor_role)
 
+@pytest.mark.django_db
+def test_group_parent_admin(group, permissions, user):
+    u = user('admin', False)
+    parent1 = group('parent-1')
+    parent2 = group('parent-2')
+    childA = group('child-1')
+
+    parent1.admin_role.members.add(u)
+    assert parent1.accessible_by(u, permissions['admin'])
+    assert not parent2.accessible_by(u, permissions['admin'])
+    assert not childA.accessible_by(u, permissions['admin'])
+
+    childA.parents.add(parent1)
+    assert childA.accessible_by(u, permissions['admin'])
+
+    childA.parents.remove(parent1)
+    assert not childA.accessible_by(u, permissions['admin'])
+
+    parent2.children.add(childA)
+    assert not childA.accessible_by(u, permissions['admin'])
+
+    parent2.admin_role.members.add(u)
+    assert childA.accessible_by(u, permissions['admin'])
