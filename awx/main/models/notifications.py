@@ -13,6 +13,8 @@ from awx.main.models.base import * # noqa
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
+from awx.main.notifications.pagerduty_backend import PagerDutyBackend
+from awx.main.notifications.hipchat_backend import HipChatBackend
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -25,7 +27,9 @@ class NotificationTemplate(CommonModel):
 
     NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                           ('slack', _('Slack'), SlackBackend),
-                          ('twilio', _('Twilio'), TwilioBackend)]
+                          ('twilio', _('Twilio'), TwilioBackend),
+                          ('pagerduty', _('Pagerduty'), PagerDutyBackend),
+                          ('hipchat', _('HipChat'), HipChatBackend)]
     NOTIFICATION_TYPE_CHOICES = [(x[0], x[1]) for x in NOTIFICATION_TYPES]
     CLASS_FOR_NOTIFICATION_TYPE = dict([(x[0], x[2]) for x in NOTIFICATION_TYPES])
 
@@ -69,6 +73,8 @@ class NotificationTemplate(CommonModel):
 
     def send(self, subject, body):
         recipients = self.notification_configuration.pop(self.notification_class.recipient_parameter)
+        if not isinstance(recipients, list):
+            recipients = [recipients]
         sender = self.notification_configuration.pop(self.notification_class.sender_parameter, None)
         backend_obj = self.notification_class(**self.notification_configuration)
         notification_obj = EmailMessage(subject, body, sender, recipients)

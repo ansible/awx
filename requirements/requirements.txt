@@ -82,6 +82,7 @@ psycopg2
 pyasn1==0.1.8
 pycparser==2.14
 pycrypto==2.6.1
+pygerduty==0.32.1
 PyJWT==1.4.0
 pymongo==2.8
 pyOpenSSL==0.15.1
