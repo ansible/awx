@@ -30,7 +30,7 @@ This would provide anyone with the above roles access to ResourceB.
 
 ## Models
 
-The RBAC system defines a few new models. Each model 
+The RBAC system defines a few new models. These models represent the underlying RBAC implemnentation and generally will be abstracted away from your daily development tasks by the implicict fields and mixins.
 
 ### `Role`
 
@@ -54,7 +54,7 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
 
 #### `accessible_objects(cls, user, permissions)`
 
-`accessible_objects` is a class level method to use instead of `Model.objects`. This method will restrict the query of objects to only the objects that a user has the passed in permissions for. This is useful when you want to only filter and display a `Resource` that a users role grants them the `permissions` to.
+`accessible_objects` is a class method to use instead of `Model.objects`. This method will restrict the query of objects to only the objects that a user has the passed in permissions for. This is useful when you want to only filter and display a `Resource` that a users role grants them the `permissions` to. Note that any permission fields that are left blank will default to `False`. `accessible_objects` will only filter out resources where the expected permission was `True` but was returned as `False`.
 
 ```python
     objects = Model.accessible_objects(user, {'write':True})
@@ -63,8 +63,23 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
 
 #### `get_permissions(self, user)`
 
+`get_permissions` is an instance method that will give you the permission dictionary for a given user. This permission dictionary will take in to account any parent roles the user is apart of.
+
+```python
+    >>> instance.get_permissions(admin)
+    {'create':True, 'read':True, 'write':True, 'update':True,
+     'delete':True, 'scm_update':True, 'execute':True, 'use':True}
+```
+
+
 #### `accessible_by(self, user, permissions)`
 
+`accessible_by` is an instance method that wraps the `get_permissions` method. Given a user and a dictionary of permissions this method will return True or False if a users roles give them a set of permissions that match the provided permissions dict. Not that any permission fields left blank will default to `False`. `accessible_by` will only return `False` in a case where the passed in permission is expected to be `True` but was returned as `False`.
+
+```python
+    >>> instance.accessible_by(admin, {'use':True, 'read':True})
+    True
+```
 ## Usage
 
 After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unintrisive and natural.
