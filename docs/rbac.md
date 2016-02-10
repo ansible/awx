@@ -22,7 +22,7 @@ what roles are checked when accessing a resource.
      | -- AdminRole
            |-- parent = ResourceA.AdminRole
 
-When a user attempts to access ResourceB we will check for their level access using the set of all unique roles, include the parents.
+When a user attempts to access ResourceB we will check for their access using the set of all unique roles, include the parents.
 
     set: ResourceA.AdminRole, ResourceB.AdminRole
 
