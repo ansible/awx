@@ -7,12 +7,12 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$location' , '$compile',  'CreateDialog', 'generateList',
+    [   'Wait', '$location' , '$compile',  'CreateDialog',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
         '$state', 'Stream', '$scope',
-        function( Wait, $location, $compile, CreateDialog, GenerateList,
+        function( Wait, $location, $compile, CreateDialog, 
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
@@ -35,14 +35,8 @@ export default
                 getManagementJobs(); 
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
-                    list = managementJobsListObject,
-                    view = GenerateList;
+                    list = managementJobsListObject;
                 scope.cleanupJob = true;
-                view.inject( list, {
-                    mode: 'edit',
-                    scope: scope,
-                    showSearch: true
-                });
 
                 SearchInit({
                     scope: scope,

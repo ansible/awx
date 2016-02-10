@@ -17,7 +17,6 @@ export default
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
             $state, Stream) {
-                console.log('rootScope ', $rootScope);
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
                     defaultUrl = GetBasePath('system_job_templates'),
