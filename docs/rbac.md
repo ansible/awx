@@ -5,7 +5,7 @@ The intended audience of this document is the Ansible Tower developer.
 
 ## Overview
 
-The RBAC system allows you to create and layer roles for controlling access to resources. Any `django.Model` can
+The RBAC system allows you to create and layer roles for controlling access to resources. Any django Model can
 be made into a `Resource` in the RBAC system by using the `ResourceMixin`. Once a model is accessible as a resource you can
 extend the model definition to have specific roles using the `ImplicitRoleField`. This role field allows you to
 configure the name of a role, any parents a role may have, and the permissions having this role will grant you to the resource.
@@ -26,17 +26,19 @@ When a user attempts to access ResourceB we will check for their access using th
 
     set: ResourceA.AdminRole, ResourceB.AdminRole
 
-This would provide anyone with the ResourceA.AdminRole or ResourceB.AdminRole access to ResourceB.
+This would provide anyone with the above roles access to ResourceB.
 
 ## Models
 
-`Role`
+The RBAC system defines a few new models. Each model 
 
-`RoleHierarchy`
+### `Role`
 
-`Resource`
+### `Resource`
 
-`RolePermission`
+### `RoleHierarchy`
+
+### `RolePermission`
 
 ## Fields
 
@@ -46,8 +48,52 @@ This would provide anyone with the ResourceA.AdminRole or ResourceB.AdminRole ac
 
 ## Mixins
 
-`ResourceMixin`
+### `ResourceMixin`
 
-Usage
------
+By mixing in the `ResourceMixin` to your model, you are turning your model in to a `Resource` in the eyes of the RBAC implementation. What this means simply is that your model will now have an `ImplicitResourceField` named resource. Your model will also gain some methods that aid in the checking the access a users roles provides them to a resource.
+
+#### `accessible_objects(cls, user, permissions)`
+
+`accessible_objects` is a class level method to use instead of `Model.objects`. This method will restrict the query of objects to only the objects that a user has the passed in permissions for. This is useful when you want to only filter and display a `Resource` that a users role grants them the `permissions` to.
+
+```python
+    objects = Model.accessible_objects(user, {'write':True})
+    objects.filter(name__istartswith='december')
+```
+
+#### `get_permissions(self, user)`
+
+#### `accessible_by(self, user, permissions)`
+
+## Usage
+
+After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unintrisive and natural.
+
+```python
+    # make your model a Resource
+    class Document(Model, ResourceMixin):
+       ...
+    # declare your new role
+    readonly_role = ImplicitRoleField(
+        role_name="readonly",
+        resource_field="resource",
+        permissions={'read':True},
+    )
+```
+
+Now that your model is a `Resource` and has a `Role` defined, you can be get to access the helper methods provided to you by the `ResourceMixin` for checking access to your resource. Here is the output of a Python REPL session.
+
+```python
+    # we've created some documents and a user
+    >>> document = Document.objects.filter(pk=1)
+    >>> user = User.objects.first()
+    >>> document.accessible_by(user, {'read': True})
+    False  # not accessible by default
+    >>> document.readonly_role.memebers.add(user)
+    >>> document.accessible_by(user, {'read':True})
+    True   # now it is accessible
+    >>> document.accessible_by(user, {'read':True, 'write':True})
+    False  # my role does not have write permission
+```
+
 
