@@ -381,7 +381,8 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $log,
     $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
-    OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state) {
+    OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state,
+    CreateSelect2) {
 
     ClearScope();
 
@@ -409,6 +410,12 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
                 break;
             }
         }
+
+        CreateSelect2({
+            element: '#project_scm_type',
+            multiple: false
+        });
+
         $scope.scmRequired = false;
         master.scm_type = $scope.scm_type;
     });
@@ -523,7 +530,7 @@ ProjectsAdd.$inject = ['Refresh', '$scope', '$rootScope', '$compile', '$location
     '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller',
     'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList',
-    'GetChoices', 'DebugForm', 'Wait', '$state'
+    'GetChoices', 'DebugForm', 'Wait', '$state', 'CreateSelect2'
 ];
 
 
@@ -532,7 +539,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
     ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
     GetChoices, Empty, DebugForm, Wait, SchedulesControllerInit,
-    SchedulesListInit, SchedulesList, ProjectUpdate, $state) {
+    SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2) {
 
     ClearScope('htmlTemplate');
 
@@ -669,6 +676,10 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 }
 
                 master.scm_type = $scope.scm_type;
+                CreateSelect2({
+                    element: '#project_scm_type',
+                    multiple: false
+                });
                 $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
 
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
@@ -822,6 +833,6 @@ ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
     'ClearScope', 'GetBasePath', 'ReturnToCaller', 'GetProjectPath',
     'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'SchedulesControllerInit',
-    'SchedulesListInit', 'SchedulesList', 'ProjectUpdate', '$state'
+    'DebugForm', 'Wait', 'SchedulesControllerInit', 'SchedulesListInit',
+    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2'
 ];

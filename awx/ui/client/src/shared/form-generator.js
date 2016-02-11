@@ -139,10 +139,13 @@ import listGenerator from './list-generator/main';
 export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
-.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList', 'SearchWidget', 'PaginateWidget', 'Attr',
-    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon', 'Store', 'ActionButton',
-    function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, DropDown, Empty, SelectIcon, Store, ActionButton) {
+.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
+    'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
+    'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
+    'Store', 'ActionButton',
+    function ($rootScope, $location, $compile, GenerateList, SearchWidget,
+        PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
+        DropDown, Empty, SelectIcon, Store, ActionButton) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -1074,10 +1077,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
+                        html += "<div class=\"Form-dropDownContainer\">\n";
                         html += "<select ";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
-                        html += "class=\"form-control";
+                        html += "class=\"form-control Form-dropDown";
                         html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
                         html += (field.ngOptions) ? this.attr(field, 'ngOptions') : "" ;
@@ -1099,7 +1103,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
                             html += "</option>\n";
                         }
+
                         html += "</select>\n";
+                        html += "</div>\n";
+
                             // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
