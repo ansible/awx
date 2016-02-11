@@ -30,7 +30,7 @@ This would provide anyone with the above roles access to ResourceB.
 
 ## Models
 
-The RBAC system defines a few new models. These models represent the underlying RBAC implemnentation and generally will be abstracted away from your daily development tasks by the implicict fields and mixins.
+The RBAC system defines a few new models. These models represent the underlying RBAC implemnentation and generally will be abstracted away from your daily development tasks by the implicit fields and mixins.
 
 ### `Role`
 
@@ -43,6 +43,35 @@ The RBAC system defines a few new models. These models represent the underlying 
 ## Fields
 
 ### `ImplicitRoleField`
+
+`ImplicitRoleField` role fields are defined on your model. They provide the definition of grantable roles for accessing your 
+`Resource`. Configuring the role is done using some keyword arguments that are provided during declaration.
+
+`resource_field` is the name of the field in your model that is a `ForeignKey` to a `Resource`. If you use the 'ResourceMixin', this field is added to your model for you and is called `resource`. This field is required for the RBAC implementation to integrate any of the role fields you declare for your model. If you did not use the `ResourceMixin` and you have manually added a `Resource` link to your model you will need to set this field accordingly.
+
+`parent_role` is the link to any parent roles you want considered when a user is requesting access to your `Resource`. A `parent_role` can be declared as a single string, `parent.readonly`, or a list of many roles, `['parentA.readonly', 'parentB.readonly']`. It is important to note that a user does not need a parent role to access a resource if granted the role for that resource explicitly. Also a user will not have access to any parent resources by being granted a role for a child resource. We demonstrate this in the _Usage_ section of this document.
+
+`role_name` is the display name of the role. This is useful when generating reports or looking the results of queries.
+
+`permissions` is a dictionary of set permissions that a user with this role will gain to your `Resource`. A permission defaults to `False` if not explicitly provided. Below is a list of available permissions. The special permission `all` is a shortcut for generating a dict with all of the explicit permissions listed below set to `True`.
+
+```python
+    # Available Permissions
+    {
+        'create':True,
+        'read':True,
+        'write':True,
+        'update':True,
+        'delete':True,
+        'scm_update':True,
+        'use':True,
+        'execute':True,
+    }
+    # Special Permissions
+    {'all':True}
+    # Example: readonly
+    {'read':True}
+```
 
 ### `ImplicitResourceField`
 
@@ -96,7 +125,7 @@ After exploring the _Overview_ the usage of the RBAC implementation in your code
     )
 ```
 
-Now that your model is a `Resource` and has a `Role` defined, you can be get to access the helper methods provided to you by the `ResourceMixin` for checking access to your resource. Here is the output of a Python REPL session.
+Now that your model is a `Resource` and has a `Role` defined, you can begin to access the helper methods provided to you by the `ResourceMixin` for checking a users access to your resource. Here is the output of a Python REPL session.
 
 ```python
     # we've created some documents and a user
