@@ -1,21 +1,42 @@
-export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', function($compile, $state, $stateParams, EditSchedule, Wait, $scope) {
+export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope) {
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
-        $scope.$watchGroup(["schedulerStartDt",
+
+        $scope.$on("formUpdated", function() {
+            $rootScope.$broadcast("loadSchedulerDetailPane");
+        });
+
+        $scope.$watchGroup(["schedulerName",
+            "schedulerStartDt",
             "schedulerStartHour",
             "schedulerStartMinute",
             "schedulerStartSecond",
             "schedulerTimeZone",
             "schedulerFrequency",
-            "schedulerInterval"], function(val) {
-                if (!$scope.scheduler_form.$invalid) {
-                    $scope.schedulerIsValid = true;
-                } else {
-                    $scope.schedulerIsValid = false;
-                }
-                return val;
-        });
+            "schedulerInterval",
+            "monthlyRepeatOption",
+            "monthDay",
+            "monthlyOccurrence",
+            "monthlyWeekDay",
+            "yearlyRepeatOption",
+            "yearlyMonth",
+            "yearlyMonthDay",
+            "yearlyOccurrence",
+            "yearlyWeekDay",
+            "yearlyOtherMonth",
+            "schedulerEnd",
+            "schedulerOccurrenceCount",
+            "schedulerEndDt"
+        ], function() {
+            $scope.$emit("formUpdated");
+        }, true);
+
+        $scope.$watch("weekDays", function() {
+            $scope.$emit("formUpdated");
+        }, true);
+
+        $rootScope.$broadcast("loadSchedulerDetailPane");
         Wait('stop');
     });
 

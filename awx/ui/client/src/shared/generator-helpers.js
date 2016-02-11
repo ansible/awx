@@ -463,7 +463,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += (field['class']) ? " " + field['class'] : "";
                 html += " " + field.columnClass;
                 html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".enabled\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + list.iterator + ".enabled' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + list.iterator + ".enabled' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
-                console.log(html);
             } else {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
