@@ -1008,7 +1008,13 @@ var tower = angular.module('Tower', [
             }
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
                 // initially set row edit indicator for crud pages
-                if ($location.$$path.split("/")[2]) {
+                if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
+                    var list = $location.$$path.split("/")[3];
+                    var id = $location.$$path.split("/")[4];
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
+                    $rootScope.initialIndicatorLoad = true;
+                } else if ($location.$$path.split("/")[2]) {
                     var list = $location.$$path.split("/")[1];
                     var id = $location.$$path.split("/")[2];
                     $rootScope.listBeingEdited = list;
@@ -1149,7 +1155,19 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
                     // broadcast event change if editing crud object
-                    if ($location.$$path.split("/")[2]) {
+                    if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
+                        var list = $location.$$path.split("/")[3];
+                        var id = $location.$$path.split("/")[4];
+
+                        if (!$rootScope.initialIndicatorLoad) {
+                            delete $rootScope.listBeingEdited;
+                            delete $rootScope.rowBeingEdited;
+                        } else {
+                            delete $rootScope.initialIndicatorLoad;
+                        }
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($location.$$path.split("/")[2]) {
                         var list = $location.$$path.split("/")[1];
                         var id = $location.$$path.split("/")[2];
 
