@@ -162,13 +162,6 @@ export default
                         scope[iterator + 'Loading'] = false;
                         scope[iterator + 'HoldInput'] = true;
 
-                        if(scope[iterator + 'SearchValue'] && scope[iterator + 'SearchValue'] !== '') {
-                            scope[iterator + '_active_search'] = true;
-                        }
-                        else {
-                            scope[iterator + '_active_search'] = false;
-                        }
-
                         if (scope[iterator + 'SearchValue']) {
                             // User typed a value in input field
                             scope[iterator + 'ShowStartBtn'] = false;

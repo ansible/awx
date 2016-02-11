@@ -333,6 +333,8 @@ export default
                     var i, modifier,
                         widgets = (list.searchWidgets) ? list.searchWidgets : 1;
 
+                    scope[iterator + '_active_search'] = false;
+
                     for (i = 1; i <= widgets; i++) {
                         modifier = (i === 1) ? '' : i;
                         if ($('#search-widget-container' + modifier)) {
@@ -342,6 +344,7 @@ export default
                                 if (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject !== 'all') {
                                     // An object type is selected
                                     scope[iterator + 'HideAllStartBtn' + modifier] = false;
+                                    scope[iterator + '_active_search'] = true;
                                     if (scope[iterator + 'SearchValue' + modifier]) {
                                         // A search value was entered
                                         scope[iterator + 'ShowStartBtn' + modifier] = false;
@@ -369,6 +372,7 @@ export default
                             }
                         }
                     }
+
                     e.stopPropagation();
                     scope.$emit('prepareSearch2', iterator, page, load, calcOnly, deferWaitStop);
 
@@ -401,6 +405,7 @@ export default
                                 (scope[iterator + 'SelectShow' + modifier] && scope[iterator + 'SearchSelectValue' + modifier]) ||
                                 (list.fields[scope[iterator + 'SearchField' + modifier]] &&
                                     list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'gtzero')) {
+                                scope[iterator + '_active_search'] = true;
                                 if (list.fields[scope[iterator + 'SearchField' + modifier]].searchField) {
                                     scope[iterator + 'SearchParams'] += '&' + list.fields[scope[iterator + 'SearchField' + modifier]].searchField + '__';
                                 } else if (list.fields[scope[iterator + 'SearchField' + modifier]].sourceModel) {
