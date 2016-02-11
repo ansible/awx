@@ -410,10 +410,9 @@ angular.module('AngularScheduler', ['underscore'])
                 var that = this;
 
                 that.scope.$on("loadSchedulerDetailPane", function() {
-                    console.log("loaded scheduler detail pane");
                     that.isValid();
                 });
-                
+
                 // Returns an rrule object
                 this.getRRule = function() {
                     var options = this.getOptions();
