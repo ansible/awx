@@ -57,16 +57,8 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 ```python
     # Available Permissions
-    {
-        'create':True,
-        'read':True,
-        'write':True,
-        'update':True,
-        'delete':True,
-        'scm_update':True,
-        'use':True,
-        'execute':True,
-    }
+    {'create':True, 'read':True, 'write':True, 'update':True,
+     'delete':True, 'scm_update':True, 'use':True, 'execute':True}
     # Special Permissions
     {'all':True}
     # Example: readonly
