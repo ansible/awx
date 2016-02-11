@@ -19,7 +19,7 @@
  *
  *
 */
-export function PortalController($scope, $compile, $stateParams, $rootScope, $location, $log, Wait, ClearScope, Stream, Rest, GetBasePath, ProcessErrors,
+export function PortalController($scope, $compile, $stateParams, $rootScope, $location, $log, Wait, ClearScope, Rest, GetBasePath, ProcessErrors,
     PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
         ClearScope('portal');
@@ -137,6 +137,6 @@ export function PortalController($scope, $compile, $stateParams, $rootScope, $lo
 
     }
 
-PortalController.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
+PortalController.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors',
     'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];

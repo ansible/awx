@@ -14,7 +14,7 @@
 export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, GetChoices, Wait, Stream, $state) {
+    SelectionInit, GetChoices, Wait, $state) {
 
     ClearScope();
 
@@ -88,11 +88,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         callback: 'choicesReadyCredential'
     });
 
-
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     $scope.addCredential = function () {
         $state.transitionTo('credentials.add');
     };
@@ -130,7 +125,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    'Stream', '$state'
+    '$state'
 ];
 
 
@@ -310,7 +305,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
-    OwnerChange, FormSave, Stream, Wait, $state) {
+    OwnerChange, FormSave, Wait, $state) {
 
     ClearScope();
 
@@ -502,9 +497,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         field: 'become_method',
         variable: 'become_options'
     });
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
 
     // Save changes to the parent
     $scope.formSave = function () {
@@ -619,5 +611,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
-    'FormSave', 'Stream', 'Wait', '$state'
+    'FormSave', 'Wait', '$state'
 ];

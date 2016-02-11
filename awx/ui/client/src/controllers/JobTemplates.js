@@ -15,7 +15,7 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
     SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun,
-    Wait, Stream, CreateDialog, $compile, $state) {
+    Wait, CreateDialog, $compile, $state) {
 
     ClearScope();
 
@@ -57,12 +57,6 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     }
 
     $scope.search(list.iterator);
-
-
-
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
 
     $scope.addJobTemplate = function () {
         $state.transitionTo('jobTemplates.add');
@@ -246,7 +240,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
     'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
-    'LookUpInit', 'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile',
+    'LookUpInit', 'PlaybookRun', 'Wait', 'CreateDialog' , '$compile',
     '$state'
 ];
 
@@ -684,7 +678,7 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
     ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller,
     ClearScope, InventoryList, CredentialList, ProjectList, LookUpInit,
     GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
-    Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
+    Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
     JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
     SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state){
 
@@ -1157,12 +1151,6 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
 
     };
 
-    $scope.showActivity = function () {
-        Stream({
-            scope: $scope
-        });
-    };
-
     $scope.formCancel = function () {
         $state.transitionTo('jobTemplates');
     };
@@ -1245,7 +1233,7 @@ JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile',
     'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit',
     'RelatedPaginateInit','ReturnToCaller', 'ClearScope', 'InventoryList',
     'CredentialList', 'ProjectList', 'LookUpInit', 'GetBasePath', 'md5Setup',
-    'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream',
+    'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait',
     'Empty', 'Prompt', 'ParseVariableString', 'ToJSON',
     'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
     'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',

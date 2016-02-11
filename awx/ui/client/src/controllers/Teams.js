@@ -14,7 +14,7 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, Stream, $state, Refresh) {
+    SelectionInit, Wait, $state, Refresh) {
 
     ClearScope();
 
@@ -79,10 +79,6 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     });
     $scope.search(list.iterator);
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     $scope.addTeam = function () {
         $state.transitionTo('teams.add');
     };
@@ -126,7 +122,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    'Stream', '$state', 'Refresh'
+    '$state', 'Refresh'
 ];
 
 
@@ -196,7 +192,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope,
     LookUpInit, Prompt, GetBasePath, CheckAccess, OrganizationList, Wait,
-    Stream, fieldChoices, fieldLabels, permissionsSearchSelect, $state) {
+    fieldChoices, fieldLabels, permissionsSearchSelect, $state) {
 
     ClearScope();
 
@@ -327,10 +323,6 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
         }
     };
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     // Save changes to the parent
     $scope.formSave = function () {
         var data = {}, fld;
@@ -440,6 +432,6 @@ TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath',
-    'CheckAccess', 'OrganizationList', 'Wait', 'Stream', 'fieldChoices',
+    'CheckAccess', 'OrganizationList', 'Wait', 'fieldChoices',
     'fieldLabels', 'permissionsSearchSelect', '$state'
 ];
