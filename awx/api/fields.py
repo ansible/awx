@@ -73,7 +73,7 @@ class EncryptedPasswordField(CharNullField):
     def to_representation(self, value):
         # Replace the actual encrypted value with the string $encrypted$.
         if force_text(value).startswith('$encrypted$'):
-             return '$encrypted$'
+            return '$encrypted$'
         return value
 
     
