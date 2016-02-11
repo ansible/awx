@@ -7,7 +7,7 @@ from django.utils.encoding import force_text
 # Django REST Framework
 from rest_framework import serializers
 
-__all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'EncryptedPasswordField']
+__all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'EncryptedPasswordField', 'VerbatimField']
 
 
 class NullFieldMixin(object):
@@ -76,5 +76,14 @@ class EncryptedPasswordField(CharNullField):
             return '$encrypted$'
         return value
 
-    
-    
+
+class VerbatimField(serializers.Field):
+    '''
+    Custom field that passes the value through without changes.
+    '''
+
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value

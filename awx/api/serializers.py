@@ -44,7 +44,7 @@ from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
-from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField
+from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
 
 from awx.fact.models import * # noqa
 
@@ -2216,6 +2216,8 @@ class ActivityStreamSerializer(BaseSerializer):
 
 class TowerSettingsSerializer(BaseSerializer):
 
+    value = VerbatimField()
+
     class Meta:
         model = TowerSettings
         fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
@@ -2249,14 +2251,20 @@ class TowerSettingsSerializer(BaseSerializer):
         manifest = settings.TOWER_SETTINGS_MANIFEST
         if attrs['key'] not in manifest:
             raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
-        # TODO: Type checking/coercion, contextual validation
-        return super(TowerSettingsSerializer, self).validate(attrs)
 
-    def _create(self, validated_data):
-        current_val = TowerSettings.objects.filter(key=validated_data['key'])
-        if current_val.exists():
-            return self.update(current_val[0], validated_data)
-        return super(TowerSettingsSerializer, self).create(validated_data)
+        if attrs['value_type'] == 'json':
+            attrs['value'] = json.dumps(attrs['value'])
+        elif attrs['value_type'] == 'list':
+            try:
+                attrs['value'] = ','.join(map(force_text, attrs['value']))
+            except TypeError:
+                attrs['value'] = force_text(attrs['value'])
+        elif attrs['value_type'] == 'bool':
+            attrs['value'] = force_text(bool(attrs['value']))
+        else:
+            attrs['value'] = force_text(attrs['value'])
+
+        return super(TowerSettingsSerializer, self).validate(attrs)
 
 
 class AuthTokenSerializer(serializers.Serializer):
