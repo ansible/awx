@@ -4,13 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
-export default [function() {
+export default ['templateUrl', function(templateUrl) {
     return {
         restrict: 'E',
         scope: true,
         replace: true,
-        template: '<select class="form-control" ng-model="streamTarget" ng-options="opt.value as opt.label for opt in options" ng-change="changeStreamTarget()"></select>',
-        controller: ['$scope', '$state', function($scope, $state) {
+        templateUrl: templateUrl('activity-stream/streamDropdownNav/stream-dropdown-nav'),
+        controller: ['$scope', '$state', 'CreateSelect2', function($scope, $state, CreateSelect2) {
 
             $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
 
@@ -28,6 +28,11 @@ export default [function() {
                 {label: 'Teams', value: 'team'},
                 {label: 'Users', value: 'user'}
             ];
+
+            CreateSelect2({
+                element:'#stream-dropdown-nav',
+                multiple: false
+            });
 
             $scope.changeStreamTarget = function(){
 
