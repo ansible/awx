@@ -18,7 +18,6 @@ from crum.signals import current_user_getter
 # AWX
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
-from awx.main.fields import ImplicitRoleField
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
@@ -116,37 +115,13 @@ def store_initial_active_state(sender, **kwargs):
     else:
         instance._saved_active_state = True
 
-def rebuild_role_hierarchy_cache(sender, reverse, model, pk_set, **kwargs):
+def rebuild_role_ancestor_list(sender, reverse, model, instance, pk_set, **kwargs):
     if reverse:
         for id in pk_set:
-            model.objects.get(id=id).rebuild_role_hierarchy_cache()
+            model.objects.get(id=id).rebuild_role_ancestor_list()
     else:
-        kwargs['instance'].rebuild_role_hierarchy_cache()
+        instance.rebuild_role_ancestor_list()
 
-def rebuild_group_parent_roles(instance, action, reverse, **kwargs):
-    objects = []
-    if reverse:
-        objects = instance.children.all()
-    else:
-        objects = instance.parents.all()
-
-    for obj in objects:
-        fields = [f for f in instance._meta.get_fields() if type(f) is ImplicitRoleField]
-        for field in fields:
-            role = None
-            if reverse:
-                if hasattr(obj, field.name):
-                    parent_role = getattr(instance, field.name)
-                    role = getattr(obj, field.name)
-            else:
-                role = getattr(instance, field.name)
-                parent_role = getattr(obj, field.name)
-
-            if role:
-                if action == 'post_add':
-                    role.parents.add(parent_role)
-                elif action == 'pre_remove':
-                    role.parents.remove(parent_role)
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -166,8 +141,8 @@ post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
-m2m_changed.connect(rebuild_role_hierarchy_cache, Role.parents.through)
-m2m_changed.connect(rebuild_group_parent_roles, Group.parents.through)
+m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+#m2m_changed.connect(rebuild_group_parent_roles, Group.parents.through)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
