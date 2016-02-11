@@ -44,7 +44,7 @@ class SlackBackend(BaseEmailBackend):
                     self.connection.rtm_send_message(r, m.body)
                     sent_messages += 1
             except Exception as e:
+                logger.error("Exception sending messages: {}".format(e))
                 if not self.fail_silently:
                     raise
-                logger.error("Exception sending messages: {}".format(e))
         return sent_messages

@@ -47,6 +47,7 @@ httplib2==0.9
 idna==2.0
 importlib==1.0.3
 ipaddress==1.0.14
+irc==13.3.1
 iso8601==0.1.10
 isodate==0.5.1
 jsonpatch==1.11
