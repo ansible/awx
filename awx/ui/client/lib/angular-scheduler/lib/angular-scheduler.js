@@ -996,7 +996,11 @@ angular.module('AngularScheduler', ['underscore'])
     .filter('schZeroPad', [ function() {
         return function (n, pad) {
             var str = (Math.pow(10,pad) + '').replace(/^1/,'') + (n + '').trim();
-            return str.substr(str.length - pad);
+            if (str.substr(str.length - pad) === 'll') {
+                return undefined;
+            } else {
+                return str.substr(str.length - pad);
+            }
         };
     }])
 
@@ -1052,6 +1056,10 @@ angular.module('AngularScheduler', ['underscore'])
         return {
             require: 'ngModel',
             link: function(scope, element, attr, ctrl) {
+                if (element.attr("ng-model").indexOf("$parent") > -1) {
+                    scope = scope.$parent;
+                    attr.ngModel = attr.ngModel.split("$parent.")[1];
+                }
                 // Add jquerui spinner to 'spinner' type input
                 var form = attr.schSpinner,
                     zeroPad = attr.zeroPad,
@@ -1076,15 +1084,24 @@ angular.module('AngularScheduler', ['underscore'])
                             });
                         }, 100);
                     },
+                    icons: {
+                        down: "Form-numberInputButton fa fa-angle-down",
+                        up: "Form-numberInputButton fa fa-angle-up"
+                    },
                     spin: function() {
-                        scope[form].$setDirty();
-                        ctrl.$dirty = true;
-                        ctrl.$pristine = false;
+                        if (scope[form][attr.ngModel]) {
+                            scope[form][attr.ngModel].$setDirty();
+                            scope[form][attr.ngModel].$dirty = true;
+                            scope[form][attr.ngModel].$pristine = false;
+                        }
                         if (!scope.$$phase) {
                             scope.$digest();
                         }
                     }
                 });
+
+                $('.ui-icon').text('');
+                $(".ui-icon").removeClass('ui-icon ui-icon-triangle-1-n ui-icon-triangle-1-s');
 
                 $(element).on("click", function () {
                     $(element).select();
