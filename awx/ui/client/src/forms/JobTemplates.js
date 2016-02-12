@@ -173,10 +173,11 @@ export default
                 },
                 job_tags: {
                     label: 'Job Tags',
-                    type: 'textarea',
+                    type: 'text',
                     rows: 1,
                     addRequired: false,
                     editRequired: false,
+                    'elementClass': 'Form-textInput',
                     column: 2,
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
