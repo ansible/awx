@@ -41,7 +41,7 @@ export default
                 changes: {
                     label: 'Changes',
                     type: 'textarea',
-                    class: 'Form-textArea',
+                    class: 'Form-textAreaLabel',
                     ngHide: "!changes || changes =='' || changes == 'null'",
                     readonly: true
                 }

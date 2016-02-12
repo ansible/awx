@@ -173,7 +173,7 @@ export default
                 },
                 job_tags: {
                     label: 'Job Tags',
-                    type: 'text',
+                    type: 'textarea',
                     rows: 1,
                     addRequired: false,
                     editRequired: false,
@@ -192,7 +192,7 @@ export default
                 variables: {
                     label: 'Extra Variables',
                     type: 'textarea',
-                    class: 'Form-textArea',
+                    class: 'Form-textAreaLabel',
                     rows: 6,
                     addRequired: false,
                     editRequired: false,

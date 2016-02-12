@@ -1043,9 +1043,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.rows) ? this.attr(field, 'rows') : "";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
-                        html += "class=\"form-control";
+                        html += "class=\"form-control Form-textArea";
                         html += (field['class']) ? " " + field['class'] : "";
-                        html += (field['elementClass']) ? " " + field['elementClass'] : ""; 
+                        html += (field['elementClass']) ? " " + field['elementClass'] : "";
                         html += "\" ";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += buildId(field, fld, this.form);
