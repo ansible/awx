@@ -108,6 +108,8 @@ angular.module('AngularScheduler', ['underscore'])
                     scope.schedulerEnd = scope.endOptions[0];
                 }
                 scope.sheduler_frequency_error = false;
+
+                scope.$emit("updateSchedulerSelects");
             };
 
             scope.showCalendar = function(fld) {

@@ -115,7 +115,8 @@
     margin-top: 2px;
 }
 
-.RepeatFrequencyOptions-spacedSelect {
+.RepeatFrequencyOptions-spacedSelect,
+.RepeatFrequencyOptions-spacedSelect ~ .select2 {
     margin-bottom: 10px;
 }
 
@@ -136,4 +137,26 @@
 .RepeatFrequencyOptions-error {
     flex: initial;
     width: 100%;
+}
+
+.RepeatFrequencyOptions-nameBorderErrorFix {
+    border-color: #ff5850 !important;
+}
+
+.RepeatFrequencyOptions-inputGroup {
+    display: flex;
+    justify-content: space-between;
+}
+
+.RepeatFrequencyOptions-inputGroup--thirds > .select2 {
+    width: ~"calc(33% - 3px)" !important;
+}
+
+.RepeatFrequencyOptions-inputGroup--halves > .select2 {
+    width: ~"calc(50% - 3px)" !important;
+}
+
+.RepeatFrequencyOptions-inputGroup--halvesWithNumber > .select2 {
+    width: ~"calc(50% - 3px)" !important;
+    margin-right: 7px;
 }
