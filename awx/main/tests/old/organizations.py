@@ -262,7 +262,9 @@ class OrganizationsTest(BaseTest):
         data1 = self.post(self.collection(), new_org, expect=201, auth=self.get_super_credentials())
 
         # duplicate post results in 400
-        self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
+        response = self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
+        self.assertTrue('name' in response, response)
+        self.assertTrue('Name' in response['name'][0], response)
 
         # look at what we got back from the post, make sure we added an org
         last_org = Organization.objects.order_by('-pk')[0]

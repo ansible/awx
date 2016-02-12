@@ -6,7 +6,7 @@ import json
 
 # Django
 from django.db import models
-from django.utils.encoding import smart_text
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 # Tower
@@ -34,7 +34,9 @@ class TowerSettings(CreatedModifiedModel):
     )
     description = models.TextField()
     category = models.CharField(max_length=128)
-    value = models.TextField()
+    value = models.TextField(
+        blank=True,
+    )
     value_type = models.CharField(
         max_length=12,
         choices=SETTINGS_TYPE_CHOICES
@@ -54,9 +56,12 @@ class TowerSettings(CreatedModifiedModel):
         elif self.value_type == 'password':
             converted_type = self.value
         elif self.value_type == 'list':
-            converted_type = [x.strip() for x in self.value.split(',')]
+            if self.value:
+                converted_type = [x.strip() for x in self.value.split(',')]
+            else:
+                converted_type = []
         elif self.value_type == 'bool':
-            converted_type = smart_text(self.value).lower() in ('true', 'yes', '1')
+            converted_type = force_text(self.value).lower() in ('true', 'yes', '1')
         elif self.value_type == 'string':
             converted_type = self.value
         else:
@@ -69,8 +74,11 @@ class TowerSettings(CreatedModifiedModel):
         if self.value_type == 'json':
             self.value = json.dumps(value)
         elif self.value_type == 'list':
-            self.value = ','.join(value)
+            try:
+                self.value = ','.join(map(force_text, value))
+            except TypeError:
+                self.value = force_text(value)
         elif self.value_type == 'bool':
-            self.value = smart_text(bool(value))
+            self.value = force_text(bool(value))
         else:
-            self.value = smart_text(value)
+            self.value = force_text(value)
