@@ -132,7 +132,6 @@ After exploring the _Overview_ the usage of the RBAC implementation in your code
     # declare your new role
     readonly_role = ImplicitRoleField(
         role_name="readonly",
-        resource_field="resource",
         permissions={'read':True},
     )
 ```
@@ -151,5 +150,3 @@ Now that your model is a `Resource` and has a `Role` defined, you can begin to a
     >>> document.accessible_by(user, {'read':True, 'write':True})
     False  # my role does not have write permission
 ```
-
-
