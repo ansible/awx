@@ -32,7 +32,7 @@ permissions are implicitly granted to all parents. (Technically speaking, this
 forms a directional graph instead of a hierarchy, but the concept should remain
 intuitive.)
 
-![Example RBAC hierarchy](img/rbac_example.svg)
+![Example RBAC hierarchy](img/rbac_example.png?raw=true)
 
 
 ### Implementation Overview
