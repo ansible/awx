@@ -557,6 +557,11 @@ var tower = angular.module('Tower', [
                 url: '/inventories/:inventory_id/manage?groups',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'inventory',
+                    activityStreamId: 'inventory_id'
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();

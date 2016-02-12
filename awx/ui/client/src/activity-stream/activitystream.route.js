@@ -18,10 +18,10 @@ export default {
         subTitle:
         [   '$stateParams',
             'Rest',
-            'ModelToPlural',
+            'ModelToBasePathKey',
             'GetBasePath',
             'ProcessErrors',
-            function($stateParams, rest, ModelToPlural, getBasePath, ProcessErrors) {
+            function($stateParams, rest, ModelToBasePathKey, getBasePath, ProcessErrors) {
                 // If we have a target and an ID then we want to go grab the name of the object
                 // that we're examining with the activity stream.  This name will be used in the
                 // subtitle.
@@ -29,7 +29,7 @@ export default {
                     var target = $stateParams.target;
                     var id = $stateParams.id;
 
-                    var url = getBasePath(ModelToPlural(target)) + id + '/';
+                    var url = getBasePath(ModelToBasePathKey(target)) + id + '/';
                     rest.setUrl(url);
                     return rest.get()
                         .then(function(data) {
