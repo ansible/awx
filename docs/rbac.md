@@ -5,14 +5,46 @@ The intended audience of this document is the Ansible Tower developer.
 
 ## Overview
 
-The RBAC system allows you to create and layer roles for controlling access to resources. Any django Model can
+### Role Based Access Control System Basics
+
+With Role Based Access Control Systems there are four main concepts to be
+familiar with, Roles, Resources, Users, and Permissions. Users can be members
+of a role, which gives them access to any permissions bestowed upon that Role.
+In order to access a Resource, a Permission must be granted to a Role enabling
+all members of that Role to access the Resource.
+
+For example, if I have an organization named "MyCompany" and I want to allow
+two people, "Alice", and "Bob", access to manage all the settings associated
+with that organization, I'd create a role (maybe called "MyCompany
+Administrator"), create a Permission to edit the organization "MyCompany" and
+assign it to the "MyCompany Administrator" role. I'd also add the two users
+"Alice" and "Bob" as members of the Role.
+
+It is often the case that you have many Roles in a system, and you want some
+roles to include all of the permissions of other roles. For example, you may
+want a System Administrator to have access to everything that an Organization
+Administrator has access to, who has everything that a Project Administrator
+has access to, and so on. We refer to this concept as the 'Role Hierarchy', and
+is represented by allowing Roles to have "Parent Roles". Any permission that a
+Role has is implicitly granted to any parent roles (or parents of those
+parents, and so on). Of course Roles can have more than one parent, and
+permissions are implicitly granted to all parents. (Technically speaking, this
+forms a directional graph instead of a hierarchy, but the concept should remain
+intuitive.)
+
+![Example RBAC hierarchy](img/rbac_example.png?raw=true)
+
+
+### Implementation Overview
+
+The RBAC system allows you to create and layer roles for controlling access to resources. Any Django Model can
 be made into a `Resource` in the RBAC system by using the `ResourceMixin`. Once a model is accessible as a resource you can
 extend the model definition to have specific roles using the `ImplicitRoleField`. This role field allows you to
 configure the name of a role, any parents a role may have, and the permissions having this role will grant you to the resource.
 
 ### Roles
 
-Roles are defined for a resource. If a role has any parents, these parents will be considered when determing
+Roles are defined for a resource. If a role has any parents, these parents will be considered when determining
 what roles are checked when accessing a resource.
 
     ResourceA
@@ -34,11 +66,11 @@ There is a special case _Singleton Role_ that you can create. This type of role 
 
 ### Models
 
-The RBAC system defines a few new models. These models represent the underlying RBAC implemnentation and generally will be abstracted away from your daily development tasks by the implicit fields and mixins.
+The RBAC system defines a few new models. These models represent the underlying RBAC implementation and generally will be abstracted away from your daily development tasks by the implicit fields and mixins.
 
 #### `Role`
 
-`Role` defines a single role within the RBAC implementation. It encapsulates the `ancestors`, `parents`, and `members` for a role. This model is intentially kepts dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
+`Role` defines a single role within the RBAC implementation. It encapsulates the `ancestors`, `parents`, and `members` for a role. This model is intentionally kept dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
 
 ##### `grant(self, resource, permissions)`
 
@@ -54,7 +86,7 @@ The `singleton` static method is a helper method on the `Role` model that helps 
 
 #### `Resource`
 
-`Resource` is simply a method to associate many different objects (that may share PK/unique names) with a single type and ensures that those are unique with respect to the RBAC implementaion. Any Django model can be a resource in the RBAC implmentation by adding a `resource` field of type `Resource`, but in most cases it is reccomended to use the `ResourceMixin` which handles this for you.
+`Resource` is simply a method to associate many different objects (that may share PK/unique names) with a single type and ensures that those are unique with respect to the RBAC implementation. Any Django model can be a resource in the RBAC implementation by adding a `resource` field of type `Resource`, but in most cases it is recommended to use the `ResourceMixin` which handles this for you.
 
 #### `RolePermission`
 
@@ -64,7 +96,7 @@ The `singleton` static method is a helper method on the `Role` model that helps 
 
 #### `ImplicitRoleField`
 
-`ImplicitRoleField` role fields are defined on your model. They provide the definition of grantable roles for accessing your 
+`ImplicitRoleField` role fields are defined on your model. They provide the definition of grantable roles for accessing your
 `Resource`. Configuring the role is done using some keyword arguments that are provided during declaration.
 
 `parent_role` is the link to any parent roles you want considered when a user is requesting access to your `Resource`. A `parent_role` can be declared as a single string, `parent.readonly`, or a list of many roles, `['parentA.readonly', 'parentB.readonly']`. It is important to note that a user does not need a parent role to access a resource if granted the role for that resource explicitly. Also a user will not have access to any parent resources by being granted a role for a child resource. We demonstrate this in the _Usage_ section of this document.
