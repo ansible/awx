@@ -12,13 +12,38 @@
 
 
 export function OrganizationsList($stateParams, $scope, $rootScope, $location,
-    $log, Rest, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
-    $state) {
+    $log, $compile, Rest, PaginateWidget, PaginateInit, SearchInit, OrganizationList, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
+    Stream, $state) {
 
     ClearScope();
 
-    var defaultUrl = GetBasePath('organizations');
+    var defaultUrl = GetBasePath('organizations'),
+        list = OrganizationList,
+        pageSize = $scope.orgCount;
 
+    PaginateInit({
+        scope: $scope,
+        list: list, 
+        url: defaultUrl,
+        pageSize: pageSize,
+    });
+    SearchInit({
+        scope: $scope,
+        list: list,
+        url: defaultUrl,
+    });
+
+    $scope.search(list.iterator);
+
+    $scope.PaginateWidget = PaginateWidget({
+        iterator: list.iterator,
+        set: 'organizations'
+    });
+
+    var paginationContainer = $('#pagination-container');
+    paginationContainer.html($scope.PaginateWidget);
+    $compile(paginationContainer.contents())($scope)
+  
     var parseCardData = function (cards) {
         return cards.map(function (card) {
             var val = {};
@@ -111,6 +136,10 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
         $('#prompt-modal').modal('hide');
     });
 
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
+    };
+
     $scope.addOrganization = function () {
         $state.transitionTo('organizations.add');
     };
@@ -150,9 +179,9 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
 }
 
 OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
-    '$location', '$log', 'Rest', 'Alert', 'Prompt', 'ClearScope',
+    '$location', '$log', '$compile', 'Rest', 'PaginateWidget', 'PaginateInit', 'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state'
+    'Stream', '$state'
 ];
 
 
@@ -166,6 +195,7 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
     var generator = GenerateForm,
         form = OrganizationForm,
         base = $location.path().replace(/^\//, '').split('/')[0];
+
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope});
     generator.reset();
@@ -213,7 +243,7 @@ OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
-    Wait, $state) {
+    Wait, Stream, $state) {
 
     ClearScope();
 
@@ -302,6 +332,12 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
             });
     };
 
+    $scope.showActivity = function () {
+        Stream({
+            scope: $scope
+        });
+    };
+
     $scope.formCancel = function () {
         $scope.$emit("ReloadOrganzationCards");
         $scope.$emit("ShowOrgListHeader");
@@ -353,5 +389,5 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
 OrganizationsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
-    'ClearScope', 'GetBasePath', 'Wait', '$state'
+    'ClearScope', 'GetBasePath', 'Wait', 'Stream', '$state'
 ];
