@@ -38,7 +38,7 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 #### `Role`
 
-`Role` defines a single role within the RBAC implementation. It encapsulates the `parents` and `members` for a role. This model is intentially kepts dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
+`Role` defines a single role within the RBAC implementation. It encapsulates the `ancestors`, `parents`, and `members` for a role. This model is intentially kepts dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
 
 ##### `grant(self, resource, permissions)`
 
@@ -48,15 +48,17 @@ The `grant` instance method takes a resource and a set of permissions (see below
 
 The `singleton` static method is a helper method on the `Role` model that helps in the creation of singleton roles. It will return the role by name if it already exists or create and return it in the case it does not.
 
-##### `rebuild_role_hierarchy_cache(self)`
+##### `rebuild_role_ancestor_list(self)`
 
-`rebuild_role_hierarchy` will rebuild the current role hierarchy that is stored in the `RoleHierarchy` table. This speeds up the querying of parent roles when assembling a users set of roles. This method is called for you automatically during `save`.
+`rebuild_role_ancestor_list` will rebuild the current role ancestory that is stored in the `ancestor` field of a `Role`. This is called for you by `save` and different Django signals.
 
 #### `Resource`
 
-#### `RoleHierarchy`
+`Resource` is simply a method to associate many different objects (that may share PK/unique names) with a single type and ensures that those are unique with respect to the RBAC implementaion. Any Django model can be a resource in the RBAC implmentation by adding a `resource` field of type `Resource`, but in most cases it is reccomended to use the `ResourceMixin` which handles this for you.
 
 #### `RolePermission`
+
+`RolePermission` holds a `role` and a `resource` and the permissions for that unique set. You interact with this model indirectly by using the `Role.grant` method and should never need to directly use this model unless you are extending the RBAC implementation itself.
 
 ### Fields
 
@@ -64,8 +66,6 @@ The `singleton` static method is a helper method on the `Role` model that helps 
 
 `ImplicitRoleField` role fields are defined on your model. They provide the definition of grantable roles for accessing your 
 `Resource`. Configuring the role is done using some keyword arguments that are provided during declaration.
-
-`resource_field` is the name of the field in your model that is a `ForeignKey` to a `Resource`. If you use the 'ResourceMixin', this field is added to your model for you and is called `resource`. This field is required for the RBAC implementation to integrate any of the role fields you declare for your model. If you did not use the `ResourceMixin` and you have manually added a `Resource` link to your model you will need to set this field accordingly.
 
 `parent_role` is the link to any parent roles you want considered when a user is requesting access to your `Resource`. A `parent_role` can be declared as a single string, `parent.readonly`, or a list of many roles, `['parentA.readonly', 'parentB.readonly']`. It is important to note that a user does not need a parent role to access a resource if granted the role for that resource explicitly. Also a user will not have access to any parent resources by being granted a role for a child resource. We demonstrate this in the _Usage_ section of this document.
 
@@ -84,6 +84,8 @@ The `singleton` static method is a helper method on the `Role` model that helps 
 ```
 
 #### `ImplicitResourceField`
+
+The `ImplicitResourceField` is used by the `ResourceMixin` to give your model a `ForeignKey` to a `Resource`. If you use the mixin you will never need to declare this field explicitly for your model.
 
 ### Mixins
 
