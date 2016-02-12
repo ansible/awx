@@ -733,6 +733,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     max: elm.attr('max'),
                     numberFormat: "d",
                     disabled: (elm.attr('readonly')) ? true : false,
+                    icons: {
+                        down: "Form-numberInputButton fa fa-angle-down",
+                        up: "Form-numberInputButton fa fa-angle-up"
+                    },
                     spin: function(e, u) {
                         ctrl.$setViewValue(u.value);
                         ctrl.$setValidity('required',true);
@@ -753,6 +757,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     opts.disabled = true;
                 }
                 $(elm).spinner(opts);
+                $('.ui-icon').text('');
+                $(".ui-icon").removeClass('ui-icon ui-icon-triangle-1-n ui-icon-triangle-1-s');
                 $(elm).on("click", function () {
                     $(elm).select();
                 });
