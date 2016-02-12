@@ -6,6 +6,10 @@
 
 $(function() {
 
+  // Add syntax highlighting to examples in description.
+  $('.description pre').addClass('prettyprint');
+  prettyPrint();
+
   // Make links from relative URLs to resources.
   $('span.str').each(function() {
     var s = $(this).html();
