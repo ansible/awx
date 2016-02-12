@@ -877,7 +877,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button class='btn btn-default show_input_button' ";
+                            html += "<button class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
@@ -914,7 +914,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildId(field, fld, this.form);
 
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
-                            html += "class='form-control";
+                            html += "class='form-control Form-textInput";
                             html += (field['class']) ? " " + this.attr(field, 'class') : "";
                             html += "' ";
                             html += (field.chkPass) ? "chk-pass " : "";
