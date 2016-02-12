@@ -28,21 +28,39 @@ When a user attempts to access ResourceB we will check for their access using th
 
 This would provide anyone with the above roles access to ResourceB.
 
-## Models
+#### Singleton Role
+
+There is a special case _Singleton Role_ that you can create. This type of role is for system wide roles.
+
+### Models
 
 The RBAC system defines a few new models. These models represent the underlying RBAC implemnentation and generally will be abstracted away from your daily development tasks by the implicit fields and mixins.
 
-### `Role`
+#### `Role`
 
-### `Resource`
+`Role` defines a single role within the RBAC implementation. It encapsulates the `parents` and `members` for a role. This model is intentially kepts dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
 
-### `RoleHierarchy`
+##### `grant(self, resource, permissions)`
 
-### `RolePermission`
+The `grant` instance method takes a resource and a set of permissions (see below) and creates an entry in the `RolePermission` table (described below). The result of this being that any member of this role will now have those granted permissions to the resource. The `grant` method considers a resource to be anything that is explicitly of the `Resource` type or any model that has a `resource` field that is of type `Resource`.
 
-## Fields
+##### `singleton(name)`
 
-### `ImplicitRoleField`
+The `singleton` static method is a helper method on the `Role` model that helps in the creation of singleton roles. It will return the role by name if it already exists or create and return it in the case it does not.
+
+##### `rebuild_role_hierarchy_cache(self)`
+
+`rebuild_role_hierarchy` will rebuild the current role hierarchy that is stored in the `RoleHierarchy` table. This speeds up the querying of parent roles when assembling a users set of roles. This method is called for you automatically during `save`.
+
+#### `Resource`
+
+#### `RoleHierarchy`
+
+#### `RolePermission`
+
+### Fields
+
+#### `ImplicitRoleField`
 
 `ImplicitRoleField` role fields are defined on your model. They provide the definition of grantable roles for accessing your 
 `Resource`. Configuring the role is done using some keyword arguments that are provided during declaration.
@@ -65,15 +83,15 @@ The RBAC system defines a few new models. These models represent the underlying 
     {'read':True}
 ```
 
-### `ImplicitResourceField`
+#### `ImplicitResourceField`
 
-## Mixins
+### Mixins
 
-### `ResourceMixin`
+#### `ResourceMixin`
 
 By mixing in the `ResourceMixin` to your model, you are turning your model in to a `Resource` in the eyes of the RBAC implementation. What this means simply is that your model will now have an `ImplicitResourceField` named resource. Your model will also gain some methods that aid in the checking the access a users roles provides them to a resource.
 
-#### `accessible_objects(cls, user, permissions)`
+##### `accessible_objects(cls, user, permissions)`
 
 `accessible_objects` is a class method to use instead of `Model.objects`. This method will restrict the query of objects to only the objects that a user has the passed in permissions for. This is useful when you want to only filter and display a `Resource` that a users role grants them the `permissions` to. Note that any permission fields that are left blank will default to `False`. `accessible_objects` will only filter out resources where the expected permission was `True` but was returned as `False`.
 
@@ -82,7 +100,7 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
     objects.filter(name__istartswith='december')
 ```
 
-#### `get_permissions(self, user)`
+##### `get_permissions(self, user)`
 
 `get_permissions` is an instance method that will give you the permission dictionary for a given user. This permission dictionary will take in to account any parent roles the user is apart of.
 
@@ -93,7 +111,7 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
 ```
 
 
-#### `accessible_by(self, user, permissions)`
+##### `accessible_by(self, user, permissions)`
 
 `accessible_by` is an instance method that wraps the `get_permissions` method. Given a user and a dictionary of permissions this method will return True or False if a users roles give them a set of permissions that match the provided permissions dict. Not that any permission fields left blank will default to `False`. `accessible_by` will only return `False` in a case where the passed in permission is expected to be `True` but was returned as `False`.
 
