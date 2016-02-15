@@ -22,7 +22,7 @@
 */
 
 export function Home($scope, $compile, $stateParams, $rootScope, $location, $log, Wait,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, $window, graphData){
+    ClearScope, Rest, GetBasePath, ProcessErrors, $window, graphData){
 
     ClearScope('home');
 
@@ -103,13 +103,6 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
         $scope.$emit('dashboardDataLoadComplete');
     });
 
-
-    $scope.showActivity = function () {
-        Stream({
-            scope: $scope
-        });
-    };
-
     $scope.refresh = function () {
         Wait('start');
         Rest.setUrl(GetBasePath('dashboard'));
@@ -145,7 +138,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
 }
 
 Home.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait',
-    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData'
+    'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData'
 ];
 
 
@@ -157,7 +150,7 @@ Home.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location',
  *
 */
 export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
+    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -363,12 +356,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
             }
         }
     });
-
-    scope.showActivity = function () {
-        Stream({
-            scope: scope
-        });
-    };
 
     scope.editGroup = function (group_id, inventory_id) {
         PreviousSearchParams = Store('group_current_search_params');
@@ -579,7 +566,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
 
 HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
+    'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
 
 /**
@@ -591,7 +578,7 @@ HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$l
 */
 
 export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Find, ShowJobSummary, ViewJob) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -664,12 +651,6 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
         ViewJob({ scope: $scope, id: id });
     };
 
-    $scope.showActivity = function () {
-        Stream({
-            scope: $scope
-        });
-    };
-
     $scope.toggleHostEnabled = function (id, sources) {
         ToggleHostEnabled({
             host_id: id,
@@ -705,6 +686,6 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
 }
 
 HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit',
     'Find', 'ShowJobSummary', 'ViewJob'
 ];

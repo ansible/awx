@@ -15,13 +15,34 @@ export default {
         label: "ACTIVITY STREAM"
     },
     resolve: {
+        features: ['FeaturesService', 'ProcessErrors', '$state', function(FeaturesService, ProcessErrors, $state) {
+            FeaturesService.get()
+            .then(function(features) {
+                if(FeaturesService.featureEnabled('activity_streams')) {
+                    // Good to go - pass the features along to the controller.
+                    return features;
+                }
+                else {
+                    // The activity stream feature isn't enabled.  Take the user
+                    // back to the dashboard
+                    $state.go('dashboard');
+                }
+            })
+            .catch(function (response) {
+                ProcessErrors(null, response.data, response.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to get feature info. GET returned status: ' +
+                    response.status
+                });
+            });
+        }],
         subTitle:
         [   '$stateParams',
             'Rest',
-            'ModelToPlural',
+            'ModelToBasePathKey',
             'GetBasePath',
             'ProcessErrors',
-            function($stateParams, rest, ModelToPlural, getBasePath, ProcessErrors) {
+            function($stateParams, rest, ModelToBasePathKey, getBasePath, ProcessErrors) {
                 // If we have a target and an ID then we want to go grab the name of the object
                 // that we're examining with the activity stream.  This name will be used in the
                 // subtitle.
@@ -29,7 +50,7 @@ export default {
                     var target = $stateParams.target;
                     var id = $stateParams.id;
 
-                    var url = getBasePath(ModelToPlural(target)) + id + '/';
+                    var url = getBasePath(ModelToBasePathKey(target)) + id + '/';
                     rest.setUrl(url);
                     return rest.get()
                         .then(function(data) {

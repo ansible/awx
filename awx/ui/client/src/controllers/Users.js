@@ -14,7 +14,7 @@
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, Stream, $state, Refresh) {
+    Wait, $state, Refresh) {
 
     ClearScope();
 
@@ -71,10 +71,6 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     });
     $scope.search(list.iterator);
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     $scope.addUser = function () {
         $state.transitionTo('users.add');
     };
@@ -115,7 +111,7 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
 UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream', '$state',
+    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
     'Refresh'
 ];
 
@@ -226,7 +222,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 export function UsersEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope,
-    GetBasePath, Prompt, CheckAccess, ResetForm, Wait, Stream, fieldChoices,
+    GetBasePath, Prompt, CheckAccess, ResetForm, Wait, fieldChoices,
     fieldLabels, permissionsSearchSelect, $state) {
 
     ClearScope();
@@ -399,10 +395,6 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
             }
         };
 
-        $scope.showActivity = function () {
-            Stream({ scope: $scope });
-        };
-
         $scope.formCancel = function () {
             $state.transitionTo('users');
         };
@@ -551,6 +543,6 @@ UsersEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess',
-    'ResetForm', 'Wait', 'Stream', 'fieldChoices', 'fieldLabels',
+    'ResetForm', 'Wait', 'fieldChoices', 'fieldLabels',
     'permissionsSearchSelect', '$state'
 ];

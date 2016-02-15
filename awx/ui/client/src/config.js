@@ -26,6 +26,8 @@
     var datepicker = $.fn.datepicker.noConflict();
     $.fn.systemTrackingDP = datepicker;
 
+    $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
+
     return {
         // custom_logo: true // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard tower console logo
         // custom_login_info: "example notice" // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.

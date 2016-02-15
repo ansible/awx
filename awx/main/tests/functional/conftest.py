@@ -1,17 +1,24 @@
 import pytest
 
+from django.contrib.auth.models import User
+
+from rest_framework.test import (
+    APIRequestFactory,
+    force_authenticate,
+)
+
 from awx.main.models.credential import Credential
+from awx.main.models.projects import Project
+from awx.main.models.jobs import JobTemplate
+from awx.main.models.ha import Instance
 from awx.main.models.inventory import (
     Inventory,
     Group,
 )
-from awx.main.models.projects import Project
-from awx.main.models.jobs import JobTemplate
 from awx.main.models.organization import (
     Organization,
     Team,
 )
-from django.contrib.auth.models import User
 
 @pytest.fixture
 def user():
@@ -62,7 +69,11 @@ def user_project(user):
     return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
 
 @pytest.fixture
-def organization():
+def instance(settings):
+    return Instance.objects.create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
+
+@pytest.fixture
+def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
 
 @pytest.fixture
@@ -92,3 +103,30 @@ def permissions():
                  'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
 
+@pytest.fixture
+def post():
+    def rf(_cls, _user, _url, pk=None, kwargs={}, middleware=None):
+        view = _cls.as_view()
+        request = APIRequestFactory().post(_url, kwargs, format='json')
+        if middleware:
+            middleware.process_request(request)
+        force_authenticate(request, user=_user)
+        response = view(request, pk=pk)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def get():
+    def rf(_cls, _user, _url, pk=None, middleware=None):
+        view = _cls.as_view()
+        request = APIRequestFactory().get(_url, format='json')
+        if middleware:
+            middleware.process_request(request)
+        force_authenticate(request, user=_user)
+        response = view(request, pk=pk)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf

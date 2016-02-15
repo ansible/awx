@@ -177,6 +177,7 @@ export default
                     rows: 1,
                     addRequired: false,
                     editRequired: false,
+                    'elementClass': 'Form-textInput',
                     column: 2,
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
@@ -191,7 +192,7 @@ export default
                 variables: {
                     label: 'Extra Variables',
                     type: 'textarea',
-                    class: 'Form-textArea',
+                    class: 'Form-textAreaLabel',
                     rows: 6,
                     addRequired: false,
                     editRequired: false,

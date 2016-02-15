@@ -39,7 +39,7 @@ export default
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
-                    class: 'Form-textArea',
+                    class: 'Form-textAreaLabel',
                     addRequired: false,
                     editRequird: false,
                     rows: 12,

@@ -263,7 +263,7 @@ export default
                         variable: 'key_required',
                         init: true
                     },
-                    class: 'Form-textArea',
+                    class: 'Form-textAreaLabel',
                     hintText: "{{ key_hint }}",
                     addRequired: false,
                     editRequired: false,

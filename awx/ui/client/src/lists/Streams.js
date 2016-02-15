@@ -14,11 +14,13 @@ export default
         editTitle: 'Activity Stream',
         listTitle: 'Activity Stream<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
         listTitleBadge: false,
+        emptyListText: 'There are no events to display at this time',
         selectInstructions: '',
         index: false,
         hover: true,
         "class": "table-condensed",
         searchWidgets: 3,
+        toolbarAuxAction: "<stream-dropdown-nav></stream-dropdown-nav>",
 
         fields: {
             timestamp: {

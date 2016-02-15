@@ -86,7 +86,7 @@ export default
                                 if (form.related[set].fields[f].searchType &&
                                         (form.related[set].fields[f].searchType === 'boolean' || form.related[set].fields[f].searchType === 'select')) {
                                     scope[iterator + 'SelectShow'] = true;
-                                    scope[iterator + 'SearchSelectOpts'] = form.fields[f].searchOptions;
+                                    scope[iterator + 'SearchSelectOpts'] = form.related[set].fields[f].searchOptions;
                                 }
                                 if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType === 'gtzero') {
                                     scope[iterator + "InputHide"] = true;
@@ -161,13 +161,6 @@ export default
                         Wait('start');
                         scope[iterator + 'Loading'] = false;
                         scope[iterator + 'HoldInput'] = true;
-
-                        if(scope[iterator + 'SearchValue'] && scope[iterator + 'SearchValue'] != '') {
-                            scope[iterator + '_active_search'] = true;
-                        }
-                        else {
-                            scope[iterator + '_active_search'] = false;
-                        }
 
                         if (scope[iterator + 'SearchValue']) {
                             // User typed a value in input field

@@ -236,8 +236,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'inventoryScriptsListObject', 'CreateSelect2',
-        function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, inventoryScriptsListObject, CreateSelect2) {
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit',
+    'Empty', 'Wait', 'ParseTypeChange', 'inventoryScriptsListObject',
+    'CreateSelect2',
+    function (GetBasePath, CredentialList, LookUpInit, Empty, Wait,
+        ParseTypeChange, inventoryScriptsListObject, CreateSelect2) {
             return function (params) {
 
                 var scope = params.scope,
@@ -258,9 +261,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                     if (scope.source.value === 'rax') {
                         scope.source_region_choices = scope.rax_regions;
                         $('#source_form').addClass('squeeze');
-                         CreateSelect2({
-                             element: '#source_source_regions'
-                         });
+                        CreateSelect2({
+                            element: '#source_source_regions'
+                        });
                     } else if (scope.source.value === 'ec2') {
                         scope.source_region_choices = scope.ec2_regions;
                          scope.group_by_choices = scope.ec2_group_by;
@@ -279,10 +282,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          });
                     } else if (scope.source.value === 'azure') {
                         scope.source_region_choices = scope.azure_regions;
-                         $('#source_form').addClass('squeeze');
-                         CreateSelect2({
-                             element: '#source_source_regions'
-                         });
+                        $('#source_form').addClass('squeeze');
+                        CreateSelect2({
+                            element: '#source_source_regions'
+                        });
                     }
                     if(scope.source.value==="custom"){
                         // need to filter the possible custom scripts by the organization defined for the current inventory
@@ -1152,6 +1155,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                sources_scope.removeChoicesReady();
                            }
                            sources_scope.removeChoicesReady = sources_scope.$on('choicesReadyGroup', function () {
+                               CreateSelect2({
+                                   element: '#source_source',
+                                   multiple: false
+                               });
                                choicesReady++;
                                if (choicesReady === 2) {
                                    if (mode === 'edit') {

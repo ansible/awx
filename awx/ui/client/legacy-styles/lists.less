@@ -173,6 +173,16 @@ table, tbody {
     justify-content: flex-end;
     display: flex;
     margin-top: -10px;
+    margin-left: 10px;
+}
+
+.List-auxAction {
+    justify-content: flex-end;
+    display: flex;
+}
+
+.List-auxActionStream {
+    width: 175px;
 }
 
 .List-buttonSubmit {
@@ -201,6 +211,28 @@ table, tbody {
 .List-searchDropdown {
     border-top-left-radius: 5px!important;
     border-bottom-left-radius: 5px!important;
+    height: 34px!important;
+    border-color: @default-second-border;
+    color: @default-icon;
+    background-color: @default-bg;
+    border-right: none;
+}
+
+.List-searchDropdown:focus,
+.List-searchDropdown:active,
+.List-searchDropdown.active
+{
+    color: @default-icon;
+    background-color: @default-tertiary-bg;
+}
+
+.List-searchDropdown:hover {
+    background-color: @default-tertiary-bg;
+    color: @default-icon;
+}
+
+.List-searchDropdownCarat {
+    border-top-color: @default-icon!important;
 }
 
 .List-searchInput {
@@ -208,8 +240,10 @@ table, tbody {
     font-size: 14px!important;
     color: @list-srch-inpt-txt!important;
     border-color: @list-srch-inpt-bord!important;
-    border-radius: 5px!important;
+    border-radius: 0px 5px 5px 0px!important;
     padding-left: 15px!important;
+    height: 34px!important;
+    padding-right: 45px!important;
 }
 
 .List-searchInput:placeholder-shown {
@@ -229,7 +263,7 @@ table, tbody {
     float: right;
     position: relative;
     top: -33px;
-    left: -1px;
+    left: -2px;
     z-index: 10;
     font-size: 16px;
     background-color: @list-srch-btn-bg;
@@ -260,6 +294,7 @@ table, tbody {
     border: 1px solid @list-no-items-bord;
     background-color: @list-no-items-bg;
     color: @list-no-items-txt;
+    text-transform: uppercase;
 }
 
 .List-editButton--selected {
@@ -283,6 +318,15 @@ table, tbody {
 .List-staticColumn--mediumStatus {
     width: 51px;
     padding-right: 0px!important;
+}
+
+.List-staticColumn--toggle {
+    width: 55px;
+    padding-right: 0px !important;
+}
+
+.List-staticColumn--schedulerTime {
+    max-width: 164px;
 }
 
 .List-staticColumnAdjacent {

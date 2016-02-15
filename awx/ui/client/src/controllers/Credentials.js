@@ -14,7 +14,7 @@
 export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, GetChoices, Wait, Stream, $state) {
+    SelectionInit, GetChoices, Wait, $state) {
 
     ClearScope();
 
@@ -88,11 +88,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         callback: 'choicesReadyCredential'
     });
 
-
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     $scope.addCredential = function () {
         $state.transitionTo('credentials.add');
     };
@@ -130,7 +125,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    'Stream', '$state'
+    '$state'
 ];
 
 
@@ -138,7 +133,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
     LookUpInit, UserList, TeamList, GetBasePath, GetChoices, Empty, KindChange,
-    OwnerChange, FormSave, $state) {
+    OwnerChange, FormSave, $state, CreateSelect2) {
 
     ClearScope();
 
@@ -166,6 +161,16 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         url: defaultUrl,
         field: 'become_method',
         variable: 'become_options'
+    });
+
+    CreateSelect2({
+        element: '#credential_become_method',
+        multiple: false
+    });
+
+    CreateSelect2({
+        element: '#credential_kind',
+        multiple: false
     });
 
     LookUpInit({
@@ -302,7 +307,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList',
     'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
-    'FormSave', '$state'
+    'FormSave', '$state', 'CreateSelect2'
 ];
 
 
@@ -310,7 +315,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
-    OwnerChange, FormSave, Stream, Wait, $state) {
+    OwnerChange, FormSave, Wait, $state, CreateSelect2) {
 
     ClearScope();
 
@@ -454,6 +459,16 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                 }
                 master.kind = $scope.kind;
 
+                CreateSelect2({
+                    element: '#credential_become_method',
+                    multiple: false
+                });
+
+                CreateSelect2({
+                    element: '#credential_kind',
+                    multiple: false
+                });
+
                 switch (data.kind) {
                 case 'aws':
                     $scope.access_key = data.username;
@@ -502,9 +517,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         field: 'become_method',
         variable: 'become_options'
     });
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
 
     // Save changes to the parent
     $scope.formSave = function () {
@@ -619,5 +631,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
-    'FormSave', 'Stream', 'Wait', '$state'
+    'FormSave', 'Wait', '$state', 'CreateSelect2'
 ];

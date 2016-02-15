@@ -15,7 +15,7 @@ import '../job-templates/main';
 export function InventoriesList($scope, $rootScope, $location, $log,
     $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
     generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-    ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
+    ClearScope, ProcessErrors, GetBasePath, Wait,
     EditInventoryProperties, Find, Empty, LogViewer, $state) {
 
     var list = InventoryList,
@@ -301,10 +301,6 @@ export function InventoriesList($scope, $rootScope, $location, $log,
         });
     };
 
-    $scope.showActivity = function () {
-        Stream({ scope:  $scope });
-    };
-
     $scope.editInventoryProperties = function (inventory_id) {
         EditInventoryProperties({ scope: $scope, inventory_id: inventory_id });
     };
@@ -368,7 +364,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 
 InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
+    'GetBasePath', 'Wait', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
 ];
 
 
@@ -462,7 +458,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
     PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
+    ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
     Prompt, PlaybookRun, CreateDialog, deleteJobTemplate, $state) {
 
     ClearScope();
@@ -588,10 +584,6 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location,
 
     $scope.manageInventory = function(){
       $location.path($location.path() + '/manage');
-    };
-
-    $scope.showActivity = function () {
-        Stream({ scope:  $scope });
     };
 
     $scope.formCancel = function () {
@@ -776,7 +768,7 @@ InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit',
     'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString',
-    'Stream', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
+    'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
     'PlaybookRun', 'CreateDialog', 'deleteJobTemplate', '$state'
 ];
 
@@ -788,7 +780,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
-    EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
+    EditInventoryProperties, ToggleHostEnabled, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob,
     GroupsCopy, HostsCopy, $stateParams) {
 
@@ -1248,53 +1240,6 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         });
     };
 
-    $scope.showGroupActivity = function () {
-        var url, title, group;
-        if ($scope.selected_group_id) {
-            url = GetBasePath('activity_stream') + '?group__id=' + $scope.selected_group_id;
-            title = 'Showing all activities for group ' + group.name;
-        } else {
-            title = 'Showing all activities for all ' + $scope.inventory.name + ' groups';
-            url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory.id;
-        }
-        Stream({
-            scope: $scope,
-            inventory_name: $scope.inventory.name,
-            url: url,
-            title: title,
-            search_iterator: 'group',
-            onClose: 'GroupStreamClosed'
-        });
-    };
-
-    if ($scope.removeGroupStreamClosed) {
-        $scope.removeGroupStreamClosed();
-    }
-    $scope.removeGroupStreamClosed = $scope.$on('GroupStreamClosed', function() {
-        $scope.refreshGroups();
-    });
-
-    hostScope.showHostActivity = function () {
-        var url, title;
-        title = 'Showing all activities for all ' + $scope.inventory.name + ' hosts';
-        url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory.id;
-        Stream({
-            scope: hostScope,
-            inventory_name: $scope.inventory.name,
-            url: url,
-            title: title,
-            search_iterator: 'host',
-            onClose: 'HostStreamClosed'
-        });
-    };
-
-    if (hostScope.removeHostStreamClosed) {
-        hostScope.removeHostStreamClosed();
-    }
-    hostScope.removeHostStreamClosed = hostScope.$on('HostStreamClosed', function() {
-        $scope.refreshGroups();
-    });
-
     hostScope.showJobSummary = function (job_id) {
         ShowJobSummary({
             job_id: job_id
@@ -1347,7 +1292,7 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
     'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
-    'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
+    'EditInventoryProperties', 'ToggleHostEnabled', 'ShowJobSummary',
     'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
     'HostsCopy', '$stateParams'
 ];
