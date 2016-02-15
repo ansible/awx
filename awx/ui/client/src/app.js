@@ -615,7 +615,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: "organizations",
-                    label: "EDIT {{name}}"
+                    label: "{{name}}"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {

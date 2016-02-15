@@ -136,8 +136,6 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
         $('#prompt-modal').modal('hide');
     });
 
-
-
     $scope.addOrganization = function () {
         $state.transitionTo('organizations.add');
     };
@@ -193,7 +191,6 @@ export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log,
     var generator = GenerateForm,
         form = OrganizationForm,
         base = $location.path().replace(/^\//, '').split('/')[0];
-
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope});
     generator.reset();
