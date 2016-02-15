@@ -15,6 +15,27 @@ export default {
         label: "ACTIVITY STREAM"
     },
     resolve: {
+        features: ['FeaturesService', 'ProcessErrors', '$state', function(FeaturesService, ProcessErrors, $state) {
+            FeaturesService.get()
+            .then(function(features) {
+                if(FeaturesService.featureEnabled('activity_streams')) {
+                    // Good to go - pass the features along to the controller.
+                    return features;
+                }
+                else {
+                    // The activity stream feature isn't enabled.  Take the user
+                    // back to the dashboard
+                    $state.go('dashboard');
+                }
+            })
+            .catch(function (response) {
+                ProcessErrors(null, response.data, response.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to get feature info. GET returned status: ' +
+                    response.status
+                });
+            });
+        }],
         subTitle:
         [   '$stateParams',
             'Rest',
