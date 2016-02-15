@@ -1,5 +1,3 @@
-/* jshint unused: vars */
-
 export default
     [   'templateUrl', '$state', 'FeaturesService', 'ProcessErrors', function(templateUrl, $state, FeaturesService, ProcessErrors) {
         return {
