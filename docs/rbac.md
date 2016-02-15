@@ -103,7 +103,16 @@ The `singleton` static method is a helper method on the `Role` model that helps 
 
 `role_name` is the display name of the role. This is useful when generating reports or looking the results of queries.
 
-`permissions` is a dictionary of set permissions that a user with this role will gain to your `Resource`. A permission defaults to `False` if not explicitly provided. Below is a list of available permissions. The special permission `all` is a shortcut for generating a dict with all of the explicit permissions listed below set to `True`.
+`permissions` can be used when the model that contains the
+`ImplicitRoleField` utilizs the `ResourceMixin`. When present, a
+`RolePermission` entry will be automatically created to grant the specified
+permissions on the resource to the role defined by the `ImplicitRoleField`.
+
+This field should be specified as a dictionary of permissions you wish to
+automatically grant.  Below is a list of available permissions. The special
+permission `all` is a shortcut for generating a dict with all of the explicit
+permissions listed below set to `True`. Note that permissions default to
+`False` if not explicitly provided.
 
 ```python
     # Available Permissions
