@@ -91,9 +91,8 @@ class ImplicitResourceField(models.ForeignKey):
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
     """Descriptor Implict Role Fields. Auto-creates the appropriate role entry on first access"""
 
-    def __init__(self, role_name, resource_field, permissions, parent_role,  *args, **kwargs):
+    def __init__(self, role_name, permissions, parent_role,  *args, **kwargs):
         self.role_name = role_name
-        self.resource_field = resource_field
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -143,10 +142,10 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         setattr(instance, self.field.name, role)
         instance.save(update_fields=[self.field.name,])
 
-        if self.resource_field and self.permissions:
+        if self.permissions is not None:
             permissions = RolePermission(
                 role=role,
-                resource=getattr(instance, self.resource_field)
+                resource=instance.resource
             )
 
             if 'all' in self.permissions and self.permissions['all']:
@@ -170,9 +169,8 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitRoleField(models.ForeignKey):
     """Implicitly creates a role entry for a resource"""
 
-    def __init__(self, role_name=None, resource_field=None, permissions=None, parent_role=None, *args, **kwargs):
+    def __init__(self, role_name=None, permissions=None, parent_role=None, *args, **kwargs):
         self.role_name = role_name
-        self.resource_field = resource_field
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -187,7 +185,6 @@ class ImplicitRoleField(models.ForeignKey):
                 self.name,
                 ImplicitRoleDescriptor(
                     self.role_name,
-                    self.resource_field,
                     self.permissions,
                     self.parent_role,
                     self
@@ -211,7 +208,8 @@ class ImplicitRoleField(models.ForeignKey):
             first_field_name = field_name.split('.')[0]
             field = getattr(cls, first_field_name)
 
-            if type(field) is ReverseManyRelatedObjectsDescriptor:
+            if type(field) is ReverseManyRelatedObjectsDescriptor or \
+               type(field) is ManyRelatedObjectsDescriptor:
                 if found_m2m_field:
                     # This limitation is due to a lack of understanding on my part, the
                     # trouble being that I can't seem to get m2m_changed to call anything that
@@ -227,13 +225,16 @@ class ImplicitRoleField(models.ForeignKey):
                 found_m2m_field = True
                 self.m2m_field_name = first_field_name
                 self.m2m_field_attr = field_name.split('.',1)[1]
-                m2m_changed.connect(self.m2m_update, field.through)
 
-            if type(field) is ManyRelatedObjectsDescriptor:
-                raise Exception('ManyRelatedObjectsDescriptor references are currently unsupported ' +
-                                '(but the reverse is, so supporting this is probably easy to add)): %s.%s' %
-                                (cls.__name__, first_field_name))
+                if type(field) is ReverseManyRelatedObjectsDescriptor:
+                    m2m_changed.connect(self.m2m_update, field.through)
+                else:
+                    m2m_changed.connect(self.m2m_update_related, field.related.through)
 
+
+    def m2m_update_related(self, **kwargs):
+        kwargs['reverse'] = not kwargs['reverse']
+        self.m2m_update(**kwargs)
 
     def m2m_update(self, sender, instance, action, reverse, model, pk_set, **kwargs):
         if action == 'post_add' or action == 'pre_remove':
