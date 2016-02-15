@@ -43,10 +43,6 @@ class Organization(CommonModel, ResourceMixin):
         blank=True,
         related_name='admin_of_organizations',
     )
-
-    # TODO: This field is deprecated. In 3.0 all projects will have exactly one
-    # organization parent, the foreign key field representing that has been
-    # moved to the Project model.
     projects = models.ManyToManyField(
         'Project',
         blank=True,

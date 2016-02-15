@@ -108,7 +108,7 @@ def migrate_projects(apps, schema_editor):
     Permission = apps.get_model('main', 'Permission')
 
     for project in Project.objects.all():
-        if project.organization is None and project.created_by is not None:
+        if project.organizations.count() == 0 and project.created_by is not None:
             project.admin_role.members.add(project.created_by)
             migrations[project.name]['users'].add(project.created_by)
 
@@ -116,10 +116,11 @@ def migrate_projects(apps, schema_editor):
             team.member_role.children.add(project.member_role)
             migrations[project.name]['teams'].add(team)
 
-        if project.organization is not None:
-            for user in project.organization.users.all():
-                project.member_role.members.add(user)
-                migrations[project.name]['users'].add(user)
+        if project.organizations.count() > 0:
+            for org in project.organizations.all():
+                for user in org.users.all():
+                    project.member_role.members.add(user)
+                    migrations[project.name]['users'].add(user)
 
         for perm in Permission.objects.filter(project=project):
             # All perms at this level just imply a user or team can read

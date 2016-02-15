@@ -29,7 +29,9 @@ def team(organization):
 
 @pytest.fixture
 def project(organization):
-    return Project.objects.create(name="test-project", organization=organization, description="test-project-desc")
+    prj = Project.objects.create(name="test-project",  description="test-project-desc")
+    prj.organizations.add(organization)
+    return prj
 
 @pytest.fixture
 def user_project(user):
