@@ -31,6 +31,14 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
                     // as a resovled promise.
                     return $q.when($rootScope.features);
                 }
+            },
+            featureEnabled: function(feature) {
+                if($rootScope.features && $rootScope.features[feature] && $rootScope.features[feature] == true) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
         };
 }];
