@@ -211,7 +211,8 @@ class ImplicitRoleField(models.ForeignKey):
             first_field_name = field_name.split('.')[0]
             field = getattr(cls, first_field_name)
 
-            if type(field) is ReverseManyRelatedObjectsDescriptor:
+            if type(field) is ReverseManyRelatedObjectsDescriptor or \
+               type(field) is ManyRelatedObjectsDescriptor:
                 if found_m2m_field:
                     # This limitation is due to a lack of understanding on my part, the
                     # trouble being that I can't seem to get m2m_changed to call anything that
@@ -227,13 +228,16 @@ class ImplicitRoleField(models.ForeignKey):
                 found_m2m_field = True
                 self.m2m_field_name = first_field_name
                 self.m2m_field_attr = field_name.split('.',1)[1]
-                m2m_changed.connect(self.m2m_update, field.through)
 
-            if type(field) is ManyRelatedObjectsDescriptor:
-                raise Exception('ManyRelatedObjectsDescriptor references are currently unsupported ' +
-                                '(but the reverse is, so supporting this is probably easy to add)): %s.%s' %
-                                (cls.__name__, first_field_name))
+                if type(field) is ReverseManyRelatedObjectsDescriptor:
+                    m2m_changed.connect(self.m2m_update, field.through)
+                else:
+                    m2m_changed.connect(self.m2m_update_related, field.related.through)
 
+
+    def m2m_update_related(self, **kwargs):
+        kwargs['reverse'] = not kwargs['reverse']
+        self.m2m_update(**kwargs)
 
     def m2m_update(self, sender, instance, action, reverse, model, pk_set, **kwargs):
         if action == 'post_add' or action == 'pre_remove':
