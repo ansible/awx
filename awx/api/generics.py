@@ -32,7 +32,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'SubListCreateAttachDetachAPIView', 'RetrieveAPIView',
            'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
            'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
-           'MongoAPIView', 'MongoListAPIView']
+           'SubDetailAPIView',
+           'ParentMixin',]
 
 logger = logging.getLogger('awx.api.generics')
 
@@ -200,28 +201,6 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         d['settings'] = settings
         return d
 
-
-class MongoAPIView(GenericAPIView):
-
-    def get_parent_object(self):
-        parent_filter = {
-            self.lookup_field: self.kwargs.get(self.lookup_field, None),
-        }
-        return get_object_or_404(self.parent_model, **parent_filter)
-
-    def check_parent_access(self, parent=None):
-        parent = parent or self.get_parent_object()
-        parent_access = getattr(self, 'parent_access', 'read')
-        if parent_access in ('read', 'delete'):
-            args = (self.parent_model, parent_access, parent)
-        else:
-            args = (self.parent_model, parent_access, parent, None)
-        if not self.request.user.can_access(*args):
-            raise PermissionDenied()
-
-class MongoListAPIView(generics.ListAPIView, MongoAPIView):
-    pass
-
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
 
     def get_queryset(self):
@@ -258,7 +237,25 @@ class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
     pass
 
-class SubListAPIView(ListAPIView):
+class ParentMixin(object):
+
+    def get_parent_object(self):
+        parent_filter = {
+            self.lookup_field: self.kwargs.get(self.lookup_field, None),
+        }
+        return get_object_or_404(self.parent_model, **parent_filter)
+
+    def check_parent_access(self, parent=None):
+        parent = parent or self.get_parent_object()
+        parent_access = getattr(self, 'parent_access', 'read')
+        if parent_access in ('read', 'delete'):
+            args = (self.parent_model, parent_access, parent)
+        else:
+            args = (self.parent_model, parent_access, parent, None)
+        if not self.request.user.can_access(*args):
+            raise PermissionDenied()
+
+class SubListAPIView(ListAPIView, ParentMixin):
     # Base class for a read-only sublist view.
 
     # Subclasses should define at least:
@@ -277,22 +274,6 @@ class SubListAPIView(ListAPIView):
             'parent_model_verbose_name_plural': smart_text(self.parent_model._meta.verbose_name_plural),
         })
         return d
-
-    def get_parent_object(self):
-        parent_filter = {
-            self.lookup_field: self.kwargs.get(self.lookup_field, None),
-        }
-        return get_object_or_404(self.parent_model, **parent_filter)
-
-    def check_parent_access(self, parent=None):
-        parent = parent or self.get_parent_object()
-        parent_access = getattr(self, 'parent_access', 'read')
-        if parent_access in ('read', 'delete'):
-            args = (self.parent_model, parent_access, parent)
-        else:
-            args = (self.parent_model, parent_access, parent, None)
-        if not self.request.user.can_access(*args):
-            raise PermissionDenied()
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -429,6 +410,9 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return self.unattach(request, *args, **kwargs)
         else:
             return self.attach(request, *args, **kwargs)
+
+class SubDetailAPIView(generics.RetrieveAPIView, GenericAPIView, ParentMixin):
+    pass
 
 class RetrieveAPIView(generics.RetrieveAPIView, GenericAPIView):
     pass

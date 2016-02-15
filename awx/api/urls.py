@@ -91,8 +91,8 @@ host_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'host_ad_hoc_commands_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_command_events/$',     'host_ad_hoc_command_events_list'),
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'host_single_fact_view'),
-    url(r'^(?P<pk>[0-9]+)/fact_versions/$',               'host_fact_versions_list'),
-    url(r'^(?P<pk>[0-9]+)/fact_view/$',               'host_fact_compare_view'),
+    url(r'^(?P<pk>[0-9]+)/fact_versions/$',             'host_fact_versions_list'),
+    url(r'^(?P<pk>[0-9]+)/fact_view/$',                 'host_fact_compare_view'),
 )
 
 group_urls = patterns('awx.api.views',

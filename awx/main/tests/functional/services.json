@@ -1,0 +1,697 @@
+[
+    {
+        "source": "sysv", 
+        "state": "running", 
+        "name": "iprdump"
+    }, 
+    {
+        "source": "sysv", 
+        "state": "running", 
+        "name": "iprinit"
+    }, 
+    {
+        "source": "sysv", 
+        "state": "running", 
+        "name": "iprupdate"
+    }, 
+    {
+        "source": "sysv", 
+        "state": "stopped", 
+        "name": "netconsole"
+    }, 
+    {
+        "source": "sysv", 
+        "state": "running", 
+        "name": "network"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "arp-ethers.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "auditd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "autovt@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "avahi-daemon.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "blk-availability.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "brandbot.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "console-getty.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "console-shell.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "cpupower.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "crond.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "dbus-org.fedoraproject.FirewallD1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "dbus-org.freedesktop.Avahi.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus-org.freedesktop.hostname1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus-org.freedesktop.locale1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus-org.freedesktop.login1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus-org.freedesktop.machine1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "dbus-org.freedesktop.NetworkManager.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "dbus-org.freedesktop.nm-dispatcher.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus-org.freedesktop.timedate1.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dbus.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "debug-shell.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "dhcpd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dhcpd6.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dhcrelay.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dm-event.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dnsmasq.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-cmdline.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-initqueue.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-mount.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-pre-mount.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-pre-pivot.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-pre-trigger.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-pre-udev.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "dracut-shutdown.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "ebtables.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "emergency.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "firewalld.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "getty@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "halt-local.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "initrd-cleanup.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "initrd-parse-etc.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "initrd-switch-root.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "initrd-udevadm-cleanup-db.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "irqbalance.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "kdump.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "kmod-static-nodes.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "lvm2-lvmetad.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "lvm2-monitor.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "lvm2-pvscan@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "messagebus.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "microcode.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "named-setup-rndc.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "named.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "NetworkManager-dispatcher.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "NetworkManager-wait-online.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "NetworkManager.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "ntpd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "ntpdate.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "openvpn@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-halt.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-kexec.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-poweroff.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-quit-wait.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-quit.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-read-write.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-reboot.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-start.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "plymouth-switch-root.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "polkit.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "postfix.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "quotaon.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rc-local.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rdisc.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rescue.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-autorelabel-mark.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-autorelabel.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-configure.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-dmesg.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-domainname.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-import-state.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-loadmodules.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "rhel-readonly.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "rsyslog.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "serial-getty@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "sshd-keygen.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "sshd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "sshd@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-ask-password-console.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-ask-password-plymouth.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-ask-password-wall.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-backlight@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-binfmt.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-fsck-root.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-fsck@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-halt.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-hibernate.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-hostnamed.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-hybrid-sleep.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-initctl.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-journal-flush.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-journald.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-kexec.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-localed.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-logind.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-machined.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-modules-load.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-nspawn@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-poweroff.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-quotacheck.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-random-seed.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "systemd-readahead-collect.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-readahead-done.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "systemd-readahead-drop.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "systemd-readahead-replay.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-reboot.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-remount-fs.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-shutdownd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-suspend.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-sysctl.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-timedated.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-tmpfiles-clean.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-tmpfiles-setup-dev.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-tmpfiles-setup.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-udev-settle.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-udev-trigger.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-udevd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-update-utmp-runlevel.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-update-utmp.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-user-sessions.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "systemd-vconsole-setup.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "teamd@.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "tuned.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "running", 
+        "name": "vmtoolsd.service"
+    }, 
+    {
+        "source": "systemd", 
+        "state": "stopped", 
+        "name": "wpa_supplicant.service"
+    }
+]

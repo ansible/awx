@@ -49,7 +49,7 @@ importlib==1.0.3
 ipaddress==1.0.14
 iso8601==0.1.10
 isodate==0.5.1
-git+https://github.com/chrismeyersfsu/django-jsonbfield@master#egg=django-jsonbfield
+git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=django-jsonbfield
 jsonpatch==1.11
 jsonpointer==1.9
 jsonschema==2.5.1

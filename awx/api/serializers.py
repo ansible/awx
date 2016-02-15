@@ -10,8 +10,6 @@ from collections import OrderedDict
 from dateutil import rrule
 from ast import literal_eval
 
-from rest_framework_mongoengine.serializers import DocumentSerializer
-
 # PyYAML
 import yaml
 
@@ -45,8 +43,6 @@ from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
-
-from awx.fact.models import * # noqa
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -482,17 +478,18 @@ class BaseSerializer(serializers.ModelSerializer):
         return ret
 
 
-class BaseFactSerializer(DocumentSerializer):
+class BaseFactSerializer(BaseSerializer):
 
     __metaclass__ = BaseSerializerMetaclass
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
         if 'module' in ret and feature_enabled('system_tracking'):
-            choices = [(o, o.title()) for o in FactVersion.objects.all().only('module').distinct('module')]
-            ret['module'] = serializers.ChoiceField(source='module', choices=choices, read_only=True, required=False)
+            # TODO: the values_list may pull in a LOT of entries before the distinct is called
+            modules = Fact.objects.all().values_list('module', flat=True).distinct()
+            choices = [(o, o.title()) for o in modules]
+            ret['module'] = serializers.ChoiceField(choices=choices, read_only=True, required=False)
         return ret
-
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 
@@ -2290,28 +2287,31 @@ class AuthTokenSerializer(serializers.Serializer):
 
 
 class FactVersionSerializer(BaseFactSerializer):
-    related = serializers.SerializerMethodField('get_related')
     
     class Meta:
-        model = FactVersion
-        fields = ('related', 'module', 'timestamp',)
+        model = Fact
+        fields = ('related', 'module', 'timestamp')
+        read_only_fields = ('*',)
 
     def get_related(self, obj):
-        host_obj = self.context.get('host_obj')
-        res = {}
+        res = super(FactVersionSerializer, self).get_related(obj)
         params = {
             'datetime': timestamp_apiformat(obj.timestamp),
             'module': obj.module,
         }
-        res.update(dict(
-            fact_view = build_url('api:host_fact_compare_view', args=(host_obj.pk,), get=params),
-        ))
+        res['fact_view'] = build_url('api:host_fact_compare_view', args=(obj.host.pk,), get=params)
         return res
-
 
 class FactSerializer(BaseFactSerializer):
 
     class Meta:
         model = Fact
-        depth = 2
-        fields = ('timestamp', 'host', 'module', 'fact')
+        # TODO: Consider adding in host to the fields list ?
+        fields = ('related', 'timestamp', 'module', 'facts', 'id', 'summary_fields', 'host')
+        read_only_fields = ('*',)
+
+    def get_related(self, obj):
+        res = super(FactSerializer, self).get_related(obj)
+        res['host'] = obj.host.get_absolute_url()
+        return res
+

@@ -1,4 +1,5 @@
 #!/bin/bash
+set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
