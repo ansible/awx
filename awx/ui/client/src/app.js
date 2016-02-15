@@ -613,6 +613,10 @@ var tower = angular.module('Tower', [
                 data: {
                     activityStreamId: 'organization_id'
                 },
+                ncyBreadcrumb: {
+                    parent: "organizations",
+                    label: "{{name}}"
+                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
