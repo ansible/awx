@@ -13,6 +13,7 @@ export default
         iterator: 'host',
         selectTitle: 'Add Existing Hosts',
         editTitle: 'Hosts',
+        listTitle: 'Hosts',
         index: false,
         hover: true,
         well: true,

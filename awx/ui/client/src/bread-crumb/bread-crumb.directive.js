@@ -1,7 +1,5 @@
-/* jshint unused: vars */
-
 export default
-    [   'templateUrl', '$state', function(templateUrl, $state) {
+    [   'templateUrl', '$state', 'FeaturesService', 'ProcessErrors', function(templateUrl, $state, FeaturesService, ProcessErrors) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -32,10 +30,35 @@ export default
                     streamConfig = (toState && toState.data) ? toState.data : {};
 
                     if(streamConfig && streamConfig.activityStream) {
-                        scope.showActivityStreamButton = true;
+
+                        // Check to see if activity_streams is an enabled feature.  $stateChangeSuccess fires
+                        // after the resolve on the state declaration so features should be available at this
+                        // point.  We use the get() function call here just in case the features aren't available.
+                        // The get() function will only fire off the server call if the features aren't already
+                        // attached to the $rootScope.
+
+                        FeaturesService.get()
+                        .then(function(features) {
+                            if(FeaturesService.featureEnabled('activity_streams')) {
+                                scope.showActivityStreamButton = true;
+                            }
+                            else {
+                                scope.showActivityStreamButton = false;
+                            }
+                        })
+                        .catch(function (response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get feature info. GET returned status: ' +
+                                response.status
+                            });
+                        });
+
                     }
                     else {
+
                         scope.showActivityStreamButton = false;
+
                     }
                 });
 

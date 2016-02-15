@@ -45,7 +45,7 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;
 
-                cls = (params['class'] === null || params['class'] === undefined) ? 'Prompt-errorButton' : params['class'];
+                cls = (params['class'] === null || params['class'] === undefined) ? 'Modal-errorButton' : params['class'];
 
                 $('#prompt_action_btn').removeClass(cls).addClass(cls);
 

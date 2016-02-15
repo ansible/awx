@@ -458,6 +458,11 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html = Badge(field);
             } else if (field.type === 'template') {
                 html = Template(field);
+            } else if (field.type === 'toggle') {
+                html += "<td class=\"List-tableCell " + fld + "-column";
+                html += (field['class']) ? " " + field['class'] : "";
+                html += " " + field.columnClass;
+                html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".enabled\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + list.iterator + ".enabled' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + list.iterator + ".enabled' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
             } else {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
@@ -672,12 +677,40 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += "<div ng-show=\"" + ngShow + "\">";
             }
 
+            html += "<div class=\"input-group input-group-sm";
+            html += "\">\n";
+            html += "<div class=\"input-group-btn dropdown\">\n";
+            html += "<button type=\"button\" ";
+            html += "id=\"search_field_ddown\" ";
+            html += "class=\"btn dropdown-toggle List-searchDropdown\" data-toggle=\"dropdown\"";
+            html += ">\n";
+            html += "<span ng-bind=\"" + iterator + "SearchFieldLabel" + modifier + "\"></span>\n";
+            html += "<span class=\"caret List-searchDropdownCarat\"></span>\n";
+            html += "</button>\n";
+            html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown" + modifier + "\">\n";
+            html += addSearchFields(i);
+            html += "</ul>\n";
+            html += "</div><!-- input-group-btn -->\n";
+
+            html += "<select id=\"search_value_select\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" " +
+                "ng-model=\"" + iterator + "SearchSelectValue" + modifier + "\" ng-change=\"search('" + iterator + "')\" ";
+            html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts track by c.value" + modifier + "\" class=\"form-control search-select";
+            html += "\"></select>\n";
+
             html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow" + modifier + " || " +
                 iterator + "InputHide" + modifier + "\" " +
                 "class=\"form-control List-searchInput\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
                 "aw-placeholder=\"" + iterator + "SearchPlaceholder" + modifier + "\" type=\"text\" ng-disabled=\"" + iterator +
                 "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + "\" ng-keypress=\"startSearch($event,'" +
                 iterator + "')\">\n";
+
+            // Reset button for drop-down
+            html += "<div class=\"input-group-btn\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" >\n";
+            html += "<button type=\"button\" class=\"btn btn-default btn-small\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\" " +
+                "aw-tool-tip=\"Clear the search\" data-placement=\"top\"><i class=\"fa fa-times\"></i></button>\n";
+            html += "</div><!-- input-group-btn -->\n";
+
+            html += "</div><!-- input-group -->\n";
 
             html += "<a class=\"search-reset-start List-searchInputIcon\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +

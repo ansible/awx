@@ -139,10 +139,13 @@ import listGenerator from './list-generator/main';
 export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
-.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList', 'SearchWidget', 'PaginateWidget', 'Attr',
-    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon', 'Store', 'ActionButton',
-    function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, DropDown, Empty, SelectIcon, Store, ActionButton) {
+.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
+    'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
+    'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
+    'Store', 'ActionButton',
+    function ($rootScope, $location, $compile, GenerateList, SearchWidget,
+        PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
+        DropDown, Empty, SelectIcon, Store, ActionButton) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -818,7 +821,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         if (field.genMD5) {
-                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " +
+                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
                                 "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
                         }
@@ -874,7 +877,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button class='btn btn-default show_input_button' ";
+                            html += "<button class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
@@ -911,7 +914,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildId(field, fld, this.form);
 
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
-                            html += "class='form-control";
+                            html += "class='form-control Form-textInput";
                             html += (field['class']) ? " " + this.attr(field, 'class') : "";
                             html += "' ";
                             html += (field.chkPass) ? "chk-pass " : "";
@@ -1040,8 +1043,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.rows) ? this.attr(field, 'rows') : "";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
-                        html += "class=\"form-control";
+                        html += "class=\"form-control Form-textArea";
                         html += (field['class']) ? " " + field['class'] : "";
+                        html += (field['elementClass']) ? " " + field['elementClass'] : "";
                         html += "\" ";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += buildId(field, fld, this.form);
@@ -1074,10 +1078,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
+                        html += "<div class=\"Form-dropDownContainer\">\n";
                         html += "<select ";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
-                        html += "class=\"form-control";
+                        html += "class=\"form-control Form-dropDown";
                         html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
                         html += (field.ngOptions) ? this.attr(field, 'ngOptions') : "" ;
@@ -1099,7 +1104,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
                             html += "</option>\n";
                         }
+
                         html += "</select>\n";
+                        html += "</div>\n";
+
                             // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
@@ -1311,12 +1319,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"input-group\">\n";
                         html += "<span class=\"input-group-btn\">\n";
-                        html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick');
+                        html += "<button type=\"button\" class=\" Form-lookupButton btn btn-default\" " + this.attr(field, 'ngClick');
                         html += (field.readonly || field.showonly) ? " disabled " : "";
                         html += (field.ngDisabled) ? this.attr(field, "ngDisabled"): "";
                         html += "id=\"" + fld + "-lookup-btn\"><i class=\"fa fa-search\"></i></button>\n";
                         html += "</span>\n";
-                        html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
+                        html += "<input type=\"text\" class=\"form-control Form-textInput input-medium lookup\" ";
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "class=\"form-control\" ";

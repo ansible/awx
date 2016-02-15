@@ -12,7 +12,7 @@
 
 
 export function ScheduleEditController($scope, $compile, $location, $stateParams, SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
+GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
 
     ClearScope();
 
@@ -70,10 +70,6 @@ GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stre
         $scope.search(SchedulesList.iterator);
     };
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     Wait('start');
 
     GetChoices({
@@ -86,4 +82,4 @@ GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stre
 }
 
 ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream' ];
+    'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices'];

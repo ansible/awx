@@ -14,7 +14,7 @@
 export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, ProjectUpdate, Refresh, Wait, Stream, GetChoices, Empty,
+    SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
     Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
     ClearScope();
@@ -191,10 +191,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         variable: 'project_scm_type_options',
         callback: 'choicesReadyProjectList'
     });
-
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
 
     $scope.addProject = function () {
         $state.transitionTo('projects.add');
@@ -377,7 +373,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'ProjectList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
-    'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
+    'Refresh', 'Wait', 'GetChoices', 'Empty', 'Find',
     'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
@@ -385,7 +381,8 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $log,
     $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
-    OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state) {
+    OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state,
+    CreateSelect2) {
 
     ClearScope();
 
@@ -413,6 +410,12 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
                 break;
             }
         }
+
+        CreateSelect2({
+            element: '#project_scm_type',
+            multiple: false
+        });
+
         $scope.scmRequired = false;
         master.scm_type = $scope.scm_type;
     });
@@ -527,7 +530,7 @@ ProjectsAdd.$inject = ['Refresh', '$scope', '$rootScope', '$compile', '$location
     '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller',
     'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList',
-    'GetChoices', 'DebugForm', 'Wait', '$state'
+    'GetChoices', 'DebugForm', 'Wait', '$state', 'CreateSelect2'
 ];
 
 
@@ -535,8 +538,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
     ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
-    GetChoices, Empty, DebugForm, Wait, Stream, SchedulesControllerInit,
-    SchedulesListInit, SchedulesList, ProjectUpdate, $state) {
+    GetChoices, Empty, DebugForm, Wait, SchedulesControllerInit,
+    SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2) {
 
     ClearScope('htmlTemplate');
 
@@ -673,6 +676,10 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 }
 
                 master.scm_type = $scope.scm_type;
+                CreateSelect2({
+                    element: '#project_scm_type',
+                    multiple: false
+                });
                 $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
 
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
@@ -761,10 +768,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             });
     };
 
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
-
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
@@ -830,6 +833,6 @@ ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
     'ClearScope', 'GetBasePath', 'ReturnToCaller', 'GetProjectPath',
     'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit',
-    'SchedulesListInit', 'SchedulesList', 'ProjectUpdate', '$state'
+    'DebugForm', 'Wait', 'SchedulesControllerInit', 'SchedulesListInit',
+    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2'
 ];

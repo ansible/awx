@@ -15,7 +15,7 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
     SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun,
-    Wait, Stream, CreateDialog, $compile, $state) {
+    Wait, CreateDialog, $compile, $state) {
 
     ClearScope();
 
@@ -57,12 +57,6 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
     }
 
     $scope.search(list.iterator);
-
-
-
-    $scope.showActivity = function () {
-        Stream({ scope: $scope });
-    };
 
     $scope.addJobTemplate = function () {
         $state.transitionTo('jobTemplates.add');
@@ -239,14 +233,14 @@ export function JobTemplatesList($scope, $rootScope, $location, $log,
 
     $scope.scheduleJob = function (id) {
         $state.go('jobTemplateSchedules', {id: id});
-    }
+    };
 }
 
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
     'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
-    'LookUpInit', 'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile',
+    'LookUpInit', 'PlaybookRun', 'Wait', 'CreateDialog' , '$compile',
     '$state'
 ];
 
@@ -255,7 +249,7 @@ export function JobTemplatesAdd(Refresh, $filter, $scope, $rootScope, $compile,
     ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, InventoryList,
     CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait,
     Empty, ToJSON, CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices,
-    $state) {
+    $state, CreateSelect2) {
 
     ClearScope();
 
@@ -377,6 +371,21 @@ export function JobTemplatesAdd(Refresh, $filter, $scope, $rootScope, $compile,
                             msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
                     });
             }
+            CreateSelect2({
+                element:'#job_templates_job_type',
+                multiple: false
+            });
+
+            CreateSelect2({
+                element:'#playbook-select',
+                multiple: false
+            });
+
+            CreateSelect2({
+                element:'#job_templates_verbosity',
+                multiple: false
+            });
+
             $scope.$emit('lookUpInitialize');
         }
     });
@@ -675,7 +684,8 @@ JobTemplatesAdd.$inject = ['Refresh', '$filter', '$scope', '$rootScope', '$compi
     'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList',
     'LookUpInit', 'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON',
-    'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state'
+    'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state',
+    'CreateSelect2'
 ];
 
 
@@ -684,9 +694,10 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
     ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller,
     ClearScope, InventoryList, CredentialList, ProjectList, LookUpInit,
     GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
-    Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
+    Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
     JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
-    SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state){
+    SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state,
+    CreateSelect2){
 
     ClearScope();
 
@@ -852,6 +863,21 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
         $scope.removeJobTemplateLoadFinished();
     }
     $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
+        CreateSelect2({
+            element:'#job_templates_job_type',
+            multiple: false
+        });
+
+        CreateSelect2({
+            element:'#playbook-select',
+            multiple: false
+        });
+
+        CreateSelect2({
+            element:'#job_templates_verbosity',
+            multiple: false
+        });
+
         for (var set in relatedSets) {
             $scope.search(relatedSets[set].iterator);
         }
@@ -1157,12 +1183,6 @@ export function JobTemplatesEdit($filter, $scope, $rootScope, $compile,
 
     };
 
-    $scope.showActivity = function () {
-        Stream({
-            scope: $scope
-        });
-    };
-
     $scope.formCancel = function () {
         $state.transitionTo('jobTemplates');
     };
@@ -1245,9 +1265,9 @@ JobTemplatesEdit.$inject = ['$filter', '$scope', '$rootScope', '$compile',
     'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit',
     'RelatedPaginateInit','ReturnToCaller', 'ClearScope', 'InventoryList',
     'CredentialList', 'ProjectList', 'LookUpInit', 'GetBasePath', 'md5Setup',
-    'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream',
+    'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait',
     'Empty', 'Prompt', 'ParseVariableString', 'ToJSON',
     'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
     'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
-    'PlaybookRun' , 'initSurvey', '$state'
+    'PlaybookRun' , 'initSurvey', '$state', 'CreateSelect2'
 ];

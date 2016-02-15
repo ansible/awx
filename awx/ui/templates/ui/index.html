@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}assets/fontcustom/fontcustom.css" type="text/css">
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2.css" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2-bootstrap-theme/dist/select2-bootstrap.css" />
 
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
@@ -53,6 +52,8 @@
     <!-- Password Dialog -->
     <div id="password-modal" style="display: none;"></div>
     <div id="idle-modal" style="display:none">Your session will expire in <span id="remaining_seconds">60</span> seconds, would you like to continue?</div>
+
+    <stream-detail-modal></stream-detail-modal>
 
     <!-- Generic Form dialog -->
     <div id="form-modal" class="modal fade">
@@ -97,18 +98,18 @@
     <!-- Confirmation Dialog -->
     <div id="prompt-modal" class="modal fade">
        <div class="modal-dialog">
-          <div class="Prompt-content modal-content">
-              <div class="Prompt-header">
-                  <div class="Prompt-title" ng-bind="promptHeader" id="prompt-header"></div>
-                  <div class="Prompt-exitHolder">
-                      <button class="close Prompt-exit" data-target="#prompt-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
+          <div class="Modal-content modal-content">
+              <div class="Modal-header">
+                  <div class="Modal-title" ng-bind="promptHeader" id="prompt-header"></div>
+                  <div class="Modal-exitHolder">
+                      <button class="close Modal-exit" data-target="#prompt-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
                   </div>
               </div>
-              <div class="Prompt-body" ng-bind-html="promptBody" id="prompt-body">
+              <div class="Modal-body" ng-bind-html="promptBody" id="prompt-body">
               </div>
-              <div class="Prompt-footer">
-                  <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Prompt-footerButton" ng-bind="promptActionText"></a>
-                  <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Prompt-defaultButton Prompt-footerButton">CANCEL</a>
+              <div class="Modal-footer">
+                  <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Modal-footerButton" ng-bind="promptActionText"></a>
+                  <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
