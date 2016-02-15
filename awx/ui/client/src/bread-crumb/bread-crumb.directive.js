@@ -1,7 +1,7 @@
 /* jshint unused: vars */
 
 export default
-    [   'templateUrl', '$state', 'FeaturesService', function(templateUrl, $state, FeaturesService) {
+    [   'templateUrl', '$state', 'FeaturesService', 'ProcessErrors', function(templateUrl, $state, FeaturesService, ProcessErrors) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -60,7 +60,7 @@ export default
                     else {
 
                         scope.showActivityStreamButton = false;
-                        
+
                     }
                 });
 
