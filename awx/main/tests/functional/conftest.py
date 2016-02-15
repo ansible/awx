@@ -6,6 +6,7 @@ from awx.main.models.inventory import (
     Group,
 )
 from awx.main.models.projects import Project
+from awx.main.models.jobs import JobTemplate
 from awx.main.models.organization import (
     Organization,
     Team,
@@ -22,6 +23,28 @@ def user():
             user.save()
         return user
     return u
+
+@pytest.fixture
+def check_jobtemplate(project, inventory, credential):
+    return \
+        JobTemplate.objects.create(
+            job_type='check',
+            project=project,
+            inventory=inventory,
+            credential=credential,
+            name='check-job-template'
+        )
+
+@pytest.fixture
+def deploy_jobtemplate(project, inventory, credential):
+    return \
+        JobTemplate.objects.create(
+            job_type='run',
+            project=project,
+            inventory=inventory,
+            credential=credential,
+            name='deploy-job-template'
+        )
 
 @pytest.fixture
 def team(organization):

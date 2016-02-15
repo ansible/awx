@@ -1,4 +1,5 @@
 from collections import defaultdict
+import _old_access as old_access
 
 def migrate_users(apps, schema_editor):
     migrations = list()
@@ -52,7 +53,7 @@ def migrate_inventory(apps, schema_editor):
 
     for inventory in Inventory.objects.all():
         teams, users = [], []
-        for perm in Permission.objects.filter(inventory=inventory):
+        for perm in Permission.objects.filter(inventory=inventory, active=True):
             role = None
             execrole = None
             if perm.permission_type == 'admin':
@@ -63,6 +64,10 @@ def migrate_inventory(apps, schema_editor):
                 pass
             elif perm.permission_type == 'write':
                 role = inventory.updater_role
+                pass
+            elif perm.permission_type == 'check':
+                pass
+            elif perm.permission_type == 'run':
                 pass
             else:
                 raise Exception('Unhandled permission type for inventory: %s' % perm.permission_type)
@@ -122,14 +127,92 @@ def migrate_projects(apps, schema_editor):
                     project.member_role.members.add(user)
                     migrations[project.name]['users'].add(user)
 
-        for perm in Permission.objects.filter(project=project):
+        for perm in Permission.objects.filter(project=project, active=True):
             # All perms at this level just imply a user or team can read
             if perm.team:
-                team.member_role.children.add(project.member_role)
-                migrations[project.name]['teams'].add(team)
+                perm.team.member_role.children.add(project.member_role)
+                migrations[project.name]['teams'].add(perm.team)
 
             if perm.user:
                 project.member_role.members.add(perm.user)
                 migrations[project.name]['users'].add(perm.user)
+
+    return migrations
+
+
+
+def migrate_job_templates(apps, schema_editor):
+    '''
+    NOTE: This must be run after orgs, inventory, projects, credential, and
+    users have been migrated
+    '''
+
+
+    '''
+    I can see job templates when:
+     X I am a superuser.
+     - I can read the inventory, project and credential (which means I am an
+       org admin or member of a team with access to all of the above).
+     - I have permission explicitly granted to check/deploy with the inventory
+       and project.
+
+
+    #This does not mean I would be able to launch a job from the template or
+    #edit the template.
+     - access.py can_read for JobTemplate enforces that you can only
+       see it if you can launch it, so the above imply launch too
+    '''
+
+
+    '''
+    Tower administrators, organization administrators, and project
+    administrators, within a project under their purview, may create and modify
+    new job templates for that project.
+
+    When editing a job template, they may select among the inventory groups and
+    credentials in the organization for which they have usage permissions, or
+    they may leave either blank to be selected at runtime.
+
+    Additionally, they may specify one or more users/teams that have execution
+    permission for that job template, among the users/teams that are a member
+    of that project.
+
+    That execution permission is valid irrespective of any explicit permissions
+    the user has or has not been granted to the inventory group or credential
+    specified in the job template.
+
+    '''
+
+    migrations = defaultdict(lambda: defaultdict(set))
+
+    User = apps.get_model('auth', 'User')
+    JobTemplate = apps.get_model('main', 'JobTemplate')
+    Team = apps.get_model('main', 'Team')
+    Permission = apps.get_model('main', 'Permission')
+
+    for jt in JobTemplate.objects.all():
+        for team in Team.objects.all():
+            if Permission.objects.filter(
+                    team=team,
+                    inventory=jt.inventory,
+                    project=jt.project,
+                    active=True,
+                    permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run']
+                ):
+                team.member_role.children.add(jt.executor_role);
+                migrations[jt.name]['teams'].add(team)
+
+
+        for user in User.objects.all():
+            if jt.accessible_by(user, {'execute': True}):
+                # If the job template is already accessible by the user, because they
+                # are a sytem, organization, or project admin, then don't add an explicit
+                # role entry for them
+                continue
+
+            if old_access.check_user_access(user, jt.__class__, 'start', jt, False):
+                jt.executor_role.members.add(user)
+                migrations[jt.name]['users'].add(user)
+
 
     return migrations
