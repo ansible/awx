@@ -51,18 +51,15 @@ class Organization(CommonModel, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Organization Administrator',
         parent_role='singleton:System Administrator',
-        resource_field='resource',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Organization Auditor',
         parent_role='singleton:System Auditor',
-        resource_field='resource',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Organization Member',
-        resource_field='resource',
         permissions = {'read': True}
     )
 
@@ -110,19 +107,16 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Team Administrator',
         parent_role='organization.admin_role',
-        resource_field='resource',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Team Auditor',
         parent_role='organization.auditor_role',
-        resource_field='resource',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Team Member',
         parent_role='admin_role',
-        resource_field='resource',
         permissions = {'read':True},
     )
 

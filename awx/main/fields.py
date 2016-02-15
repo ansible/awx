@@ -91,9 +91,8 @@ class ImplicitResourceField(models.ForeignKey):
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
     """Descriptor Implict Role Fields. Auto-creates the appropriate role entry on first access"""
 
-    def __init__(self, role_name, resource_field, permissions, parent_role,  *args, **kwargs):
+    def __init__(self, role_name, permissions, parent_role,  *args, **kwargs):
         self.role_name = role_name
-        self.resource_field = resource_field
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -143,10 +142,10 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         setattr(instance, self.field.name, role)
         instance.save(update_fields=[self.field.name,])
 
-        if self.resource_field and self.permissions:
+        if self.permissions is not None:
             permissions = RolePermission(
                 role=role,
-                resource=getattr(instance, self.resource_field)
+                resource=instance.resource
             )
 
             if 'all' in self.permissions and self.permissions['all']:
@@ -170,9 +169,8 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitRoleField(models.ForeignKey):
     """Implicitly creates a role entry for a resource"""
 
-    def __init__(self, role_name=None, resource_field=None, permissions=None, parent_role=None, *args, **kwargs):
+    def __init__(self, role_name=None, permissions=None, parent_role=None, *args, **kwargs):
         self.role_name = role_name
-        self.resource_field = resource_field
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -187,7 +185,6 @@ class ImplicitRoleField(models.ForeignKey):
                 self.name,
                 ImplicitRoleDescriptor(
                     self.role_name,
-                    self.resource_field,
                     self.permissions,
                     self.parent_role,
                     self

@@ -96,13 +96,11 @@ class Inventory(CommonModel, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Inventory Administrator',
         parent_role='organization.admin_role',
-        resource_field='resource',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Auditor',
         parent_role='organization.auditor_role',
-        resource_field='resource',
         permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
@@ -545,25 +543,21 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Inventory Group Administrator',
         parent_role=['inventory.admin_role', 'parents.admin_role'],
-        resource_field='resource',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
-        resource_field='resource',
         permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
         parent_role=['inventory.updater_role', 'parents.updater_role'],
-        resource_field='resource',
         permissions = {'read': True, 'write': True, 'create': True, 'use': True},
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
         parent_role=['inventory.executor_role', 'parents.executor_role'],
-        resource_field='resource',
         permissions = {'read':True, 'execute':True},
     )
 
