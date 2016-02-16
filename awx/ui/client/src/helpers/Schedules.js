@@ -55,9 +55,9 @@ export default
         }])
 
         .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait',
-        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost',
+        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
         function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors,
-            GetBasePath, SchedulePost) {
+            GetBasePath, SchedulePost, $state) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
@@ -171,6 +171,7 @@ export default
                     if (callback) {
                         scope.$emit(callback, data);
                     }
+                    $state.go("^");
                 });
 
                 scope.saveSchedule = function() {
@@ -208,8 +209,8 @@ export default
         }])
 
         .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
-            'SchedulePost',
-        function($location, $stateParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost) {
+            'SchedulePost', '$state',
+        function($location, $stateParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost, $state) {
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
@@ -280,6 +281,7 @@ export default
                     if (callback) {
                         scope.$emit(callback, data);
                     }
+                    $state.go("^");
                 });
 
                 scope.saveSchedule = function() {
