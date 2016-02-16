@@ -145,6 +145,7 @@
                             Local Time Zone
                         </label>
                         <select
+                            class="MakeSelect2"
                             name="schedulerTimeZone"
                             id="schedulerTimeZone"
                             ng-model="schedulerTimeZone"
@@ -160,6 +161,7 @@
                         </label>
                         <select name="schedulerFrequency"
                             id="schedulerFrequency"
+                            class="MakeSelect2"
                             ng-model="schedulerFrequency"
                             ng-options="f.name for f in frequencyOptions"
                             required class="form-control input-sm"
@@ -254,7 +256,8 @@
                                     ng-model="$parent.monthlyOccurrence"
                                     ng-options="o.name for o in occurrences"
                                     ng-disabled="monthlyRepeatOption != 'other'"
-                                    class="form-control input-sm
+                                    class=" MakeSelect2 form-control
+                                        input-sm
                                         RepeatFrequencyOptions-spacedSelect
                                         RepeatFrequencyOptions-monthlyOccurence"
                                 >
@@ -264,7 +267,7 @@
                                     ng-model="$parent.monthlyWeekDay"
                                     ng-options="w.name for w in weekdays"
                                     ng-disabled="monthlyRepeatOption != 'other'"
-                                    class="form-control input-sm" >
+                                    class="MakeSelect2 form-control input-sm" >
                                 </select>
                             </div>
                         </div>
@@ -291,7 +294,7 @@
                                     ng-model="$parent.yearlyMonth"
                                     ng-options="m.name for m in months"
                                     ng-disabled="yearlyRepeatOption != 'month'"
-                                    class="form-control input-sm
+                                    class="MakeSelect2 form-control input-sm
                                         RepeatFrequencyOptions-spacedSelect"
                                 >
                                 </select>
@@ -335,7 +338,8 @@
                                     ng-model="$parent.yearlyOccurrence"
                                     ng-options="o.name for o in occurrences"
                                     ng-disabled="yearlyRepeatOption != 'other'"
-                                    class="form-control input-sm
+                                    class="MakeSelect2
+                                        form-control input-sm
                                         RepeatFrequencyOptions-spacedSelect
                                         RepeatFrequencyOptions-yearlyOccurence
                                         RepeatFrequencyOptions-thirdSelect"
@@ -346,7 +350,8 @@
                                     ng-model="$parent.yearlyWeekDay"
                                     ng-options="w.name for w in weekdays"
                                     ng-disabled="yearlyRepeatOption != 'other'"
-                                    class="form-control input-sm
+                                    class="MakeSelect2
+                                        form-control input-sm
                                         RepeatFrequencyOptions-spacedSelect
                                         RepeatFrequencyOptions-thirdSelect"
                                 >
@@ -356,7 +361,8 @@
                                     ng-model="$parent.yearlyOtherMonth"
                                     ng-options="m.name for m in months"
                                     ng-disabled="yearlyRepeatOption != 'other'"
-                                    class="form-control input-sm
+                                    class="MakeSelect2
+                                        form-control input-sm
                                         RepeatFrequencyOptions-thirdSelect">
                                 </select>
                             </div>
@@ -451,7 +457,8 @@
                                     ng-model="$parent.schedulerEnd"
                                     ng-options="e.name for e in endOptions"
                                     required
-                                    class="form-control input-sm"
+                                    class="MakeSelect2
+                                        form-control input-sm"
                                     ng-change="schedulerEndChange()">
                                 </select>
                             </div>

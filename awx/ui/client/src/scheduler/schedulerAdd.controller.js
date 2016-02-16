@@ -52,59 +52,13 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
 
     var callSelect2 = function() {
         CreateSelect2({
-            element: '#schedulerTimeZone',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#schedulerFrequency',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#monthlyWeekDay',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#monthlyOccurrence',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#monthlyOccurrence',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#yearlyMonth',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#yearlyWeekDay',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#yearlyOccurrence',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#yearlyOtherMonth',
-            multiple: false
-        });
-
-        CreateSelect2({
-            element: '#schedulerEnd',
+            element: '.MakeSelect2',
             multiple: false
         });
     };
 
     $scope.$on("updateSchedulerSelects", function() {
         callSelect2();
-        console.log("select2 is called");
     });
 
     callSelect2();
