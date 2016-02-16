@@ -568,8 +568,21 @@ class AuthTokenView(APIView):
     serializer_class = AuthTokenSerializer
     model = AuthToken
 
+    def get_serializer(self, *args, **kwargs):
+        serializer = self.serializer_class(*args, **kwargs)
+        # Override when called from browsable API to generate raw data form;
+        # update serializer "validated" data to be displayed by the raw data
+        # form.
+        if hasattr(self, '_raw_data_form_marker'):
+            # Always remove read only fields from serializer.
+            for name, field in serializer.fields.items():
+                if getattr(field, 'read_only', None):
+                     del serializer.fields[name]
+            serializer._data = self.update_raw_data(serializer.data)
+        return serializer
+
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             request_hash = AuthToken.get_request_hash(self.request)
             try:
@@ -1178,6 +1191,19 @@ class HostGroupsList(SubListCreateAttachDetachAPIView):
     parent_model = Host
     relationship = 'groups'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(HostGroupsList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent host inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(HostGroupsList, self).create(request, *args, **kwargs)
+
 class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
 
@@ -1334,6 +1360,19 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'children'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupChildrenList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent group inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(GroupChildrenList, self).create(request, *args, **kwargs)
+
     def unattach(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if sub_id is not None:
@@ -1394,8 +1433,14 @@ class GroupHostsList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'hosts'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupHostsList, self).update_raw_data(data)
+
     def create(self, request, *args, **kwargs):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
+        # Inject parent group inventory ID into new host data.
+        request.data['inventory'] = parent_group.inventory_id
         existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data['name'])
         if existing_hosts.count() > 0 and ('variables' not in request.data or
                                            request.data['variables'] == '' or
@@ -2582,6 +2627,15 @@ class AdHocCommandList(ListCreateAPIView):
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandList, self).dispatch(*args, **kwargs)
+
+    def update_raw_data(self, data):
+        # Hide inventory and limit fields from raw data, since they will be set
+        # automatically by sub list create view.
+        parent_model = getattr(self, 'parent_model', None)
+        if parent_model in (Host, Group):
+            data.pop('inventory', None)
+            data.pop('limit', None)
+        return super(AdHocCommandList, self).update_raw_data(data)
 
     def create(self, request, *args, **kwargs):
         # Inject inventory ID and limit if parent objects is a host/group.

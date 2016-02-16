@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from collections import OrderedDict
 import inspect
 import logging
 import time
@@ -155,6 +156,22 @@ class APIView(views.APIView):
         context = self.get_description_context()
         return render_to_string(template_list, context)
 
+    def update_raw_data(self, data):
+        # Remove the parent key if the view is a sublist, since it will be set
+        # automatically.
+        parent_key = getattr(self, 'parent_key', None)
+        if parent_key:
+            data.pop(parent_key, None)
+
+        # Use request data as-is when original request is an update and the
+        # submitted data was rejected.
+        request_method = getattr(self, '_raw_data_request_method', None)
+        response_status = getattr(self, '_raw_data_response_status', 0)
+        if request_method in ('POST', 'PUT', 'PATCH') and response_status in xrange(400, 500):
+            return self.request.data.copy()
+
+        return data
+
 
 class GenericAPIView(generics.GenericAPIView, APIView):
     # Base class for all model-based views.
@@ -166,11 +183,14 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     def get_serializer(self, *args, **kwargs):
         serializer = super(GenericAPIView, self).get_serializer(*args, **kwargs)
         # Override when called from browsable API to generate raw data form;
-        # always remove read only fields from sample raw data.
+        # update serializer "validated" data to be displayed by the raw data
+        # form.
         if hasattr(self, '_raw_data_form_marker'):
+            # Always remove read only fields from serializer.
             for name, field in serializer.fields.items():
                 if getattr(field, 'read_only', None):
-                    del serializer.fields[name]
+                     del serializer.fields[name]
+            serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
     def get_queryset(self):
@@ -438,6 +458,10 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         self.update_filter(request, *args, **kwargs)
         return super(RetrieveUpdateAPIView, self).update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        self.update_filter(request, *args, **kwargs)
+        return super(RetrieveUpdateAPIView, self).partial_update(request, *args, **kwargs)
 
     def update_filter(self, request, *args, **kwargs):
         ''' scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering '''
