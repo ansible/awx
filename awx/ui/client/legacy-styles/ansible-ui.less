@@ -43,6 +43,7 @@
 @import "portal.less";
 @import "text-label.less";
 @import "./bootstrap-datepicker.less";
+@import "awx/ui/client/src/shared/branding/colors.default.less";
 
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
@@ -107,7 +108,7 @@ a:focus {
 }
 
 .btn-grey:hover {
-  background-color: #FFF;
+  background-color: @default-bg;
 }
 
 #cowsay {
@@ -317,7 +318,7 @@ i:active,
 #home_groups_table .actions .cancel { padding-right: 3px; }
 
 .success-badge {
-  color: #ffffff;
+  color: @default-bg;
   background-color: #5cb85c;
 }
 
@@ -631,12 +632,12 @@ dd {
   }
 
   .form-control.ng-dirty.ng-pristine {
-      border-color: #e1e1e1;
+      border-color: @default-second-border;
       box-shadow: none;
   }
 
   .form-control.ng-dirty.ng-pristine:focus {
-      border-color: #1678c4;
+      border-color: @default-link;
   }
 /* For some reason TB 3 RC1 does not provide an input-mini */
 
@@ -712,7 +713,7 @@ legend {
           padding-bottom: 0;
       }
       .pagination > .active > a {
-          background-color: #fff;
+          background-color: @default-bg;
           color: #428bca;
           border-color: none;
           border: 1px solid #428bca;
@@ -945,7 +946,7 @@ input[type="checkbox"].checkbox-no-label {
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  background-color: #fff;
+  background-color: @default-bg;
 }
 
 .table-hover-inverse tbody tr:hover > td,
@@ -1169,12 +1170,12 @@ input[type="checkbox"].checkbox-no-label {
 /* Inventory job status badge */
   .failures-true {
     background-color: @red;
-    color: #fff;
+    color: @default-bg;
   }
 
   .failures-false {
     background-color: @green;
-    color: #fff;
+    color: @default-bg;
   }
 
 /* Cloud inventory status. i.e. inventory_source.status values */
@@ -1357,8 +1358,8 @@ input[type="checkbox"].checkbox-no-label {
       }
 
       .free-button {
-          background-color: #ff5850;
-          border: 1px solid #ff5850;
+          background-color: @default-err;
+          border: 1px solid @default-err;
           color: @white;
       }
       .free-button:hover {
@@ -1947,20 +1948,20 @@ button.dropdown-toggle,
 }
 
 .tooltip.bottom .tooltip-arrow {
-    border-bottom-color: #848992;
+    border-bottom-color: @default-interface-txt;
 }
 
 
 .tooltip.top .tooltip-arrow {
-    border-top-color: #848992;
+    border-top-color: @default-interface-txt;
 }
 
 .tooltip.left .tooltip-arrow {
-    border-left-color: #848992;
+    border-left-color: @default-interface-txt;
 }
 
 .tooltip.right .tooltip-arrow {
-    border-right-color: #848992;
+    border-right-color: @default-interface-txt;
 }
 
 .tooltip.Tooltip.fade.bottom.in {
@@ -1973,7 +1974,7 @@ button.dropdown-toggle,
 }
 
 .tooltip-inner {
-    background-color: #848992;
+    background-color: @default-interface-txt;
 }
 
 .tooltip-inner--logOut {
@@ -1994,9 +1995,9 @@ button.dropdown-toggle,
 }
 
 .form-control {
-    border-color: #e1e1e1;
+    border-color: @default-second-border;
     background-color: #f6f6f6;
-    color: #161b1f;
+    color: @default-data-txt;
     transition: border-color 0.3s;
     box-shadow: none;
 }

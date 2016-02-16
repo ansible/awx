@@ -15,6 +15,10 @@
 @default-link:          #1678C4;
 @default-link-hov:      #4498DA;
 @default-button-hov:    #F2F2F2;
+@default-list-header-bg:#EBEBEB;
+@default-no-items-bord: #F6F6F6;
+@default-as-detail-txt: #707070;
+@default-dark:          #000000;
 
 // layout
 @page-bg:               @default-secondary-bg;
@@ -31,7 +35,7 @@
 // lists
 @list-empty-txt:        @default-interface-txt;
 @list-header-bord:      @default-bg;
-@list-header-bg:        #EBEBEB;
+@list-header-bg:        @default-list-header-bg;
 @list-header-txt:       @default-interface-txt;
 @list-header-icon:      @default-icon;
 @list-item:             @default-data-txt;
@@ -64,7 +68,7 @@
 @list-srch-btn-bg:      @default-bg;
 @list-srch-btn-hov-bg:  @default-tertiary-bg;
 @list-no-items-txt:     @default-icon;
-@list-no-items-bord:    #F6F6F6;
+@list-no-items-bord:    @default-no-items-bord;
 @list-no-items-bg:      @default-secondary-bg;
 
 // tooltups
@@ -73,7 +77,7 @@
 
 // login modal
 @login-alert:           @default-interface-txt;
-@login-backdrop:        #000000;
+@login-backdrop:        @default-dark;
 @login-bg:              @default-bg;
 @login-header-bg:       @default-bg;
 @login-alert-error:     @default-err;
@@ -82,7 +86,7 @@
 @login-notice-title:    @default-interface-txt;
 @login-notice-bg:       @default-secondary-bg;
 @login-notice-border:   @default-secondary-bg;
-@login-notice-text:     #707070;
+@login-notice-text:     @default-as-detail-txt;
 
 // login modal third party auth
 @third-party-label:     @default-interface-txt;
@@ -157,8 +161,8 @@
 @db-graph-axis-label:   @default-interface-txt;
 
 // panel
-@panel-bg:        @default-bg;
-@panel-border:    @default-border;
+@panel-bg:              @default-bg;
+@panel-border:          @default-border;
 
 // activity stream details modal
-@as-detail-changes-txt:  #707070;
+@as-detail-changes-txt: @default-as-detail-txt;

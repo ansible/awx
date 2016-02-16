@@ -1,14 +1,16 @@
 /** @define SchedulerFormDetail */
 
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
 .SchedulerFormDetail-container {
     padding: 15px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid @default-border;
     border-radius: 5px;
     margin-bottom: 20px;
 }
 
 .SchedulerFormDetail-container--error {
-    border-color: #ff5850;
+    border-color: @default-err;
 }
 
 .SchedulerFormDetail-errorText {
@@ -19,7 +21,7 @@
 
 .SchedulerFormDetail-label {
     text-transform: uppercase;
-    color: #848992;
+    color: @default-interface-txt;
     margin-bottom: 15px;
 }
 
@@ -47,7 +49,7 @@
 .SchedulerFormDetail-dateFormats {
     text-transform: uppercase;
     font-size: 13px;
-    color: #848992;
+    color: @default-interface-txt;
 }
 
 .SchedulerFormDetail-dateFormatsLabel {
@@ -57,12 +59,12 @@
 
 .SchedulerFormDetail-radioLabel {
     margin-top: -3px !important;
-    color: #161B1F !important;
+    color: @default-data-txt !important;
 }
 
 .SchedulerFormDetail-radioButton {
     margin-top: 2px !important;
-    color: #848992 !important;
+    color: @default-interface-txt !important;
 }
 
 .SchedulerFormDetail-occurrenceList {

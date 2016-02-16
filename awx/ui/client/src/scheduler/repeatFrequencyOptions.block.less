@@ -1,9 +1,11 @@
 /** @define RepeatFrequencyOptions */
 
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
 .RepeatFrequencyOptions {
     width: ~"calc(100% + 21px)";
     padding: 20px;
-    border-left: 5px solid #e8e8e8;
+    border-left: 5px solid @default-border;
     margin-left: -20px;
     padding-left: 17px;
     padding-right: 0px;
@@ -60,10 +62,10 @@
     margin-top: -2px;
     text-transform: uppercase;
     font-weight: bold;
-    color: #848992;
+    color: @default-interface-txt;
     font-size: 13px;
     margin-left: -20px;
-    border-left: 5px solid #e8e8e8;
+    border-left: 5px solid @default-border;
     padding-left: 15px;
     padding-bottom: 15px;
 }
@@ -94,7 +96,7 @@
 
 .RepeatFrequencyOptions-inlineLabel {
     font-weight: normal;
-    color: #848992;
+    color: @default-interface-txt;
     text-transform: uppercase;
     flex: initial;
     width: 54px;
@@ -123,7 +125,7 @@
 .RepeatFrequencyOptions-subFormBorderFixer {
     height: 25px;
     width: 5px;
-    background: #ffffff;
+    background: @default-bg;
     margin-left: -20px;
     margin-top: -25px;
     margin-right: 50px;
@@ -140,7 +142,7 @@
 }
 
 .RepeatFrequencyOptions-nameBorderErrorFix {
-    border-color: #ff5850 !important;
+    border-color: @default-err !important;
 }
 
 .RepeatFrequencyOptions-inputGroup {
