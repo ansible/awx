@@ -1251,7 +1251,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         source = attrs.get('source', self.instance and self.instance.source or '')
         source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
         if source == 'custom':
-            if not source_script is None or source_script == '':
+            if source_script is None or source_script == '':
                 errors['source_script'] = 'source_script must be provided'
             else:
                 try:

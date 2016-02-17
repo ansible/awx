@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-from collections import OrderedDict
 import inspect
 import logging
 import time
@@ -189,7 +188,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             # Always remove read only fields from serializer.
             for name, field in serializer.fields.items():
                 if getattr(field, 'read_only', None):
-                     del serializer.fields[name]
+                    del serializer.fields[name]
             serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
