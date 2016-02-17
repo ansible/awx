@@ -122,6 +122,12 @@ def rebuild_role_ancestor_list(sender, reverse, model, instance, pk_set, **kwarg
     else:
         instance.rebuild_role_ancestor_list()
 
+def sync_superuser_status_to_rbac(sender, instance, **kwargs):
+    if instance.is_superuser:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
+    else:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -142,6 +148,7 @@ post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+post_save.connect(sync_superuser_status_to_rbac, sender=User)
 #m2m_changed.connect(rebuild_group_parent_roles, Group.parents.through)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or

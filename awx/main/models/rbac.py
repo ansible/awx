@@ -13,9 +13,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 # AWX
 from awx.main.models.base import * # noqa
 
-__all__ = ['Role', 'RolePermission', 'Resource']
+__all__ = ['Role', 'RolePermission', 'Resource', 'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR', 'ROLE_SINGLETON_SYSTEM_AUDITOR']
 
 logger = logging.getLogger('awx.main.models.rbac')
+
+ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='System Administrator'
+ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor' 
 
 
 class Role(CommonModelNameNotUnique):
@@ -91,7 +94,7 @@ class Role(CommonModelNameNotUnique):
         try:
             return Role.objects.get(singleton_name=name)
         except Role.DoesNotExist:
-            ret = Role(singleton_name=name)
+            ret = Role(singleton_name=name, name=name)
             ret.save()
             return ret
 
