@@ -172,9 +172,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'schedule':
                 icon = "fa-calendar";
                 break;
-            case 'stdout':
-                icon = "fa-external-link";
-                break;
             case 'question_cancel':
                 icon = 'fa-times';
                 break;

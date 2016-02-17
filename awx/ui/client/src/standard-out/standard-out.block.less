@@ -1,0 +1,60 @@
+@import "../shared/branding/colors.default.less";
+
+/** @define StandardOut */
+
+.StandardOut {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.StandardOut-leftPanel {
+    flex: 0 0 400px;
+}
+
+.StandardOut-rightPanel {
+    flex: 1 0;
+    margin-left: 20px;
+}
+
+.StandardOut-panelHeader {
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.StandardOut-consoleOutput {
+    margin-top: 25px;
+    min-height: 200px;
+    background-color: @default-secondary-bg;
+    border-radius: 5px;
+}
+
+.StandardOut-details {
+    margin-top: 25px;
+}
+
+.StandardOut-detailsRow {
+    display: flex;
+}
+
+.StandardOut-detailsRow:not(:last-child) {
+    margin-bottom: 20px;
+}
+
+.StandardOut-detailsLabel {
+    width: 130px;
+    flex: 0 0 130px;
+    color: @default-interface-txt;
+    text-transform: uppercase;
+}
+
+.StandardOut-detailsContent {
+    flex: 1 0;
+}
+
+.StandardOut-statusText {
+    margin-left: 6px;
+}

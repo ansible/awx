@@ -27,7 +27,7 @@ export default
                 dataTitle: "{{ completed_job.status_popover_title }}",
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(completed_job.id)",
+                ngClick:"viewJobDetails(completed_job)",
                 searchable: true,
                 searchType: 'select',
                 nosort: true,
@@ -40,7 +40,7 @@ export default
             },
             id: {
                 label: 'ID',
-                ngClick:"viewJobLog(completed_job.id)",
+                ngClick:"viewJobDetails(completed_job)",
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ completed_job.status_tip }}",
@@ -49,7 +49,7 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
-                ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
+                ngClick: "viewJobDetails(completed_job)",
                 defaultSearchField: true,
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
@@ -89,13 +89,6 @@ export default
 
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
 
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ completed_job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "completed_job.type == 'job'"
-            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
@@ -110,11 +103,5 @@ export default
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top'
             }
-            // job_details: {
-            //     mode: 'all',
-            //     ngClick: "viewJobLog(completed_job.id)",
-            //     awToolTip: 'View job details',
-            //     dataPlacement: 'top'
-            // }
         }
     });
