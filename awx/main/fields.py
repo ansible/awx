@@ -85,7 +85,8 @@ class ImplicitResourceField(models.ForeignKey):
 
     def _save(self, instance, *args, **kwargs):
         # Ensure that our field gets initialized after our first save
-        getattr(instance, self.name)
+        if not hasattr(instance, self.name):
+            getattr(instance, self.name)
 
 
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
@@ -257,4 +258,5 @@ class ImplicitRoleField(models.ForeignKey):
 
     def _save(self, instance, *args, **kwargs):
         # Ensure that our field gets initialized after our first save
-        getattr(instance, self.name)
+        if not hasattr(instance, self.name):
+            getattr(instance, self.name)
