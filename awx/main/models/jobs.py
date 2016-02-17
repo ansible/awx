@@ -307,7 +307,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                 except Exception:
                     try:
                         kwargs_extra_vars = yaml.safe_load(kwargs_extra_vars)
-                        assert type(kwargs_extra_vars) is dict
+                        assert isinstance(kwargs_extra_vars, dict)
                     except:
                         kwargs_extra_vars = {}
         else:
@@ -487,7 +487,7 @@ class Job(UnifiedJob, JobOptions):
 
     def handle_extra_data(self, extra_data):
         extra_vars = {}
-        if type(extra_data) == dict:
+        if isinstance(extra_data, dict):
             extra_vars = extra_data
         elif extra_data is None:
             return
@@ -1070,7 +1070,7 @@ class SystemJob(UnifiedJob, SystemJobOptions):
 
     def handle_extra_data(self, extra_data):
         extra_vars = {}
-        if type(extra_data) == dict:
+        if isinstance(extra_data, dict):
             extra_vars = extra_data
         elif extra_data is None:
             return

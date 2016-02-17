@@ -226,7 +226,7 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        if not type(request.data) == dict:
+        if not isinstance(request.data, dict):
             return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.data:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1941,13 +1941,13 @@ class JobTemplateSurveySpec(GenericAPIView):
             return Response(dict(error="'description' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
         if "spec" not in obj.survey_spec:
             return Response(dict(error="'spec' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
-        if type(obj.survey_spec["spec"]) != list:
+        if not isinstance(obj.survey_spec["spec"], list):
             return Response(dict(error="'spec' must be a list of items"), status=status.HTTP_400_BAD_REQUEST)
         if len(obj.survey_spec["spec"]) < 1:
             return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
         for survey_item in obj.survey_spec["spec"]:
-            if type(survey_item) != dict:
+            if not isinstance(survey_item, dict):
                 return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
                 return Response(dict(error="'type' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)

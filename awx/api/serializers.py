@@ -8,7 +8,6 @@ import re
 import logging
 from collections import OrderedDict
 from dateutil import rrule
-from ast import literal_eval
 
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
@@ -1955,6 +1954,7 @@ class JobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     credential_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
+    extra_vars = VerbatimField(required=False)
 
     class Meta:
         model = JobTemplate
@@ -2001,20 +2001,16 @@ class JobLaunchSerializer(BaseSerializer):
             except KeyError:
                 errors['passwords_needed_to_start'] = credential.passwords_needed
 
-        extra_vars = force_text(attrs.get('extra_vars', {}))
-        try:
-            extra_vars = literal_eval(extra_vars)
-            extra_vars = json.dumps(extra_vars)
-        except Exception:
-            pass
+        extra_vars = attrs.get('extra_vars', {})
 
-        try:
-            extra_vars = json.loads(extra_vars)
-        except (ValueError, TypeError):
+        if isinstance(extra_vars, basestring):
             try:
-                extra_vars = yaml.safe_load(extra_vars)
-            except (yaml.YAMLError, TypeError, AttributeError):
-                errors['extra_vars'] = 'Must be valid JSON or YAML'
+                extra_vars = json.loads(extra_vars)
+            except (ValueError, TypeError):
+                try:
+                    extra_vars = yaml.safe_load(extra_vars)
+                except (yaml.YAMLError, TypeError, AttributeError):
+                    errors['extra_vars'] = 'Must be valid JSON or YAML'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
