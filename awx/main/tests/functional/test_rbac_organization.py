@@ -1,7 +1,11 @@
+import mock
 import pytest
 
 from awx.main.migrations import _rbac as rbac
-from awx.main.access import OrganizationAccess
+from awx.main.access import (
+    BaseAccess,
+    OrganizationAccess,
+)
 from django.apps import apps
 
 
@@ -29,8 +33,10 @@ def test_organization_migration_user(organization, permissions, user):
     assert len(migrations) == 1
     assert organization.accessible_by(u, permissions['auditor'])
 
+
+@mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
-def test_organization_access_superuser(organization, user):
+def test_organization_access_superuser(cl, organization, user):
     access = OrganizationAccess(user('admin', True))
     organization.users.add(user('user', False))
 
@@ -42,8 +48,9 @@ def test_organization_access_superuser(organization, user):
     assert len(org.users.all()) == 1
 
 
+@mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
-def test_organization_access_admin(organization, user):
+def test_organization_access_admin(cl, organization, user):
     '''can_change because I am an admin of that org'''
     a = user('admin', False)
     organization.admins.add(a)
@@ -57,8 +64,10 @@ def test_organization_access_admin(organization, user):
     assert len(org.admins.all()) == 1
     assert len(org.users.all()) == 1
 
+
+@mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
-def test_organization_access_user(organization, user):
+def test_organization_access_user(cl, organization, user):
     access = OrganizationAccess(user('user', False))
     organization.users.add(user('user', False))
 
