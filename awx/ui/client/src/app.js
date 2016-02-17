@@ -31,6 +31,7 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
+import jobDetail from './job-detail/main';
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -43,7 +44,6 @@ import templateUrl from './shared/template-url/main';
 import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
-import {JobDetailController} from './controllers/JobDetail';
 import {JobStdoutController} from './controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
 import {LicenseController} from './controllers/License';
@@ -95,6 +95,7 @@ var tower = angular.module('Tower', [
     login.name,
     activityStream.name,
     footer.name,
+    jobDetail.name,
     'templates',
     'Utilities',
     'LicenseHelper',
@@ -289,33 +290,6 @@ var tower = angular.module('Tower', [
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobDetail', {
-                url: '/jobs/:id',
-                templateUrl: urlPrefix + 'partials/job_detail.html',
-                controller: JobDetailController,
-                ncyBreadcrumb: {
-                    parent: 'jobs',
-                    label: "{{ job.id }} - {{ job.name }}"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "job_events"
-                            });
-                            $rootScope.event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
                     }]
                 }
             }).
