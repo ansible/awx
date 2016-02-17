@@ -769,9 +769,9 @@ class OrganizationSerializer(BaseSerializer):
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
             activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
             notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:organization_notifications_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:organization_notifications_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:organization_notifications_error_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:organization_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:organization_notifiers_error_list', args=(obj.pk,)),
         ))
         return res
 
@@ -851,9 +851,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
             schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:project_notifications_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:project_notifications_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:project_notifications_error_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
         ))
         # Backwards compatibility.
         if obj.current_update:
@@ -1298,9 +1298,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:inventory_source_notifications_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:inventory_source_notifications_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:inventory_source_notifications_error_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:inventory_source_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:inventory_source_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:inventory_source_notifiers_error_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1564,9 +1564,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
             launch = reverse('api:job_template_launch', args=(obj.pk,)),
-            notifiers_any = reverse('api:job_template_notifications_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:job_template_notifications_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:job_template_notifications_error_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -2053,22 +2053,24 @@ class JobLaunchSerializer(BaseSerializer):
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         return attrs
 
-class NotificationTemplateSerializer(BaseSerializer):
+class NotifierSerializer(BaseSerializer):
 
     class Meta:
-        model = NotificationTemplate
+        model = Notifier
         fields = ('*', 'organization', 'notification_type', 'notification_configuration')
 
     def get_related(self, obj):
-        res = super(NotificationTemplateSerializer, self).get_related(obj)
+        res = super(NotifierSerializer, self).get_related(obj)
         res.update(dict(
-            test = reverse('api:notification_template_test', args=(obj.pk,)),
-            notifications = reverse('api:notification_template_notification_list', args=(obj.pk,)),
+            test = reverse('api:notifier_test', args=(obj.pk,)),
+            notifications = reverse('api:notifier_notification_list', args=(obj.pk,)),
         ))
+        if obj.organization and obj.organization.active:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
     def validate(self, attrs):
-        notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
+        notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
@@ -2088,7 +2090,7 @@ class NotificationSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)
         res.update(dict(
-            notification_template = reverse('api:notification_template_detail', args=(obj.notifier.pk,)),
+            notifier = reverse('api:notifier_detail', args=(obj.notifier.pk,)),
         ))
         return res
 

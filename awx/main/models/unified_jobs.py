@@ -304,7 +304,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         Return notifiers relevant to this Unified Job Template
         '''
         # NOTE: Derived classes should implement
-        return NotificationTemplate.objects.none()
+        return Notifier.objects.none()
 
     def create_unified_job(self, **kwargs):
         '''

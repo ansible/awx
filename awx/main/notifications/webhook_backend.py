@@ -17,12 +17,14 @@ class WebhookBackend(BaseEmailBackend):
     sender_parameter = None
 
     def __init__(self, headers, fail_silently=False, **kwargs):
+        self.headers = headers
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
     def send_messages(self, messages):
         sent_messages = 0
         for m in messages:
             r = requests.post("{}".format(m.recipients()[0]),
+                              data=m.body,
                               headers=self.headers)
             if r.status_code >= 400:
                 logger.error("Error sending notification webhook: {}".format(r.text))

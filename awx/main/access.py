@@ -1484,11 +1484,11 @@ class ScheduleAccess(BaseAccess):
         else:
             return False
 
-class NotificationTemplateAccess(BaseAccess):
+class NotifierAccess(BaseAccess):
     '''
-    I can see/use a notification template if I have permission to
+    I can see/use a notifier if I have permission to
     '''
-    model = NotificationTemplate
+    model = Notifier
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
@@ -1708,5 +1708,5 @@ register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
-register_access(NotificationTemplate, NotificationTemplateAccess)
+register_access(Notifier, NotifierAccess)
 register_access(Notification, NotificationAccess)

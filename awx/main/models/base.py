@@ -343,20 +343,20 @@ class NotificationFieldsModel(BaseModel):
     class Meta:
         abstract = True
 
-    notification_errors = models.ManyToManyField(
-        "NotificationTemplate",
+    notifiers_error = models.ManyToManyField(
+        "Notifier",
         blank=True,
-        related_name='%(class)s_notifications_for_errors'
+        related_name='%(class)s_notifiers_for_errors'
     )
 
-    notification_success = models.ManyToManyField(
-        "NotificationTemplate",
+    notifiers_success = models.ManyToManyField(
+        "Notifier",
         blank=True,
-        related_name='%(class)s_notifications_for_success'
+        related_name='%(class)s_notifiers_for_success'
     )
 
-    notification_any = models.ManyToManyField(
-        "NotificationTemplate",
+    notifiers_any = models.ManyToManyField(
+        "Notifier",
         blank=True,
-        related_name='%(class)s_notifications_for_any'
+        related_name='%(class)s_notifiers_for_any'
     )

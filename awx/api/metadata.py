@@ -12,7 +12,7 @@ from rest_framework import serializers
 from rest_framework.request import clone_request
 
 # Ansible Tower
-from awx.main.models import InventorySource, NotificationTemplate
+from awx.main.models import InventorySource, Notifier
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -58,7 +58,7 @@ class Metadata(metadata.SimpleMetadata):
         # Special handling of notification configuration where the required properties
         # are conditional on the type selected.
         if field.field_name == 'notification_configuration':
-            for (notification_type_name, notification_tr_name, notification_type_class) in NotificationTemplate.NOTIFICATION_TYPES:
+            for (notification_type_name, notification_tr_name, notification_type_class) in Notifier.NOTIFICATION_TYPES:
                 field_info[notification_type_name] = notification_type_class.init_parameters
 
         # Update type of fields returned...

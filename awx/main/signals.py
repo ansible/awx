@@ -307,7 +307,7 @@ model_serializer_mapping = {
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
     TowerSettings: TowerSettingsSerializer,
-    NotificationTemplate: NotificationTemplateSerializer,
+    Notifier: NotifierSerializer,
     Notification: NotificationSerializer,
 }
 

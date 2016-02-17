@@ -23,9 +23,9 @@ from jsonfield import JSONField
 
 logger = logging.getLogger('awx.main.models.notifications')
 
-__all__ = ['NotificationTemplate', 'Notification']
+__all__ = ['Notifier', 'Notification']
 
-class NotificationTemplate(CommonModel):
+class Notifier(CommonModel):
 
     NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                           ('slack', _('Slack'), SlackBackend),
@@ -45,7 +45,7 @@ class NotificationTemplate(CommonModel):
         blank=False,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='notification_templates',
+        related_name='notifiers',
     )
 
     notification_type = models.CharField(
@@ -56,7 +56,7 @@ class NotificationTemplate(CommonModel):
     notification_configuration = JSONField(blank=False)
 
     def get_absolute_url(self):
-        return reverse('api:notification_template_detail', args=(self.pk,))
+        return reverse('api:notifier_detail', args=(self.pk,))
 
     @property
     def notification_class(self):
@@ -100,7 +100,7 @@ class Notification(CreatedModifiedModel):
         ordering = ('pk',)
 
     notifier = models.ForeignKey(
-        'NotificationTemplate',
+        'Notifier',
         related_name='notifications',
         on_delete=models.CASCADE,
         editable=False
@@ -122,7 +122,7 @@ class Notification(CreatedModifiedModel):
     )
     notification_type = models.CharField(
         max_length = 32,
-        choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES,
+        choices=Notifier.NOTIFICATION_TYPE_CHOICES,
     )
     recipients = models.TextField(
         blank=True,

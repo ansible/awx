@@ -23,7 +23,7 @@ from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import Notifier
 from awx.main.utils import ignore_inventory_computed_fields, _inventory_updates
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
@@ -1184,10 +1184,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @property
     def notifiers(self):
         # Return all notifiers defined on the Project, and on the Organization for each trigger type
-        base_notifiers = NotificationTemplate.objects.filter(active=True)
-        error_notifiers = list(base_notifiers.filter(organization_notifications_for_errors__in=self))
-        success_notifiers = list(base_notifiers.filter(organization_notifications_for_success__in=self))
-        any_notifiers = list(base_notifiers.filter(organization_notifications_for_any__in=self))
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors__in=self))
+        success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success__in=self))
+        any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any__in=self))
         return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
 
     def clean_source(self):
