@@ -2059,6 +2059,9 @@ class NotifierSerializer(BaseSerializer):
         model = Notifier
         fields = ('*', 'organization', 'notification_type', 'notification_configuration')
 
+    type_map = {"string": str, "int": int, "bool": bool, "list": list,
+                "password": str, "object": dict}
+
     def get_related(self, obj):
         res = super(NotifierSerializer, self).get_related(obj)
         res.update(dict(
@@ -2072,12 +2075,22 @@ class NotifierSerializer(BaseSerializer):
     def validate(self, attrs):
         notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
+        incorrect_type_fields = []
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
                 missing_fields.append(field)
-            # TODO: Type checks
+                continue
+            field_val = attrs['notification_configuration'][field]
+            field_type = notification_class.init_parameters[field]['type']
+            expected_type = self.type_map[field_type]
+            if not isinstance(field_val, expected_type):
+                incorrect_type_fields.append((field, field_type))
         if missing_fields:
-            raise serializers.ValidationError("Missing required fields for Notification Configuration: {}".format(missing_fields))
+            error_list = ["Missing required fields for Notification Configuration: {}".format(missing_fields)]
+            for type_field_error in incorrect_type_fields:
+                error_list.append("Configuration field {} incorrect type, expected {}".format(type_field_error[0],
+                                                                                              type_field_error[1]))
+            raise serializers.ValidationError(error_list)
         return attrs
 
 class NotificationSerializer(BaseSerializer):
