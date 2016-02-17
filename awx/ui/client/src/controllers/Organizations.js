@@ -12,13 +12,38 @@
 
 
 export function OrganizationsList($stateParams, $scope, $rootScope, $location,
-    $log, Rest, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
+    $log, $compile, Rest, PaginateWidget, PaginateInit, SearchInit, OrganizationList, Alert, Prompt, ClearScope, ProcessErrors, GetBasePath, Wait,
     $state) {
 
     ClearScope();
 
-    var defaultUrl = GetBasePath('organizations');
+    var defaultUrl = GetBasePath('organizations'),
+        list = OrganizationList,
+        pageSize = $scope.orgCount;
 
+    PaginateInit({
+        scope: $scope,
+        list: list, 
+        url: defaultUrl,
+        pageSize: pageSize,
+    });
+    SearchInit({
+        scope: $scope,
+        list: list,
+        url: defaultUrl,
+    });
+
+    $scope.search(list.iterator);
+
+    $scope.PaginateWidget = PaginateWidget({
+        iterator: list.iterator,
+        set: 'organizations'
+    });
+
+    var paginationContainer = $('#pagination-container');
+    paginationContainer.html($scope.PaginateWidget);
+    $compile(paginationContainer.contents())($scope)
+  
     var parseCardData = function (cards) {
         return cards.map(function (card) {
             var val = {};
@@ -150,7 +175,7 @@ export function OrganizationsList($stateParams, $scope, $rootScope, $location,
 }
 
 OrganizationsList.$inject = ['$stateParams', '$scope', '$rootScope',
-    '$location', '$log', 'Rest', 'Alert', 'Prompt', 'ClearScope',
+    '$location', '$log', '$compile', 'Rest', 'PaginateWidget', 'PaginateInit', 'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
     '$state'
 ];

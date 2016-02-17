@@ -1,4 +1,4 @@
-export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope) {
+export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2) {
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
@@ -53,4 +53,17 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
         id: parseInt($stateParams.schedule_id),
         callback: 'SchedulesRefresh'
     });
+
+    var callSelect2 = function() {
+        CreateSelect2({
+            element: '.MakeSelect2',
+            multiple: false
+        });
+    };
+
+    $scope.$on("updateSchedulerSelects", function() {
+        callSelect2();
+    });
+
+    callSelect2();
 }];

@@ -1111,6 +1111,20 @@ class InventoryActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
 
+class InventoryJobTemplateList(SubListAPIView):
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+    parent_model = Inventory
+    relationship = 'jobtemplates'
+    new_in_300 = True
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(inventory=parent)
+
 class InventoryScanJobTemplateList(SubListAPIView):
 
     model = JobTemplate

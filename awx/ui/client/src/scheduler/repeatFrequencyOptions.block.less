@@ -1,9 +1,11 @@
 /** @define RepeatFrequencyOptions */
 
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
 .RepeatFrequencyOptions {
     width: ~"calc(100% + 21px)";
     padding: 20px;
-    border-left: 5px solid #e8e8e8;
+    border-left: 5px solid @default-border;
     margin-left: -20px;
     padding-left: 17px;
     padding-right: 0px;
@@ -60,10 +62,10 @@
     margin-top: -2px;
     text-transform: uppercase;
     font-weight: bold;
-    color: #848992;
+    color: @default-interface-txt;
     font-size: 13px;
     margin-left: -20px;
-    border-left: 5px solid #e8e8e8;
+    border-left: 5px solid @default-border;
     padding-left: 15px;
     padding-bottom: 15px;
 }
@@ -94,7 +96,7 @@
 
 .RepeatFrequencyOptions-inlineLabel {
     font-weight: normal;
-    color: #848992;
+    color: @default-interface-txt;
     text-transform: uppercase;
     flex: initial;
     width: 54px;
@@ -115,14 +117,15 @@
     margin-top: 2px;
 }
 
-.RepeatFrequencyOptions-spacedSelect {
+.RepeatFrequencyOptions-spacedSelect,
+.RepeatFrequencyOptions-spacedSelect ~ .select2 {
     margin-bottom: 10px;
 }
 
 .RepeatFrequencyOptions-subFormBorderFixer {
     height: 25px;
     width: 5px;
-    background: #ffffff;
+    background: @default-bg;
     margin-left: -20px;
     margin-top: -25px;
     margin-right: 50px;
@@ -136,4 +139,26 @@
 .RepeatFrequencyOptions-error {
     flex: initial;
     width: 100%;
+}
+
+.RepeatFrequencyOptions-nameBorderErrorFix {
+    border-color: @default-err !important;
+}
+
+.RepeatFrequencyOptions-inputGroup {
+    display: flex;
+    justify-content: space-between;
+}
+
+.RepeatFrequencyOptions-inputGroup--thirds > .select2 {
+    width: ~"calc(33% - 3px)" !important;
+}
+
+.RepeatFrequencyOptions-inputGroup--halves > .select2 {
+    width: ~"calc(50% - 3px)" !important;
+}
+
+.RepeatFrequencyOptions-inputGroup--halvesWithNumber > .select2 {
+    width: ~"calc(50% - 3px)" !important;
+    margin-right: 7px;
 }
