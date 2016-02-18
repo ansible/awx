@@ -214,19 +214,20 @@ export default
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
-                    base = $location.path().replace(/^\//, '').split('/')[0],
+                    base = params.base || $location.path().replace(/^\//, '').split('/')[0],
                     url =  GetBasePath(base),
                     scheduler;
-
+                console.log('AddSchedule $stateParams: ', $stateParams)
                 if (!Empty($stateParams.template_id)) {
                     url += $stateParams.template_id + '/schedules/';
                 }
-                else if (!Empty($stateParams.id)) {
+                else if (!Empty($stateParams.id) && base != 'system_job_templates') {
                     url += $stateParams.id + '/schedules/';
                 }
-                else if (!Empty($stateParams.management_job)) {
-                    url += $stateParams.management_job + '/schedules/';
-                    if(scope.management_job.id === 4){
+                else if (base == 'system_job_templates') {
+                    console.log('at least we know its a mgmt job!')
+                    url += $stateParams.id + '/schedules/';
+                    if(scope.id === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -538,7 +539,7 @@ export default
                 var scope = params.scope,
                     parent_scope = params.parent_scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator,
-                    base = $location.path().replace(/^\//, '').split('/')[0];
+                    base = params.base || $location.path().replace(/^\//, '').split('/')[0];
 
                 scope.toggleSchedule = function(event, id) {
                     try {

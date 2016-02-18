@@ -24,6 +24,7 @@ export default
                     Rest.setUrl(defaultUrl);
                     Rest.get()
                         .success(function(data){
+                            console.log(data)
                             $scope.mgmtCards = data.results;
                             Wait('stop');
                         })
@@ -238,10 +239,9 @@ export default
                     }
                 };
 
-                $scope.configureSchedule = function() {
-                    $state.transitionTo('managementJobsSchedule', {
-                        management_job: this.job_type, 
-                        management_job_id: this.card.id
+                $scope.configureSchedule = function(id) {
+                    $state.transitionTo('managementJobSchedules', {
+                        id: id
                     });
                 };
 
