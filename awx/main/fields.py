@@ -63,7 +63,7 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
         resource = super(ResourceFieldDescriptor, self).__get__(instance, instance_type)
         if resource:
             return resource
-        resource = Resource._default_manager.create(content_object=instance)
+        resource = Resource.objects.create(content_object=instance)
         setattr(instance, self.field.name, resource)
         instance.save(update_fields=[self.field.name,])
         return resource
@@ -107,7 +107,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         if not self.role_name:
             raise FieldError('Implicit role missing `role_name`')
 
-        role = Role._default_manager.create(name=self.role_name, content_object=instance)
+        role = Role.objects.create(name=self.role_name, content_object=instance)
         if self.parent_role:
             def resolve_field(obj, field):
                 ret = []
