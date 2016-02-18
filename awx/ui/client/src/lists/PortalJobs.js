@@ -64,7 +64,7 @@ export default
 
             job_details: {
                 mode: 'all',
-                ngClick: "viewJobLog(portal_job.id)",
+                ngClick: "viewJobDetails(portal_job)",
                 awToolTip: 'View job details',
                 dataPlacement: 'top'
             }

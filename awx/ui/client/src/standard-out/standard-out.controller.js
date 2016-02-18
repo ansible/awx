@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobStdout
@@ -11,11 +11,12 @@
 */
 
 
-export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $state, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, ModelToBasePathKey) {
 
     ClearScope();
 
     var job_id = $stateParams.id,
+        jobType = $state.current.data.jobType,
         api_complete = false,
         stdout_url,
         current_range,
@@ -32,26 +33,27 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
     $scope.isClosed = true;
 
 
-    function openSockets() {
-        if (/\/jobs\/(\d)+\/stdout/.test($location.$$url)) {
-            $log.debug("socket watching on job_events-" + job_id);
-            $rootScope.event_socket.on("job_events-" + job_id, function() {
-                $log.debug("socket fired on job_events-" + job_id);
-                if (api_complete) {
-                    event_queue++;
-                }
-            });
-        } else if (/\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
-            $log.debug("socket watching on ad_hoc_command_events-" + job_id);
-            $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
-                $log.debug("socket fired on ad_hoc_command_events-" + job_id);
-                if (api_complete) {
-                    event_queue++;
-                }
-            });
-        }
-    }
-    openSockets();
+    // function openSockets() {
+    //     if (/\/jobs\/(\d)+\/stdout/.test($location.$$url)) {
+    //         $log.debug("socket watching on job_events-" + job_id);
+    //         $rootScope.event_socket.on("job_events-" + job_id, function() {
+    //             $log.debug("socket fired on job_events-" + job_id);
+    //             if (api_complete) {
+    //                 event_queue++;
+    //             }
+    //         });
+    //     } else if (/\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+    //         $log.debug("socket watching on ad_hoc_command_events-" + job_id);
+    //         $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
+    //             $log.debug("socket fired on ad_hoc_command_events-" + job_id);
+    //             if (api_complete) {
+    //                 event_queue++;
+    //             }
+    //         });
+    //     }
+    // }
+    //
+    // openSockets();
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
@@ -158,9 +160,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
     $(".StandardOut").height($("body").height() - 60);
 
-    // Note: could be ad_hoc_commands or jobs
-    var jobType = $location.path().replace(/^\//, '').split('/')[0];
-    Rest.setUrl(GetBasePath(jobType) + job_id + '/');
+    Rest.setUrl(GetBasePath('base') + jobType + '/' + job_id + '/');
     Rest.get()
         .success(function(data) {
             $scope.job = data;
@@ -182,13 +182,15 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
             $scope.verbosity = data.verbosity;
             $scope.job_tags = data.job_tags;
             stdout_url = data.related.stdout;
-            if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
-                live_event_processing = false;
-                if ($rootScope.jobStdOutInterval) {
-                    window.clearInterval($rootScope.jobStdOutInterval);
-                }
+            // if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
+            //     live_event_processing = false;
+            //     if ($rootScope.jobStdOutInterval) {
+            //         window.clearInterval($rootScope.jobStdOutInterval);
+            //     }
+            // }
+            if(stdout_url) {
+                $scope.$emit('LoadStdout');
             }
-            $scope.$emit('LoadStdout');
         })
         .error(function(data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -197,11 +199,9 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
     $scope.refresh = function(){
         if (loaded_sections.length === 0) { ////this if statement for refresh
-            $log.debug('calling LoadStdout');
             $scope.$emit('LoadStdout');
         }
         else if (live_event_processing) {
-            $log.debug('calling getNextSection');
             getNextSection();
         }
     };
@@ -281,4 +281,4 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 }
 
-JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'ModelToBasePathKey'];

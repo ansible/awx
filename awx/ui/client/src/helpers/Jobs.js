@@ -22,12 +22,11 @@ export default
      *  Initialize calling scope with all the bits required to support a jobs list
      *
      */
-    .factory('JobsControllerInit', ['$location', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer', '$window',
-        function($location, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
+    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer', '$window',
+        function($state, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
             return function(params) {
                 var scope = params.scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator;
-                    //base = $location.path().replace(/^\//, '').split('/')[0];
 
                 scope.deleteJob = function(id) {
                     DeleteJob({ scope: scope, id: id });
@@ -70,53 +69,39 @@ export default
                 };
 
                 scope.refreshJobs = function() {
-                    // if (base !== 'jobs') {
-                        scope.search(iterator);
-                    // }
-
+                    scope.search(iterator);
                 };
 
-                scope.viewJobLog = function(id) {
-                    var list, job;
-                    if (scope.completed_jobs) {
-                        list = scope.completed_jobs;
-                    }
-                    else if (scope.running_jobs) {
-                        list = scope.running_jobs;
-                    }
-                    else if (scope.queued_jobs) {
-                        list = scope.queued_jobs;
-                    }
-                    else if (scope.jobs) {
-                        list = scope.jobs;
-                    }
-                    else if(scope.all_jobs){
-                        list = scope.all_jobs;
-                    }
-                    else if(scope.portal_jobs){
-                        list=scope.portal_jobs;
-                    }
-                    job = Find({ list: list, key: 'id', val: id });
-                    if (job.type === 'job') {
+                scope.viewJobDetails = function(job) {
+
+                    var goToJobDetails = function(state) {
                         if(scope.$parent.portalMode===true){
-                            $window.open('/#/jobs/' + job.id, '_blank');
+                            var url = $state.href(state, {id: job.id});
+                            $window.open(url, '_blank');
                         }
                         else {
-                            $location.url('/jobs/' + job.id);
+                            $state.go(state, {id: job.id});
                         }
-                    } else if (job.type === 'ad_hoc_command') {
-                        if(scope.$parent.portalMode===true){
-                            $window.open('/#/ad_hoc_commands/' + job.id, '_blank');
-                        }
-                        else {
-                            $location.url('/ad_hoc_commands/' + job.id);
-                        }
-                    } else {
-                        LogViewer({
-                            scope: scope,
-                            url: job.url
-                        });
                     }
+
+                    switch(job.type) {
+                        case 'job':
+                            goToJobDetails('jobDetail');
+                            break;
+                        case 'ad_hoc_command':
+                            goToJobDetails('adHocJobStdout');
+                            break;
+                        case 'system_job':
+                            goToJobDetails('managementJobStdout');
+                            break;
+                        case 'project_update':
+                            goToJobDetails('scmUpdateStdout');
+                            break;
+                        case 'inventory_update':
+                            goToJobDetails('inventorySyncStdout');
+                            break;
+                    }
+
                 };
             };
         }
