@@ -45,7 +45,6 @@ import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
-import {JobDetailController} from './controllers/JobDetail';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
 import {LicenseController} from './controllers/License';
 import {ScheduleEditController} from './controllers/Schedules';
