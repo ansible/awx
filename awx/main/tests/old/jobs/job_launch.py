@@ -15,7 +15,7 @@ import yaml
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']
 
-class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
+class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateLaunchTest, self).setUp()
 
@@ -178,7 +178,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             self.post(self.launch_url, {}, expect=400)
 
-class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TestCase):
+class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateLaunchPasswordsTest, self).setUp()
 
