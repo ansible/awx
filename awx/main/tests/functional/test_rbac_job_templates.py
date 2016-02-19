@@ -1,8 +1,14 @@
+import mock
 import pytest
 
+from awx.main.access import (
+    BaseAccess,
+    JobTemplateAccess,
+)
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
 from django.apps import apps
+
 
 @pytest.mark.django_db
 def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, user):
@@ -131,3 +137,15 @@ def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplat
 
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+
+
+@mock.patch.object(BaseAccess, 'check_license', return_value=None)
+@pytest.mark.django_db
+def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
+    # GIVEN a superuser
+    u = user('admin', True)
+    # WHEN access to a job template is checked
+    access = JobTemplateAccess(u)
+    # THEN all access checks should pass
+    assert access.can_read(deploy_jobtemplate)
+    assert access.can_add({})

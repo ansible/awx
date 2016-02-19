@@ -130,3 +130,8 @@ def get():
             middleware.process_response(request, response)
         return response
     return rf
+
+@pytest.fixture(scope="session", autouse=True)
+def celery_memory_broker():
+    from django.conf import settings
+    settings.BROKER_URL='memory://localhost/'

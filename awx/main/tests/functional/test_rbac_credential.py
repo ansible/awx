@@ -80,9 +80,10 @@ def test_credential_access_admin(user, organization, team, credential):
     # unowned credential can be deleted
     assert access.can_delete(credential)
 
-    credential.created_by = u
-    credential.save()
+    team.users.add(u)
     assert not access.can_change(credential, {'user': u.pk})
 
-    team.users.add(u)
+    credential.team = team
+    credential.save()
+
     assert access.can_change(credential, {'user': u.pk})

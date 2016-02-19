@@ -953,6 +953,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
+            job_templates = reverse('api:inventory_job_template_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),

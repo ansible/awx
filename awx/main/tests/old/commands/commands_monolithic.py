@@ -1063,7 +1063,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.groups.count(), 0)
         self.assertNotEqual(new_inv.total_hosts, 0)
         self.assertNotEqual(new_inv.total_groups, 0)
-        self.assertElapsedLessThan(30)
+        self.assertElapsedLessThan(60)
 
     def test_splunk_inventory(self):
         new_inv = self.organizations[0].inventories.create(name='splunk')
@@ -1082,7 +1082,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.groups.count(), 0)
         self.assertNotEqual(new_inv.total_hosts, 0)
         self.assertNotEqual(new_inv.total_groups, 0)
-        self.assertElapsedLessThan(120)
+        self.assertElapsedLessThan(600)
 
     def _get_ngroups_for_nhosts(self, n):
         if n > 0:
@@ -1108,7 +1108,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.hosts.filter(active=False).count(), nhosts_inactive)
         self.assertEqual(new_inv.total_hosts, nhosts)
         self.assertEqual(new_inv.total_groups, ngroups)
-        self.assertElapsedLessThan(45)
+        self.assertElapsedLessThan(120)
 
     @unittest.skipIf(getattr(settings, 'LOCAL_DEVELOPMENT', False),
                      'Skip this test in local development environments, '
