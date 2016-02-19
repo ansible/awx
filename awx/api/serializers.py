@@ -331,7 +331,22 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.active
 
     def build_standard_field(self, field_name, model_field):
+
+        # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
+        # when a Model's editable field is set to False. The short circuit skips choice rendering.
+        #
+        # This logic is to force rendering choice's on an uneditable field.
+        # Note: Consider expanding this rendering for more than just choices fields
+        # Note: This logic works in conjuction with 
+        if hasattr(model_field, 'choices') and model_field.choices:
+            was_editable = model_field.editable
+            model_field.editable = True
+
         field_class, field_kwargs = super(BaseSerializer, self).build_standard_field(field_name, model_field)
+        if hasattr(model_field, 'choices') and model_field.choices:
+            model_field.editable = was_editable
+            if was_editable is False:
+                field_kwargs['read_only'] = True
 
         # Update help text for common fields.
         opts = self.Meta.model._meta.concrete_model._meta
