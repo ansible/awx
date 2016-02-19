@@ -11,6 +11,10 @@ export default {
     route: '/ad_hoc_commands/:id/stdout',
     templateUrl: templateUrl('standard-out/adhoc/standard-out-adhoc'),
     controller: 'JobStdoutController',
+    ncyBreadcrumb: {
+        parent: "jobs",
+        label: "{{ job.module_name }}"
+    },
     data: {
         jobType: 'ad_hoc_commands'
     },

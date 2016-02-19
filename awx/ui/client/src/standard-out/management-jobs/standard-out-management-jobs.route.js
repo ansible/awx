@@ -11,6 +11,10 @@ export default {
     route: '/management_jobs/:id/stdout',
     templateUrl: templateUrl('standard-out/management-jobs/standard-out-management-jobs'),
     controller: 'JobStdoutController',
+    ncyBreadcrumb: {
+        parent: "jobs",
+        label: "{{ job.name }}"
+    },
     data: {
         jobType: 'system_jobs'
     },

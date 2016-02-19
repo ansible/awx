@@ -13,6 +13,10 @@ export default {
     route: '/scm_update/:id/stdout',
     templateUrl: templateUrl('standard-out/scm-update/standard-out-scm-update'),
     controller: 'JobStdoutController',
+    ncyBreadcrumb: {
+        parent: "jobs",
+        label: "{{ project_name }}"
+    },
     data: {
         jobType: 'project_updates'
     },

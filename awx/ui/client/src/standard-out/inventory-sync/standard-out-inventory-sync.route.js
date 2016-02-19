@@ -13,6 +13,10 @@ export default {
     route: '/inventory_sync/:id/stdout',
     templateUrl: templateUrl('standard-out/inventory-sync/standard-out-inventory-sync'),
     controller: 'JobStdoutController',
+    ncyBreadcrumb: {
+        parent: "jobs",
+        label: "{{ inventory_source_name }}"
+    },
     data: {
         jobType: 'inventory_updates'
     },
