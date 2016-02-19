@@ -24,7 +24,6 @@ export default
                     Rest.setUrl(defaultUrl);
                     Rest.get()
                         .success(function(data){
-                            console.log(data)
                             $scope.mgmtCards = data.results;
                             Wait('stop');
                         })
