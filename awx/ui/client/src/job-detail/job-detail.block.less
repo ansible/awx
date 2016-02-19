@@ -3,6 +3,58 @@
 @import '../shared/branding/colors.less';
 @import '../shared/branding/colors.default.less';
 
-.JobDetail-results{
-    background-color: #848992;
+.JobDetail-panelHeader{
+    height: 50px;
+    display: flex;
+}
+
+.JobDetail-panelHeaderText{
+    color: #848992;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.JobDetail-panelHeaderText:hover{
+    color: #848992;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.JobDetail-expandArrow{
+    color: #848992;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+    margin-left: 5px;
+}
+
+.JobDetail-resultsDetails{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.JobDetail-resultRow{
+    flex: 1 0 auto;
+    width: 50%;
+    display: flex;
+}
+
+.JobDetail-resultRow label{
+    color: #848992;
+    font-size: 14px;
+    font-weight: normal!important;
+    // width: 40%;
+    flex: 1 0 auto;
+}
+
+.JobDetail-resultRowText{
+    width: 40%;
+    flex: 1 0 auto;
 }
