@@ -200,7 +200,7 @@ export default
 
             scope.haltEventQueue = false;
             scope.processing = false;
-            scope.lessStatus = true;
+            scope.lessStatus = false;
 
             scope.host_summary = {};
             scope.host_summary.ok = 0;
@@ -854,7 +854,7 @@ export default
                     $('#job-summary-container').show();
                 }
 
-                scope.lessStatus = true; // close the view more status option
+                scope.lessStatus = false; // close the view more status option
 
                 // Detail table height adjusting. First, put page height back to 'normal'.
                 $('#plays-table-detail').height(80);
