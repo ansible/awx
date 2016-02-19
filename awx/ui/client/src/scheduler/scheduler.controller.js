@@ -19,7 +19,6 @@ export default [
     GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
 
         ClearScope();
-        console.log($stateParams)
 
         var base, e, id, url, parentObject;
         base = $location.path().replace(/^\//, '').split('/')[0];
@@ -92,5 +91,4 @@ export default [
             variable: 'type_choices',
             callback: 'choicesReady'
         });
-        console.log($scope)
     }];

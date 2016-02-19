@@ -6,7 +6,6 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
         $scope.$on("formUpdated", function() {
             $rootScope.$broadcast("loadSchedulerDetailPane");
         });
-        console.log('schedulerAdd.controller $scope: ', $scope)
 
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",

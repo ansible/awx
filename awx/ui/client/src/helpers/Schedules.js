@@ -217,7 +217,6 @@ export default
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
                     url =  GetBasePath(base),
                     scheduler;
-                console.log('AddSchedule $stateParams: ', $stateParams)
                 if (!Empty($stateParams.template_id)) {
                     url += $stateParams.template_id + '/schedules/';
                 }
@@ -225,9 +224,8 @@ export default
                     url += $stateParams.id + '/schedules/';
                 }
                 else if (base == 'system_job_templates') {
-                    console.log('at least we know its a mgmt job!')
                     url += $stateParams.id + '/schedules/';
-                    if(scope.id === 4){
+                    if($stateParams.id  == 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
