@@ -5,10 +5,10 @@
                 <div class="JobDetail-resultsContainer Panel">
                     <div class="JobDetail-panelHeader">
                         <a class="JobDetail-panelHeaderText" ng-show="lessStatus" href="" ng-click="toggleLessStatus()">
-                            RESULTS<i class="JobDetail-expandArrow fa fa-angle-left"></i>
+                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
                         </a>
                         <a class="JobDetail-panelHeaderText" ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">
-                            RESULTS<i class="JobDetail-expandArrow fa fa-angle-down"></i>
+                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
                         </a>
                         <button id="submit-action" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Start a job using this template" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
                         <button id="delete-action" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJobTemplate(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
