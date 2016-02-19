@@ -8,11 +8,101 @@
                 </div>
                 <div class="StandardOut-details">
 
+                    <div class="StandardOut-detailsRow" ng-show="inventory_source_name">
+                        <div class="StandardOut-detailsLabel">NAME</div>
+                        <div class="StandardOut-detailsContent">
+                            <a href="/#/home/groups/?id={{ group }}">
+                                {{ inventory_source_name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <div class="StandardOut-detailsRow">
                         <div class="StandardOut-detailsLabel">STATUS</div>
                         <div class="StandardOut-detailsContent">
                             <i class="fa icon-job-{{ job.status }}"></i>
                             <span class="StandardOut-statusText">{{ job.status }}</span>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="{{job.license_error !== null}}">
+                        <div class="StandardOut-detailsLabel">LICENSE ERROR</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.license_error }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.started">
+                        <div class="StandardOut-detailsLabel">STARTED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel">FINISHED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel">ELAPSED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.elapsed }} seconds
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.launch_type">
+                        <div class="StandardOut-detailsLabel">LAUNCH TYPE</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.launch_type }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="credential_name">
+                        <div class="StandardOut-detailsLabel">CREDENTIAL</div>
+                        <div class="StandardOut-detailsContent">
+                            <a ui-sref="credentials.edit({credential_id: credential})">
+                                {{ credential_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="inventory_source_name">
+                        <div class="StandardOut-detailsLabel">GROUP</div>
+                        <div class="StandardOut-detailsContent">
+                            <a href="/#/home/groups/?id={{ group }}">
+                                {{ inventory_source_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="source">
+                        <div class="StandardOut-detailsLabel">SOURCE</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ source }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="source_regions">
+                        <div class="StandardOut-detailsLabel">REGIONS</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ source_regions }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="{{ job.overwrite !== null }}">
+                        <div class="StandardOut-detailsLabel">OVERWRITE</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.overwrite }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="{{ job.overwrite_vars !== null }}">
+                        <div class="StandardOut-detailsLabel">OVERWRITE VARS</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.overwrite_vars }}
                         </div>
                     </div>
 

@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $state, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, ModelToBasePathKey) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $state, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, ModelToBasePathKey, Empty, GetChoices, LookUpName) {
 
     ClearScope();
 
@@ -182,6 +182,78 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
             $scope.verbosity = data.verbosity;
             $scope.job_tags = data.job_tags;
             stdout_url = data.related.stdout;
+
+            // If we have a source then we have to go get the source choices from the server
+            if (!Empty(data.source)) {
+                if ($scope.removeChoicesReady) {
+                    $scope.removeChoicesReady();
+                }
+                $scope.removeChoicesReady = $scope.$on('ChoicesReady', function() {
+                    $scope.source_choices.every(function(e) {
+                        if (e.value === data.source) {
+                            $scope.source = e.label;
+                            return false;
+                        }
+                        return true;
+                    });
+                });
+                // GetChoices can be found in the helper: LogViewer.js
+                // It attaches the source choices to $scope.source_choices.
+                // Then, when the callback is fired, $scope.source is bound
+                // to the corresponding label.
+                GetChoices({
+                    scope: $scope,
+                    url: GetBasePath('inventory_sources'),
+                    field: 'source',
+                    variable: 'source_choices',
+                    choice_name: 'choices',
+                    callback: 'ChoicesReady'
+                });
+            }
+
+            // LookUpName can be found in the helper: LogViewer.js
+            // It attaches the name that it gets (based on the url)
+            // to the $scope variable defined by the attribute scope_var.
+            if (!Empty(data.credential)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'credential',
+                    url: GetBasePath('credentials') + data.credential + '/'
+                });
+            }
+
+            if (!Empty(data.inventory)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'inventory',
+                    url: GetBasePath('inventory') + data.inventory + '/'
+                });
+            }
+
+            if (!Empty(data.project)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'project',
+                    url: GetBasePath('projects') + data.project + '/'
+                });
+            }
+
+            if (!Empty(data.cloud_credential)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'cloud_credential',
+                    url: GetBasePath('credentials') + data.cloud_credential + '/'
+                });
+            }
+
+            if (!Empty(data.inventory_source)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'inventory_source',
+                    url: GetBasePath('inventory_sources') + data.inventory_source + '/'
+                });
+            }
+
             // if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
             //     live_event_processing = false;
             //     if ($rootScope.jobStdOutInterval) {
@@ -281,4 +353,4 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 }
 
-JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'ModelToBasePathKey'];
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'ModelToBasePathKey', 'Empty', 'GetChoices', 'LookUpName'];
