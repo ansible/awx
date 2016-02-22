@@ -1,7 +1,7 @@
 import pytest
 
 from awx.main.migrations import _rbac as rbac
-from awx.main.models import Permission
+from awx.main.models import Permission, Role
 from django.apps import apps
 from awx.main.migrations import _old_access as old_access
 
@@ -24,6 +24,8 @@ def test_project_user_project(user_project, project, user):
 @pytest.mark.django_db
 def test_project_accessible_by_sa(user, project):
     u = user('systemadmin', is_superuser=True)
+    # This gets setup by a signal, but we want to test the migration which will set this up too, so remove it
+    Role.singleton('System Administrator').members.remove(u)
 
     assert project.accessible_by(u, {'read': True}) is False
     rbac.migrate_organization(apps, None)
