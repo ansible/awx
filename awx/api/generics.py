@@ -348,7 +348,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         # object deserialized
         obj = serializer.save()
         serializer = self.get_serializer(instance=obj)
-    
+
         headers = {'Location': obj.get_absolute_url()}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -359,7 +359,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     def attach(self, request, *args, **kwargs):
         created = False
         parent = self.get_parent_object()
-        relationship = getattr(parent, self.relationship)
+        relationship = getattrd(parent, self.relationship)
         sub_id = request.data.get('id', None)
         data = request.data
 
@@ -378,7 +378,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         # Retrive the sub object (whether created or by ID).
         sub = get_object_or_400(self.model, pk=sub_id)
-            
+
         # Verify we have permission to attach.
         if not request.user.can_access(self.parent_model, 'attach', parent, sub,
                                        self.relationship, data,
@@ -405,7 +405,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         parent = self.get_parent_object()
         parent_key = getattr(self, 'parent_key', None)
-        relationship = getattr(parent, self.relationship)
+        relationship = getattrd(parent, self.relationship)
         sub = get_object_or_400(self.model, pk=sub_id)
 
         if not request.user.can_access(self.parent_model, 'unattach', parent,
