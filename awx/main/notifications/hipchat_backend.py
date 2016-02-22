@@ -5,11 +5,11 @@ import logging
 
 import requests
 
-from django.core.mail.backends.base import BaseEmailBackend
+from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.hipchat_backend')
 
-class HipChatBackend(BaseEmailBackend):
+class HipChatBackend(TowerBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
                        "channels": {"label": "Destination Channels", "type": "list"},
@@ -35,7 +35,7 @@ class HipChatBackend(BaseEmailBackend):
                 r = requests.post("{}/v2/room/{}/notification".format(self.api_url, rcp),
                                   params={"auth_token": self.token},
                                   json={"color": self.color,
-                                        "message": m.body,
+                                        "message": m.subject,
                                         "notify": self.notify,
                                         "from": m.from_email,
                                         "message_format": "text"})

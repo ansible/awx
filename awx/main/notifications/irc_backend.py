@@ -7,11 +7,11 @@ import logging
 
 import irc.client
 
-from django.core.mail.backends.base import BaseEmailBackend
+from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.irc_backend')
 
-class IrcBackend(BaseEmailBackend):
+class IrcBackend(TowerBaseEmailBackend):
 
     init_parameters = {"server": {"label": "IRC Server Address", "type": "string"},
                        "port": {"label": "IRC Server Port", "type": "int"},

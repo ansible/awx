@@ -496,6 +496,26 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
+    def notification_data(self):
+        data = super(Job, self).notification_data()
+        all_hosts = {}
+        for h in self.job_host_summaries.all():
+            all_hosts[h.host.name] = dict(failed=h.failed,
+                                          changed=h.changed,
+                                          dark=h.dark,
+                                          failures=h.failures,
+                                          ok=h.ok,
+                                          processed=h.processed,
+                                          skipped=h.skipped)
+        data.update(dict(inventory=self.inventory.name,
+                         project=self.project.name,
+                         playbook=self.playbook,
+                         credential=self.credential.name,
+                         limit=self.limit,
+                         extra_vars=self.extra_vars,
+                         hosts=all_hosts))
+        return data
+
     def handle_extra_data(self, extra_data):
         extra_vars = {}
         if type(extra_data) == dict:

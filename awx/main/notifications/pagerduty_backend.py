@@ -4,11 +4,11 @@
 import logging
 import pygerduty
 
-from django.core.mail.backends.base import BaseEmailBackend
+from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.pagerduty_backend')
 
-class PagerDutyBackend(BaseEmailBackend):
+class PagerDutyBackend(TowerBaseEmailBackend):
 
     init_parameters = {"subdomain": {"label": "Pagerduty subdomain", "type": "string"},
                        "token": {"label": "API Token", "type": "password"},
@@ -21,6 +21,9 @@ class PagerDutyBackend(BaseEmailBackend):
         super(PagerDutyBackend, self).__init__(fail_silently=fail_silently)
         self.subdomain = subdomain
         self.token = token
+
+    def format_body(self, body):
+        return body
 
     def send_messages(self, messages):
         sent_messages = 0

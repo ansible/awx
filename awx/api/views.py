@@ -3053,7 +3053,8 @@ class NotifierTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        notification = obj.generate_notification("Tower Notification Test", "Ansible Tower Test Notification")
+        notification = obj.generate_notification("Tower Notification Test {}".format(obj.id),
+                                                 {"body": "Ansible Tower Test Notification {}".format(obj.id)})
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:

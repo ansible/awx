@@ -5,11 +5,11 @@ import logging
 
 from twilio.rest import TwilioRestClient
 
-from django.core.mail.backends.base import BaseEmailBackend
+from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.twilio_backend')
 
-class TwilioBackend(BaseEmailBackend):
+class TwilioBackend(TowerBaseEmailBackend):
 
     init_parameters = {"account_sid": {"label": "Account SID", "type": "string"},
                        "account_token": {"label": "Account Token", "type": "password"},
@@ -38,7 +38,7 @@ class TwilioBackend(BaseEmailBackend):
                 connection.messages.create(
                     to=m.to,
                     from_=m.from_email,
-                    body=m.body)
+                    body=m.subject)
                 sent_messages += 1
             except Exception as e:
                 logger.error("Exception sending messages: {}".format(e))

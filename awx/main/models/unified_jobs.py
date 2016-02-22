@@ -731,6 +731,16 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             tasks that might preclude creating one'''
         return []
 
+    def notification_data(self):
+        return dict(id=self.id,
+                    name=self.name,
+                    url=self.get_absolute_url(), #TODO: Need to replace with UI job view
+                    created_by=str(self.created_by),
+                    started=self.started.isoformat(),
+                    finished=self.finished.isoformat(),
+                    status=self.status,
+                    traceback=self.result_traceback)
+
     def start(self, error_callback, success_callback, **kwargs):
         '''
         Start the task running via Celery.

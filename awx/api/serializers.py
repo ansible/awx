@@ -2118,7 +2118,7 @@ class NotificationSerializer(BaseSerializer):
     class Meta:
         model = Notification
         fields = ('*', '-name', '-description', 'notifier', 'error', 'status', 'notifications_sent',
-                  'notification_type', 'recipients', 'subject', 'body')
+                  'notification_type', 'recipients', 'subject')
 
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)

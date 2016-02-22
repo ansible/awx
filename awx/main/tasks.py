@@ -207,10 +207,8 @@ def handle_work_success(self, result, task_actual):
     notification_subject = "{} #{} '{}' succeeded on Ansible Tower".format(friendly_name,
                                                                            task_actual['id'],
                                                                            instance_name)
-    notification_body = "{} #{} '{}' succeeded on Ansible Tower\nTo view the output: {}".format(friendly_name,
-                                                                                                task_actual['id'],
-                                                                                                instance_name,
-                                                                                                instance.get_absolute_url())
+    notification_body = instance.notification_data()
+    notification_body['friendly_name'] = friendly_name
     send_notifications.delay([n.generate_notification(notification_subject, notification_body)
                               for n in notifiers.get('success', []) + notifiers.get('any', [])],
                              job_id=task_actual['id'])
@@ -265,10 +263,8 @@ def handle_work_error(self, task_id, subtasks=None):
         notification_subject = "{} #{} '{}' failed on Ansible Tower".format(first_task_friendly_name,
                                                                             first_task_id,
                                                                             first_task_name)
-        notification_body = "{} #{} '{}' failed on Ansible Tower\nTo view the output: {}".format(first_task_friendly_name,
-                                                                                                 first_task_id,
-                                                                                                 first_task_name,
-                                                                                                 first_task.get_absolute_url())
+        notification_body = first_task.notification_data()
+        notification_body['friendly_name'] = first_task_friendly_name
         send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
                                   for n in notifiers.get('error', []) + notifiers.get('any', [])],
                                  job_id=first_task_id)

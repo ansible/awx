@@ -18,3 +18,10 @@ class CustomEmailBackend(EmailBackend):
     recipient_parameter = "recipients"
     sender_parameter = "sender"
 
+    def format_body(self, body):
+        body_actual = "{} #{} had status {} on Ansible Tower, view details at {}\n\n".format(body['friendly_name'],
+                                                                                         body['id'],
+                                                                                         body['status'],
+                                                                                         body['url'])
+        body_actual += pprint.pformat(body, indent=4)
+        return body_actual

@@ -4,11 +4,11 @@
 import logging
 from slackclient import SlackClient
 
-from django.core.mail.backends.base import BaseEmailBackend
+from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.slack_backend')
 
-class SlackBackend(BaseEmailBackend):
+class SlackBackend(TowerBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
                        "channels": {"label": "Destination Channels", "type": "list"}}
@@ -41,7 +41,7 @@ class SlackBackend(BaseEmailBackend):
         for m in messages:
             try:
                 for r in m.recipients():
-                    self.connection.rtm_send_message(r, m.body)
+                    self.connection.rtm_send_message(r, m.subject)
                     sent_messages += 1
             except Exception as e:
                 logger.error("Exception sending messages: {}".format(e))

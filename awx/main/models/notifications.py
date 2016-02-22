@@ -69,8 +69,8 @@ class Notifier(CommonModel):
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                             self.notification_class.init_parameters):
             if new_instance:
-                value = getattr(self.notification_configuration, field, '')
-                setattr(self, '_saved_{}'.format(field), value)
+                value = self.notification_configuration[field]
+                setattr(self, '_saved_{}_{}'.format("config", field), value)
                 self.notification_configuration[field] = ''
             else:
                 encrypted = encrypt_field(self, 'notification_configuration', subfield=field)
@@ -82,8 +82,9 @@ class Notifier(CommonModel):
             update_fields = []
             for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                                 self.notification_class.init_parameters):
-                saved_value = getattr(self, '_saved_{}'.format(field), '')
-                setattr(self.notification_configuration, field, saved_value)
+                saved_value = getattr(self, '_saved_{}_{}'.format("config", field), '')
+                self.notification_configuration[field] = saved_value
+                #setattr(self.notification_configuration, field, saved_value)
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')
             self.save(update_fields=update_fields)
@@ -112,7 +113,7 @@ class Notifier(CommonModel):
             recipients = [recipients]
         sender = self.notification_configuration.pop(self.notification_class.sender_parameter, None)
         backend_obj = self.notification_class(**self.notification_configuration)
-        notification_obj = EmailMessage(subject, body, sender, recipients)
+        notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         return backend_obj.send_messages([notification_obj])
 
 class Notification(CreatedModifiedModel):
@@ -165,11 +166,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
+    body = JSONField(blank=True)
     
     def get_absolute_url(self):
         return reverse('api:notification_detail', args=(self.pk,))
