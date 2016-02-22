@@ -7,8 +7,8 @@
  import {templateUrl} from '../shared/template-url/template-url.factory';
 
 export default {
-    route: '/inventories/:inventory_id/adhoc',
-    name: 'inventoryAdhoc',
+    route: '/adhoc',
+    name: 'inventoryManage.adhoc',
     templateUrl: templateUrl('adhoc/adhoc'),
     controller: 'adhocController',
     resolve: {

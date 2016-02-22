@@ -859,7 +859,8 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
             }
         }
         $rootScope.hostPatterns = host_patterns;
-        $location.path('/inventories/' + $scope.inventory.id + '/adhoc');
+        $state.go('inventoryManage.adhoc');
+        //$location.path('/inventories/' + $scope.inventory.id + '/adhoc');
     };
 
     $scope.refreshHostsOnGroupRefresh = false;
