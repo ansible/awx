@@ -101,6 +101,8 @@ table, tbody {
     margin-left: 15px;
 }
 
+
+/* -- Pagination -- */
 .List-pagination {
     margin-top: 20px;
     font-size: 12px;
@@ -108,6 +110,23 @@ table, tbody {
     text-transform: uppercase;
     height: 22px;
     display: flex;
+
+    .pagination>li>a,
+    .pagination>li>span {
+      border: 1px solid @grey-border;
+      padding: 3px 6px;
+      font-size: 10px;
+    }
+
+    .pagination li {
+      a#next-page {
+        border-radius: 0 4px 4px 0;
+      }
+
+      a#previous-page {
+        border-radius: 4px 0 0 4px;
+      }
+    }
 }
 
 .List-paginationPagerHolder {
@@ -244,6 +263,7 @@ table, tbody {
     padding-left: 15px!important;
     height: 34px!important;
     padding-right: 45px!important;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .List-searchInput:placeholder-shown {
@@ -347,4 +367,26 @@ table, tbody {
     color: #d7d7d7;
     display: block;
     font-size: 13px;
+}
+
+#lookup-modal-dialog {
+
+  .List-searchWidget {
+    width: 66.6666%
+  }
+
+  .List-tableHeaderRow {
+    .List-tableHeader:first-of-type {
+      width: 3%;
+    }
+  }
+
+  .List-tableHeader,
+  .List-tableHeader:last-of-type {
+    text-align:left;
+  }
+
+  .List-tableCell {
+    color: @default-interface-txt;
+  }
 }

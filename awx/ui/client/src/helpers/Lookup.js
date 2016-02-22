@@ -132,7 +132,6 @@ export default
                     master[field] = scope[field];
                     master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
                         scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
-
                     GenerateList.inject(list, {
                         mode: 'lookup',
                         id: 'lookup-modal-dialog',
@@ -145,22 +144,22 @@ export default
                     hdr = (params.hdr) ? params.hdr : 'Select ' + name;
 
                     // Show pop-up
-                    buttons = [{
+                    buttons = [
+                      {
+                          label: "Save",
+                          onClick: function() {
+                              scope.selectAction();
+                          },
+                          //icon: "fa-check",
+                          "class": "btn btn-primary",
+                          "id": "lookup-save-button"
+                      },{
                         label: "Cancel",
-                        icon: "fa-times",
                         "class": "btn btn-default",
                         "id": "lookup-cancel-button",
                         onClick: function() {
                             $('#lookup-modal-dialog').dialog('close');
                         }
-                    },{
-                        label: "Select",
-                        onClick: function() {
-                            scope.selectAction();
-                        },
-                        icon: "fa-check",
-                        "class": "btn btn-primary",
-                        "id": "lookup-save-button"
                     }];
 
                     if (scope.removeModalReady) {
@@ -175,7 +174,7 @@ export default
                         scope: scope,
                         buttons: buttons,
                         width: 600,
-                        height: (instructions) ? 625 : 500,
+                        height: (instructions) ? 625 : 450,
                         minWidth: 500,
                         title: hdr,
                         id: 'lookup-modal-dialog',

@@ -299,44 +299,47 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         list = this.list,
                         base, size, action, fld, cnt, field_action, fAction, itm;
 
-                    if(options.title !== false){
-                        html += "<div class=\"List-header\">";
-                        html += "<div class=\"List-title\">";
+                        if (options.mode !== 'lookup') {
+                          if(options.title !== false){
+                              html += "<div class=\"List-header\">";
+                              html += "<div class=\"List-title\">";
 
-                        if (list.listTitle) {
+                              if (list.listTitle) {
 
-                            html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
-                            // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
-                            list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge == false) ? false : true;
-                            if(list.listTitleBadge) {
-                                html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
-                            }
+                                  html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
+                                  // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
+                                  list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge == false) ? false : true;
+                                  if(list.listTitleBadge) {
+                                      html += "<span class=\"badge List-titleBadge\">{{(" + list.iterator + "_total_rows | number:0)}}</span>";
+                                  }
 
+                              }
+
+                              html += "</div>";
+                              if(list.toolbarAuxAction) {
+                                  html += "<div class=\"List-auxAction\">";
+                                  html += list.toolbarAuxAction;
+                                  html += "</div>";
+                              }
+                              html += "<div class=\"List-actions\">";
+                              html += "<div class=\"list-actions\" ng-include=\"'" +
+                                  templateUrl('shared/list-generator/list-actions') +
+                                  "'\">\n";
+
+                              for (action in list.actions) {
+                                  list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                              }
+
+                              html += "</div>\n";
+                              html += "</div>";
+                              html += "</div>";
+                          }
                         }
 
-                        html += "</div>";
-                        if(list.toolbarAuxAction) {
-                            html += "<div class=\"List-auxAction\">";
-                            html += list.toolbarAuxAction;
-                            html += "</div>";
-                        }
-                        html += "<div class=\"List-actions\">";
-                        html += "<div class=\"list-actions\" ng-include=\"'" +
-                            templateUrl('shared/list-generator/list-actions') +
-                            "'\">\n";
-
-                        for (action in list.actions) {
-                            list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
-                        }
-
-                        html += "</div>\n";
-                        html += "</div>";
-                        html += "</div>";
-                    }
 
                     if (options.mode === 'edit' && list.editInstructions) {
                         html += "<div class=\"alert alert-info alert-block\">\n";
-                        html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
+                        html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"fa fa-times-circle\"></i></button>\n";
                         html += "<strong>Hint: </strong>" + list.editInstructions + "\n";
                         html += "</div>\n";
                     }
@@ -356,7 +359,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">";
                     html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
                     html += "</div>";
-
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         // Only show the search bar if we are loading results or if we have at least 1 base result
                         html += "<div class=\"row List-searchRow\" ng-show=\"" + list.iterator + "Loading == true || " + list.iterator + "_active_search == true || (" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows > 0)\">\n";
@@ -459,6 +461,20 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         innerTable += '<td class="col-xs-1 select-column List-tableCell"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
                     }
 
+                    // Change layout if a lookup list, place radio buttons before labels
+                    if (options.mode === 'lookup') {
+                      if(options.input_type==="radio"){ //added by JT so that lookup forms can be either radio inputs or check box inputs
+                          innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                          list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
+                          "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                      }
+                      else { // its assumed that options.input_type = checkbox
+                          innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                          list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
+                          "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                      }
+                    }
+
                     cnt = 2;
                     base = (list.base) ? list.base : list.name;
                     base = base.replace(/^\//, '');
@@ -475,7 +491,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
                     }
 
-                    if (options.mode === 'select' || options.mode === 'lookup') {
+                    if (options.mode === 'select') {
                         if(options.input_type==="radio"){ //added by JT so that lookup forms can be either radio inputs or check box inputs
                             innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
@@ -543,6 +559,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
                         innerTable += "</td>\n";
                     }
+
                     innerTable += "</tr>\n";
 
                     // Message for loading
@@ -611,7 +628,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     if (list.multiSelect) {
                         html += buildSelectAll().prop('outerHTML');
                     }
-
+                    else if (options.mode === 'lookup') {
+                        html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\"></th>";
+                    }
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
                             !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
@@ -643,9 +662,10 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             html += "</th>\n";
                         }
                     }
-                    if (options.mode === 'select' || options.mode === 'lookup') {
-                        html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
-                    } else if (options.mode === 'edit' && list.fieldActions) {
+                    if (options.mode === 'select') {
+                      html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
+                    }
+                    else if (options.mode === 'edit' && list.fieldActions) {
                         html += "<th class=\"List-tableHeader actions-column";
                         html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                         html += "\">";
