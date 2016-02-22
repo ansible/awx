@@ -2059,8 +2059,20 @@ class NotifierSerializer(BaseSerializer):
         model = Notifier
         fields = ('*', 'organization', 'notification_type', 'notification_configuration')
 
-    type_map = {"string": str, "int": int, "bool": bool, "list": list,
-                "password": str, "object": dict}
+    type_map = {"string": (str, unicode),
+                "int": (int,),
+                "bool": (bool,),
+                "list": (list,),
+                "password": (str, unicode),
+                "object": (dict,)}
+
+    def to_representation(self, obj):
+        ret = super(NotifierSerializer, self).to_representation(obj)
+        for field in obj.notification_class.init_parameters:
+            if field in ret['notification_configuration'] and \
+               force_text(ret['notification_configuration'][field]).startswith('$encrypted$'):
+                ret['notification_configuration'][field] = '$encrypted$'
+        return ret
 
     def get_related(self, obj):
         res = super(NotifierSerializer, self).get_related(obj)
@@ -2076,20 +2088,28 @@ class NotifierSerializer(BaseSerializer):
         notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         incorrect_type_fields = []
+        if 'notification_configuration' not in attrs:
+            return attrs
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
                 missing_fields.append(field)
                 continue
             field_val = attrs['notification_configuration'][field]
             field_type = notification_class.init_parameters[field]['type']
-            expected_type = self.type_map[field_type]
-            if not isinstance(field_val, expected_type):
+            expected_types = self.type_map[field_type]
+            if not type(field_val) in expected_types:
                 incorrect_type_fields.append((field, field_type))
+                continue
+            if field_type == "password" and field_val.startswith('$encrypted$'):
+                missing_fields.append(field)
+        error_list = []
         if missing_fields:
-            error_list = ["Missing required fields for Notification Configuration: {}".format(missing_fields)]
+            error_list.append("Missing required fields for Notification Configuration: {}".format(missing_fields))
+        if incorrect_type_fields:
             for type_field_error in incorrect_type_fields:
-                error_list.append("Configuration field {} incorrect type, expected {}".format(type_field_error[0],
+                error_list.append("Configuration field '{}' incorrect type, expected {}".format(type_field_error[0],
                                                                                               type_field_error[1]))
+        if error_list:
             raise serializers.ValidationError(error_list)
         return attrs
 

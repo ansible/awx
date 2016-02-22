@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
 from awx.main.models.base import * # noqa
+from awx.main.utils import encrypt_field, decrypt_field
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
@@ -62,6 +63,31 @@ class Notifier(CommonModel):
     def notification_class(self):
         return self.CLASS_FOR_NOTIFICATION_TYPE[self.notification_type]
 
+    def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
+        update_fields = kwargs.get('update_fields', [])
+        for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
+                            self.notification_class.init_parameters):
+            if new_instance:
+                value = getattr(self.notification_configuration, field, '')
+                setattr(self, '_saved_{}'.format(field), value)
+                self.notification_configuration[field] = ''
+            else:
+                encrypted = encrypt_field(self, 'notification_configuration', subfield=field)
+                self.notification_configuration[field] = encrypted
+                if 'notification_configuration' not in update_fields:
+                    update_fields.append('notification_configuration')
+        super(Notifier, self).save(*args, **kwargs)
+        if new_instance:
+            update_fields = []
+            for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
+                                self.notification_class.init_parameters):
+                saved_value = getattr(self, '_saved_{}'.format(field), '')
+                setattr(self.notification_configuration, field, saved_value)
+                if 'notification_configuration' not in update_fields:
+                    update_fields.append('notification_configuration')
+            self.save(update_fields=update_fields)
+
     @property
     def recipients(self):
         return self.notification_configuration[self.notification_class.recipient_parameter]
@@ -76,6 +102,11 @@ class Notifier(CommonModel):
         return notification
 
     def send(self, subject, body):
+        for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
+                                self.notification_class.init_parameters):
+            self.notification_configuration[field] = decrypt_field(self,
+                                                                   'notification_configuration',
+                                                                   subfield=field)
         recipients = self.notification_configuration.pop(self.notification_class.recipient_parameter)
         if not isinstance(recipients, list):
             recipients = [recipients]
