@@ -18,6 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 # AWX
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import * # noqa
+from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.models.mixins import ResourceMixin
 from awx.main.conf import tower_settings
 
@@ -50,12 +51,12 @@ class Organization(CommonModel, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Organization Administrator',
-        parent_role='singleton:System Administrator',
+        parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Organization Auditor',
-        parent_role='singleton:System Auditor',
+        parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
