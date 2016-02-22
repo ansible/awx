@@ -8,7 +8,7 @@ from awx.main.models.rbac import Resource
 from awx.main.fields import ImplicitResourceField
 
 
-__all__ = 'ResourceMixin'
+__all__ = ['ResourceMixin']
 
 class ResourceMixin(models.Model):
 
