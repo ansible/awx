@@ -2,9 +2,6 @@ import pytest
 
 from django.core.urlresolvers import resolve
 from django.utils.six.moves.urllib.parse import urlparse
-
-from awx.main.models.organization import Organization
-from awx.main.models.ha import Instance
 from django.contrib.auth.models import User
 
 from rest_framework.test import (
@@ -24,6 +21,9 @@ from awx.main.models.organization import (
     Organization,
     Team,
 )
+
+from awx.main.models.rbac import Role
+
 
 @pytest.fixture
 def user():
@@ -90,6 +90,22 @@ def inventory(organization):
     return Inventory.objects.create(name="test-inventory", organization=organization)
 
 @pytest.fixture
+def role():
+    return Role.objects.create(name='role')
+
+@pytest.fixture
+def admin(user):
+    return user('admin', True)
+
+@pytest.fixture
+def alice(user):
+    return user('alice', False)
+
+@pytest.fixture
+def bob(user):
+    return user('bob', False)
+
+@pytest.fixture
 def group(inventory):
     def g(name):
         return Group.objects.create(inventory=inventory, name=name)
@@ -107,6 +123,7 @@ def permissions():
         'usage':{'read':False, 'create':False, 'write':False,
                  'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
+
 
 @pytest.fixture
 def post():

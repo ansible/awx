@@ -581,7 +581,7 @@ class AuthTokenView(APIView):
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
-                # Get user un-expired tokens that are not invalidated that are 
+                # Get user un-expired tokens that are not invalidated that are
                 # over the configured limit.
                 # Mark them as invalid and inform the user
                 invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
@@ -700,24 +700,29 @@ class TeamUsersList(SubListCreateAttachDetachAPIView):
     parent_model = Team
     relationship = 'users'
 
-class TeamPermissionsList(SubListCreateAttachDetachAPIView):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class TeamRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
     parent_model = Team
-    relationship = 'permissions'
-    parent_key = 'team'
+    relationship='member_role.children'
 
     def get_queryset(self):
-        # FIXME: Default get_queryset should handle this.
+        # XXX: This needs to be the intersection between
+        # what roles the user has and what roles the viewer
+        # has access to see.
         team = Team.objects.get(pk=self.kwargs['pk'])
-        base = Permission.objects.filter(team = team)
-        #if Team.can_user_administrate(self.request.user, team, None):
-        if self.request.user.can_access(Team, 'change', team, None):
-            return base
-        elif team.users.filter(pk=self.request.user.pk).count() > 0:
-            return base
-        raise PermissionDenied()
+        return team.member_role.children
+
+    # XXX: Need to enforce permissions
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(type(self), self).post(request, *args, **kwargs)
 
 class TeamProjectsList(SubListCreateAttachDetachAPIView):
 
@@ -920,13 +925,30 @@ class UserTeamsList(SubListAPIView):
     parent_model = User
     relationship = 'teams'
 
-class UserPermissionsList(SubListCreateAttachDetachAPIView):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class UserRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
     parent_model = User
-    relationship = 'permissions'
-    parent_key = 'user'
+    relationship='roles'
+
+    def get_queryset(self):
+        # XXX: This needs to be the intersection between
+        # what roles the user has and what roles the viewer
+        # has access to see.
+        u = User.objects.get(pk=self.kwargs['pk'])
+        return u.roles
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(type(self), self).post(request, *args, **kwargs)
+
+
 
 class UserProjectsList(SubListAPIView):
 
@@ -1047,10 +1069,6 @@ class CredentialActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
-class PermissionDetail(RetrieveUpdateDestroyAPIView):
-
-    model = Permission
-    serializer_class = PermissionSerializer
 
 class InventoryScriptList(ListCreateAPIView):
 
@@ -2872,7 +2890,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-        
+
         if request.accepted_renderer.format in ('html', 'api', 'json'):
             content_format = request.query_params.get('content_format', 'html')
             content_encoding = request.query_params.get('content_encoding', None)
@@ -3030,6 +3048,134 @@ class SettingsReset(APIView):
         if settings_key is not None:
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+#class RoleList(ListCreateAPIView):
+class RoleList(ListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    new_in_300 = True
+
+    # XXX: Permissions - only roles the user has access to see should be listed here
+    def get_queryset(self):
+        return Role.objects
+
+    # XXX: Need to define who can create custom roles, and then restrict access
+    #      appropriately
+    # XXX: Need to define how we want to deal with administration of custom roles.
+
+class RoleDetail(RetrieveUpdateAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    new_in_300 = True
+
+    # XXX: Permissions - only appropriate people should be able to change these
+
+
+class RoleUsersList(SubListCreateAttachDetachAPIView):
+
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Role
+    relationship = 'members'
+
+    def get_queryset(self):
+        # XXX: Access control
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return role.members
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(type(self), self).post(request, *args, **kwargs)
+
+
+class RoleTeamsList(ListAPIView):
+
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Role
+    relationship = 'member_role.parents'
+
+    def get_queryset(self):
+        # TODO: Check
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return Team.objects.filter(member_role__children__in=[role])
+
+    def post(self, request, pk, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        team = Team.objects.get(pk=sub_id)
+        if request.data.get('disassociate', None):
+            team.member_role.children.remove(role)
+        else:
+            team.member_role.children.add(role)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # XXX attach/detach needs to ensure we have the appropriate perms
+
+
+class RoleParentsList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'parents'
+
+    def get_queryset(self):
+        # XXX: This should be the intersection between the roles of the user
+        # and the roles that the requesting user has access to see
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return role.parents
+
+class RoleChildrenList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'children'
+
+    def get_queryset(self):
+        # XXX: This should be the intersection between the roles of the user
+        # and the roles that the requesting user has access to see
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return role.children
+
+class ResourceDetail(RetrieveAPIView):
+
+    model = Resource
+    serializer_class = ResourceSerializer
+    new_in_300 = True
+
+    # XXX: Permissions - only roles the user has access to see should be listed here
+    def get_queryset(self):
+        return Resource.objects
+
+class ResourceAccessList(ListAPIView):
+
+    model = User
+    serializer_class = ResourceAccessListElementSerializer
+    new_in_300 = True
+
+    def get_queryset(self):
+        self.resource_id = self.kwargs['pk']
+        resource = Resource.objects.get(pk=self.kwargs['pk'])
+        roles = set([p.role for p in resource.permissions.all()])
+        ancestors = set()
+        for r in roles:
+            ancestors.update(set(r.ancestors.all()))
+        return User.objects.filter(roles__in=list(ancestors))
+
+
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

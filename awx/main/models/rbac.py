@@ -156,6 +156,35 @@ class Resource(CommonModelNameNotUnique):
             return {k[4:]:v for k,v in res[0].items()}
         return None
 
+    def get_role_permissions(self, role):
+        '''
+        Returns a dict (or None) of the permissions a role has for a given
+        resource.
+
+        Note: Each field in the dict is the `or` of all respective permissions
+        that have been granted to either the role or any descendents of that role.
+        '''
+
+        qs = Role.objects.filter(id=role.id, descendents__permissions__resource=self)
+
+        qs = qs.annotate(max_create = Max('descendents__permissions__create'))
+        qs = qs.annotate(max_read = Max('descendents__permissions__read'))
+        qs = qs.annotate(max_write = Max('descendents__permissions__write'))
+        qs = qs.annotate(max_update = Max('descendents__permissions__update'))
+        qs = qs.annotate(max_delete = Max('descendents__permissions__delete'))
+        qs = qs.annotate(max_scm_update = Max('descendents__permissions__scm_update'))
+        qs = qs.annotate(max_execute = Max('descendents__permissions__execute'))
+        qs = qs.annotate(max_use = Max('descendents__permissions__use'))
+
+        qs = qs.values('max_create', 'max_read', 'max_write', 'max_update',
+                       'max_delete', 'max_scm_update', 'max_execute', 'max_use')
+
+        res = qs.all()
+        if len(res):
+            # strip away the 'max_' prefix
+            return {k[4:]:v for k,v in res[0].items()}
+        return None
+
 
 class RolePermission(CreatedModifiedModel):
     '''

@@ -39,6 +39,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
@@ -127,7 +128,7 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
                 'foo': {'required': False, 'default': ''},
                 'bar': {'label': 'New Label for Bar'},
             }
-            
+
             # The resulting value of extra_kwargs would be:
             extra_kwargs = {
                 'foo': {'required': False, 'default': ''},
@@ -201,7 +202,7 @@ class BaseSerializer(serializers.ModelSerializer):
     __metaclass__ = BaseSerializerMetaclass
 
     class Meta:
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'resource_id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'name', 'description')
         summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
         summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
@@ -216,6 +217,8 @@ class BaseSerializer(serializers.ModelSerializer):
     created       = serializers.SerializerMethodField()
     modified      = serializers.SerializerMethodField()
     active        = serializers.SerializerMethodField()
+    resource_id   = serializers.SerializerMethodField()
+
 
     def get_type(self, obj):
         return get_type_for_model(self.Meta.model)
@@ -254,6 +257,8 @@ class BaseSerializer(serializers.ModelSerializer):
             res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
+        if isinstance(obj, ResourceMixin):
+            res['resource'] = reverse('api:resource_detail', args=(obj.resource_id,))
         return res
 
     def _get_summary_fields(self, obj):
@@ -304,7 +309,29 @@ class BaseSerializer(serializers.ModelSerializer):
             summary_fields['modified_by'] = OrderedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
+
+        # RBAC summary fields
+        request = self.context.get('request', None)
+        if request and isinstance(obj, ResourceMixin) and request.user.is_authenticated():
+            summary_fields['permissions'] = obj.get_permissions(request.user)
+        roles = {}
+        for field in obj._meta.get_fields():
+            if type(field) is ImplicitRoleField:
+                role = getattr(obj, field.name)
+                #roles[field.name] = RoleSerializer(data=role).to_representation(role)
+                roles[field.name] = {
+                    'id': role.id,
+                    'name': role.name,
+                    'url': role.get_absolute_url(),
+                }
+        if len(roles) > 0:
+            summary_fields['roles'] = roles
         return summary_fields
+
+    def get_resource_id(self, obj):
+        if isinstance(obj, ResourceMixin):
+            return obj.resource.id
+        return None
 
     def get_created(self, obj):
         if obj is None:
@@ -479,6 +506,8 @@ class BaseSerializer(serializers.ModelSerializer):
         # set by the sub list create view.
         if parent_key and hasattr(view, '_raw_data_form_marker'):
             ret.pop(parent_key, None)
+        if 'resource_id' in ret and ret['resource_id'] is None:
+            ret.pop('resource_id')
         return ret
 
 
@@ -737,7 +766,7 @@ class UserSerializer(BaseSerializer):
             admin_of_organizations = reverse('api:user_admin_of_organizations_list', args=(obj.pk,)),
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
-            permissions            = reverse('api:user_permissions_list',         args=(obj.pk,)),
+            roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
         ))
         return res
@@ -1369,7 +1398,7 @@ class TeamSerializer(BaseSerializer):
             projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
             users        = reverse('api:team_users_list',       args=(obj.pk,)),
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
-            permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
+            roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
@@ -1383,54 +1412,68 @@ class TeamSerializer(BaseSerializer):
         return ret
 
 
-class PermissionSerializer(BaseSerializer):
+
+class RoleSerializer(BaseSerializer):
 
     class Meta:
-        model = Permission
-        fields = ('*', 'user', 'team', 'project', 'inventory',
-                  'permission_type', 'run_ad_hoc_commands')
+        model = Role
+        fields = ('*',)
 
     def get_related(self, obj):
-        res = super(PermissionSerializer, self).get_related(obj)
-        if obj.user and obj.user.is_active:
-            res['user']        = reverse('api:user_detail', args=(obj.user.pk,))
-        if obj.team and obj.team.active:
-            res['team']        = reverse('api:team_detail', args=(obj.team.pk,))
-        if obj.project and obj.project.active:
-            res['project']     = reverse('api:project_detail', args=(obj.project.pk,))
-        if obj.inventory and obj.inventory.active:
-            res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        return res
+        ret = super(RoleSerializer, self).get_related(obj)
+        if obj.content_object:
+            if type(obj.content_object) is Organization:
+                ret['organization'] = reverse('api:organization_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Team:
+                ret['team'] = reverse('api:team_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Project:
+                ret['project'] = reverse('api:project_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Inventory:
+                ret['inventory'] = reverse('api:inventory_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Host:
+                ret['host'] = reverse('api:host_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Group:
+                ret['group'] = reverse('api:group_detail', args=(obj.object_id,))
+            if type(obj.content_object) is InventorySource:
+                ret['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.object_id,))
+            if type(obj.content_object) is Credential:
+                ret['credential'] = reverse('api:credential_detail', args=(obj.object_id,))
+            if type(obj.content_object) is JobTemplate:
+                ret['job_template'] = reverse('api:job_template_detail', args=(obj.object_id,))
 
-    def validate(self, attrs):
-        # Can only set either user or team.
-        if attrs.get('user', None) and attrs.get('team', None):
-            raise serializers.ValidationError('permission can only be assigned'
-                                              ' to a user OR a team, not both')
-        # Cannot assign admit/read/write permissions for a project.
-        if attrs.get('permission_type', None) in ('admin', 'read', 'write') and attrs.get('project', None):
-            raise serializers.ValidationError('project cannot be assigned for '
-                                              'inventory-only permissions')
-        # Project is required when setting deployment permissions.
-        if attrs.get('permission_type', None) in ('run', 'check') and not attrs.get('project', None):
-            raise serializers.ValidationError('project is required when '
-                                              'assigning deployment permissions')
-
-        return super(PermissionSerializer, self).validate(attrs)
-
-    def to_representation(self, obj):
-        ret = super(PermissionSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        if 'user' in ret and (not obj.user or not obj.user.is_active):
-            ret['user'] = None
-        if 'team' in ret and (not obj.team or not obj.team.active):
-            ret['team'] = None
-        if 'project' in ret and (not obj.project or not obj.project.active):
-            ret['project'] = None
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
-            ret['inventory'] = None
         return ret
+
+
+class ResourceSerializer(BaseSerializer):
+
+    class Meta:
+        model = Resource
+        fields = ('*',)
+
+
+class ResourceAccessListElementSerializer(UserSerializer):
+
+    def to_representation(self, user):
+        ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
+        resource_id = self.context['view'].resource_id
+        resource = Resource.objects.get(pk=resource_id)
+        if 'summary_fields' not in ret:
+            ret['summary_fields'] = {}
+        ret['summary_fields']['permissions'] = resource.get_permissions(user)
+
+        def format_role_perm(role):
+            return { 'role': { 'id': role.id, 'name': role.name}, 'permissions': resource.get_role_permissions(role)}
+
+        direct_permissive_role_ids = resource.permissions.values_list('role__id')
+        direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
+        ret['summary_fields']['direct_access'] = [format_role_perm(r) for r in direct_access_roles]
+
+        all_permissive_role_ids = resource.permissions.values_list('role__ancestors__id')
+        indirect_access_roles = user.roles.filter(id__in=all_permissive_role_ids).exclude(id__in=direct_permissive_role_ids).all()
+        ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles]
+        return ret
+
+
 
 
 class CredentialSerializer(BaseSerializer):
@@ -1705,7 +1748,7 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
-        # Check for passwords needed 
+        # Check for passwords needed
         needed = self.get_passwords_needed_to_start(obj)
         provided = dict([(field, data.get(field, '')) for field in needed])
         if not all(provided.values()):
@@ -2292,7 +2335,7 @@ class AuthTokenSerializer(serializers.Serializer):
 
 class FactVersionSerializer(BaseFactSerializer):
     related = serializers.SerializerMethodField('get_related')
-    
+
     class Meta:
         model = FactVersion
         fields = ('related', 'module', 'timestamp',)

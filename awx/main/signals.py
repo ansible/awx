@@ -338,7 +338,6 @@ model_serializer_mapping = {
     Credential: CredentialSerializer,
     Team: TeamSerializer,
     Project: ProjectSerializer,
-    Permission: PermissionSerializer,
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
