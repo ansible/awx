@@ -20,7 +20,7 @@ __all__ = ['Role', 'RolePermission', 'Resource', 'ROLE_SINGLETON_SYSTEM_ADMINIST
 logger = logging.getLogger('awx.main.models.rbac')
 
 ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='System Administrator'
-ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor' 
+ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor'
 
 
 class Role(CommonModelNameNotUnique):
@@ -44,6 +44,9 @@ class Role(CommonModelNameNotUnique):
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
         self.rebuild_role_ancestor_list()
+
+    def get_absolute_url(self):
+        return reverse('api:role_detail', args=(self.pk,))
 
     def rebuild_role_ancestor_list(self):
         '''
