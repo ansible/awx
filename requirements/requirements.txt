@@ -123,12 +123,10 @@ requests==2.5.1
 requestsexceptions==1.1.1
 shade==1.4.0
 simplejson==3.8.1
-git+https://github.com/chrismeyersfsu/sitecustomize.git#egg=sitecustomize
 six==1.9.0
 statsd==3.2.1
 stevedore==1.10.0
 suds==0.4
-South==1.0.2
 unicodecsv==0.14.1
 warlock==1.2.0
 wheel==0.24.0
