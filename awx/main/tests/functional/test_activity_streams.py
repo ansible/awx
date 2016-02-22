@@ -1,11 +1,6 @@
 import mock
 import pytest
 
-from awx.api.views import (
-    ActivityStreamList,
-    ActivityStreamDetail,
-    OrganizationList,
-)
 from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
 from django.core.urlresolvers import reverse
@@ -17,7 +12,7 @@ def mock_feature_enabled(feature, bypass_database=None):
 @pytest.mark.django_db
 def test_get_activity_stream_list(monkeypatch, organization, get, user):
     url = reverse('api:activity_stream_list')
-    response = get(ActivityStreamList, user('admin', True), url)
+    response = get(url, user('admin', True))
 
     assert response.status_code == 200
 
@@ -31,7 +26,7 @@ def test_basic_fields(monkeypatch, organization, get, user):
 
     aspk = activity_stream.pk
     url = reverse('api:activity_stream_detail', args=(aspk,))
-    response = get(ActivityStreamDetail, user('admin', True), url, pk=aspk)
+    response = get(url, user('admin', True))
 
     assert response.status_code == 200
     assert 'related' in response.data
@@ -46,8 +41,9 @@ def test_middleware_actor_added(monkeypatch, post, get, user):
     u = user('admin-poster', True)
 
     url = reverse('api:organization_list')
-    response = post(OrganizationList, u, url,
-                    kwargs=dict(name='test-org', description='test-desc'),
+    response = post(url,
+                    dict(name='test-org', description='test-desc'),
+                    u,
                     middleware=ActivityStreamMiddleware())
     assert response.status_code == 201
 
@@ -55,7 +51,7 @@ def test_middleware_actor_added(monkeypatch, post, get, user):
     activity_stream = ActivityStream.objects.filter(organization__pk=org_id).first()
 
     url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
-    response = get(ActivityStreamDetail, u, url, pk=activity_stream.pk)
+    response = get(url, u)
 
     assert response.status_code == 200
     assert response.data['summary_fields']['actor']['username'] == 'admin-poster'

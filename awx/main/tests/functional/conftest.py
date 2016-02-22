@@ -1,5 +1,10 @@
 import pytest
 
+from django.core.urlresolvers import resolve
+from django.utils.six.moves.urllib.parse import urlparse
+
+from awx.main.models.organization import Organization
+from awx.main.models.ha import Instance
 from django.contrib.auth.models import User
 
 from rest_framework.test import (
@@ -105,13 +110,16 @@ def permissions():
 
 @pytest.fixture
 def post():
-    def rf(_cls, _user, _url, pk=None, kwargs={}, middleware=None):
-        view = _cls.as_view()
-        request = APIRequestFactory().post(_url, kwargs, format='json')
+    def rf(url, data, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().post(url, data, **kwargs)
         if middleware:
             middleware.process_request(request)
-        force_authenticate(request, user=_user)
-        response = view(request, pk=pk)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
         return response
@@ -119,13 +127,101 @@ def post():
 
 @pytest.fixture
 def get():
-    def rf(_cls, _user, _url, pk=None, middleware=None):
-        view = _cls.as_view()
-        request = APIRequestFactory().get(_url, format='json')
+    def rf(url, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().get(url, **kwargs)
         if middleware:
             middleware.process_request(request)
-        force_authenticate(request, user=_user)
-        response = view(request, pk=pk)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def put():
+    def rf(url, data, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().put(url, data, **kwargs)
+        if middleware:
+            middleware.process_request(request)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def patch():
+    def rf(url, data, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().patch(url, data, **kwargs)
+        if middleware:
+            middleware.process_request(request)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def delete():
+    def rf(url, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().delete(url, **kwargs)
+        if middleware:
+            middleware.process_request(request)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def head():
+    def rf(url, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().head(url, **kwargs)
+        if middleware:
+            middleware.process_request(request)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
+        if middleware:
+            middleware.process_response(request, response)
+        return response
+    return rf
+
+@pytest.fixture
+def options():
+    def rf(url, data, user=None, middleware=None, **kwargs):
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        if 'format' not in kwargs:
+            kwargs['format'] = 'json'
+        request = APIRequestFactory().options(url, data, **kwargs)
+        if middleware:
+            middleware.process_request(request)
+        if user:
+            force_authenticate(request, user=user)
+        response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
         return response

@@ -20,7 +20,7 @@ export default
         fields: {
             id: {
                 label: 'ID',
-                ngClick:"viewJobLog(job.id)",
+                ngClick:"viewJobDetails(job)",
                 key: true,
                 desc: true,
                 searchType: 'int',
@@ -36,7 +36,7 @@ export default
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(job.id)",
+                ngClick:"viewJobDetails(job)",
                 searchable: true,
                 nosort: true,
                 searchType: 'select',
@@ -66,7 +66,7 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngClick: "viewJobLog(job.id, job.nameHref)",
+                ngClick: "viewJobDetails(job)",
                 defaultSearchField: true
             }
         },
@@ -74,13 +74,6 @@ export default
         actions: { },
 
         fieldActions: {
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "job.type == 'job'"
-            },
             submit: {
                 mode: 'all',
                 icon: 'icon-rocket',

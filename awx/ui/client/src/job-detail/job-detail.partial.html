@@ -1,29 +1,25 @@
 <div class="tab-pane" id="jobs-detail">
     <div ng-cloak id="htmlTemplate">
-
         <div class="row" style="position: relative;">
             <div id="job-detail-container">
-                <div class="job_well">
-                    <div class="row">
-                        <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3">Status</label>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-5 job_status"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status_label }}</div>
-
-                        <div class="col-lg-4 text-right JobDetails-status">
-                            <a href="" id="play-help" aw-pop-over="Live event processing is now paused. Click here to resume." id="play-button-help" data-placement="left" ng-show="pauseLiveEvents" ><i class="fa fa-question"></i></a>
-                            <a href="" ng-click="togglePlayButton()" id="play-button" class="btn btn-primary btn-xs" aw-tool-tip="Resume viewing live events" data-placement="top" ng-show="pauseLiveEvents" style="margin-right:25px;"><i class="fa fa-play"></i></a>
-                            <a href="/#/jobs/{{ job_id }}/stdout" id="view-stdout-button" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
-                            <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refresh()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'"
-                                data-original-title="" title=""><i class="fa fa-refresh"></i></button>
-                            <a href="" ng-click="deleteJob()" id="cancel-job-button" ng-show="job_status.status == 'running' || job_status.status=='pending' " type="button" class="btn btn-primary btn-xs" aw-tool-tip="Cancel" data-placement="top"><i class="fa fa-minus-circle"></i></a>
-                            <a href="" ng-click="deleteJob()" id="delete-job-button" ng-hide="job_status.status == 'running' || job_status.status == 'pending' " type="button" class="btn btn-primary btn-xs" aw-tool-tip="Delete" data-placement="top"><i class="fa fa-trash-o"></i></a>
-                            <a href="" ng-click="relaunchJob()" id="relaunch-job-button" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Relaunch using the same parameters" data-placement="top"><i class="fa fa-rocket"></i></a>
-                            <button type="button" id="summary-button" class="btn btn-primary btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left"></i></button>
-                        </div>
+                <div class="JobDetail-resultsContainer Panel">
+                    <div class="JobDetail-panelHeader">
+                        <a class="JobDetail-panelHeaderText" ng-show="lessStatus" href="" ng-click="toggleLessStatus()">
+                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
+                        </a>
+                        <a class="JobDetail-panelHeaderText" ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">
+                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
+                        </a>
+                        <button id="submit-action" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Start a job using this template" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
+                        <button id="delete-action" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJobTemplate(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
                     </div>
 
-                    <div class="form-horizontal" role="form" id="job-status-form">
-
-                        <div class="form-group" ng-show="job_status.explanation">
+                    <div class="form-horizontal JobDetail-resultsDetails" role="form" id="job-status-form">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.started">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
+                            <div class="JobDetail-resultRowText"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status_label }}</div>
+                        </div>
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.explanation">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 col-xs-12">Explanation</label>
                             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9  job_status_explanation"
                             ng-show="!previousTaskFailed" ng-bind-html="job_status.explanation"></div>
@@ -44,117 +40,116 @@
                             </div>
                         </div>
 
-                        <div class="form-group" ng-show="job_status.traceback">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.traceback">
                             <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Results Traceback</label>
-                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_traceback" ng-bind-html="job_status.traceback"></div>
+                            <div class="JobDetail-resultRowText col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_traceback" ng-bind-html="job_status.traceback"></div>
                         </div>
 
-                        <div class="form-group" ng-show="job_status.started">
-                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Timing</label>
-                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                                <div ng-show="job_status.started" id="started-time">Started &nbsp;{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
-                                <div ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</div>
-                                <div ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</div>
-                            </div>
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.started">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Started</label>
+                            <div class="JobDetail-resultRowText">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job_template_name">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.started">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Finished</label>
+                            <div class="JobDetail-resultRowText">{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</div>
+                        </div>
+
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_status.started">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Elapsed</label>
+                            <div class="JobDetail-resultRowText">{{ job_status.elapsed }}</div>
+                        </div>
+
+
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_template_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job_type">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job_type">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Job Type</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job_type }}</div>
+                            <div class="JobDetail-resultRowText">{{ job_type }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="created_by">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="created_by">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Launched By</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href="{{ users_url }}" aw-tool-tip="Edit the User" data-placement="top">{{ created_by }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="scheduled_by">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="scheduled_by">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Launched By</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href aw-tool-tip="Edit the Schedule" data-placement="top" ng-click="editSchedule()">{{scheduled_by}}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="inventory_name">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="inventory_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="project_name">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="project_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.playbook">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job.playbook">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Playbook</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.playbook }}</div>
+                            <div class="JobDetail-resultRowText">{{ job.playbook }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="credential_name">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="credential_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Machine Credential</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText JobDetail-resultRowText">
                                 <a href="{{ credential_url }}" aw-tool-tip="Edit the credential" data-placement="top">{{ credential_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="cloud_credential_name">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="cloud_credential_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Cloud Credential</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <a href="{{ cloud_credential_url }}" aw-tool-tip="Edit the credential" data-placement="top">{{ cloud_credential_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.forks">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="job.forks">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Forks</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.forks }}</div>
+                            <div class="JobDetail-resultRowText">{{ job.forks }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.limit">
+                        <div class="form-group JobDetail-resultRow toggle-show"  ng-show="job.limit">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Limit</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.limit }}</div>
+                            <div class="JobDetail-resultRowText">{{ job.limit }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="verbosity">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="verbosity">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Verbosity</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ verbosity }}</div>
+                            <div class="JobDetail-resultRowText">{{ verbosity }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.job_tags">
+                        <div class="form-group JobDetail-resultRow toggle-show"  ng-show="job.job_tags">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Job Tags</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.job_tags }}</div>
+                            <div class="JobDetail-resultRowText">{{ job.job_tags }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="variables">
+                        <div class="form-group JobDetail-resultRow toggle-show" ng-show="variables">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Extra Variables</label>
-                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                            <div class="JobDetail-resultRowText">
                                 <div id="pre-formatted-variables">{{ variables }}</div>
                                 <!-- <pre>{{ variables }}</pre> -->
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-sm-12 more-or-less">
-                                <a ng-show="lessStatus" href="" ng-click="toggleLessStatus()">more <i class="fa fa-angle-down"></i></a>
-                                <a ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">less <i class="fa fa-angle-up"></i></a>
-                            </div>
-                        </div>
-
-                        <hr>
-
                     </div>
+                </div>
+                <!--- JobDetail-results---------------------------------------------->
 
                     <div id="job-detail-tables">
                         <div id="play-section" class="section">
@@ -378,11 +373,11 @@
                         </div><!-- section -->
                     </div><!-- job-detail-tables -->
 
-                </div><!-- well -->
+
 
             </div><!-- job-detail-container -->
 
-            <div id="job-summary-container">
+            <!-- <div id="job-summary-container"> -->
                 <div class="job_well">
                     <div id="summary-well-top-section">
                         <div id="hide-summary-button" style="display: hidden;">

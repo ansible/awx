@@ -1,0 +1,95 @@
+<div class="tab-pane" id="jobs-stdout">
+    <div ng-cloak id="htmlTemplate">
+    <div class="StandardOut">
+        <div class="StandardOut-leftPanel">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    RESULTS
+                </div>
+                <div class="StandardOut-details">
+
+                    <div class="StandardOut-detailsRow" ng-show="project_name">
+                        <div class="StandardOut-detailsLabel">NAME</div>
+                        <div class="StandardOut-detailsContent">
+                            <a ui-sref="projects.edit({id: job.project})">
+                                {{ project_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow">
+                        <div class="StandardOut-detailsLabel">STATUS</div>
+                        <div class="StandardOut-detailsContent">
+                            <i class="fa icon-job-{{ job.status }}"></i>
+                            <span class="StandardOut-statusText">{{ job.status }}</span>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.started">
+                        <div class="StandardOut-detailsLabel">STARTED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel">FINISHED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel">ELAPSED</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.elapsed }} seconds
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.launch_type">
+                        <div class="StandardOut-detailsLabel">LAUNCH TYPE</div>
+                        <div class="StandardOut-detailsContent">
+                            {{ job.launch_type }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="project_name">
+                        <div class="StandardOut-detailsLabel">PROJECT</div>
+                        <div class="StandardOut-detailsContent">
+                            <a ui-sref="projects.edit({id: job.project})">
+                                {{ project_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="credential_name">
+                        <div class="StandardOut-detailsLabel">CREDENTIAL</div>
+                        <div class="StandardOut-detailsContent">
+                            <a ui-sref="credentials.edit({credential_id: credential})">
+                                {{ credential_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="StandardOut-rightPanel">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    STANDARD OUT
+                </div>
+                <div class="StandardOut-consoleOutput">
+                    <div id="pre-container" class="body_background body_foreground pre mono-space StandardOut-preContainer"
+                    lr-infinite-scroll="stdOutScrollToTop" scroll-threshold="300" data-direction="up" time-threshold="500">
+                        <div id="pre-container-content"  class="StandardOut-preContent"></div>
+                    </div>
+                    <div class="scroll-spinner" id="stdoutMoreRowsBottom">
+                        <i class="fa fa-cog fa-spin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

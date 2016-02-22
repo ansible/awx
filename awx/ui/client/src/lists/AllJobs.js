@@ -25,7 +25,7 @@ export default
                 dataTitle: "{{ all_job.status_popover_title }}",
                 icon: 'icon-job-{{ all_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(all_job.id)",
+                ngClick:"viewJobDetails(all_job)",
                 searchable: true,
                 searchType: 'select',
                 nosort: true,
@@ -38,7 +38,7 @@ export default
             },
             id: {
                 label: 'ID',
-                ngClick:"viewJobLog(all_job.id)",
+                ngClick:"viewJobDetails(all_job)",
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ all_job.status_tip }}",
@@ -47,7 +47,7 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
-                ngClick: "viewJobLog(all_job.id, all_job.nameHref)",
+                ngClick: "viewJobDetails(all_job)",
                 defaultSearchField: true,
                 awToolTip: "{{ all_job.name | sanitize }}",
                 dataPlacement: 'top'
@@ -87,13 +87,6 @@ export default
 
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
 
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ all_job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "all_job.type == 'job'"
-            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',

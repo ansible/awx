@@ -31,6 +31,7 @@ import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
+import jobDetail from './job-detail/main';
 
 // modules
 import setupMenu from './setup-menu/main';
@@ -43,8 +44,7 @@ import templateUrl from './shared/template-url/main';
 import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
-import {JobDetailController} from './controllers/JobDetail';
-import {JobStdoutController} from './controllers/JobStdout';
+import standardOut from './standard-out/main';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
 import {LicenseController} from './controllers/License';
 import {ScheduleEditController} from './controllers/Schedules';
@@ -95,6 +95,8 @@ var tower = angular.module('Tower', [
     login.name,
     activityStream.name,
     footer.name,
+    jobDetail.name,
+    standardOut.name,
     'templates',
     'Utilities',
     'LicenseHelper',
@@ -289,83 +291,6 @@ var tower = angular.module('Tower', [
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobDetail', {
-                url: '/jobs/:id',
-                templateUrl: urlPrefix + 'partials/job_detail.html',
-                controller: JobDetailController,
-                ncyBreadcrumb: {
-                    parent: 'jobs',
-                    label: "{{ job.id }} - {{ job.name }}"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "job_events"
-                            });
-                            $rootScope.event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
-                    }]
-                }
-            }).
-
-            state('jobsStdout', {
-                url: '/jobs/:id/stdout',
-                templateUrl: urlPrefix + 'partials/job_stdout.html',
-                controller: JobStdoutController,
-                ncyBreadcrumb: {
-                    parent: 'jobDetail',
-                    label: "STANDARD OUT"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "job_events"
-                            });
-                            $rootScope.event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
-                    }]
-                }
-            }).
-
-            state('adHocJobStdout', {
-                url: '/ad_hoc_commands/:id',
-                templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
-                controller: JobStdoutController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.adhoc_event_socket) {
-                            $rootScope.adhoc_event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "ad_hoc_command_events"
-                            });
-                            $rootScope.adhoc_event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
                     }]
                 }
             }).
@@ -1062,6 +987,9 @@ var tower = angular.module('Tower', [
                                 $rootScope.$emit('JobStatusChange-jobs', data);
                             } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
                                 /\/ad_hoc_commands\/(\d)+/.test(urlToCheck)) {
+
+                                // TODO: something will need to change here for stdout
+
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
                             } else if (/\/jobs\/(\d)+/.test(urlToCheck)) {

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name controllers.function:JobStdout
@@ -11,11 +11,12 @@
 */
 
 
-export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $state, $stateParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, ModelToBasePathKey, Empty, GetChoices, LookUpName) {
 
     ClearScope();
 
     var job_id = $stateParams.id,
+        jobType = $state.current.data.jobType,
         api_complete = false,
         stdout_url,
         current_range,
@@ -32,26 +33,27 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
     $scope.isClosed = true;
 
 
-    function openSockets() {
-        if (/\/jobs\/(\d)+\/stdout/.test($location.$$url)) {
-            $log.debug("socket watching on job_events-" + job_id);
-            $rootScope.event_socket.on("job_events-" + job_id, function() {
-                $log.debug("socket fired on job_events-" + job_id);
-                if (api_complete) {
-                    event_queue++;
-                }
-            });
-        } else if (/\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
-            $log.debug("socket watching on ad_hoc_command_events-" + job_id);
-            $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
-                $log.debug("socket fired on ad_hoc_command_events-" + job_id);
-                if (api_complete) {
-                    event_queue++;
-                }
-            });
-        }
-    }
-    openSockets();
+    // function openSockets() {
+    //     if (/\/jobs\/(\d)+\/stdout/.test($location.$$url)) {
+    //         $log.debug("socket watching on job_events-" + job_id);
+    //         $rootScope.event_socket.on("job_events-" + job_id, function() {
+    //             $log.debug("socket fired on job_events-" + job_id);
+    //             if (api_complete) {
+    //                 event_queue++;
+    //             }
+    //         });
+    //     } else if (/\/ad_hoc_commands\/(\d)+/.test($location.$$url)) {
+    //         $log.debug("socket watching on ad_hoc_command_events-" + job_id);
+    //         $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
+    //             $log.debug("socket fired on ad_hoc_command_events-" + job_id);
+    //             if (api_complete) {
+    //                 event_queue++;
+    //             }
+    //         });
+    //     }
+    // }
+    //
+    // openSockets();
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
@@ -158,9 +160,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
     $(".StandardOut").height($("body").height() - 60);
 
-    // Note: could be ad_hoc_commands or jobs
-    var jobType = $location.path().replace(/^\//, '').split('/')[0];
-    Rest.setUrl(GetBasePath(jobType) + job_id + '/');
+    Rest.setUrl(GetBasePath('base') + jobType + '/' + job_id + '/');
     Rest.get()
         .success(function(data) {
             $scope.job = data;
@@ -182,13 +182,87 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
             $scope.verbosity = data.verbosity;
             $scope.job_tags = data.job_tags;
             stdout_url = data.related.stdout;
-            if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
-                live_event_processing = false;
-                if ($rootScope.jobStdOutInterval) {
-                    window.clearInterval($rootScope.jobStdOutInterval);
+
+            // If we have a source then we have to go get the source choices from the server
+            if (!Empty(data.source)) {
+                if ($scope.removeChoicesReady) {
+                    $scope.removeChoicesReady();
                 }
+                $scope.removeChoicesReady = $scope.$on('ChoicesReady', function() {
+                    $scope.source_choices.every(function(e) {
+                        if (e.value === data.source) {
+                            $scope.source = e.label;
+                            return false;
+                        }
+                        return true;
+                    });
+                });
+                // GetChoices can be found in the helper: LogViewer.js
+                // It attaches the source choices to $scope.source_choices.
+                // Then, when the callback is fired, $scope.source is bound
+                // to the corresponding label.
+                GetChoices({
+                    scope: $scope,
+                    url: GetBasePath('inventory_sources'),
+                    field: 'source',
+                    variable: 'source_choices',
+                    choice_name: 'choices',
+                    callback: 'ChoicesReady'
+                });
             }
-            $scope.$emit('LoadStdout');
+
+            // LookUpName can be found in the helper: LogViewer.js
+            // It attaches the name that it gets (based on the url)
+            // to the $scope variable defined by the attribute scope_var.
+            if (!Empty(data.credential)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'credential',
+                    url: GetBasePath('credentials') + data.credential + '/'
+                });
+            }
+
+            if (!Empty(data.inventory)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'inventory',
+                    url: GetBasePath('inventory') + data.inventory + '/'
+                });
+            }
+
+            if (!Empty(data.project)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'project',
+                    url: GetBasePath('projects') + data.project + '/'
+                });
+            }
+
+            if (!Empty(data.cloud_credential)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'cloud_credential',
+                    url: GetBasePath('credentials') + data.cloud_credential + '/'
+                });
+            }
+
+            if (!Empty(data.inventory_source)) {
+                LookUpName({
+                    scope: $scope,
+                    scope_var: 'inventory_source',
+                    url: GetBasePath('inventory_sources') + data.inventory_source + '/'
+                });
+            }
+
+            // if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
+            //     live_event_processing = false;
+            //     if ($rootScope.jobStdOutInterval) {
+            //         window.clearInterval($rootScope.jobStdOutInterval);
+            //     }
+            // }
+            if(stdout_url) {
+                $scope.$emit('LoadStdout');
+            }
         })
         .error(function(data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -197,11 +271,9 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
     $scope.refresh = function(){
         if (loaded_sections.length === 0) { ////this if statement for refresh
-            $log.debug('calling LoadStdout');
             $scope.$emit('LoadStdout');
         }
         else if (live_event_processing) {
-            $log.debug('calling getNextSection');
             getNextSection();
         }
     };
@@ -281,4 +353,4 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
 
 }
 
-JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'ModelToBasePathKey', 'Empty', 'GetChoices', 'LookUpName'];
