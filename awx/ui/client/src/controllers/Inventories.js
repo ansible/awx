@@ -16,7 +16,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
     generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait,
-    EditInventoryProperties, Find, Empty, LogViewer, $state) {
+    EditInventoryProperties, Find, Empty, $state) {
 
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
@@ -295,10 +295,12 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 
     $scope.viewJob = function(url) {
-        LogViewer({
-            scope: $scope,
-            url: url
-        });
+
+        // Pull the id out of the URL
+        var id = url.replace(/^\//, '').split('/')[3];
+
+        $state.go('inventorySyncStdout', {id: id});
+
     };
 
     $scope.editInventoryProperties = function (inventory_id) {
@@ -364,7 +366,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 
 InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Wait', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer', '$state'
+    'GetBasePath', 'Wait', 'EditInventoryProperties', 'Find', 'Empty', '$state'
 ];
 
 
@@ -781,7 +783,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, ShowJobSummary,
-    InventoryGroupsHelp, HelpDialog, ViewJob,
+    InventoryGroupsHelp, HelpDialog,
     GroupsCopy, HostsCopy, $stateParams) {
 
     var PreviousSearchParams,
@@ -1254,12 +1256,8 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
             opts.autoShow = params.autoShow || false;
         }
         HelpDialog(opts);
-    };
-
-    $scope.viewJob = function(id) {
-        ViewJob({ scope: $scope, id: id });
-    };
-
+    }
+;
     $scope.showHosts = function (group_id, show_failures) {
         // Clicked on group
         if (group_id !== null) {
@@ -1293,6 +1291,6 @@ InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
     'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
     'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'ShowJobSummary',
-    'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'GroupsCopy',
+    'InventoryGroupsHelp', 'HelpDialog', 'GroupsCopy',
     'HostsCopy', '$stateParams'
 ];
