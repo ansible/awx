@@ -47,6 +47,7 @@ class BaseService(object):
 
     def __init__(self, module):
         self.module = module
+        self.incomplete_warning = False
 
 class ServiceScanService(BaseService):
 
@@ -66,7 +67,10 @@ class ServiceScanService(BaseService):
                 if len(line_data) < 4:
                     continue # Skipping because we expected more data
                 service_name = " ".join(line_data[3:])
-                service_state = "running" if line_data[1] == "+" else "stopped"
+                if line_data[1] == "+":
+                    service_state = "running"
+                else:
+                    service_state = "stopped"
                 services.append({"name": service_name, "state": service_state, "source": "sysv"})
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")
@@ -94,6 +98,23 @@ class ServiceScanService(BaseService):
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
             p = re.compile('(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
             rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
+            # Check for special cases where stdout does not fit pattern
+            match_any = False
+            for line in stdout.split('\n'):
+                if p.match(line):
+                    match_any = True
+            if not match_any:
+                p_simple = re.compile('(?P<service>.*?)\s+(?P<rl0>on|off)')
+                match_any = False
+                for line in stdout.split('\n'):
+                    if p_simple.match(line):
+                        match_any = True
+                if match_any:
+                    # Try extra flags " -l --allservices" needed for SLES11
+                    rc, stdout, stderr = self.module.run_command('%s -l --allservices' % chkconfig_path, use_unsafe_shell=True)
+                elif '--list' in stderr:
+                    # Extra flag needed for RHEL5
+                    rc, stdout, stderr = self.module.run_command('%s --list' % chkconfig_path, use_unsafe_shell=True)
             for line in stdout.split('\n'):
                 m = p.match(line)
                 if m:
@@ -106,11 +127,13 @@ class ServiceScanService(BaseService):
                             service_state = 'running'
                         #elif rc in (1,3):
                         else:
-                            service_state = 'stopped'
+                            if 'root' in stderr or 'permission' in stderr.lower() or 'not in sudoers' in stderr.lower():
+                                self.incomplete_warning = True
+                                continue
+                            else:
+                                service_state = 'stopped'
                     service_data = {"name": service_name, "state": service_state, "source": "sysv"}
                     services.append(service_data)
-            # rc, stdout, stderr = self.module.run_command("%s --list" % chkconfig_path)
-            # Do something with chkconfig status
         return services
 
 class SystemctlScanService(BaseService):
@@ -139,8 +162,12 @@ class SystemctlScanService(BaseService):
             line_data = line.split()
             if len(line_data) != 2:
                 continue
+            if line_data[1] == "enabled":
+                state_val = "running"
+            else:
+                state_val = "stopped"
             services.append({"name": line_data[0],
-                             "state": "running" if line_data[1] == "enabled" else "stopped",
+                             "state": state_val,
                              "source": "systemd"})
         return services
 
@@ -148,12 +175,19 @@ def main():
     module = AnsibleModule(argument_spec = dict())
     service_modules = (ServiceScanService, SystemctlScanService)
     all_services = []
+    incomplete_warning = False
     for svc_module in service_modules:
         svcmod = svc_module(module)
         svc = svcmod.gather_services()
         if svc is not None:
             all_services += svc
+            if svcmod.incomplete_warning:
+                incomplete_warning = True
+    if len(all_services) == 0:
+        module.fail_json(msg="Failed to find any services. Sometimes this is due to insufficient privileges.")
     results = dict(ansible_facts=dict(services=all_services))
+    if incomplete_warning:
+        results['msg'] = "WARNING: Could not find status for all services. Sometimes this is due to insufficient privileges."
     module.exit_json(**results)
 
 main()

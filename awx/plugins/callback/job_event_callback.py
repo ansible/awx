@@ -37,6 +37,8 @@ import logging
 import os
 import pwd
 import urlparse
+import re
+from copy import deepcopy
 
 # Requests
 import requests
@@ -45,6 +47,43 @@ import requests
 import zmq
 
 import psutil
+
+
+CENSOR_FIELD_WHITELIST=[
+    'msg',
+    'failed',
+    'changed',
+    'results',
+    'start',
+    'end',
+    'delta',
+    'cmd',
+    '_ansible_no_log',
+    'cmd',
+    'rc',
+    'failed_when_result',
+    'skipped',
+    'skip_reason',
+]
+
+def censor(obj):
+    if obj.get('_ansible_no_log', False):
+        new_obj = {}
+        for k in CENSOR_FIELD_WHITELIST:
+            if k in obj:
+                new_obj[k] = obj[k]
+            if k == 'cmd' and k in obj:
+                if re.search(r'\s', obj['cmd']):
+                    new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
+                                            r'\1 <censored>',
+                                            obj['cmd'])
+        new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        obj = new_obj
+    if 'results' in obj:
+        for i in xrange(len(obj['results'])):
+            obj['results'][i] = censor(obj['results'][i])
+    return obj
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -159,6 +198,9 @@ class BaseCallbackModule(object):
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
+        if 'res' in event_data:
+            event_data['res'] = censor(deepcopy(event_data['res']))
+
         if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)
         else:
@@ -326,9 +368,9 @@ class JobCallbackModule(BaseCallbackModule):
     def playbook_on_start(self):
         self._log_event('playbook_on_start')
 
-    def v2_playbook_on_start(self):
-        # since there is no task/play info, this is currently identical
-        # to the v1 callback which does the same thing
+    def v2_playbook_on_start(self, playbook):
+        # NOTE: the playbook parameter was added late in Ansible 2.0 development
+        #       so we don't currently utilize but could later.
         self.playbook_on_start()
 
     def playbook_on_notify(self, host, handler):
