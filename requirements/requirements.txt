@@ -50,7 +50,6 @@ idna==2.0
 importlib==1.0.3
 ip-associations-python-novaclient-ext==0.1
 ipaddress==1.0.16
-git+https://github.com/chrismeyersfsu/python-ipy.git@fix-127_localhost#egg=IPy
 iso8601==0.1.11
 isodate==0.5.1
 jsonpatch==1.12
