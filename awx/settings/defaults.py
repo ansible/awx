@@ -341,6 +341,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
         'schedule': timedelta(seconds=30)
     },
+    'admin_checks': {
+        'task': 'awx.main.tasks.run_administrative_checks',
+        'schedule': timedelta(days=30)
+    },
 }
 
 # Social Auth configuration.
@@ -679,6 +683,8 @@ FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+TOWER_ADMIN_ALERTS = True
+
 TOWER_SETTINGS_MANIFEST = {
     "SCHEDULE_MAX_JOBS": {
         "name": "Maximum Scheduled Jobs",
@@ -803,6 +809,13 @@ TOWER_SETTINGS_MANIFEST = {
         "name": "All Users Visible to Organization Admins",
         "description": "Controls whether any Organization Admin can view all users, even those not associated with their Organization",
         "default": ORG_ADMINS_CAN_SEE_ALL_USERS,
+        "type": "bool",
+        "category": "system",
+    },
+    "TOWER_ADMIN_ALERTS": {
+        "name": "Enable Tower Administrator Alerts",
+        "description": "Allow Tower to email Admin users for system events that may require attention",
+        "default": TOWER_ADMIN_ALERTS,
         "type": "bool",
         "category": "system",
     },

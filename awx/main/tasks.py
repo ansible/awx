@@ -39,6 +39,8 @@ from celery import Task, task
 from django.conf import settings
 from django.db import transaction, DatabaseError
 from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
 # AWX
 from awx.lib.metrics import task_timer
@@ -46,6 +48,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
+from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
@@ -53,7 +56,7 @@ from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
-           'update_inventory_computed_fields', 'send_notifications']
+           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -69,6 +72,8 @@ logger = logging.getLogger('awx.main.tasks')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
+    if job_id is not None:
+        job_actual = UnifiedJob.objects.get(id=job_id)
     for notification_id in notification_list:
         notification = Notification.objects.get(id=notification_id)
         try:
@@ -82,8 +87,26 @@ def send_notifications(notification_list, job_id=None):
         finally:
             notification.save()
         if job_id is not None:
-            j = UnifiedJob.objects.get(id=job_id)
-            j.notifications.add(notification)
+            job_actual.notifications.add(notification)
+
+@task(bind=True)
+def run_administrative_checks(self):
+    if not tower_settings.TOWER_ADMIN_ALERTS:
+        return
+    reader = TaskSerializer()
+    validation_info = reader.from_database()
+    used_percentage = validation_info.get('current_instances',0) / validation_info.get('instance_count', 100)
+    tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+    if (used_percentage * 100) > 90:
+        send_mail("Ansible Tower host usage over 90%",
+                  "Ansible Tower host usage over 90%",
+                  tower_admin_emails,
+                  fail_silently=True)
+    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+        send_mail("Ansible Tower license will expire soon",
+                  "Ansible Tower license will expire soon",
+                  tower_admin_emails,
+                  fail_silently=True)
 
 @task()
 def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
@@ -154,7 +177,6 @@ def notify_task_runner(metadata_dict):
     """
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
-
 
 @task()
 def mongodb_control(cmd):

@@ -21,13 +21,11 @@ class WebhookBackend(TowerBaseEmailBackend):
         super(WebhookBackend, self).__init__(fail_silently=fail_silently)
 
     def format_body(self, body):
-        logger.error("Generating body from {}".format(str(body)))
         return body
 
     def send_messages(self, messages):
         sent_messages = 0
         for m in messages:
-            logger.error("BODY: " + str(m.body))
             r = requests.post("{}".format(m.recipients()[0]),
                               data=json.dumps(m.body),
                               headers=self.headers)
