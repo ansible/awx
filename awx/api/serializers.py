@@ -299,6 +299,7 @@ class BaseSerializer(serializers.ModelSerializer):
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
         if isinstance(obj, ResourceMixin):
             res['resource'] = reverse('api:resource_detail', args=(obj.resource_id,))
+            res['resource_access_list'] = reverse('api:resource_access_list', args=(obj.resource_id,))
         return res
 
     def _get_summary_fields(self, obj):
