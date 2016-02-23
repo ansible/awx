@@ -1876,6 +1876,21 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
     is_job_start = True
     always_allow_superuser = False
 
+    def update_raw_data(self, data):
+        obj = self.get_object()
+        extra_vars = data.get('extra_vars') or {}
+        if obj:
+            for p in obj.passwords_needed_to_start:
+                data[p] = u''
+            if obj.credential and obj.credential.active:
+                data.pop('credential', None)
+            else:
+                data['credential'] = None
+            for v in obj.variables_needed_to_start:
+                extra_vars.setdefault(v, u'')
+        data['extra_vars'] = extra_vars
+        return data
+
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
