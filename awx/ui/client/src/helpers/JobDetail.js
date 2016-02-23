@@ -235,7 +235,7 @@ export default
                 }
                 if (newActivePlay) {
                     scope.activePlay = newActivePlay;
-                    scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
+                    scope.jobData.plays[scope.activePlay].playActiveClass = 'List-tableRow--selected';
                 }
             }
         };
@@ -265,7 +265,7 @@ export default
                 }
                 if (newActiveTask) {
                     scope.activeTask = newActiveTask;
-                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'List-tableRow--selected';
                 }
             }
         };
@@ -700,12 +700,12 @@ export default
                     task.missingPct = task.missingPct - diff;
                 }
             }
-            task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
-            task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
-            task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
-            task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
-            task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block', 'width': task.unreachablePct + "%" } : { 'display': 'none' };
-            task.missingStyle = (task.missingPct > 0) ? { 'display': 'inline-block', 'width': task.missingPct + "%" } : { 'display': 'none' };
+            task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block' }: { 'display': 'none' };
+            task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block'} : { 'display': 'none' };
+            task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.missingStyle = (task.missingPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
         };
     }])
 
@@ -793,7 +793,7 @@ export default
             scope.selectedPlay = id;
             scope.plays.forEach(function(play, idx) {
                 if (play.id === scope.selectedPlay) {
-                    scope.plays[idx].playActiveClass = 'active';
+                    scope.plays[idx].playActiveClass = 'List-tableRow--selected';
                 }
                 else {
                     scope.plays[idx].playActiveClass = '';
@@ -940,7 +940,7 @@ export default
             scope.selectedTask = id;
             scope.tasks.forEach(function(task, idx) {
                 if (task.id === scope.selectedTask) {
-                    scope.tasks[idx].taskActiveClass = 'active';
+                    scope.tasks[idx].taskActiveClass = 'List-tableRow--selected';
                 }
                 else {
                     scope.tasks[idx].taskActiveClass = '';
@@ -1155,21 +1155,21 @@ export default
             }
             if (scope.host_summary.changed) {
                 graph_data.push({
-                    label: 'Changed',
+                    label: 'CHANGED',
                     value: scope.host_summary.changed,
                     color: '#FF9900'
                 });
             }
             if (scope.host_summary.unreachable) {
                 graph_data.push({
-                    label: 'Unreachable',
+                    label: 'UNREACHABLE',
                     value: scope.host_summary.unreachable,
                     color: '#FF0000'
                 });
             }
             if (scope.host_summary.failed) {
                 graph_data.push({
-                    label: 'Failed',
+                    label: 'FAILED',
                     value: scope.host_summary.failed,
                     color: '#ff5850'
                 });
@@ -1180,148 +1180,88 @@ export default
                 total_count += graph_data[gd_obj].value;
             }
             scope.total_count_for_graph = total_count;
-            // Adjust the size
-            width = $('#job-summary-container .job_well').width();
-            height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 80;
-            svg_radius = Math.min(width, height);
-            svg_width = width;
-            svg_height = height;
-            if (svg_height > 0 && svg_width > 0) {
-                if (!resize && $('#graph-section svg').length > 0) {
-                    // Donut3D.transition("completedHostsDonut", graph_data, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
-                    DonutChart({
-                        target: '#graph-section',
-                        height: height,
-                        width: width,
-                        data: graph_data,
-                        radius: svg_radius
-                    });
-                }
-                else {
-                    if ($('#graph-section svg').length > 0) {
-                        $('#graph-section svg').remove();
-                    }
-                    // svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
-                    // svg.append("g").attr("id","completedHostsDonut");
-                    // Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2) - 35, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
-                    DonutChart({
-                        target: '#graph-section',
-                        height: height,
-                        width: width,
-                        data: graph_data,
-                        radius: svg_radius
-                    });
-                    $('#graph-section .header .legend').show();
-                }
-            }
+            DonutChart({
+                data: graph_data
+            });
         };
     }])
 
     .factory('DonutChart', [function() {
         return function(params) {
-            var target = params.target,
-                height = Math.max(params.height, 250),
-                width = Math.max(params.width, 250),
-                dataset = params.data,
-                outerRadius = Math.min(width, height) / 2,
-                innerRadius = (outerRadius/3),
-                svg, arc, pie, legend,
-                tooltip, path,
-                legendRectSize = 18,
-                legendSpacing = 4;
+            var dataset = params.data,
+                element = $("#graph-section"),
+                colors, total,job_detail_chart;
 
-            svg = d3.select(target)
-                .append('svg')
-                .data([dataset])
-                .attr('width', width)
-                .attr('height', height)
-                .append('g')
-                .attr('transform', 'translate(' + (width / 2) +
-                ',' + (height / 2) + ')');
-
-            arc = d3.svg.arc()
-                .innerRadius(outerRadius - innerRadius)
-                .outerRadius(outerRadius);
-
-            pie = d3.layout.pie()
-                .value(function(d) { return d.value; })
-                .sort(function() {return null; });
-
-            tooltip = d3.select(target)
-                .append('div')
-                .attr('class', 'donut-tooltip');
-
-            tooltip.append('div')
-                .attr('class', 'donut-tooltip-inner');
-
-            path = svg.selectAll('path')
-                .data(pie(dataset))
-                .enter()
-                .append('path')
-                .attr('d', arc)
-                .attr('fill', function(d) {
-                  return d.data.color;
-                });
-
-            path.on('mouseenter', function(d) {
-                var total = d3.sum(dataset.map(function(d) {
+            colors = ['#60D66F', '#FF9900','#FF0000','#ff5850'];
+            total = d3.sum(dataset.map(function(d) {
                   return d.value;
-                }));
+            }));
+            job_detail_chart = nv.models.pieChart()
+                .margin({bottom: 15})
+                .x(function(d) {
+                    return d.label +': '+ Math.round((d.value/total)*100) + "%";
+                })
+                .y(function(d) { return d.value; })
+                .showLabels(true)
+                .showLegend(false)
+                .growOnHover(false)
+                .labelThreshold(0.01)
+                .tooltipContent(function(x, y) {
+                    return '<p>'+x+'</p>'+ '<p>' +  Math.floor(y.replace(',','')) + ' HOSTS ' +  '</p>';
+                })
+                .color(colors);
 
-                var label;
-                if (d.data.value === 1) {
-                    label = " host ";
-                } else {
-                    label = " hosts ";
-                }
-                var percent = Math.round(1000 * d.data.value / total) / 10;
-                tooltip.select('.donut-tooltip-inner').html(d.data.value + label + " (" +
-                    percent + "%) " + d.data.label + ".");
-                //.attr('style', 'color:white;font-family:');
-                tooltip.style('display', 'block');
-              });
-
-            path.on('mouseleave', function() {
-                tooltip.style('display', 'none');
-              });
-
-            path.on('mousemove', function() {
-                // d3.mouse() gives the coordinates of hte mouse, then add
-                // some offset to provide breathing room for hte tooltip
-                // based on the dimensions of the donut
-                tooltip.style('top', (d3.mouse(this)[1] + (height/5) + 'px'))
-                .style('left', (d3.mouse(this)[0] + (width/3) + 'px'));
-            });
-
-          legend = svg.selectAll('.legend')
-              .data(pie(dataset))
-              .enter()
-              .append('g')
-              .attr('class', 'legend')
-              .attr('transform', function(d, i) {
-                  var height = legendRectSize + legendSpacing;
-                  var offset =  height * dataset.length / 2;
-                  var horz = -2 * legendRectSize;
-                  var vert = i * height - offset;
-                  return 'translate(' + horz + ',' + vert + ')';
-              });
-
-            legend.append('rect')
-              .attr('width', legendRectSize)
-              .attr('height', legendRectSize)
-              .attr('fill', function(d) {
-                return d.data.color;
-              })
-              .attr('stroke', function(d) {
-                return d.data.color;
-              });
-
-            legend.append('text')
-              .attr('x', legendRectSize + legendSpacing)
-              .attr('y', legendRectSize - legendSpacing)
-              .text(function(d) {
-                  return d.data.label;
-              });
+            d3.select(element.find('svg')[0])
+                .datum(dataset)
+                .transition().duration(350)
+                .call(job_detail_chart)
+                .style({
+                    "font-family": 'Open Sans',
+                    "font-style": "normal",
+                    "font-weight":400,
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                });
+            d3.select(element.find(".nv-label text")[0])
+                .attr("class", "DashboardGraphs-hostStatusLabel--successful")
+                .style({
+                    "font-family": 'Open Sans',
+                    "text-anchor": "start",
+                    "font-size": "16px",
+                    "text-transform" : "uppercase",
+                    "fill" : '#3CB878',
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                });
+            d3.select(element.find(".nv-label text")[1])
+                .attr("class", "DashboardGraphs-hostStatusLabel--failed")
+                .style({
+                    "font-family": 'Open Sans',
+                    "text-anchor" : "end !imporant",
+                    "font-size": "16px",
+                    "text-transform" : "uppercase",
+                    "fill" : "#FF9900",
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                });
+            d3.select(element.find(".nv-label text")[2])
+                .attr("class", "DashboardGraphs-hostStatusLabel--successful")
+                .style({
+                    "font-family": 'Open Sans',
+                    "text-anchor" : "end !imporant",
+                    "font-size": "16px",
+                    "text-transform" : "uppercase",
+                    "fill" : "#FF0000",
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                });
+            d3.select(element.find(".nv-label text")[3])
+                .attr("class", "DashboardGraphs-hostStatusLabel--failed")
+                .style({
+                    "font-family": 'Open Sans',
+                    "text-anchor" : "end !imporant",
+                    "font-size": "16px",
+                    "text-transform" : "uppercase",
+                    "fill" : "#ff5850",
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                });
+                return job_detail_chart;
         };
     }])
 

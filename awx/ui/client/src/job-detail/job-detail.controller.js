@@ -19,7 +19,7 @@ export default
         'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer',
         'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
-        'EditSchedule',
+        'EditSchedule', 'ParseTypeChange',
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
             $log, ClearScope, GetBasePath, Wait, Rest, ProcessErrors,
@@ -28,7 +28,7 @@ export default
             SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob,
             PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
-            fieldLabels, EditSchedule
+            fieldLabels, EditSchedule, ParseTypeChange
         ) {
             ClearScope();
 
@@ -41,7 +41,7 @@ export default
                 job_type_options;
 
             scope.plays = [];
-
+            scope.parseType = 'yaml';
             scope.previousTaskFailed = false;
 
             scope.$watch('job_status', function(job_status) {
@@ -201,6 +201,8 @@ export default
             scope.haltEventQueue = false;
             scope.processing = false;
             scope.lessStatus = false;
+            scope.lessDetail = false;
+            scope.lessEvents = false;
 
             scope.host_summary = {};
             scope.host_summary.ok = 0;
@@ -555,7 +557,7 @@ export default
                                     });
                                 });
                                 if (scope.activeTask && scope.jobData.plays[scope.activePlay] && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
-                                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'List-tableRow--selected';
                                 }
                                 scope.$emit('LoadHosts');
                             })
@@ -675,7 +677,7 @@ export default
                                 scope.host_summary.failed;
                         });
                         if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
-                            scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
+                            scope.jobData.plays[scope.activePlay].playActiveClass = 'List-tableRow--selected';
                         }
                         scope.$emit('LoadTasks', events_url);
                     })
@@ -804,6 +806,7 @@ export default
                                return true;
                            });
                         //scope.setSearchAll('host');
+                        ParseTypeChange({ scope: scope, field_id: 'pre-formatted-variables' });
                         scope.$emit('LoadPlays', data.related.job_events);
                     })
                     .error(function(data, status) {
@@ -839,7 +842,7 @@ export default
                     $('.overlay').hide();
                     $('#summary-button').hide();
                     $('#hide-summary-button').hide();
-                    $('#job-detail-container').css({ "width": "58.33333333%", "padding-right": "7px" });
+                    // $('#job-detail-container').css({ "width": "58.33333333%", "padding-right": "7px" });
                     $('#job-summary-container .job_well').css({
                         'box-shadow': 'none',
                         'height': 'auto'
@@ -859,12 +862,12 @@ export default
                 // Detail table height adjusting. First, put page height back to 'normal'.
                 $('#plays-table-detail').height(80);
                 //$('#plays-table-detail').mCustomScrollbar("update");
-                $('#tasks-table-detail').height(120);
+                // $('#tasks-table-detail').height(120);
                 //$('#tasks-table-detail').mCustomScrollbar("update");
                 $('#hosts-table-detail').height(150);
                 //$('#hosts-table-detail').mCustomScrollbar("update");
                 height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
-                    $('#job-detail-container').outerHeight() - $('#job-detail-footer').outerHeight() - 20;
+                    $('#job-detail-container').outerHeight() - 20;
                 if (height > 15) {
                     // there's a bunch of white space at the bottom, let's use it
                     $('#plays-table-detail').height(80 + (height * 0.10));
@@ -872,10 +875,9 @@ export default
                     $('#hosts-table-detail').height(150 + (height * 0.70));
                 }
                 // Summary table height adjusting.
-                height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() -
-                    $('#hosts-summary-section .table-header').outerHeight() -
-                    $('#summary-search-section').outerHeight() - 20;
-                $('#hosts-summary-table').height(height);
+                height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .JobDetail-searchHeaderRow').outerHeight() -
+                    $('#hosts-summary-section .table-header').outerHeight() - 20;
+                // $('#hosts-summary-table').height(height);
                 //$('#hosts-summary-table').mCustomScrollbar("update");
                 scope.$emit('RefreshCompleted');
             };
@@ -986,6 +988,28 @@ export default
                 else {
                     $('#job-status-form .toggle-show').slideDown(200);
                     scope.lessStatus = false;
+                }
+            };
+
+            scope.toggleLessDetail = function() {
+                if (!scope.lessDetail) {
+                    $('#job-detail-details').slideUp(200);
+                    scope.lessDetail = true;
+                }
+                else {
+                    $('#job-detail-details').slideDown(200);
+                    scope.lessDetail = false;
+                }
+            };
+
+            scope.toggleLessEvents = function() {
+                if (!scope.lessEvents) {
+                    $('#events-summary').slideUp(200);
+                    scope.lessEvents = true;
+                }
+                else {
+                    $('#events-summary').slideDown(200);
+                    scope.lessEvents = false;
                 }
             };
 
