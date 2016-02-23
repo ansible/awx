@@ -32,3 +32,6 @@ if not all([SOCIAL_AUTH_SAML_SP_ENTITY_ID, SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
 
 if not AUTH_BASIC_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [x for x in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] if x != 'rest_framework.authentication.BasicAuthentication']
+
+# Update cache to use celery broker URL defined in configuration files.
+CACHES['default']['LOCATION'] = BROKER_URL

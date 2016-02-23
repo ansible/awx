@@ -4,6 +4,7 @@
 from rest_framework.exceptions import APIException
 
 from awx.main.task_engine import TaskSerializer
+from awx.main.utils import memoize
 
 
 class LicenseForbids(APIException):
@@ -11,6 +12,7 @@ class LicenseForbids(APIException):
     default_detail = 'Your Tower license does not allow that.'
 
 
+@memoize()
 def get_license(show_key=False, bypass_database=False):
     """Return a dictionary representing the license currently in
     place on this Tower instance.

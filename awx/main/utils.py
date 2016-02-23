@@ -16,9 +16,13 @@ import threading
 import contextlib
 import tempfile
 
+# Decorator
+from decorator import decorator
+
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
+from django.utils.text import slugify
 from django.core.urlresolvers import reverse
 from django.apps import apps
 
@@ -27,7 +31,7 @@ from Crypto.Cipher import AES
 
 logger = logging.getLogger('awx.main.utils')
 
-__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
+__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
@@ -93,6 +97,23 @@ class RequireDebugTrueOrTest(logging.Filter):
         return settings.DEBUG or 'test' in sys.argv
 
 
+def memoize(ttl=60):
+    '''
+    Decorator to wrap a function and cache its result.
+    '''
+    from django.core.cache import cache
+
+    def _memoizer(f, *args, **kwargs):
+        key = slugify('%s %r %r' % (f.__name__, args, kwargs))
+        value = cache.get(key)
+        if value is None:
+            value = f(*args, **kwargs)
+            cache.set(key, value, ttl)
+        return value
+    return decorator(_memoizer)
+
+
+@memoize()
 def get_ansible_version():
     '''
     Return Ansible version installed.
@@ -101,11 +122,11 @@ def get_ansible_version():
         proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
         result = proc.communicate()[0]
-        stripped_result = result.split('\n')[0].replace('ansible', '').strip()
-        return stripped_result
+        return result.split('\n')[0].replace('ansible', '').strip()
     except:
         return 'unknown'
 
+@memoize()
 def get_ssh_version():
     '''
     Return SSH version installed.
@@ -444,6 +465,7 @@ def ignore_inventory_group_removal():
     finally:
         _inventory_updates.is_removing = previous_value
 
+@memoize()
 def check_proot_installed():
     '''
     Check that proot is installed.
