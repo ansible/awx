@@ -6,6 +6,8 @@ import logging
 
 # Django
 from django.db import models
+from django.db.models.aggregates import Max
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -13,9 +15,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 # AWX
 from awx.main.models.base import * # noqa
 
-__all__ = ['Role', 'RolePermission', 'Resource']
+__all__ = ['Role', 'RolePermission', 'Resource', 'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR', 'ROLE_SINGLETON_SYSTEM_AUDITOR']
 
 logger = logging.getLogger('awx.main.models.rbac')
+
+ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='System Administrator'
+ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor'
 
 
 class Role(CommonModelNameNotUnique):
@@ -39,6 +44,9 @@ class Role(CommonModelNameNotUnique):
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
         self.rebuild_role_ancestor_list()
+
+    def get_absolute_url(self):
+        return reverse('api:role_detail', args=(self.pk,))
 
     def rebuild_role_ancestor_list(self):
         '''
@@ -91,7 +99,7 @@ class Role(CommonModelNameNotUnique):
         try:
             return Role.objects.get(singleton_name=name)
         except Role.DoesNotExist:
-            ret = Role(singleton_name=name)
+            ret = Role(singleton_name=name, name=name)
             ret.save()
             return ret
 
@@ -112,6 +120,70 @@ class Resource(CommonModelNameNotUnique):
     content_type = models.ForeignKey(ContentType, null=True, default=None)
     object_id = models.PositiveIntegerField(null=True, default=None)
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    def get_permissions(self, user):
+        '''
+        Returns a dict (or None) of the permissions a user has for a given
+        resource.
+
+        Note: Each field in the dict is the `or` of all respective permissions
+        that have been granted to the roles that are applicable for the given
+        user.
+
+        In example, if a user has been granted read access through a permission
+        on one role and write access through a permission on a separate role,
+        the returned dict will denote that the user has both read and write
+        access.
+        '''
+
+        qs = user.__class__.objects.filter(id=user.id, roles__descendents__permissions__resource=self)
+
+        qs = qs.annotate(max_create = Max('roles__descendents__permissions__create'))
+        qs = qs.annotate(max_read = Max('roles__descendents__permissions__read'))
+        qs = qs.annotate(max_write = Max('roles__descendents__permissions__write'))
+        qs = qs.annotate(max_update = Max('roles__descendents__permissions__update'))
+        qs = qs.annotate(max_delete = Max('roles__descendents__permissions__delete'))
+        qs = qs.annotate(max_scm_update = Max('roles__descendents__permissions__scm_update'))
+        qs = qs.annotate(max_execute = Max('roles__descendents__permissions__execute'))
+        qs = qs.annotate(max_use = Max('roles__descendents__permissions__use'))
+
+        qs = qs.values('max_create', 'max_read', 'max_write', 'max_update',
+                       'max_delete', 'max_scm_update', 'max_execute', 'max_use')
+
+        res = qs.all()
+        if len(res):
+            # strip away the 'max_' prefix
+            return {k[4:]:v for k,v in res[0].items()}
+        return None
+
+    def get_role_permissions(self, role):
+        '''
+        Returns a dict (or None) of the permissions a role has for a given
+        resource.
+
+        Note: Each field in the dict is the `or` of all respective permissions
+        that have been granted to either the role or any descendents of that role.
+        '''
+
+        qs = Role.objects.filter(id=role.id, descendents__permissions__resource=self)
+
+        qs = qs.annotate(max_create = Max('descendents__permissions__create'))
+        qs = qs.annotate(max_read = Max('descendents__permissions__read'))
+        qs = qs.annotate(max_write = Max('descendents__permissions__write'))
+        qs = qs.annotate(max_update = Max('descendents__permissions__update'))
+        qs = qs.annotate(max_delete = Max('descendents__permissions__delete'))
+        qs = qs.annotate(max_scm_update = Max('descendents__permissions__scm_update'))
+        qs = qs.annotate(max_execute = Max('descendents__permissions__execute'))
+        qs = qs.annotate(max_use = Max('descendents__permissions__use'))
+
+        qs = qs.values('max_create', 'max_read', 'max_write', 'max_update',
+                       'max_delete', 'max_scm_update', 'max_execute', 'max_use')
+
+        res = qs.all()
+        if len(res):
+            # strip away the 'max_' prefix
+            return {k[4:]:v for k,v in res[0].items()}
+        return None
 
 
 class RolePermission(CreatedModifiedModel):

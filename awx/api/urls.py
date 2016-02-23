@@ -30,7 +30,7 @@ user_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/admin_of_organizations/$',    'user_admin_of_organizations_list'),
     url(r'^(?P<pk>[0-9]+)/projects/$',                  'user_projects_list'),
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'user_credentials_list'),
-    url(r'^(?P<pk>[0-9]+)/permissions/$',               'user_permissions_list'),
+    url(r'^(?P<pk>[0-9]+)/roles/$',                     'user_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'user_activity_stream_list'),
 )
 
@@ -58,7 +58,7 @@ team_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/projects/$',                  'team_projects_list'),
     url(r'^(?P<pk>[0-9]+)/users/$',                     'team_users_list'),
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'team_credentials_list'),
-    url(r'^(?P<pk>[0-9]+)/permissions/$',               'team_permissions_list'),
+    url(r'^(?P<pk>[0-9]+)/roles/$',                     'team_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'team_activity_stream_list'),
 )
 
@@ -141,8 +141,22 @@ credential_urls = patterns('awx.api.views',
     # See also credentials resources on users/teams.
 )
 
-permission_urls = patterns('awx.api.views',
-    url(r'^(?P<pk>[0-9]+)/$',                           'permission_detail'),
+role_urls = patterns('awx.api.views',
+    url(r'^$',                                          'role_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'role_detail'),
+    url(r'^(?P<pk>[0-9]+)/users/$',                     'role_users_list'),
+    url(r'^(?P<pk>[0-9]+)/teams/$',                     'role_teams_list'),
+    url(r'^(?P<pk>[0-9]+)/parents/$',                   'role_parents_list'),
+    url(r'^(?P<pk>[0-9]+)/children/$',                  'role_children_list'),
+)
+
+resource_urls = patterns('awx.api.views',
+    #url(r'^$',                                         'resource_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'resource_detail'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'resource_access_list'),
+    #url(r'^(?P<pk>[0-9]+)/users/$',                     'resource_users_list'),
+    #url(r'^(?P<pk>[0-9]+)/teams/$',                     'resource_teams_list'),
+    #url(r'^(?P<pk>[0-9]+)/roles/$',                     'resource_teams_list'),
 )
 
 job_template_urls = patterns('awx.api.views',
@@ -249,7 +263,8 @@ v1_urls = patterns('awx.api.views',
     url(r'^inventory_updates/',     include(inventory_update_urls)),
     url(r'^inventory_scripts/',     include(inventory_script_urls)),
     url(r'^credentials/',           include(credential_urls)),
-    url(r'^permissions/',           include(permission_urls)),
+    url(r'^roles/',                 include(role_urls)),
+    url(r'^resources/',             include(resource_urls)),
     url(r'^job_templates/',         include(job_template_urls)),
     url(r'^jobs/',                  include(job_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),

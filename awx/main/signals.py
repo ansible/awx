@@ -116,11 +116,35 @@ def store_initial_active_state(sender, **kwargs):
         instance._saved_active_state = True
 
 def rebuild_role_ancestor_list(sender, reverse, model, instance, pk_set, **kwargs):
+    'When a role parent is added or removed, update our role hierarchy list'
     if reverse:
         for id in pk_set:
             model.objects.get(id=id).rebuild_role_ancestor_list()
     else:
         instance.rebuild_role_ancestor_list()
+
+def sync_superuser_status_to_rbac(sender, instance, **kwargs):
+    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
+    if instance.is_superuser:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
+    else:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
+def sync_user_to_team_members_role(sender, reverse, model, instance, pk_set, action, **kwargs):
+    'When a user is added or removed from Team.users, ensure that is reflected in Team.member_role'
+    if action == 'post_add' or action == 'pre_remove':
+        if reverse:
+            for team in Team.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    team.member_role.members.add(instance)
+                if action == 'pre_remove':
+                    team.member_role.members.remove(instance)
+        else:
+            for user in User.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    instance.member_role.members.add(user)
+                if action == 'pre_remove':
+                    instance.member_role.members.remove(user)
 
 
 pre_save.connect(store_initial_active_state, sender=Host)
@@ -142,6 +166,8 @@ post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+post_save.connect(sync_superuser_status_to_rbac, sender=User)
+m2m_changed.connect(sync_user_to_team_members_role, Team.users.through)
 #m2m_changed.connect(rebuild_group_parent_roles, Group.parents.through)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
@@ -312,7 +338,6 @@ model_serializer_mapping = {
     Credential: CredentialSerializer,
     Team: TeamSerializer,
     Project: ProjectSerializer,
-    Permission: PermissionSerializer,
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,

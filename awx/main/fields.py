@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Django
+from django.db import connection
 from django.db.models.signals import post_save
 from django.db.models.signals import m2m_changed
 from django.db import models
@@ -14,6 +15,7 @@ from django.db.models.fields.related import (
 )
 
 from django.core.exceptions import FieldError
+from django.db.transaction import TransactionManagementError
 
 
 # AWX
@@ -63,6 +65,8 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
         resource = super(ResourceFieldDescriptor, self).__get__(instance, instance_type)
         if resource:
             return resource
+        if connection.needs_rollback:
+            raise TransactionManagementError('Current transaction has failed, cannot create implicit resource')
         resource = Resource.objects.create(content_object=instance)
         setattr(instance, self.field.name, resource)
         instance.save(update_fields=[self.field.name,])
@@ -106,6 +110,9 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 
         if not self.role_name:
             raise FieldError('Implicit role missing `role_name`')
+
+        if connection.needs_rollback:
+            raise TransactionManagementError('Current transaction has failed, cannot create implicit role')
 
         role = Role.objects.create(name=self.role_name, content_object=instance)
         if self.parent_role:

@@ -11,7 +11,7 @@ from django.apps import apps
 
 @pytest.mark.django_db
 def test_organization_migration_admin(organization, permissions, user):
-    u = user('admin', True)
+    u = user('admin', False)
     organization.admins.add(u)
 
     assert not organization.accessible_by(u, permissions['admin'])

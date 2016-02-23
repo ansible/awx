@@ -10,6 +10,9 @@ def test_team_migration_user(team, user, permissions):
     team.users.add(u)
     team.save()
 
+    # This gets setup by a signal handler, but we want to test the migration, so remove the user
+    team.member_role.members.remove(u)
+
     assert not team.accessible_by(u, permissions['auditor'])
 
     migrated = rbac.migrate_team(apps, None)

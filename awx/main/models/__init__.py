@@ -18,6 +18,7 @@ from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
 from awx.main.models.configuration import * # noqa
 from awx.main.models.rbac import * # noqa
+from awx.main.models.mixins import * # noqa
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
