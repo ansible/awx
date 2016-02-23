@@ -133,7 +133,10 @@ class InventoryScript(object):
             else:
                 sys.stderr.write('%s\n' % str(e))
             if hasattr(e, 'response'):
-                sys.stderr.write('%s\n' % e.response.content)
+                if hasattr(e.response, 'content'):
+                    sys.stderr.write('%s\n' % e.response.content)
+                else:
+                    sys.stderr.write('%s\n' % e.response)
             sys.exit(1)
 
 def main():
