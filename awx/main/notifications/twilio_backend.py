@@ -5,6 +5,8 @@ import logging
 
 from twilio.rest import TwilioRestClient
 
+from django.utils.encoding import smart_text
+
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.twilio_backend')
@@ -31,7 +33,7 @@ class TwilioBackend(TowerBaseEmailBackend):
         except Exception as e:
             if not self.fail_silently:
                 raise
-            logger.error("Exception connecting to Twilio: {}".format(e))
+            logger.error(smart_text("Exception connecting to Twilio: {}".format(e)))
 
         for m in messages:
             try:
@@ -41,7 +43,7 @@ class TwilioBackend(TowerBaseEmailBackend):
                     body=m.subject)
                 sent_messages += 1
             except Exception as e:
-                logger.error("Exception sending messages: {}".format(e))
+                logger.error(smart_text("Exception sending messages: {}".format(e)))
                 if not self.fail_silently:
                     raise
         return sent_messages

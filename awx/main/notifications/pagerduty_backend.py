@@ -4,6 +4,8 @@
 import logging
 import pygerduty
 
+from django.utils.encoding import smart_text
+
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.pagerduty_backend')
@@ -33,7 +35,7 @@ class PagerDutyBackend(TowerBaseEmailBackend):
         except Exception as e:
             if not self.fail_silently:
                 raise
-            logger.error("Exception connecting to PagerDuty: {}".format(e))
+            logger.error(smart_text("Exception connecting to PagerDuty: {}".format(e)))
         for m in messages:
             try:
                 pager.trigger_incident(m.recipients()[0],
@@ -41,7 +43,7 @@ class PagerDutyBackend(TowerBaseEmailBackend):
                                        details=m.body,
                                        client=m.from_email)
             except Exception as e:
-                logger.error("Exception sending messages: {}".format(e))
+                logger.error(smart_text("Exception sending messages: {}".format(e)))
                 if not self.fail_silently:
                     raise
         return sent_messages

@@ -2,9 +2,11 @@
 # All Rights Reserved.
 
 import logging
-
 import requests
 import json
+
+from django.utils.encoding import smart_text
+
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
@@ -30,8 +32,8 @@ class WebhookBackend(TowerBaseEmailBackend):
                               data=json.dumps(m.body),
                               headers=self.headers)
             if r.status_code >= 400:
-                logger.error("Error sending notification webhook: {}".format(r.text))
+                logger.error(smart_text("Error sending notification webhook: {}".format(r.text)))
                 if not self.fail_silently:
-                    raise Exception("Error sending notification webhook: {}".format(r.text))
+                    raise Exception(smart_text("Error sending notification webhook: {}".format(r.text)))
             sent_messages += 1
         return sent_messages

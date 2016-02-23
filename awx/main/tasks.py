@@ -39,6 +39,7 @@ from celery import Task, task
 from django.conf import settings
 from django.db import transaction, DatabaseError
 from django.utils.timezone import now
+from django.utils.encoding import smart_text
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 
@@ -83,7 +84,7 @@ def send_notifications(notification_list, job_id=None):
         except Exception as e:
             logger.error("Send Notification Failed {}".format(e))
             notification.status = "failed"
-            notification.error = str(e)
+            notification.error = smart_text(e)
         finally:
             notification.save()
         if job_id is not None:

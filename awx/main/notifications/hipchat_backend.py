@@ -5,6 +5,8 @@ import logging
 
 import requests
 
+from django.utils.encoding import smart_text
+
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.hipchat_backend')
@@ -40,8 +42,8 @@ class HipChatBackend(TowerBaseEmailBackend):
                                         "from": m.from_email,
                                         "message_format": "text"})
                 if r.status_code != 204:
-                    logger.error("Error sending messages: {}".format(r.text))
+                    logger.error(smart_text("Error sending messages: {}".format(r.text)))
                     if not self.fail_silently:
-                        raise Exception("Error sending message to hipchat: {}".format(r.text))
+                        raise Exception(smart_text("Error sending message to hipchat: {}".format(r.text)))
                 sent_messages += 1
         return sent_messages
