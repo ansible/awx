@@ -10,7 +10,6 @@ import urlparse
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, smart_text
 from django.core.exceptions import ValidationError

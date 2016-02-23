@@ -104,7 +104,7 @@ class Notifier(CommonModel):
 
     def send(self, subject, body):
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
-                                self.notification_class.init_parameters):
+                            self.notification_class.init_parameters):
             self.notification_configuration[field] = decrypt_field(self,
                                                                    'notification_configuration',
                                                                    subfield=field)

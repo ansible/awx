@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-import logging
+import pprint
 
 from django.utils.encoding import smart_text
 from django.core.mail.backends.smtp import EmailBackend

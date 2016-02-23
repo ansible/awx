@@ -30,7 +30,6 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.models.notifications import Notification
 from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
 from awx.main.redact import UriCleaner
 

@@ -2108,7 +2108,7 @@ class NotifierSerializer(BaseSerializer):
         if incorrect_type_fields:
             for type_field_error in incorrect_type_fields:
                 error_list.append("Configuration field '{}' incorrect type, expected {}".format(type_field_error[0],
-                                                                                              type_field_error[1]))
+                                                                                                type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
         return attrs

@@ -88,7 +88,7 @@ class IrcBackend(TowerBaseEmailBackend):
         self.connection.add_global_handler("join", self.on_join)
         start_time = time.time()
         process_time = time.time()
-        while self.channels_sent < len(self.channels) and (process_time-start_time) < 60:
+        while self.channels_sent < len(self.channels) and (process_time - start_time) < 60:
             self.reactor.process_once(0.1)
             process_time = time.time()
         self.reactor.disconnect_all()
