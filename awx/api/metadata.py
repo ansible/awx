@@ -4,6 +4,7 @@
 # Django
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
+from django.utils.encoding import force_text
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -17,8 +18,28 @@ from awx.main.models import InventorySource
 
 class Metadata(metadata.SimpleMetadata):
 
+    # DRF 3.3 doesn't render choices for read-only fields
+    #
+    # We want to render choices for read-only fields
+    #
+    # Note: This works in conjuction with logic in serializers.py that sets
+    # field property editable=True before calling DRF build_standard_field()
+    # Note: Consider expanding this rendering for more than just choices fields
+    def _render_read_only_choices(self, field, field_info):
+        if field_info.get('read_only') and hasattr(field, 'choices'):
+            field_info['choices'] = [
+                {
+                    'value': choice_value,
+                    'display_name': force_text(choice_name, strings_only=True)
+                }
+                for choice_value, choice_name in field.choices.items()
+            ]
+        return field_info
+
     def get_field_info(self, field):
         field_info = super(Metadata, self).get_field_info(field)
+        if hasattr(field, 'choices') and field.choices:
+            field_info = self._render_read_only_choices(field, field_info)
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
