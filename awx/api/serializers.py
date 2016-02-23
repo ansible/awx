@@ -96,6 +96,46 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 
+def reverseGenericForeignKey(content_object):
+    '''
+    Computes a reverse for a GenericForeignKey field.
+
+    Returns a dictionary of the form
+        { '<type>': reverse(<type detail>) }
+    for example
+        { 'organization': '/api/v1/organizations/1/' }
+    '''
+
+    ret = {}
+    if type(content_object) is Organization:
+        ret['organization'] = reverse('api:organization_detail', args=(content_object.pk,))
+    if type(content_object) is User:
+        ret['user'] = reverse('api:user_detail', args=(content_object.pk,))
+    if type(content_object) is Team:
+        ret['team'] = reverse('api:team_detail', args=(content_object.pk,))
+    if type(content_object) is Project:
+        ret['project'] = reverse('api:project_detail', args=(content_object.pk,))
+    if type(content_object) is Inventory:
+        ret['inventory'] = reverse('api:inventory_detail', args=(content_object.pk,))
+    if type(content_object) is Host:
+        ret['host'] = reverse('api:host_detail', args=(content_object.pk,))
+    if type(content_object) is Group:
+        ret['group'] = reverse('api:group_detail', args=(content_object.pk,))
+    if type(content_object) is InventorySource:
+        ret['inventory_source'] = reverse('api:inventory_source_detail', args=(content_object.pk,))
+    if type(content_object) is Credential:
+        ret['credential'] = reverse('api:credential_detail', args=(content_object.pk,))
+    if type(content_object) is JobTemplate:
+        ret['job_template'] = reverse('api:job_template_detail', args=(content_object.pk,))
+    if type(content_object) is Role:
+        ret['role'] = reverse('api:role_detail', args=(content_object.pk,))
+    if type(content_object) is Job:
+        ret['job'] = reverse('api:job_detail', args=(content_object.pk,))
+    if type(content_object) is JobEvent:
+        ret['job_event'] = reverse('api:job_event_detail', args=(content_object.pk,))
+    return ret
+
+
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
     Custom metaclass to enable attribute inheritance from Meta objects on
@@ -1421,25 +1461,16 @@ class RoleSerializer(BaseSerializer):
 
     def get_related(self, obj):
         ret = super(RoleSerializer, self).get_related(obj)
-        if obj.content_object:
-            if type(obj.content_object) is Organization:
-                ret['organization'] = reverse('api:organization_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Team:
-                ret['team'] = reverse('api:team_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Project:
-                ret['project'] = reverse('api:project_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Inventory:
-                ret['inventory'] = reverse('api:inventory_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Host:
-                ret['host'] = reverse('api:host_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Group:
-                ret['group'] = reverse('api:group_detail', args=(obj.object_id,))
-            if type(obj.content_object) is InventorySource:
-                ret['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.object_id,))
-            if type(obj.content_object) is Credential:
-                ret['credential'] = reverse('api:credential_detail', args=(obj.object_id,))
-            if type(obj.content_object) is JobTemplate:
-                ret['job_template'] = reverse('api:job_template_detail', args=(obj.object_id,))
+        ret['users'] = reverse('api:role_users_list', args=(obj.pk,))
+        ret['teams'] = reverse('api:role_teams_list', args=(obj.pk,))
+        try:
+            if obj.content_object:
+                ret.update(reverseGenericForeignKey(obj.content_object))
+        except AttributeError:
+            # AttributeError's happen if our content_object is pointing at
+            # a model that no longer exists. This is dirty data and ideally
+            # doesn't exist, but in case it does, let's not puke.
+            pass
 
         return ret
 
@@ -1449,6 +1480,21 @@ class ResourceSerializer(BaseSerializer):
     class Meta:
         model = Resource
         fields = ('*',)
+
+    def get_related(self, obj):
+        ret = super(ResourceSerializer, self).get_related(obj)
+        ret['access_list'] = reverse('api:resource_access_list', args=(obj.pk,))
+        try:
+            if obj.content_object:
+                ret.update(reverseGenericForeignKey(obj.content_object))
+        except AttributeError as e:
+            print(e)
+            # AttributeError's happen if our content_object is pointing at
+            # a model that no longer exists. This is dirty data and ideally
+            # doesn't exist, but in case it does, let's not puke.
+            pass
+
+        return ret
 
 
 class ResourceAccessListElementSerializer(UserSerializer):

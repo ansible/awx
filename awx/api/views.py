@@ -135,6 +135,8 @@ class ApiV1RootView(APIView):
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
+        data['roles'] = reverse('api:role_list')
+        data['resources'] = reverse('api:resource_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
@@ -3159,6 +3161,15 @@ class ResourceDetail(RetrieveAPIView):
     # XXX: Permissions - only roles the user has access to see should be listed here
     def get_queryset(self):
         return Resource.objects
+
+class ResourceList(ListAPIView):
+
+    model = Resource
+    serializer_class = ResourceSerializer
+    new_in_300 = True
+
+    def get_queryset(self):
+        return Resource.objects.filter(permissions__role__ancestors__members=self.request.user)
 
 class ResourceAccessList(ListAPIView):
 
