@@ -484,6 +484,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         else:
             return ''
 
+    def get_ui_url(self):
+        real_instance = self.get_real_instance()
+        if real_instance != self:
+            return real_instance.get_ui_url()
+        else:
+            return ''
+
     @classmethod
     def _get_task_class(cls):
         raise NotImplementedError # Implement in subclasses.
@@ -734,7 +741,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def notification_data(self):
         return dict(id=self.id,
                     name=self.name,
-                    url=self.get_absolute_url(), #TODO: Need to replace with UI job view
+                    url=self.get_ui_url(),
                     created_by=str(self.created_by),
                     started=self.started.isoformat(),
                     finished=self.finished.isoformat(),

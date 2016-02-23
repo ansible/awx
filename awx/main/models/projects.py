@@ -24,6 +24,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.notifications import Notifier
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
+from awx.main.conf import tower_settings
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -388,6 +389,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

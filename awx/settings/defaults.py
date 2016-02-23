@@ -685,6 +685,8 @@ ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
 TOWER_ADMIN_ALERTS = True
 
+TOWER_URL_BASE = "https://towerhost"
+
 TOWER_SETTINGS_MANIFEST = {
     "SCHEDULE_MAX_JOBS": {
         "name": "Maximum Scheduled Jobs",
@@ -817,6 +819,13 @@ TOWER_SETTINGS_MANIFEST = {
         "description": "Allow Tower to email Admin users for system events that may require attention",
         "default": TOWER_ADMIN_ALERTS,
         "type": "bool",
+        "category": "system",
+    },
+    "TOWER_URL_BASE": {
+        "name": "Base URL of the Tower host",
+        "description": "This is used by services like Notifications to render a valid url to the Tower host",
+        "default": TOWER_URL_BASE,
+        "type": "string",
         "category": "system",
     },
     "LICENSE": {

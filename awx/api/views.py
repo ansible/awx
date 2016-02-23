@@ -268,6 +268,7 @@ class ApiV1ConfigView(APIView):
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
             tower_settings.LICENSE = data_actual
+            tower_settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
 
             # Spawn a task to ensure that MongoDB is started (or stopped)
             # as appropriate, based on whether the license uses it.
@@ -3053,8 +3054,8 @@ class NotifierTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        notification = obj.generate_notification("Tower Notification Test {}".format(obj.id),
-                                                 {"body": "Ansible Tower Test Notification {}".format(obj.id)})
+        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, tower_settings.TOWER_URL_BASE),
+                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, tower_settings.TOWER_URL_BASE)})
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:

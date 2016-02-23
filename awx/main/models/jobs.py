@@ -6,6 +6,7 @@ import hmac
 import json
 import yaml
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -379,6 +380,9 @@ class Job(UnifiedJob, JobOptions):
 
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
 
     @property
     def task_auth_token(self):
@@ -1095,6 +1099,9 @@ class SystemJob(UnifiedJob, SystemJobOptions):
 
     def get_absolute_url(self):
         return reverse('api:system_job_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         return True
