@@ -38,7 +38,6 @@ git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=d
 git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@5dfa1df79f81765d36c0de31dc1c2f390e42d428#egg=django-rest-framework-mongoengine
 git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=gevent-socketio
 git+https://github.com/chrismeyersfsu/python-ipy.git@fix-127_localhost#egg=IPy
-git+https://github.com/chrismeyersfsu/shade.git@tower_0.5.0#egg=shade
 git+https://github.com/chrismeyersfsu/sitecustomize.git#egg=sitecustomize
 greenlet==0.4.9
 dogpile.cache==0.5.7
