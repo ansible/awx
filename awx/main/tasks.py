@@ -95,7 +95,9 @@ def run_administrative_checks(self):
         return
     reader = TaskSerializer()
     validation_info = reader.from_database()
-    used_percentage = validation_info.get('current_instances',0) / validation_info.get('instance_count', 100)
+    if validation_info.get('instance_count', 0) < 1:
+        return
+    used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
     tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
     if (used_percentage * 100) > 90:
         send_mail("Ansible Tower host usage over 90%",
