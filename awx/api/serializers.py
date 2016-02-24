@@ -1970,7 +1970,7 @@ class JobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     credential_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
-    extra_vars = VerbatimField(required=False)
+    extra_vars = VerbatimField(required=False, write_only=True)
 
     class Meta:
         model = JobTemplate
@@ -1978,18 +1978,11 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential', 'credential_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch',)
-        write_only_fields = ('credential', 'extra_vars',)
-
-    def to_representation(self, obj):
-        res = super(JobLaunchSerializer, self).to_representation(obj)
-        view = self.context.get('view', None)
-        if obj and hasattr(view, '_raw_data_form_marker'):
-            if obj.passwords_needed_to_start:
-                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
-                res.update(password_keys)
-            if self.get_credential_needed_to_start(obj) is True:
-                res.update(dict(credential=''))
-        return res
+        extra_kwargs = {
+            'credential': {
+                'write_only': True,
+            },
+        }
 
     def get_credential_needed_to_start(self, obj):
         return not (obj and obj.credential and obj.credential.active)
