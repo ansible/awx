@@ -249,4 +249,32 @@ class Migration(migrations.Migration):
             name='resource',
             field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
+
+        migrations.CreateModel(
+            name='UserResource',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(default=None, editable=False)),
+                ('modified', models.DateTimeField(default=None, editable=False)),
+                ('description', models.TextField(default=b'', blank=True)),
+                ('active', models.BooleanField(default=True, editable=False)),
+                ('name', models.CharField(max_length=512)),
+                ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True')),
+                ('created_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('resource', awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True')),
+                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+                ('user', awx.main.fields.AutoOneToOneField(related_name='resource', editable=False, to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'db_table': 'main_rbac_user_resource',
+                'verbose_name': 'user_resource',
+                'verbose_name_plural': 'user_resources',
+            },
+        ),
+        migrations.AlterUniqueTogether(
+            name='userresource',
+            unique_together=set([('user', 'admin_role')]),
+        ),
+
     ]
