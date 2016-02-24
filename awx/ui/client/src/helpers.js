@@ -21,7 +21,6 @@ import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
 import License from "./helpers/License";
 import LoadConfig from "./helpers/LoadConfig";
-import StandardOut from "./helpers/StandardOut";
 import Lookup from "./helpers/Lookup";
 import PaginationHelpers from "./helpers/PaginationHelpers";
 import Parse from "./helpers/Parse";
@@ -59,7 +58,6 @@ export
         Jobs,
         License,
         LoadConfig,
-        StandardOut,
         Lookup,
         PaginationHelpers,
         Parse,
