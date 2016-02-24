@@ -10,7 +10,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'inventorySyncStdout',
-    route: '/inventory_sync/:id/stdout',
+    route: '/inventory_sync/:id',
     templateUrl: templateUrl('standard-out/inventory-sync/standard-out-inventory-sync'),
     controller: 'JobStdoutController',
     ncyBreadcrumb: {

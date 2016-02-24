@@ -58,3 +58,18 @@
 .StandardOut-statusText {
     margin-left: 6px;
 }
+
+.StandardOut--capitalize {
+    text-transform: capitalize;
+}
+
+@standardout-breakpoint: 900px;
+
+@media screen and (max-width: @standardout-breakpoint) {
+    .StandardOut {
+        flex-direction: column;
+    }
+    .StandardOut-rightPanel {
+        margin-left: 0px;
+    }
+}

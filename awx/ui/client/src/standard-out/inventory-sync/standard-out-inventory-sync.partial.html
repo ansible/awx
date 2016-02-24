@@ -21,13 +21,13 @@
                         <div class="StandardOut-detailsLabel">STATUS</div>
                         <div class="StandardOut-detailsContent">
                             <i class="fa icon-job-{{ job.status }}"></i>
-                            <span class="StandardOut-statusText">{{ job.status }}</span>
+                            <span class="StandardOut-statusText StandardOut--capitalize">{{ job.status }}</span>
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="{{job.license_error !== null}}">
                         <div class="StandardOut-detailsLabel">LICENSE ERROR</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.license_error }}
                         </div>
                     </div>
@@ -55,7 +55,7 @@
 
                     <div class="StandardOut-detailsRow" ng-show="job.launch_type">
                         <div class="StandardOut-detailsLabel">LAUNCH TYPE</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.launch_type }}
                         </div>
                     </div>
@@ -94,14 +94,14 @@
 
                     <div class="StandardOut-detailsRow" ng-show="{{ job.overwrite !== null }}">
                         <div class="StandardOut-detailsLabel">OVERWRITE</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.overwrite }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="{{ job.overwrite_vars !== null }}">
                         <div class="StandardOut-detailsLabel">OVERWRITE VARS</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.overwrite_vars }}
                         </div>
                     </div>
