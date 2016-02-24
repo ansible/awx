@@ -67,7 +67,7 @@ CENSOR_FIELD_WHITELIST=[
 ]
 
 def censor(obj, no_log=False):
-    if type(obj) is not dict:
+    if not isinstance(obj, dict):
         if no_log:
             return "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         return obj
@@ -84,7 +84,7 @@ def censor(obj, no_log=False):
         new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         obj = new_obj
     if 'results' in obj:
-        if type(obj['results']) is list:
+        if isinstance(obj['results'], list):
             for i in xrange(len(obj['results'])):
                 obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
         elif obj.get('_ansible_no_log', False):
