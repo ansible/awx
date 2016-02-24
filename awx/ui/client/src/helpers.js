@@ -19,7 +19,6 @@ import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
 import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
-import License from "./helpers/License";
 import LoadConfig from "./helpers/LoadConfig";
 import LogViewer from "./helpers/LogViewer";
 import Lookup from "./helpers/Lookup";
@@ -57,7 +56,6 @@ export
         JobSubmission,
         JobTemplates,
         Jobs,
-        License,
         LoadConfig,
         LogViewer,
         Lookup,
