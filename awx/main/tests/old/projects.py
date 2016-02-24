@@ -758,6 +758,7 @@ class ProjectsTest(BaseTransactionTest):
         team_permission['name'] += '2'
         team_permission['user'] = user.pk
         self.post(url, team_permission, expect=400, auth=self.get_super_credentials())
+        del team_permission['user']
 
         # can list permissions on a user
         url = reverse('api:user_permissions_list', args=(user.pk,))

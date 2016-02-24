@@ -38,6 +38,7 @@ import os
 import pwd
 import urlparse
 import re
+from copy import deepcopy
 
 # Requests
 import requests
@@ -72,6 +73,40 @@ else:
             pass
     statsd = NoStatsClient()
 
+CENSOR_FIELD_WHITELIST=[
+    'msg',
+    'failed',
+    'changed',
+    'results',
+    'start',
+    'end',
+    'delta',
+    'cmd',
+    '_ansible_no_log',
+    'cmd',
+    'rc',
+    'failed_when_result',
+    'skipped',
+    'skip_reason',
+]
+
+def censor(obj):
+    if obj.get('_ansible_no_log', False):
+        new_obj = {}
+        for k in CENSOR_FIELD_WHITELIST:
+            if k in obj:
+                new_obj[k] = obj[k]
+            if k == 'cmd' and k in obj:
+                if re.search(r'\s', obj['cmd']):
+                    new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
+                                            r'\1 <censored>',
+                                            obj['cmd'])
+        new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        obj = new_obj
+    if 'results' in obj:
+        for i in xrange(len(obj['results'])):
+            obj['results'][i] = censor(obj['results'][i])
+    return obj
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -211,6 +246,9 @@ class BaseCallbackModule(object):
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
+        if 'res' in event_data:
+            event_data['res'] = censor(deepcopy(event_data['res']))
+
         if self.callback_consumer_port:
             with statsd.timer('zmq_post_event_msg.{0}'.format(event)):
                 self._post_job_event_queue_msg(event, event_data)
