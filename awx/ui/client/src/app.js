@@ -234,7 +234,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('dashboardGroups', {
-                url: '/home/groups',
+                url: '/home/groups?id&name&has_active_failures&status&source&has_external_source&inventory_source__id',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeGroups,
                 ncyBreadcrumb: {
@@ -249,7 +249,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('dashboardHosts', {
-                url: '/home/hosts?has_active_failures',
+                url: '/home/hosts?has_active_failures&name&id',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeHosts,
                 data: {
