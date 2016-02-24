@@ -478,6 +478,10 @@ class BaseSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class EmptySerializer(serializers.Serializer):
+    pass
+
+
 class BaseFactSerializer(DocumentSerializer):
 
     __metaclass__ = BaseSerializerMetaclass

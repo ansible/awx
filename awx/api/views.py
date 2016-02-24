@@ -1940,7 +1940,7 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
     parent_model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2019,8 +2019,8 @@ class JobTemplateActivityStreamList(SubListAPIView):
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
     permission_classes = (JobTemplateCallbackPermission,)
+    serializer_class = EmptySerializer
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -2202,7 +2202,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -2273,7 +2273,7 @@ class JobActivityStreamList(SubListAPIView):
 class JobStart(GenericAPIView):
 
     model = Job
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
     is_job_start = True
 
     def get(self, request, *args, **kwargs):
