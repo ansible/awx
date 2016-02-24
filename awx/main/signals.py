@@ -146,6 +146,49 @@ def sync_user_to_team_members_role(sender, reverse, model, instance, pk_set, act
                 if action == 'pre_remove':
                     instance.member_role.members.remove(user)
 
+def sync_admin_to_org_admin_role(sender, reverse, model, instance, pk_set, action, **kwargs):
+    'When a user is added or removed from Organization.admins, ensure that is reflected in Organization.admin_role'
+    if action == 'post_add' or action == 'pre_remove':
+        if reverse:
+            for org in Organization.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    org.admin_role.members.add(instance)
+                if action == 'pre_remove':
+                    org.admin_role.members.remove(instance)
+        else:
+            for user in User.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    instance.admin_role.members.add(user)
+                if action == 'pre_remove':
+                    instance.admin_role.members.remove(user)
+
+def sync_user_to_org_members_role(sender, reverse, model, instance, pk_set, action, **kwargs):
+    'When a user is added or removed from Organization.users, ensure that is reflected in Organization.member_role'
+    if action == 'post_add' or action == 'pre_remove':
+        if reverse:
+            for org in Organization.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    org.member_role.members.add(instance)
+                    org.admin_role.children.add(instance.resource.admin_role)
+                if action == 'pre_remove':
+                    org.member_role.members.remove(instance)
+                    org.admin_role.children.remove(instance.resource.admin_role)
+        else:
+            for user in User.objects.filter(id__in=pk_set).all():
+                if action == 'post_add':
+                    instance.member_role.members.add(user)
+                    instance.admin_role.children.add(user.resource.admin_role)
+                if action == 'pre_remove':
+                    instance.member_role.members.remove(user)
+                    instance.admin_role.children.remove(user.resource.admin_role)
+
+def create_user_resource(sender, **kwargs):
+        instance = kwargs['instance']
+        try:
+            UserResource.objects.get(user=instance)
+        except UserResource.DoesNotExist:
+            ur = UserResource.objects.create(user=instance)
+            ur.admin_role.members.add(instance)
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -168,7 +211,9 @@ post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 m2m_changed.connect(sync_user_to_team_members_role, Team.users.through)
-#m2m_changed.connect(rebuild_group_parent_roles, Group.parents.through)
+post_save.connect(create_user_resource, sender=User)
+m2m_changed.connect(sync_user_to_org_members_role, Organization.users.through)
+m2m_changed.connect(sync_admin_to_org_admin_role, Organization.admins.through)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.

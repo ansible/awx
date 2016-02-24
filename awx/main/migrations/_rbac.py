@@ -5,7 +5,12 @@ def migrate_users(apps, schema_editor):
     migrations = list()
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
+    UserResource = apps.get_model('main', "UserResource")
+
     for user in User.objects.all():
+        ur = UserResource.objects.create(user=user)
+        ur.admin_role.members.add(user)
+
         if user.is_superuser:
             Role.singleton('System Administrator').members.add(user)
             migrations.append(user)
