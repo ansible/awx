@@ -123,8 +123,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertFalse(ad_hoc_command.passwords_needed_to_start)
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        self.check_job_result(ad_hoc_command, 'failed')
-        self.check_ad_hoc_command_events(ad_hoc_command, 'unreachable')
+        self.check_job_result(ad_hoc_command, 'successful')
+        self.check_ad_hoc_command_events(ad_hoc_command, 'skipped')
 
     @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('canceled', 0))
     def test_cancel_ad_hoc_command(self, ignore):
@@ -568,7 +568,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command(become_enabled=True)
             self.assertEqual(response['become_enabled'], True)
-        
+
         # Try to run with expired license.
         self.create_expired_license_file()
         with self.current_user('admin'):
@@ -1199,7 +1199,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.run_test_ad_hoc_command()
 
-        # Test the ad hoc command events list for a host.  Should return the 
+        # Test the ad hoc command events list for a host.  Should return the
         # events only for that particular host.
         url = reverse('api:host_ad_hoc_command_events_list', args=(self.host.pk,))
         with self.current_user('admin'):

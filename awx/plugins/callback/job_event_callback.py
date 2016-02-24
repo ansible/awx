@@ -487,6 +487,7 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     def __init__(self):
         self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
         self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id
+        self.skipped_hosts = set()
         super(AdHocCommandCallbackModule, self).__init__()
 
     def _log_event(self, event, **event_data):
@@ -496,6 +497,19 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
 
     def runner_on_file_diff(self, host, diff):
         pass # Ignore file diff for ad hoc commands.
+
+    def runner_on_ok(self, host, res):
+        # When running in check mode using a module that does not support check
+        # mode, Ansible v1.9 will call runner_on_skipped followed by
+        # runner_on_ok for the same host; only capture the skipped event and
+        # ignore the ok event.
+        if host not in self.skipped_hosts:
+            super(AdHocCommandCallbackModule, self).runner_on_ok(host, res)
+
+    def runner_on_skipped(self, host, item=None):
+        super(AdHocCommandCallbackModule, self).runner_on_skipped(host, item)
+        self.skipped_hosts.add(host)
+
 
 
 if os.getenv('JOB_ID', ''):
