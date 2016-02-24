@@ -10,7 +10,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'scmUpdateStdout',
-    route: '/scm_update/:id/stdout',
+    route: '/scm_update/:id',
     templateUrl: templateUrl('standard-out/scm-update/standard-out-scm-update'),
     controller: 'JobStdoutController',
     ncyBreadcrumb: {

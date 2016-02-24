@@ -8,7 +8,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'managementJobStdout',
-    route: '/management_jobs/:id/stdout',
+    route: '/management_jobs/:id',
     templateUrl: templateUrl('standard-out/management-jobs/standard-out-management-jobs'),
     controller: 'JobStdoutController',
     ncyBreadcrumb: {
