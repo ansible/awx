@@ -6,7 +6,7 @@ import sys
 import warnings
 import site
 
-__version__ = '2.4.4'
+__version__ = '2.4.5'
 
 __all__ = ['__version__']
 
