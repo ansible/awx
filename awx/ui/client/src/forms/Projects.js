@@ -19,6 +19,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         name: 'project',
         forceListeners: true,
         tabs: true,
+        subFormTitles: {
+            sourceSubForm: 'Source Details',
+        },
+
 
         fields: {
             name: {
@@ -62,7 +66,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngOptions: 'type.label for type in scm_type_options track by type.value',
                 ngChange: 'scmChange()',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                hasSubForm: true
             },
             missing_path_alert: {
                 type: 'alertblock',
@@ -112,6 +117,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     variable: "scmRequired",
                     init: false
                 },
+                subForm: 'sourceSubForm',
                 helpCollapse: [{
                     hdr: 'GIT URLs',
                     content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
@@ -135,14 +141,15 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.',
                     show: "scm_type.value == 'hg'"
-                }]
+                }],
             },
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                subForm: 'sourceSubForm'
             },
             credential: {
                 label: 'SCM Credential',
@@ -152,12 +159,14 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                subForm: 'sourceSubForm'
             },
             checkbox_group: {
                 label: 'SCM Update Options',
                 type: 'checkbox_group',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
+                subForm: 'sourceSubForm',
                 fields: [{
                     name: 'scm_clean',
                     label: 'Clean',

@@ -1476,6 +1476,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     html += "</div>\n";
                 } else {
+                    var inSubForm = false;
+                    var currentSubForm = undefined;
+                    var hasSubFormField;
                     // original, single-column form
                     section = '';
                     group = '';
@@ -1502,8 +1505,32 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 html += "<div" + sectionShow + ">\n";
                                 section = field.section;
                             }
+
+                            // To hide/show the subform when the value changes on parent
+                            if (field.hasSubForm === true) {
+                              hasSubFormField = fld;
+                            }
+
+                            // Add a subform container
+                            if(field.subForm && currentSubForm === undefined) {
+                                currentSubForm = field.subForm;
+                                var subFormTitle = this.form.subFormTitles[field.subForm];
+
+                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined"> ';
+                                html += '<span class="Form-subForm--title">'+ subFormTitle +'</span>';
+                            }
+                            else if (!field.subForm && currentSubForm !== undefined) {
+                               currentSubForm = undefined;
+                               html += '</div></div> ';
+                            }
+
                             html += this.buildField(fld, field, options, this.form);
+
                         }
+                    }
+                    if (currentSubForm) {
+                      currentSubForm = undefined;
+                      html += '</div>';
                     }
                     if (section !== '') {
                         html += "</div>\n</div>\n";
