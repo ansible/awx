@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('key', models.CharField(unique=True, max_length=255)),
                 ('description', models.TextField()),
                 ('category', models.CharField(max_length=128)),
-                ('value', models.TextField()),
+                ('value', models.TextField(blank=True)),
                 ('value_type', models.CharField(max_length=12, choices=[(b'string', 'String'), (b'int', 'Integer'), (b'float', 'Decimal'), (b'json', 'JSON'), (b'bool', 'Boolean'), (b'password', 'Password'), (b'list', 'List')])),
                 ('user', models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
             ],

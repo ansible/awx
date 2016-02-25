@@ -55,6 +55,7 @@ describe("adhoc.controller", function() {
         $provide.value('Wait', waitCallback);
         $provide.value('$stateExtender', stateExtenderCallback);
         $provide.value('$stateParams', angular.noop);
+        $provide.value('$state', angular.noop);
     }]));
 
     beforeEach("put $q in scope", window.inject(['$q', function($q) {

@@ -158,8 +158,6 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         }
     };
 
-    $(".StandardOut").height($("body").height() - 60);
-
     Rest.setUrl(GetBasePath('base') + jobType + '/' + job_id + '/');
     Rest.get()
         .success(function(data) {

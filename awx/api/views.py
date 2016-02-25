@@ -228,7 +228,7 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        if not type(request.data) == dict:
+        if not isinstance(request.data, dict):
             return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.data:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
@@ -570,8 +570,21 @@ class AuthTokenView(APIView):
     serializer_class = AuthTokenSerializer
     model = AuthToken
 
+    def get_serializer(self, *args, **kwargs):
+        serializer = self.serializer_class(*args, **kwargs)
+        # Override when called from browsable API to generate raw data form;
+        # update serializer "validated" data to be displayed by the raw data
+        # form.
+        if hasattr(self, '_raw_data_form_marker'):
+            # Always remove read only fields from serializer.
+            for name, field in serializer.fields.items():
+                if getattr(field, 'read_only', None):
+                    del serializer.fields[name]
+            serializer._data = self.update_raw_data(serializer.data)
+        return serializer
+
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             request_hash = AuthToken.get_request_hash(self.request)
             try:
@@ -1212,6 +1225,19 @@ class HostGroupsList(SubListCreateAttachDetachAPIView):
     parent_model = Host
     relationship = 'groups'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(HostGroupsList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent host inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(HostGroupsList, self).create(request, *args, **kwargs)
+
 class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
 
@@ -1368,6 +1394,19 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'children'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupChildrenList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent group inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(GroupChildrenList, self).create(request, *args, **kwargs)
+
     def unattach(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if sub_id is not None:
@@ -1428,8 +1467,14 @@ class GroupHostsList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'hosts'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupHostsList, self).update_raw_data(data)
+
     def create(self, request, *args, **kwargs):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
+        # Inject parent group inventory ID into new host data.
+        request.data['inventory'] = parent_group.inventory_id
         existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data['name'])
         if existing_hosts.count() > 0 and ('variables' not in request.data or
                                            request.data['variables'] == '' or
@@ -1851,6 +1896,21 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
     is_job_start = True
     always_allow_superuser = False
 
+    def update_raw_data(self, data):
+        obj = self.get_object()
+        extra_vars = data.get('extra_vars') or {}
+        if obj:
+            for p in obj.passwords_needed_to_start:
+                data[p] = u''
+            if obj.credential and obj.credential.active:
+                data.pop('credential', None)
+            else:
+                data['credential'] = None
+            for v in obj.variables_needed_to_start:
+                extra_vars.setdefault(v, u'')
+        data['extra_vars'] = extra_vars
+        return data
+
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
@@ -1900,7 +1960,7 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
     parent_model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1930,13 +1990,13 @@ class JobTemplateSurveySpec(GenericAPIView):
             return Response(dict(error="'description' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
         if "spec" not in obj.survey_spec:
             return Response(dict(error="'spec' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
-        if type(obj.survey_spec["spec"]) != list:
+        if not isinstance(obj.survey_spec["spec"], list):
             return Response(dict(error="'spec' must be a list of items"), status=status.HTTP_400_BAD_REQUEST)
         if len(obj.survey_spec["spec"]) < 1:
             return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
         for survey_item in obj.survey_spec["spec"]:
-            if type(survey_item) != dict:
+            if not isinstance(survey_item, dict):
                 return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
                 return Response(dict(error="'type' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
@@ -1979,8 +2039,8 @@ class JobTemplateActivityStreamList(SubListAPIView):
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
     permission_classes = (JobTemplateCallbackPermission,)
+    serializer_class = EmptySerializer
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -2162,7 +2222,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -2233,7 +2293,7 @@ class JobActivityStreamList(SubListAPIView):
 class JobStart(GenericAPIView):
 
     model = Job
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
     is_job_start = True
 
     def get(self, request, *args, **kwargs):
@@ -2616,6 +2676,15 @@ class AdHocCommandList(ListCreateAPIView):
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandList, self).dispatch(*args, **kwargs)
+
+    def update_raw_data(self, data):
+        # Hide inventory and limit fields from raw data, since they will be set
+        # automatically by sub list create view.
+        parent_model = getattr(self, 'parent_model', None)
+        if parent_model in (Host, Group):
+            data.pop('inventory', None)
+            data.pop('limit', None)
+        return super(AdHocCommandList, self).update_raw_data(data)
 
     def create(self, request, *args, **kwargs):
         # Inject inventory ID and limit if parent objects is a host/group.

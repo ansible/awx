@@ -51,7 +51,8 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
     EditSchedule({
         scope: $scope,
         id: parseInt($stateParams.schedule_id),
-        callback: 'SchedulesRefresh'
+        callback: 'SchedulesRefresh',
+        base: $scope.base ? $scope.base: null
     });
 
     var callSelect2 = function() {

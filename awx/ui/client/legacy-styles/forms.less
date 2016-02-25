@@ -141,6 +141,28 @@
     padding-right: 50px;
 }
 
+.Form-subForm {
+    width: 100%;
+    border-left: 5px solid @default-border;
+    margin-left: -20px;
+    padding-left: 15px;
+    margin-bottom: 15px;
+
+    .Form-formGroup {
+        float: left;
+    }
+}
+
+.Form-subForm--title {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: @default-interface-txt;
+  font-size: small;
+  width: 100%;
+  float: left;
+  margin-bottom: 10px;
+}
+
 .Form-textAreaLabel{
     width:100%;
 }
@@ -362,6 +384,16 @@ input[type='radio']:checked:before {
     height: 30px;
     display: flex;
     justify-content: flex-end;
+}
+
+.Form-button{
+    margin-left: 4px;
+}
+
+.Form-buttonDefault {
+    background-color: @default-bg;
+    color: @default-interface-txt;
+    border-color: @default-border;
 }
 
 .Form-saveButton{

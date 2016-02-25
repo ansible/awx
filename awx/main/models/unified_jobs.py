@@ -321,7 +321,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                     value = value.id
                 create_kwargs[id_field_name] = value
             elif field_name in kwargs:
-                if field_name == 'extra_vars' and type(kwargs[field_name]) == dict:
+                if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
                     create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
                 else:
                     create_kwargs[field_name] = kwargs[field_name]

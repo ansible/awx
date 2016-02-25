@@ -216,7 +216,7 @@ REST_FRAMEWORK = {
         'awx.api.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
+        'awx.api.parsers.JSONParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -662,10 +662,7 @@ ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
 # Internal API URL for use by inventory scripts and callback plugin.
-if 'devserver' in INSTALLED_APPS:
-    INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
-else:
-    INTERNAL_API_URL = 'http://127.0.0.1:8000'
+INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
 # ZeroMQ callback settings.
 CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"

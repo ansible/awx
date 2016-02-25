@@ -18,6 +18,9 @@ export default
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'credential',
             forceListeners: true,
+            subFormTitles: {
+                credentialSubForm: 'Type Details',
+            },
 
             actions: {
 
@@ -103,7 +106,8 @@ export default
                             '</dl>\n',
                     dataTitle: 'Type',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    hasSubForm: true,
                     // helpCollapse: [{
                     //     hdr: 'Select a Credential Type',
                     //     content: '<dl>\n' +
@@ -131,7 +135,8 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    apiField: 'username'
+                    apiField: 'username',
+                    subForm: 'credentialSubForm',
                 },
                 secret_key: {
                     label: 'Secret Key',
@@ -145,7 +150,8 @@ export default
                     ask: false,
                     clear: false,
                     hasShowInputButton: true,
-                    apiField: 'passwowrd'
+                    apiField: 'passwowrd',
+                    subForm: 'credentialSubForm'
                 },
                 security_token: {
                     label: 'STS Token',
@@ -157,7 +163,8 @@ export default
                     hasShowInputButton: true,
                     dataTitle: 'STS Token',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "host": {
                     labelBind: 'hostLabel',
@@ -172,7 +179,8 @@ export default
                     awRequiredWhen: {
                         variable: 'host_required',
                         init: false
-                    }
+                    },
+                    subForm: 'credentialSubForm'
                 },
                 "username": {
                     labelBind: 'usernameLabel',
@@ -183,7 +191,8 @@ export default
                         variable: 'username_required',
                         init: false
                     },
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: "credentialSubForm"
                 },
                 "email_address": {
                     labelBind: 'usernameLabel',
@@ -197,7 +206,8 @@ export default
                     awPopOver: '<p>The email address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
                     dataTitle: 'Email',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "subscription_id": {
                     labelBind: "usernameLabel",
@@ -213,8 +223,8 @@ export default
                     awPopOver: '<p>Subscription ID is an Azure construct, which is mapped to a username.</p>',
                     dataTitle: 'Subscription ID',
                     dataPlacement: 'right',
-                    dataContainer: "body"
-
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "api_key": {
                     label: 'API Key',
@@ -228,6 +238,7 @@ export default
                     ask: false,
                     hasShowInputButton: true,
                     clear: false,
+                    subForm: 'credentialSubForm'
                 },
                 "password": {
                     labelBind: 'passwordLabel',
@@ -242,7 +253,8 @@ export default
                     awRequiredWhen: {
                         variable: "password_required",
                         init: false
-                    }
+                    },
+                    subForm: "credentialSubForm"
                 },
                 "ssh_password": {
                     label: 'Password', // formally 'SSH Password'
@@ -252,7 +264,8 @@ export default
                     editRequired: false,
                     ask: true,
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 },
                 "ssh_key_data": {
                     labelBind: 'sshKeyDataLabel',
@@ -273,7 +286,8 @@ export default
                     awPopOverWatch:   "key_description",
                     dataTitle: 'Help',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: "credentialSubForm"
                 },
                 "ssh_key_unlock": {
                     label: 'Private Key Passphrase',
@@ -285,6 +299,7 @@ export default
                     ask: true,
                     hasShowInputButton: true,
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
+                    subForm: 'credentialSubForm'
                 },
                 "become_method": {
                     label: "Privilege Escalation",
@@ -297,7 +312,8 @@ export default
                     "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
                     "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "become_username": {
                     label: 'Privilege Escalation Username',
@@ -305,7 +321,8 @@ export default
                     ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
                     addRequired: false,
                     editRequired: false,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 },
                 "become_password": {
                     label: 'Privilege Escalation Password',
@@ -315,7 +332,8 @@ export default
                     editRequired: false,
                     ask: true,
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 },
                 "project": {
                     labelBind: 'projectLabel',
@@ -331,7 +349,8 @@ export default
                     awRequiredWhen: {
                         variable: 'project_required',
                         init: false
-                    }
+                    },
+                    subForm: 'credentialSubForm'
                 },
                 "vault_password": {
                     label: "Vault Password",
@@ -341,7 +360,8 @@ export default
                     editRequired: false,
                     ask: true,
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 }
             },
 

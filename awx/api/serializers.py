@@ -8,7 +8,6 @@ import re
 import logging
 from collections import OrderedDict
 from dateutil import rrule
-from ast import literal_eval
 
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
@@ -399,7 +398,22 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.active
 
     def build_standard_field(self, field_name, model_field):
+
+        # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
+        # when a Model's editable field is set to False. The short circuit skips choice rendering.
+        #
+        # This logic is to force rendering choice's on an uneditable field.
+        # Note: Consider expanding this rendering for more than just choices fields
+        # Note: This logic works in conjuction with
+        if hasattr(model_field, 'choices') and model_field.choices:
+            was_editable = model_field.editable
+            model_field.editable = True
+
         field_class, field_kwargs = super(BaseSerializer, self).build_standard_field(field_name, model_field)
+        if hasattr(model_field, 'choices') and model_field.choices:
+            model_field.editable = was_editable
+            if was_editable is False:
+                field_kwargs['read_only'] = True
 
         # Update help text for common fields.
         opts = self.Meta.model._meta.concrete_model._meta
@@ -532,24 +546,14 @@ class BaseSerializer(serializers.ModelSerializer):
         return attrs
 
     def to_representation(self, obj):
-        # FIXME: Doesn't get called anymore for an new raw data form!
-        # When rendering the raw data form, create an instance of the model so
-        # that the model defaults will be filled in.
-        view = self.context.get('view', None)
-        parent_key = getattr(view, 'parent_key', None)
-        if not obj and hasattr(view, '_raw_data_form_marker'):
-            obj = self.Meta.model()
-            # FIXME: Would be nice to include any posted data for the raw data
-            # form, so that a submission with errors can be modified in place
-            # and resubmitted.
         ret = super(BaseSerializer, self).to_representation(obj)
-        # Remove parent key from raw form data, since it will be automatically
-        # set by the sub list create view.
-        if parent_key and hasattr(view, '_raw_data_form_marker'):
-            ret.pop(parent_key, None)
         if 'resource_id' in ret and ret['resource_id'] is None:
             ret.pop('resource_id')
         return ret
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
 
 
 class BaseFactSerializer(DocumentSerializer):
@@ -680,6 +684,12 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     class Meta:
         fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-result_stdout')
+
+    def get_field_names(self, declared_fields, info):
+        field_names = super(UnifiedJobListSerializer, self).get_field_names(declared_fields, info)
+        # Meta multiple inheritance and -field_name options don't seem to be
+        # taking effect above, so remove the undesired fields here.
+        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'result_stdout'))
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
@@ -1066,6 +1076,14 @@ class HostSerializer(BaseSerializerWithVariables):
                   'last_job_host_summary')
         read_only_fields = ('last_job', 'last_job_host_summary')
 
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(HostSerializer, self).build_relational_field(field_name, relation_info)
+        # Inventory is read-only unless creating a new host.
+        if self.instance and field_name == 'inventory':
+            field_kwargs['read_only'] = True
+            field_kwargs.pop('queryset', None)
+        return field_class, field_kwargs
+
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
@@ -1124,15 +1142,12 @@ class HostSerializer(BaseSerializerWithVariables):
         return value
 
     def validate(self, attrs):
-        name = force_text(attrs.get('name', ''))
+        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
         host, port = self._get_host_port_from_name(name)
 
         if port:
             attrs['name'] = host
-            if self.instance:
-                variables = force_text(attrs.get('variables', self.instance.variables) or '')
-            else:
-                variables = force_text(attrs.get('variables', ''))
+            variables = force_text(attrs.get('variables', self.instance and self.instance.variables or ''))
             try:
                 vars_dict = json.loads(variables.strip() or '{}')
                 vars_dict['ansible_ssh_port'] = port
@@ -1169,6 +1184,14 @@ class GroupSerializer(BaseSerializerWithVariables):
         fields = ('*', 'inventory', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
                   'groups_with_active_failures', 'has_inventory_sources')
+
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(GroupSerializer, self).build_relational_field(field_name, relation_info)
+        # Inventory is read-only unless creating a new group.
+        if self.instance and field_name == 'inventory':
+            field_kwargs['read_only'] = True
+            field_kwargs.pop('queryset', None)
+        return field_class, field_kwargs
 
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
@@ -1318,8 +1341,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         # TODO: Validate source, validate source_regions
         errors = {}
 
-        source_script = attrs.get('source_script', None)
-        if 'source' in attrs and attrs.get('source', '') == 'custom':
+        source = attrs.get('source', self.instance and self.instance.source or '')
+        source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
+        if source == 'custom':
             if source_script is None or source_script == '':
                 errors['source_script'] = 'source_script must be provided'
             else:
@@ -1472,7 +1496,6 @@ class RoleSerializer(BaseSerializer):
             # a model that no longer exists. This is dirty data and ideally
             # doesn't exist, but in case it does, let's not puke.
             pass
-
         return ret
 
 
@@ -1613,9 +1636,10 @@ class JobOptionsSerializer(BaseSerializer):
 
     def validate(self, attrs):
         if 'project' in self.fields and 'playbook' in self.fields:
-            project = attrs.get('project', None)
-            playbook = attrs.get('playbook', '')
-            if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
+            project = attrs.get('project', self.instance and self.instance.project or None)
+            playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
+            job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
+            if not project and job_type != PERM_INVENTORY_SCAN:
                 raise serializers.ValidationError({'project': 'This field is required.'})
             if project and playbook and force_text(playbook) not in project.playbooks:
                 raise serializers.ValidationError({'playbook': 'Playbook not found for project'})
@@ -1669,8 +1693,8 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         return d
 
     def validate(self, attrs):
-        survey_enabled = attrs.get('survey_enabled', False)
-        job_type = attrs.get('job_type', None)
+        survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
+        job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
             raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs'})
 
@@ -1828,8 +1852,8 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
     def get_field_names(self, declared_fields, info):
         field_names = super(AdHocCommandSerializer, self).get_field_names(declared_fields, info)
-        # Meta inheritance and -field_name options don't seem to be taking
-        # effect above, so remove the undesired fields here.
+        # Meta multiple inheritance and -field_name options don't seem to be
+        # taking effect above, so remove the undesired fields here.
         return tuple(x for x in field_names if x not in ('unified_job_template', 'description'))
 
     def build_standard_field(self, field_name, model_field):
@@ -1861,19 +1885,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         return res
 
     def to_representation(self, obj):
-        # In raw data form, populate limit field from host/group name.
-        view = self.context.get('view', None)
-        parent_model = getattr(view, 'parent_model', None)
-        if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
-            if not obj:
-                obj = self.Meta.model()
         ret = super(AdHocCommandSerializer, self).to_representation(obj)
-        # Hide inventory and limit fields from raw data, since they will be set
-        # automatically by sub list create view.
-        if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
-            if parent_model in (Host, Group):
-                ret.pop('inventory', None)
-                ret.pop('limit', None)
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         if 'credential' in ret and (not obj.credential or not obj.credential.active):
@@ -2051,6 +2063,7 @@ class JobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     credential_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
+    extra_vars = VerbatimField(required=False, write_only=True)
 
     class Meta:
         model = JobTemplate
@@ -2058,18 +2071,11 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential', 'credential_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch',)
-        write_only_fields = ('credential', 'extra_vars',)
-
-    def to_representation(self, obj):
-        res = super(JobLaunchSerializer, self).to_representation(obj)
-        view = self.context.get('view', None)
-        if obj and hasattr(view, '_raw_data_form_marker'):
-            if obj.passwords_needed_to_start:
-                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
-                res.update(password_keys)
-            if self.get_credential_needed_to_start(obj) is True:
-                res.update(dict(credential=''))
-        return res
+        extra_kwargs = {
+            'credential': {
+                'write_only': True,
+            },
+        }
 
     def get_credential_needed_to_start(self, obj):
         return not (obj and obj.credential and obj.credential.active)
@@ -2084,7 +2090,7 @@ class JobLaunchSerializer(BaseSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
-        credential = attrs.get('credential', None) or (obj and obj.credential)
+        credential = attrs.get('credential', obj and obj.credential or None)
         if not credential or not credential.active:
             errors['credential'] = 'Credential not provided'
 
@@ -2097,20 +2103,16 @@ class JobLaunchSerializer(BaseSerializer):
             except KeyError:
                 errors['passwords_needed_to_start'] = credential.passwords_needed
 
-        extra_vars = force_text(attrs.get('extra_vars', {}))
-        try:
-            extra_vars = literal_eval(extra_vars)
-            extra_vars = json.dumps(extra_vars)
-        except Exception:
-            pass
+        extra_vars = attrs.get('extra_vars', {})
 
-        try:
-            extra_vars = json.loads(extra_vars)
-        except (ValueError, TypeError):
+        if isinstance(extra_vars, basestring):
             try:
-                extra_vars = yaml.safe_load(extra_vars)
-            except (yaml.YAMLError, TypeError, AttributeError):
-                errors['extra_vars'] = 'Must be valid JSON or YAML'
+                extra_vars = json.loads(extra_vars)
+            except (ValueError, TypeError):
+                try:
+                    extra_vars = yaml.safe_load(extra_vars)
+                except (yaml.YAMLError, TypeError, AttributeError):
+                    errors['extra_vars'] = 'Must be valid JSON or YAML'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
