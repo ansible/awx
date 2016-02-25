@@ -21,9 +21,13 @@ export default [
         ClearScope();
 
         var base, e, id, url, parentObject;
-
         base = $location.path().replace(/^\//, '').split('/')[0];
-
+        if (base == 'management_jobs') {
+            $scope.base = base = 'system_job_templates';
+        }
+        if ($stateParams.job_type){
+            $scope.job_type = $stateParams.job_type;
+        }
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
