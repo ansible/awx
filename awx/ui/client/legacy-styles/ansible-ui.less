@@ -697,9 +697,21 @@ legend {
     margin-bottom: 7px;
   }
 
-  .pagination > li > a {
+  .pagination>li>a,
+  .pagination>li>span {
+    border: 1px solid @grey-border;
     padding: 3px 6px;
     font-size: 10px;
+  }
+
+  .pagination li {
+    a#next-page {
+      border-radius: 0 4px 4px 0;
+    }
+
+    a#previous-page {
+      border-radius: 4px 0 0 4px;
+    }
   }
 
   .modal-body {
