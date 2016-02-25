@@ -12,7 +12,7 @@
 
 export default function() {
     return {
-        editTitle: 'Execute Command',
+        addTitle: 'Execute Command',
         name: 'adhoc',
         well: true,
         forceListeners: true,
@@ -125,13 +125,16 @@ export default function() {
 
         buttons: {
             launch: {
-                label: 'Launch',
+                label: 'Save',
                 ngClick: 'launchJob()',
-                ngDisabled: true
+                ngDisabled: true,
+                'class': 'Form-buttonDefault Form-button'
             },
             reset: {
                 ngClick: 'formReset()',
-                ngDisabled: true
+                ngDisabled: true,
+                label: 'Reset',
+                'class': 'Form-buttonDefault Form-button'
             }
         },
 
