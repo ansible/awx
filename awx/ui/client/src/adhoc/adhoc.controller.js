@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -10,7 +10,7 @@
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
 function adhocController($q, $scope, $rootScope, $location, $stateParams,
-    CheckPasswords, PromptForPasswords, CreateLaunchDialog, adhocForm,
+    $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
     KindChange, LookUpInit, CredentialList, Empty, Wait) {
 
@@ -162,6 +162,10 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
 
     privateFn.initializeForm(id, urls, hostPattern);
 
+    $scope.formCancel = function(){
+        $state.go('inventoryManage');
+    }
+
     // remove all data input into the form and reset the form back to defaults
     $scope.formReset = function () {
         GenerateForm.reset();
@@ -291,7 +295,7 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
 }
 
 export default ['$q', '$scope', '$rootScope', '$location', '$stateParams',
-    'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'adhocForm',
+    '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'adhocForm',
     'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',
     adhocController];

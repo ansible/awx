@@ -8,7 +8,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'adHocJobStdout',
-    route: '/ad_hoc_commands/:id/stdout',
+    route: '/ad_hoc_commands/:id',
     templateUrl: templateUrl('standard-out/adhoc/standard-out-adhoc'),
     controller: 'JobStdoutController',
     ncyBreadcrumb: {

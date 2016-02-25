@@ -34,7 +34,10 @@ def handle_error(request, status=404, **kwargs):
             status_code = status
             default_detail = kwargs['content']
         api_error_view = ApiErrorView.as_view(view_name=kwargs['name'], exception_class=APIException)
-        return api_error_view(request)
+        response = api_error_view(request)
+        if hasattr(response, 'render'):
+            response.render()
+        return response
     else:
         kwargs['content'] = format_html('<span class="nocode">{}</span>', kwargs.get('content', ''))
         return render(request, 'error.html', kwargs, status=status)

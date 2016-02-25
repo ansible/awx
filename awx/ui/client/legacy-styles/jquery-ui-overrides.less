@@ -14,12 +14,13 @@ table.ui-datepicker-calendar {
 }
 
 /* Modal dialog */
-
 .ui-dialog-title {
-    font-size: 22px;
-    color: @blue-link;
+    font-size: 15px;
+    color: @default-interface-txt;
     font-weight: bold;
     line-height: normal;
+    font-family: 'Open Sans', helvetica;
+    text-transform: uppercase;
 }
 .ui-dialog {
     .close {
@@ -33,12 +34,14 @@ table.ui-datepicker-calendar {
     .ui-widget-header {
         border-radius: 0;
         border: none;
-        border-bottom: 1px solid #A9A9A9;
-        height: 55px;
     }
     .ui-dialog-titlebar {
         padding-bottom: 0;
         padding-top: 12px;
+
+        button.close i {
+          font-size: 24px;
+        }
     }
     .ui-dialog-titlebar .ui-state-default {
         background-image: none;
@@ -58,9 +61,58 @@ table.ui-datepicker-calendar {
         background-position: -80px -224px;
         color: @black;
     }
+
+    button.btn.btn-primary,
+    button.btn.btn-default {
+      padding: 5px 15px;
+      font-size: 12px;
+      line-height: 1.5;
+      transition: background-color 0.2s;
+      font-size: 12px;
+    }
+
+    button.btn.btn-primary {
+      text-transform: uppercase;
+      background-color: @default-succ;
+      border-color: @default-succ;
+
+      &:hover {
+        background-color: @default-succ-hov;
+        border-color: @default-succ-hov;
+      }
+
+      &:disabled {
+        background-color: @default-succ-disabled;
+        border-color: @default-succ-disabled;
+      }
+
+      &:first-of-type {
+        margin-right: 24px;
+      }
+    }
+
+    button.btn.btn-default {
+      text-transform: uppercase;
+      border-color: @default-border;
+      color: @default-interface-txt;
+    }
+
+    .ui-dialog-buttonpane.ui-widget-content {
+      border: none;
+      margin: 0;
+      padding-top: 0;
+      padding-right: 8px;
+    }
+
+    .input-group-btn.dropdown, .List-pagination, .List-tableHeader {
+      font-family: 'Open Sans', sans-serif;
+    }
+
 }
 
 .ui-dialog-buttonset {
+    text-transform: uppercase;
+
     button.btn.btn-default.ui-state-hover,
     button.btn.btn-default.ui-state-active,
     button.btn.btn-default.ui-state-focus {

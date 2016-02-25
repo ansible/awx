@@ -45,6 +45,7 @@ import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
+import lookUpHelper from './lookup/main';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
 import {LicenseController} from './controllers/License';
 import {ScheduleEditController} from './controllers/Schedules';
@@ -234,7 +235,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('dashboardGroups', {
-                url: '/home/groups',
+                url: '/home/groups?id&name&has_active_failures&status&source&has_external_source&inventory_source__id',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeGroups,
                 ncyBreadcrumb: {
@@ -249,7 +250,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('dashboardHosts', {
-                url: '/home/hosts?has_active_failures',
+                url: '/home/hosts?has_active_failures&name&id',
                 templateUrl: urlPrefix + 'partials/subhome.html',
                 controller: HomeHosts,
                 data: {

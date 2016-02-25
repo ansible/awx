@@ -106,7 +106,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 resizable: resizable,
                 create: function () {
                     // Fix the close button
-                    $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
+                    $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).html('<i class="fa fa-times-circle"></i>');
 
                     setTimeout(function() {
                         // Make buttons bootstrapy

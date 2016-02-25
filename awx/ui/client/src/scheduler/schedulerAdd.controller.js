@@ -47,7 +47,8 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
 
     AddSchedule({
         scope: $scope,
-        callback: 'SchedulesRefresh'
+        callback: 'SchedulesRefresh',
+        base: $scope.base ? $scope.base : null
     });
 
     var callSelect2 = function() {

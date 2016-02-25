@@ -1,16 +1,16 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
 
 import managementJobsCard from './card/main';
-import managementJobsSchedule from './schedule/main';
+import managementJobsScheduler from './scheduler/main';
 import list from './management-jobs.list';
 
 export default
     angular.module('managementJobs', [
         managementJobsCard.name,
-        managementJobsSchedule.name
+        managementJobsScheduler.name
     ])
     .factory('managementJobsListObject', list);
