@@ -34,4 +34,5 @@ if not AUTH_BASIC_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [x for x in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] if x != 'rest_framework.authentication.BasicAuthentication']
 
 # Update cache to use celery broker URL defined in configuration files.
-CACHES['default']['LOCATION'] = BROKER_URL
+if CACHES['default']['BACKEND'] == 'redis_cache.RedisCache':
+    CACHES['default']['LOCATION'] = BROKER_URL
