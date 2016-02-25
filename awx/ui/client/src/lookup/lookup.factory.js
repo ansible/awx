@@ -21,10 +21,10 @@
 *  })
 */
 
-export default ['Alert', 'Rest', 'ProcessErrors', 'generateList',
+export default ['Rest', 'ProcessErrors', 'generateList',
     'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate',
     'Empty', 'CreateDialog',
-    function(Alert, Rest, ProcessErrors, GenerateList,
+    function(Rest, ProcessErrors, GenerateList,
         SearchInit, PaginateInit, GetBasePath, FormatDate,
         Empty, CreateDialog) {
         return function(params) {
