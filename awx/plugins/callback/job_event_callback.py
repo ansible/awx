@@ -2,10 +2,10 @@
 # This file is a utility Ansible plugin that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
 #
@@ -90,10 +90,12 @@ CENSOR_FIELD_WHITELIST=[
     'skip_reason',
 ]
 
-def censor(obj):
+def censor(obj, no_log=False):
     if not isinstance(obj, dict):
+        if no_log:
+            return "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         return obj
-    if obj.get('_ansible_no_log', False):
+    if obj.get('_ansible_no_log', no_log):
         new_obj = {}
         for k in CENSOR_FIELD_WHITELIST:
             if k in obj:
@@ -106,8 +108,12 @@ def censor(obj):
         new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         obj = new_obj
     if 'results' in obj:
-        for i in xrange(len(obj['results'])):
-            obj['results'][i] = censor(obj['results'][i])
+        if isinstance(obj['results'], list):
+            for i in xrange(len(obj['results'])):
+                obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
+        elif obj.get('_ansible_no_log', False):
+            obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+
     return obj
 
 class TokenAuth(requests.auth.AuthBase):
@@ -462,7 +468,7 @@ class JobCallbackModule(BaseCallbackModule):
         # this from a normal task
         self._log_event('playbook_on_task_start', task=task,
                         name=task.get_name())
-                        
+
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
                                 salt=None, default=None):
