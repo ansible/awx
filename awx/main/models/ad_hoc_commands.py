@@ -218,8 +218,9 @@ class AdHocCommandEvent(CreatedModifiedModel):
         ('runner_on_unreachable', _('Host Unreachable'), True),
         # Tower won't see no_hosts (check is done earlier without callback).
         #('runner_on_no_hosts', _('No Hosts Matched'), False),
-        # Tower should probably never see skipped (no conditionals).
-        #('runner_on_skipped', _('Host Skipped'), False),
+        # Tower will see skipped (when running in check mode for a module that
+        # does not support check mode).
+        ('runner_on_skipped', _('Host Skipped'), False),
         # Tower does not support async for ad hoc commands.
         #('runner_on_async_poll', _('Host Polling'), False),
         #('runner_on_async_ok', _('Host Async OK'), False),

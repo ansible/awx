@@ -2,10 +2,10 @@
 # This file is a utility Ansible plugin that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
 #
@@ -66,8 +66,12 @@ CENSOR_FIELD_WHITELIST=[
     'skip_reason',
 ]
 
-def censor(obj):
-    if obj.get('_ansible_no_log', False):
+def censor(obj, no_log=False):
+    if not isinstance(obj, dict):
+        if no_log:
+            return "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        return obj
+    if obj.get('_ansible_no_log', no_log):
         new_obj = {}
         for k in CENSOR_FIELD_WHITELIST:
             if k in obj:
@@ -80,8 +84,12 @@ def censor(obj):
         new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         obj = new_obj
     if 'results' in obj:
-        for i in xrange(len(obj['results'])):
-            obj['results'][i] = censor(obj['results'][i])
+        if isinstance(obj['results'], list):
+            for i in xrange(len(obj['results'])):
+                obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
+        elif obj.get('_ansible_no_log', False):
+            obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+
     return obj
 
 
@@ -410,7 +418,7 @@ class JobCallbackModule(BaseCallbackModule):
         # this from a normal task
         self._log_event('playbook_on_task_start', task=task,
                         name=task.get_name())
-                        
+
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
                                 salt=None, default=None):
@@ -479,6 +487,7 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     def __init__(self):
         self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
         self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id
+        self.skipped_hosts = set()
         super(AdHocCommandCallbackModule, self).__init__()
 
     def _log_event(self, event, **event_data):
@@ -488,6 +497,19 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
 
     def runner_on_file_diff(self, host, diff):
         pass # Ignore file diff for ad hoc commands.
+
+    def runner_on_ok(self, host, res):
+        # When running in check mode using a module that does not support check
+        # mode, Ansible v1.9 will call runner_on_skipped followed by
+        # runner_on_ok for the same host; only capture the skipped event and
+        # ignore the ok event.
+        if host not in self.skipped_hosts:
+            super(AdHocCommandCallbackModule, self).runner_on_ok(host, res)
+
+    def runner_on_skipped(self, host, item=None):
+        super(AdHocCommandCallbackModule, self).runner_on_skipped(host, item)
+        self.skipped_hosts.add(host)
+
 
 
 if os.getenv('JOB_ID', ''):
