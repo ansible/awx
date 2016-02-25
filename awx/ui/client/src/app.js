@@ -199,9 +199,9 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
-        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider) {
-
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider', '$urlMatcherFactoryProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider, $urlMatcherFactoryProvider) {
+            $urlMatcherFactoryProvider.strictMode(false)
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
