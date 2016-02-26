@@ -463,6 +463,13 @@ class JobCallbackModule(BaseCallbackModule):
 
     def v2_playbook_on_play_start(self, play):
         setattr(self, 'play', play)
+        # Ansible 2.0.0.2 doesn't default .name to hosts like it did in 1.9.4,
+        # though that default will likely return in a future version of Ansible.
+        if (not hasattr(play, 'name') or not play.name) and hasattr(play, 'hosts'):
+            if isinstance(play.hosts, list):
+                play.name = ','.join(play.hosts)
+            else:
+                play.name = play.hosts
         self._log_event('playbook_on_play_start', name=play.name,
                         pattern=play.hosts)
 
