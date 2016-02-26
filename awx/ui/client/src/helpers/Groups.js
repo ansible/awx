@@ -18,7 +18,7 @@ export default
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', 'SearchHelper',
                'PaginationHelpers', listGenerator.name, 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
                'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
-               'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
+               'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'StandardOutHelper',
                'SchedulesHelper'
 ])
 
@@ -65,8 +65,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  * TODO: Document
  *
  */
-.factory('ViewUpdateStatus', ['Rest', 'ProcessErrors', 'GetBasePath', 'Alert', 'Wait', 'Empty', 'Find', 'LogViewer',
-         function (Rest, ProcessErrors, GetBasePath, Alert, Wait, Empty, Find, LogViewer) {
+.factory('ViewUpdateStatus', ['$state', 'Rest', 'ProcessErrors', 'GetBasePath', 'Alert', 'Wait', 'Empty', 'Find',
+         function ($state, Rest, ProcessErrors, GetBasePath, Alert, Wait, Empty, Find) {
              return function (params) {
 
                  var scope = params.scope,
@@ -76,11 +76,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                  if (scope.removeSourceReady) {
                      scope.removeSourceReady();
                  }
-                 scope.removeSourceReady = scope.$on('SourceReady', function(e, url) {
-                     LogViewer({
-                         scope: scope,
-                         url: url
-                     });
+                 scope.removeSourceReady = scope.$on('SourceReady', function(e, source) {
+
+                    // Pull the ID out of related.current_update / related.last_update
+                    var update_id = (source.current_update) ? source.related.current_update.replace(/^\//, '').split('/')[3] : source.related.last_update.replace(/^\//, '').split('/')[3];
+
+                    $state.go('inventorySyncStdout', {id: update_id});
+
                  });
 
                  if (group) {
@@ -94,8 +96,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          Rest.setUrl(group.related.inventory_source);
                          Rest.get()
                          .success(function (data) {
-                             var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
-                             scope.$emit('SourceReady', url);
+                             scope.$emit('SourceReady', data);
                          })
                          .error(function (data, status) {
                              ProcessErrors(scope, data, status, null, { hdr: 'Error!',

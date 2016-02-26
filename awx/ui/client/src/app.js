@@ -172,7 +172,7 @@ var tower = angular.module('Tower', [
     'SchedulesHelper',
     'JobsListDefinition',
     'LogViewerStatusDefinition',
-    'LogViewerHelper',
+    'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'EventViewerHelper',
     'HostEventsViewerHelper',
