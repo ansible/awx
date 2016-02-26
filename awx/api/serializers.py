@@ -50,7 +50,7 @@ from awx.fact.models import * # noqa
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
-DEFAULT_SUMMARY_FIELDS = ('name', 'description')# , 'created_by', 'modified_by')#, 'type')
+DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modified_by')#, 'type')
 
 # Keys are fields (foreign keys) where, if found on an instance, summary info
 # should be added to the serialized data.  Values are a tuple of field names on
