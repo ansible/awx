@@ -1535,6 +1535,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             role_dict = { 'id': role.id, 'name': role.name}
             try:
                 role_dict['resource_name'] = role.content_object.name
+                role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverseGenericForeignKey(role.content_object)
             except:
                 pass
