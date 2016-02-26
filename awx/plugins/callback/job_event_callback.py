@@ -77,6 +77,8 @@ def censor(obj, no_log=False):
             if k in obj:
                 new_obj[k] = obj[k]
             if k == 'cmd' and k in obj:
+                if isinstance(obj['cmd'], list):
+                    obj['cmd'] = ' '.join(obj['cmd'])
                 if re.search(r'\s', obj['cmd']):
                     new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
                                             r'\1 <censored>',
