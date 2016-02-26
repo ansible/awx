@@ -204,12 +204,12 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         $scope.removeGoToJobDetails();
     }
     $scope.removeGoToJobDetails = $scope.$on('GoToJobDetails', function(e, data) {
-        if (data.related.current_update || data.related.last_update) {
+        if (data.summary_fields.current_update || data.summary_fields.last_update) {
 
             Wait('start');
 
-            // Pull the id out of the URL
-            var id = (data.related.current_update) ? data.related.current_update.replace(/^\//, '').split('/')[3] : data.related.last_update.replace(/^\//, '').split('/')[3];
+            // Grab the id from summary_fields
+            var id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
 
             $state.go('scmUpdateStdout', {id: id});
 
