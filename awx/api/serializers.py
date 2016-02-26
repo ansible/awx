@@ -1532,7 +1532,15 @@ class ResourceAccessListElementSerializer(UserSerializer):
         ret['summary_fields']['permissions'] = resource.get_permissions(user)
 
         def format_role_perm(role):
-            return { 'role': { 'id': role.id, 'name': role.name}, 'permissions': resource.get_role_permissions(role)}
+            role_dict = { 'id': role.id, 'name': role.name}
+            try:
+                role_dict['resource_name'] = role.content_object.name
+                role_dict['resource_type'] = role.content_type.name
+                role_dict['related'] = reverseGenericForeignKey(role.content_object)
+            except:
+                pass
+
+            return { 'role': role_dict, 'permissions': resource.get_role_permissions(role)}
 
         direct_permissive_role_ids = resource.permissions.values_list('role__id')
         direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
