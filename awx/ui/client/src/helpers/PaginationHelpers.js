@@ -32,14 +32,14 @@ export default
                 // Which page are we on?
                 if (Empty(next) && previous) {
                     // no next page, but there is a previous page
-                    scope[iterator + '_page'] = parseInt(previous.match(/page=\d+/)[0].replace(/page=/, '')) + 1;
+                    scope[iterator + '_page'] = /page=\d+/.test(previous) ? parseInt(previous.match(/page=(\d+)/)[1]) + 1 : 2
                 } else if (next && Empty(previous)) {
                     // next page available, but no previous page
                     scope[iterator + '_page'] = 1;
                     $('#'+iterator+'-pagination #pagination-links li:eq(1)').attr('class', 'disabled');
                 } else if (next && previous) {
                     // we're in between next and previous
-                    scope[iterator + '_page'] = parseInt(previous.match(/page=\d+/)[0].replace(/page=/, '')) + 1;
+                    scope[iterator + '_page'] = /page=\d+/.test(previous) ? parseInt(previous.match(/page=(\d+)/)[1]) + 1 : 2
                 }
 
                 // Calc the range of up to 10 pages to show
