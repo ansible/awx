@@ -1,14 +1,17 @@
+/*
+* Style conventions
+* .ModuleName-component-subComponent
+* Naming describes components of the view
+*/
 @import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
+
 
 .License-container{
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	.OnePlusTwo-container;
 }
-.License-container label{
-	text-transform: uppercase;
-	color: @default-interface-txt;
-	font-weight: 500;
+.License-field--label{
+	.OnePlusTwo-left--detailsLabel;
 }
 .License-management .CodeMirror-scroll{
 	min-height: 140px;
@@ -19,20 +22,16 @@
 }
 .License-eula textarea{
 	width: 100%;
-	height: 140px;
+	height: 300px;
 }
 .License-field label{
 	width: 155px;
 }
-.License-field span{
-	width: 255px;
-	display: inline-block;
+.License-field--content{
+	.OnePlusTwo-left--detailsContent;
 }
 .License-field{
-	word-wrap: break-word;
-	width: 100%;
-	margin-top: 4px;
-	margin-bottom: 4px;
+	.OnePlusTwo-left--detailsRow;
 }
 .License-greenText{
 	color: @submit-button-bg;
@@ -41,40 +40,27 @@
 	color: #d9534f;
 }
 .License-fields{
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: space-around;	
+	.OnePlusTwo-left--details;	
 }
 .License-details {
-	height: 520px;
-	width: 460px;
-	flex-grow: 1;
-	display: inline-block;
-    background-color: @default-bg;
-    padding: 20px;
-    border-radius: 5px;
-    border: @default-interface-txt;
-    align-items: baseline;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    margin-right: 20px;
+	.OnePlusTwo-left--panel(600px);
 }
 .License-titleText {
-	color: @default-interface-txt;
-    font-size: 14px;
-    font-weight: bold;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
+	.OnePlusTwo-panelHeader;
 }
 .License-management{
-	height: 520px;
-	flex-grow: 2;
-	display: inline-block;
-	background-color: @default-bg;
-    padding: 20px;
-    border-radius: 5px;
-    border: @default-interface-txt;
-    align-items: baseline;
-    margin-top: 20px;
+	.OnePlusTwo-right--panel(600px);
+}
+.License-submit--container{
+	height: 33px;
+}
+.License-submit--success{
+	line-height:33px;
+	margin: 0 10px 0 0;
+}
+.License-file--container {
+	margin: 20px 0 20px 0;
+	input[type=file] {
+	display: none;
+	}
 }
