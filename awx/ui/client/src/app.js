@@ -887,9 +887,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state', 'GetBasePath',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state) {
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
             var sock;
 
             $rootScope.deletePermission = function (user, role, userName,
@@ -897,7 +897,7 @@ var tower = angular.module('Tower', [
                     var action = function () {
                         $('#prompt-modal').modal('hide');
                         Wait('start');
-                        var url = "/api/v1/users/" + user + "/roles/";
+                        var url = GetBasePath("users") + user + "/roles/";
                         Rest.setUrl(url);
                         Rest.post({"disassociate": true, "id": role})
                             .success(function () {
@@ -906,7 +906,7 @@ var tower = angular.module('Tower', [
                             })
                             .error(function (data, status) {
                                 ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                                    msg: 'Could not disacssociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
                             });
                     };
 
