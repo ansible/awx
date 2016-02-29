@@ -16,9 +16,9 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.models.rbac import ALL_PERMISSIONS
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
-from awx.main.conf import tower_settings
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
@@ -51,6 +51,21 @@ access_registry = {
     # <model_class>: [<access_class>, ...],
     # ...
 }
+
+
+def user_or_team(data):
+    try:
+        if 'user' in data:
+            pk = get_pk_from_dict(data, 'user')
+            return get_object_or_400(User, pk=pk), None
+        elif 'team' in data:
+            pk = get_pk_from_dict(data, 'team')
+            return None, get_object_or_400(Team, pk=pk)
+        else:
+            return None, None
+    except ParseError:
+        return None, None
+
 
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
@@ -193,24 +208,16 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        qs = self.model.objects.filter(is_active=True).distinct()
-        if self.user.is_superuser:
-            return qs
-        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
-            return qs
-        return qs.filter(
-            Q(pk=self.user.pk) |
-            Q(organizations__in=self.user.admin_of_organizations.filter(active=True)) |
-            Q(organizations__in=self.user.organizations.filter(active=True)) |
-            Q(teams__in=self.user.teams.filter(active=True))
-        ).distinct()
+        qs = self.model.accessible_objects(self.user, {'read':True})
+        return qs
 
     def can_add(self, data):
         if data is not None and 'is_superuser' in data:
             if to_python_boolean(data['is_superuser'], allow_none=True) and not self.user.is_superuser:
                 return False
-        return bool(self.user.is_superuser or
-                    self.user.admin_of_organizations.filter(active=True).exists())
+        if self.user.is_superuser:
+            return True
+        return Organization.accessible_objects(self.user, ALL_PERMISSIONS).filter(active=True).exists()
 
     def can_change(self, obj, data):
         if data is not None and 'is_superuser' in data:
@@ -225,7 +232,7 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return bool(obj.organizations.filter(active=True, admins__in=[self.user]).exists())
+        return obj.accessible_by(self.user, {'create': True, 'write':True, 'update':True, 'read':True})
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -235,8 +242,8 @@ class UserAccess(BaseAccess):
         if obj.is_superuser and super_users.count() == 1:
             # cannot delete the last active superuser
             return False
-        return bool(self.user.is_superuser or
-                    obj.organizations.filter(active=True, admins__in=[self.user]).exists())
+        return obj.accessible_by(self.user, {'delete': True})
+
 
 class OrganizationAccess(BaseAccess):
     '''

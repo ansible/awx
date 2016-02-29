@@ -31,7 +31,8 @@ ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor'
 role_rebuilding_paused = False
 roles_needing_rebuilding = set()
 
-
+ALL_PERMISSIONS = {'create': True, 'read': True, 'update': True, 'delete': True,
+                   'write': True, 'scm_update': True, 'use': True, 'execute': True}
 
 class Role(CommonModelNameNotUnique):
     '''
@@ -122,18 +123,6 @@ class Role(CommonModelNameNotUnique):
     def grant(self, resource, permissions):
         # take either the raw Resource or something that includes the ResourceMixin
         resource = resource if type(resource) is Resource else resource.resource
-
-        if 'all' in permissions and permissions['all']:
-            del permissions['all']
-            permissions['create']     = True
-            permissions['read']       = True
-            permissions['write']      = True
-            permissions['update']     = True
-            permissions['delete']     = True
-            permissions['scm_update'] = True
-            permissions['use']        = True
-            permissions['execute']    = True
-
         permission = RolePermission(role=self, resource=resource)
         for k in permissions:
             setattr(permission, k, int(permissions[k]))
@@ -256,8 +245,8 @@ class RolePermission(CreatedModifiedModel):
     create     = models.IntegerField(default = 0)
     read       = models.IntegerField(default = 0)
     write      = models.IntegerField(default = 0)
-    update     = models.IntegerField(default = 0)
     delete     = models.IntegerField(default = 0)
+    update     = models.IntegerField(default = 0)
     execute    = models.IntegerField(default = 0)
     scm_update = models.IntegerField(default = 0)
     use        = models.IntegerField(default = 0)
