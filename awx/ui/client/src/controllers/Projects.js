@@ -649,7 +649,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                             data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     }
                 }
-
                 relatedSets = form.relatedSets(data.related);
 
 

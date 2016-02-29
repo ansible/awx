@@ -1,0 +1,71 @@
+/** @define RoleList */
+
+.RoleList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.RoleList-tagContainer {
+    display: flex;
+    max-width: 100%;
+}
+
+.RoleList-tag {
+    border-radius: 5px;
+    padding: 2px 10px;
+    margin: 4px 0px;
+    border: 1px solid #e1e1e1;
+    font-size: 12px;
+    color: #848992;
+    text-transform: uppercase;
+    background-color: #fff;
+    margin-right: 5px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.RoleList-tag--deletable {
+    margin-right: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-right: 0;
+    max-wdith: ~"calc(100% - 23px)";
+}
+
+.RoleList-deleteContainer {
+    border: 1px solid #e1e1e1;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 0 5px;
+    margin: 4px 0px;
+    margin-right: 5px;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+}
+
+.RoleList-tagDelete {
+    font-size: 13px;
+    color: #b7b7b7;
+}
+
+.RoleList-name {
+    flex: initial;
+    max-width: 100%;
+}
+
+.RoleList-tag--deletable > .RoleList-name {
+    max-width: ~"calc(100% - 23px)";
+}
+
+.RoleList-deleteContainer:hover, {
+    border-color: #ff5850;
+    background-color: #ff5850;
+}
+
+.RoleList-deleteContainer:hover > .RoleList-tagDelete {
+    color: #fff;
+}

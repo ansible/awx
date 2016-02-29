@@ -31,6 +31,7 @@ import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 import notifications from './notifications/main';
+import access from './access/main';
 
 // modules
 import about from './about/main';
@@ -101,6 +102,7 @@ var tower = angular.module('Tower', [
     jobDetail.name,
     notifications.name,
     standardOut.name,
+    access.name,
     'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -884,15 +886,37 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense',
-        '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService',
-        function (
-            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense,
-            $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-            LoadConfig, Store, ShowSocketHelp, pendoService)
-            {
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state',
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state) {
             var sock;
+
+            $rootScope.deletePermission = function (user, role, userName,
+                roleName, resourceName) {
+                    var action = function () {
+                        $('#prompt-modal').modal('hide');
+                        Wait('start');
+                        var url = "/api/v1/users/" + user + "/roles/";
+                        Rest.setUrl(url);
+                        Rest.post({"disassociate": true, "id": role})
+                            .success(function () {
+                                Wait('stop');
+                                $rootScope.$broadcast("refreshList", "permission");
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                    msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                            });
+                    };
+
+                    Prompt({
+                        hdr: 'Remove Role from ' + resourceName,
+                        body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + roleName + '</span> role associated with ' + userName + '.</div>',
+                        action: action,
+                        actionText: 'REMOVE'
+                    });
+                };
 
             function activateTab() {
                 // Make the correct tab active

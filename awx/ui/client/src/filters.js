@@ -7,7 +7,6 @@
 import sanitizeFilter from './shared/xss-sanitizer.filter';
 import capitalizeFilter from './shared/capitalize.filter';
 import longDateFilter from './shared/long-date.filter';
-
 export {
   sanitizeFilter,
   capitalizeFilter,

@@ -665,10 +665,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         }
                     }
                     if (options.mode === 'select') {
-                      html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
-                    }
-                    else if (options.mode === 'edit' && list.fieldActions) {
-                        html += "<th class=\"List-tableHeader actions-column";
+                        html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
+                    } else if (options.mode === 'edit' && list.fieldActions) {
+                        html += "<th class=\"List-tableHeader List-tableHeader--actions actions-column";
                         html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                         html += "\">";
                         html += (list.fieldActions.label === undefined || list.fieldActions.label) ? "Actions" : "";

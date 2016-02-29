@@ -134,7 +134,7 @@ export default
                 } else if (mode === 'lookup') {
                     scope[iterator + '_page_size'] = 5;
                 } else {
-                    scope[iterator + '_page_size'] = 20;
+                    scope[iterator + '_page_size'] = 2;
                 }
 
                 scope.getPage = function (page, set, iterator) {

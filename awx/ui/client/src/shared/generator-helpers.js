@@ -449,6 +449,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
+            } else if (field.type === 'role') {
+                html += "<td class=\"List-tableCell\"><role-list class=\"RoleList\"></role-list></td>";
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
@@ -520,7 +522,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                                 list: list,
                                 field: field,
                                 fld: fld,
-                                base: base
+                                base: field.linkBase || base
                             }) + ' ';
                         });
                     }
@@ -532,7 +534,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                             list: list,
                             field: field,
                             fld: fld,
-                            base: base
+                            base: field.linkBase || base
                         });
                     }
                 }
