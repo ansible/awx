@@ -5,6 +5,7 @@
 import hmac
 import json
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -138,6 +139,9 @@ class AdHocCommand(UnifiedJob):
 
     def get_absolute_url(self):
         return reverse('api:ad_hoc_command_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
 
     @property
     def task_auth_token(self):

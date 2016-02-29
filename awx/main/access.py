@@ -1486,6 +1486,31 @@ class ScheduleAccess(BaseAccess):
         else:
             return False
 
+class NotifierAccess(BaseAccess):
+    '''
+    I can see/use a notifier if I have permission to
+    '''
+    model = Notifier
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        if self.user.is_superuser:
+            return qs
+        return qs
+
+class NotificationAccess(BaseAccess):
+    '''
+    I can see/use a notification if I have permission to
+    '''
+    model = Notification
+
+    def get_queryset(self):
+        qs = self.model.objects.distinct()
+        if self.user.is_superuser:
+            return qs
+        return qs
+    
+
 class ActivityStreamAccess(BaseAccess):
     '''
     I can see activity stream events only when I have permission on all objects included in the event
@@ -1685,3 +1710,5 @@ register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
+register_access(Notifier, NotifierAccess)
+register_access(Notification, NotificationAccess)

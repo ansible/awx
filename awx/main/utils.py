@@ -139,12 +139,13 @@ def get_encryption_key(instance, field_name):
     h.update(field_name)
     return h.digest()[:16]
 
-
-def encrypt_field(instance, field_name, ask=False):
+def encrypt_field(instance, field_name, ask=False, subfield=None):
     '''
     Return content of the given instance and field name encrypted.
     '''
     value = getattr(instance, field_name)
+    if isinstance(value, dict) and subfield is not None:
+        value = value[subfield]
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
     value = smart_str(value)
@@ -157,11 +158,13 @@ def encrypt_field(instance, field_name, ask=False):
     return '$encrypted$%s$%s' % ('AES', b64data)
 
 
-def decrypt_field(instance, field_name):
+def decrypt_field(instance, field_name, subfield=None):
     '''
     Return content of the given instance and field name decrypted.
     '''
     value = getattr(instance, field_name)
+    if isinstance(value, dict) and subfield is not None:
+        value = value[subfield]
     if not value or not value.startswith('$encrypted$'):
         return value
     algo, b64data = value[len('$encrypted$'):].split('$', 1)

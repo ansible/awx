@@ -1,9 +1,11 @@
 import pytest
+import mock
 
 from django.core.urlresolvers import resolve
 from django.utils.six.moves.urllib.parse import urlparse
 
 from awx.main.models.organization import Organization
+from awx.main.models.projects import Project
 from awx.main.models.ha import Instance
 from django.contrib.auth.models import User
 from rest_framework.test import (
@@ -148,3 +150,11 @@ def instance(settings):
 @pytest.fixture
 def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
+
+@pytest.fixture
+@mock.patch.object(Project, "update", lambda self, **kwargs: None)
+def project(instance):
+    return Project.objects.create(name="test-proj",
+                                  description="test-proj-desc",
+                                  scm_type="git",
+                                  scm_url="https://github.com/jlaska/ansible-playbooks")

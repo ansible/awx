@@ -291,7 +291,7 @@ migrate:
 
 # Run after making changes to the models to create a new migration.
 dbchange:
-	$(PYTHON) manage.py schemamigration main v14_changes --auto
+	$(PYTHON) manage.py makemigrations
 
 # access database shell, asks for password
 dbshell:

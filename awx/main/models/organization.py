@@ -23,7 +23,7 @@ from awx.main.conf import tower_settings
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 
 
-class Organization(CommonModel):
+class Organization(CommonModel, NotificationFieldsModel):
     '''
     An organization is the basic unit of multi-tenancy divisions
     '''

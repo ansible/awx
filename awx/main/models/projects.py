@@ -20,8 +20,10 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
+from awx.main.models.notifications import Notifier
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
+from awx.main.conf import tower_settings
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -309,6 +311,18 @@ class Project(UnifiedJobTemplate, ProjectOptions):
                 return True
         return False
 
+    @property
+    def notifiers(self):
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
+        # Get Organization Notifiers
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.organizations.all())))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.organizations.all())))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.organizations.all())))
+        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
+
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
 
@@ -369,6 +383,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
