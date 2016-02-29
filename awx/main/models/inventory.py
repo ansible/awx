@@ -1185,11 +1185,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     @property
     def notifiers(self):
-        # Return all notifiers defined on the Project, and on the Organization for each trigger type
         base_notifiers = Notifier.objects.filter(active=True)
-        error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors__in=[self]))
-        success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success__in=[self]))
-        any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any__in=[self]))
+        error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors=self.inventory.organization))
+        success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success=self.inventory.organization))
+        any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any=self.inventory.organization))
         return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
 
     def clean_source(self):

@@ -17,6 +17,7 @@ from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.utils.encoding import smart_text
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -741,7 +742,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return dict(id=self.id,
                     name=self.name,
                     url=self.get_ui_url(),
-                    created_by=str(self.created_by),
+                    created_by=smart_text(self.created_by),
                     started=self.started.isoformat(),
                     finished=self.finished.isoformat(),
                     status=self.status,

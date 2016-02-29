@@ -313,20 +313,15 @@ class Project(UnifiedJobTemplate, ProjectOptions):
 
     @property
     def notifiers(self):
-        # Return all notifiers defined on the Project, and on the Organization for each trigger type
-        # TODO: Currently there is no org fk on project so this will need to be added back once that is
-        #       available after the rbac pr
         base_notifiers = Notifier.objects.filter(active=True)
-        # error_notifiers = list(base_notifiers.filter(Q(project_notifications_for_errors__in=self) |
-        #                                              Q(organization_notifications_for_errors__in=self.organization)))
-        # success_notifiers = list(base_notifiers.filter(Q(project_notifications_for_success__in=self) |
-        #                                                Q(organization_notifications_for_success__in=self.organization)))
-        # any_notifiers = list(base_notifiers.filter(Q(project_notifications_for_any__in=self) |
-        #                                            Q(organization_notifications_for_any__in=self.organization)))
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
-        return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
+        # Get Organization Notifiers
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.organizations.all())))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.organizations.all())))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.organizations.all())))
+        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))

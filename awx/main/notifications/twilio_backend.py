@@ -20,11 +20,10 @@ class TwilioBackend(TowerBaseEmailBackend):
     recipient_parameter = "to_numbers"
     sender_parameter = "from_number"
 
-    def __init__(self, account_sid, account_token, from_phone, fail_silently=False, **kwargs):
+    def __init__(self, account_sid, account_token, fail_silently=False, **kwargs):
         super(TwilioBackend, self).__init__(fail_silently=fail_silently)
         self.account_sid = account_sid
         self.account_token = account_token
-        self.from_phone = from_phone
 
     def send_messages(self, messages):
         sent_messages = 0

@@ -235,7 +235,7 @@ def handle_work_success(self, result, task_actual):
                                                                                instance_name,
                                                                                notification_body['url'])
     send_notifications.delay([n.generate_notification(notification_subject, notification_body)
-                              for n in notifiers.get('success', []) + notifiers.get('any', [])],
+                              for n in set(notifiers.get('success', []) + notifiers.get('any', []))],
                              job_id=task_actual['id'])
 
 @task(bind=True)
@@ -292,7 +292,7 @@ def handle_work_error(self, task_id, subtasks=None):
                                                                                 notification_body['url'])
         notification_body['friendly_name'] = first_task_friendly_name
         send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in notifiers.get('error', []) + notifiers.get('any', [])],
+                                  for n in set(notifiers.get('error', []) + notifiers.get('any', []))],
                                  job_id=first_task_id)
 
 
