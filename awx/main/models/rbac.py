@@ -15,12 +15,22 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 # AWX
 from awx.main.models.base import * # noqa
 
-__all__ = ['Role', 'RolePermission', 'Resource', 'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR', 'ROLE_SINGLETON_SYSTEM_AUDITOR']
+__all__ = [
+    'Role',
+    'RolePermission',
+    'Resource',
+    'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR',
+    'ROLE_SINGLETON_SYSTEM_AUDITOR',
+]
 
 logger = logging.getLogger('awx.main.models.rbac')
 
 ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='System Administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor'
+
+role_rebuilding_paused = False
+roles_needing_rebuilding = set()
+
 
 
 class Role(CommonModelNameNotUnique):
@@ -48,6 +58,36 @@ class Role(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:role_detail', args=(self.pk,))
 
+    @staticmethod
+    def pause_role_ancestor_rebuilding():
+        '''
+        Pauses role ancestor list updating. This is useful when you're making
+        many changes to the same roles, for example doing bulk inserts or
+        making many changes to the same object in succession.
+
+        Note that the unpause_role_ancestor_rebuilding MUST be called within
+        the same execution context (preferably within the same transaction),
+        otherwise the RBAC role ancestor hierarchy will not be properly
+        updated.
+        '''
+
+        global role_rebuilding_paused
+        role_rebuilding_paused = True
+
+    @staticmethod
+    def unpause_role_ancestor_rebuilding():
+        '''
+        Unpauses the role ancestor list updating. This will will rebuild all
+        roles that need updating since the last call to
+        pause_role_ancestor_rebuilding and bring everything back into sync.
+        '''
+        global role_rebuilding_paused
+        global roles_needing_rebuilding
+        role_rebuilding_paused = False
+        for role in Role.objects.filter(id__in=list(roles_needing_rebuilding)).all():
+            role.rebuild_role_ancestor_list()
+        roles_needing_rebuilding = set()
+
     def rebuild_role_ancestor_list(self):
         '''
         Updates our `ancestors` map to accurately reflect all of the ancestors for a role
@@ -57,6 +97,11 @@ class Role(CommonModelNameNotUnique):
 
         Note that this method relies on any parents' ancestor list being correct.
         '''
+        global role_rebuilding_paused, roles_needing_rebuilding
+
+        if role_rebuilding_paused:
+            roles_needing_rebuilding.add(self.id)
+            return
 
         actual_ancestors = set(Role.objects.filter(id=self.id).values_list('parents__ancestors__id', flat=True))
         actual_ancestors.add(self.id)
@@ -67,9 +112,9 @@ class Role(CommonModelNameNotUnique):
         # If it differs, update, and then update all of our children
         if actual_ancestors != stored_ancestors:
             for id in actual_ancestors - stored_ancestors:
-                self.ancestors.add(Role.objects.get(id=id))
+                self.ancestors.add(id)
             for id in stored_ancestors - actual_ancestors:
-                self.ancestors.remove(Role.objects.get(id=id))
+                self.ancestors.remove(id)
 
             for child in self.children.all():
                 child.rebuild_role_ancestor_list()

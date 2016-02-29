@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.models import (
     Role,
+    Resource,
     Organization,
 )
 
@@ -90,14 +91,50 @@ def test_auto_m2m_adjuments(organization, project, alice):
     assert project.accessible_by(alice, {'read': True}) is True
 
 @pytest.mark.django_db
-@pytest.mark.skipif(True, reason='Unimplemented')
 def test_auto_field_adjuments(organization, inventory, team, alice):
-    'Ensures the auto role reparenting is working correctly through m2m maps'
+    'Ensures the auto role reparenting is working correctly through non m2m fields'
     org2 = Organization.objects.create(name='Org 2', description='org 2')
     org2.admin_role.members.add(alice)
     assert inventory.accessible_by(alice, {'read': True}) is False
     inventory.organization = org2
+    inventory.save()
     assert inventory.accessible_by(alice, {'read': True}) is True
     inventory.organization = organization
+    inventory.save()
     assert inventory.accessible_by(alice, {'read': True}) is False
+    #assert False
+
+@pytest.mark.django_db
+def test_implicit_deletes(alice):
+    'Ensures implicit resources and roles delete themselves'
+    delorg = Organization.objects.create(name='test-org')
+    delorg.admin_role.members.add(alice)
+
+    resource_id = delorg.resource.id
+    admin_role_id = delorg.admin_role.id
+    auditor_role_id = delorg.auditor_role.id
+
+    assert Role.objects.filter(id=admin_role_id).count() == 1
+    assert Role.objects.filter(id=auditor_role_id).count() == 1
+    assert Resource.objects.filter(id=resource_id).count() == 1
+    n_alice_roles = alice.roles.count()
+    n_system_admin_children = Role.singleton('System Administrator').children.count()
+
+    delorg.delete()
+
+    assert Role.objects.filter(id=admin_role_id).count() == 0
+    assert Role.objects.filter(id=auditor_role_id).count() == 0
+    assert Resource.objects.filter(id=resource_id).count() == 0
+    assert alice.roles.count() == (n_alice_roles - 1)
+    assert Role.singleton('System Administrator').children.count() == (n_system_admin_children - 1)
+
+@pytest.mark.django_db
+def test_content_object(user):
+    'Ensure our conent_object stuf seems to be working'
+
+    print('Creating organization')
+    org = Organization.objects.create(name='test-org')
+    print('Organizaiton id: %d  resource: %d  admin_role: %d' % (org.id, org.resource.id, org.admin_role.id))
+    assert org.resource.content_object.id == org.id
+    assert org.admin_role.content_object.id == org.id
 
