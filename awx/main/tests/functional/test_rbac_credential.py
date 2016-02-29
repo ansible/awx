@@ -69,11 +69,9 @@ def test_credential_access_superuser():
     assert access.can_delete(credential)
 
 @pytest.mark.django_db
-def test_credential_access_admin(user, organization, team, credential):
+def test_credential_access_admin(user, team, credential):
     u = user('org-admin', False)
-    organization.admins.add(u)
-    team.organization = organization
-    team.save()
+    team.organization.admin_role.members.add(u)
 
     access = CredentialAccess(u)
 
@@ -85,10 +83,16 @@ def test_credential_access_admin(user, organization, team, credential):
     # unowned credential can be deleted
     assert access.can_delete(credential)
 
-    team.users.add(u)
-    assert not access.can_change(credential, {'user': u.pk})
-
+    # credential is now part of a team
+    # that is part of an organization
+    # that I am an admin for
     credential.team = team
     credential.save()
+    credential.owner_role.rebuild_role_ancestor_list()
 
+    cred = Credential.objects.create(kind='aws', name='test-cred')
+    cred.team = team
+    cred.save()
+
+    # should have can_change access as org-admin
     assert access.can_change(credential, {'user': u.pk})

@@ -258,15 +258,14 @@ class OrganizationAccess(BaseAccess):
     model = Organization
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.accessible_objects(self.user, {'read':True})
         qs = qs.select_related('created_by', 'modified_by')
-        if self.user.is_superuser:
-            return qs
-        return qs.filter(Q(admins__in=[self.user]) | Q(users__in=[self.user]))
+        return qs
 
     def can_change(self, obj, data):
-        return bool(self.user.is_superuser or
-                    self.user in obj.admins.all())
+        if self.user.is_superuser:
+            return True
+        return obj.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_delete(self, obj):
         self.check_license(feature='multiple_organizations', check_expiration=False)
@@ -567,55 +566,29 @@ class CredentialAccess(BaseAccess):
         """Return the queryset for credentials, based on what the user is
         permitted to see.
         """
-        # Create a base queryset.
-        # If the user is a superuser, and therefore can see everything, this
-        # is also sufficient, and we are done.
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.accessible_objects(self.user, {'read':True})
         qs = qs.select_related('created_by', 'modified_by', 'user', 'team')
-        if self.user.is_superuser:
-            return qs
-
-        # Get the list of organizations for which the user is an admin
-        orgs_as_admin_ids = set(self.user.admin_of_organizations.filter(active=True).values_list('id', flat=True))
-        return qs.filter(
-            Q(user=self.user) |
-            Q(user__organizations__id__in=orgs_as_admin_ids) |
-            Q(user__admin_of_organizations__id__in=orgs_as_admin_ids) |
-            Q(team__organization__id__in=orgs_as_admin_ids, team__active=True) |
-            Q(team__users__in=[self.user], team__active=True)
-        )
+        return qs
 
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        user_pk = get_pk_from_dict(data, 'user')
-        if user_pk:
-            user_obj = get_object_or_400(User, pk=user_pk)
-            return self.user.can_access(User, 'change', user_obj, None)
-        team_pk = get_pk_from_dict(data, 'team')
-        if team_pk:
-            team_obj = get_object_or_400(Team, pk=team_pk)
-            return self.user.can_access(Team, 'change', team_obj, None)
-        return False
+
+        user, team = user_or_team(data)
+        if user is None and team is None:
+            return False
+
+        if user is not None:
+            return user.resource.accessible_by(self.user, {'write': True})
+        if team is not None:
+            return team.accessible_by(self.user, {'write':True})
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
         if not self.can_add(data):
             return False
-        if self.user == obj.created_by:
-            return True
-        if obj.user:
-            if self.user == obj.user:
-                return True
-            if obj.user.organizations.filter(active=True, admins__in=[self.user]).exists():
-                return True
-            if obj.user.admin_of_organizations.filter(active=True, admins__in=[self.user]).exists():
-                return True
-        if obj.team:
-            if self.user in obj.team.organization.admins.filter(is_active=True):
-                return True
-        return False
+        return obj.accessible_by(self.user, {'read':True, 'update': True, 'delete':True})
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
