@@ -58,7 +58,7 @@ def test_encrypted_subfields(get, post, user, organization):
     response = post(url,
                     dict(name="test-twilio",
                          description="test twilio",
-                         organization=1,
+                         organization=organization.id,
                          notification_type="twilio",
                          notification_configuration=dict(account_sid="dummy",
                                                          account_token="shouldhide",
@@ -67,7 +67,6 @@ def test_encrypted_subfields(get, post, user, organization):
                     u)
     assert response.status_code == 201
     notifier_actual = Notifier.objects.get(id=response.data['id'])
-    assert notifier_actual.notification_configuration['account_token'].startswith("$encrypted$")
     url = reverse('api:notifier_detail', args=(response.data['id'],))
     response = get(url, u)
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
@@ -90,35 +89,30 @@ def test_inherited_notifiers(get, post, user, organization, project):
                         u)
         assert response.status_code == 201
         notifiers.append(response.data['id'])
-    o = Organization.objects.get(id=1)
-    p = Project.objects.get(id=1)
-    o.projects.add(p)
-    i = Inventory.objects.create(name='test', organization=o)
+    organization.projects.add(project)
+    i = Inventory.objects.create(name='test', organization=organization)
     i.save()
     g = Group.objects.create(name='test', inventory=i)
     g.save()
-    jt = JobTemplate.objects.create(name='test', inventory=i, project=p, playbook='debug.yml')
+    jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
-    url = reverse('api:organization_notifiers_any_list', args=(1,))
+    url = reverse('api:organization_notifiers_any_list', args=(organization.id,))
     response = post(url, dict(id=notifiers[0]), u)
     assert response.status_code == 204
-    url = reverse('api:project_notifiers_any_list', args=(1,))
+    url = reverse('api:project_notifiers_any_list', args=(project.id,))
     response = post(url, dict(id=notifiers[1]), u)
     assert response.status_code == 204
     url = reverse('api:job_template_notifiers_any_list', args=(jt.id,))
     response = post(url, dict(id=notifiers[2]), u)
     assert response.status_code == 204
     assert len(jt.notifiers['any']) == 3
-    assert len(p.notifiers['any']) == 2
+    assert len(project.notifiers['any']) == 2
     assert len(g.inventory_source.notifiers['any']) == 1
 
 @pytest.mark.django_db
 def test_notifier_merging(get, post, user, organization, project, notifier):
     u = user('admin-poster', True)
-    o = Organization.objects.get(id=1)
-    p = Project.objects.get(id=1)
-    n = Notifier.objects.get(id=1)
-    o.projects.add(p)
-    o.notifiers_any.add(n)
-    p.notifiers_any.add(n)
-    assert len(p.notifiers['any']) == 1
+    organization.projects.add(project)
+    organization.notifiers_any.add(notifier)
+    project.notifiers_any.add(notifier)
+    assert len(project.notifiers['any']) == 1
