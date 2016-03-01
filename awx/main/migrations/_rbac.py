@@ -5,10 +5,9 @@ def migrate_users(apps, schema_editor):
     migrations = list()
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
-    UserResource = apps.get_model('main', "UserResource")
 
     for user in User.objects.all():
-        ur = UserResource.objects.create(user=user)
+        ur = user.resource # implicitly creates the UserResource field if it didn't already exist
         ur.admin_role.members.add(user)
 
         if user.is_superuser:
