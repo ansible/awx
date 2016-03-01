@@ -273,9 +273,9 @@ version_file:
 # Do any one-time init tasks.
 init:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    awx-manage register_instance --primary --hostname=127.0.0.1; \
+	    $(PYTHON) manage.py register_instance --primary --hostname=127.0.0.1; \
 	else \
-	    sudo awx-manage register_instance --primary --hostname=127.0.0.1; \
+	    sudo $(PYTHON) manage.py register_instance --primary --hostname=127.0.0.1; \
 	fi
 
 # Refresh development environment after pulling new code.
@@ -358,7 +358,7 @@ pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
-	
+
 # Run all API unit tests.
 test:
 	py.test awx/main/tests awx/api/tests awx/fact/tests
