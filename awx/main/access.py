@@ -294,53 +294,23 @@ class InventoryAccess(BaseAccess):
     model = Inventory
 
     def get_queryset(self, allowed=None, ad_hoc=None):
-        allowed = allowed or PERMISSION_TYPES_ALLOWING_INVENTORY_READ
-        qs = Inventory.objects.filter(active=True).distinct()
+        qs = self.model.accessible_objects(self.user)
         qs = qs.select_related('created_by', 'modified_by', 'organization')
-        if self.user.is_superuser:
-            return qs
-        qs = qs.filter(organization__active=True)
-        admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
-        has_user_kw = dict(
-            permissions__user__in=[self.user],
-            permissions__permission_type__in=allowed,
-            permissions__active=True,
-        )
-        if ad_hoc is not None:
-            has_user_kw['permissions__run_ad_hoc_commands'] = ad_hoc
-        has_user_perms = qs.filter(**has_user_kw).distinct()
-        has_team_kw = dict(
-            permissions__team__users__in=[self.user],
-            permissions__team__active=True,
-            permissions__permission_type__in=allowed,
-            permissions__active=True,
-        )
-        if ad_hoc is not None:
-            has_team_kw['permissions__run_ad_hoc_commands'] = ad_hoc
-        has_team_perms = qs.filter(**has_team_kw).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-    def has_permission_types(self, obj, allowed, ad_hoc=None):
-        return bool(obj and self.get_queryset(allowed, ad_hoc).filter(pk=obj.pk).exists())
+        return qs
 
     def can_read(self, obj):
-        return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
+        return obj.accessible_by(self.user, {'read': True})
 
     def can_add(self, data):
         # If no data is specified, just checking for generic add permission?
         if not data:
-            return bool(self.user.is_superuser or
-                        self.user.admin_of_organizations.filter(active=True).exists())
-        # Otherwise, verify that the user has access to change the parent
-        # organization of this inventory.
+            return Organization.accessible_objects(self.user, ALL_PERMISSIONS).exists()
         if self.user.is_superuser:
             return True
-        else:
-            org_pk = get_pk_from_dict(data, 'organization')
-            org = get_object_or_400(Organization, pk=org_pk)
-            if self.user.can_access(Organization, 'change', org, None):
-                return True
-        return False
+
+        org_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=org_pk)
+        return org.accessible_by(self.user, {'read': True, 'create':True, 'update': True, 'delete': True})
 
     def can_change(self, obj, data):
         # Verify that the user has access to the new organization if moving an
@@ -348,10 +318,10 @@ class InventoryAccess(BaseAccess):
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             org = get_object_or_400(Organization, pk=org_pk)
-            if not self.user.can_access(Organization, 'change', org, None):
+            if not org.accessible_by(self.user, {'read': True, 'create':True, 'update': True, 'delete': True}):
                 return False
         # Otherwise, just check for write permission.
-        return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+        return obj.accessible_by(self.user, {'read': True, 'create':True, 'update': True, 'delete': True})
 
     def can_admin(self, obj, data):
         # Verify that the user has access to the new organization if moving an
@@ -359,16 +329,16 @@ class InventoryAccess(BaseAccess):
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             org = get_object_or_400(Organization, pk=org_pk)
-            if not self.user.can_access(Organization, 'change', org, None):
+            if not org.accessible_by(self.user, ALL_PERMISSIONS):
                 return False
         # Otherwise, just check for admin permission.
-        return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
+        return obj.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_delete(self, obj):
         return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
-        return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ, True)
+        return obj.accessible_by(self.user, {'execute': True})
 
 class HostAccess(BaseAccess):
     '''

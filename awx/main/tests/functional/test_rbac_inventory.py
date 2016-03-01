@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
+from awx.main.access import InventoryAccess
 from django.apps import apps
 
 @pytest.mark.django_db
