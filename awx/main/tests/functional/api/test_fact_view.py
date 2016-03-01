@@ -1,7 +1,6 @@
 import mock
 import pytest
 import json
-import urllib
 
 from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
