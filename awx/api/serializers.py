@@ -2164,7 +2164,7 @@ class NotifierSerializer(BaseSerializer):
                 "bool": (bool,),
                 "list": (list,),
                 "password": (str, unicode),
-                "object": (dict,)}
+                "object": (dict, OrderedDict)}
 
     def to_representation(self, obj):
         ret = super(NotifierSerializer, self).to_representation(obj)
