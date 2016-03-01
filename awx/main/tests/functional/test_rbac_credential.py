@@ -30,7 +30,10 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     credential.team = team
     credential.save()
 
-    # No permissions pre-migration
+
+    # No permissions pre-migration (this happens automatically so we patch this)
+    team.admin_role.children.remove(credential.owner_role)
+    team.member_role.children.remove(credential.usage_role)
     assert not credential.accessible_by(u, permissions['admin'])
 
     migrated = rbac.migrate_credential(apps, None)
@@ -47,6 +50,8 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
     credential.save()
 
     # No permissions pre-migration
+    team.admin_role.children.remove(credential.owner_role)
+    team.member_role.children.remove(credential.usage_role)
     assert not credential.accessible_by(u, permissions['usage'])
 
     # Usage permissions post migration
