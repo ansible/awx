@@ -14,6 +14,8 @@ def test_organization_migration_admin(organization, permissions, user):
     u = user('admin', False)
     organization.admins.add(u)
 
+    # Undo some automatic work that we're supposed to be testing with our migration
+    organization.admin_role.members.remove(u)
     assert not organization.accessible_by(u, permissions['admin'])
 
     migrations = rbac.migrate_organization(apps, None)
@@ -26,6 +28,8 @@ def test_organization_migration_user(organization, permissions, user):
     u = user('user', False)
     organization.users.add(u)
 
+    # Undo some automatic work that we're supposed to be testing with our migration
+    organization.member_role.members.remove(u)
     assert not organization.accessible_by(u, permissions['auditor'])
 
     migrations = rbac.migrate_organization(apps, None)
