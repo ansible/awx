@@ -114,6 +114,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         verbose_name=_('Project'),
         help_text=_('The identifier for the project.'),
     )
+    domain = models.CharField(
+        blank=True,
+        default='',
+        max_length=100,
+        verbose_name=_('Domain'),
+        help_text=_('The identifier for the domain.'),
+    )
     ssh_key_data = models.TextField(
         blank=True,
         default='',

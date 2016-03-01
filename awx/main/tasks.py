@@ -712,6 +712,8 @@ class RunJob(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             openstack_data = {
                 'clouds': {
                     'devstack': {
@@ -1151,6 +1153,8 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.

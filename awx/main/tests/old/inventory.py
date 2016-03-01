@@ -2068,6 +2068,26 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.check_inventory_source(inventory_source)
         self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
 
+    def test_update_from_openstack_v3(self):
+        # Check that update works with Keystone v3 identity service
+        api_url = getattr(settings, 'TEST_OPENSTACK_HOST_V3', '')
+        api_user = getattr(settings, 'TEST_OPENSTACK_USER', '')
+        api_password = getattr(settings, 'TEST_OPENSTACK_PASSWORD', '')
+        api_project = getattr(settings, 'TEST_OPENSTACK_PROJECT', '')
+        api_domain = getattr(settings, 'TEST_OPENSTACK_DOMAIN', '')
+        if not all([api_url, api_user, api_password, api_project, api_domain]):
+            self.skipTest("No test openstack v3 credentials defined")
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='openstack',
+                                               host=api_url,
+                                               username=api_user,
+                                               password=api_password,
+                                               project=api_project,
+                                               domain=api_domain)
+        inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
+        self.check_inventory_source(inventory_source)
+        self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
+
     def test_update_from_azure(self):
         source_username = getattr(settings, 'TEST_AZURE_USERNAME', '')
         source_key_data = getattr(settings, 'TEST_AZURE_KEY_DATA', '')
