@@ -1,14 +1,11 @@
 import mock
 import pytest
 
-from awx.main.models.notifications import Notification, Notifier
+from awx.main.models.notifications import Notifier
 from awx.main.models.inventory import Inventory, Group
-from awx.main.models.organization import Organization
-from awx.main.models.projects import Project
 from awx.main.models.jobs import JobTemplate
 
 from django.core.urlresolvers import reverse
-from django.core.mail.message import EmailMessage
 
 @pytest.fixture
 def notifier():
@@ -111,7 +108,7 @@ def test_inherited_notifiers(get, post, user, organization, project):
 
 @pytest.mark.django_db
 def test_notifier_merging(get, post, user, organization, project, notifier):
-    u = user('admin-poster', True)
+    user('admin-poster', True)
     organization.projects.add(project)
     organization.notifiers_any.add(notifier)
     project.notifiers_any.add(notifier)
