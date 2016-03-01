@@ -16,19 +16,12 @@ from django.utils import timezone
 def mock_feature_enabled(feature, bypass_database=None):
     return True
 
-def build_url(*args, **kwargs):
-    get = kwargs.pop('get', {})
-    url = reverse(*args, **kwargs)
-    if get:
-        url += '?' + urllib.urlencode(get)
-    return url
-
 def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params={}, host_count=1):
     hosts = hosts(host_count=host_count)
     fact_scans(fact_scans=3, timestamp_epoch=epoch)
 
-    url = build_url('api:host_fact_versions_list', args=(hosts[0].pk,), get=get_params)
-    response = get(url, user('admin', True))
+    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    response = get(url, user('admin', True), data=get_params)
 
     return (hosts[0], response)
 

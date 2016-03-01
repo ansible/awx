@@ -10,13 +10,6 @@ from django.utils import timezone
 def mock_feature_enabled(feature, bypass_database=None):
     return True
 
-def build_url(*args, **kwargs):
-    get = kwargs.pop('get', {})
-    url = reverse(*args, **kwargs)
-    if get:
-        url += '?' + urllib.urlencode(get)
-    return url
-
 # TODO: Consider making the fact_scan() fixture a Class, instead of a function, and move this method into it
 def find_fact(facts, host_id, module_name, timestamp):
     for f in facts:
@@ -28,8 +21,8 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), module_name
     hosts = hosts(host_count=1)
     facts = fact_scans(fact_scans=1, timestamp_epoch=epoch)
 
-    url = build_url('api:host_fact_compare_view', args=(hosts[0].pk,), get=get_params)
-    response = get(url, user('admin', True), params=get_params)
+    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    response = get(url, user('admin', True), data=get_params)
 
     fact_known = find_fact(facts, hosts[0].id, module_name, epoch)
     return (fact_known, response)
