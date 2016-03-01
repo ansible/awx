@@ -151,18 +151,23 @@ def organizations(instance):
 @pytest.fixture
 def group(inventory):
     def g(name):
-        return Group.objects.create(inventory=inventory, name=name)
+        try:
+            return Group.objects.get(name=name, inventory=inventory)
+        except:
+            return Group.objects.create(inventory=inventory, name=name)
     return g
 
 @pytest.fixture
 def hosts(group):
+    group1 = group('group-1')
+
     def rf(host_count=1):
         hosts = []
         for i in xrange(0, host_count):
-            name = '%s-host-%s' % (group.name, i)
-            (host, created) = group.inventory.hosts.get_or_create(name=name)
+            name = '%s-host-%s' % (group1.name, i)
+            (host, created) = group1.inventory.hosts.get_or_create(name=name)
             if created:
-                group.hosts.add(host)
+                group1.hosts.add(host)
             hosts.append(host)
         return hosts
     return rf
@@ -307,6 +312,8 @@ def options():
 
 @pytest.fixture
 def fact_scans(group, fact_ansible_json, fact_packages_json, fact_services_json):
+    group1 = group('group-1')
+
     def rf(fact_scans=1, timestamp_epoch=timezone.now()):
         facts_json = {}
         facts = []
@@ -318,7 +325,7 @@ def fact_scans(group, fact_ansible_json, fact_packages_json, fact_services_json)
         facts_json['services'] = fact_services_json
 
         for i in xrange(0, fact_scans):
-            for host in group.hosts.all():
+            for host in group1.hosts.all():
                 for module_name in module_names:
                     facts.append(Fact.objects.create(host=host, timestamp=timestamp_current, module=module_name, facts=facts_json[module_name]))
             timestamp_current += timedelta(days=1)
