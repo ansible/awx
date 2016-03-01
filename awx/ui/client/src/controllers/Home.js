@@ -149,7 +149,7 @@ Home.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location',
  * @description This controls the 'home/groups' page that is loaded from the dashboard
  *
 */
-export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
+export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $location, $stateParams, HomeGroupList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
@@ -461,58 +461,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         attachElem(event, html, title);
     });
 
-    if (scope.removeGroupSummaryReady) {
-        scope.removeGroupSummaryReady();
-    }
-    scope.removeGroupSummaryReady = scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
-        var html, title;
-
-        Wait('stop');
-
-        // Build the html for our popover
-        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-        html += "<thead>\n";
-        html += "<tr>";
-        html += "<th>Status</th>";
-        html += "<th>Last Sync</th>";
-        html += "<th>Group</th>";
-        html += "</tr>";
-        html += "</thead>\n";
-        html += "<tbody>\n";
-        data.results.forEach( function(row) {
-            html += "<tr>";
-            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
-            html += "<td>" + ($filter('longDate')(row.last_updated)).replace(/ /,'<br />') + "</td>";
-            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
-            html += "</tr>\n";
-        });
-        html += "</tbody>\n";
-        html += "</table>\n";
-        title = "Sync Status";
-        attachElem(event, html, title);
-    });
-
-    scope.showGroupSummary = function(event, id) {
-        var group, status;
-        if (!Empty(id)) {
-            group = Find({ list: scope.home_groups, key: 'id', val: id });
-            status = group.summary_fields.inventory_source.status;
-            if (status === 'running' || status === 'failed' || status === 'error' || status === 'successful') {
-                Wait('start');
-                Rest.setUrl(group.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
-                Rest.get()
-                    .success(function(data) {
-                        scope.$emit('GroupSummaryReady', event, group, data);
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors( scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + group.related.inventory_sources + ' failed. GET returned status: ' + status
-                        });
-                    });
-            }
-        }
-    };
-
     scope.showHostSummary = function(event, id) {
         var url, jobs = [];
         if (!Empty(id)) {
@@ -549,13 +497,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         }
     };
 
-    scope.viewJob = function(url) {
-        LogViewer({
-            scope: modal_scope,
-            url: url
-        });
-    };
-
     scope.cancelUpdate = function(id) {
         var group = Find({ list: scope.home_groups, key: 'id', val: id });
         GroupsCancelUpdate({ scope: scope, group: group });
@@ -564,7 +505,7 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
 
 }
 
-HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
+HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$location', '$stateParams', 'HomeGroupList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
@@ -578,7 +519,7 @@ HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$l
 */
 
 export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Find, ShowJobSummary, ViewJob) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Find, ShowJobSummary) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -647,10 +588,6 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
         $scope.search(list.iterator);
     };
 
-    $scope.viewJob = function(id) {
-        ViewJob({ scope: $scope, id: id });
-    };
-
     $scope.toggleHostEnabled = function (id, sources) {
         ToggleHostEnabled({
             host_id: id,
@@ -687,5 +624,5 @@ export function HomeHosts($scope, $location, $stateParams, HomeHostList, Generat
 
 HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit',
-    'Find', 'ShowJobSummary', 'ViewJob'
+    'Find', 'ShowJobSummary'
 ];

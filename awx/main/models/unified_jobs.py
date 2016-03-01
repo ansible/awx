@@ -17,6 +17,7 @@ from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.utils.encoding import smart_text
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -40,7 +41,7 @@ logger = logging.getLogger('awx.main.models.unified_jobs')
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 
 
-class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
+class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
     '''
     Concrete base class for unified job templates.
     '''
@@ -297,6 +298,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         return kwargs   # Override if needed in subclass.
 
+    @property
+    def notifiers(self):
+        '''
+        Return notifiers relevant to this Unified Job Template
+        '''
+        # NOTE: Derived classes should implement
+        return Notifier.objects.none()
+
     def create_unified_job(self, **kwargs):
         '''
         Create a new unified job based on this unified job template.
@@ -385,6 +394,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         editable=False,
         related_name='%(class)s_blocked_jobs+',
     )
+    notifications = models.ManyToManyField(
+        'Notification',
+        editable=False,
+        related_name='%(class)s_notifications',
+    )
     cancel_flag = models.BooleanField(
         blank=True,
         default=False,
@@ -467,6 +481,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         real_instance = self.get_real_instance()
         if real_instance != self:
             return real_instance.get_absolute_url()
+        else:
+            return ''
+
+    def get_ui_url(self):
+        real_instance = self.get_real_instance()
+        if real_instance != self:
+            return real_instance.get_ui_url()
         else:
             return ''
 
@@ -717,7 +738,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             tasks that might preclude creating one'''
         return []
 
-    def start(self, error_callback, **kwargs):
+    def notification_data(self):
+        return dict(id=self.id,
+                    name=self.name,
+                    url=self.get_ui_url(),
+                    created_by=smart_text(self.created_by),
+                    started=self.started.isoformat(),
+                    finished=self.finished.isoformat(),
+                    status=self.status,
+                    traceback=self.result_traceback)
+
+    def start(self, error_callback, success_callback, **kwargs):
         '''
         Start the task running via Celery.
         '''
@@ -743,7 +774,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         #                   if field not in needed])
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
-        task_class().apply_async((self.pk,), opts, link_error=error_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
         return True
 
     def signal_start(self, **kwargs):
@@ -765,7 +796,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, **kwargs)
+            return self.start(None, None, **kwargs)
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')

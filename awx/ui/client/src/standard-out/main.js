@@ -9,8 +9,9 @@ import stdoutManagementJobsRoute from './management-jobs/standard-out-management
 import stdoutInventorySyncRoute from './inventory-sync/standard-out-inventory-sync.route';
 import stdoutScmUpdateRoute from './scm-update/standard-out-scm-update.route';
 import {JobStdoutController} from './standard-out.controller';
+import StandardOutHelper from './standard-out-factories/main';
 
-export default angular.module('standardOut', [])
+export default angular.module('standardOut', [StandardOutHelper.name])
     .controller('JobStdoutController', JobStdoutController)
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(stdoutAdhocRoute);

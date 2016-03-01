@@ -14,7 +14,7 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
     angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
+        'JobSubmissionHelper', 'StandardOutHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
 
     /**
      *  JobsControllerInit({ scope: $scope });
@@ -22,8 +22,8 @@ export default
      *  Initialize calling scope with all the bits required to support a jobs list
      *
      */
-    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer', '$window',
-        function($state, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
+    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob', '$window',
+        function($state, Find, DeleteJob, RelaunchJob, $window) {
             return function(params) {
                 var scope = params.scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator;

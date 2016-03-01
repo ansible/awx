@@ -20,7 +20,7 @@ export default
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'HostListDefinition',
                'SearchHelper', 'PaginationHelpers', listGenerator.name, 'HostsHelper',
                'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-               'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper',
+               'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'StandardOutHelper',
                'GroupListDefinition'
 ])
 
@@ -156,17 +156,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
             }
         }
 
-    };
-}])
-
-.factory('ViewJob', ['LogViewer', 'GetBasePath', function(LogViewer, GetBasePath) {
-    return function(params) {
-        var scope = params.scope,
-        id = params.id;
-        LogViewer({
-            scope: scope,
-            url: GetBasePath('jobs') + id + '/'
-        });
     };
 }])
 

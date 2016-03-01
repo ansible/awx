@@ -128,8 +128,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertFalse(ad_hoc_command.passwords_needed_to_start)
         self.assertTrue(ad_hoc_command.signal_start())
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        self.check_job_result(ad_hoc_command, 'failed')
-        self.check_ad_hoc_command_events(ad_hoc_command, 'unreachable')
+        self.check_job_result(ad_hoc_command, 'successful')
+        self.check_ad_hoc_command_events(ad_hoc_command, 'skipped')
 
     @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('canceled', 0))
     def test_cancel_ad_hoc_command(self, ignore):

@@ -195,7 +195,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
                         return true;
                     });
                 });
-                // GetChoices can be found in the helper: LogViewer.js
+                // GetChoices can be found in the helper: StandardOut.js
                 // It attaches the source choices to $scope.source_choices.
                 // Then, when the callback is fired, $scope.source is bound
                 // to the corresponding label.
@@ -209,7 +209,7 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
                 });
             }
 
-            // LookUpName can be found in the helper: LogViewer.js
+            // LookUpName can be found in the helper: StandardOut.js
             // It attaches the name that it gets (based on the url)
             // to the $scope variable defined by the attribute scope_var.
             if (!Empty(data.credential)) {

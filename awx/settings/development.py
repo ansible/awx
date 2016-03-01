@@ -13,7 +13,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
-
 MONGO_HOST = '127.0.0.1'
 MONGO_PORT = 27017
 MONGO_USERNAME = None
@@ -66,10 +65,13 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
-STATSD_CLIENT = 'django_statsd.clients.normal'
-STATSD_HOST = 'graphite'
+STATSD_CLIENT = 'django_statsd.clients.null'
+STATSD_HOST = None
+STATSD_PREFIX = None
+#STATSD_CLIENT = 'django_statsd.clients.normal'
+#STATSD_HOST = 'graphite'
 STATSD_PORT = 8125
-STATSD_PREFIX = 'tower'
+#STATSD_PREFIX = 'tower'
 STATSD_MAXUDPSIZE = 512
 
 # If there is an `/etc/tower/settings.py`, include it.

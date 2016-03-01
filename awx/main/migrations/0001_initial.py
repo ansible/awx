@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('host_name', models.CharField(default=b'', max_length=1024, editable=False)),
-                ('event', models.CharField(max_length=100, choices=[(b'runner_on_failed', 'Host Failed'), (b'runner_on_ok', 'Host OK'), (b'runner_on_unreachable', 'Host Unreachable')])),
+                ('event', models.CharField(max_length=100, choices=[(b'runner_on_failed', 'Host Failed'), (b'runner_on_ok', 'Host OK'), (b'runner_on_unreachable', 'Host Unreachable'), (b'runner_on_skipped', 'Host Skipped')])),
                 ('event_data', jsonfield.fields.JSONField(default={}, blank=True)),
                 ('failed', models.BooleanField(default=False, editable=False)),
                 ('changed', models.BooleanField(default=False, editable=False)),
