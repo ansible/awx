@@ -3,7 +3,11 @@
 
 # Django
 from django.db import connection
-from django.db.models.signals import post_save
+from django.db.models.signals import (
+    post_init,
+    post_save,
+    post_delete,
+)
 from django.db.models.signals import m2m_changed
 from django.db import models
 from django.db.models.fields.related import (
@@ -69,7 +73,8 @@ class ResourceFieldDescriptor(ReverseSingleRelatedObjectDescriptor):
             raise TransactionManagementError('Current transaction has failed, cannot create implicit resource')
         resource = Resource.objects.create(content_object=instance)
         setattr(instance, self.field.name, resource)
-        instance.save(update_fields=[self.field.name,])
+        if instance.pk:
+            instance.save(update_fields=[self.field.name,])
         return resource
 
 
@@ -85,12 +90,45 @@ class ImplicitResourceField(models.ForeignKey):
     def contribute_to_class(self, cls, name):
         super(ImplicitResourceField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, ResourceFieldDescriptor(self))
-        post_save.connect(self._save, cls, True)
+        post_save.connect(self._post_save, cls, True)
+        post_delete.connect(self._post_delete, cls, True)
 
-    def _save(self, instance, *args, **kwargs):
-        # Ensure that our field gets initialized after our first save
-        if not hasattr(instance, self.name):
-            getattr(instance, self.name)
+    def _post_save(self, instance, *args, **kwargs):
+        # Ensures our resource object exists and that it's content_object
+        # points back to our hosting instance.
+        this_resource = getattr(instance, self.name)
+        if not this_resource.object_id:
+            this_resource.content_object = instance
+            this_resource.save()
+
+    def _post_delete(self, instance, *args, **kwargs):
+        getattr(instance, self.name).delete()
+
+
+
+
+def resolve_role_field(obj, field):
+    ret = []
+
+    field_components = field.split('.', 1)
+    if hasattr(obj, field_components[0]):
+        obj = getattr(obj, field_components[0])
+    else:
+        return []
+
+    if len(field_components) == 1:
+        if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role:
+            raise Exception('%s refers to a %s, not an ImplicitRoleField or Role' % (field, str(type(obj))))
+        ret.append(obj)
+    else:
+        if type(obj) is ManyRelatedObjectsDescriptor:
+            for o in obj.all():
+                ret += resolve_role_field(o, field_components[1])
+        else:
+            ret += resolve_role_field(obj, field_components[1])
+
+    return ret
+
 
 
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
@@ -116,27 +154,6 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 
         role = Role.objects.create(name=self.role_name, content_object=instance)
         if self.parent_role:
-            def resolve_field(obj, field):
-                ret = []
-
-                field_components = field.split('.', 1)
-                if hasattr(obj, field_components[0]):
-                    obj = getattr(obj, field_components[0])
-                else:
-                    return []
-
-                if len(field_components) == 1:
-                    if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role:
-                        raise Exception('%s refers to a %s, not an ImplicitRoleField or Role' % (field, str(type(obj))))
-                    ret.append(obj)
-                else:
-                    if type(obj) is ManyRelatedObjectsDescriptor:
-                        for o in obj.all():
-                            ret += resolve_field(o, field_components[1])
-                    else:
-                        ret += resolve_field(obj, field_components[1])
-
-                return ret
 
             # Add all non-null parent roles as parents
             paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
@@ -144,11 +161,12 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
                 if path.startswith("singleton:"):
                     parents = [Role.singleton(path[10:])]
                 else:
-                    parents = resolve_field(instance, path)
+                    parents = resolve_role_field(instance, path)
                 for parent in parents:
                     role.parents.add(parent)
         setattr(instance, self.field.name, role)
-        instance.save(update_fields=[self.field.name,])
+        if instance.pk:
+            instance.save(update_fields=[self.field.name,])
 
         if self.permissions is not None:
             permissions = RolePermission(
@@ -198,7 +216,9 @@ class ImplicitRoleField(models.ForeignKey):
                     self
                 )
                 )
-        post_save.connect(self._save, cls, True)
+        post_init.connect(self._post_init, cls, True)
+        post_save.connect(self._post_save, cls, True)
+        post_delete.connect(self._post_delete, cls, True)
         add_lazy_relation(cls, self, "self", self.bind_m2m_changed)
 
     def bind_m2m_changed(self, _self, _role_class, cls):
@@ -263,7 +283,81 @@ class ImplicitRoleField(models.ForeignKey):
                         getattr(instance, self.name).parents.remove(getattr(obj, self.m2m_field_attr))
 
 
-    def _save(self, instance, *args, **kwargs):
+    def _post_init(self, instance, *args, **kwargs):
+        if not self.parent_role:
+            return
+        #if not hasattr(instance, self.name):
+        #    getattr(instance, self.name)
+
+        if not hasattr(self, '__original_parent_roles'):
+            paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
+            all_parents = set()
+            for path in paths:
+                if path.startswith("singleton:"):
+                    parents = [Role.singleton(path[10:])]
+                else:
+                    parents = resolve_role_field(instance, path)
+                for parent in parents:
+                    all_parents.add(parent)
+                    #role.parents.add(parent)
+            self.__original_parent_roles = all_parents
+
+            '''
+            field_names = self.parent_role
+            if type(field_names) is not list:
+                field_names = [field_names]
+            self.__original_values = {}
+            for field_name in field_names:
+                if field_name.startswith('singleton:'):
+                    continue
+                first_field_name = field_name.split('.')[0]
+                self.__original_values[first_field_name] = getattr(instance, first_field_name)
+            '''
+        else:
+            print('WE DO NEED THIS')
+        pass
+
+    def _post_save(self, instance, *args, **kwargs):
         # Ensure that our field gets initialized after our first save
-        if not hasattr(instance, self.name):
-            getattr(instance, self.name)
+        this_role = getattr(instance, self.name)
+        if not this_role.object_id:
+            # Ensure our ref back to our instance is set. This will not be set the
+            # first time the object is saved because we create the role in our _post_init
+            # but that happens before an id for the instance has been set (because it
+            # hasn't been saved yet!). Now that everything has an id, we patch things
+            # so the role references the instance.
+            this_role.content_object = instance
+            this_role.save()
+
+        # As object relations change, the role hierarchy might also change if the relations
+        # that changed were referenced in our magic parent_role field. This code synchronizes
+        # these changes.
+        if not self.parent_role:
+            return
+
+        paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
+        original_parents = self.__original_parent_roles
+        new_parents = set()
+        for path in paths:
+            if path.startswith("singleton:"):
+                parents = [Role.singleton(path[10:])]
+            else:
+                parents = resolve_role_field(instance, path)
+            for parent in parents:
+                new_parents.add(parent)
+
+        Role.pause_role_ancestor_rebuilding()
+        for role in original_parents - new_parents:
+            this_role.parents.remove(role)
+        for role in new_parents - original_parents:
+            this_role.parents.add(role)
+        Role.unpause_role_ancestor_rebuilding()
+
+        self.__original_parent_roles = new_parents
+
+    def _post_delete(self, instance, *args, **kwargs):
+        this_role = getattr(instance, self.name)
+        children = [c for c in this_role.children.all()]
+        this_role.delete()
+        for child in children:
+            children.rebuild_role_ancestor_list()
