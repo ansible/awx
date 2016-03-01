@@ -1,16 +1,21 @@
 import mock
 import pytest
 import json
+import urllib
 
-from awx.api.views import (
-    HostFactCompareView,
-)
 from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 def mock_feature_enabled(feature, bypass_database=None):
     return True
+
+def build_url(*args, **kwargs):
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
 
 # TODO: Consider making the fact_scan() fixture a Class, instead of a function, and move this method into it
 def find_fact(facts, host_id, module_name, timestamp):
@@ -23,8 +28,8 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), module_name
     hosts = hosts(host_count=1)
     facts = fact_scans(fact_scans=1, timestamp_epoch=epoch)
 
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
-    response = get(HostFactCompareView, user('admin', True), url, pk=hosts[0].id, params=get_params)
+    url = build_url('api:host_fact_compare_view', args=(hosts[0].pk,), get=get_params)
+    response = get(url, user('admin', True), params=get_params)
 
     fact_known = find_fact(facts, hosts[0].id, module_name, epoch)
     return (fact_known, response)
@@ -34,7 +39,7 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), module_name
 def test_no_fact_found(hosts, get, user):
     hosts = hosts(host_count=1)
     url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
-    response = get(HostFactCompareView, user('admin', True), url, pk=hosts[0].id)
+    response = get(url, user('admin', True))
 
     expected_response = {
         "detail": "Fact not found"
@@ -49,7 +54,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
     fact_scans(fact_scans=1)
 
     url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
-    response = get(HostFactCompareView, user('admin', True), url, pk=hosts[0].id)
+    response = get(url, user('admin', True))
 
     assert 'related' in response.data
     assert 'id' in response.data
@@ -111,7 +116,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
     team_obj.users.add(user_obj)
 
     url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
-    response = get(HostFactCompareView, user_obj, url, pk=hosts[0].id)
+    response = get(url, user_obj)
     return response
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)

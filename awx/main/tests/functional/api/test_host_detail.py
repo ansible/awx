@@ -2,9 +2,6 @@
 # Other host tests should live here to make this test suite more complete.
 import pytest
 
-from awx.api.views import (
-    HostDetail,
-)
 from django.core.urlresolvers import reverse
 
 @pytest.mark.django_db
@@ -12,7 +9,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
     hosts = hosts(host_count=1)
 
     url = reverse('api:host_detail', args=(hosts[0].pk,))
-    response = get(HostDetail, user('admin', True), url, pk=hosts[0].id)
+    response = get(url, user('admin', True))
 
     assert 'related' in response.data
     assert 'fact_versions' in response.data['related']

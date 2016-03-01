@@ -7,9 +7,6 @@ import urllib
 
 # AWX
 from awx.main.models.fact import Fact
-from awx.api.views import (
-    HostFactVersionsList,
-)
 from awx.main.utils import timestamp_apiformat
 
 # Django
@@ -19,12 +16,19 @@ from django.utils import timezone
 def mock_feature_enabled(feature, bypass_database=None):
     return True
 
+def build_url(*args, **kwargs):
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
+
 def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params={}, host_count=1):
     hosts = hosts(host_count=host_count)
     fact_scans(fact_scans=3, timestamp_epoch=epoch)
 
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
-    response = get(HostFactVersionsList, user('admin', True), url, pk=hosts[0].id, params=get_params)
+    url = build_url('api:host_fact_versions_list', args=(hosts[0].pk,), get=get_params)
+    response = get(url, user('admin', True))
 
     return (hosts[0], response)
 
@@ -50,7 +54,7 @@ def check_response_facts(facts_known, response):
 def test_no_facts_db(hosts, get, user):
     hosts = hosts(host_count=1)
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
-    response = get(HostFactVersionsList, user('admin', True), url, pk=hosts[0].id)
+    response = get(url, user('admin', True))
 
     response_expected = {
         'results': []
@@ -81,7 +85,7 @@ def test_basic_options_fields(hosts, fact_scans, options, user):
     fact_scans(fact_scans=1)
 
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
-    response = options(HostFactVersionsList, user('admin', True), url, pk=hosts[0].id)
+    response = options(url, user('admin', True), pk=hosts[0].id)
 
     #import json
     #print(json.dumps(response.data))
@@ -192,7 +196,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
     team_obj.users.add(user_obj)
 
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
-    response = get(HostFactVersionsList, user_obj, url, pk=hosts[0].id)
+    response = get(url, user_obj)
     return response
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
