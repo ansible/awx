@@ -72,28 +72,21 @@ def test_basic_fields(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-@pytest.mark.skipif(True, reason="Options fix landed in devel but not here. Enable this after this pr gets merged.")
 def test_basic_options_fields(hosts, fact_scans, options, user):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
-    response = options(url, user('admin', True), pk=hosts[0].id)
+    response = options(url, None, user('admin', True), pk=hosts[0].id)
 
-    #import json
-    #print(json.dumps(response.data))
-    assert 'related' in response.data
-    assert 'id' in response.data
-    assert 'facts' in response.data
-    assert 'module' in response.data
-    assert 'host' in response.data
-    assert isinstance(response.data['host'], int)
-    assert 'summary_fields' in response.data
-    assert 'host' in response.data['summary_fields']
-    assert 'name' in response.data['summary_fields']['host']
-    assert 'description' in response.data['summary_fields']['host']
-    assert 'host' in response.data['related']
-    assert reverse('api:host_detail', args=(hosts[0].pk,)) == response.data['related']['host']
+    import json
+    print(json.dumps(response.data))
+
+    assert 'related' in response.data['actions']['GET']
+    assert 'module' in response.data['actions']['GET']
+    assert ("ansible", "Ansible") in response.data['actions']['GET']['module']['choices']
+    assert ("services", "Services") in response.data['actions']['GET']['module']['choices']
+    assert ("packages", "Packages") in response.data['actions']['GET']['module']['choices']
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
