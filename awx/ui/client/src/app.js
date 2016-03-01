@@ -987,9 +987,10 @@ var tower = angular.module('Tower', [
                             if (urlToCheck === '/jobs') {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
                             } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
-                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck)) {
-
-                                // TODO: something will need to change here for stdout
+                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck) ||
+                                /\/inventory_sync\/(\d)+/.test(urlToCheck) ||
+                                /\/management_job\/(\d)+/.test(urlToCheck) ||
+                                /\/scm_update\/(\d)+/.test(urlToCheck)) {
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
