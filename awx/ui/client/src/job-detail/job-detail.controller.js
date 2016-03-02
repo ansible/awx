@@ -842,7 +842,6 @@ export default
                     $('.overlay').hide();
                     $('#summary-button').hide();
                     $('#hide-summary-button').hide();
-                    // $('#job-detail-container').css({ "width": "58.33333333%", "padding-right": "7px" });
                     $('#job-summary-container .job_well').css({
                         'box-shadow': 'none',
                         'height': 'auto'

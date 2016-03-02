@@ -12,6 +12,13 @@
     height: 30px;
 }
 
+.JobDetail-expandContainer{
+    flex: 1;
+    margin: 0px;
+    line-height: 30px;
+    white-space: nowrap;
+}
+
 .JobDetail-panelHeaderText{
     color: @default-interface-txt;
     flex: 1 0 auto;
@@ -94,7 +101,7 @@
 .JobDetail-tableToggle.active{
     background-color: @default-link;
     border: 1px solid @default-link;
-    color: #eeeeee;
+    color: @toggle-selected-text;
 }
 
 .JobDetail-tableToggle--left{

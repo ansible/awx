@@ -4,14 +4,18 @@
             <div id="job-detail-container" class="JobDetail-leftSide">
                 <div id="job-results-panel" class="JobDetail-resultsContainer Panel">
                     <div class="JobDetail-panelHeader">
-                        <a class="JobDetail-panelHeaderText" ng-show="lessStatus" href="" ng-click="toggleLessStatus()">
-                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
-                        </a>
-                        <a class="JobDetail-panelHeaderText" ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">
-                            RESULTS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
-                        </a>
-                        <button id="submit-action" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Start a job using this template" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
-                        <button id="delete-action" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJobTemplate(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                        <div class="JobDetail-expandContainer">
+                            <a class="JobDetail-panelHeaderText" ng-show="lessStatus" href="" ng-click="toggleLessStatus()">
+                                RESULTS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
+                            </a>
+                            <a class="JobDetail-panelHeaderText" ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">
+                                RESULTS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
+                            </a>
+                        </div>
+                        <div class="JobDetail-actions">
+                            <button id="submit-action" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Start a job using this template" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
+                            <button id="delete-action" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJobTemplate(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                        </div>
                     </div>
 
                     <div class="form-horizontal JobDetail-resultsDetails" role="form" id="job-status-form">
@@ -150,12 +154,14 @@
 
                 <div id="job-detail-panel" class="JobDetail-resultsContainer Panel">
                     <div class="JobDetail-panelHeader">
-                        <a class="JobDetail-panelHeaderText" ng-show="lessDetail" href="" ng-click="toggleLessDetail()">
-                            DETAILS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
-                        </a>
-                        <a class="JobDetail-panelHeaderText" ng-show="!lessDetail" href="" ng-click="toggleLessDetail()">
-                            DETAILS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
-                        </a>
+                        <div class="JobDetail-expandContainer">
+                            <a class="JobDetail-panelHeaderText" ng-show="lessDetail" href="" ng-click="toggleLessDetail()">
+                                DETAILS<i class="JobDetail-expandArrow fa fa-caret-left"></i>
+                            </a>
+                            <a class="JobDetail-panelHeaderText" ng-show="!lessDetail" href="" ng-click="toggleLessDetail()">
+                                DETAILS<i class="JobDetail-expandArrow fa fa-caret-down"></i>
+                            </a>
+                        </div>
                     </div>
 
                     <div id="job-detail-details">
@@ -362,13 +368,14 @@
                         </div>
 
                         <div class="JobDetail-panelHeader">
-                            <a class="JobDetail-panelHeaderText" ng-show="lessEvents" href="" ng-click="toggleLessEvents()">
-                                EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-left"></i>
-                            </a>
-                            <a class="JobDetail-panelHeaderText" ng-show="!lessEvents" href="" ng-click="toggleLessEvents()">
-                                EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-down"></i>
-                            </a>
-
+                            <div class="JobDetail-expandContainer">
+                                <a class="JobDetail-panelHeaderText" ng-show="lessEvents" href="" ng-click="toggleLessEvents()">
+                                    EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-left"></i>
+                                </a>
+                                <a class="JobDetail-panelHeaderText" ng-show="!lessEvents" href="" ng-click="toggleLessEvents()">
+                                    EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-down"></i>
+                                </a>
+                            </div>
                         </div>
                         <div id="events-summary">
                         <div id="hosts-summary-section" class="section">
@@ -387,14 +394,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                            <!-- <div class="row legend-row">
-                                <div class="col-md-12">
-                                    <div class="legend"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
-                                <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
-                                </div>
-                            </div> -->
-
                             <div class="table-header">
                                 <table class="table table-condensed">
                                     <thead>
