@@ -61,6 +61,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     )
     member_role = ImplicitRoleField(
         role_name='Organization Member',
+        parent_role='admin_role',
         permissions = {'read': True}
     )
 
