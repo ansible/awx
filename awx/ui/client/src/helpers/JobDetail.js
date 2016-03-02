@@ -235,7 +235,7 @@ export default
                 }
                 if (newActivePlay) {
                     scope.activePlay = newActivePlay;
-                    scope.jobData.plays[scope.activePlay].playActiveClass = 'List-tableRow--selected';
+                    scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
                 }
             }
         };
@@ -265,7 +265,7 @@ export default
                 }
                 if (newActiveTask) {
                     scope.activeTask = newActiveTask;
-                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'List-tableRow--selected';
+                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'JobDetail-tableRow--selected';
                 }
             }
         };
@@ -793,7 +793,7 @@ export default
             scope.selectedPlay = id;
             scope.plays.forEach(function(play, idx) {
                 if (play.id === scope.selectedPlay) {
-                    scope.plays[idx].playActiveClass = 'List-tableRow--selected';
+                    scope.plays[idx].playActiveClass = 'JobDetail-tableRow--selected';
                 }
                 else {
                     scope.plays[idx].playActiveClass = '';
@@ -940,7 +940,7 @@ export default
             scope.selectedTask = id;
             scope.tasks.forEach(function(task, idx) {
                 if (task.id === scope.selectedTask) {
-                    scope.tasks[idx].taskActiveClass = 'List-tableRow--selected';
+                    scope.tasks[idx].taskActiveClass = 'JobDetail-tableRow--selected';
                 }
                 else {
                     scope.tasks[idx].taskActiveClass = '';
@@ -1143,7 +1143,7 @@ export default
         return function(params) {
             var scope = params.scope,
                 resize = params.resize,
-                width, height, svg_height, svg_width, svg_radius, graph_data = [];
+                graph_data = [];
 
             // Ready the data
             if (scope.host_summary.ok) {
@@ -1192,7 +1192,8 @@ export default
                 element = $("#graph-section"),
                 colors, total,job_detail_chart;
 
-            colors = ['#60D66F', '#FF9900','#FF0000','#ff5850'];
+            // colors = ['#60D66F', '#FF9900','#FF0000','#ff5850'];
+            colors = _.map(dataset, function(d){return d.color});
             total = d3.sum(dataset.map(function(d) {
                   return d.value;
             }));
@@ -1221,6 +1222,7 @@ export default
                     "font-weight":400,
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
+
             d3.select(element.find(".nv-label text")[0])
                 .attr("class", "DashboardGraphs-hostStatusLabel--successful")
                 .style({
@@ -1228,7 +1230,7 @@ export default
                     "text-anchor": "start",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
-                    "fill" : '#3CB878',
+                    "fill" : colors[0],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[1])
@@ -1238,7 +1240,7 @@ export default
                     "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
-                    "fill" : "#FF9900",
+                    "fill" : colors[1],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[2])
@@ -1248,7 +1250,7 @@ export default
                     "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
-                    "fill" : "#FF0000",
+                    "fill" : colors[2],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[3])
@@ -1258,7 +1260,7 @@ export default
                     "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
-                    "fill" : "#ff5850",
+                    "fill" : colors[3],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
                 return job_detail_chart;

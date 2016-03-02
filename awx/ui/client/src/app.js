@@ -975,7 +975,7 @@ var tower = angular.module('Tower', [
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if ($state.is('jobDetail')) {
+                            } if ($state.is('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
                             } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
