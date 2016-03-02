@@ -49,6 +49,9 @@ export default
                         case 'schedule':
                             rtnTitle = 'SCHEDULES';
                             break;
+                        case 'host':
+                            rtnTitle = 'HOSTS';
+                            break;
                     }
 
                     return rtnTitle;
