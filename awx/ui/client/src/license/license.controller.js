@@ -24,7 +24,6 @@ export default
 	 	// So we hide the default input, show our own, and simulate clicks to the hidden input
 	 	$scope.fakeClick = function(){
 	 		$('#License-file').click();
-	 		//document.getElementById('License-file').click();
 	 	}
 		$scope.newLicense = {};
 		$scope.submit = function(event){
