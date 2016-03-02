@@ -42,7 +42,7 @@ export default ['templateUrl', function(templateUrl) {
                 }
                 else {
                     // Attach the taget to the query parameters
-                    $state.go('activityStream', {target: $scope.streamTarget});
+                    $state.go('activityStream', {target: $scope.streamTarget}, {inherit: false});
                 }
 
             }
