@@ -13,6 +13,7 @@ from django.core.management.base import CommandError
 # AWX
 from awx.main.management.commands.cleanup_facts import CleanupFacts, Command
 from awx.main.models.fact import Fact
+from awx.main.models.inventory import Host
 
 @pytest.mark.django_db
 def test_cleanup_granularity(fact_scans, hosts):
@@ -56,10 +57,36 @@ def test_cleanup_older_than_granularity_module(fact_scans, hosts):
     deleted_count = cleanup_facts.cleanup(timestamp_future, granularity, module='ansible')
     assert 20 == deleted_count
 
+
+'''
+Reduce the granularity of half of the facts scans, by half.
+'''
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Needs implementing. Takes brain power.")
 def test_cleanup_logic(fact_scans, hosts):
-    pass
+    epoch = timezone.now()
+    hosts = hosts(5)
+    fact_scans(60, timestamp_epoch=epoch)
+    timestamp_middle = epoch + timedelta(days=30)
+    granularity = relativedelta(days=2)
+    module = 'ansible'
+
+    cleanup_facts = CleanupFacts()
+    deleted_count = cleanup_facts.cleanup(timestamp_middle, granularity, module=module)
+
+
+    host_ids = Host.objects.all().values_list('id', flat=True)
+    host_facts = {}
+    for host_id in host_ids:
+        facts = Fact.objects.filter(host__id=host_id, module=module, timestamp__lt=timestamp_middle).order_by('-timestamp')
+        host_facts[host_id] = facts
+
+    for host_id, facts in host_facts.iteritems():
+        assert 15 == len(facts)
+
+        timestamp_pivot = timestamp_middle
+        for fact in facts:
+            timestamp_pivot -= granularity
+            assert fact.timestamp == timestamp_pivot
 
 @pytest.mark.django_db
 def test_parameters_ok(mocker):
