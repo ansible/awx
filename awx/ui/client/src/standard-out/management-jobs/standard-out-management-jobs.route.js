@@ -22,18 +22,8 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-            // if (!$rootScope.adhoc_event_socket) {
-            //     $rootScope.adhoc_event_socket = Socket({
-            //         scope: $rootScope,
-            //         endpoint: "ad_hoc_command_events"
-            //     });
-            //     $rootScope.adhoc_event_socket.init();
-            //     return true;
-            // } else {
-            //     return true;
-            // }
-
+        managementJobSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+            // TODO: determine whether or not we have socket support for management job standard out
             return true;
         }]
     }
