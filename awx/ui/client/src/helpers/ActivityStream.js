@@ -16,7 +16,7 @@ export default
             function () {
                 return function (target) {
 
-                    var rtnTitle = 'DASHBOARD';
+                    var rtnTitle = 'ALL ACTIVITY';
 
                     switch(target) {
                         case 'project':

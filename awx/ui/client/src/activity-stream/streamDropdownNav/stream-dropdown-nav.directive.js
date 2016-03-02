@@ -15,8 +15,8 @@ export default ['templateUrl', function(templateUrl) {
             $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
 
             $scope.options = [
+                {label: 'All Activity', value: 'dashboard'},
                 {label: 'Credentials', value: 'credential'},
-                {label: 'Dashboard', value: 'dashboard'},
                 {label: 'Hosts', value: 'host'},
                 {label: 'Inventories', value: 'inventory'},
                 {label: 'Inventory Scripts', value: 'inventory_script'},
@@ -38,7 +38,7 @@ export default ['templateUrl', function(templateUrl) {
 
                 if($scope.streamTarget && $scope.streamTarget == 'dashboard') {
                     // Just navigate to the base activity stream
-                    $state.go('activityStream', {}, {inherit: false, reload: true});
+                    $state.go('activityStream', {}, {inherit: false});
                 }
                 else {
                     // Attach the taget to the query parameters
