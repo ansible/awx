@@ -1,0 +1,99 @@
+<div class="License-container">
+	<div class="License-details">
+		<div class="Panel">
+			<div class="License-titleText">Details</div>
+			<div class="License-fields">
+				<div class="License-field">
+					<div class="License-field--label">License</div>
+					<div class="License-field--content"> 
+					<span ng-show='valid'><i class="fa fa-circle License-greenText"></i>   Valid</span>
+					<span ng-show='invalid'><i class="fa fa-circle License-redText"></i>   Invalid</span>
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Version</div>
+					<div class="License-field--content"> 
+					{{license.version}}
+					</div>
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">License Type</div> 
+					<div class="License-field--content">
+					{{license.license_info.license_type}}
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Subscription</div>
+					<div class="License-field--content"> 
+					{{license.license_info.subscription_name}}
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">License Key</div> 
+					<div class="License-field--content"> 					
+					{{license.license_info.license_key}}
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Expires On</div>
+					<div class="License-field--content"> 
+					{{time.expiresOn}}
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Time Remaining</div>
+					<div class="License-field--content"> 
+					{{time.remaining}} Day
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Hosts Available</div> 
+					<div class="License-field--content">
+					{{license.license_info.available_instances}}
+					</div>	
+				</div>
+				<div class="License-field">
+					<div class="License-field--label">Hosts Used</div>
+					<div class="License-field--content"> 
+					{{license.license_info.current_instances}}
+					</div>	
+				</div>
+				<div class="License-field License-greenText">
+					<div class="License-field--label">Hosts Remaining</div>
+					<div class="License-field--content"> 
+					{{license.license_info.free_instances}}
+					</div>	
+				</div>
+			</div>
+			<p>If you are ready to upgrade, please contact us by clicking the button below</p>
+			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-default">Upgrade</button></a>
+		</div>
+	</div>
+	<div class="License-management">
+		<div class="Panel">
+			<div class="License-titleText">License Management</div>
+			<p>Choose your license file, agree to the End User License Agreement, and click submit.</p>
+			<form id="License-form" name="license">
+				<div class="input-group License-file--container">
+					<span class="btn btn-default input-group-addon" ng-click="fakeClick()">Browse...</span>
+					<input class="form-control" ng-disabled="true" placeholder="{{fileName}}" />
+					<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
+				</div>
+				<div class="License-titleText prepend-asterisk"> End User License Agreement</div>
+				<div class="form-group License-eula">
+					<textarea class="form-control">{{license.eula}}
+					</textarea>
+				</div>
+				<div class="form-group">
+					<div class="checkbox">
+						<div class="License-details--label"><input type="checkbox" ng-model="newLicense.eula" required>  I agree to the End User License Agreement</div>
+						<div class="License-submit--container pull-right">
+							<span ng-hide="success == null || false" class="License-greenText License-submit--success pull-left">Save successful!</span>
+							<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null">Submit</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

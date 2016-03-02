@@ -19,7 +19,6 @@ import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
 import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
-import License from "./helpers/License";
 import LoadConfig from "./helpers/LoadConfig";
 import PaginationHelpers from "./helpers/PaginationHelpers";
 import Parse from "./helpers/Parse";
@@ -55,7 +54,6 @@ export
         JobSubmission,
         JobTemplates,
         Jobs,
-        License,
         LoadConfig,
         PaginationHelpers,
         Parse,

@@ -1,10 +1,8 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
-
-
 
 var urlPrefix;
 
@@ -34,6 +32,7 @@ import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 
 // modules
+import license from './license/main';
 import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
@@ -47,7 +46,6 @@ import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import lookUpHelper from './lookup/main';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
-import {LicenseController} from './controllers/License';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
@@ -80,6 +78,7 @@ var tower = angular.module('Tower', [
     // 'ngAnimate',
     'ngSanitize',
     'ngCookies',
+    license.name,
     RestServices.name,
     browserData.name,
     systemTracking.name,
@@ -100,7 +99,6 @@ var tower = angular.module('Tower', [
     standardOut.name,
     'templates',
     'Utilities',
-    'LicenseHelper',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
@@ -859,21 +857,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('license', {
-                url: '/license',
-                templateUrl: urlPrefix + 'partials/license.html',
-                controller: LicenseController,
-                ncyBreadcrumb: {
-                    parent: 'setup',
-                    label: 'LICENSE'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             state('sockets', {
                 url: '/sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
@@ -1043,7 +1026,6 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
-
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
@@ -1083,15 +1065,15 @@ var tower = angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
-                            // if not headed to /login or /logout, then check the license
-                            CheckLicense.test();
-                        }
                     }
                     activateTab();
                 });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                    // catch license expiration notifications immediately after user logs in, redirect
+                    if (fromState.name == 'signIn'){
+                        CheckLicense.notify();
+                    }
                     // broadcast event change if editing crud object
                     if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
                         var list = $location.$$path.split("/")[3];
