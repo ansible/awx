@@ -985,7 +985,7 @@ var tower = angular.module('Tower', [
                                 $state.is('adHocJobStdout') ||
                                 $state.is('inventorySyncStdout') ||
                                 $state.is('managementJobStdout') ||
-                                $state.is('scmUpdateStdout') {
+                                $state.is('scmUpdateStdout')) {
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
