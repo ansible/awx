@@ -1695,23 +1695,31 @@ class RoleAccess(BaseAccess):
     def get_queryset(self):
         if self.user.is_superuser:
             return self.model.objects.all()
-        return self.model.objects.none()
+        return self.model.visible_roles(self.user)
 
     def can_change(self, obj, data):
         return self.user.is_superuser
 
     def can_add(self, obj, data):
-        return self.user.is_superuser
+        # Unsupported for now
+        return False
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
-        return self.user.is_superuser
+        return self.can_unattach(obj, sub_obj, relationship)
 
     def can_unattach(self, obj, sub_obj, relationship):
-        return self.user.is_superuser
+        if self.user.is_superuser:
+            return True
+        if obj.object_id and \
+           isinstance(obj.content_object, ResourceMixin) and \
+           obj.content_object.accessible_by(self.user, {'write': True}):
+               return True
+        return False
 
     def can_delete(self, obj):
-        return self.user.is_superuser
+        # Unsupported for now
+        return False
 
 
 class ResourceAccess(BaseAccess):
