@@ -21,6 +21,7 @@ django-auth-ldap==1.2.6
 django-celery==3.1.17
 django-crum==0.6.1
 django-extensions==1.5.9
+git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=django-jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
 djangorestframework==3.3.2
@@ -48,6 +49,7 @@ idna==2.0
 importlib==1.0.3
 ip-associations-python-novaclient-ext==0.1
 ipaddress==1.0.16
+irc==13.3.1
 iso8601==0.1.11
 isodate==0.5.1
 jsonpatch==1.12
@@ -84,6 +86,7 @@ psycopg2
 pyasn1==0.1.9
 pycrypto==2.6.1
 pycparser==2.14
+pygerduty==0.32.1
 PyJWT==1.4.0
 pymongo==2.8
 pyOpenSSL==0.15.1
@@ -121,11 +124,13 @@ requestsexceptions==1.1.1
 shade==1.4.0
 simplejson==3.8.1
 six==1.9.0
+slackclient==0.16
 statsd==3.2.1
 stevedore==1.10.0
 suds==0.4
 unicodecsv==0.14.1
 warlock==1.2.0
+twilio==4.9.1
 wheel==0.24.0
 wrapt==1.10.6
 wsgiref==0.1.2

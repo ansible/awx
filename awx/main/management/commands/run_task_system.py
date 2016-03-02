@@ -15,7 +15,7 @@ from django.core.management.base import NoArgsCommand
 # AWX
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
-from awx.main.tasks import handle_work_error
+from awx.main.tasks import handle_work_error, handle_work_success
 from awx.main.utils import get_system_task_capacity
 
 # Celery
@@ -265,14 +265,15 @@ def process_graph(graph, task_capacity):
                               [{'type': graph.get_node_type(n['node_object']),
                                 'id': n['node_object'].id} for n in node_dependencies]
             error_handler = handle_work_error.s(subtasks=dependent_nodes)
-            start_status = node_obj.start(error_callback=error_handler)
+            success_handler = handle_work_success.s(task_actual={'type': graph.get_node_type(node_obj),
+                                                                 'id': node_obj.id})
+            start_status = node_obj.start(error_callback=error_handler, success_callback=success_handler)
             if not start_status:
                 node_obj.status = 'failed'
                 if node_obj.job_explanation:
                     node_obj.job_explanation += ' '
                 node_obj.job_explanation += 'Task failed pre-start check.'
                 node_obj.save()
-                # TODO: Run error handler
                 continue
             remaining_volume -= impact
             running_impact += impact

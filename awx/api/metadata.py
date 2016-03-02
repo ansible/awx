@@ -13,7 +13,7 @@ from rest_framework import serializers
 from rest_framework.request import clone_request
 
 # Ansible Tower
-from awx.main.models import InventorySource
+from awx.main.models import InventorySource, Notifier
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -75,6 +75,12 @@ class Metadata(metadata.SimpleMetadata):
             for cp in ('ec2',):
                 get_group_by_choices = getattr(InventorySource, 'get_%s_group_by_choices' % cp)
                 field_info['%s_group_by_choices' % cp] = get_group_by_choices()
+
+        # Special handling of notification configuration where the required properties
+        # are conditional on the type selected.
+        if field.field_name == 'notification_configuration':
+            for (notification_type_name, notification_tr_name, notification_type_class) in Notifier.NOTIFICATION_TYPES:
+                field_info[notification_type_name] = notification_type_class.init_parameters
 
         # Update type of fields returned...
         if field.field_name == 'type':

@@ -15,7 +15,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
-    Find, LogViewer, GetProjectIcon, GetProjectToolTip, $filter, $state) {
+    Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
     ClearScope();
 
@@ -200,24 +200,19 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         $state.transitionTo('projects.edit', {id: id});
     };
 
-    if ($scope.removeShowLogViewer) {
-        $scope.removeShowLogViewer();
+    if ($scope.removeGoToJobDetails) {
+        $scope.removeGoToJobDetails();
     }
-    $scope.removeShowLogViewer = $scope.$on('ShowLogViewer', function(e, data) {
-        if (data.related.current_update) {
+    $scope.removeGoToJobDetails = $scope.$on('GoToJobDetails', function(e, data) {
+        if (data.summary_fields.current_update || data.summary_fields.last_update) {
+
             Wait('start');
-            LogViewer({
-                scope: $scope,
-                url: data.related.current_update,
-                getIcon: GetProjectIcon
-            });
-        } else if (data.related.last_update) {
-            Wait('start');
-            LogViewer({
-                scope: $scope,
-                url: data.related.last_update,
-                getIcon: GetProjectIcon
-            });
+
+            // Grab the id from summary_fields
+            var id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
+
+            $state.go('scmUpdateStdout', {id: id});
+
         } else {
             Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
                 ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
@@ -235,7 +230,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             Rest.setUrl(project.url);
             Rest.get()
                 .success(function(data) {
-                    $scope.$emit('ShowLogViewer', data);
+                    $scope.$emit('GoToJobDetails', data);
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -374,7 +369,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
     'Refresh', 'Wait', 'GetChoices', 'Empty', 'Find',
-    'LogViewer', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
+    'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
 ];
 
 

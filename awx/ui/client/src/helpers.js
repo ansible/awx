@@ -21,7 +21,6 @@ import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
 import License from "./helpers/License";
 import LoadConfig from "./helpers/LoadConfig";
-import LogViewer from "./helpers/LogViewer";
 import PaginationHelpers from "./helpers/PaginationHelpers";
 import Parse from "./helpers/Parse";
 import ProjectPath from "./helpers/ProjectPath";
@@ -58,7 +57,6 @@ export
         Jobs,
         License,
         LoadConfig,
-        LogViewer,
         PaginationHelpers,
         Parse,
         ProjectPath,

@@ -13,8 +13,8 @@
 export default
     angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFormDefinition', 'HostsHelper'])
 
-        .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'LookUpName', 'Empty', 'EventAddPreFormattedText',
-        function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, LookUpName, Empty, EventAddPreFormattedText) {
+        .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'Empty', 'EventAddPreFormattedText',
+        function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, Empty, EventAddPreFormattedText) {
             return function(params) {
                 var parent_scope = params.scope,
                     url = params.url,

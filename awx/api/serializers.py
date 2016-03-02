@@ -9,8 +9,6 @@ import logging
 from collections import OrderedDict
 from dateutil import rrule
 
-from rest_framework_mongoengine.serializers import DocumentSerializer
-
 # PyYAML
 import yaml
 
@@ -46,12 +44,10 @@ from awx.main.conf import tower_settings
 from awx.api.license import feature_enabled
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
 
-from awx.fact.models import * # noqa
-
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
-DEFAULT_SUMMARY_FIELDS = ('name', 'description')# , 'created_by', 'modified_by')#, 'type')
+DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modified_by')#, 'type')
 
 # Keys are fields (foreign keys) where, if found on an instance, summary info
 # should be added to the serialized data.  Values are a tuple of field names on
@@ -555,18 +551,18 @@ class BaseSerializer(serializers.ModelSerializer):
 class EmptySerializer(serializers.Serializer):
     pass
 
-
-class BaseFactSerializer(DocumentSerializer):
+class BaseFactSerializer(BaseSerializer):
 
     __metaclass__ = BaseSerializerMetaclass
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
         if 'module' in ret and feature_enabled('system_tracking'):
-            choices = [(o, o.title()) for o in FactVersion.objects.all().only('module').distinct('module')]
-            ret['module'] = serializers.ChoiceField(source='module', choices=choices, read_only=True, required=False)
+            # TODO: the values_list may pull in a LOT of entries before the distinct is called
+            modules = Fact.objects.all().values_list('module', flat=True).distinct()
+            choices = [(o, o.title()) for o in modules]
+            ret['module'] = serializers.ChoiceField(choices=choices, read_only=True, required=False)
         return ret
-
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 
@@ -868,7 +864,11 @@ class OrganizationSerializer(BaseSerializer):
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
-            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,))
+            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
+            notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:organization_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:organization_notifiers_error_list', args=(obj.pk,)),
         ))
         return res
 
@@ -938,6 +938,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
             schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
         ))
         # Backwards compatibility.
         if obj.current_update:
@@ -983,6 +986,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
         res.update(dict(
             project = reverse('api:project_detail', args=(obj.project.pk,)),
             cancel = reverse('api:project_update_cancel', args=(obj.pk,)),
+            notifications = reverse('api:project_update_notifications_list', args=(obj.pk,)),
         ))
         return res
 
@@ -1390,6 +1394,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
+            notifiers_any = reverse('api:inventory_source_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:inventory_source_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:inventory_source_notifiers_error_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1434,6 +1441,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         res.update(dict(
             inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
             cancel = reverse('api:inventory_update_cancel', args=(obj.pk,)),
+            notifications = reverse('api:inventory_update_notifications_list', args=(obj.pk,)),
         ))
         return res
 
@@ -1672,6 +1680,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
             launch = reverse('api:job_template_launch', args=(obj.pk,)),
+            notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1726,6 +1737,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             job_tasks = reverse('api:job_job_tasks_list', args=(obj.pk,)),
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
+            notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
         ))
         if obj.job_template and obj.job_template.active:
             res['job_template'] = reverse('api:job_template_detail',
@@ -2141,6 +2153,79 @@ class JobLaunchSerializer(BaseSerializer):
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         return attrs
 
+class NotifierSerializer(BaseSerializer):
+
+    class Meta:
+        model = Notifier
+        fields = ('*', 'organization', 'notification_type', 'notification_configuration')
+
+    type_map = {"string": (str, unicode),
+                "int": (int,),
+                "bool": (bool,),
+                "list": (list,),
+                "password": (str, unicode),
+                "object": (dict, OrderedDict)}
+
+    def to_representation(self, obj):
+        ret = super(NotifierSerializer, self).to_representation(obj)
+        for field in obj.notification_class.init_parameters:
+            if field in ret['notification_configuration'] and \
+               force_text(ret['notification_configuration'][field]).startswith('$encrypted$'):
+                ret['notification_configuration'][field] = '$encrypted$'
+        return ret
+
+    def get_related(self, obj):
+        res = super(NotifierSerializer, self).get_related(obj)
+        res.update(dict(
+            test = reverse('api:notifier_test', args=(obj.pk,)),
+            notifications = reverse('api:notifier_notification_list', args=(obj.pk,)),
+        ))
+        if obj.organization and obj.organization.active:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+        return res
+
+    def validate(self, attrs):
+        notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
+        missing_fields = []
+        incorrect_type_fields = []
+        if 'notification_configuration' not in attrs:
+            return attrs
+        for field in notification_class.init_parameters:
+            if field not in attrs['notification_configuration']:
+                missing_fields.append(field)
+                continue
+            field_val = attrs['notification_configuration'][field]
+            field_type = notification_class.init_parameters[field]['type']
+            expected_types = self.type_map[field_type]
+            if not type(field_val) in expected_types:
+                incorrect_type_fields.append((field, field_type))
+                continue
+            if field_type == "password" and field_val.startswith('$encrypted$'):
+                missing_fields.append(field)
+        error_list = []
+        if missing_fields:
+            error_list.append("Missing required fields for Notification Configuration: {}".format(missing_fields))
+        if incorrect_type_fields:
+            for type_field_error in incorrect_type_fields:
+                error_list.append("Configuration field '{}' incorrect type, expected {}".format(type_field_error[0],
+                                                                                                type_field_error[1]))
+        if error_list:
+            raise serializers.ValidationError(error_list)
+        return attrs
+
+class NotificationSerializer(BaseSerializer):
+
+    class Meta:
+        model = Notification
+        fields = ('*', '-name', '-description', 'notifier', 'error', 'status', 'notifications_sent',
+                  'notification_type', 'recipients', 'subject')
+
+    def get_related(self, obj):
+        res = super(NotificationSerializer, self).get_related(obj)
+        res.update(dict(
+            notifier = reverse('api:notifier_detail', args=(obj.notifier.pk,)),
+        ))
+        return res
 
 class ScheduleSerializer(BaseSerializer):
 
@@ -2391,28 +2476,31 @@ class AuthTokenSerializer(serializers.Serializer):
 
 
 class FactVersionSerializer(BaseFactSerializer):
-    related = serializers.SerializerMethodField('get_related')
 
     class Meta:
-        model = FactVersion
-        fields = ('related', 'module', 'timestamp',)
+        model = Fact
+        fields = ('related', 'module', 'timestamp')
+        read_only_fields = ('*',)
 
     def get_related(self, obj):
-        host_obj = self.context.get('host_obj')
-        res = {}
+        res = super(FactVersionSerializer, self).get_related(obj)
         params = {
             'datetime': timestamp_apiformat(obj.timestamp),
             'module': obj.module,
         }
-        res.update(dict(
-            fact_view = build_url('api:host_fact_compare_view', args=(host_obj.pk,), get=params),
-        ))
+        res['fact_view'] = build_url('api:host_fact_compare_view', args=(obj.host.pk,), get=params)
         return res
-
 
 class FactSerializer(BaseFactSerializer):
 
     class Meta:
         model = Fact
-        depth = 2
-        fields = ('timestamp', 'host', 'module', 'fact')
+        # TODO: Consider adding in host to the fields list ?
+        fields = ('related', 'timestamp', 'module', 'facts', 'id', 'summary_fields', 'host')
+        read_only_fields = ('*',)
+
+    def get_related(self, obj):
+        res = super(FactSerializer, self).get_related(obj)
+        res['host'] = obj.host.get_absolute_url()
+        return res
+

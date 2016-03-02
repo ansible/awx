@@ -39,6 +39,9 @@ from celery import Task, task
 from django.conf import settings
 from django.db import transaction, DatabaseError
 from django.utils.timezone import now
+from django.utils.encoding import smart_text
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
 # AWX
 from awx.lib.metrics import task_timer
@@ -46,13 +49,15 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
+from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -63,6 +68,48 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 logger = logging.getLogger('awx.main.tasks')
+
+@task()
+def send_notifications(notification_list, job_id=None):
+    if not isinstance(notification_list, list):
+        raise TypeError("notification_list should be of type list")
+    if job_id is not None:
+        job_actual = UnifiedJob.objects.get(id=job_id)
+    for notification_id in notification_list:
+        notification = Notification.objects.get(id=notification_id)
+        try:
+            sent = notification.notifier.send(notification.subject, notification.body)
+            notification.status = "successful"
+            notification.notifications_sent = sent
+        except Exception as e:
+            logger.error("Send Notification Failed {}".format(e))
+            notification.status = "failed"
+            notification.error = smart_text(e)
+        finally:
+            notification.save()
+        if job_id is not None:
+            job_actual.notifications.add(notification)
+
+@task(bind=True)
+def run_administrative_checks(self):
+    if not tower_settings.TOWER_ADMIN_ALERTS:
+        return
+    reader = TaskSerializer()
+    validation_info = reader.from_database()
+    if validation_info.get('instance_count', 0) < 1:
+        return
+    used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
+    tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+    if (used_percentage * 100) > 90:
+        send_mail("Ansible Tower host usage over 90%",
+                  "Ansible Tower host usage over 90%",
+                  tower_admin_emails,
+                  fail_silently=True)
+    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+        send_mail("Ansible Tower license will expire soon",
+                  "Ansible Tower license will expire soon",
+                  tower_admin_emails,
+                  fail_silently=True)
 
 @task()
 def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
@@ -134,7 +181,6 @@ def notify_task_runner(metadata_dict):
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
 
-
 @task()
 def mongodb_control(cmd):
     # Sanity check: Do not send arbitrary commands.
@@ -160,6 +206,39 @@ def mongodb_control(cmd):
         p.wait()
 
 @task(bind=True)
+def handle_work_success(self, result, task_actual):
+    if task_actual['type'] == 'project_update':
+        instance = ProjectUpdate.objects.get(id=task_actual['id'])
+        instance_name = instance.name
+        notifiers = instance.project.notifiers
+        friendly_name = "Project Update"
+    elif task_actual['type'] == 'inventory_update':
+        instance = InventoryUpdate.objects.get(id=task_actual['id'])
+        instance_name = instance.name
+        notifiers = instance.inventory_source.notifiers
+        friendly_name = "Inventory Update"
+    elif task_actual['type'] == 'job':
+        instance = Job.objects.get(id=task_actual['id'])
+        instance_name = instance.job_template.name
+        notifiers = instance.job_template.notifiers
+        friendly_name = "Job"
+    elif task_actual['type'] == 'ad_hoc_command':
+        instance = AdHocCommand.objects.get(id=task_actual['id'])
+        instance_name = instance.module_name
+        notifiers = [] # TODO: Ad-hoc commands need to notify someone
+        friendly_name = "AdHoc Command"
+    else:
+        return
+    notification_body = instance.notification_data()
+    notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
+                                                                               task_actual['id'],
+                                                                               instance_name,
+                                                                               notification_body['url'])
+    send_notifications.delay([n.generate_notification(notification_subject, notification_body)
+                              for n in set(notifiers.get('success', []) + notifiers.get('any', []))],
+                             job_id=task_actual['id'])
+
+@task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
@@ -173,15 +252,23 @@ def handle_work_error(self, task_id, subtasks=None):
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
+                notifiers = instance.project.notifiers
+                friendly_name = "Project Update"
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
+                notifiers = instance.inventory_source.notifiers
+                friendly_name = "Inventory Update"
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
+                notifiers = instance.job_template.notifiers
+                friendly_name = "Job"
             elif each_task['type'] == 'ad_hoc_command':
                 instance = AdHocCommand.objects.get(id=each_task['id'])
                 instance_name = instance.module_name
+                notifiers = []
+                friendly_name = "AdHoc Command"
             else:
                 # Unknown task type
                 break
@@ -190,6 +277,7 @@ def handle_work_error(self, task_id, subtasks=None):
                 first_task_id = instance.id
                 first_task_type = each_task['type']
                 first_task_name = instance_name
+                first_task_friendly_name = friendly_name
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
@@ -197,6 +285,16 @@ def handle_work_error(self, task_id, subtasks=None):
                     (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
+        notification_body = first_task.notification_data()
+        notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
+                                                                                first_task_id,
+                                                                                first_task_name,
+                                                                                notification_body['url'])
+        notification_body['friendly_name'] = first_task_friendly_name
+        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                  for n in set(notifiers.get('error', []) + notifiers.get('any', []))],
+                                 job_id=first_task_id)
+
 
 @task()
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):

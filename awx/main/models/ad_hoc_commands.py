@@ -5,6 +5,7 @@
 import hmac
 import json
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -139,6 +140,9 @@ class AdHocCommand(UnifiedJob):
     def get_absolute_url(self):
         return reverse('api:ad_hoc_command_detail', args=(self.pk,))
 
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
+
     @property
     def task_auth_token(self):
         '''Return temporary auth token used for task requests via API.'''
@@ -221,8 +225,9 @@ class AdHocCommandEvent(CreatedModifiedModel):
         ('runner_on_unreachable', _('Host Unreachable'), True),
         # Tower won't see no_hosts (check is done earlier without callback).
         #('runner_on_no_hosts', _('No Hosts Matched'), False),
-        # Tower should probably never see skipped (no conditionals).
-        #('runner_on_skipped', _('Host Skipped'), False),
+        # Tower will see skipped (when running in check mode for a module that
+        # does not support check mode).
+        ('runner_on_skipped', _('Host Skipped'), False),
         # Tower does not support async for ad hoc commands.
         #('runner_on_async_poll', _('Host Polling'), False),
         #('runner_on_async_ok', _('Host Async OK'), False),
