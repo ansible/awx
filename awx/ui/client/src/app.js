@@ -898,9 +898,9 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+        function ($q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
 
 
@@ -976,33 +976,28 @@ var tower = angular.module('Tower', [
                                 ' status changed to ' + data.status +
                                 ' send to ' + $location.$$url);
 
-                            var urlToCheck = $location.$$url;
-                            if (urlToCheck.indexOf("?") !== -1) {
-                                urlToCheck = urlToCheck.substr(0, urlToCheck.indexOf("?"));
-                            }
-
                             // this acts as a router...it emits the proper
                             // value based on what URL the user is currently
                             // accessing.
-                            if (urlToCheck === '/jobs') {
+                            if ($state.is('jobs')) {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
-                            } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
-                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck) ||
-                                /\/inventory_sync\/(\d)+/.test(urlToCheck) ||
-                                /\/management_job\/(\d)+/.test(urlToCheck) ||
-                                /\/scm_update\/(\d)+/.test(urlToCheck)) {
+                            } else if ($state.is('jobDetail') ||
+                                $state.is('adHocJobStdout') ||
+                                $state.is('inventorySyncStdout') ||
+                                $state.is('managementJobStdout') ||
+                                $state.is('scmUpdateStdout') {
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if (/\/jobs\/(\d)+/.test(urlToCheck)) {
+                            } else if ($state.is('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
-                            } else if (urlToCheck === '/home') {
+                            } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
-                            } else if (urlToCheck === '/portal') {
+                            } else if ($state.is('portal')) {
                                 $rootScope.$emit('JobStatusChange-portal', data);
-                            } else if (urlToCheck === '/projects') {
+                            } else if ($state.is('projects')) {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/inventories\/(\d)+\/manage/.test(urlToCheck)) {
+                            } else if ($state.is('inventoryManage')) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         });
