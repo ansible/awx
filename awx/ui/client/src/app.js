@@ -32,6 +32,7 @@ import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 
 // modules
+import about from './about/main';
 import license from './license/main';
 import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
@@ -78,6 +79,7 @@ var tower = angular.module('Tower', [
     // 'ngAnimate',
     'ngSanitize',
     'ngCookies',
+    about.name,
     license.name,
     RestServices.name,
     browserData.name,
@@ -179,7 +181,6 @@ var tower = angular.module('Tower', [
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'SocketHelper',
-    'AboutAnsibleHelpModal',
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
@@ -882,9 +883,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
+        LoadConfig, Store, ShowSocketHelp, pendoService) {
 
 
             var sock;
@@ -1121,10 +1122,6 @@ var tower = angular.module('Tower', [
                 }
 
                 activateTab();
-
-                $rootScope.viewAboutTower = function(){
-                    AboutAnsibleHelp();
-                };
 
                 $rootScope.viewCurrentUser = function () {
                     $location.path('/users/' + $rootScope.current_user.id);

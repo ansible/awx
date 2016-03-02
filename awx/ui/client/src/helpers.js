@@ -7,7 +7,6 @@
 import './forms';
 import './lists';
 
-import AboutAnsible from "./helpers/AboutAnsible";
 import Children from "./helpers/Children";
 import Credentials from "./helpers/Credentials";
 import EventViewer from "./helpers/EventViewer";
@@ -42,8 +41,7 @@ import ApiModelHelper from "./helpers/ApiModel";
 import ActivityStreamHelper from "./helpers/ActivityStream";
 
 export
-    {   AboutAnsible,
-        Children,
+    {   Children,
         Credentials,
         EventViewer,
         Events,
