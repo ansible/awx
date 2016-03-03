@@ -157,11 +157,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     )
     owner_role = ImplicitRoleField(
         role_name='Credential Owner',
+        role_description='Owner of the credential',
         parent_role='team.admin_role',
         permissions = {'all': True}
     )
     usage_role = ImplicitRoleField(
         role_name='Credential User',
+        role_description='May use this credential, but not read sensitive portions or modify it',
         parent_role= 'team.member_role',
         permissions = {'use': True}
     )

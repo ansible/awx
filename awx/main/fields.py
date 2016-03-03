@@ -134,8 +134,9 @@ def resolve_role_field(obj, field):
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
     """Descriptor Implict Role Fields. Auto-creates the appropriate role entry on first access"""
 
-    def __init__(self, role_name, permissions, parent_role,  *args, **kwargs):
+    def __init__(self, role_name, role_description, permissions, parent_role,  *args, **kwargs):
         self.role_name = role_name
+        self.role_description = role_description if role_description else ""
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -152,7 +153,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         if connection.needs_rollback:
             raise TransactionManagementError('Current transaction has failed, cannot create implicit role')
 
-        role = Role.objects.create(name=self.role_name, content_object=instance)
+        role = Role.objects.create(name=self.role_name, description=self.role_description, content_object=instance)
         if self.parent_role:
 
             # Add all non-null parent roles as parents
@@ -195,8 +196,9 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitRoleField(models.ForeignKey):
     """Implicitly creates a role entry for a resource"""
 
-    def __init__(self, role_name=None, permissions=None, parent_role=None, *args, **kwargs):
+    def __init__(self, role_name=None, role_description=None, permissions=None, parent_role=None, *args, **kwargs):
         self.role_name = role_name
+        self.role_description = role_description
         self.permissions = permissions
         self.parent_role = parent_role
 
@@ -211,6 +213,7 @@ class ImplicitRoleField(models.ForeignKey):
                 self.name,
                 ImplicitRoleDescriptor(
                     self.role_name,
+                    self.role_description,
                     self.permissions,
                     self.parent_role,
                     self

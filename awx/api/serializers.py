@@ -358,6 +358,7 @@ class BaseSerializer(serializers.ModelSerializer):
                 roles[field.name] = {
                     'id': role.id,
                     'name': role.name,
+                    'description': role.description,
                     'url': role.get_absolute_url(),
                 }
         if len(roles) > 0:
@@ -1540,7 +1541,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
         ret['summary_fields']['permissions'] = resource.get_permissions(user)
 
         def format_role_perm(role):
-            role_dict = { 'id': role.id, 'name': role.name}
+            role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
             try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
