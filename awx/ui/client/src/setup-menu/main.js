@@ -3,9 +3,7 @@ import icon from '../shared/icon/main';
 
 export default
     angular.module('setupMenu',
-                   [    'AboutAnsibleHelpModal',
-                        icon.name
-                   ])
+        [ icon.name])
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route);
         }]);
