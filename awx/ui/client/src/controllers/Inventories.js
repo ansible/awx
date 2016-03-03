@@ -922,7 +922,7 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         generateList.inject(InventoryGroups, {
             mode: 'edit',
             id: 'group-list-container',
-            searchSize: 'col-lg-6 col-md-6 col-sm-6',
+            searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
             scope: $scope
         });
 

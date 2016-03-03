@@ -143,7 +143,6 @@ table, tbody {
 
 .List-header {
     display: flex;
-    height: 34px;
     align-items: center;
 }
 
@@ -151,7 +150,7 @@ table, tbody {
     align-items: center;
     flex: 1 0 auto;
     display: flex;
-    margin-top: -2px;
+    height: 34px;
 }
 
 .List-titleBadge {
@@ -172,20 +171,31 @@ table, tbody {
     text-transform: uppercase;
 }
 
-.List-actions {
+.List-actionHolder {
     justify-content: flex-end;
     display: flex;
+    height: 34px;
+}
+
+.List-actions {
     margin-top: -10px;
+}
+
+.List-auxAction + .List-actions {
     margin-left: 10px;
 }
 
 .List-auxAction {
-    justify-content: flex-end;
+    align-items: center;
     display: flex;
 }
 
 .List-auxActionStream {
     width: 175px;
+}
+
+.List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+    margin-left: 10px;
 }
 
 .List-buttonSubmit {
@@ -351,4 +361,26 @@ table, tbody {
     color: #d7d7d7;
     display: block;
     font-size: 13px;
+}
+
+@media (max-width: 991px) {
+    .List-searchWidget + .List-searchWidget {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .List-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .List-actionHolder {
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1 0 auto;
+        margin-top: 12px;
+    }
+    .List-well {
+        margin-top: 20px;
+    }
 }
