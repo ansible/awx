@@ -730,11 +730,8 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
     relationship='member_role.children'
 
     def get_queryset(self):
-        # XXX: This needs to be the intersection between
-        # what roles the user has and what roles the viewer
-        # has access to see.
         team = Team.objects.get(pk=self.kwargs['pk'])
-        return team.member_role.children
+        return team.member_role.children.filter(id__in=Role.visible_roles(self.request.user))
 
     # XXX: Need to enforce permissions
     def post(self, request, *args, **kwargs):
@@ -979,13 +976,11 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
     serializer_class = RoleSerializer
     parent_model = User
     relationship='roles'
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        # XXX: This needs to be the intersection between
-        # what roles the user has and what roles the viewer
-        # has access to see.
-        u = User.objects.get(pk=self.kwargs['pk'])
-        return u.roles
+        #u = User.objects.get(pk=self.kwargs['pk'])
+        return Role.visible_roles(self.request.user).filter(members__in=[int(self.kwargs['pk']), ])
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
@@ -994,6 +989,10 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(type(self), self).post(request, *args, **kwargs)
+
+    def check_parent_access(self, parent=None):
+        # We hide roles that shouldn't be seen in our queryset
+        return True
 
 
 
@@ -3162,28 +3161,26 @@ class SettingsReset(APIView):
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-#class RoleList(ListCreateAPIView):
+
 class RoleList(ListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
-    # XXX: Permissions - only roles the user has access to see should be listed here
     def get_queryset(self):
-        return Role.objects
+        if self.request.user.is_superuser:
+            return Role.objects
+        return Role.visible_roles(self.request.user)
 
-    # XXX: Need to define who can create custom roles, and then restrict access
-    #      appropriately
-    # XXX: Need to define how we want to deal with administration of custom roles.
 
-class RoleDetail(RetrieveUpdateAPIView):
+class RoleDetail(RetrieveAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
-
-    # XXX: Permissions - only appropriate people should be able to change these
 
 
 class RoleUsersList(SubListCreateAttachDetachAPIView):
@@ -3192,6 +3189,8 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
     serializer_class = UserSerializer
     parent_model = Role
     relationship = 'members'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: Access control
@@ -3213,6 +3212,8 @@ class RoleTeamsList(ListAPIView):
     serializer_class = TeamSerializer
     parent_model = Role
     relationship = 'member_role.parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # TODO: Check
@@ -3243,6 +3244,8 @@ class RoleParentsList(SubListAPIView):
     serializer_class = RoleSerializer
     parent_model = Role
     relationship = 'parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: This should be the intersection between the roles of the user
@@ -3256,6 +3259,8 @@ class RoleChildrenList(SubListAPIView):
     serializer_class = RoleSerializer
     parent_model = Role
     relationship = 'children'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: This should be the intersection between the roles of the user
@@ -3267,6 +3272,7 @@ class ResourceDetail(RetrieveAPIView):
 
     model = Resource
     serializer_class = ResourceSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     # XXX: Permissions - only roles the user has access to see should be listed here
@@ -3277,6 +3283,7 @@ class ResourceList(ListAPIView):
 
     model = Resource
     serializer_class = ResourceSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     def get_queryset(self):
@@ -3286,6 +3293,7 @@ class ResourceAccessList(ListAPIView):
 
     model = User
     serializer_class = ResourceAccessListElementSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     def get_queryset(self):

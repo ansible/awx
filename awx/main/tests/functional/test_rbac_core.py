@@ -138,3 +138,32 @@ def test_content_object(user):
     assert org.resource.content_object.id == org.id
     assert org.admin_role.content_object.id == org.id
 
+@pytest.mark.django_db
+def test_hierarchy_rebuilding():
+    'Tests some subdtle cases around role hierarchy rebuilding'
+
+    X = Role.objects.create(name='X')
+    A = Role.objects.create(name='A')
+    B = Role.objects.create(name='B')
+    C = Role.objects.create(name='C')
+    D = Role.objects.create(name='D')
+
+    A.children.add(B)
+    A.children.add(D)
+    B.children.add(C)
+    C.children.add(D)
+
+    assert A.is_ancestor_of(D)
+    assert X.is_ancestor_of(D) is False
+
+    X.children.add(A)
+
+    assert X.is_ancestor_of(D) is True
+
+    X.children.remove(A)
+
+    # This can be the stickler, the rebuilder needs to ensure that D's role
+    # hierarchy is built after both A and C are updated.
+    assert X.is_ancestor_of(D) is False
+
+

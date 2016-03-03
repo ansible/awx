@@ -211,20 +211,24 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Project Administrator',
+        role_description='May manage this project',
         parent_role='organizations.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
+        role_description='May read all settings associated with this project',
         parent_role='organizations.auditor_role',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Project Member',
+        role_description='Implies membership within this project',
         permissions = {'read': True}
     )
     scm_update_role = ImplicitRoleField(
         role_name='Project Updater',
+        role_description='May update this project from the source control management system',
         parent_role='admin_role',
         permissions = {'scm_update': True}
     )

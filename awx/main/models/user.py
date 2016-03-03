@@ -26,5 +26,6 @@ class UserResource(CommonModelNameNotUnique, ResourceMixin):
 
     admin_role = ImplicitRoleField(
         role_name='User Administrator',
+        role_description='May manage this user',
         permissions = {'all': True},
     )

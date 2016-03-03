@@ -98,19 +98,23 @@ class Inventory(CommonModel, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Inventory Administrator',
+        role_description='May manage this inventory',
         parent_role='organization.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Auditor',
+        role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
         permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
         role_name='Inventory Updater',
+        role_description='May update the inventory',
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
+        role_description='May execute jobs against this inventory',
     )
 
     def get_absolute_url(self):
