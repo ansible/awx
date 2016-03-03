@@ -71,7 +71,7 @@ def test_cleanup_logic(fact_scans, hosts):
     module = 'ansible'
 
     cleanup_facts = CleanupFacts()
-    deleted_count = cleanup_facts.cleanup(timestamp_middle, granularity, module=module)
+    cleanup_facts.cleanup(timestamp_middle, granularity, module=module)
 
 
     host_ids = Host.objects.all().values_list('id', flat=True)
