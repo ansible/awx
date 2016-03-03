@@ -21,7 +21,6 @@ export default
 					$scope.subscription = res.data.license_info.subscription_name;
 					$scope.version = processVersion(res.data.version);
 					$('#about-modal').modal('show');
-					console.log(window.cowsay)
 				});
 		};
 		var back = function(){
