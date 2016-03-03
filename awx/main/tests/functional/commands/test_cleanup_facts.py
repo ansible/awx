@@ -3,6 +3,7 @@
 
 # Python
 import pytest
+import mock
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 
@@ -91,7 +92,7 @@ def test_cleanup_logic(fact_scans, hosts):
             timestamp_pivot -= granularity
             assert fact.timestamp == timestamp_pivot
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_parameters_ok(mocker):
     run = mocker.patch('awx.main.management.commands.cleanup_facts.CleanupFacts.run')
@@ -162,7 +163,7 @@ def test_string_time_to_timestamp_invalid():
         res = cmd.string_time_to_timestamp(kv['time'])
         assert res is None
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_parameters_fail(mocker):
     # Mock run() just in case, but it should never get called because an error should be thrown

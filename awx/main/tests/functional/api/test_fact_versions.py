@@ -79,9 +79,6 @@ def test_basic_options_fields(hosts, fact_scans, options, user):
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
     response = options(url, None, user('admin', True), pk=hosts[0].id)
 
-    import json
-    print(json.dumps(response.data))
-
     assert 'related' in response.data['actions']['GET']
     assert 'module' in response.data['actions']['GET']
     assert ("ansible", "Ansible") in response.data['actions']['GET']['module']['choices']
