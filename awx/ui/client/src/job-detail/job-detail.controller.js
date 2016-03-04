@@ -43,6 +43,7 @@ export default
             scope.plays = [];
             scope.parseType = 'yaml';
             scope.previousTaskFailed = false;
+            $scope.stdoutFullScreen = false;
 
             scope.$watch('job_status', function(job_status) {
                 if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
@@ -202,7 +203,7 @@ export default
             scope.processing = false;
             scope.lessStatus = false;
             scope.lessDetail = false;
-            scope.lessEvents = false;
+            scope.lessEvents = true;
 
             scope.host_summary = {};
             scope.host_summary.ok = 0;
@@ -557,7 +558,7 @@ export default
                                     });
                                 });
                                 if (scope.activeTask && scope.jobData.plays[scope.activePlay] && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
-                                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'List-tableRow--selected';
+                                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'JobDetail-tableRow--selected';
                                 }
                                 scope.$emit('LoadHosts');
                             })
@@ -677,7 +678,7 @@ export default
                                 scope.host_summary.failed;
                         });
                         if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
-                            scope.jobData.plays[scope.activePlay].playActiveClass = 'List-tableRow--selected';
+                            scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
                         }
                         scope.$emit('LoadTasks', events_url);
                     })
@@ -981,11 +982,11 @@ export default
 
             scope.toggleLessStatus = function() {
                 if (!scope.lessStatus) {
-                    $('#job-status-form .toggle-show').slideUp(200);
+                    $('#job-status-form').slideUp(200);
                     scope.lessStatus = true;
                 }
                 else {
-                    $('#job-status-form .toggle-show').slideDown(200);
+                    $('#job-status-form').slideDown(200);
                     scope.lessStatus = false;
                 }
             };
@@ -1009,6 +1010,7 @@ export default
                 else {
                     $('#events-summary').slideDown(200);
                     scope.lessEvents = false;
+                    DrawGraph({scope:scope});
                 }
             };
 
@@ -1432,16 +1434,10 @@ export default
                 $scope.$emit('LoadJob');
             };
 
-            scope.editHost = function(id) {
-                HostsEdit({
-                    host_scope: scope,
-                    group_scope: null,
-                    host_id: id,
-                    inventory_id: scope.job.inventory,
-                    mode: 'edit',  // 'add' or 'edit'
-                    selected_group_id: null
-                });
-            };
+            // Click binding for the expand/collapse button on the standard out log
+            $scope.toggleStdoutFullscreen = function() {
+                $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+            }
 
             scope.editSchedule = function() {
             	// We need to get the schedule's ID out of the related links
