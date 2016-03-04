@@ -1289,7 +1289,17 @@ class HostActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
-class HostFactVersionsList(ListAPIView, ParentMixin):
+class SystemTrackingEnforcementMixin(APIView):
+    '''
+    Use check_permissions instead of initial() because it's in the OPTION's path as well
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled("system_tracking"):
+            raise LicenseForbids("Your license does not permit use "
+                                 "of system tracking.")
+        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
+
+class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
 
     model = Fact
     serializer_class = FactVersionSerializer
@@ -1297,10 +1307,6 @@ class HostFactVersionsList(ListAPIView, ParentMixin):
     new_in_220 = True
 
     def get_queryset(self):
-        if not feature_enabled("system_tracking"):
-            raise LicenseForbids("Your license does not permit use "
-                                 "of system tracking.")
-
         from_spec = self.request.query_params.get('from', None)
         to_spec = self.request.query_params.get('to', None)
         module_spec = self.request.query_params.get('module', None)
@@ -1318,7 +1324,7 @@ class HostFactVersionsList(ListAPIView, ParentMixin):
         queryset = self.get_queryset() or []
         return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
-class HostFactCompareView(SubDetailAPIView):
+class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
     model = Fact
     new_in_220 = True
@@ -1326,11 +1332,6 @@ class HostFactCompareView(SubDetailAPIView):
     serializer_class = FactSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
         datetime_spec = request.query_params.get('datetime', None)
         module_spec = request.query_params.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()

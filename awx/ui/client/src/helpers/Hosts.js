@@ -229,7 +229,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                generator = GenerateList;
 
                // Inject the list html
-               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'host-list-container', searchSize: 'col-lg-6 col-md-6 col-sm-6' });
+               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'host-list-container', searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' });
 
                // Load data
                HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, pageSize: pageSize });

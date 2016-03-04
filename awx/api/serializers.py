@@ -558,7 +558,7 @@ class BaseFactSerializer(BaseSerializer):
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
-        if 'module' in ret and feature_enabled('system_tracking'):
+        if 'module' in ret:
             # TODO: the values_list may pull in a LOT of entries before the distinct is called
             modules = Fact.objects.all().values_list('module', flat=True).distinct()
             choices = [(o, o.title()) for o in modules]

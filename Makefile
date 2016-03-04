@@ -273,9 +273,9 @@ version_file:
 # Do any one-time init tasks.
 init:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    $(PYTHON) manage.py register_instance --primary --hostname=127.0.0.1; \
+	    tower-manage register_instance --primary --hostname=127.0.0.1; \
 	else \
-	    sudo $(PYTHON) manage.py register_instance --primary --hostname=127.0.0.1; \
+	    sudo tower-manage register_instance --primary --hostname=127.0.0.1; \
 	fi
 
 # Refresh development environment after pulling new code.

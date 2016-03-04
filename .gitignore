@@ -34,7 +34,7 @@ __pycache__
 /tar-build
 /setup-bundle-build
 /dist
-*.egg-info
+/*.egg-info
 *.py[c,o]
 
 # JavaScript

@@ -53,7 +53,6 @@ from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
-from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
@@ -958,11 +957,6 @@ class RunJob(BaseTask):
         Return whether this task should use proot.
         '''
         return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
-
-    def pre_run_hook(self, job, **kwargs):
-        if job.job_type == PERM_INVENTORY_SCAN:
-            if not test_mongo_connection():
-                raise RuntimeError("Fact Scan Database is offline")
 
     def post_run_hook(self, job, **kwargs):
         '''

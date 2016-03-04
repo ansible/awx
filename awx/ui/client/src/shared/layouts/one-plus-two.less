@@ -1,0 +1,79 @@
+/*
+* Large resolution: 1/3 + 2/3 width panels
+* Small resolution: 100% width panels, stacked
+* Options: static height, custom breakpoint
+*
+* Style conventions
+* .ModuleName-component--subComponent
+*/
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
+
+.OnePlusTwo-container(@height: 100%; @breakpoint: 900px){
+	height: @height;
+	display: flex;
+	flex-direction: row;
+	@media screen and (max-width: @breakpoint){
+		flex-direction: column;
+	}
+}
+
+.OnePlusTwo-left--panel(@height: 100%; @breakpoint: 900px) {
+    flex: 0 0;
+    height: @height;
+    width: 100%;
+    .Panel{
+        height: 100%;
+    }
+    @media screen and (min-width: @breakpoint){
+        max-width: 400px;
+    }
+}
+
+.OnePlusTwo-right--panel(@height: 100%; @breakpoint: 900px) {
+    height: @height;
+    flex: 1 0;
+    margin-left: 20px;
+    .Panel{
+        height: 100%;
+    }
+	@media screen and (max-width: @breakpoint){
+		flex-direction: column;
+        margin-left: 0px;
+        margin-top: 25px;
+	}
+}
+
+.OnePlusTwo-panelHeader {
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.OnePlusTwo-left--details {
+    margin-top: 25px;
+}
+
+.OnePlusTwo-left--detailsRow {
+    display: flex;
+    :not(:last-child){
+     margin-bottom: 20px;       
+    }
+}
+
+.OnePlusTwo-left--detailsLabel {
+    width: 140px;
+    display: inline-block;
+    color: @default-interface-txt;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.OnePlusTwo-left--detailsContent {
+    display: inline-block;
+    max-width: 220px;
+    word-wrap: break-word;
+}
+

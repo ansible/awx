@@ -7,7 +7,6 @@
 import './forms';
 import './lists';
 
-import AboutAnsible from "./helpers/AboutAnsible";
 import Children from "./helpers/Children";
 import Credentials from "./helpers/Credentials";
 import EventViewer from "./helpers/EventViewer";
@@ -19,7 +18,6 @@ import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
 import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
-import License from "./helpers/License";
 import LoadConfig from "./helpers/LoadConfig";
 import PaginationHelpers from "./helpers/PaginationHelpers";
 import Parse from "./helpers/Parse";
@@ -43,8 +41,7 @@ import ApiModelHelper from "./helpers/ApiModel";
 import ActivityStreamHelper from "./helpers/ActivityStream";
 
 export
-    {   AboutAnsible,
-        Children,
+    {   Children,
         Credentials,
         EventViewer,
         Events,
@@ -55,7 +52,6 @@ export
         JobSubmission,
         JobTemplates,
         Jobs,
-        License,
         LoadConfig,
         PaginationHelpers,
         Parse,

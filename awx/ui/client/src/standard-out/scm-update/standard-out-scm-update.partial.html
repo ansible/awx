@@ -1,7 +1,7 @@
 <div class="tab-pane" id="jobs-stdout">
     <div ng-cloak id="htmlTemplate">
     <div class="StandardOut">
-        <div class="StandardOut-leftPanel">
+        <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
                     RESULTS
@@ -77,17 +77,19 @@
         <div class="StandardOut-rightPanel">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
-                    STANDARD OUT
-                </div>
-                <div class="StandardOut-consoleOutput">
-                    <div id="pre-container" class="body_background body_foreground pre mono-space StandardOut-preContainer"
-                    lr-infinite-scroll="stdOutScrollToTop" scroll-threshold="300" data-direction="up" time-threshold="500">
-                        <div id="pre-container-content"  class="StandardOut-preContent"></div>
+                    <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
+                    <div class="StandardOut-panelHeaderActions">
+                        <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
+                            <i class="fa fa-arrows-alt"></i>
+                        </button>
+                        <a href="/api/v1/project_updates/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
+                                <i class="fa fa-download"></i>
+                            </button>
+                        </a>
                     </div>
-                    <div class="scroll-spinner" id="stdoutMoreRowsBottom">
-                        <i class="fa fa-cog fa-spin"></i>
-                    </div>
                 </div>
+                <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log>
             </div>
         </div>
     </div>

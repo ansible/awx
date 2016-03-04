@@ -42,11 +42,12 @@
           View and edit your license information.
           </p>
         </a>
-        <a ng-click="showAboutModal()" class="SetupItem">
+        <a ui-sref="setup.about" class="SetupItem">
           <h4 class="SetupItem-title">About Tower</h4>
           <p class="SetupItem-description">
           View information about this version of Ansible Tower.
           </p>
       </a>
     </div>
+    <div ui-view></div>
 </section>

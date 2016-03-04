@@ -1,10 +1,8 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
-
-
 
 var urlPrefix;
 
@@ -34,6 +32,8 @@ import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 
 // modules
+import about from './about/main';
+import license from './license/main';
 import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
@@ -47,7 +47,6 @@ import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import lookUpHelper from './lookup/main';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
-import {LicenseController} from './controllers/License';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
@@ -80,6 +79,8 @@ var tower = angular.module('Tower', [
     // 'ngAnimate',
     'ngSanitize',
     'ngCookies',
+    about.name,
+    license.name,
     RestServices.name,
     browserData.name,
     systemTracking.name,
@@ -100,7 +101,6 @@ var tower = angular.module('Tower', [
     standardOut.name,
     'templates',
     'Utilities',
-    'LicenseHelper',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
@@ -181,7 +181,6 @@ var tower = angular.module('Tower', [
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'SocketHelper',
-    'AboutAnsibleHelpModal',
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
@@ -859,21 +858,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('license', {
-                url: '/license',
-                templateUrl: urlPrefix + 'partials/license.html',
-                controller: LicenseController,
-                ncyBreadcrumb: {
-                    parent: 'setup',
-                    label: 'LICENSE'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             state('sockets', {
                 url: '/sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
@@ -898,12 +882,14 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
-
-
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense', 
+        '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService',
+        function (
+            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense, 
+            $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+            LoadConfig, Store, ShowSocketHelp, pendoService) 
+            {
             var sock;
 
             function activateTab() {
@@ -976,32 +962,28 @@ var tower = angular.module('Tower', [
                                 ' status changed to ' + data.status +
                                 ' send to ' + $location.$$url);
 
-                            var urlToCheck = $location.$$url;
-                            if (urlToCheck.indexOf("?") !== -1) {
-                                urlToCheck = urlToCheck.substr(0, urlToCheck.indexOf("?"));
-                            }
-
                             // this acts as a router...it emits the proper
                             // value based on what URL the user is currently
                             // accessing.
-                            if (urlToCheck === '/jobs') {
+                            if ($state.is('jobs')) {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
-                            } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
-                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck)) {
-
-                                // TODO: something will need to change here for stdout
+                            } else if ($state.is('jobDetail') ||
+                                $state.is('adHocJobStdout') ||
+                                $state.is('inventorySyncStdout') ||
+                                $state.is('managementJobStdout') ||
+                                $state.is('scmUpdateStdout')) {
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if (/\/jobs\/(\d)+/.test(urlToCheck)) {
+                            } if ($state.is('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
-                            } else if (urlToCheck === '/home') {
+                            } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
-                            } else if (urlToCheck === '/portal') {
+                            } else if ($state.is('portal')) {
                                 $rootScope.$emit('JobStatusChange-portal', data);
-                            } else if (urlToCheck === '/projects') {
+                            } else if ($state.is('projects')) {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/inventories\/(\d)+\/manage/.test(urlToCheck)) {
+                            } else if ($state.is('inventoryManage')) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         });
@@ -1043,7 +1025,6 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
-
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
@@ -1083,15 +1064,15 @@ var tower = angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
-                            // if not headed to /login or /logout, then check the license
-                            CheckLicense.test();
-                        }
                     }
                     activateTab();
                 });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                    // catch license expiration notifications immediately after user logs in, redirect
+                    if (fromState.name == 'signIn'){
+                        CheckLicense.notify();
+                    }
                     // broadcast event change if editing crud object
                     if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
                         var list = $location.$$path.split("/")[3];
@@ -1139,10 +1120,6 @@ var tower = angular.module('Tower', [
                 }
 
                 activateTab();
-
-                $rootScope.viewAboutTower = function(){
-                    AboutAnsibleHelp();
-                };
 
                 $rootScope.viewCurrentUser = function () {
                     $location.path('/users/' + $rootScope.current_user.id);

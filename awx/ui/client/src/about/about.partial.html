@@ -1,0 +1,32 @@
+<div class="About modal fade" id="about-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img class="About-brand--ansible img-responsive" src="/static/assets/ansible_tower_logo_minimalc.png" />
+                <button type="button" class="close About-close" ng-click="back()">
+                    <span class="fa fa-times-circle"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="About-cowsay--container">
+<!-- Don't indent this properly, you'll break the cow -->
+<pre class="About-cowsay--code">
+ ________________
+/  Tower Version \\
+\\<span>{{version}}</span>/
+ ----------------
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\     A)\\/\\
+                ||----w |
+                ||     ||
+</pre>
+                </div>
+                <img class="About-brand--redhat img-responsive" src="/static/assets/redhat_ansible_lockup.png" />
+                <p class="text-center">Copyright 2016. All rights reserved.<br>
+                Ansible and Ansible Tower are registered trademarks of <a href="http://www.redhat.com/" target="_blank">Red Hat, Inc</a>.<br>
+                Visit <a href="http://www.ansible.com/" target="_blank">Ansible.com</a> for more information.<br>
+                {{subscription}}</p>
+        </div>
+    </div>
+</div>

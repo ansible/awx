@@ -1,7 +1,6 @@
 import mock
 import pytest
 import json
-import urllib
 
 from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
@@ -9,6 +8,9 @@ from django.utils import timezone
 
 def mock_feature_enabled(feature, bypass_database=None):
     return True
+
+def mock_feature_disabled(feature, bypass_database=None):
+    return False
 
 # TODO: Consider making the fact_scan() fixture a Class, instead of a function, and move this method into it
 def find_fact(facts, host_id, module_name, timestamp):
@@ -26,6 +28,30 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), module_name
 
     fact_known = find_fact(facts, hosts[0].id, module_name, epoch)
     return (fact_known, response)
+
+def check_system_tracking_feature_forbidden(response):
+    assert 402 == response.status_code
+    assert 'Your license does not permit use of system tracking.' == response.data['detail']
+
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@pytest.mark.django_db
+@pytest.mark.license_feature
+def test_system_tracking_license_get(hosts, get, user):
+    hosts = hosts(host_count=1)
+    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    response = get(url, user('admin', True))
+
+    check_system_tracking_feature_forbidden(response)
+
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@pytest.mark.django_db
+@pytest.mark.license_feature
+def test_system_tracking_license_options(hosts, options, user):
+    hosts = hosts(host_count=1)
+    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    response = options(url, None, user('admin', True))
+
+    check_system_tracking_feature_forbidden(response)
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
