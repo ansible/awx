@@ -32,7 +32,7 @@ export default
                 // Which page are we on?
                 if (Empty(next) && previous) {
                     // no next page, but there is a previous page
-                    scope[iterator + '_page'] = /page=\d+/.test(previous) ? parseInt(previous.match(/page=(\d+)/)[1]) + 1 : 2;
+                    scope[iterator + '_page'] = scope[iterator + '_num_pages'];
                 } else if (next && Empty(previous)) {
                     // next page available, but no previous page
                     scope[iterator + '_page'] = 1;
