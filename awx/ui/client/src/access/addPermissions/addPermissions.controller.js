@@ -72,6 +72,16 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
                     .roles[key].name };
         });
 
+    scope.roleKey = Object
+        .keys(scope.object.summary_fields.roles)
+        .map(function(key) {
+            return {
+                name: scope.object.summary_fields
+                    .roles[key].name,
+                description: scope.object.summary_fields
+                    .roles[key].description };
+        });
+
     // handle form tabs
     scope.toggleFormTabs = function(list) {
         scope.usersSelected = (list === 'users');
