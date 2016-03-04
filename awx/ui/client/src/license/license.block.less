@@ -33,6 +33,9 @@
 .License-field{
 	.OnePlusTwo-left--detailsRow;
 }
+.License-field + .License-field {
+    margin-top: 20px;
+}
 .License-greenText{
 	color: @submit-button-bg;
 }
@@ -40,16 +43,16 @@
 	color: #d9534f;
 }
 .License-fields{
-	.OnePlusTwo-left--details;	
+	.OnePlusTwo-left--details;
 }
 .License-details {
-	.OnePlusTwo-left--panel(600px);
+	.OnePlusTwo-left--panel(650px);
 }
 .License-titleText {
 	.OnePlusTwo-panelHeader;
 }
 .License-management{
-	.OnePlusTwo-right--panel(600px);
+	.OnePlusTwo-right--panel(650px);
 }
 .License-submit--container{
 	height: 33px;
@@ -59,8 +62,21 @@
 	margin: 0 10px 0 0;
 }
 .License-file--container {
-	margin: 20px 0 20px 0;
 	input[type=file] {
 	display: none;
 	}
+}
+.License-upgradeText {
+	margin: 20px 0px;
+}
+.License-body {
+	margin-top: 25px;
+}
+.License-subTitleText {
+	text-transform: uppercase;
+	margin: 20px 0px 5px 0px;
+	color: @default-interface-txt;
+}
+.License-helperText {
+	color: @default-interface-txt;
 }

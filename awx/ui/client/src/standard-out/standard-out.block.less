@@ -1,28 +1,22 @@
 @import "../shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
 
 /** @define StandardOut */
 
-.StandardOut {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
+.StandardOut-container {
+    .OnePlusTwo-container;
 }
 
 .StandardOut-leftPanel {
-    flex: 0 0 400px;
-    margin-right: 20px;
+    .OnePlusTwo-left--panel(590px);
 }
 
 .StandardOut-rightPanel {
-    flex: 1 0;
+    .OnePlusTwo-right--panel(590px);
 }
 
 .StandardOut-panelHeader {
-    color: @default-interface-txt;
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    display: flex;
+    .OnePlusTwo-panelHeader
 }
 
 .StandardOut-consoleOutput {
@@ -30,31 +24,28 @@
     min-height: 200px;
     background-color: @default-secondary-bg;
     border-radius: 5px;
-    height: 300px;
+    height: ~"calc(100% - 74px)";
     overflow: scroll;
 }
 
 .StandardOut-details {
-    margin-top: 25px;
+    .OnePlusTwo-left--details;
 }
 
 .StandardOut-detailsRow {
-    display: flex;
+    .OnePlusTwo-left--detailsRow;
 }
 
-.StandardOut-detailsRow:not(:last-child) {
-    margin-bottom: 20px;
+.StandardOut-detailsRow + .StandardOut-detailsRow {
+    margin-top: 20px;
 }
 
 .StandardOut-detailsLabel {
-    width: 130px;
-    flex: 0 0 130px;
-    color: @default-interface-txt;
-    text-transform: uppercase;
+    .OnePlusTwo-left--detailsLabel;
 }
 
 .StandardOut-detailsContent {
-    flex: 1 0;
+    .OnePlusTwo-left--detailsContent;
 }
 
 .StandardOut-statusText {
@@ -66,7 +57,7 @@
 }
 
 .StandardOut-preContainer {
-    height: 300px;
+    height: 100%;
 }
 
 .StandardOut-panelHeaderText {
@@ -104,15 +95,4 @@
 
 .StandardOut-actionButton + a {
     margin-left: 15px;
-}
-
-@standardout-breakpoint: 900px;
-
-@media screen and (max-width: @standardout-breakpoint) {
-    .StandardOut {
-        flex-direction: column;
-    }
-    .StandardOut-leftPanel {
-        margin-right: 0px;
-    }
 }
