@@ -32,6 +32,7 @@ from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -2005,6 +2006,7 @@ class JobTemplateCallback(GenericAPIView):
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
     serializer_class = EmptySerializer
+    parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [FormParser]
 
     @csrf_exempt
     @transaction.non_atomic_requests
