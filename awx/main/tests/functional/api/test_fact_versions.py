@@ -16,6 +16,9 @@ from django.utils import timezone
 def mock_feature_enabled(feature, bypass_database=None):
     return True
 
+def mock_feature_disabled(feature, bypass_database=None):
+    return False
+
 def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params={}, host_count=1):
     hosts = hosts(host_count=host_count)
     fact_scans(fact_scans=3, timestamp_epoch=epoch)
@@ -42,8 +45,33 @@ def check_response_facts(facts_known, response):
         assert timestamp_apiformat(fact_known.timestamp) == response.data['results'][i]['timestamp']
         check_url(response.data['results'][i]['related']['fact_view'], fact_known, fact_known.module)
 
+def check_system_tracking_feature_forbidden(response):
+    assert 402 == response.status_code
+    assert 'Your license does not permit use of system tracking.' == response.data['detail']
+
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@pytest.mark.django_db
+@pytest.mark.license_feature
+def test_system_tracking_license_get(hosts, get, user):
+    hosts = hosts(host_count=1)
+    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    response = get(url, user('admin', True))
+
+    check_system_tracking_feature_forbidden(response)
+
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@pytest.mark.django_db
+@pytest.mark.license_feature
+def test_system_tracking_license_options(hosts, options, user):
+    hosts = hosts(host_count=1)
+    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    response = options(url, None, user('admin', True))
+
+    check_system_tracking_feature_forbidden(response)
+
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
+@pytest.mark.license_feature
 def test_no_facts_db(hosts, get, user):
     hosts = hosts(host_count=1)
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
@@ -72,6 +100,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
+@pytest.mark.license_feature
 def test_basic_options_fields(hosts, fact_scans, options, user):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
