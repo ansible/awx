@@ -1,0 +1,66 @@
+/*
+* Style conventions
+* .ModuleName-component-subComponent
+* Naming describes components of the view
+*/
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
+
+
+.License-container{
+	.OnePlusTwo-container;
+}
+.License-field--label{
+	.OnePlusTwo-left--detailsLabel;
+}
+.License-management .CodeMirror-scroll{
+	min-height: 140px;
+}
+.License-file textarea{
+	display: block;
+	width: 100%;
+}
+.License-eula textarea{
+	width: 100%;
+	height: 300px;
+}
+.License-field label{
+	width: 155px;
+}
+.License-field--content{
+	.OnePlusTwo-left--detailsContent;
+}
+.License-field{
+	.OnePlusTwo-left--detailsRow;
+}
+.License-greenText{
+	color: @submit-button-bg;
+}
+.License-redText{
+	color: #d9534f;
+}
+.License-fields{
+	.OnePlusTwo-left--details;	
+}
+.License-details {
+	.OnePlusTwo-left--panel(600px);
+}
+.License-titleText {
+	.OnePlusTwo-panelHeader;
+}
+.License-management{
+	.OnePlusTwo-right--panel(600px);
+}
+.License-submit--container{
+	height: 33px;
+}
+.License-submit--success{
+	line-height:33px;
+	margin: 0 10px 0 0;
+}
+.License-file--container {
+	margin: 20px 0 20px 0;
+	input[type=file] {
+	display: none;
+	}
+}

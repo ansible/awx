@@ -10,19 +10,19 @@
 
 .StandardOut-leftPanel {
     flex: 0 0 400px;
+    margin-right: 20px;
 }
 
 .StandardOut-rightPanel {
     flex: 1 0;
-    margin-left: 20px;
 }
 
 .StandardOut-panelHeader {
     color: @default-interface-txt;
     font-size: 14px;
     font-weight: bold;
-    margin-right: 10px;
     text-transform: uppercase;
+    display: flex;
 }
 
 .StandardOut-consoleOutput {
@@ -30,6 +30,8 @@
     min-height: 200px;
     background-color: @default-secondary-bg;
     border-radius: 5px;
+    height: 300px;
+    overflow: scroll;
 }
 
 .StandardOut-details {
@@ -63,13 +65,54 @@
     text-transform: capitalize;
 }
 
+.StandardOut-preContainer {
+    height: 300px;
+}
+
+.StandardOut-panelHeaderText {
+    align-items: center;
+    flex: 1 0 auto;
+    display: flex;
+}
+
+.StandardOut-panelHeaderActions {
+    justify-content: flex-end;
+    display: flex;
+    margin-left: 10px;
+    font-size: 20px;
+}
+
+.StandardOut-actionButton {
+    font-size: 16px;
+    height: 30px;
+    min-width: 30px;
+    color: #b7b7b7;
+    background-color: inherit;
+    border: none;
+    border-radius: 50%;
+}
+
+.StandardOut-actionButton:hover {
+    background-color: @list-actn-bg-hov !important;
+    color: @list-actn-icn-hov;
+}
+
+.StandardOut-actionButton--active {
+    background-color: @list-actn-bg-hov !important;
+    color: @list-actn-icn-hov;
+}
+
+.StandardOut-actionButton + a {
+    margin-left: 15px;
+}
+
 @standardout-breakpoint: 900px;
 
 @media screen and (max-width: @standardout-breakpoint) {
     .StandardOut {
         flex-direction: column;
     }
-    .StandardOut-rightPanel {
-        margin-left: 0px;
+    .StandardOut-leftPanel {
+        margin-right: 0px;
     }
 }

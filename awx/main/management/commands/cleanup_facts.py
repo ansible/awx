@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.fact.models.fact import * # noqa
+from awx.main.models.fact import Fact
 from awx.api.license import feature_enabled
 
 OLDER_THAN = 'older_than'
@@ -31,7 +31,7 @@ class CleanupFacts(object):
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity, module=None):
-        fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
+        fact_oldest = Fact.objects.all().order_by('timestamp').first()
         if not fact_oldest:
             return 0
 
@@ -44,7 +44,10 @@ class CleanupFacts(object):
         # Special case, granularity=0x where x is d, w, or y
         # The intent is to delete all facts < older_than_abs
         if granularity == relativedelta():
-            return FactVersion.objects.filter(**kv).order_by('-timestamp').delete()
+            qs = Fact.objects.filter(**kv)
+            count = qs.count()
+            qs.delete()
+            return count
 
         total = 0
 
@@ -61,18 +64,17 @@ class CleanupFacts(object):
                 kv['module'] = module
 
 
-            fact_version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp').limit(1)
-            if fact_version_objs:
-                fact_version_obj = fact_version_objs[0]
+            fact_version_obj = Fact.objects.filter(**kv).order_by('-timestamp').first()
+            if fact_version_obj:
                 kv = {
                     'timestamp__lt': fact_version_obj.timestamp,
                     'timestamp__gt': date_pivot_next
                 }
                 if module:
                     kv['module'] = module
-                count = FactVersion.objects.filter(**kv).delete()
-                # FIXME: These two deletes should be a transaction
-                count = Fact.objects.filter(**kv).delete()
+                qs = Fact.objects.filter(**kv)
+                count = qs.count()
+                qs.delete()
                 total += count
 
             date_pivot = date_pivot_next
