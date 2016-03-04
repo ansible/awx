@@ -1142,7 +1142,6 @@ export default
     .factory('DrawGraph', ['DonutChart', function(DonutChart) {
         return function(params) {
             var scope = params.scope,
-                resize = params.resize,
                 graph_data = [];
 
             // Ready the data
@@ -1192,8 +1191,9 @@ export default
                 element = $("#graph-section"),
                 colors, total,job_detail_chart;
 
-            // colors = ['#60D66F', '#FF9900','#FF0000','#ff5850'];
-            colors = _.map(dataset, function(d){return d.color});
+            colors = _.map(dataset, function(d){
+                return d.color;
+            });
             total = d3.sum(dataset.map(function(d) {
                   return d.value;
             }));
