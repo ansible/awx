@@ -1,0 +1,144 @@
+@import "../../shared/branding/colors.default.less";
+
+/** @define AddPermissions */
+.AddPermissions {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.AddPermissions-content {
+    max-width: 750px !important;
+}
+
+.AddPermissions-header {
+    padding: 20px;
+    padding-bottom: 10px;
+    padding-top: 15px;
+}
+
+.AddPermissions-body {
+    padding-top: 0px !important;
+    max-height: 70vh;
+    overflow: scroll;
+}
+
+.AddPermissions-footer {
+    padding-top: 20px !important;
+}
+
+.AddPermissions-list .List-searchRow {
+    height: 0px;
+}
+
+.AddPermissions-list .List-searchWidget {
+    height: 66px;
+}
+
+.AddPermissions-list .List-tableHeader:last-child {
+    border-top-right-radius: 5px;
+}
+
+.AddPermissions-list select-all {
+    display: none;
+}
+
+.AddPermissions-title {
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.AddPermissions-buttons {
+    margin-left: auto;
+    margin-bottom: 20px;
+}
+
+.AddPermissions-directions {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    color: #848992;
+}
+
+.AddPermissions-directionNumber {
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
+    background-color: #ebebeb;
+    padding-left: 6px;
+    padding-right: 1px;
+    padding-bottom: 3px;
+    margin-right: 10px;
+}
+
+.AddPermissions-separator {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.AddPermissions-roleRow {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.AddPermissions-roleName {
+    width: 30%;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.AddPermissions-roleNameVal {
+    font-size: 14px;
+    max-width: ~"calc(100% - 46px)";
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.AddPermissions-roleType {
+    border-radius: 5px;
+    padding: 0px 6px;
+    border: 1px solid #e1e1e1;
+    font-size: 10px;
+    color: #848992;
+    text-transform: uppercase;
+    background-color: #fff;
+    margin-left: 6px;
+}
+
+.AddPermissions-roleSelect {
+    width: ~"calc(70% - 40px)";
+    margin-right: 20px;
+}
+
+.AddPermissions-roleSelect .Form-dropDown {
+    height: inherit !important;
+}
+
+.AddPermissions-roleRemove {
+    border-radius: 50%;
+    padding: 3px;
+    line-height: 11px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #b7b7b7;
+    background-color: #fafafa;
+    border: 0;
+}
+
+.AddPermissions-roleRemove:hover {
+    background-color: #ff5850;
+    color: #fff;
+}
+
+.AddPermissions-selectHide {
+    display: none;
+}
+
+.AddPermissions .select2-search__field {
+  text-transform: uppercase;
+}

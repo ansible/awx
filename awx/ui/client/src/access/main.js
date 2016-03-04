@@ -8,5 +8,5 @@ import roleList from './roleList.directive';
 import addPermissions from './addPermissions/main';
 
 export default
-    angular.module('access', [])
+    angular.module('access', [addPermissions.name])
         .directive('roleList', roleList);

@@ -892,6 +892,10 @@ var tower = angular.module('Tower', [
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
             var sock;
 
+            $rootScope.addPermission = function (scope) {
+                $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
+            }
+
             $rootScope.deletePermission = function (user, role, userName,
                 roleName, resourceName) {
                     var action = function () {

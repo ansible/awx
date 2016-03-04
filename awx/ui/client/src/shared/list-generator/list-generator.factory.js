@@ -416,6 +416,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     function buildTable() {
                         var extraClasses = list['class'];
                         var multiSelect = list.multiSelect ? 'multi-select-list' : null;
+                        var multiSelectExtended = list.multiSelectExtended ? 'true' : 'false';
 
                         if (options.mode === 'summary') {
                             extraClasses += ' table-summary';
@@ -425,7 +426,8 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     .attr('id', list.name + '_table')
                                     .addClass('List-table')
                                     .addClass(extraClasses)
-                                    .attr('multi-select-list', multiSelect);
+                                    .attr('multi-select-list', multiSelect)
+                                    .attr('is-extended', multiSelectExtended);
 
                     }
 
@@ -460,7 +462,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     if (list.multiSelect) {
-                        innerTable += '<td class="col-xs-1 select-column List-tableCell"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                        innerTable += '<td class="col-xs-1 select-column List- List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
                     }
 
                     // Change layout if a lookup list, place radio buttons before labels
@@ -609,7 +611,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     function buildSelectAll() {
                         return $('<th>')
-                                .addClass('col-xs-1 select-column List-tableHeader')
+                                .addClass('col-xs-1 select-column List-tableHeader List-staticColumn--smallStatus')
                                 .append(
                                     $('<select-all>')
                                         .attr('selections-empty', 'selectedItems.length === 0')

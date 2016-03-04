@@ -1548,7 +1548,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
-
+                        if (options.mode === 'edit' && this.form.tabs) {
+                            html += "ng-show=\"" + this.form.name + "Selected\"; "
+                        }
                         html += ">\n";
 
                         if (this.form.horizontal) {
