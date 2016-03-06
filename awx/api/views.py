@@ -18,6 +18,7 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count
@@ -263,6 +264,8 @@ class ApiV1ConfigView(APIView):
         if license_data['valid_key']:
             tower_settings.LICENSE = data_actual
             tower_settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
+            # Clear cache when license is updated.
+            cache.clear()
             return Response(license_data)
 
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
@@ -282,6 +285,8 @@ class ApiV1ConfigView(APIView):
                     break
 
         TowerSettings.objects.filter(key="LICENSE").delete()
+        # Clear cache when license is updated.
+        cache.clear()
 
         # Only stop mongod if license removal succeeded
         if has_error is None:

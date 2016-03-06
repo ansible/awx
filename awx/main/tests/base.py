@@ -24,6 +24,7 @@ import yaml
 import django.test
 from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils.encoding import force_text
@@ -152,6 +153,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
                 'LOCATION': 'unittests'
             }
         }
+        cache.clear()
         self._start_time = time.time()
 
     def tearDown(self):
@@ -195,6 +197,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         writer.write_file(license_path)
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
+        cache.clear()
 
     def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
         writer = LicenseWriter(
@@ -209,6 +212,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         writer.write_file(license_path)
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
+        cache.clear()
 
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
