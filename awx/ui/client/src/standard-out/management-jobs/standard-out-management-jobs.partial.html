@@ -49,13 +49,12 @@
                         </div>
                     </div>
 
-                    <!-- TODO: figure out how to show the extra vars on different rows like the mockup -->
-
                     <div class="StandardOut-detailsRow" ng-show="job.extra_vars">
                         <div class="StandardOut-detailsLabel">EXTRA VARS</div>
-                        <div class="StandardOut-detailsContent">
-                            {{ job.extra_vars }}
-                        </div>
+                    </div>
+
+                    <div ng-show="job.extra_vars">
+                        <textarea rows="6" ng-model="variables" name="variables" class="StandardOut-extraVars" id="pre-formatted-variables"></textarea>
                     </div>
 
                 </div>

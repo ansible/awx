@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName, ParseTypeChange, ParseVariableString) {
 
     ClearScope();
 
@@ -35,6 +35,9 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
         // TODO: when the job completes we should refresh the job data so that we pull in the finish
         // timestamp as well as the run time.
     });
+
+    // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
+    $scope.parseType = 'yaml';
 
     // Go out and get the job details based on the job type.  jobType gets defined
     // in the data block of the route declaration for each of the different types
@@ -132,6 +135,11 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                 });
             }
 
+            if (!Empty(data.extra_vars)) {
+                $scope.variables = ParseVariableString(data.extra_vars);
+                ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
+            }
+
             // If the job isn't running we want to clear out the interval that goes out and checks for stdout updates.
             // This interval is defined in the standard out log directive controller.
             if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
@@ -158,4 +166,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName', 'ParseTypeChange', 'ParseVariableString'];
