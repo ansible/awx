@@ -6,16 +6,17 @@
 
 /* jshint unused: vars */
 export default
-    ['addPermissionsTeamsList', 'generateList', 'GetBasePath', 'SelectionInit', 'SearchInit',
-        'PaginateInit', function(addPermissionsTeamsList, generateList,
+    ['addPermissionsTeamsList', 'addPermissionsUsersList', 'generateList', 'GetBasePath', 'SelectionInit', 'SearchInit',
+        'PaginateInit', function(addPermissionsTeamsList,
+            addPermissionsUsersList, generateList,
             GetBasePath, SelectionInit, SearchInit, PaginateInit) {
             return {
                 restrict: 'E',
                 scope: {
                 },
-                template: "<div id='addPermissionsTeamsList'></div>",
+                template: "<div class='addPermissionsList-inner'></div>",
                 link: function(scope, element, attrs, ctrl) {
-                    scope.$on("linkLists", function() {
+                    scope.$on("linkLists", function(e) {
                         var generator = generateList,
                             list = addPermissionsTeamsList,
                             url = GetBasePath("teams"),
@@ -23,9 +24,22 @@ export default
                             id = "addPermissionsTeamsList",
                             mode = "edit";
 
+                        if (attrs.type === 'users') {
+                            list = addPermissionsUsersList;
+                            url = GetBasePath("users") + "?is_superuser=false";
+                            set = "users";
+                            id = "addPermissionsUsersList";
+                            mode = "edit";
+                        }
+
+                        scope.id = id;
+
                         scope.$watch("selectedItems", function() {
                             scope.$emit("itemsSelected", scope.selectedItems);
                         });
+
+                        element.find(".addPermissionsList-inner")
+                            .attr("id", id);
 
                         generator.inject(list, { id: id,
                             title: false, mode: mode, scope: scope });

@@ -6,55 +6,22 @@
 
 /**
  * @ngdoc function
- * @name controllers.function:Authentication
+ * @name controllers.function:Access
  * @description
- * Controller for handling /#/login and /#/logout routes.
- *
- * Tower (app.js) verifies the user is authenticated and that the user session is not expired. If either condition is not true,
- * the user is redirected to /#/login and the Authentication controller.
- *
- * Methods for checking the session state are found in [js/shared/AuthService.js](/static/docs/api/shared.function:AuthService), which is referenced here as Authorization.
- *
- * #Login Modal Dialog
- *
- * The modal dialog prompting for username and password is found in templates/ui/index.html.
- *```
- *     <!-- login modal -->
- *     <div id="login-modal" class="modal fade">
- *         <div class="modal-dialog">
- *             <div class="modal-content" id="login-modal-content">
- *             </div><!-- modal-content -->
- *         </div><!-- modal-dialog -->
- *     </div><!-- modal -->
- *```
- * HTML for the login form is generated, compiled and injected into <div id="login-modal-content"></div> by the controller. This is done to associate the form with the controller's scope. Because
- * <div id="login-modal"></div> is outside of the ng-view container, it gets associated with $rootScope by default. In the controller we create a new scope using $rootScope.$new() and associate
- * that with the login form. Doing this each time the controller is instantiated insures the form is clean and not pre-populated with a prior user's username and password.
- *
- * Just before the release of 2.0 a bug was discovered where clicking logout and then immediately clicking login without providing a username and password would successfully log
- * the user back into Tower. Implementing the above approach fixed this, forcing a new username/password to be entered each time the login dialog appears.
- *
- * #Login Workflow
- *
- * When the the login button is clicked, the following occurs:
- *
- * - Call Authorization.retrieveToken(username, password) - sends a POST request to /api/v1/authtoken to get a new token value.
- * - Call Authorization.setToken(token, expires) to store the token and exipration time in a session cookie.
- * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
- * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v1/me
- * - Store user information in the session cookie by calling Authorization.setUser().
- * - Get the Tower license by calling Authorization.getLicense() - sends a GET request to /api/vi/config
- * - Stores the license object in local storage by calling Authorization.setLicense(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false.
- *
- * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, Tower (in app.js) calls
- * Timer.isExpired(). This verifies the UI does not think the session is expired, and if not, moves the expiration time into the future. The number of
- * seconds between API calls before a session is considered expired is set in config.js as session_timeout.
- *
- * @Usage
- * This is usage information.
+ * Controller for handling permissions adding
  */
 
 export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (rootScope, scope, GetBasePath, Rest, $q) {
+    var manuallyUpdateChecklists = function(list, id, isSelected) {
+        var elemScope = angular
+            .element("#" +
+                list + "s_table #" + id + ".List-tableRow input")
+            .scope();
+        if (elemScope) {
+            elemScope.isSelected = !!isSelected;
+        }
+    };
+
     scope.allSelected = [];
 
     // the object permissions are being added to
@@ -72,6 +39,8 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
                     .roles[key].name };
         });
 
+    // TODO: get working with api
+    // array w roles and descriptions for key
     scope.roleKey = Object
         .keys(scope.object.summary_fields.roles)
         .map(function(key) {
@@ -82,35 +51,36 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
                     .roles[key].description };
         });
 
-    // handle form tabs
+    // handle form tab changes
     scope.toggleFormTabs = function(list) {
         scope.usersSelected = (list === 'users');
         scope.teamsSelected = !scope.usersSelected;
     };
 
-    // TODO: manually handle selection/deselection
-    // of user/team checkboxes
+    // manually handle selection/deselection of user/team checkboxes
     scope.$on("selectedOrDeselected", function(e, val) {
         val = val.value;
         if (val.isSelected) {
+            // deselected, so remove from the allSelected list
             scope.allSelected = scope.allSelected.filter(function(i) {
+                // return all but the object who has the id and type
+                // of the element to deselect
                 return (!(val.id === i.id && val.type === i.type));
             });
         } else {
-            var name;
-
-            if (val.type === "user") {
-                name = (val.first_name &&
-                    val.last_name) ?
-                    val.first_name + " " +
-                    val.last_name :
-                    val.username;
-            } else {
-                name = val.name;
-            }
-
+            // selected, so add to the allSelected list
             scope.allSelected.push({
-                name: name,
+                name: function() {
+                    if (val.type === "user") {
+                        return (val.first_name &&
+                            val.last_name) ?
+                            val.first_name + " " +
+                            val.last_name :
+                            val.username;
+                    } else {
+                        return val .name;
+                    }
+                },
                 type: val.type,
                 roles: [],
                 id: val.id
@@ -118,10 +88,16 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
         }
     });
 
+    // used to handle changes to the itemsSelected scope var on "next page",
+    // "sorting etc."
     scope.$on("itemsSelected", function(e, inList) {
+        // compile a list of objects that needed to be checked in the lists
         scope.updateLists = scope.allSelected.filter(function(inMemory) {
             var notInList = true;
             inList.forEach(function(val) {
+                // if the object is part of the allSelected list and is
+                // selected,
+                // you don't need to add it updateLists
                 if (inMemory.id === val.id &&
                     inMemory.type === val.type) {
                     notInList = false;
@@ -131,61 +107,19 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
         });
     });
 
+    // handle changes to the updatedLists by manually selected those values in
+    // the UI
     scope.$watch("updateLists", function(toUpdate) {
         (toUpdate || []).forEach(function(obj) {
-            var elemScope = angular
-                .element("#" +
-                    obj.type + "s_table #" + obj.id +
-                    ".List-tableRow input")
-                .scope()
-            if (elemScope) {
-                elemScope.isSelected = true;
-            }
+            manuallyUpdateChecklists(obj.type, obj.id, true);
         });
 
         delete scope.updateLists;
     });
 
-    // create array of users/teams
-    // scope.$watchGroup(['selectedUsers', 'selectedTeams'],
-    //     function(val) {
-    //         scope.allSelected = (val[0] || [])
-    //             .map(function(i) {
-    //                 var roles = i.roles || [];
-    //                 var name = (i.first_name &&
-    //                     i.last_name) ?
-    //                     i.first_name + " " +
-    //                     i.last_name :
-    //                     i.username;
-    //
-    //                 return {
-    //                     name: name,
-    //                     type: "user",
-    //                     roles: roles,
-    //                     id: i.id
-    //                 };
-    //         }).concat((val[1] || [])
-    //             .map(function(i) {
-    //                 var roles = i.roles || [];
-    //
-    //                 return {
-    //                     name: i.name,
-    //                     type: "team",
-    //                     roles: roles,
-    //                     id: i.id
-    //                 };
-    //         }));
-    // });
-
     // remove selected user/team
     scope.removeObject = function(obj) {
-        var elemScope = angular
-            .element("#" +
-                obj.type + "s_table #" + obj.id + ".List-tableRow input")
-            .scope()
-        if (elemScope) {
-            elemScope.isSelected = false;
-        }
+        manuallyUpdateChecklists(obj.type, obj.id, false);
 
         scope.allSelected = scope.allSelected.filter(function(i) {
             return (!(obj.id === i.id && obj.type === i.type));
@@ -197,7 +131,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
         scope.posts = _
             .flatten((val || [])
             .map(function (owner) {
-                var url = GetBasePath(owner.type + "s") + "/" + owner.id +
+                var url = GetBasePath(owner.type + "s") + owner.id +
                     "/roles/";
 
                 return (owner.roles || [])
@@ -217,7 +151,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
             });
 
         $q.all(requests)
-            .then(function (responses) {
+            .then(function () {
                 rootScope.$broadcast("refreshList", "permission");
                 scope.closeModal();
             }, function (error) {

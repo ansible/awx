@@ -1,7 +1,7 @@
-<div id="add-permissions-modal" class="LoginModal modal fade">
-    <div class="LoginModal-backDrop is-loggedOut"></div>
-    <div class="LoginModal-dialog">
-        <div class="LoginModal-content is-loggedOut AddPermissions-content">
+<div id="add-permissions-modal" class="AddPermissions modal fade">
+    <div class="AddPermissions-backDrop is-loggedOut"></div>
+    <div class="AddPermissions-dialog">
+        <div class="AddPermissions-content is-loggedOut">
             <div class="AddPermissions-header">
                 <div class="List-header">
                     <div class="List-title">
@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </div>
-            <div class="LoginModal-body AddPermissions-body">
+            <div class="AddPermissions-body">
                 <div class="AddPermissions-directions">
                     <span class="AddPermissions-directionNumber">
                         1.
@@ -41,14 +41,12 @@
                 </div>
 
                 <div class="AddPermissions-list" ng-show="usersSelected">
-                    <add-permissions-users
-                        selected="selectedUsers">
-                    </add-permissions-users>
+                    <add-permissions-list type="users">
+                    </add-permissions-list>
                 </div>
                 <div class="AddPermissions-list" ng-show="teamsSelected">
-                    <add-permissions-teams
-                        selected="selectedTeams">
-                    </add-permissions-teams>
+                    <add-permissions-list type="teams">
+                    </add-permissions-list>
                 </div>
 
                 <div class="AddPermissions-separator"
@@ -83,7 +81,7 @@
                     </ng-form>
                 </form>
             </div>
-            <div class="LoginModal-footer AddPermissions-footer">
+            <div class="AddPermissions-footer">
                 {{ post }}
                 <div class="buttons Form-buttons AddPermissions-buttons">
                     <button type="button"

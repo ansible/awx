@@ -17,7 +17,7 @@ export default
                 templateUrl: templateUrl('access/addPermissions/addPermissions'),
                 link: function(scope, element, attrs, ctrl) {
                     scope.toggleFormTabs('users');
-                    
+
                     $("body").append(element);
 
                     Wait('start');

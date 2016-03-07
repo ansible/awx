@@ -1,15 +1,39 @@
 @import "../../shared/branding/colors.default.less";
 
 /** @define AddPermissions */
-.AddPermissions {
-    position: absolute;
+
+.AddPermissions-backDrop {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
     top: 0;
-    width: 100%;
-    height: 100%;
+    left: 0;
+    z-index: 1041;
+    opacity: 0;
+    transition: 0.5s opacity;
+    background: @login-backdrop;
+    opacity: 0.2;
+}
+
+.AddPermissions-dialog {
+    margin: 30px auto;
+    margin-top: 95px;
 }
 
 .AddPermissions-content {
-    max-width: 750px !important;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 0;
+    box-shadow: none;
+    background-color: @login-bg;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 1042;
+    position: relative;
+    opacity: 1;
+    transition: opacity 0.5s;
 }
 
 .AddPermissions-header {
@@ -19,13 +43,20 @@
 }
 
 .AddPermissions-body {
-    padding-top: 0px !important;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 0px;
     max-height: 70vh;
     overflow: scroll;
 }
 
 .AddPermissions-footer {
-    padding-top: 20px !important;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: center;
+    padding: 20px;
+    padding-bottom: 0px;
+    padding-top: 20px;
 }
 
 .AddPermissions-list .List-searchRow {
@@ -64,7 +95,7 @@
     font-size: 14px;
     font-weight: bold;
     border-radius: 50%;
-    background-color: #ebebeb;
+    background-color: @default-list-header-bg;
     padding-left: 6px;
     padding-right: 1px;
     padding-bottom: 3px;
@@ -75,7 +106,7 @@
     margin-top: 20px;
     margin-bottom: 20px;
     width: 100%;
-    border-bottom: 1px solid #e1e1e1;
+    border-bottom: 1px solid @default-second-border;
 }
 
 .AddPermissions-roleRow {
@@ -102,11 +133,11 @@
 .AddPermissions-roleType {
     border-radius: 5px;
     padding: 0px 6px;
-    border: 1px solid #e1e1e1;
+    border: 1px solid @default-second-border;
     font-size: 10px;
-    color: #848992;
+    color: @default-interface-txt;
     text-transform: uppercase;
-    background-color: #fff;
+    background-color: @default-bg;
     margin-left: 6px;
 }
 
@@ -125,14 +156,14 @@
     line-height: 11px;
     padding-left: 5px;
     padding-right: 5px;
-    color: #b7b7b7;
-    background-color: #fafafa;
+    color: @default-icon;
+    background-color: @default-tertiary-bg;
     border: 0;
 }
 
 .AddPermissions-roleRemove:hover {
-    background-color: #ff5850;
-    color: #fff;
+    background-color: @default-err;
+    color: @default-bg;
 }
 
 .AddPermissions-selectHide {
