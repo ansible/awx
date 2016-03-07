@@ -20,6 +20,15 @@
 	display: block;
 	width: 100%;
 }
+.License-submit--success.ng-hide-add, .License-submit--success.ng-hide-remove {
+  transition: all ease-in-out 0.5s;
+}
+.License-submit--success{
+	opacity: 1;
+}
+.License-submit--success.ng-hide{
+	opacity: 0;
+}
 .License-eula textarea{
 	width: 100%;
 	height: 300px;
@@ -63,4 +72,8 @@
 	input[type=file] {
 	display: none;
 	}
+}
+.License-input--fake{
+	border-top-right-radius: 4px !important;
+	border-bottom-right-radius: 4px !important;
 }
