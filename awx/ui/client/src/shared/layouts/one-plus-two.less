@@ -22,25 +22,24 @@
     flex: 0 0;
     height: @height;
     width: 100%;
+	margin-right: 20px;
     .Panel{
         height: 100%;
     }
-    @media screen and (min-width: @breakpoint){
-        max-width: 400px;
-    }
+	@media screen and (max-width: @breakpoint){
+		margin-right: 0px;
+		height: inherit;
+	}
 }
 
 .OnePlusTwo-right--panel(@height: 100%; @breakpoint: 900px) {
     height: @height;
     flex: 1 0;
-    margin-left: 20px;
     .Panel{
         height: 100%;
     }
 	@media screen and (max-width: @breakpoint){
 		flex-direction: column;
-        margin-left: 0px;
-        margin-top: 25px;
 	}
 }
 
@@ -50,6 +49,7 @@
     font-weight: bold;
     margin-right: 10px;
     text-transform: uppercase;
+	display: flex;
 }
 
 .OnePlusTwo-left--details {
@@ -58,9 +58,6 @@
 
 .OnePlusTwo-left--detailsRow {
     display: flex;
-    :not(:last-child){
-     margin-bottom: 20px;       
-    }
 }
 
 .OnePlusTwo-left--detailsLabel {
@@ -73,7 +70,6 @@
 
 .OnePlusTwo-left--detailsContent {
     display: inline-block;
-    max-width: 220px;
+    width: 220px;
     word-wrap: break-word;
 }
-
