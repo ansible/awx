@@ -6,6 +6,7 @@ import datetime
 import logging
 import re
 import copy
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -24,7 +25,9 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
+from awx.main.models.notifications import Notifier
 from awx.main.utils import ignore_inventory_computed_fields, _inventory_updates
+from awx.main.conf import tower_settings
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
 
@@ -95,19 +98,23 @@ class Inventory(CommonModel, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Inventory Administrator',
+        role_description='May manage this inventory',
         parent_role='organization.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Auditor',
+        role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
         permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
         role_name='Inventory Updater',
+        role_description='May update the inventory',
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
+        role_description='May execute jobs against this inventory',
     )
 
     def get_absolute_url(self):
@@ -1217,6 +1224,14 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
                 return True
         return False
 
+    @property
+    def notifiers(self):
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors=self.inventory.organization))
+        success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success=self.inventory.organization))
+        any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any=self.inventory.organization))
+        return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
+
     def clean_source(self):
         source = self.source
         if source and self.group:
@@ -1275,6 +1290,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
 
     def get_absolute_url(self):
         return reverse('api:inventory_update_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         if type(obj) == InventoryUpdate:

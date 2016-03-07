@@ -42,9 +42,6 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# MongoEngine
-import mongoengine
-
 # QSStats
 import qsstats
 
@@ -56,12 +53,11 @@ from social.backends.utils import load_backends
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
-from awx.main.tasks import mongodb_control
+from awx.main.tasks import mongodb_control, send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.utils.decorators import paginated
-from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.api.license import feature_enabled, feature_exists, LicenseForbids
@@ -70,7 +66,6 @@ from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
-from awx.fact.models import * # noqa
 from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
 
@@ -137,6 +132,8 @@ class ApiV1RootView(APIView):
         data['schedules'] = reverse('api:schedule_list')
         data['roles'] = reverse('api:role_list')
         data['resources'] = reverse('api:resource_list')
+        data['notifiers'] = reverse('api:notifier_list')
+        data['notifications'] = reverse('api:notification_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
@@ -252,32 +249,12 @@ class ApiV1ConfigView(APIView):
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Sanity check: If this license includes system tracking, make
-        # sure that we have a valid MongoDB to point to, and complain if
-        # we do not.
-        if ('features' in license_data and 'system_tracking' in license_data['features'] and
-           license_data['features']['system_tracking'] and settings.MONGO_HOST == NotImplemented):
-            return Response({
-                'error': 'This license supports system tracking, which '
-                         'requires MongoDB to be installed. Since you are '
-                         'running in an HA environment, you will need to '
-                         'provide a MongoDB instance. Please re-run the '
-                         'installer prior to installing this license.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
             tower_settings.LICENSE = data_actual
-
-            # Spawn a task to ensure that MongoDB is started (or stopped)
-            # as appropriate, based on whether the license uses it.
-            if license_data['features']['system_tracking']:
-                mongodb_control.delay('start')
-            else:
-                mongodb_control.delay('stop')
-
-            # Done; return the response.
+            tower_settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data)
+
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
@@ -698,6 +675,35 @@ class OrganizationActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class OrganizationNotifiersList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Organization
+    relationship = 'notifiers'
+    parent_key = 'organization'
+
+class OrganizationNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Organization
+    relationship = 'notifiers_any'
+
+class OrganizationNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Organization
+    relationship = 'notifiers_error'
+
+class OrganizationNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Organization
+    relationship = 'notifiers_success'
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -724,11 +730,8 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
     relationship='member_role.children'
 
     def get_queryset(self):
-        # XXX: This needs to be the intersection between
-        # what roles the user has and what roles the viewer
-        # has access to see.
         team = Team.objects.get(pk=self.kwargs['pk'])
-        return team.member_role.children
+        return team.member_role.children.filter(id__in=Role.visible_roles(self.request.user))
 
     # XXX: Need to enforce permissions
     def post(self, request, *args, **kwargs):
@@ -868,6 +871,26 @@ class ProjectActivityStreamList(SubListAPIView):
             return qs.filter(project=parent)
         return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
 
+class ProjectNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Project
+    relationship = 'notifiers_any'
+
+class ProjectNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Project
+    relationship = 'notifiers_error'
+
+class ProjectNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = Project
+    relationship = 'notifiers_success'
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -918,6 +941,12 @@ class ProjectUpdateCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class ProjectUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Project
+    relationship = 'notifications'
 
 class UserList(ListCreateAPIView):
 
@@ -947,13 +976,11 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
     serializer_class = RoleSerializer
     parent_model = User
     relationship='roles'
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        # XXX: This needs to be the intersection between
-        # what roles the user has and what roles the viewer
-        # has access to see.
-        u = User.objects.get(pk=self.kwargs['pk'])
-        return u.roles
+        #u = User.objects.get(pk=self.kwargs['pk'])
+        return Role.visible_roles(self.request.user).filter(members__in=[int(self.kwargs['pk']), ])
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
@@ -962,6 +989,10 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(type(self), self).post(request, *args, **kwargs)
+
+    def check_parent_access(self, parent=None):
+        # We hide roles that shouldn't be seen in our queryset
+        return True
 
 
 
@@ -1172,33 +1203,6 @@ class InventoryScanJobTemplateList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(job_type=PERM_INVENTORY_SCAN, inventory=parent)
 
-class InventorySingleFactView(MongoAPIView):
-
-    model = Fact
-    parent_model = Inventory
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.query_params.get("fact_key", None)
-        fact_value = request.query_params.get("fact_value", None)
-        datetime_spec = request.query_params.get("timestamp", None)
-        module_spec = request.query_params.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        inventory_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([h.name for h in inventory_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
-
-
 class HostList(ListCreateAPIView):
 
     model = Host
@@ -1285,102 +1289,59 @@ class HostActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
-class HostFactVersionsList(MongoListAPIView):
+class SystemTrackingEnforcementMixin(APIView):
+    '''
+    Use check_permissions instead of initial() because it's in the OPTION's path as well
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled("system_tracking"):
+            raise LicenseForbids("Your license does not permit use "
+                                 "of system tracking.")
+        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
 
+class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
+
+    model = Fact
     serializer_class = FactVersionSerializer
     parent_model = Host
     new_in_220 = True
-    filter_backends = (MongoFilterBackend,)
 
     def get_queryset(self):
         from_spec = self.request.query_params.get('from', None)
         to_spec = self.request.query_params.get('to', None)
         module_spec = self.request.query_params.get('module', None)
 
-        if not feature_enabled("system_tracking"):
-            raise LicenseForbids("Your license does not permit use "
-                                 "of system tracking.")
+        if from_spec:
+            from_spec = dateutil.parser.parse(from_spec)
+        if to_spec:
+            to_spec = dateutil.parser.parse(to_spec)
 
-        host = self.get_parent_object()
-        self.check_parent_access(host)
+        host_obj = self.get_parent_object()
 
-        try:
-            fact_host = FactHost.objects.get(hostname=host.name, inventory_id=host.inventory.pk)
-        except FactHost.DoesNotExist:
-            return None
-        except mongoengine.ConnectionError:
-            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
-
-        kv = {
-            'host': fact_host.id,
-        }
-        if module_spec is not None:
-            kv['module'] = module_spec
-        if from_spec is not None:
-            from_actual = dateutil.parser.parse(from_spec)
-            kv['timestamp__gt'] = from_actual
-        if to_spec is not None:
-            to_actual = dateutil.parser.parse(to_spec)
-            kv['timestamp__lte'] = to_actual
-
-        return FactVersion.objects.filter(**kv).order_by("-timestamp")
+        return Fact.get_timeline(host_obj.id, module=module_spec, ts_from=from_spec, ts_to=to_spec)
 
     def list(self, *args, **kwargs):
         queryset = self.get_queryset() or []
-        try:
-            serializer = FactVersionSerializer(queryset, many=True, context=dict(host_obj=self.get_parent_object()))
-        except mongoengine.ConnectionError:
-            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
-        return Response(dict(results=serializer.data))
+        return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
-class HostSingleFactView(MongoAPIView):
+class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
     model = Fact
-    parent_model = Host
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.query_params.get("fact_key", None)
-        fact_value = request.query_params.get("fact_value", None)
-        datetime_spec = request.query_params.get("timestamp", None)
-        module_spec = request.query_params.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        host_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([host_obj.name], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
-
-class HostFactCompareView(MongoAPIView):
-
     new_in_220 = True
     parent_model = Host
     serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
 
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
+    def retrieve(self, request, *args, **kwargs):
         datetime_spec = request.query_params.get('datetime', None)
         module_spec = request.query_params.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
 
         host_obj = self.get_parent_object()
-        fact_entry = Fact.get_host_version(host_obj.name, host_obj.inventory.pk, datetime_actual, module_spec)
-        host_data = FactSerializer(fact_entry).data if fact_entry is not None else {}
 
-        return Response(host_data)
+        fact_entry = Fact.get_host_fact(host_obj.id, module_spec, datetime_actual)
+        if not fact_entry:
+            return Response({'detail': 'Fact not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(self.serializer_class(instance=fact_entry).data)
 
 class GroupList(ListCreateAPIView):
 
@@ -1548,33 +1509,6 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         if hasattr(obj, 'mark_inactive'):
             obj.mark_inactive_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class GroupSingleFactView(MongoAPIView):
-
-    model = Fact
-    parent_model = Group
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.query_params.get("fact_key", None)
-        fact_value = request.query_params.get("fact_value", None)
-        datetime_spec = request.query_params.get("timestamp", None)
-        module_spec = request.query_params.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        group_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([h.name for h in group_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
@@ -1803,6 +1737,27 @@ class InventorySourceActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class InventorySourceNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = InventorySource
+    relationship = 'notifiers_any'
+
+class InventorySourceNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = InventorySource
+    relationship = 'notifiers_error'
+
+class InventorySourceNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = InventorySource
+    relationship = 'notifiers_success'
+
 class InventorySourceHostsList(SubListAPIView):
 
     model = Host
@@ -1866,6 +1821,13 @@ class InventoryUpdateCancel(RetrieveAPIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class InventoryUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = InventoryUpdate
+    relationship = 'notifications'
 
 class JobTemplateList(ListCreateAPIView):
 
@@ -2035,6 +1997,27 @@ class JobTemplateActivityStreamList(SubListAPIView):
 
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
+
+class JobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = JobTemplate
+    relationship = 'notifiers_any'
+
+class JobTemplateNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = JobTemplate
+    relationship = 'notifiers_error'
+
+class JobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = JobTemplate
+    relationship = 'notifiers_success'
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -2368,6 +2351,13 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url()}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+class JobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Job
+    relationship = 'notifications'
 
 class BaseJobHostSummariesList(SubListAPIView):
 
@@ -3022,6 +3012,58 @@ class AdHocCommandStdout(UnifiedJobStdout):
     model = AdHocCommand
     new_in_220 = True
 
+class NotifierList(ListCreateAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    new_in_300 = True
+
+class NotifierDetail(RetrieveUpdateDestroyAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    new_in_300 = True
+
+class NotifierTest(GenericAPIView):
+
+    view_name = 'Notifier Test'
+    model = Notifier
+    serializer_class = EmptySerializer
+    new_in_300 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, tower_settings.TOWER_URL_BASE),
+                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, tower_settings.TOWER_URL_BASE)})
+        if not notification:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            send_notifications.delay([notification.id])
+            headers = {'Location': notification.get_absolute_url()}
+            return Response({"notification": notification.id},
+                            headers=headers,
+                            status=status.HTTP_202_ACCEPTED)
+
+class NotifierNotificationList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Notifier
+    relationship = 'notifications'
+    parent_key = 'notifier'
+
+class NotificationList(ListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    new_in_300 = True
+
+class NotificationDetail(RetrieveAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    new_in_300 = True
+
 class ActivityStreamList(SimpleListAPIView):
 
     model = ActivityStream
@@ -3120,28 +3162,26 @@ class SettingsReset(APIView):
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-#class RoleList(ListCreateAPIView):
+
 class RoleList(ListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
-    # XXX: Permissions - only roles the user has access to see should be listed here
     def get_queryset(self):
-        return Role.objects
+        if self.request.user.is_superuser:
+            return Role.objects
+        return Role.visible_roles(self.request.user)
 
-    # XXX: Need to define who can create custom roles, and then restrict access
-    #      appropriately
-    # XXX: Need to define how we want to deal with administration of custom roles.
 
-class RoleDetail(RetrieveUpdateAPIView):
+class RoleDetail(RetrieveAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
-
-    # XXX: Permissions - only appropriate people should be able to change these
 
 
 class RoleUsersList(SubListCreateAttachDetachAPIView):
@@ -3150,6 +3190,8 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
     serializer_class = UserSerializer
     parent_model = Role
     relationship = 'members'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: Access control
@@ -3171,6 +3213,8 @@ class RoleTeamsList(ListAPIView):
     serializer_class = TeamSerializer
     parent_model = Role
     relationship = 'member_role.parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # TODO: Check
@@ -3201,6 +3245,8 @@ class RoleParentsList(SubListAPIView):
     serializer_class = RoleSerializer
     parent_model = Role
     relationship = 'parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: This should be the intersection between the roles of the user
@@ -3214,6 +3260,8 @@ class RoleChildrenList(SubListAPIView):
     serializer_class = RoleSerializer
     parent_model = Role
     relationship = 'children'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         # XXX: This should be the intersection between the roles of the user
@@ -3225,6 +3273,7 @@ class ResourceDetail(RetrieveAPIView):
 
     model = Resource
     serializer_class = ResourceSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     # XXX: Permissions - only roles the user has access to see should be listed here
@@ -3235,6 +3284,7 @@ class ResourceList(ListAPIView):
 
     model = Resource
     serializer_class = ResourceSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     def get_queryset(self):
@@ -3244,6 +3294,7 @@ class ResourceAccessList(ListAPIView):
 
     model = User
     serializer_class = ResourceAccessListElementSerializer
+    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     def get_queryset(self):

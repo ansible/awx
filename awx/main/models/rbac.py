@@ -6,6 +6,7 @@ import logging
 
 # Django
 from django.db import models
+from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -127,6 +128,10 @@ class Role(CommonModelNameNotUnique):
         for k in permissions:
             setattr(permission, k, int(permissions[k]))
         permission.save()
+
+    @staticmethod
+    def visible_roles(user):
+        return Role.objects.filter(Q(descendents__in=user.roles.filter()) | Q(ancestors__in=user.roles.filter()))
 
     @staticmethod
     def singleton(name):

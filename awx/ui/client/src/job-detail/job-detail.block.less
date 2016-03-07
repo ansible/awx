@@ -3,9 +3,32 @@
 @import '../shared/branding/colors.less';
 @import '../shared/branding/colors.default.less';
 
-.JobDetail-panelHeader{
-    height: 50px;
+.JobDetail{
     display: flex;
+    flex-direction: row;
+}
+
+.JobDetail-leftSide{
+    flex: 1 0 auto;
+    width: 50%;
+    padding-right: 20px;
+}
+
+.JobDetail-rightSide{
+    flex: 1 0 auto;
+    width: 50%;
+}
+
+.JobDetail-panelHeader{
+    display: flex;
+    height: 30px;
+}
+
+.JobDetail-expandContainer{
+    flex: 1;
+    margin: 0px;
+    line-height: 30px;
+    white-space: nowrap;
 }
 
 .JobDetail-panelHeaderText{
@@ -38,11 +61,16 @@
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
+    padding-top: 25px;
 }
 
 .JobDetail-resultRow{
     width: 50%;
     display: flex;
+}
+
+.JobDetail-resultRowLabel{
+    text-transform: uppercase;
 }
 
 .JobDetail-resultRow label{
@@ -52,7 +80,103 @@
     flex: 1 0 auto;
 }
 
+.JobDetail-resultRow--variables{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-left:15px;
+}
+
+.JobDetail-extraVars{
+    text-transform: none;
+}
+
+.JobDetail-extraVarsLabel{
+    margin-left:-15px;
+    padding-bottom: 15px;
+}
+
 .JobDetail-resultRowText{
     width: 40%;
     flex: 1 0 auto;
+    padding:0px;
+    text-transform: none;
+}
+
+.JobDetail-searchHeaderRow{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    height: 50px;
+    margin-top: 25px;
+}
+
+.JobDetail-searchContainer{
+    flex: 1 0 auto;
+}
+
+.JobDetail-tableToggleContainer{
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.JobDetail-tableToggle{
+    padding-left:10px;
+    padding-right: 10px;
+    border: 1px solid @default-second-border;
+}
+
+.JobDetail-tableToggle.active{
+    background-color: @default-link;
+    border: 1px solid @default-link;
+    color: @default-bg;
+}
+
+.JobDetail-tableToggle--left{
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.JobDetail-tableToggle--right{
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.JobDetail-searchInput{
+    border-radius: 5px !important;
+}
+
+.JobDetail-tableHeader:last-of-type{
+    text-align:justify;
+}
+
+.JobDetail-statusIcon{
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.JobDetail-tableRow--selected,
+.JobDetail-tableRow--selected > :first-child{
+   border-left: 5px solid @list-row-select-bord;
+}
+
+.JobDetail-tableRow--selected > :first-child > .JobDetail-statusIcon{
+    margin-left: -5px;
+}
+
+.JobDetail-statusIcon--results{
+    padding-left: 0px;
+    padding-right: 10px;
+}
+
+.JobDetail-graphSection{
+    height: 320px;
+    width:100%;
+}
+
+.JobDetail-stdoutActionButton--active{
+    flex:none;
+    width:0px;
+    padding-right: 0px;
 }

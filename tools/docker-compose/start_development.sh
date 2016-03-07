@@ -1,4 +1,5 @@
 #!/bin/bash
+set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
@@ -19,12 +20,8 @@ else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
 
-if [ -f "/.develop_run" ]; then
-    echo "Skipping 'make develop' step since it has already run - remove /.develop_run to force it"
-else
-    make develop
-    touch /.develop_run
-fi
+rm -rf /tower_devel/ansible_tower.egg-info
+mv /tmp/ansible_tower.egg-info /tower_devel/
 
 # Check if we need to build dependencies
 if [ -f "awx/lib/.deps_built" ]; then

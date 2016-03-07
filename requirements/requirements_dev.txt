@@ -3,7 +3,9 @@ django-debug-toolbar==1.4
 unittest2
 pep8
 flake8
+pyflakes==1.0.0 # Pinned until PR merges https://gitlab.com/pycqa/flake8/merge_requests/56
 pytest
 pytest-cov
 pytest-django
 pytest-pythonpath
+pytest-mock

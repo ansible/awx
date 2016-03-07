@@ -20,10 +20,12 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
+from awx.main.models.notifications import Notifier
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
 from awx.main.fields import ImplicitRoleField
+from awx.main.conf import tower_settings
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -209,20 +211,24 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Project Administrator',
+        role_description='May manage this project',
         parent_role='organizations.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
+        role_description='May read all settings associated with this project',
         parent_role='organizations.auditor_role',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Project Member',
+        role_description='Implies membership within this project',
         permissions = {'read': True}
     )
     scm_update_role = ImplicitRoleField(
         role_name='Project Updater',
+        role_description='May update this project from the source control management system',
         parent_role='admin_role',
         permissions = {'scm_update': True}
     )
@@ -330,6 +336,18 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
                 return True
         return False
 
+    @property
+    def notifiers(self):
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
+        # Get Organization Notifiers
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.organizations.all())))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.organizations.all())))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.organizations.all())))
+        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
+
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
 
@@ -390,6 +408,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

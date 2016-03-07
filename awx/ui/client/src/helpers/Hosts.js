@@ -20,7 +20,7 @@ export default
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'HostListDefinition',
                'SearchHelper', 'PaginationHelpers', listGenerator.name, 'HostsHelper',
                'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-               'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper',
+               'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'StandardOutHelper',
                'GroupListDefinition'
 ])
 
@@ -159,17 +159,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
     };
 }])
 
-.factory('ViewJob', ['LogViewer', 'GetBasePath', function(LogViewer, GetBasePath) {
-    return function(params) {
-        var scope = params.scope,
-        id = params.id;
-        LogViewer({
-            scope: scope,
-            url: GetBasePath('jobs') + id + '/'
-        });
-    };
-}])
-
 .factory('HostsReload', [ '$stateParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
          'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
          function($stateParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
@@ -240,7 +229,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                generator = GenerateList;
 
                // Inject the list html
-               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'host-list-container', searchSize: 'col-lg-6 col-md-6 col-sm-6' });
+               generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'host-list-container', searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' });
 
                // Load data
                HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, pageSize: pageSize });

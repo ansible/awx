@@ -23,6 +23,9 @@ RUN pip2 install honcho
 RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64.deb
 RUN dpkg -i dumb-init_*.deb
 ADD start_development.sh /start_development.sh
+ADD ansible-tower.egg-link /usr/local/lib/python2.7/dist-packages/ansible-tower.egg-link
+ADD tower-manage /usr/local/bin/tower-manage
+ADD ansible_tower.egg-info /tmp/ansible_tower.egg-info
 
 EXPOSE 8013 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]

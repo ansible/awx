@@ -6,6 +6,7 @@ import hmac
 import json
 import yaml
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -22,6 +23,7 @@ from jsonfield import JSONField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.notifications import Notifier
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
@@ -183,16 +185,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     )
     admin_role = ImplicitRoleField(
         role_name='Job Template Administrator',
+        role_description='Full access to all settings',
         parent_role='project.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Job Template Auditor',
+        role_description='Read-only access to all settings',
         parent_role='project.auditor_role',
         permissions = {'read': True}
     )
     executor_role = ImplicitRoleField(
-        role_name='Job Template Executor',
+        role_name='Job Template Runner',
+        role_description='May run the job template',
         permissions = {'read': True, 'execute': True}
     )
 
@@ -347,6 +352,20 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     def _can_update(self):
         return self.can_start_without_user_input()
 
+    @property
+    def notifiers(self):
+        # Return all notifiers defined on the Job Template, on the Project, and on the Organization for each trigger type
+        # TODO: Currently there is no org fk on project so this will need to be added once that is
+        #       available after the rbac pr
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self, self.project]))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
+        # Get Organization Notifiers
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.project.organizations.all())))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.project.organizations.all())))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.project.organizations.all())))
+        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
 class Job(UnifiedJob, JobOptions):
     '''
@@ -385,6 +404,9 @@ class Job(UnifiedJob, JobOptions):
 
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
 
     @property
     def task_auth_token(self):
@@ -501,6 +523,26 @@ class Job(UnifiedJob, JobOptions):
                 if source not in inventory_sources_found and source.needs_update_on_launch:
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
+
+    def notification_data(self):
+        data = super(Job, self).notification_data()
+        all_hosts = {}
+        for h in self.job_host_summaries.all():
+            all_hosts[h.host.name] = dict(failed=h.failed,
+                                          changed=h.changed,
+                                          dark=h.dark,
+                                          failures=h.failures,
+                                          ok=h.ok,
+                                          processed=h.processed,
+                                          skipped=h.skipped)
+        data.update(dict(inventory=self.inventory.name,
+                         project=self.project.name,
+                         playbook=self.playbook,
+                         credential=self.credential.name,
+                         limit=self.limit,
+                         extra_vars=self.extra_vars,
+                         hosts=all_hosts))
+        return data
 
     def handle_extra_data(self, extra_data):
         extra_vars = {}
@@ -1081,6 +1123,9 @@ class SystemJob(UnifiedJob, SystemJobOptions):
 
     def get_absolute_url(self):
         return reverse('api:system_job_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         return True

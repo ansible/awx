@@ -16,7 +16,7 @@ export default
             function () {
                 return function (target) {
 
-                    var rtnTitle = 'DASHBOARD';
+                    var rtnTitle = 'ALL ACTIVITY';
 
                     switch(target) {
                         case 'project':
@@ -48,6 +48,9 @@ export default
                             break;
                         case 'schedule':
                             rtnTitle = 'SCHEDULES';
+                            break;
+                        case 'host':
+                            rtnTitle = 'HOSTS';
                             break;
                     }
 

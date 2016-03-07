@@ -1,0 +1,2922 @@
+[
+    {
+        "name": "kbd", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.15.5", 
+        "release": "10.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "centos-release", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7", 
+        "release": "0.1406.el7.centos.2.3", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "postfix", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "2.10.1", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "filesystem", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.2", 
+        "release": "18.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "tuned", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.3.0", 
+        "release": "11.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "ncurses-base", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.9", 
+        "release": "13.20130511.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "aic94xx-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "30", 
+        "release": "6.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "kbd-misc", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.15.5", 
+        "release": "10.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "irqbalance", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "1.0.6", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "tzdata", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2014b", 
+        "release": "1.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "openssh-clients", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "6.4p1", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "glibc-common", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.17", 
+        "release": "55.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "authconfig", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "6.2.8", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "xz-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.1.2", 
+        "release": "8alpha.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "btrfs-progs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.12", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ncurses-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.9", 
+        "release": "13.20130511.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "sudo", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.8.6p7", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libsepol", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.9", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iprutils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.3.16", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libselinux", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.2", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl6000g2b-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "17.168.5.2", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "info", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl7260-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "22.0.7.0", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "dbus-libs", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.6.12", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libertas-sd8787-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "20140213", 
+        "release": "0.3.git4164c23.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "sed", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.2.2", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl6050-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "41.28.5.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "chkconfig", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.3.61", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl1000-firmware", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "39.31.5.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "nspr", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.10.2", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl6000-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "9.221.4.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "nss-util", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl2000-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "18.168.6.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "grep", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.16", 
+        "release": "1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl5150-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.24.2.2", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "gawk", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.0.2", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl4965-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "228.61.2.24", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "expat", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.0", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl3160-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "22.0.7.0", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libattr", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.46", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl3945-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "15.32.2.9", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libcap", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.22", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libsemanage-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.10", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libxml2", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.9.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-HTTP-Tiny", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.033", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libgcrypt", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.5.3", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Pod-Perldoc", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.20", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "lua", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.1.4", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Encode", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.51", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pkgconfig", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "0.27.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Pod-Usage", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.63", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "shared-mime-info", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Exporter", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.68", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libcap-ng", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.7.3", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Time-Local", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.2300", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libidn", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.28", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Carp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.26", 
+        "release": "244.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "gmp", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "5.1.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-PathTools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.40", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "p11-kit", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.18.7", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-macros", 
+        "source": "rpm", 
+        "epoch": 4, 
+        "version": "5.16.3", 
+        "release": "285.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libdaemon", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.14", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-File-Temp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.23.01", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libcroco", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.6.8", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-threads-shared", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.43", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libnl3-cli", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.2.21", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Filter", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.49", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cyrus-sasl-lib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.26", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Getopt-Long", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.40", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "groff-base", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.22.2", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpg-pubkey", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "04bbaa7b", 
+        "release": "4c881cbf", 
+        "arch": null
+    }, 
+    {
+        "name": "libunistring", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.9.3", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libicu", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "50.1.2", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "diffutils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.3", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libdnet", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.12", 
+        "release": "13.1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "xz", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.1.2", 
+        "release": "8alpha.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "open-vm-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "9.4.0", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "sysvinit-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.88", 
+        "release": "14.dsf.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "open-vm-tools-deploypkg", 
+        "source": "rpm", 
+        "epoch": 0, 
+        "version": "9.4.10", 
+        "release": "3", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "newt", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.52.15", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-kitchen", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.1", 
+        "release": "5.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "ethtool", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "3.8", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "yum-utils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.31", 
+        "release": "29.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "hostname", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.13", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "emacs-filesystem", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "24.3", 
+        "release": "11.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "gdbm", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.10", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "emacs-common", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "24.3", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "less", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "458", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "epel-release", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7", 
+        "release": "5", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "p11-kit-trust", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.18.7", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pkcs11-helper", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.11", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nettle", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.7.1", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "easy-rsa", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.2", 
+        "release": "1.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "gobject-introspection", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.36.0", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libevent", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.21", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gsettings-desktop-schemas", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.8.2", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dhcp-libs", 
+        "source": "rpm", 
+        "epoch": 12, 
+        "version": "4.2.5", 
+        "release": "36.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "acl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.51", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dhcp", 
+        "source": "rpm", 
+        "epoch": 12, 
+        "version": "4.2.5", 
+        "release": "36.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "elfutils-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.158", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bind-license", 
+        "source": "rpm", 
+        "epoch": 32, 
+        "version": "9.9.4", 
+        "release": "18.el7_1.1", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "mozjs17", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "17.0.0", 
+        "release": "10.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bind", 
+        "source": "rpm", 
+        "epoch": 32, 
+        "version": "9.9.4", 
+        "release": "18.el7_1.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pinentry", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.8.1", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bind-libs-lite", 
+        "source": "rpm", 
+        "epoch": 32, 
+        "version": "9.9.4", 
+        "release": "18.el7_1.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libselinux-utils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.2", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "audit-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libedit", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.0", 
+        "release": "12.20121213cvs.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "audit-libs-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libmodman", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.1", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "checkpolicy", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.12", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "glib-networking", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.36.2", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "setools-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.3.7", 
+        "release": "46.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "snappy", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.0", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "audit", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "numactl-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.9", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "autogen-libopts", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.18", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libverto", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.2.5", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ntp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.2.6p5", 
+        "release": "19.el7.centos.3", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libsemanage", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.10", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "krb5-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.11.3", 
+        "release": "49.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "openldap", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.39", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cracklib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.9.0", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libmount", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.23.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "systemd-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "208", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libpwquality", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.2.3", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pam", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.8", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "shadow-utils", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "4.1.5.1", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "util-linux", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.23.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.7.5", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-decorator", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.4.0", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "gettext", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.18.2.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "centos-logos", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "70.0.6", 
+        "release": "1.el7.centos", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libselinux-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.2", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-slip-dbus", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.4.0", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "pyliblzma", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.5.3", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "yum-metadata-parser", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.4", 
+        "release": "10.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pyxattr", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.5.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-backports-ssl_match_hostname", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.4.0.2", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "python-pyudev", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.15", 
+        "release": "6.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "binutils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.23.52.0.1", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "logrotate", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.8.6", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "alsa-lib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.27.2", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "mariadb-libs", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "5.5.35", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libcurl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7.29.0", 
+        "release": "19.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-urlgrabber", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.10", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "rpm-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.11.1", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "fipscheck", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "json-c", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.11", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "virt-what", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.13", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libnetfilter_conntrack", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.4", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iproute", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.10.0", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "qrencode-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.4.1", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "device-mapper-libs", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "1.02.84", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "systemd", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "208", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "systemd-sysv", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "208", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iputils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "20121221", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "device-mapper-event-libs", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "1.02.84", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "NetworkManager-glib", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "0.9.9.1", 
+        "release": "13.git20140326.4dba720.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "polkit-pkla-compat", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cronie-anacron", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.11", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "crontabs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.11", 
+        "release": "6.20121102git.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "device-mapper-event", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "1.02.84", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "avahi-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.6.31", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "avahi-autoipd", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.6.31", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dnsmasq", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.66", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ebtables", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.10", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libpciaccess", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.13.1", 
+        "release": "4.1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "fxload", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2002_04_11", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "alsa-tools-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.27", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libpipeline", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.2.3", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gnupg2", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.22", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "rpm-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.11.1", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pygpgme", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.3", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "hardlink", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.0", 
+        "release": "19.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dracut-network", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "033", 
+        "release": "161.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "plymouth", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.8.9", 
+        "release": "0.10.20140113.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "teamd", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.9", 
+        "release": "15.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libestr", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.1.9", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "NetworkManager-tui", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "0.9.9.1", 
+        "release": "13.git20140326.4dba720.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "kernel", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.10.0", 
+        "release": "123.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dracut-config-rescue", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "033", 
+        "release": "161.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "man-db", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.6.3", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "lvm2", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "2.02.105", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libgcc", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.8.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "setup", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.8.71", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "microcode_ctl", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "2.1", 
+        "release": "7.1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "basesystem", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "10.0", 
+        "release": "7.el7.centos", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "biosdevname", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.5.0", 
+        "release": "10.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "linux-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "20140213", 
+        "release": "0.3.git4164c23.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "openssh-server", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "6.4p1", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "parted", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.1", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nss-softokn-freebl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "selinux-policy-targeted", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.12.1", 
+        "release": "153.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "glibc", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.17", 
+        "release": "55.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "xfsprogs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.2.0", 
+        "release": "0.10.alpha2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libstdc++", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.8.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "e2fsprogs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.42.9", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bash", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.2.45", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "passwd", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.79", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pcre", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.32", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "tar", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "1.26", 
+        "release": "29.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "zlib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.2.7", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "rootfiles", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.1", 
+        "release": "11.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "iwl6000g2a-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "17.168.5.3", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libuuid", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.23.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl2030-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "18.168.6.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "popt", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.13", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl100-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "39.31.5.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libcom_err", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.42.9", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl135-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "18.168.6.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libdb", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.3.21", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl105-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "18.168.6.1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "bzip2-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.6", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libertas-sd8686-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "20140213", 
+        "release": "0.3.git4164c23.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "readline", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "6.2", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ivtv-firmware", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "20080701", 
+        "release": "26.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "elfutils-libelf", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.158", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libertas-usb8388-firmware", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "20140213", 
+        "release": "0.3.git4164c23.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libgpg-error", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.12", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iwl5000-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.83.5.1_1", 
+        "release": "34.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libacl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.51", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpg-pubkey", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "f4a80eb5", 
+        "release": "53a7ff4b", 
+        "arch": null
+    }, 
+    {
+        "name": "cpio", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.11", 
+        "release": "22.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-parent", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "0.225", 
+        "release": "244.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libnl3", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.2.21", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-podlators", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.5.1", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "sqlite", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.7.17", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Pod-Escapes", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.04", 
+        "release": "285.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libffi", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.0.13", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Text-ParseWords", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.29", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "glib2", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.36.3", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Storable", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.45", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dbus-glib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.100", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-constant", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.27", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "findutils", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "4.5.11", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Socket", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.010", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "file-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.11", 
+        "release": "21.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Time-HiRes", 
+        "source": "rpm", 
+        "epoch": 4, 
+        "version": "1.9725", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libtasn1", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.3", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Scalar-List-Utils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.27", 
+        "release": "248.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "tcp_wrappers-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7.6", 
+        "release": "77.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-Pod-Simple", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "3.28", 
+        "release": "4.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "file", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.11", 
+        "release": "21.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-File-Path", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.09", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "nss-softokn", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-threads", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.87", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libassuan", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.0", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl-libs", 
+        "source": "rpm", 
+        "epoch": 4, 
+        "version": "5.16.3", 
+        "release": "285.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "e2fsprogs-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.42.9", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "perl", 
+        "source": "rpm", 
+        "epoch": 4, 
+        "version": "5.16.3", 
+        "release": "285.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "which", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.20", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpg-pubkey", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "66fd4949", 
+        "release": "4803fe57", 
+        "arch": null
+    }, 
+    {
+        "name": "libgomp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.8.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "procps-ng", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.3.10", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "kmod-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "14", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "net-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0", 
+        "release": "0.17.20131004git.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libnfnetlink", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libmspack", 
+        "source": "rpm", 
+        "epoch": 0, 
+        "version": "0.0.20040308alpha", 
+        "release": "2", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "slang", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.4", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-chardet", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.1", 
+        "release": "7.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "lzo", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.06", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "yum", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.4.3", 
+        "release": "125.el7.centos", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "pciutils-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.2.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpm-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.20.7", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "keyutils-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.5.8", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "liblockfile", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.08", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gettext-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.18.2.1", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "emacs-nox", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "24.3", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libteam", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.9", 
+        "release": "15.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpg-pubkey", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "352c64e5", 
+        "release": "52ae6884", 
+        "arch": null
+    }, 
+    {
+        "name": "ca-certificates", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2013.1.95", 
+        "release": "71.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "openvpn", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.3.7", 
+        "release": "1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gnutls", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.1.18", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "strace", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.8", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ModemManager-glib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.0", 
+        "release": "6.git20130913.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "tmux", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.8", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "vim-minimal", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "7.4.160", 
+        "release": "1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dhcp-common", 
+        "source": "rpm", 
+        "epoch": 12, 
+        "version": "4.2.5", 
+        "release": "36.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "device-mapper-persistent-data", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.3.2", 
+        "release": "1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dhclient", 
+        "source": "rpm", 
+        "epoch": 12, 
+        "version": "4.2.5", 
+        "release": "36.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libdb-utils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.3.21", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bind-libs", 
+        "source": "rpm", 
+        "epoch": 32, 
+        "version": "9.9.4", 
+        "release": "18.el7_1.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libss", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.42.9", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "bind-utils", 
+        "source": "rpm", 
+        "epoch": 32, 
+        "version": "9.9.4", 
+        "release": "18.el7_1.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "make", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "3.82", 
+        "release": "21.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nmap-ncat", 
+        "source": "rpm", 
+        "epoch": 2, 
+        "version": "6.40", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "freetype", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.11", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "policycoreutils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.5", 
+        "release": "15.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ncurses", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "5.9", 
+        "release": "13.20130511.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-IPy", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.75", 
+        "release": "6.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libproxy", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.4.11", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libcgroup", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.41", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libsoup", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.42.2", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "policycoreutils-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.2.5", 
+        "release": "15.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libndp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.2", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iftop", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0", 
+        "release": "0.7.pre4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libsysfs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.1.0", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ntpdate", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.2.6p5", 
+        "release": "19.el7.centos.3", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ustr", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.4", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nss-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "openssl-libs", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.0.1e", 
+        "release": "34.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gzip", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.5", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cracklib-dicts", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.9.0", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nss", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libuser", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.60", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "coreutils", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.22", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libblkid", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.23.2", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libutempter", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.6", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "nss-sysinit", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.15.4", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.7.5", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dbus-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.1", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pygobject3-base", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.8.2", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-slip", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.4.0", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "python-iniparse", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.4", 
+        "release": "9.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "newt-python", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.52.15", 
+        "release": "4.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-configobj", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.7.2", 
+        "release": "7.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "python-backports", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0", 
+        "release": "6.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "python-setuptools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.9.8", 
+        "release": "3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "grubby", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "8.28", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "kmod", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "14", 
+        "release": "9.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "openssl", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.0.1e", 
+        "release": "34.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "plymouth-core-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.8.9", 
+        "release": "0.10.20140113.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libssh2", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.3", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "python-pycurl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7.19.0", 
+        "release": "17.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "curl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7.29.0", 
+        "release": "19.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "rpm", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.11.1", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "selinux-policy", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.12.1", 
+        "release": "153.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "fipscheck-lib", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.1", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "openssh", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "6.4p1", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dmidecode", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "2.12", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libmnl", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.3", 
+        "release": "7.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "iptables", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.21", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libpcap", 
+        "source": "rpm", 
+        "epoch": 14, 
+        "version": "1.5.3", 
+        "release": "3.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "device-mapper", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "1.02.84", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cryptsetup-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.6.3", 
+        "release": "2.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dbus", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "1.6.12", 
+        "release": "8.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "libgudev1", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "208", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "initscripts", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "9.49.17", 
+        "release": "1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "polkit", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.112", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "os-prober", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.58", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "cronie", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.4.11", 
+        "release": "11.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "grub2-tools", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "2.02", 
+        "release": "0.2.10.el7.centos.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "lvm2-libs", 
+        "source": "rpm", 
+        "epoch": 7, 
+        "version": "2.02.105", 
+        "release": "14.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "avahi", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.6.31", 
+        "release": "13.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "wpa_supplicant", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "2.0", 
+        "release": "12.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "ppp", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.5", 
+        "release": "33.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "hwdata", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.252", 
+        "release": "7.3.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "libdrm", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4.50", 
+        "release": "1.1.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "alsa-firmware", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.0.27", 
+        "release": "2.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "kpartx", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.4.9", 
+        "release": "66.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "pth", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.7", 
+        "release": "22.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "rpm-build-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "4.11.1", 
+        "release": "16.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "gpgme", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.3.2", 
+        "release": "5.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "yum-plugin-fastestmirror", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "1.1.31", 
+        "release": "24.el7", 
+        "arch": "noarch"
+    }, 
+    {
+        "name": "kernel-tools-libs", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.10.0", 
+        "release": "123.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "dracut", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "033", 
+        "release": "161.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "plymouth-scripts", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.8.9", 
+        "release": "0.10.20140113.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "jansson", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.4", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "NetworkManager", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "0.9.9.1", 
+        "release": "13.git20140326.4dba720.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "rsyslog", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "7.4.7", 
+        "release": "6.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "kexec-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "2.0.4", 
+        "release": "32.el7.centos", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "grub2", 
+        "source": "rpm", 
+        "epoch": 1, 
+        "version": "2.02", 
+        "release": "0.2.10.el7.centos.1", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "kernel-tools", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "3.10.0", 
+        "release": "123.el7", 
+        "arch": "x86_64"
+    }, 
+    {
+        "name": "firewalld", 
+        "source": "rpm", 
+        "epoch": null, 
+        "version": "0.3.9", 
+        "release": "7.el7", 
+        "arch": "noarch"
+    }
+]

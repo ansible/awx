@@ -316,6 +316,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                               }
 
                               html += "</div>";
+                              html += "<div class=\"List-actionHolder\">";
                               if(list.toolbarAuxAction) {
                                   html += "<div class=\"List-auxAction\">";
                                   html += list.toolbarAuxAction;
@@ -331,6 +332,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                               }
 
                               html += "</div>\n";
+                              html += "</div>";
                               html += "</div>";
                               html += "</div>";
                           }

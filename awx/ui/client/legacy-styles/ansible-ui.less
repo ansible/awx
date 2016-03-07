@@ -99,7 +99,9 @@ a:focus {
   color: @blue-dark;
   text-decoration: none;
 }
-
+.btn{
+  text-transform: uppercase;
+}
 /* Old style TB default button with grey background */
 .btn-grey {
   color: #333;
@@ -917,15 +919,11 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Display list actions next to search widget */
 .list-actions {
-  text-align: right;
+    text-align: right;
 
-  button {
-    margin-left: 4px;
-  }
-
-  .fa-lg {
-    vertical-align: -8%;
-  }
+    .fa-lg {
+        vertical-align: -8%;
+    }
 }
 
 .jqui-accordion {
@@ -1948,11 +1946,6 @@ tr td button i {
     .inputCompactMobile {
         margin-bottom: 15px;
     }
-}
-
-button.dropdown-toggle,
-.input-group-btn {
-    z-index: 1;
 }
 
 #login-modal-body {

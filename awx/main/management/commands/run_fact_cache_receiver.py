@@ -9,9 +9,11 @@ from datetime import datetime
 # Django
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
+#from django.core.exceptions import Does
 
 # AWX
-from awx.fact.models.fact import * # noqa
+from awx.main.models.fact import Fact
+from awx.main.models.inventory import Host
 from awx.main.socket import Socket
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
@@ -47,35 +49,34 @@ class FactCacheReceiver(object):
         # ansible v2 will not emit this message. Thus, this can be removed at that time.
         if 'module_setup' in facts_data and len(facts_data) == 1:
             logger.info('Received module_setup message')
-            return
+            return None
 
         try:
-            host = FactHost.objects.get(hostname=hostname, inventory_id=inventory_id)
-        except FactHost.DoesNotExist:
-            logger.info('Creating new host <hostname, inventory_id> <%s, %s>' % (hostname, inventory_id))
-            host = FactHost(hostname=hostname, inventory_id=inventory_id)
-            host.save()
-            logger.info('Created new host <%s>' % (host.id))
-        except FactHost.MultipleObjectsReturned:
-            query = "db['fact_host'].find(hostname=%s, inventory_id=%s)" % (hostname, inventory_id)
-            logger.warn('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
+            host_obj = Host.objects.get(name=hostname, inventory__id=inventory_id)
+        except Fact.DoesNotExist:
+            logger.warn('Failed to intake fact. Host does not exist <hostname, inventory_id> <%s, %s>' % (hostname, inventory_id))
             return
+        except Fact.MultipleObjectsReturned:
+            logger.warn('Database inconsistent. Multiple Hosts found for <hostname, inventory_id> <%s, %s>.' % (hostname, inventory_id))
+            return None
         except Exception, e:
             logger.error("Exception communicating with Fact Cache Database: %s" % str(e))
-            return
+            return None
 
-        (module, facts) = self.process_facts(facts_data)
+        (module_name, facts) = self.process_facts(facts_data)
         self.timestamp = datetime.fromtimestamp(date_key, None)
 
-        try:
-            # Update existing Fact entry
-            version_obj = FactVersion.objects.get(timestamp=self.timestamp, host=host, module=module)
-            Fact.objects(id=version_obj.fact.id).update_one(fact=facts)
-            logger.info('Updated existing fact <%s>' % (version_obj.fact.id))
-        except FactVersion.DoesNotExist:
+        # Update existing Fact entry
+	fact_obj = Fact.objects.filter(host__id=host_obj.id, module=module_name, timestamp=self.timestamp)
+        if fact_obj:
+            fact_obj.facts = facts
+            fact_obj.save()
+            logger.info('Updated existing fact <%s>' % (fact_obj.id))
+        else:
             # Create new Fact entry
-            (fact_obj, version_obj) = Fact.add_fact(self.timestamp, facts, host, module)
-            logger.info('Created new fact <fact, fact_version> <%s, %s>' % (fact_obj.id, version_obj.id))
+            fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
+            logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
+        return fact_obj
 
     def run_receiver(self, use_processing_threads=True):
         with Socket('fact_cache', 'r') as facts:

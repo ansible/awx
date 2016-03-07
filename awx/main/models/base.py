@@ -25,7 +25,7 @@ from awx.main.utils import encrypt_field
 
 __all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
-           'CommonModelNameNotUnique',
+           'CommonModelNameNotUnique', 'NotificationFieldsModel',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_SCAN',
            'PERM_INVENTORY_CHECK', 'PERM_JOBTEMPLATE_CREATE', 'JOB_TYPE_CHOICES',
@@ -336,4 +336,27 @@ class CommonModelNameNotUnique(PrimordialModel):
     name = models.CharField(
         max_length=512,
         unique=False,
+    )
+
+class NotificationFieldsModel(BaseModel):
+
+    class Meta:
+        abstract = True
+
+    notifiers_error = models.ManyToManyField(
+        "Notifier",
+        blank=True,
+        related_name='%(class)s_notifiers_for_errors'
+    )
+
+    notifiers_success = models.ManyToManyField(
+        "Notifier",
+        blank=True,
+        related_name='%(class)s_notifiers_for_success'
+    )
+
+    notifiers_any = models.ManyToManyField(
+        "Notifier",
+        blank=True,
+        related_name='%(class)s_notifiers_for_any'
     )
