@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName, ParseTypeChange, ParseVariableString) {
 
     ClearScope();
 
@@ -37,6 +37,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
             getJobDetails();
         }
     });
+
+    // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
+    $scope.parseType = 'yaml';
+
 
     function getJobDetails() {
 
@@ -166,4 +170,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName', 'ParseTypeChange', 'ParseVariableString'];
