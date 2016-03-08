@@ -210,7 +210,7 @@ def migrate_job_templates(apps, schema_editor):
 
         for user in User.objects.all():
             if permission.filter(user=user).exists():
-                jt.exector_role.members.add(user)
+                jt.executor_role.members.add(user)
                 migrations[jt.name]['users'].add(user)
 
             if jt.accessible_by(user, {'execute': True}):

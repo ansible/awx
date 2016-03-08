@@ -22,7 +22,7 @@ def test_team_migration_user(team, user, permissions):
 
 @pytest.mark.django_db
 def test_team_access_superuser(team, user):
-    team.users.add(user('member', False))
+    team.member_role.members.add(user('member', False))
 
     access = TeamAccess(user('admin', True))
 
@@ -31,13 +31,13 @@ def test_team_access_superuser(team, user):
     assert access.can_delete(team)
 
     t = access.get_queryset()[0]
-    assert len(t.users.all()) == 1
-    assert len(t.organization.admins.all()) == 0
+    assert len(t.member_role.members.all()) == 1
+    assert len(t.organization.admin_role.members.all()) == 0
 
 @pytest.mark.django_db
 def test_team_access_org_admin(organization, team, user):
     a = user('admin', False)
-    organization.admins.add(a)
+    organization.admin_role.members.add(a)
     team.organization = organization
     team.save()
 
@@ -47,13 +47,13 @@ def test_team_access_org_admin(organization, team, user):
     assert access.can_delete(team)
 
     t = access.get_queryset()[0]
-    assert len(t.users.all()) == 0
-    assert len(t.organization.admins.all()) == 1
+    assert len(t.member_role.members.all()) == 0
+    assert len(t.organization.admin_role.members.all()) == 1
 
 @pytest.mark.django_db
 def test_team_access_member(organization, team, user):
     u = user('member', False)
-    team.users.add(u)
+    team.member_role.members.add(u)
     team.organization = organization
     team.save()
 
@@ -63,6 +63,6 @@ def test_team_access_member(organization, team, user):
     assert not access.can_delete(team)
 
     t = access.get_queryset()[0]
-    assert len(t.users.all()) == 1
-    assert len(t.organization.admins.all()) == 0
+    assert len(t.member_role.members.all()) == 1
+    assert len(t.organization.admin_role.members.all()) == 0
 
