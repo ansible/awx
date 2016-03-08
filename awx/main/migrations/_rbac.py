@@ -195,19 +195,24 @@ def migrate_job_templates(apps, schema_editor):
     Permission = apps.get_model('main', 'Permission')
 
     for jt in JobTemplate.objects.all():
+        permission = Permission.objects.filter(
+            inventory=jt.inventory,
+            project=jt.project,
+            active=True,
+            permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run'],
+        )
+
         for team in Team.objects.all():
-            if Permission.objects.filter(
-                    team=team,
-                    inventory=jt.inventory,
-                    project=jt.project,
-                    active=True,
-                    permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run']
-                ):
-                team.member_role.children.add(jt.executor_role);
+            if permission.filter(team=team).exists():
+                team.member_role.children.add(jt.executor_role)
                 migrations[jt.name]['teams'].add(team)
 
 
         for user in User.objects.all():
+            if permission.filter(user=user).exists():
+                jt.executor_role.members.add(user)
+                migrations[jt.name]['users'].add(user)
+
             if jt.accessible_by(user, {'execute': True}):
                 # If the job template is already accessible by the user, because they
                 # are a sytem, organization, or project admin, then don't add an explicit

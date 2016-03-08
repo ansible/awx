@@ -51,7 +51,7 @@ class ResourceMixin(models.Model):
         '''
 
         perms = self.get_permissions(user)
-        if not perms:
+        if perms is None:
             return False
         for k in permissions:
             if k not in perms or perms[k] < permissions[k]:

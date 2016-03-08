@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
+from awx.main.access import InventoryAccess
 from django.apps import apps
 
 @pytest.mark.django_db
@@ -195,3 +196,39 @@ def test_group_parent_admin(group, permissions, user):
 
     parent2.admin_role.members.add(u)
     assert childA.accessible_by(u, permissions['admin'])
+
+@pytest.mark.django_db
+def test_access_admin(organization, inventory, user):
+    a = user('admin', False)
+    inventory.organization = organization
+    organization.admin_role.members.add(a)
+
+    access = InventoryAccess(a)
+    assert access.can_read(inventory)
+    assert access.can_add(None)
+    assert access.can_add({'organization': organization.id})
+    assert access.can_change(inventory, None)
+    assert access.can_change(inventory, {'organization': organization.id})
+    assert access.can_admin(inventory, None)
+    assert access.can_admin(inventory, {'organization': organization.id})
+    assert access.can_delete(inventory)
+    assert access.can_run_ad_hoc_commands(inventory)
+
+@pytest.mark.django_db
+def test_access_auditor(organization, inventory, user):
+    u = user('admin', False)
+    inventory.organization = organization
+    organization.auditor_role.members.add(u)
+
+    access = InventoryAccess(u)
+    assert access.can_read(inventory)
+    assert not access.can_add(None)
+    assert not access.can_add({'organization': organization.id})
+    assert not access.can_change(inventory, None)
+    assert not access.can_change(inventory, {'organization': organization.id})
+    assert not access.can_admin(inventory, None)
+    assert not access.can_admin(inventory, {'organization': organization.id})
+    assert not access.can_delete(inventory)
+    assert not access.can_run_ad_hoc_commands(inventory)
+
+

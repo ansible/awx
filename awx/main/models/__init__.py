@@ -39,7 +39,6 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 from django.contrib.auth.models import User # noqa
 from awx.main.access import * # noqa
 User.add_to_class('get_queryset', get_user_queryset)
-User.add_to_class('can_access', check_user_access)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
