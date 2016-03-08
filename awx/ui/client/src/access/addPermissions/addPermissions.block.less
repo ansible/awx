@@ -9,10 +9,9 @@
     top: 0;
     left: 0;
     z-index: 1041;
-    opacity: 0;
+    opacity: 0.2;
     transition: 0.5s opacity;
     background: @login-backdrop;
-    opacity: 0.2;
 }
 
 .AddPermissions-dialog {
@@ -22,18 +21,15 @@
 
 .AddPermissions-content {
     max-width: 750px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
     border: 0;
     box-shadow: none;
     background-color: @login-bg;
     border-radius: 4px;
-    opacity: 0;
     transition: opacity 0.5s;
     z-index: 1042;
     position: relative;
     opacity: 1;
-    transition: opacity 0.5s;
 }
 
 .AddPermissions-header {
@@ -43,9 +39,7 @@
 }
 
 .AddPermissions-body {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 0px;
+    padding: 0p 20px;
     max-height: 70vh;
     overflow: scroll;
 }
@@ -103,8 +97,7 @@
 }
 
 .AddPermissions-separator {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 20px 0px;
     width: 100%;
     border-bottom: 1px solid @default-second-border;
 }
@@ -152,10 +145,8 @@
 
 .AddPermissions-roleRemove {
     border-radius: 50%;
-    padding: 3px;
+    padding: 5px 3px;
     line-height: 11px;
-    padding-left: 5px;
-    padding-right: 5px;
     color: @default-icon;
     background-color: @default-tertiary-bg;
     border: 0;
@@ -171,5 +162,5 @@
 }
 
 .AddPermissions .select2-search__field {
-  text-transform: uppercase;
+    text-transform: uppercase;
 }
