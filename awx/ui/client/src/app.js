@@ -30,6 +30,7 @@ import inventoryScripts from './inventory-scripts/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
+import notifications from './notifications/main';
 
 // modules
 import about from './about/main';
@@ -98,6 +99,7 @@ var tower = angular.module('Tower', [
     activityStream.name,
     footer.name,
     jobDetail.name,
+    notifications.name,
     standardOut.name,
     'templates',
     'Utilities',
@@ -882,13 +884,13 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense', 
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense',
         '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService',
         function (
-            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense, 
+            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense,
             $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-            LoadConfig, Store, ShowSocketHelp, pendoService) 
+            LoadConfig, Store, ShowSocketHelp, pendoService)
             {
             var sock;
 
