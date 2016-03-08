@@ -233,7 +233,8 @@ def handle_work_success(self, result, task_actual):
                                                                                task_actual['id'],
                                                                                instance_name,
                                                                                notification_body['url'])
-    send_notifications.delay([n.generate_notification(notification_subject, notification_body)
+    notification_body['friendly_name'] = friendly_name
+    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
                               for n in set(notifiers.get('success', []) + notifiers.get('any', []))],
                              job_id=task_actual['id'])
 
