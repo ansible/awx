@@ -76,7 +76,7 @@ __deferLoadIfEnabled();
 /*#endif#*/
 
 var tower = angular.module('Tower', [
-    // 'ngAnimate',
+    //'ngAnimate',
     'ngSanitize',
     'ngCookies',
     about.name,
