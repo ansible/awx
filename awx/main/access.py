@@ -20,7 +20,7 @@ from awx.main.models.rbac import ALL_PERMISSIONS
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
 
-__all__ = ['get_user_queryset']
+__all__ = ['get_user_queryset', 'check_user_access']
 
 PERMISSION_TYPES = [
     PERM_INVENTORY_ADMIN,
@@ -90,6 +90,24 @@ def get_user_queryset(user, model_class):
             queryset = queryset.filter(pk__in=qs.values_list('pk', flat=True))
         return queryset
 
+def check_user_access(user, model_class, action, *args, **kwargs):
+    '''
+    Return True if user can perform action against model_class with the
+    provided parameters.
+    '''
+    for access_class in access_registry.get(model_class, []):
+        access_instance = access_class(user)
+        access_method = getattr(access_instance, 'can_%s' % action, None)
+        if not access_method:
+            logger.debug('%s.%s not found', access_instance.__class__.__name__,
+                         'can_%s' % action)
+            continue
+        result = access_method(*args, **kwargs)
+        logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
+                     access_method.__name__, args, result)
+        if result:
+            return result
+    return False
 
 class BaseAccess(object):
     '''
@@ -137,7 +155,7 @@ class BaseAccess(object):
             return self.can_change(obj, None)
         else:
             return bool(self.can_change(obj, None) and
-                        sub_obj.accessible_by(self.user, {'read':True}))
+                        self.user.can_access(type(sub_obj), 'read', sub_obj))
 
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)

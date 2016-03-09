@@ -91,10 +91,10 @@ def test_get_user_roles_list(get, admin):
 def test_user_view_other_user_roles(organization, inventory, team, get, alice, bob):
     'Users can see roles for other users, but only the roles that that user has access to see as well'
     organization.member_role.members.add(alice)
-    organization.admins.add(bob)
+    organization.admin_role.members.add(bob)
     custom_role = Role.objects.create(name='custom_role-test_user_view_admin_roles_list')
     organization.member_role.children.add(custom_role)
-    team.users.add(bob)
+    team.member_role.members.add(bob)
 
     # alice and bob are in the same org and can see some child role of that org.
     # Bob is an org admin, alice can see this.
@@ -118,7 +118,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     assert team.member_role.id not in role_hash # alice can't see this
 
     # again but this time alice is part of the team, and should be able to see the team role
-    team.users.add(alice)
+    team.member_role.members.add(alice)
     response = get(url, alice)
     assert response.status_code == 200
     roles = response.data
@@ -271,7 +271,7 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
     joe = user('joe')
-    organization.admins.add(org_admin)
+    organization.admin_role.members.add(org_admin)
 
     assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
@@ -286,7 +286,7 @@ def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemp
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
     joe = user('joe')
-    organization.admins.add(org_admin)
+    organization.admin_role.members.add(org_admin)
     check_jobtemplate.executor_role.members.add(joe)
 
     assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
@@ -336,7 +336,6 @@ def test_get_role_teams(get, team, admin, role):
     role.parents.add(team.member_role)
     url = reverse('api:role_teams_list', args=(role.id,))
     response = get(url, admin)
-    print(response.data)
     assert response.status_code == 200
     assert response.data['count'] == 1
     assert response.data['results'][0]['id'] == team.id
@@ -347,7 +346,6 @@ def test_add_team_to_role(post, team, admin, role):
     url = reverse('api:role_teams_list', args=(role.id,))
     assert role.members.filter(id=admin.id).count() == 0
     res = post(url, {'id': team.id}, admin)
-    print res.data
     assert res.status_code == 204
     assert role.parents.filter(id=team.member_role.id).count() == 1
 
@@ -357,7 +355,6 @@ def test_remove_team_from_role(post, team, admin, role):
     url = reverse('api:role_teams_list', args=(role.id,))
     assert role.members.filter(id=admin.id).count() == 1
     res = post(url, {'disassociate': True, 'id': team.id}, admin)
-    print res.data
     assert res.status_code == 204
     assert role.parents.filter(id=team.member_role.id).count() == 0
 
@@ -398,11 +395,10 @@ def test_role_children(get, team, admin, role):
 
 @pytest.mark.django_db
 def test_resource_access_list(get, team, admin, role):
-    team.users.add(admin)
+    team.member_role.members.add(admin)
     content_type_id = ContentType.objects.get_for_model(team).pk
-    url = reverse('api:resource_access_list', args=(content_type_id, team.id,))
+    url = reverse('api:team_access_list', args=(team.id,))
     res = get(url, admin)
-    print(res.data)
     assert res.status_code == 200
 
 

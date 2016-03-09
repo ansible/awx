@@ -91,15 +91,10 @@ def test_team_symantics(organization, team, alice):
     assert organization.accessible_by(alice, {'read': True}) is False
     team.member_role.children.add(organization.auditor_role)
     assert organization.accessible_by(alice, {'read': True}) is False
-    team.users.add(alice)
+    team.member_role.members.add(alice)
     assert organization.accessible_by(alice, {'read': True}) is True
-    team.users.remove(alice)
+    team.member_role.members.remove(alice)
     assert organization.accessible_by(alice, {'read': True}) is False
-    alice.teams.add(team)
-    assert organization.accessible_by(alice, {'read': True}) is True
-    alice.teams.remove(team)
-    assert organization.accessible_by(alice, {'read': True}) is False
-
 
 @pytest.mark.django_db
 def test_auto_m2m_adjuments(organization, project, alice):
