@@ -47,7 +47,7 @@ import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import lookUpHelper from './lookup/main';
-import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
+import JobTemplates from './job-templates/main';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
@@ -65,7 +65,6 @@ import './shared/directives';
 import './shared/filters';
 import './shared/InventoryTree';
 import './shared/Socket';
-import './job-templates/main';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
@@ -101,6 +100,7 @@ var tower = angular.module('Tower', [
     jobDetail.name,
     notifications.name,
     standardOut.name,
+    JobTemplates.name,
     'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -297,52 +297,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('jobTemplates', {
-                url: '/job_templates',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'job_template'
-                },
-                ncyBreadcrumb: {
-                    label: "JOB TEMPLATES"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobTemplates.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                ncyBreadcrumb: {
-                    parent: "jobTemplates",
-                    label: "CREATE JOB TEMPLATE"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobTemplates.edit', {
-                url: '/:template_id',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
-                data: {
-                    activityStreamId: 'template_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
             state('projects', {
                 url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
@@ -451,28 +405,6 @@ var tower = angular.module('Tower', [
                 data: {
                     activityStreamId: 'inventory_id'
                 },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventoryJobTemplateAdd', {
-                url: '/inventories/:inventory_id/job_templates/add',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventoryJobTemplateEdit', {
-                url: '/inventories/:inventory_id/job_templates/:template_id',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
