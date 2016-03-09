@@ -11,7 +11,7 @@
  * Controller for handling permissions adding
  */
 
-export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (rootScope, scope, GetBasePath, Rest, $q) {
+export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', function (rootScope, scope, GetBasePath, Rest, $q, Wait, ProcessErrors) {
     var manuallyUpdateChecklists = function(list, id, isSelected) {
         var elemScope = angular
             .element("#" +
@@ -144,6 +144,8 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
 
     // post roles to api
     scope.updatePermissions = function() {
+        Wait('start');
+
         var requests = scope.posts
             .map(function(post) {
                 Rest.setUrl(post.url);
@@ -152,10 +154,18 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', function (r
 
         $q.all(requests)
             .then(function () {
+                Wait('stop');
                 rootScope.$broadcast("refreshList", "permission");
                 scope.closeModal();
             }, function (error) {
-                // TODO: request(s) errored out.  Call process errors
+                Wait('stop');
+                rootScope.$broadcast("refreshList", "permission");
+                scope.closeModal();
+                ProcessErrors(null, error.data, error.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to post role(s): POST returned status' +
+                    error.status
+                });
             });
     };
 }];
