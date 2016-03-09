@@ -803,6 +803,21 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(job.hosts.count(), 1)
         self.assertEqual(job.hosts.all()[0], host)
 
+        # Create the job itself using URL-encoded form data instead of JSON.
+        result = self.post(url, data, expect=202, remote_addr=host_ip, data_type='form')
+
+        # Establish that we got back what we expect, and made the changes
+        # that we expect.
+        self.assertTrue('Location' in result.response, result.response)
+        self.assertEqual(jobs_qs.count(), 2)
+        job = jobs_qs[0]
+        self.assertEqual(urlparse.urlsplit(result.response['Location']).path,
+                         job.get_absolute_url())
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
         # Run the callback job again with extra vars and verify their presence
         data.update(dict(extra_vars=dict(key="value")))
         result = self.post(url, data, expect=202, remote_addr=host_ip)
@@ -853,9 +868,9 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             if host_ip:
                 break
         self.assertTrue(host)
-        self.assertEqual(jobs_qs.count(), 2)
-        self.post(url, data, expect=202, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 3)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 4)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
@@ -878,9 +893,9 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             if host_ip:
                 break
         self.assertTrue(host)
-        self.assertEqual(jobs_qs.count(), 3)
-        self.post(url, data, expect=202, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 4)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 5)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
@@ -892,9 +907,9 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         host_qs = host_qs.filter(variables__icontains='ansible_ssh_host')
         host = host_qs[0]
         host_ip = host.variables_dict['ansible_ssh_host']
-        self.assertEqual(jobs_qs.count(), 4)
-        self.post(url, data, expect=202, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 5)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 6)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
@@ -926,9 +941,9 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 host_ip = list(ips)[0]
                 break
         self.assertTrue(host)
-        self.assertEqual(jobs_qs.count(), 5)
-        self.post(url, data, expect=202, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 6)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 7)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, ':&'.join([job_template.limit, host.name]))

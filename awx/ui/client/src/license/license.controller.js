@@ -5,9 +5,9 @@
  *************************************************/
 
 export default
-	[	'Wait', '$state', '$scope', '$location',
+	[	'Wait', '$state', '$scope', '$rootScope', '$location',
 	 'GetBasePath', 'Rest', 'ProcessErrors', 'CheckLicense', 'moment',
-	 function( Wait, $state, $scope, $location,
+	 function( Wait, $state, $scope, $rootScope, $location,
 	 	GetBasePath, Rest, ProcessErrors, CheckLicense, moment){
 	 	$scope.getKey = function(event){
 	 		// Mimic HTML5 spec, show filename
@@ -16,9 +16,19 @@ export default
 	 		var raw = new FileReader();
 	 		// readAsFoo runs async
 	 		raw.onload = function(){
-	 			$scope.newLicense.file = JSON.parse(raw.result);
+	 			try {
+	 				$scope.newLicense.file = JSON.parse(raw.result);
+	 			}
+	 			catch(err) {
+	 				ProcessErrors($rootScope, null, null, null, {msg: 'Invalid file format. Please upload valid JSON.'});
+	 			}
 	 		}
-	 		raw.readAsText(event.target.files[0]);
+	 		try {
+	 			raw.readAsText(event.target.files[0]);
+	 		}
+	 		catch(err) {
+	 			ProcessErrors($rootScope, null, null, null, {msg: 'Invalid file format. Please upload valid JSON.'});
+	 		}
 	 	};
 	 	// HTML5 spec doesn't provide a way to customize file input css
 	 	// So we hide the default input, show our own, and simulate clicks to the hidden input
@@ -33,6 +43,11 @@ export default
 					reset();
 					init();
 					$scope.success = true;
+					// for animation purposes
+					var successTimeout = setTimeout(function(){
+						$scope.success = false;
+						clearTimeout(successTimeout);
+					}, 4000);
 			});
 		};
 	 	var calcDaysRemaining = function(ms){
@@ -51,6 +66,7 @@ export default
 	 		CheckLicense.get()
 	 		.then(function(res){
 	 			$scope.license = res.data;
+	 			$scope.license.version = res.data.version.split('-')[0];
 	 			$scope.time = {};
 	 			$scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
 	 			$scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
