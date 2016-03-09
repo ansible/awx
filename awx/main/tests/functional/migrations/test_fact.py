@@ -8,6 +8,9 @@ from awx.main.models.fact import Fact
 
 from awx.main.migrations import _system_tracking as system_tracking
 
+from awx.fact.models.fact import Fact as FactMongo
+from awx.fact.models.fact import FactVersion, FactHost
+
 def micro_to_milli(micro):
     return micro - (((int)(micro / 1000)) * 1000)
 
@@ -58,3 +61,19 @@ def test_migrate_facts_hostname_does_not_exist(inventories, hosts, hosts_mongo, 
         assert len(fact) == 1
         assert fact[0] is not None
    
+@pytest.mark.django_db
+@pytest.mark.mongo_db
+def test_drop_system_tracking_db(inventories, hosts, hosts_mongo, fact_scans):
+    inventory_objs = inventories(1)
+    hosts_mongo(1, inventory_objs)
+    facts_known = fact_scans(1, inventory_objs)
+
+    assert FactMongo.objects.all().count() > 0
+    assert FactVersion.objects.all().count() > 0
+    assert FactHost.objects.all().count() > 0
+
+    system_tracking.drop_system_tracking_db()
+  
+    assert FactMongo.objects.all().count() == 0
+    assert FactVersion.objects.all().count() == 0
+    assert FactHost.objects.all().count() == 0

@@ -1,9 +1,22 @@
 
 from awx.fact.models import FactVersion
+from mongoengine.connection import ConnectionError
+from django.conf import settings
+
+def drop_system_tracking_db():
+    try:
+        db = FactVersion._get_db()
+        db.connection.drop_database(settings.MONGO_DB)
+    except ConnectionError:
+        # TODO: Log this. Not a deal-breaker. Just let the user know they
+        # may need to manually drop/delete the database.
+        pass
 
 def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
     Host = apps.get_model('main', "Host")
+
+    # TODO: Check to see if mongo connection works and mongo is on.
 
     migrated_count = 0
     not_migrated_count = 0
@@ -18,4 +31,5 @@ def migrate_facts(apps, schema_editor):
             # This isn't a hard error. Just something the user would want to know.
             not_migrated_count += 1
 
+    drop_system_tracking_db()
     return (migrated_count, not_migrated_count)
