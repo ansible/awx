@@ -487,6 +487,10 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
+    if settings.ANSIBLE_USE_VENV:
+        show_paths.append(settings.ANSIBLE_VENV_PATH)
+    if settings.TOWER_USE_VENV:
+        show_paths.append(settings.TOWER_VENV_PATH)
     show_paths.extend(getattr(tower_settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):

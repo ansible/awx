@@ -15,6 +15,8 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
+VENV_BASE ?= /tower_devel/venv
+
 CLIENT_TEST_DIR ?= build_test
 
 # Determine appropriate shasum command
@@ -232,24 +234,49 @@ rebase:
 push:
 	git push origin master
 
-# Install runtime, development and jenkins requirements
-requirements requirements_dev requirements_jenkins: %: real-%
-
-# Install third-party requirements needed for development environment.
-# NOTE:
-#  * --target is only supported on newer versions of pip
-#  * https://github.com/pypa/pip/issues/3056 - the workaround is to override the `install-platlib`
-#  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
-#  * --target implies --ignore-installed
-real-requirements:
-	@if [ "$(PYTHON_VERSION)" = "2.6" ]; then \
-	  pip install -r requirements/requirements_python26.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
-	else \
-	  pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
+virtualenv:
+	if [ "$(VENV_BASE)" ]; then \
+		if [ ! -d "$(VENV_BASE)" ]; then \
+			mkdir $(VENV_BASE); \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/tower" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/tower; \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/ansible; \
+		fi; \
 	fi
 
-real-requirements_dev:
-	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
+# Install runtime, development and jenkins requirements
+requirements requirements_ansible requirements_dev requirements_jenkins: %: real-%
+
+real-requirements_ansible: virtualenv
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/ansible/bin/activate; \
+	fi; \
+	pip install -r requirements/requirements_ansible.txt; \
+	if [ "$(VENV_BASE)" ]; then \
+		deactivate; \
+	fi
+
+# Install third-party requirements needed for Tower's environment.
+real-requirements: requirements_ansible
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	pip install -r requirements/requirements.txt; \
+	if [ "$(VENV_BASE)" ]; then \
+		deactivate; \
+	fi
+
+real-requirements_dev: requirements_ansible
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	pip install -r requirements/requirements_dev.txt; \
+	if [ "$(VENV_BASE)" ]; then \
+		deactivate; \
+	fi
 
 # Install third-party requirements needed for running unittests in jenkins
 real-requirements_jenkins:
@@ -272,7 +299,10 @@ version_file:
 
 # Do any one-time init tasks.
 init:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	if [ "$(VIRTUAL_ENV)" ]; then \
 	    tower-manage register_instance --primary --hostname=127.0.0.1; \
 	else \
 	    sudo tower-manage register_instance --primary --hostname=127.0.0.1; \
@@ -287,6 +317,9 @@ adduser:
 
 # Create database tables and apply any new migrations.
 migrate:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py migrate --noinput --fake-initial
 
 # Run after making changes to the models to create a new migration.
@@ -319,27 +352,48 @@ servercc: server_noattach
 # Alternate approach to tmux to run all development tasks specified in
 # Procfile.  https://youtu.be/OPMgaibszjk
 honcho:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	honcho start
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py runserver
 
 # Run to start the background celery worker for development.
 celeryd:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair
 
 # Run to start the zeromq callback receiver
 receiver:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_callback_receiver
 
 taskmanager:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_task_system
 
 socketservice:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_socketio_service
 
 factcacher:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_fact_cache_receiver
 
 reports:

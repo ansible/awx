@@ -21,7 +21,7 @@ else
 fi
 
 rm -rf /tower_devel/ansible_tower.egg-info
-mv /tmp/ansible_tower.egg-info /tower_devel/
+cp -R /tmp/ansible_tower.egg-info /tower_devel/
 
 # Check if we need to build dependencies
 if [ -f "awx/lib/.deps_built" ]; then
@@ -30,6 +30,9 @@ else
     make requirements_dev
     touch awx/lib/.deps_built
 fi
+
+rm -rf /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 
 # Tower bootstrapping
 make version_file
