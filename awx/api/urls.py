@@ -24,6 +24,7 @@ organization_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notifiers_any/$',             'organization_notifiers_any_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_error/$',           'organization_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'organization_notifiers_success_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'organization_access_list'),
 )
 
 user_urls = patterns('awx.api.views',
@@ -36,6 +37,7 @@ user_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'user_credentials_list'),
     url(r'^(?P<pk>[0-9]+)/roles/$',                     'user_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'user_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'user_access_list'),
 )
 
 project_urls = patterns('awx.api.views',
@@ -51,6 +53,7 @@ project_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notifiers_any/$',             'project_notifiers_any_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_error/$',           'project_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'project_notifiers_success_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'project_access_list'),
 )
 
 project_update_urls = patterns('awx.api.views',
@@ -68,6 +71,7 @@ team_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'team_credentials_list'),
     url(r'^(?P<pk>[0-9]+)/roles/$',                     'team_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'team_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'team_access_list'),
 )
 
 inventory_urls = patterns('awx.api.views',
@@ -84,6 +88,7 @@ inventory_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_templates/$',             'inventory_job_template_list'),
     url(r'^(?P<pk>[0-9]+)/scan_job_templates/$',        'inventory_scan_job_template_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'inventory_ad_hoc_commands_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'inventory_access_list'),
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'inventory_single_fact_view'),
 )
 
@@ -117,6 +122,7 @@ group_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'group_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'group_ad_hoc_commands_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'group_access_list'),
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'group_single_fact_view'),
 )
 
@@ -150,6 +156,7 @@ credential_urls = patterns('awx.api.views',
     url(r'^$',                                          'credential_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'credential_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'credential_detail'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'credential_access_list'),
     # See also credentials resources on users/teams.
 )
 
@@ -160,15 +167,6 @@ role_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/teams/$',                     'role_teams_list'),
     url(r'^(?P<pk>[0-9]+)/parents/$',                   'role_parents_list'),
     url(r'^(?P<pk>[0-9]+)/children/$',                  'role_children_list'),
-)
-
-resource_urls = patterns('awx.api.views',
-    #url(r'^$',                                          'resource_list'),
-    #url(r'^(?P<pk>[0-9]+)/$',                           'resource_detail'),
-    url(r'^(?P<content_type_id>[0-9]+)/(?P<pk>[0-9]+)/access_list/$', 'resource_access_list'),
-    #url(r'^(?P<pk>[0-9]+)/users/$',                     'resource_users_list'),
-    #url(r'^(?P<pk>[0-9]+)/teams/$',                     'resource_teams_list'),
-    #url(r'^(?P<pk>[0-9]+)/roles/$',                     'resource_teams_list'),
 )
 
 job_template_urls = patterns('awx.api.views',
@@ -183,6 +181,7 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notifiers_any/$',         'job_template_notifiers_any_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_error/$',         'job_template_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'job_template_notifiers_success_list'),
+    url(r'^(?P<pk>[0-9]+)/access_list/$',               'job_template_access_list'),
 )
 
 job_urls = patterns('awx.api.views',
@@ -292,7 +291,6 @@ v1_urls = patterns('awx.api.views',
     url(r'^inventory_scripts/',     include(inventory_script_urls)),
     url(r'^credentials/',           include(credential_urls)),
     url(r'^roles/',                 include(role_urls)),
-    url(r'^resources/',             include(resource_urls)),
     url(r'^job_templates/',         include(job_template_urls)),
     url(r'^jobs/',                  include(job_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),

@@ -26,6 +26,7 @@ from rest_framework import views
 # AWX
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
+from awx.api.serializers import ResourceAccessListElementSerializer
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -33,6 +34,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
            'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
            'SubDetailAPIView',
+           'ResourceAccessList',
            'ParentMixin',]
 
 logger = logging.getLogger('awx.api.generics')
@@ -473,3 +475,20 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView
 
 class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass
+
+
+class ResourceAccessList(ListAPIView):
+
+    serializer_class = ResourceAccessListElementSerializer
+
+    def get_queryset(self):
+        self.object_id = self.kwargs['pk']
+        resource_model = getattr(self, 'resource_model')
+        obj = resource_model.objects.get(pk=self.object_id)
+
+        roles = set([p.role for p in obj.role_permissions.all()])
+        ancestors = set()
+        for r in roles:
+            ancestors.update(set(r.ancestors.all()))
+        return User.objects.filter(roles__in=list(ancestors))
+
