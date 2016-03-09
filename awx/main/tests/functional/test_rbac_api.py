@@ -1,6 +1,7 @@
 import mock # noqa
 import pytest
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 
@@ -51,8 +52,6 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
 
     assert inventory.admin_role.id not in role_hash
     assert team.member_role.id not in role_hash
-
-
 
 
 @pytest.mark.django_db
@@ -225,7 +224,7 @@ def test_get_role(get, admin, role):
     assert response.data['id'] == role.id
 
 @pytest.mark.django_db
-def test_put_role(put, admin, role):
+def test_put_role_405(put, admin, role):
     url = reverse('api:role_detail', args=(role.id,))
     response = put(url, {'name': 'Some new name'}, admin)
     assert response.status_code == 405
@@ -233,7 +232,7 @@ def test_put_role(put, admin, role):
     #assert r.name == 'Some new name'
 
 @pytest.mark.django_db
-def test_put_role_access_denied(put, alice, admin, role):
+def test_put_role_access_denied(put, alice, role):
     url = reverse('api:role_detail', args=(role.id,))
     response = put(url, {'name': 'Some new name'}, alice)
     assert response.status_code == 403 or response.status_code == 405
@@ -400,8 +399,10 @@ def test_role_children(get, team, admin, role):
 @pytest.mark.django_db
 def test_resource_access_list(get, team, admin, role):
     team.users.add(admin)
-    url = reverse('api:resource_access_list', args=(team.resource.id,))
+    content_type_id = ContentType.objects.get_for_model(team).pk
+    url = reverse('api:resource_access_list', args=(content_type_id, team.id,))
     res = get(url, admin)
+    print(res.data)
     assert res.status_code == 200
 
 
@@ -420,7 +421,6 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     assert 'summary_fields' in org
     assert 'resource_id' in org
     assert org['resource_id'] > 0
-    assert org['related']['resource'] != ''
     assert 'roles' in org['summary_fields']
 
     org_role_response = get(org['summary_fields']['roles']['admin_role']['url'], admin)
@@ -434,7 +434,6 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
 
 @pytest.mark.django_db
 def test_ensure_permissions_is_present(organization, get, user):
-    #u = user('admin', True)
     url = reverse('api:organization_detail', args=(organization.id,))
     response = get(url, user('admin', True))
     assert response.status_code == 200
@@ -446,7 +445,6 @@ def test_ensure_permissions_is_present(organization, get, user):
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):
-    #u = user('admin', True)
     url = reverse('api:organization_detail', args=(organization.id,))
     response = get(url, user('admin', True))
     assert response.status_code == 200

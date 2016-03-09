@@ -19,7 +19,8 @@ from awx.main.models.base import * # noqa
 __all__ = [
     'Role',
     'RolePermission',
-    'Resource',
+    'get_user_permissions_on_resource',
+    'get_role_permissions_on_resource',
     'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR',
     'ROLE_SINGLETON_SYSTEM_AUDITOR',
 ]
@@ -120,26 +121,6 @@ class Role(CommonModelNameNotUnique):
             for child in self.children.all():
                 child.rebuild_role_ancestor_list()
 
-    def grant(self, resource, permissions):
-        # take either the raw Resource or something that includes the ResourceMixin
-        resource = resource if type(resource) is Resource else resource.resource
-
-        if 'all' in permissions and permissions['all']:
-            del permissions['all']
-            permissions['create']     = True
-            permissions['read']       = True
-            permissions['write']      = True
-            permissions['update']     = True
-            permissions['delete']     = True
-            permissions['scm_update'] = True
-            permissions['use']        = True
-            permissions['execute']    = True
-
-        permission = RolePermission(role=self, resource=resource)
-        for k in permissions:
-            setattr(permission, k, int(permissions[k]))
-        permission.save()
-
     @staticmethod
     def visible_roles(user):
         return Role.objects.filter(Q(descendents__in=user.roles.filter()) | Q(ancestors__in=user.roles.filter()))
@@ -149,14 +130,14 @@ class Role(CommonModelNameNotUnique):
         try:
             return Role.objects.get(singleton_name=name)
         except Role.DoesNotExist:
-            ret = Role(singleton_name=name, name=name)
-            ret.save()
+            ret = Role.objects.create(singleton_name=name, name=name)
             return ret
 
     def is_ancestor_of(self, role):
         return role.ancestors.filter(id=self.id).exists()
 
 
+"""
 class Resource(CommonModelNameNotUnique):
     '''
     Role model
@@ -171,69 +152,7 @@ class Resource(CommonModelNameNotUnique):
     object_id = models.PositiveIntegerField(null=True, default=None)
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    def get_permissions(self, user):
-        '''
-        Returns a dict (or None) of the permissions a user has for a given
-        resource.
-
-        Note: Each field in the dict is the `or` of all respective permissions
-        that have been granted to the roles that are applicable for the given
-        user.
-
-        In example, if a user has been granted read access through a permission
-        on one role and write access through a permission on a separate role,
-        the returned dict will denote that the user has both read and write
-        access.
-        '''
-
-        qs = user.__class__.objects.filter(id=user.id, roles__descendents__permissions__resource=self)
-
-        qs = qs.annotate(max_create = Max('roles__descendents__permissions__create'))
-        qs = qs.annotate(max_read = Max('roles__descendents__permissions__read'))
-        qs = qs.annotate(max_write = Max('roles__descendents__permissions__write'))
-        qs = qs.annotate(max_update = Max('roles__descendents__permissions__update'))
-        qs = qs.annotate(max_delete = Max('roles__descendents__permissions__delete'))
-        qs = qs.annotate(max_scm_update = Max('roles__descendents__permissions__scm_update'))
-        qs = qs.annotate(max_execute = Max('roles__descendents__permissions__execute'))
-        qs = qs.annotate(max_use = Max('roles__descendents__permissions__use'))
-
-        qs = qs.values('max_create', 'max_read', 'max_write', 'max_update',
-                       'max_delete', 'max_scm_update', 'max_execute', 'max_use')
-
-        res = qs.all()
-        if len(res):
-            # strip away the 'max_' prefix
-            return {k[4:]:v for k,v in res[0].items()}
-        return None
-
-    def get_role_permissions(self, role):
-        '''
-        Returns a dict (or None) of the permissions a role has for a given
-        resource.
-
-        Note: Each field in the dict is the `or` of all respective permissions
-        that have been granted to either the role or any descendents of that role.
-        '''
-
-        qs = Role.objects.filter(id=role.id, descendents__permissions__resource=self)
-
-        qs = qs.annotate(max_create = Max('descendents__permissions__create'))
-        qs = qs.annotate(max_read = Max('descendents__permissions__read'))
-        qs = qs.annotate(max_write = Max('descendents__permissions__write'))
-        qs = qs.annotate(max_update = Max('descendents__permissions__update'))
-        qs = qs.annotate(max_delete = Max('descendents__permissions__delete'))
-        qs = qs.annotate(max_scm_update = Max('descendents__permissions__scm_update'))
-        qs = qs.annotate(max_execute = Max('descendents__permissions__execute'))
-        qs = qs.annotate(max_use = Max('descendents__permissions__use'))
-
-        qs = qs.values('max_create', 'max_read', 'max_write', 'max_update',
-                       'max_delete', 'max_scm_update', 'max_execute', 'max_use')
-
-        res = qs.all()
-        if len(res):
-            # strip away the 'max_' prefix
-            return {k[4:]:v for k,v in res[0].items()}
-        return None
+"""
 
 
 class RolePermission(CreatedModifiedModel):
@@ -245,6 +164,9 @@ class RolePermission(CreatedModifiedModel):
         app_label = 'main'
         verbose_name_plural = _('permissions')
         db_table = 'main_rbac_permissions'
+        index_together = [
+            ('content_type', 'object_id')
+        ]
 
     role = models.ForeignKey(
         Role,
@@ -252,12 +174,10 @@ class RolePermission(CreatedModifiedModel):
         on_delete=models.CASCADE,
         related_name='permissions',
     )
-    resource = models.ForeignKey(
-        Resource,
-        null=False,
-        on_delete=models.CASCADE,
-        related_name='permissions',
-    )
+    content_type = models.ForeignKey(ContentType, null=False, default=None)
+    object_id = models.PositiveIntegerField(null=False, default=None)
+    resource = GenericForeignKey('content_type', 'object_id')
+
     create     = models.IntegerField(default = 0)
     read       = models.IntegerField(default = 0)
     write      = models.IntegerField(default = 0)
@@ -266,3 +186,69 @@ class RolePermission(CreatedModifiedModel):
     execute    = models.IntegerField(default = 0)
     scm_update = models.IntegerField(default = 0)
     use        = models.IntegerField(default = 0)
+
+
+
+def get_user_permissions_on_resource(resource, user):
+    '''
+    Returns a dict (or None) of the permissions a user has for a given
+    resource.
+
+    Note: Each field in the dict is the `or` of all respective permissions
+    that have been granted to the roles that are applicable for the given
+    user.
+
+    In example, if a user has been granted read access through a permission
+    on one role and write access through a permission on a separate role,
+    the returned dict will denote that the user has both read and write
+    access.
+    '''
+
+    qs = RolePermission.objects.filter(
+        content_type=ContentType.objects.get_for_model(resource),
+        object_id=resource.id,
+        role__ancestors__in=user.roles.all()
+    )
+
+    res = qs = qs.aggregate(
+        create = Max('create'),
+        read = Max('read'),
+        write = Max('write'),
+        update = Max('update'),
+        delete = Max('delete'),
+        scm_update = Max('scm_update'),
+        execute = Max('execute'),
+        use = Max('use')
+    )
+    if res['read'] is None:
+        return None
+    return res
+
+def get_role_permissions_on_resource(resource, role):
+    '''
+    Returns a dict (or None) of the permissions a role has for a given
+    resource.
+
+    Note: Each field in the dict is the `or` of all respective permissions
+    that have been granted to either the role or any descendents of that role.
+    '''
+
+    qs = RolePermission.objects.filter(
+        content_type=ContentType.objects.get_for_model(resource),
+        object_id=resource.id,
+        role__ancestors=role
+    )
+
+    res = qs = qs.aggregate(
+        create = Max('create'),
+        read = Max('read'),
+        write = Max('write'),
+        update = Max('update'),
+        delete = Max('delete'),
+        scm_update = Max('scm_update'),
+        execute = Max('execute'),
+        use = Max('use')
+    )
+    if res['read'] is None:
+        return None
+    return res

@@ -1722,34 +1722,6 @@ class RoleAccess(BaseAccess):
         return False
 
 
-class ResourceAccess(BaseAccess):
-    '''
-    TODO: XXX: Needs implemenation
-    '''
-
-    model = Role
-
-    def get_queryset(self):
-        if self.user.is_superuser:
-            return self.model.objects.all()
-        return self.model.objects.none()
-
-    def can_change(self, obj, data):
-        return self.user.is_superuser
-
-    def can_add(self, obj, data):
-        return self.user.is_superuser
-
-    def can_attach(self, obj, sub_obj, relationship, data,
-                   skip_sub_obj_read_check=False):
-        return self.user.is_superuser
-
-    def can_unattach(self, obj, sub_obj, relationship):
-        return self.user.is_superuser
-
-    def can_delete(self, obj):
-        return self.user.is_superuser
-
 register_access(User, UserAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
@@ -1777,6 +1749,5 @@ register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
 register_access(Role, RoleAccess)
-register_access(Resource, ResourceAccess)
 register_access(Notifier, NotifierAccess)
 register_access(Notification, NotificationAccess)

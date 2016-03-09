@@ -163,9 +163,9 @@ role_urls = patterns('awx.api.views',
 )
 
 resource_urls = patterns('awx.api.views',
-    url(r'^$',                                          'resource_list'),
-    url(r'^(?P<pk>[0-9]+)/$',                           'resource_detail'),
-    url(r'^(?P<pk>[0-9]+)/access_list/$',               'resource_access_list'),
+    #url(r'^$',                                          'resource_list'),
+    #url(r'^(?P<pk>[0-9]+)/$',                           'resource_detail'),
+    url(r'^(?P<content_type_id>[0-9]+)/(?P<pk>[0-9]+)/access_list/$', 'resource_access_list'),
     #url(r'^(?P<pk>[0-9]+)/users/$',                     'resource_users_list'),
     #url(r'^(?P<pk>[0-9]+)/teams/$',                     'resource_teams_list'),
     #url(r'^(?P<pk>[0-9]+)/roles/$',                     'resource_teams_list'),

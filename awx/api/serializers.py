@@ -16,6 +16,7 @@ import yaml
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
@@ -293,8 +294,8 @@ class BaseSerializer(serializers.ModelSerializer):
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
         if isinstance(obj, ResourceMixin):
-            res['resource'] = reverse('api:resource_detail', args=(obj.resource_id,))
-            res['resource_access_list'] = reverse('api:resource_access_list', args=(obj.resource_id,))
+            content_type_id = ContentType.objects.get_for_model(obj).pk
+            res['resource_access_list'] = reverse('api:resource_access_list', kwargs={'content_type_id': content_type_id, 'pk': obj.pk})
         return res
 
     def _get_summary_fields(self, obj):
@@ -366,8 +367,8 @@ class BaseSerializer(serializers.ModelSerializer):
         return summary_fields
 
     def get_resource_id(self, obj):
-        if isinstance(obj, ResourceMixin):
-            return obj.resource.id
+        content_type_id = ContentType.objects.get_for_model(obj).pk
+        return '%d/%d' % (content_type_id, obj.pk)
         return None
 
     def get_created(self, obj):
@@ -1508,6 +1509,7 @@ class RoleSerializer(BaseSerializer):
         return ret
 
 
+"""
 class ResourceSerializer(BaseSerializer):
 
     class Meta:
@@ -1529,16 +1531,19 @@ class ResourceSerializer(BaseSerializer):
 
         return ret
 
+"""
 
 class ResourceAccessListElementSerializer(UserSerializer):
 
     def to_representation(self, user):
         ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
-        resource_id = self.context['view'].resource_id
-        resource = Resource.objects.get(pk=resource_id)
+        content_type = ContentType.objects.get(pk=self.context['view'].content_type_id)
+        object_id = self.context['view'].object_id
+        obj = content_type.model_class().objects.get(pk=object_id)
+
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
-        ret['summary_fields']['permissions'] = resource.get_permissions(user)
+        ret['summary_fields']['permissions'] = get_user_permissions_on_resource(obj, user)
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
@@ -1549,13 +1554,14 @@ class ResourceAccessListElementSerializer(UserSerializer):
             except:
                 pass
 
-            return { 'role': role_dict, 'permissions': resource.get_role_permissions(role)}
+            return { 'role': role_dict, 'permissions': get_role_permissions_on_resource(obj, role)}
 
-        direct_permissive_role_ids = resource.permissions.values_list('role__id')
+        content_type = ContentType.objects.get_for_model(obj)
+        direct_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__id')
         direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
         ret['summary_fields']['direct_access'] = [format_role_perm(r) for r in direct_access_roles]
 
-        all_permissive_role_ids = resource.permissions.values_list('role__ancestors__id')
+        all_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__ancestors__id')
         indirect_access_roles = user.roles.filter(id__in=all_permissive_role_ids).exclude(id__in=direct_permissive_role_ids).all()
         ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles]
         return ret
