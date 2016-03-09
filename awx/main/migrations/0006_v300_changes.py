@@ -107,7 +107,7 @@ def create_system_job_templates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0004_v300_changes'),
+        ('main', '0005_v300_fact_migrations'),
     ]
 
     operations = [
