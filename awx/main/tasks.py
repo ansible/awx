@@ -180,30 +180,6 @@ def notify_task_runner(metadata_dict):
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
 
-@task()
-def mongodb_control(cmd):
-    # Sanity check: Do not send arbitrary commands.
-    if cmd not in ('start', 'stop'):
-        raise ValueError('Only "start" and "stop" are allowed.')
-
-    # Either start or stop mongo, as requested.
-    p = subprocess.Popen('sudo service mongod %s' % cmd, shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    p.wait()
-
-    # Check to make sure the stop actually succeeded
-    p = subprocess.Popen('pidof mongod', shell=True)
-    shutdown_failed = p.wait() == 0
-
-    # If there was an error, log it.
-    if err:
-        logger.error(err)
-
-    if cmd == 'stop' and shutdown_failed:
-        p = subprocess.Popen('sudo mongod --shutdown -f /etc/mongod.conf', shell=True)
-        p.wait()
-
 @task(bind=True)
 def handle_work_success(self, result, task_actual):
     if task_actual['type'] == 'project_update':
