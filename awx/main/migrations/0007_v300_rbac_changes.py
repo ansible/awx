@@ -41,7 +41,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
                 ('name', models.CharField(max_length=512)),
                 ('singleton_name', models.TextField(default=None, unique=True, null=True, db_index=True)),
                 ('object_id', models.PositiveIntegerField(default=None, null=True)),
