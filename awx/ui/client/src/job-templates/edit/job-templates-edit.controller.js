@@ -316,16 +316,8 @@ export default
                 Rest.setUrl(defaultUrl + id+ '/survey_spec/');
                 Rest.get()
                     .success(function (data) {
-                        if(!data || !data.name){
-                            $('#job_templates_delete_survey_btn').hide();
-                            $('#job_templates_edit_survey_btn').hide();
-                            $('#job_templates_create_survey_btn').show();
-                        }
-                        else {
+                        if(data && data.name){
                             $scope.survey_exists = true;
-                            $('#job_templates_delete_survey_btn').show();
-                            $('#job_templates_edit_survey_btn').show();
-                            $('#job_templates_create_survey_btn').hide();
                         }
                     })
                     .error(function (data, status) {
@@ -343,11 +335,6 @@ export default
                 Wait('stop');
                 $scope.survey_exists = true;
                 $scope.invalid_survey = false;
-                $('#job_templates_survey_enabled_chbox').attr('checked', true);
-                $('#job_templates_delete_survey_btn').show();
-                $('#job_templates_edit_survey_btn').show();
-                $('#job_templates_create_survey_btn').hide();
-
             });
 
             if ($scope.removeLoadJobs) {
@@ -564,33 +551,5 @@ export default
                     });
                 }
             };
-
-            // handler for 'Enable Survey' button
-            $scope.surveyEnabled = function(){
-                Rest.setUrl(defaultUrl + id+ '/');
-                Rest.patch({"survey_enabled": $scope.survey_enabled})
-                    .success(function (data) {
-
-                        if(Empty(data.summary_fields.survey)){
-                            $('#job_templates_delete_survey_btn').hide();
-                            $('#job_templates_edit_survey_btn').hide();
-                            $('#job_templates_create_survey_btn').show();
-                        }
-                        else{
-                            $scope.survey_exists = true;
-                            $('#job_templates_delete_survey_btn').show();
-                            $('#job_templates_edit_survey_btn').show();
-                            $('#job_templates_create_survey_btn').hide();
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to retrieve save survey_enabled: ' + $stateParams.template_id + '. GET status: ' + status
-                        });
-                    });
-            };
-
-
         }
     ];

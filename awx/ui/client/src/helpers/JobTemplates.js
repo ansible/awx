@@ -92,17 +92,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                           } else {
                                               scope[fld] = data[fld];
                                               if(fld ==='survey_enabled'){
-                                                  // $scope.$emit('EnableSurvey', fld);
-                                                  $('#job_templates_survey_enabled_chbox').attr('checked', scope[fld]);
-                                                  if(Empty(data.summary_fields.survey)) {
-                                                      $('#job_templates_delete_survey_btn').hide();
-                                                      $('#job_templates_edit_survey_btn').hide();
-                                                      $('#job_templates_create_survey_btn').show();
-                                                  }
-                                                  else{
-                                                      $('#job_templates_delete_survey_btn').show();
-                                                      $('#job_templates_edit_survey_btn').show();
-                                                      $('#job_templates_create_survey_btn').hide();
+                                                  if(!Empty(data.summary_fields.survey)) {
                                                       scope.survey_exists = true;
                                                   }
                                               }
