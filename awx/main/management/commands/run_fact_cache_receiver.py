@@ -67,7 +67,7 @@ class FactCacheReceiver(object):
         self.timestamp = datetime.fromtimestamp(date_key, None)
 
         # Update existing Fact entry
-	fact_obj = Fact.objects.filter(host__id=host_obj.id, module=module_name, timestamp=self.timestamp)
+        fact_obj = Fact.objects.filter(host__id=host_obj.id, module=module_name, timestamp=self.timestamp)
         if fact_obj:
             fact_obj.facts = facts
             fact_obj.save()

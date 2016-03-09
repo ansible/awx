@@ -11,6 +11,7 @@ import shutil
 import sys
 import tempfile
 import time
+import urllib
 from multiprocessing import Process
 from subprocess import Popen
 import re
@@ -463,6 +464,8 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
                 response = method(url, json.dumps(data), 'application/json')
             elif data_type == 'yaml':
                 response = method(url, yaml.safe_dump(data), 'application/yaml')
+            elif data_type == 'form':
+                response = method(url, urllib.urlencode(data), 'application/x-www-form-urlencoded')
             else:
                 self.fail('Unsupported data_type %s' % data_type)
         else:
