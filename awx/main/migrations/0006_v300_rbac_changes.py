@@ -19,26 +19,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Resource',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', models.DateTimeField(default=None, editable=False)),
-                ('modified', models.DateTimeField(default=None, editable=False)),
-                ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
-                ('name', models.CharField(max_length=512)),
-                ('object_id', models.PositiveIntegerField(default=None, null=True)),
-                ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType', null=True)),
-                ('created_by', models.ForeignKey(related_name="{u'class': 'resource', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name="{u'class': 'resource', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
-            ],
-            options={
-                'db_table': 'main_rbac_resources',
-                'verbose_name_plural': 'resources',
-            },
-        ),
-        migrations.CreateModel(
             name='Role',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -68,6 +48,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
+                ('object_id', models.PositiveIntegerField(default=None)),
                 ('create', models.IntegerField(default=0)),
                 ('read', models.IntegerField(default=0)),
                 ('write', models.IntegerField(default=0)),
@@ -76,7 +57,7 @@ class Migration(migrations.Migration):
                 ('execute', models.IntegerField(default=0)),
                 ('scm_update', models.IntegerField(default=0)),
                 ('use', models.IntegerField(default=0)),
-                ('resource', models.ForeignKey(related_name='permissions', to='main.Resource')),
+                ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType')),
                 ('role', models.ForeignKey(related_name='permissions', to='main.Role')),
             ],
             options={
@@ -84,20 +65,31 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'permissions',
             },
         ),
-        migrations.AlterField(
-            model_name='towersettings',
-            name='value',
-            field=models.TextField(blank=True),
+        migrations.CreateModel(
+            name='UserResource',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(default=None, editable=False)),
+                ('modified', models.DateTimeField(default=None, editable=False)),
+                ('description', models.TextField(default=b'', blank=True)),
+                ('active', models.BooleanField(default=True, editable=False)),
+                ('name', models.CharField(max_length=512)),
+                ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True')),
+                ('created_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+                ('user', awx.main.fields.AutoOneToOneField(related_name='resource', editable=False, to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'db_table': 'main_rbac_user_resource',
+                'verbose_name': 'user_resource',
+                'verbose_name_plural': 'user_resources',
+            },
         ),
         migrations.AddField(
             model_name='credential',
             name='owner_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='credential',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
         migrations.AddField(
             model_name='credential',
@@ -121,18 +113,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='group',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='group',
             name='updater_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='host',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -151,18 +133,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventory',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='inventory',
             name='updater_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='inventorysource',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
         migrations.AddField(
             model_name='jobtemplate',
@@ -180,11 +152,6 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
         migrations.AddField(
-            model_name='jobtemplate',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
-        ),
-        migrations.AddField(
             model_name='organization',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
@@ -200,11 +167,6 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
-        ),
-        migrations.AddField(
             model_name='project',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
@@ -218,11 +180,6 @@ class Migration(migrations.Migration):
             model_name='project',
             name='member_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
         ),
         migrations.AddField(
             model_name='project',
@@ -244,37 +201,12 @@ class Migration(migrations.Migration):
             name='member_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
-        migrations.AddField(
-            model_name='team',
-            name='resource',
-            field=awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True'),
-        ),
-
-        migrations.CreateModel(
-            name='UserResource',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', models.DateTimeField(default=None, editable=False)),
-                ('modified', models.DateTimeField(default=None, editable=False)),
-                ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
-                ('name', models.CharField(max_length=512)),
-                ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True')),
-                ('created_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name="{u'class': 'userresource', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('resource', awx.main.fields.ImplicitResourceField(related_name='+', to='main.Resource', null=b'True')),
-                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
-                ('user', awx.main.fields.AutoOneToOneField(related_name='resource', editable=False, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'main_rbac_user_resource',
-                'verbose_name': 'user_resource',
-                'verbose_name_plural': 'user_resources',
-            },
-        ),
         migrations.AlterUniqueTogether(
             name='userresource',
             unique_together=set([('user', 'admin_role')]),
         ),
-
+        migrations.AlterIndexTogether(
+            name='rolepermission',
+            index_together=set([('content_type', 'object_id')]),
+        ),
     ]

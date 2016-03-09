@@ -131,7 +131,6 @@ class ApiV1RootView(APIView):
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
         data['roles'] = reverse('api:role_list')
-        data['resources'] = reverse('api:resource_list')
         data['notifiers'] = reverse('api:notifier_list')
         data['notifications'] = reverse('api:notification_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
@@ -3269,6 +3268,7 @@ class RoleChildrenList(SubListAPIView):
         role = Role.objects.get(pk=self.kwargs['pk'])
         return role.children
 
+'''
 class ResourceDetail(RetrieveAPIView):
 
     model = Resource
@@ -3290,6 +3290,8 @@ class ResourceList(ListAPIView):
     def get_queryset(self):
         return Resource.objects.filter(permissions__role__ancestors__members=self.request.user)
 
+'''
+
 class ResourceAccessList(ListAPIView):
 
     model = User
@@ -3298,9 +3300,13 @@ class ResourceAccessList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        self.resource_id = self.kwargs['pk']
-        resource = Resource.objects.get(pk=self.kwargs['pk'])
-        roles = set([p.role for p in resource.permissions.all()])
+        self.content_type_id = self.kwargs['content_type_id']
+        self.object_id = self.kwargs['pk']
+        #resource = Resource.objects.get(pk=self.kwargs['pk'])
+        content_type = ContentType.objects.get(pk=self.content_type_id)
+        obj = content_type.model_class().objects.get(pk=self.object_id)
+
+        roles = set([p.role for p in obj.role_permissions.all()])
         ancestors = set()
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
