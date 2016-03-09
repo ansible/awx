@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 from django.utils.timezone import now
 
 from awx.api.license import feature_enabled
@@ -107,7 +107,7 @@ def create_system_job_templates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0005_v300_active_flag_removal'),
+        ('main', '0008_v300_rbac_drop_fields'),
     ]
 
     operations = [
