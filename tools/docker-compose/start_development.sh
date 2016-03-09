@@ -20,12 +20,8 @@ else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
 
-if [ -f "/.develop_run" ]; then
-    echo "Skipping 'make develop' step since it has already run - remove /.develop_run to force it"
-else
-    make develop
-    touch /.develop_run
-fi
+rm -rf /tower_devel/ansible_tower.egg-info
+cp -R /tmp/ansible_tower.egg-info /tower_devel/
 
 # Check if we need to build dependencies
 if [ -f "awx/lib/.deps_built" ]; then
@@ -34,6 +30,9 @@ else
     make requirements_dev
     touch awx/lib/.deps_built
 fi
+
+rm -rf /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 
 # Tower bootstrapping
 make version_file
