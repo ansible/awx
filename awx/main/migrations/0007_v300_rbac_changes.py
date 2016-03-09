@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         ('taggit', '0002_auto_20150616_2121'),
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0006_v300_active_flag_removal'),
+        ('main', '0006_v300_changes'),
     ]
 
     operations = [
