@@ -16,6 +16,7 @@ import yaml
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
@@ -237,7 +238,7 @@ class BaseSerializer(serializers.ModelSerializer):
     __metaclass__ = BaseSerializerMetaclass
 
     class Meta:
-        fields = ('id', 'type', 'resource_id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'name', 'description')
         summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
         summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
@@ -252,7 +253,6 @@ class BaseSerializer(serializers.ModelSerializer):
     created       = serializers.SerializerMethodField()
     modified      = serializers.SerializerMethodField()
     active        = serializers.SerializerMethodField()
-    resource_id   = serializers.SerializerMethodField()
 
 
     def get_type(self, obj):
@@ -292,9 +292,6 @@ class BaseSerializer(serializers.ModelSerializer):
             res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
-        if isinstance(obj, ResourceMixin):
-            res['resource'] = reverse('api:resource_detail', args=(obj.resource_id,))
-            res['resource_access_list'] = reverse('api:resource_access_list', args=(obj.resource_id,))
         return res
 
     def _get_summary_fields(self, obj):
@@ -364,11 +361,6 @@ class BaseSerializer(serializers.ModelSerializer):
         if len(roles) > 0:
             summary_fields['roles'] = roles
         return summary_fields
-
-    def get_resource_id(self, obj):
-        if isinstance(obj, ResourceMixin):
-            return obj.resource.id
-        return None
 
     def get_created(self, obj):
         if obj is None:
@@ -544,8 +536,6 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         ret = super(BaseSerializer, self).to_representation(obj)
-        if 'resource_id' in ret and ret['resource_id'] is None:
-            ret.pop('resource_id')
         return ret
 
 
@@ -816,6 +806,7 @@ class UserSerializer(BaseSerializer):
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
             roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
+            access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
         ))
         return res
 
@@ -870,6 +861,7 @@ class OrganizationSerializer(BaseSerializer):
             notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:organization_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:organization_notifiers_error_list', args=(obj.pk,)),
+            access_list = reverse('api:organization_access_list',         args=(obj.pk,)),
         ))
         return res
 
@@ -942,6 +934,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
+            access_list = reverse('api:project_access_list',         args=(obj.pk,)),
         ))
         # Backwards compatibility.
         if obj.current_update:
@@ -1041,6 +1034,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             job_templates = reverse('api:inventory_job_template_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
+            access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
@@ -1211,6 +1205,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
+            access_list = reverse('api:group_access_list',         args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
@@ -1474,6 +1469,7 @@ class TeamSerializer(BaseSerializer):
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
             roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
+            access_list  = reverse('api:team_access_list',      args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
@@ -1508,37 +1504,17 @@ class RoleSerializer(BaseSerializer):
         return ret
 
 
-class ResourceSerializer(BaseSerializer):
-
-    class Meta:
-        model = Resource
-        fields = ('*',)
-
-    def get_related(self, obj):
-        ret = super(ResourceSerializer, self).get_related(obj)
-        ret['access_list'] = reverse('api:resource_access_list', args=(obj.pk,))
-        try:
-            if obj.content_object:
-                ret.update(reverseGenericForeignKey(obj.content_object))
-        except AttributeError as e:
-            print(e)
-            # AttributeError's happen if our content_object is pointing at
-            # a model that no longer exists. This is dirty data and ideally
-            # doesn't exist, but in case it does, let's not puke.
-            pass
-
-        return ret
-
 
 class ResourceAccessListElementSerializer(UserSerializer):
 
     def to_representation(self, user):
         ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
-        resource_id = self.context['view'].resource_id
-        resource = Resource.objects.get(pk=resource_id)
+        object_id = self.context['view'].object_id
+        obj = self.context['view'].resource_model.objects.get(pk=object_id)
+
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
-        ret['summary_fields']['permissions'] = resource.get_permissions(user)
+        ret['summary_fields']['permissions'] = get_user_permissions_on_resource(obj, user)
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
@@ -1549,13 +1525,14 @@ class ResourceAccessListElementSerializer(UserSerializer):
             except:
                 pass
 
-            return { 'role': role_dict, 'permissions': resource.get_role_permissions(role)}
+            return { 'role': role_dict, 'permissions': get_role_permissions_on_resource(obj, role)}
 
-        direct_permissive_role_ids = resource.permissions.values_list('role__id')
+        content_type = ContentType.objects.get_for_model(obj)
+        direct_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__id')
         direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
         ret['summary_fields']['direct_access'] = [format_role_perm(r) for r in direct_access_roles]
 
-        all_permissive_role_ids = resource.permissions.values_list('role__ancestors__id')
+        all_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__ancestors__id')
         indirect_access_roles = user.roles.filter(id__in=all_permissive_role_ids).exclude(id__in=direct_permissive_role_ids).all()
         ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles]
         return ret
@@ -1605,7 +1582,8 @@ class CredentialSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
         res.update(dict(
-            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,))
+            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
+            access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
         if obj.user:
             res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
@@ -1684,6 +1662,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
+            access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))

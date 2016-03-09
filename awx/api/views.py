@@ -131,7 +131,6 @@ class ApiV1RootView(APIView):
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
         data['roles'] = reverse('api:role_list')
-        data['resources'] = reverse('api:resource_list')
         data['notifiers'] = reverse('api:notifier_list')
         data['notifications'] = reverse('api:notification_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
@@ -704,6 +703,12 @@ class OrganizationNotifiersSuccessList(SubListCreateAttachDetachAPIView):
     parent_model = Organization
     relationship = 'notifiers_success'
 
+class OrganizationAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Organization
+    new_in_300 = True
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -784,6 +789,11 @@ class TeamActivityStreamList(SubListAPIView):
                          Q(credential__in=parent.credentials.all()) |
                          Q(permission__in=parent.permissions.all()))
 
+class TeamAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Team
+    new_in_300 = True
 
 class ProjectList(ListCreateAPIView):
 
@@ -948,6 +958,12 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     parent_model = Project
     relationship = 'notifications'
 
+class ProjectAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Project
+    new_in_300 = True
+
 class UserList(ListCreateAPIView):
 
     model = User
@@ -1087,6 +1103,12 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
             own_credential.mark_inactive()
         return super(UserDetail, self).destroy(request, *args, **kwargs)
 
+class UserAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = User
+    new_in_300 = True
+
 class CredentialList(ListCreateAPIView):
 
     model = Credential
@@ -1115,6 +1137,11 @@ class CredentialActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(type(self), self).get(request, *args, **kwargs)
 
+class CredentialAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Credential
+    new_in_300 = True
 
 class InventoryScriptList(ListCreateAPIView):
 
@@ -1174,6 +1201,12 @@ class InventoryActivityStreamList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+class InventoryAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Inventory
+    new_in_300 = True
 
 class InventoryJobTemplateList(SubListAPIView):
 
@@ -1509,6 +1542,13 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         if hasattr(obj, 'mark_inactive'):
             obj.mark_inactive_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class GroupAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Group
+    new_in_300 = True
+
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
@@ -2186,6 +2226,12 @@ class JobTemplateJobsList(SubListCreateAPIView):
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
+
+class JobTemplateAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = JobTemplate
+    new_in_300 = True
 
 class SystemJobTemplateList(ListAPIView):
 
@@ -3269,42 +3315,6 @@ class RoleChildrenList(SubListAPIView):
         role = Role.objects.get(pk=self.kwargs['pk'])
         return role.children
 
-class ResourceDetail(RetrieveAPIView):
-
-    model = Resource
-    serializer_class = ResourceSerializer
-    permission_classes = (IsAuthenticated,)
-    new_in_300 = True
-
-    # XXX: Permissions - only roles the user has access to see should be listed here
-    def get_queryset(self):
-        return Resource.objects
-
-class ResourceList(ListAPIView):
-
-    model = Resource
-    serializer_class = ResourceSerializer
-    permission_classes = (IsAuthenticated,)
-    new_in_300 = True
-
-    def get_queryset(self):
-        return Resource.objects.filter(permissions__role__ancestors__members=self.request.user)
-
-class ResourceAccessList(ListAPIView):
-
-    model = User
-    serializer_class = ResourceAccessListElementSerializer
-    permission_classes = (IsAuthenticated,)
-    new_in_300 = True
-
-    def get_queryset(self):
-        self.resource_id = self.kwargs['pk']
-        resource = Resource.objects.get(pk=self.kwargs['pk'])
-        roles = set([p.role for p in resource.permissions.all()])
-        ancestors = set()
-        for r in roles:
-            ancestors.update(set(r.ancestors.all()))
-        return User.objects.filter(roles__in=list(ancestors))
 
 
 
