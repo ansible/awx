@@ -11,9 +11,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && apt
 RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list && echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" | tee /etc/apt/sources.list.d/postgres-9.4.list
 RUN apt-get update
 RUN apt-get install -y openssh-server ansible mg vim tmux git mercurial subversion python-dev python-psycopg2 make postgresql-client libpq-dev nodejs python-psutil libxml2-dev libxslt-dev lib32z1-dev libsasl2-dev libldap2-dev libffi-dev libzmq-dev proot python-pip libxmlsec1-dev swig redis-server && rm -rf /var/lib/apt/lists/*
-RUN pip install flake8
-RUN pip install pytest pytest-pythonpath pytest-django pytest-cov
-RUN pip install dateutils # for private/license_writer.py
+RUN pip install flake8 pytest pytest-pythonpath pytest-django pytest-cov pytest-mock dateutils django-debug-toolbar==1.4 pyflakes==1.0.0 virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db
@@ -23,6 +21,9 @@ RUN pip2 install honcho
 RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64.deb
 RUN dpkg -i dumb-init_*.deb
 ADD start_development.sh /start_development.sh
+ADD ansible-tower.egg-link /tmp/ansible-tower.egg-link
+ADD tower-manage /usr/local/bin/tower-manage
+ADD ansible_tower.egg-info /tmp/ansible_tower.egg-info
 
 EXPOSE 8013 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]

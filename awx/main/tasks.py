@@ -445,11 +445,9 @@ class BaseTask(Task):
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         # Update PYTHONPATH to use local site-packages.
-        python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
-        local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
-        if local_site_packages not in python_paths:
-            python_paths.insert(0, local_site_packages)
-        env['PYTHONPATH'] = os.pathsep.join(python_paths)
+        if settings.ANSIBLE_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
         if self.should_use_proot:
             env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
@@ -1276,7 +1274,9 @@ class RunInventoryUpdate(BaseTask):
         """
         env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         **kwargs)
-
+        if settings.TOWER_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
+            env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)

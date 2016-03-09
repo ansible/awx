@@ -1,7 +1,4 @@
--r requirements.txt
 ansible==1.9.4
-# Based on django-jenkins==0.16.3, with a fix for properly importing coverage
-git+https://github.com/jlaska/django-jenkins.git@release_0.16.4#egg=django-jenkins
 coverage
 pyflakes
 pep8
