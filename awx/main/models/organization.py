@@ -38,16 +38,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
 
-    users = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='organizations',
-    )
-    admins = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='admin_of_organizations',
-    )
     projects = models.ManyToManyField(
         'Project',
         blank=True,
@@ -96,11 +86,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
 
-    users = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='teams',
-    )
     organization = models.ForeignKey(
         'Organization',
         blank=False,
