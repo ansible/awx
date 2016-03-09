@@ -1,8 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import traceback
-
 # Django
 from django.db import connection
 from django.db.models.signals import (
