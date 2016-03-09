@@ -419,8 +419,6 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'resource_id' in org
-    assert org['resource_id'] > 0
     assert 'roles' in org['summary_fields']
 
     org_role_response = get(org['summary_fields']['roles']['admin_role']['url'], admin)
