@@ -51,6 +51,12 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                     .roles[key].description };
         });
 
+    scope.showKeyPane = false;
+
+    scope.toggleKeyPane = function() {
+        scope.showKeyPane = !scope.showKeyPane;
+    };
+
     // handle form tab changes
     scope.toggleFormTabs = function(list) {
         scope.usersSelected = (list === 'users');

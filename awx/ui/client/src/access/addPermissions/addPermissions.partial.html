@@ -58,6 +58,23 @@
                         2.
                     </span>
                     Please assign roles to the selected users/teams
+                    <div class="AddPermissions-keyToggle"
+                        ng-class="{'is-active': showKeyPane}"
+                        ng-click="toggleKeyPane()">
+                        Key
+                    </div>
+                </div>
+                <div class="AddPermissions-keyPane"
+                    ng-show="showKeyPane">
+                    <div class="AddPermissions-keyRow"
+                        ng-repeat="key in roleKey">
+                        <div class="AddPermissions-keyName">
+                            {{ key.name }}
+                        </div>
+                        <div class="AddPermissions-keyDescription">
+                            {{ key.description }}
+                        </div>
+                    </div>
                 </div>
                 <form name="userForm" novalidate>
                     <ng-form name="userRoleForm">

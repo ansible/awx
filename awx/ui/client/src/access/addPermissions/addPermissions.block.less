@@ -83,6 +83,8 @@
     margin-top: 10px;
     margin-bottom: 20px;
     color: #848992;
+    display: flex;
+    align-items: center;
 }
 
 .AddPermissions-directionNumber {
@@ -90,9 +92,7 @@
     font-weight: bold;
     border-radius: 50%;
     background-color: @default-list-header-bg;
-    padding-left: 6px;
-    padding-right: 1px;
-    padding-bottom: 3px;
+    padding: 2px 6px;
     margin-right: 10px;
 }
 
@@ -163,4 +163,52 @@
 
 .AddPermissions .select2-search__field {
     text-transform: uppercase;
+}
+
+.AddPermissions-keyToggle {
+    margin-left: auto;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    font-size: 12px;
+    background-color: @default-bg;
+    border-radius: 5px;
+    color: @default-interface-txt;
+    border: 1px solid @default-second-border;
+    cursor: pointer;
+}
+
+.AddPermissions-keyToggle:hover {
+    background-color: @default-tertiary-bg;
+}
+
+.AddPermissions-keyToggle.is-active {
+    background-color: @default-link;
+    border-color: @default-link;
+    color: @default-bg;
+}
+
+.AddPermissions-keyPane {
+    margin: 20px 0;
+    border-radius: 5px;
+    padding: 15px;
+    padding-bottom: 0px;
+    border: 1px solid @default-second-border;
+    color: @default-interface-txt;
+}
+
+.AddPermissions-keyRow {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.AddPermissions-keyName {
+    flex: 1 0 auto;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding-bottom: 3px;
+}
+
+.AddPermissions-keyDescription {
+    flex: 1 0 auto;
 }
