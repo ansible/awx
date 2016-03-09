@@ -66,7 +66,7 @@ def test_migrate_facts_hostname_does_not_exist(inventories, hosts, hosts_mongo, 
 def test_drop_system_tracking_db(inventories, hosts, hosts_mongo, fact_scans):
     inventory_objs = inventories(1)
     hosts_mongo(1, inventory_objs)
-    facts_known = fact_scans(1, inventory_objs)
+    fact_scans(1, inventory_objs)
 
     assert FactMongo.objects.all().count() > 0
     assert FactVersion.objects.all().count() > 0
