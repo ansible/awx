@@ -162,7 +162,7 @@ class ProjectsTest(BaseTransactionTest):
                          set(Project.get_local_path_choices()))
 
         # return local paths are only the ones not used by any active project.
-        qs = Project.objects.filter(active=True)
+        qs = Project.objects
         used_paths = qs.values_list('local_path', flat=True)
         self.assertFalse(set(response['project_local_paths']) & set(used_paths))
         for project in self.projects:
@@ -402,7 +402,7 @@ class ProjectsTest(BaseTransactionTest):
         # =====================================================================
         # TEAM PROJECTS
 
-        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter( organization__pk=self.organizations[1].pk)[0]
         team_projects = reverse('api:team_projects_list', args=(team.pk,))
 
         p1 = self.projects[0]
@@ -419,7 +419,7 @@ class ProjectsTest(BaseTransactionTest):
         # =====================================================================
         # TEAMS USER MEMBERSHIP
 
-        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter( organization__pk=self.organizations[1].pk)[0]
         team_users = reverse('api:team_users_list', args=(team.pk,))
         for x in team.deprecated_users.all():
             team.deprecated_users.remove(x)
@@ -1262,7 +1262,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
         # Test that we can delete project updates.
-        for pu in project.project_updates.filter(active=True):
+        for pu in project.project_updates:
             pu_url = reverse('api:project_update_detail', args=(pu.pk,))
             with self.current_user(self.super_django_user):
                 self.delete(pu_url, expect=204)

@@ -209,7 +209,6 @@ REST_FRAMEWORK = {
         'awx.api.permissions.ModelAccessPermission',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'awx.api.filters.ActiveOnlyBackend',
         'awx.api.filters.TypeFilterBackend',
         'awx.api.filters.FieldLookupBackend',
         'rest_framework.filters.SearchFilter',

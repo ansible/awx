@@ -214,7 +214,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
+        if request.user.is_superuser or request.user.admin_of_organizations.count():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -609,7 +609,7 @@ class OrganizationList(ListCreateAPIView):
         # by the license, then we are only willing to create this organization
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
-                self.model.objects.filter(active=True).count() > 0):
+                self.model.objects.count() > 0):
             raise LicenseForbids('Your Tower license only permits a single '
                                  'organization to exist.')
 
@@ -804,7 +804,7 @@ class ProjectList(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         # Not optimal, but make sure the project status and last_updated fields
         # are up to date here...
-        projects_qs = Project.objects.filter(active=True)
+        projects_qs = Project.objects
         projects_qs = projects_qs.select_related('current_job', 'last_job')
         for project in projects_qs:
             project._set_status_and_last_job_run()
@@ -1421,7 +1421,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
                                        sub, self.relationship):
             raise PermissionDenied()
 
-        if sub.parents.filter(active=True).exclude(pk=parent.pk).count() == 0:
+        if sub.parents.exclude(pk=parent.pk).count() == 0:
             sub.delete()
         else:
             relationship.remove(sub)
@@ -1593,9 +1593,9 @@ class InventoryScriptView(RetrieveAPIView):
         hostvars = bool(request.query_params.get('hostvars', ''))
         show_all = bool(request.query_params.get('all', ''))
         if show_all:
-            hosts_q = dict(active=True)
+            hosts_q = dict()
         else:
-            hosts_q = dict(active=True, enabled=True)
+            hosts_q = dict(enabled=True)
         if hostname:
             host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
@@ -1613,8 +1613,7 @@ class InventoryScriptView(RetrieveAPIView):
                 all_group['hosts'] = groupless_hosts
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=obj.id, group__active=True,
-                                  host__inventory_id=obj.id, host__active=True)
+            group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
             if 'enabled' in hosts_q:
                 group_hosts_kw['host__enabled'] = hosts_q['enabled']
             group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
@@ -1627,8 +1626,8 @@ class InventoryScriptView(RetrieveAPIView):
 
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=obj.id, from_group__active=True,
-                to_group__inventory_id=obj.id, to_group__active=True,
+                from_group__inventory_id=obj.id,
+                to_group__inventory_id=obj.id,
             )
             group_parents_qs = group_parents_qs.order_by('from_group__name')
             group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
@@ -1638,7 +1637,7 @@ class InventoryScriptView(RetrieveAPIView):
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in obj.groups.filter(active=True):
+            for group in obj.groups:
                 group_info = OrderedDict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
@@ -1684,9 +1683,9 @@ class InventoryTreeView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
-        group_children_map = inventory.get_group_children_map(active=True)
-        root_group_pks = inventory.root_groups.filter(active=True).order_by('name').values_list('pk', flat=True)
-        groups_qs = inventory.groups.filter(active=True)
+        group_children_map = inventory.get_group_children_map()
+        root_group_pks = inventory.root_groups.order_by('name').values_list('pk', flat=True)
+        groups_qs = inventory.groups
         groups_qs = groups_qs.select_related('inventory')
         groups_qs = groups_qs.prefetch_related('inventory_source')
         all_group_data = GroupSerializer(groups_qs, many=True).data
@@ -1890,7 +1889,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if obj:
             for p in obj.passwords_needed_to_start:
                 data[p] = u''
-            if obj.credential and obj.credential.active:
+            if obj.credential:
                 data.pop('credential', None)
             else:
                 data['credential'] = None
@@ -2087,7 +2086,7 @@ class JobTemplateCallback(GenericAPIView):
             return set()
         # Find the host objects to search for a match.
         obj = self.get_object()
-        qs = obj.inventory.hosts.filter(active=True)
+        qs = obj.inventory.hosts
         # First try for an exact match on the name.
         try:
             return set([qs.get(name__in=remote_hosts)])
@@ -2147,7 +2146,7 @@ class JobTemplateCallback(GenericAPIView):
         # match again.
         inventory_sources_already_updated = []
         if len(matching_hosts) != 1:
-            inventory_sources = job_template.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+            inventory_sources = job_template.inventory.inventory_sources.filter( update_on_launch=True)
             inventory_update_pks = set()
             for inventory_source in inventory_sources:
                 if inventory_source.needs_update_on_launch:

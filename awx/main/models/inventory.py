@@ -123,15 +123,12 @@ class Inventory(CommonModel, ResourceMixin):
 
     variables_dict = VarsDictProperty('variables')
 
-    def get_group_hosts_map(self, active=None):
+    def get_group_hosts_map(self):
         '''
         Return dictionary mapping group_id to set of child host_id's.
         '''
         # FIXME: Cache this mapping?
         group_hosts_kw = dict(group__inventory_id=self.pk, host__inventory_id=self.pk)
-        if active is not None:
-            group_hosts_kw['group__active'] = active
-            group_hosts_kw['host__active'] = active
         group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
         group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id')
         group_hosts_map = {}
@@ -140,15 +137,12 @@ class Inventory(CommonModel, ResourceMixin):
             group_host_ids.add(host_id)
         return group_hosts_map
 
-    def get_group_parents_map(self, active=None):
+    def get_group_parents_map(self):
         '''
         Return dictionary mapping group_id to set of parent group_id's.
         '''
         # FIXME: Cache this mapping?
         group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
-        if active is not None:
-            group_parents_kw['from_group__active'] = active
-            group_parents_kw['to_group__active'] = active
         group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
         group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
         group_parents_map = {}
@@ -157,15 +151,12 @@ class Inventory(CommonModel, ResourceMixin):
             group_parents.add(to_group_id)
         return group_parents_map
 
-    def get_group_children_map(self, active=None):
+    def get_group_children_map(self):
         '''
         Return dictionary mapping group_id to set of child group_id's.
         '''
         # FIXME: Cache this mapping?
         group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
-        if active is not None:
-            group_parents_kw['from_group__active'] = active
-            group_parents_kw['to_group__active'] = active
         group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
         group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
         group_children_map = {}
@@ -176,12 +167,12 @@ class Inventory(CommonModel, ResourceMixin):
 
     def update_host_computed_fields(self):
         '''
-        Update computed fields for all active hosts in this inventory.
+        Update computed fields for all hosts in this inventory.
         '''
         hosts_to_update = {}
-        hosts_qs = self.hosts.filter(active=True)
+        hosts_qs = self.hosts
         # Define queryset of all hosts with active failures.
-        hosts_with_active_failures = hosts_qs.filter(last_job_host_summary__isnull=False, last_job_host_summary__job__active=True, last_job_host_summary__failed=True).values_list('pk', flat=True)
+        hosts_with_active_failures = hosts_qs.filter(last_job_host_summary__isnull=False, last_job_host_summary__failed=True).values_list('pk', flat=True)
         # Find all hosts that need the has_active_failures flag set.
         hosts_to_set = hosts_qs.filter(has_active_failures=False, pk__in=hosts_with_active_failures)
         for host_pk in hosts_to_set.values_list('pk', flat=True):
@@ -193,7 +184,7 @@ class Inventory(CommonModel, ResourceMixin):
             host_updates = hosts_to_update.setdefault(host_pk, {})
             host_updates['has_active_failures'] = False
         # Define queryset of all hosts with cloud inventory sources.
-        hosts_with_cloud_inventory = hosts_qs.filter(inventory_sources__active=True, inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True)
+        hosts_with_cloud_inventory = hosts_qs.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True)
         # Find all hosts that need the has_inventory_sources flag set.
         hosts_to_set = hosts_qs.filter(has_inventory_sources=False, pk__in=hosts_with_cloud_inventory)
         for host_pk in hosts_to_set.values_list('pk', flat=True):
@@ -218,13 +209,13 @@ class Inventory(CommonModel, ResourceMixin):
         '''
         Update computed fields for all active groups in this inventory.
         '''
-        group_children_map = self.get_group_children_map(active=True)
-        group_hosts_map = self.get_group_hosts_map(active=True)
-        active_host_pks = set(self.hosts.filter(active=True).values_list('pk', flat=True))
-        failed_host_pks = set(self.hosts.filter(active=True, last_job_host_summary__job__active=True, last_job_host_summary__failed=True).values_list('pk', flat=True))
-        # active_group_pks = set(self.groups.filter(active=True).values_list('pk', flat=True))
+        group_children_map = self.get_group_children_map()
+        group_hosts_map = self.get_group_hosts_map()
+        active_host_pks = set(self.hosts.values_list('pk', flat=True))
+        failed_host_pks = set(self.hosts.filter(last_job_host_summary__failed=True).values_list('pk', flat=True))
+        # active_group_pks = set(self.groups.values_list('pk', flat=True))
         failed_group_pks = set() # Update below as we check each group.
-        groups_with_cloud_pks = set(self.groups.filter(active=True, inventory_sources__active=True, inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
+        groups_with_cloud_pks = set(self.groups.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
         groups_to_update = {}
 
         # Build list of group pks to check, starting with the groups at the
@@ -296,11 +287,11 @@ class Inventory(CommonModel, ResourceMixin):
             self.update_host_computed_fields()
         if update_groups:
             self.update_group_computed_fields()
-        active_hosts = self.hosts.filter(active=True)
+        active_hosts = self.hosts
         failed_hosts = active_hosts.filter(has_active_failures=True)
-        active_groups = self.groups.filter(active=True)
+        active_groups = self.groups
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(active=True, source__in=CLOUD_INVENTORY_SOURCES)
+        active_inventory_sources = self.inventory_sources.filter( source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
@@ -405,10 +396,8 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
         Update model fields that are computed from database relationships.
         '''
         has_active_failures = bool(self.last_job_host_summary and
-                                   self.last_job_host_summary.job.active and
                                    self.last_job_host_summary.failed)
-        active_inventory_sources = self.inventory_sources.filter(active=True,
-                                                                 source__in=CLOUD_INVENTORY_SOURCES)
+        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         computed_fields = {
             'has_active_failures': has_active_failures,
             'has_inventory_sources': bool(active_inventory_sources.count()),
@@ -424,7 +413,7 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
         # change.
         # NOTE: I think this is no longer needed
         # if update_groups:
-        #     for group in self.all_groups.filter(active=True):
+        #     for group in self.all_groups:
         #         group.update_computed_fields()
         # if update_inventory:
         #     self.inventory.update_computed_fields(update_groups=False,
@@ -620,14 +609,12 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         '''
         Update model fields that are computed from database relationships.
         '''
-        active_hosts = self.all_hosts.filter(active=True)
-        failed_hosts = active_hosts.filter(last_job_host_summary__job__active=True,
-                                           last_job_host_summary__failed=True)
-        active_groups = self.all_children.filter(active=True)
+        active_hosts = self.all_hosts
+        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
+        active_groups = self.all_children
         # FIXME: May not be accurate unless we always update groups depth-first.
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(active=True,
-                                                                 source__in=CLOUD_INVENTORY_SOURCES)
+        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         computed_fields = {
             'total_hosts': active_hosts.count(),
             'has_active_failures': bool(failed_hosts.count()),
@@ -1154,7 +1141,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
 
     def _can_update(self):
         if self.source == 'custom':
-            return bool(self.source_script and self.source_script.active)
+            return bool(self.source_script)
         else:
             return bool(self.source in CLOUD_INVENTORY_SOURCES)
 
@@ -1171,7 +1158,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
 
     @property
     def needs_update_on_launch(self):
-        if self.active and self.source and self.update_on_launch:
+        if self.source and self.update_on_launch:
             if not self.last_job_run:
                 return True
             if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) <= now():
@@ -1180,7 +1167,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
 
     @property
     def notifiers(self):
-        base_notifiers = Notifier.objects.filter(active=True)
+        base_notifiers = Notifier.objects
         error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors=self.inventory.organization))
         success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success=self.inventory.organization))
         any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any=self.inventory.organization))
@@ -1189,7 +1176,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin)
     def clean_source(self):
         source = self.source
         if source and self.group:
-            qs = self.group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES, active=True, group__active=True)
+            qs = self.group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
             existing_sources = qs.exclude(pk=self.pk)
             if existing_sources.count():
                 s = u', '.join([x.group.name for x in existing_sources])
@@ -1233,7 +1220,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         inventory_source = self.inventory_source
-        if self.active and inventory_source.inventory and self.name == inventory_source.name:
+        if inventory_source.inventory and self.name == inventory_source.name:
             if inventory_source.group:
                 self.name = '%s (%s)' % (inventory_source.group.name, inventory_source.inventory.name)
             else:
@@ -1269,7 +1256,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
             return False
 
         if (self.source not in ('custom', 'ec2') and
-                not (self.credential and self.credential.active)):
+                not (self.credential)):
             return False
         return True
 

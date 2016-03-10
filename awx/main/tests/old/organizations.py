@@ -436,10 +436,8 @@ class OrganizationsTest(BaseTest):
         self.delete(urls[0], expect=204, auth=self.get_super_credentials())
 
         # check that when we have deleted an object it comes back 404 via GET
-        # but that it's still in the database as inactive
         self.get(urls[1], expect=404, auth=self.get_normal_credentials())
-        org1 = Organization.objects.get(pk=urldata1['id'])
-        self.assertEquals(org1.active, False)
+        assert Organization.objects.filter(pk=urldata1['id']).count() == 0
 
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())

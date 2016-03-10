@@ -245,7 +245,7 @@ class UserAccess(BaseAccess):
                 return False
         if self.user.is_superuser:
             return True
-        return Organization.accessible_objects(self.user, ALL_PERMISSIONS).filter(active=True).exists()
+        return Organization.accessible_objects(self.user, ALL_PERMISSIONS).exists()
 
     def can_change(self, obj, data):
         if data is not None and 'is_superuser' in data:
@@ -266,7 +266,7 @@ class UserAccess(BaseAccess):
         if obj == self.user:
             # cannot delete yourself
             return False
-        super_users = User.objects.filter(is_active=True, is_superuser=True)
+        super_users = User.objects.filter(is_superuser=True)
         if obj.is_superuser and super_users.count() == 1:
             # cannot delete the last active superuser
             return False
@@ -525,7 +525,7 @@ class InventoryUpdateAccess(BaseAccess):
     model = InventoryUpdate
 
     def get_queryset(self):
-        qs = InventoryUpdate.objects.filter(active=True).distinct()
+        qs = InventoryUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory_source__group',
                                'inventory_source__inventory')
         inventory_sources_qs = self.user.get_queryset(InventorySource)
@@ -675,7 +675,7 @@ class ProjectUpdateAccess(BaseAccess):
     model = ProjectUpdate
 
     def get_queryset(self):
-        qs = ProjectUpdate.objects.filter(active=True).distinct()
+        qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
         project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
         return qs.filter(project_id__in=project_ids)
@@ -819,7 +819,7 @@ class JobAccess(BaseAccess):
     model = Job
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'cloud_credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
@@ -841,12 +841,10 @@ class JobAccess(BaseAccess):
         # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
-            active=True,
             permission_type__in=allowed_deploy,
         )
         check_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
-            active=True,
             permission_type__in=allowed_check,
         )
 
@@ -945,18 +943,17 @@ class AdHocCommandAccess(BaseAccess):
     model = AdHocCommand
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'credential')
         if self.user.is_superuser:
             return qs
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        team_ids = set(Team.objects.filter(active=True, users__in=[self.user]).values_list('id', flat=True))
+        team_ids = set(Team.objects.filter( users__in=[self.user]).values_list('id', flat=True))
 
         permission_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
-            active=True,
             permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
             run_ad_hoc_commands=True,
         ).values_list('id', flat=True))
@@ -980,7 +977,7 @@ class AdHocCommandAccess(BaseAccess):
         # If a credential is provided, the user should have read access to it.
         credential_pk = get_pk_from_dict(data, 'credential')
         if credential_pk:
-            credential = get_object_or_400(Credential, pk=credential_pk, active=True)
+            credential = get_object_or_400(Credential, pk=credential_pk)
             if not credential.accessible_by(self.user, {'read':True}):
                 return False
 
@@ -988,7 +985,7 @@ class AdHocCommandAccess(BaseAccess):
         # given inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if inventory_pk:
-            inventory = get_object_or_400(Inventory, pk=inventory_pk, active=True)
+            inventory = get_object_or_400(Inventory, pk=inventory_pk)
             if not inventory.accessible_by(self.user, {'execute': True}):
                 return False
 

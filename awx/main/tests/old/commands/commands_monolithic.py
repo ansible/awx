@@ -520,12 +520,12 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(inventory_source.inventory_updates.count(), 1)
         inventory_update = inventory_source.inventory_updates.all()[0]
         self.assertEqual(inventory_update.status, 'successful')
-        for host in inventory.hosts.filter(active=True):
+        for host in inventory.hosts:
             if host.pk in (except_host_pks or []):
                 continue
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
-        for group in inventory.groups.filter(active=True):
+        for group in inventory.groups:
             if group.pk in (except_group_pks or []):
                 continue
             source_pks = group.inventory_sources.values_list('pk', flat=True)
@@ -693,7 +693,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                     'lbservers', 'others'])
         if overwrite:
             expected_group_names.remove('lbservers')
-        group_names = set(new_inv.groups.filter(active=True).values_list('name', flat=True))
+        group_names = set(new_inv.groups.values_list('name', flat=True))
         self.assertEqual(expected_group_names, group_names)
         expected_host_names = set(['web1.example.com', 'web2.example.com',
                                    'web3.example.com', 'db1.example.com',
@@ -703,13 +703,13 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                    'fe80::1610:9fff:fedd:b654', '::1'])
         if overwrite:
             expected_host_names.remove('lb.example.com')
-        host_names = set(new_inv.hosts.filter(active=True).values_list('name', flat=True))
+        host_names = set(new_inv.hosts.values_list('name', flat=True))
         self.assertEqual(expected_host_names, host_names)
         expected_inv_vars = {'vara': 'A', 'varc': 'C'}
         if overwrite_vars:
             expected_inv_vars.pop('varc')
         self.assertEqual(new_inv.variables_dict, expected_inv_vars)
-        for host in new_inv.hosts.filter(active=True):
+        for host in new_inv.hosts:
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
                                  {'ansible_ssh_host': 'w1.example.net'})
@@ -721,35 +721,35 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(host.variables_dict, {'lbvar': 'ni!'})
             else:
                 self.assertEqual(host.variables_dict, {})
-        for group in new_inv.groups.filter(active=True):
+        for group in new_inv.groups:
             if group.name == 'servers':
                 expected_vars = {'varb': 'B', 'vard': 'D'}
                 if overwrite_vars:
                     expected_vars.pop('vard')
                 self.assertEqual(group.variables_dict, expected_vars)
-                children = set(group.children.filter(active=True).values_list('name', flat=True))
+                children = set(group.children.values_list('name', flat=True))
                 expected_children = set(['dbservers', 'webservers', 'lbservers'])
                 if overwrite:
                     expected_children.remove('lbservers')
                 self.assertEqual(children, expected_children)
-                self.assertEqual(group.hosts.filter(active=True).count(), 0)
+                self.assertEqual(group.hosts.count(), 0)
             elif group.name == 'dbservers':
                 self.assertEqual(group.variables_dict, {'dbvar': 'ugh'})
-                self.assertEqual(group.children.filter(active=True).count(), 0)
-                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
                 self.assertEqual(hosts, host_names)
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
-                self.assertEqual(group.children.filter(active=True).count(), 0)
-                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
                 host_names = set(['web1.example.com','web2.example.com',
                                   'web3.example.com'])
                 self.assertEqual(hosts, host_names)
             elif group.name == 'lbservers':
                 self.assertEqual(group.variables_dict, {})
-                self.assertEqual(group.children.filter(active=True).count(), 0)
-                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
                 host_names = set(['lb.example.com'])
                 self.assertEqual(hosts, host_names)
         if overwrite:
@@ -799,7 +799,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         # Check hosts in dotcom group.
         group = new_inv.groups.get(name='dotcom')
         self.assertEqual(group.hosts.count(), 65)
-        for host in group.hosts.filter(active=True, name__startswith='web'):
+        for host in group.hosts.filter( name__startswith='web'):
             self.assertEqual(host.variables_dict.get('ansible_ssh_user', ''), 'example')
         # Check hosts in dotnet group.
         group = new_inv.groups.get(name='dotnet')
@@ -807,7 +807,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         # Check hosts in dotorg group.
         group = new_inv.groups.get(name='dotorg')
         self.assertEqual(group.hosts.count(), 61)
-        for host in group.hosts.filter(active=True):
+        for host in group.hosts:
             if host.name.startswith('mx.'):
                 continue
             self.assertEqual(host.variables_dict.get('ansible_ssh_user', ''), 'example')
@@ -815,7 +815,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         # Check hosts in dotus group.
         group = new_inv.groups.get(name='dotus')
         self.assertEqual(group.hosts.count(), 10)
-        for host in group.hosts.filter(active=True):
+        for host in group.hosts:
             if int(host.name[2:4]) % 2 == 0:
                 self.assertEqual(host.variables_dict.get('even_odd', ''), 'even')
             else:
@@ -969,7 +969,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         else:
             return 0
 
-    def _check_largeinv_import(self, new_inv, nhosts, nhosts_inactive=0):
+    def _check_largeinv_import(self, new_inv, nhosts):
         self._start_time = time.time()
         inv_file = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'largeinv.py')
         ngroups = self._get_ngroups_for_nhosts(nhosts)
@@ -982,9 +982,8 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         # Check that inventory is populated as expected within a reasonable
         # amount of time.  Computed fields should also be updated.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
-        self.assertEqual(new_inv.hosts.filter(active=True).count(), nhosts)
-        self.assertEqual(new_inv.groups.filter(active=True).count(), ngroups)
-        self.assertEqual(new_inv.hosts.filter(active=False).count(), nhosts_inactive)
+        self.assertEqual(new_inv.hosts.count(), nhosts)
+        self.assertEqual(new_inv.groups.count(), ngroups)
         self.assertEqual(new_inv.total_hosts, nhosts)
         self.assertEqual(new_inv.total_groups, ngroups)
         self.assertElapsedLessThan(120)
@@ -998,10 +997,10 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.groups.count(), 0)
         nhosts = 2000
         # Test initial import into empty inventory.
-        self._check_largeinv_import(new_inv, nhosts, 0)
+        self._check_largeinv_import(new_inv, nhosts)
         # Test re-importing and overwriting.
-        self._check_largeinv_import(new_inv, nhosts, 0)
+        self._check_largeinv_import(new_inv, nhosts)
         # Test re-importing with only half as many hosts.
-        self._check_largeinv_import(new_inv, nhosts / 2, nhosts / 2)
+        self._check_largeinv_import(new_inv, nhosts / 2)
         # Test re-importing that clears all hosts.
-        self._check_largeinv_import(new_inv, 0, nhosts)
+        self._check_largeinv_import(new_inv, 0)

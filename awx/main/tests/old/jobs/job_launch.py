@@ -137,7 +137,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.post(self.launch_url, {'credential_id': 0}, expect=400)
             self.post(self.launch_url, {'credential': 'one'}, expect=400)
             self.post(self.launch_url, {'credential_id': 'one'}, expect=400)
-            doug_pk = self.cred_doug.pk
+            cred_doug_pk = self.cred_doug.pk
             self.cred_doug.delete()
             self.post(self.launch_url, {'credential': cred_doug_pk}, expect=400)
             self.post(self.launch_url, {'credential_id': cred_doug_pk}, expect=400)
