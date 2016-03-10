@@ -1907,8 +1907,11 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not obj.survey_enabled:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # Sanity check: Are surveys available on this license?
+        # If not, do not allow them to be used.
+        if not feature_enabled('surveys'):
+            raise LicenseForbids('Your license does not allow '
+                                 'adding surveys.')
         return Response(obj.survey_spec)
 
     def post(self, request, *args, **kwargs):
