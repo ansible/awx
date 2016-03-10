@@ -299,11 +299,6 @@
                 Wait('stop');
                 $scope.survey_exists = true;
                 $scope.invalid_survey = false;
-                $('#job_templates_survey_enabled_chbox').attr('checked', true);
-                $('#job_templates_delete_survey_btn').show();
-                $('#job_templates_edit_survey_btn').show();
-                $('#job_templates_create_survey_btn').hide();
-
             });
 
 
