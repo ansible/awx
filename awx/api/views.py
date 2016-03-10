@@ -54,7 +54,7 @@ from social.backends.utils import load_backends
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
-from awx.main.tasks import mongodb_control, send_notifications
+from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
@@ -274,7 +274,6 @@ class ApiV1ConfigView(APIView):
 
         # Only stop mongod if license removal succeeded
         if has_error is None:
-            mongodb_control.delay('stop')
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
