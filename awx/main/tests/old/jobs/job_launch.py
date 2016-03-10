@@ -96,7 +96,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def test_credential_explicit(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
-            self.cred_sue.mark_inactive()
+            self.cred_sue.delete()
             response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
@@ -105,7 +105,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def test_credential_explicit_via_credential_id(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
-            self.cred_sue.mark_inactive()
+            self.cred_sue.delete()
             response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
@@ -131,15 +131,16 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # Can't launch a job template without a credential defined (or if we
         # pass an invalid/inactive credential value).
         with self.current_user(self.user_sue):
-            self.cred_sue.mark_inactive()
+            self.cred_sue.delete()
             self.post(self.launch_url, {}, expect=400)
             self.post(self.launch_url, {'credential': 0}, expect=400)
             self.post(self.launch_url, {'credential_id': 0}, expect=400)
             self.post(self.launch_url, {'credential': 'one'}, expect=400)
             self.post(self.launch_url, {'credential_id': 'one'}, expect=400)
-            self.cred_doug.mark_inactive()
-            self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=400)
-            self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=400)
+            doug_pk = self.cred_doug.pk
+            self.cred_doug.delete()
+            self.post(self.launch_url, {'credential': cred_doug_pk}, expect=400)
+            self.post(self.launch_url, {'credential_id': cred_doug_pk}, expect=400)
 
     def test_explicit_unowned_cred(self):
         # Explicitly specify a credential that we don't have access to
@@ -174,7 +175,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
     def test_deleted_credential_fail(self):
         # Job Templates with deleted credentials cannot be launched.
-        self.cred_sue.mark_inactive()
+        self.cred_sue.delete()
         with self.current_user(self.user_sue):
             self.post(self.launch_url, {}, expect=400)
 
@@ -202,7 +203,7 @@ class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTe
         passwords_required = ['ssh_password', 'become_password', 'ssh_key_unlock']
         # Job Templates with deleted credentials cannot be launched.
         with self.current_user(self.user_sue):
-            self.cred_sue_ask.mark_inactive()
+            self.cred_sue_ask.delete()
             response = self.post(self.launch_url, {'credential_id': self.cred_sue_ask_many.pk}, expect=400)
             for p in passwords_required:
                 self.assertIn(p, response['passwords_needed_to_start'])

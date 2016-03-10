@@ -110,17 +110,6 @@ def run_administrative_checks(self):
                   tower_admin_emails,
                   fail_silently=True)
 
-@task()
-def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
-    from awx.main.signals import disable_activity_stream
-    with ignore_inventory_computed_fields():
-        with disable_activity_stream():
-            for group in groups:
-                Group.objects.get(id=group).mark_inactive(skip_active_check=True)
-            for host in hosts:
-                Host.objects.get(id=host).mark_inactive(skip_active_check=True)
-    update_inventory_computed_fields(inventory)
-
 @task(bind=True)
 def tower_periodic_scheduler(self):
     def get_last_run():

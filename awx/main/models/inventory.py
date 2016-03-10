@@ -26,7 +26,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.notifications import Notifier
-from awx.main.utils import ignore_inventory_computed_fields, _inventory_updates
+from awx.main.utils import _inventory_updates
 from awx.main.conf import tower_settings
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
@@ -120,18 +120,6 @@ class Inventory(CommonModel, ResourceMixin):
     def get_absolute_url(self):
         return reverse('api:inventory_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True):
-        '''
-        When marking inventory inactive, also mark hosts and groups inactive.
-        '''
-        with ignore_inventory_computed_fields():
-            for host in self.hosts.filter(active=True):
-                host.mark_inactive()
-            for group in self.groups.filter(active=True):
-                group.mark_inactive(recompute=False)
-            for inventory_source in self.inventory_sources.filter(active=True):
-                inventory_source.mark_inactive()
-        super(Inventory, self).mark_inactive(save=save)
 
     variables_dict = VarsDictProperty('variables')
 
@@ -412,15 +400,6 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
     def get_absolute_url(self):
         return reverse('api:host_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True, from_inventory_import=False, skip_active_check=False):
-        '''
-        When marking hosts inactive, remove all associations to related
-        inventory sources.
-        '''
-        super(Host, self).mark_inactive(save=save, skip_active_check=skip_active_check)
-        if not from_inventory_import:
-            self.inventory_sources.clear()
-
     def update_computed_fields(self, update_inventory=True, update_groups=True):
         '''
         Update model fields that are computed from database relationships.
@@ -575,10 +554,10 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         return reverse('api:group_detail', args=(self.pk,))
 
     @transaction.atomic
-    def mark_inactive_recursive(self):
-        from awx.main.tasks import bulk_inventory_element_delete
+    def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
+
 
         def mark_actual():
             all_group_hosts = Group.hosts.through.objects.select_related("host", "group").filter(group__inventory=self.inventory)
@@ -629,38 +608,13 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
                     for direct_child in group_children[group]:
                         linked_children.append((group, direct_child))
                 marked_groups.append(group)
-            Group.objects.filter(id__in=marked_groups).update(active=False)
-            Host.objects.filter(id__in=marked_hosts).update(active=False)
-            Group.parents.through.objects.filter(to_group__id__in=marked_groups)
-            Group.hosts.through.objects.filter(group__id__in=marked_groups)
-            Group.inventory_sources.through.objects.filter(group__id__in=marked_groups).delete()
-            bulk_inventory_element_delete.delay(self.inventory.id, groups=marked_groups, hosts=marked_hosts)
+            Group.objects.filter(id__in=marked_groups).delete()
+            Host.objects.filter(id__in=marked_hosts).delete()
+            update_inventory_computed_fields.delay(self.inventory.id)
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()
 
-    def mark_inactive(self, save=True, recompute=True, from_inventory_import=False, skip_active_check=False):
-        '''
-        When marking groups inactive, remove all associations to related
-        groups/hosts/inventory_sources.
-        '''
-        def mark_actual():
-            super(Group, self).mark_inactive(save=save, skip_active_check=skip_active_check)
-            self.inventory_source.mark_inactive(save=save)
-            self.inventory_sources.clear()
-            self.parents.clear()
-            self.children.clear()
-            self.hosts.clear()
-        i = self.inventory
-
-        if from_inventory_import:
-            super(Group, self).mark_inactive(save=save, skip_active_check=skip_active_check)
-        elif recompute:
-            with ignore_inventory_computed_fields():
-                mark_actual()
-            i.update_computed_fields()
-        else:
-            mark_actual()
 
     def update_computed_fields(self):
         '''

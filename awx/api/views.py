@@ -1093,8 +1093,6 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
             raise PermissionDenied('Cannot delete user')
-        for own_credential in Credential.objects.filter(user=obj):
-            own_credential.mark_inactive()
         return super(UserDetail, self).destroy(request, *args, **kwargs)
 
 class UserAccessList(ResourceAccessList):
@@ -1400,7 +1398,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
-        parent.mark_inactive()
+        parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
@@ -1424,7 +1422,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
             raise PermissionDenied()
 
         if sub.parents.filter(active=True).exclude(pk=parent.pk).count() == 0:
-            sub.mark_inactive()
+            sub.delete()
         else:
             relationship.remove(sub)
 
@@ -1526,15 +1524,9 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if not getattr(obj, 'active', True):
-            raise Http404()
-        if not getattr(obj, 'is_active', True):
-            raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if hasattr(obj, 'mark_inactive'):
-            obj.mark_inactive_recursive()
+        obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupAccessList(ResourceAccessList):

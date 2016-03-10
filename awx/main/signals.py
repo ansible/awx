@@ -265,7 +265,7 @@ def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
             if inventory_source_pk:
                 try:
                     inventory_source = InventorySource.objects.get(pk=inventory_source_pk, active=True)
-                    inventory_source.mark_inactive()
+                    inventory_source.delete()
                 except InventorySource.DoesNotExist:
                     pass
             inventory_pk = getattr(instance, '_saved_inventory_pk', None)

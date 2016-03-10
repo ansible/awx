@@ -53,13 +53,13 @@ class MemObject(object):
     '''
     Common code shared between in-memory groups and hosts.
     '''
-    
+
     def __init__(self, name, source_dir):
         assert name, 'no name'
         assert source_dir, 'no source dir'
         self.name = name
         self.source_dir = source_dir
-    
+
     def load_vars(self, base_path):
         all_vars = {}
         files_found = 0
@@ -107,7 +107,7 @@ class MemGroup(MemObject):
         group_vars = os.path.join(source_dir, 'group_vars', self.name)
         self.variables = self.load_vars(group_vars)
         logger.debug('Loaded group: %s', self.name)
-        
+
     def child_group_by_name(self, name, loader):
         if name == 'all':
             return
@@ -266,7 +266,7 @@ class BaseLoader(object):
             logger.debug('Filtering group %s', name)
             return None
         if name not in self.all_group.all_groups:
-            group = MemGroup(name, self.source_dir) 
+            group = MemGroup(name, self.source_dir)
             if not child:
                 all_group.add_child_group(group)
             self.all_group.all_groups[name] = group
@@ -315,7 +315,7 @@ class IniLoader(BaseLoader):
                             for t in tokens[1:]:
                                 k,v = t.split('=', 1)
                                 host.variables[k] = v
-                        group.add_host(host) 
+                        group.add_host(host)
                 elif input_mode == 'children':
                     group.child_group_by_name(line, self)
                 elif input_mode == 'vars':
@@ -328,7 +328,7 @@ class IniLoader(BaseLoader):
 # from API documentation:
 #
 # if called with --list, inventory outputs like so:
-#        
+#
 # {
 #    "databases"   : {
 #        "hosts"   : [ "host1.example.com", "host2.example.com" ],
@@ -581,7 +581,7 @@ class Command(NoArgsCommand):
     def _get_instance_id(self, from_dict, default=''):
         '''
         Retrieve the instance ID from the given dict of host variables.
-        
+
         The instance ID variable may be specified as 'foo.bar', in which case
         the lookup will traverse into nested dicts, equivalent to:
 
@@ -765,7 +765,7 @@ class Command(NoArgsCommand):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for host in hosts_qs.filter(pk__in=del_pks):
                 host_name = host.name
-                host.mark_inactive()
+                host.delete()
                 self.logger.info('Deleted host "%s"', host_name)
         if settings.SQL_DEBUG:
             self.logger.warning('host deletions took %d queries for %d hosts',
@@ -799,7 +799,8 @@ class Command(NoArgsCommand):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for group in groups_qs.filter(pk__in=del_pks):
                 group_name = group.name
-                group.mark_inactive(recompute=False)
+                with ignore_inventory_computed_fields():
+                    group.delete()
                 self.logger.info('Group "%s" deleted', group_name)
         if settings.SQL_DEBUG:
             self.logger.warning('group deletions took %d queries for %d groups',
@@ -1297,7 +1298,7 @@ class Command(NoArgsCommand):
                 except CommandError as e:
                     self.mark_license_failure(save=True)
                     raise e
-     
+
                 if self.inventory_source.group:
                     inv_name = 'group "%s"' % (self.inventory_source.group.name)
                 else:
@@ -1336,7 +1337,7 @@ class Command(NoArgsCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
-            
+
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
         elif exc:

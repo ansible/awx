@@ -169,7 +169,7 @@ class ProjectsTest(BaseTransactionTest):
             local_path = project.local_path
             response = self.get(url, expect=200, auth=self.get_super_credentials())
             self.assertTrue(local_path not in response['project_local_paths'])
-            project.mark_inactive()
+            project.delete()
             response = self.get(url, expect=200, auth=self.get_super_credentials())
             self.assertTrue(local_path in response['project_local_paths'])
 

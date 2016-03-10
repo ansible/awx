@@ -196,7 +196,7 @@ class UsersTest(BaseTest):
         self.post(url, expect=201, data=new_user2, auth=self.get_normal_credentials())
         self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
         # Normal user cannot add users after his org is marked inactive.
-        self.organizations[0].mark_inactive()
+        self.organizations[0].delete()
         new_user3 = dict(username='blippy3')
         self.post(url, expect=403, data=new_user3, auth=self.get_normal_credentials())
 
@@ -316,7 +316,7 @@ class UsersTest(BaseTest):
                             remote_addr=remote_addr)
 
         # Token auth should be denied if the user is inactive.
-        self.normal_django_user.mark_inactive()
+        self.normal_django_user.delete()
         response = self.get(user_me_url, expect=401, auth=auth_token2,
                             remote_addr=remote_addr)
         self.assertEqual(response['detail'], 'User inactive or deleted')
@@ -422,7 +422,7 @@ class UsersTest(BaseTest):
         # Normal user can no longer see all users after the organization he
         # admins is marked inactive, nor can he see any other users that were
         # in that org, so he only sees himself.
-        self.organizations[0].mark_inactive()
+        self.organizations[0].delete()
         data3 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data3['count'], 1)
 

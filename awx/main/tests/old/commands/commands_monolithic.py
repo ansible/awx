@@ -15,7 +15,6 @@ import unittest2 as unittest
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils.timezone import now
@@ -231,126 +230,6 @@ class DumpDataTest(BaseCommandMixin, BaseTest):
         result, stdout, stderr = self.run_command('dumpdata')
         self.assertEqual(result, None)
         json.loads(stdout)
-
-class CleanupDeletedTest(BaseCommandMixin, BaseTest):
-    '''
-    Test cases for cleanup_deleted management command.
-    '''
-
-    def setUp(self):
-        self.start_redis()
-        super(CleanupDeletedTest, self).setUp()
-        self.create_test_inventories()
-
-    def tearDown(self):
-        super(CleanupDeletedTest, self).tearDown()
-        self.stop_redis()
-
-    def get_model_counts(self):
-        def get_models(m):
-            if not m._meta.abstract:
-                yield m
-            for sub in m.__subclasses__():
-                for subm in get_models(sub):
-                    yield subm
-        counts = {}
-        for model in get_models(PrimordialModel):
-            active = model.objects.filter(active=True).count()
-            inactive = model.objects.filter(active=False).count()
-            counts[model] = (active, inactive)
-        return counts
-
-    def test_cleanup_our_models(self):
-        # Test with nothing to be deleted.
-        counts_before = self.get_model_counts()
-        self.assertFalse(sum(x[1] for x in counts_before.values()))
-        result, stdout, stderr = self.run_command('cleanup_deleted')
-        self.assertEqual(result, None)
-        counts_after = self.get_model_counts()
-        self.assertEqual(counts_before, counts_after)
-        # "Delete" some hosts.
-        for host in Host.objects.all():
-            host.mark_inactive()
-        # With no parameters, "days" defaults to 90, which won't cleanup any of
-        # the hosts we just removed.
-        counts_before = self.get_model_counts()
-        self.assertTrue(sum(x[1] for x in counts_before.values()))
-        result, stdout, stderr = self.run_command('cleanup_deleted')
-        self.assertEqual(result, None)
-        counts_after = self.get_model_counts()
-        self.assertEqual(counts_before, counts_after)
-        # Even with days=1, the hosts will remain.
-        counts_before = self.get_model_counts()
-        self.assertTrue(sum(x[1] for x in counts_before.values()))
-        result, stdout, stderr = self.run_command('cleanup_deleted', days=1)
-        self.assertEqual(result, None)
-        counts_after = self.get_model_counts()
-        self.assertEqual(counts_before, counts_after)
-        # With days=0, the hosts will be deleted.
-        counts_before = self.get_model_counts()
-        self.assertTrue(sum(x[1] for x in counts_before.values()))
-        result, stdout, stderr = self.run_command('cleanup_deleted', days=0)
-        self.assertEqual(result, None)
-        counts_after = self.get_model_counts()
-        self.assertNotEqual(counts_before, counts_after)
-        self.assertFalse(sum(x[1] for x in counts_after.values()))
-        return # Don't test how long it takes (for now).
-
-        # Create lots of hosts already marked as deleted.
-        t = time.time()
-        dtnow = now()
-        for x in xrange(1000):
-            hostname = "_deleted_%s_host-%d" % (dtnow.isoformat(), x)
-            host = self.inventories[0].hosts.create(name=hostname, active=False)
-        create_elapsed = time.time() - t
-
-        # Time how long it takes to cleanup deleted items, should be no more
-        # then the time taken to create them.
-        counts_before = self.get_model_counts()
-        self.assertTrue(sum(x[1] for x in counts_before.values()))
-        t = time.time()
-        result, stdout, stderr = self.run_command('cleanup_deleted', days=0)
-        cleanup_elapsed = time.time() - t
-        self.assertEqual(result, None)
-        counts_after = self.get_model_counts()
-        self.assertNotEqual(counts_before, counts_after)
-        self.assertFalse(sum(x[1] for x in counts_after.values()))
-        self.assertTrue(cleanup_elapsed < create_elapsed,
-                        'create took %0.3fs, cleanup took %0.3fs, expected < %0.3fs' % (create_elapsed, cleanup_elapsed, create_elapsed))
-
-    def get_user_counts(self):
-        active = User.objects.filter(is_active=True).count()
-        inactive = User.objects.filter(is_active=False).count()
-        return active, inactive
-
-    def test_cleanup_user_model(self):
-        # Test with nothing to be deleted.
-        counts_before = self.get_user_counts()
-        self.assertFalse(counts_before[1])
-        result, stdout, stderr = self.run_command('cleanup_deleted')
-        self.assertEqual(result, None)
-        counts_after = self.get_user_counts()
-        self.assertEqual(counts_before, counts_after)
-        # "Delete some users".
-        for user in User.objects.all():
-            user.mark_inactive()
-            self.assertTrue(len(user.username) <= 30,
-                            'len(%r) == %d' % (user.username, len(user.username)))
-        # With days=1, no users will be deleted.
-        counts_before = self.get_user_counts()
-        self.assertTrue(counts_before[1])
-        result, stdout, stderr = self.run_command('cleanup_deleted', days=1)
-        self.assertEqual(result, None)
-        counts_after = self.get_user_counts()
-        self.assertEqual(counts_before, counts_after)
-        # With days=0, inactive users will be deleted.
-        counts_before = self.get_user_counts()
-        self.assertTrue(counts_before[1])
-        result, stdout, stderr = self.run_command('cleanup_deleted', days=0)
-        self.assertEqual(result, None)
-        counts_after = self.get_user_counts()
-        self.assertNotEqual(counts_before, counts_after)
-        self.assertFalse(counts_after[1])
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,

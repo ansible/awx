@@ -423,7 +423,7 @@ class InventoryTest(BaseTest):
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
                                      args=(Group.objects.get(name='nondel').pk,))
-        del_group.mark_inactive()
+        del_group.delete()
         nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
         self.post(del_children_url, data=nondel_detail, expect=403, auth=self.get_normal_credentials())
 
@@ -944,13 +944,10 @@ class InventoryTest(BaseTest):
         # Mark group C inactive. Its child groups and hosts should now also be
         # attached to group A. Group D hosts should be unchanged.  Group C
         # should also no longer have any group or host relationships.
-        g_c.mark_inactive()
+        g_c.delete()
         self.assertTrue(g_d in g_a.children.all())
         self.assertTrue(h_c in g_a.hosts.all())
         self.assertFalse(h_d in g_a.hosts.all())
-        self.assertFalse(g_c.parents.all())
-        self.assertFalse(g_c.children.all())
-        self.assertFalse(g_c.hosts.all())
 
     def test_safe_delete_recursion(self):
         # First hierarchy
@@ -989,11 +986,9 @@ class InventoryTest(BaseTest):
         self.assertTrue(other_sub_group in sub_group.children.all())
 
         # Now recursively remove its parent and the reference from subgroup should remain
-        other_top_group.mark_inactive_recursive()
-        other_top_group = Group.objects.get(pk=other_top_group.pk)
+        other_top_group.delete_recursive()
         self.assertTrue(s2 in sub_group.all_hosts.all())
         self.assertTrue(other_sub_group in sub_group.children.all())
-        self.assertFalse(other_top_group.active)
 
     def test_group_parents_and_children(self):
         # Test for various levels of group parent/child relations, with hosts,
@@ -1173,7 +1168,7 @@ class InventoryTest(BaseTest):
         # Delete recently added hosts and verify the count drops.
         hostnames4 = list('defg')
         for host in Host.objects.filter(name__in=hostnames4):
-            host.mark_inactive()
+            host.delete()
         with self.current_user(self.super_django_user):
             response = self.get(url)
         for n, d in enumerate(reversed(response['hosts'])):

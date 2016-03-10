@@ -88,7 +88,8 @@ class InventoryScriptTest(BaseScriptTest):
                                               inventory=inventory,
                                               variables=variables)
                 if x in (3, 7):
-                    host.mark_inactive()
+                    host.delete()
+                    continue
                 hosts.append(host)
 
             # add localhost just to make sure it's thrown into all (Ansible github bug)
@@ -106,7 +107,8 @@ class InventoryScriptTest(BaseScriptTest):
                                                 inventory=inventory,
                                                 variables=variables)
                 if x == 2:
-                    group.mark_inactive()
+                    group.delete()
+                    continue
                 groups.append(group)
                 group.hosts.add(hosts[x])
                 group.hosts.add(hosts[x + 5])
@@ -320,9 +322,9 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_with_deleted_inventory(self):
         inventory = self.inventories[0]
-        inventory.mark_inactive()
-        self.assertFalse(inventory.active)
-        os.environ['INVENTORY_ID'] = str(inventory.pk)
+        pk = inventory.pk
+        inventory.delete()
+        os.environ['INVENTORY_ID'] = str(pk)
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
         self.assertEqual(json.loads(stdout), {'failed': True})
