@@ -230,9 +230,14 @@ export default
                         url += (url.match(/\/$/)) ? '?' : '&';
                         url += scope[iterator + 'SearchParams'];
                         url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
+                        scope[iterator + '_active_search'] = true;
                         RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
                     };
 
+
+                    scope.$on("refreshList", function(e, iterator) {
+                        scope.search(iterator);
+                    });
 
                     scope.sort = function (iterator, fld) {
                         var sort_order, icon, direction, set;

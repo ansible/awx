@@ -158,69 +158,69 @@ export default
                     }
                 },
 
-                permissions: {
-                    type: 'collection',
-                    title: 'Permissions',
-                    iterator: 'permission',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('permissions')",
-                            label: 'Add',
-                            awToolTip: 'Add a permission for this user',
-                            ngShow: 'PermissionAddAllowed',
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name',
-                            ngClick: "edit('permissions', permission.id, permission.name)"
-                        },
-                        inventory: {
-                            label: 'Inventory',
-                            sourceModel: 'inventory',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.inventory.name'
-                        },
-                        project: {
-                            label: 'Project',
-                            sourceModel: 'project',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.project.name'
-                        },
-                        permission_type: {
-                            label: 'Permission',
-                            ngBind: 'getPermissionText()',
-                            searchType: 'select'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('permissions', permission.id, permission.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the permission',
-                            'class': 'btn btn-default'
-                        },
-
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('permissions', permission.id, permission.name, 'permission')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the permission',
-                            ngShow: 'PermissionAddAllowed'
-                        }
-                    }
-
-                },
+                // permissions: {
+                //     type: 'collection',
+                //     title: 'Permissions',
+                //     iterator: 'permission',
+                //     open: false,
+                //     index: false,
+                //
+                //     actions: {
+                //         add: {
+                //             ngClick: "add('permissions')",
+                //             label: 'Add',
+                //             awToolTip: 'Add a permission for this user',
+                //             ngShow: 'PermissionAddAllowed',
+                //             actionClass: 'btn List-buttonSubmit',
+                //             buttonContent: '&#43; ADD'
+                //         }
+                //     },
+                //
+                //     fields: {
+                //         name: {
+                //             key: true,
+                //             label: 'Name',
+                //             ngClick: "edit('permissions', permission.id, permission.name)"
+                //         },
+                //         inventory: {
+                //             label: 'Inventory',
+                //             sourceModel: 'inventory',
+                //             sourceField: 'name',
+                //             ngBind: 'permission.summary_fields.inventory.name'
+                //         },
+                //         project: {
+                //             label: 'Project',
+                //             sourceModel: 'project',
+                //             sourceField: 'name',
+                //             ngBind: 'permission.summary_fields.project.name'
+                //         },
+                //         permission_type: {
+                //             label: 'Permission',
+                //             ngBind: 'getPermissionText()',
+                //             searchType: 'select'
+                //         }
+                //     },
+                //
+                //     fieldActions: {
+                //         edit: {
+                //             label: 'Edit',
+                //             ngClick: "edit('permissions', permission.id, permission.name)",
+                //             icon: 'icon-edit',
+                //             awToolTip: 'Edit the permission',
+                //             'class': 'btn btn-default'
+                //         },
+                //
+                //         "delete": {
+                //             label: 'Delete',
+                //             ngClick: "delete('permissions', permission.id, permission.name, 'permission')",
+                //             icon: 'icon-trash',
+                //             "class": 'btn-danger',
+                //             awToolTip: 'Delete the permission',
+                //             ngShow: 'PermissionAddAllowed'
+                //         }
+                //     }
+                //
+                // },
 
                 admin_of_organizations: { // Assumes a plural name (e.g. things)
                     type: 'collection',

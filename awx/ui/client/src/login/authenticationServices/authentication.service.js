@@ -85,7 +85,9 @@ export default
                 }
                 Store('sessionTime', x);
 
-                $rootScope.lastUser = $cookieStore.get('current_user').id;
+                if ($cookieStore.get('current_user')) {
+                    $rootScope.lastUser = $cookieStore.get('current_user').id;
+                }
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('token');

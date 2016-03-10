@@ -614,7 +614,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
             var element = params.element,
             options = params.opts,
-            multiple = (params.multiple!==undefined) ? params.multiple : true;
+            multiple = (params.multiple!==undefined) ? params.multiple : true,
+            placeholder = params.placeholder;
 
             $.fn.select2.amd.require([
                 'select2/utils',
@@ -632,6 +633,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                            }, Dropdown);
 
                 $(element).select2({
+                    placeholder: placeholder,
                     multiple: multiple,
                     containerCssClass: 'Form-dropDown',
                     width: '100%',

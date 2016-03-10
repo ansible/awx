@@ -30,7 +30,7 @@ export default
                 item: '=item'
             },
             require: '^multiSelectList',
-            template: '<input type="checkbox" data-multi-select-list-item ng-model="isSelected">',
+            template: '<input type="checkbox" data-multi-select-list-item ng-model="isSelected" ng-change="userInteractionSelect()">',
             link: function(scope, element, attrs, multiSelectList) {
 
                 scope.isSelected = false;
@@ -51,6 +51,10 @@ export default
                 scope.$on('$destroy', function() {
                     multiSelectList.deregisterItem(scope.decoratedItem);
                 });
+
+                scope.userInteractionSelect = function() {
+                    scope.$emit("selectedOrDeselected", scope.decoratedItem);
+                }
 
             }
         };

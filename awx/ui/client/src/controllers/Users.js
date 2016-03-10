@@ -240,37 +240,38 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log,
 
     $scope.$emit("RefreshUsersList");
 
-    // return a promise from the options request with the permission type choices (including adhoc) as a param
-    var permissionsChoice = fieldChoices({
-        scope: $scope,
-        url: 'api/v1/' + base + '/' + id + '/permissions/',
-        field: 'permission_type'
-    });
-
-    // manipulate the choices from the options request to be set on
-    // scope and be usable by the list form
-    permissionsChoice.then(function (choices) {
-        choices =
-            fieldLabels({
-                choices: choices
-            });
-        _.map(choices, function(n, key) {
-            $scope.permission_label[key] = n;
-        });
-    });
+    // // return a promise from the options request with the permission type choices (including adhoc) as a param
+    // var permissionsChoice = fieldChoices({
+    //     scope: $scope,
+    //     url: 'api/v1/' + base + '/' + id + '/permissions/',
+    //     field: 'permission_type'
+    // });
+    //
+    // // manipulate the choices from the options request to be set on
+    // // scope and be usable by the list form
+    // permissionsChoice.then(function (choices) {
+    //     choices =
+    //         fieldLabels({
+    //             choices: choices
+    //         });
+    //     _.map(choices, function(n, key) {
+    //         $scope.permission_label[key] = n;
+    //     });
+    // });
 
     // manipulate the choices from the options request to be usable
     // by the search option for permission_type, you can't inject the
     // list until this is done!
-    permissionsChoice.then(function (choices) {
-        form.related.permissions.fields.permission_type.searchOptions =
-            permissionsSearchSelect({
-                choices: choices
-            });
-        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-        generator.reset();
-        $scope.$emit("loadForm");
-    });
+    // permissionsChoice.then(function (choices) {
+    //     form.related.permissions.fields.permission_type.searchOptions =
+    //         permissionsSearchSelect({
+    //             choices: choices
+    //         });
+    // });
+
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+    generator.reset();
+    $scope.$emit("loadForm");
 
     if ($scope.removeFormReady) {
         $scope.removeFormReady();
