@@ -16,6 +16,7 @@ DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 VENV_BASE ?= /tower_devel/venv
+SCL_PREFIX ?=
 
 CLIENT_TEST_DIR ?= build_test
 
@@ -109,6 +110,7 @@ MOCK_CFG ?=
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+
 # Provide a fallback value for RPM_DIST
 ifeq ($(RPM_DIST),)
     RPM_DIST = .el6
@@ -118,7 +120,17 @@ RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
 ifeq ($(RPM_ARCH),)
     RPM_ARCH = $(shell uname -m)
 endif
-RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
+
+# Software collections settings if on EL6
+ifeq ($(RPM_DIST),.el6)
+    SCL_PREFIX = python27-
+    SCL_DEFINES = --define 'scl python27'
+else
+    SCL_PREFIX =
+    SCL_DEFINES =
+endif
+
+RPM_NVR = $(SCL_PREFIX)$(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
 # TAR Bundle build parameters
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
@@ -701,7 +713,7 @@ rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
 
 mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
@@ -711,7 +723,7 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	@echo "#############################################"
@@ -843,9 +855,11 @@ packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx: pack
 # TODO - figure out how to build the front-end and python requirements with
 # 'build'
 build:
+	export SCL_PREFIX
 	$(PYTHON) setup.py build
 
 install:
+	export SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
 # Docker Compose Development environment
