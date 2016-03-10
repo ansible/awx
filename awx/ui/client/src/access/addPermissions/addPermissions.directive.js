@@ -18,6 +18,8 @@ export default
                 link: function(scope, element, attrs, ctrl) {
                     scope.toggleFormTabs('users');
 
+                    $("body").addClass("is-modalOpen");
+
                     $("body").append(element);
 
                     Wait('start');
@@ -35,12 +37,17 @@ export default
                     });
 
                     scope.closeModal = function() {
+                        $("body").removeClass("is-modalOpen");
                         $('#add-permissions-modal').on('hidden.bs.modal',
                             function () {
                                 $('.AddPermissions').remove();
                             });
                         $('#add-permissions-modal').modal('hide');
                     };
+
+                    scope.$on('closePermissionsModal', function() {
+                        scope.closeModal();
+                    });
 
                     Wait('stop');
 
