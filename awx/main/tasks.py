@@ -201,6 +201,11 @@ def handle_work_success(self, result, task_actual):
         instance_name = instance.module_name
         notifiers = [] # TODO: Ad-hoc commands need to notify someone
         friendly_name = "AdHoc Command"
+    elif task_actual['type'] == 'system_job':
+        instance = SystemJob.objects.get(id=task_actual['id'])
+        instance_name = instance.system_job_template.name
+        notifiers = instance.system_job_template.notifiers
+        friendly_name = "System Job"
     else:
         return
     notification_body = instance.notification_data()
@@ -244,6 +249,11 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance_name = instance.module_name
                 notifiers = []
                 friendly_name = "AdHoc Command"
+            elif task_actual['type'] == 'system_job':
+                instance = SystemJob.objects.get(id=task_actual['id'])
+                instance_name = instance.system_job_template.name
+                notifiers = instance.system_job_template.notifiers
+                friendly_name = "System Job"
             else:
                 # Unknown task type
                 break

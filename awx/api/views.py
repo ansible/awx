@@ -2223,6 +2223,27 @@ class SystemJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'system_job_template'
 
+class SystemJobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_any'
+
+class SystemJobTemplateNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_error'
+
+class SystemJobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_success'
+
 class JobList(ListCreateAPIView):
 
     model = Job
@@ -2903,6 +2924,12 @@ class SystemJobCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class SystemJobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = SystemJob
+    relationship = 'notifications'
 
 class UnifiedJobTemplateList(ListAPIView):
 

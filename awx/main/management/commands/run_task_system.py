@@ -108,6 +108,8 @@ class SimpleDAG(object):
             return "inventory_update"
         elif type(obj) == ProjectUpdate:
             return "project_update"
+        elif type(obj) == SystemJob:
+            return "system_job"
         return "unknown"
 
     def get_dependencies(self, obj):

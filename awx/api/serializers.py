@@ -1852,6 +1852,10 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
             jobs = reverse('api:system_job_template_jobs_list', args=(obj.pk,)),
             schedules = reverse('api:system_job_template_schedules_list', args=(obj.pk,)),
             launch = reverse('api:system_job_template_launch', args=(obj.pk,)),
+            notifiers_any = reverse('api:system_job_template_notifiers_any_list', args=(obj.pk,)),
+            notifiers_success = reverse('api:system_job_template_notifiers_success_list', args=(obj.pk,)),
+            notifiers_error = reverse('api:system_job_template_notifiers_error_list', args=(obj.pk,)),
+
         ))
         return res
 
@@ -1866,6 +1870,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
         if obj.system_job_template and obj.system_job_template.active:
             res['system_job_template'] = reverse('api:system_job_template_detail',
                                                  args=(obj.system_job_template.pk,))
+            res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:system_job_cancel', args=(obj.pk,))
         return res
