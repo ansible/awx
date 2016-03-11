@@ -564,7 +564,7 @@ class CredentialAccess(BaseAccess):
             return False
 
         if user is not None:
-            return user.resource.accessible_by(self.user, {'write': True})
+            return user.accessible_by(self.user, {'write': True})
         if team is not None:
             return team.accessible_by(self.user, {'write':True})
 

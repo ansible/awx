@@ -1,7 +1,6 @@
 import mock # noqa
 import pytest
 
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 
@@ -47,7 +46,7 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id in role_hash
     assert organization.admin_role.id in role_hash
     assert organization.member_role.id in role_hash
-    assert this_user.resource.admin_role.id in role_hash
+    assert this_user.admin_role.id in role_hash
     assert custom_role.id in role_hash
 
     assert inventory.admin_role.id not in role_hash
@@ -396,7 +395,6 @@ def test_role_children(get, team, admin, role):
 @pytest.mark.django_db
 def test_resource_access_list(get, team, admin, role):
     team.member_role.members.add(admin)
-    content_type_id = ContentType.objects.get_for_model(team).pk
     url = reverse('api:team_access_list', args=(team.id,))
     res = get(url, admin)
     assert res.status_code == 200
