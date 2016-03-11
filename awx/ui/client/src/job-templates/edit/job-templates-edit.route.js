@@ -18,5 +18,8 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }]
+    },
+    params: {
+        copied: null
     }
 };

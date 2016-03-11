@@ -303,17 +303,7 @@
 
 
             function saveCompleted() {
-                setTimeout(function() {
-                  $scope.$apply(function() {
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'job_templates') {
-                        ReturnToCaller();
-                    }
-                    else {
-                        ReturnToCaller(1);
-                    }
-                  });
-                }, 500);
+                $state.go('jobTemplates', null, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {

@@ -9,7 +9,7 @@ export default
         '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
         'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
         'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
-        'LookUpInit', 'PlaybookRun', 'Wait', 'CreateDialog' , '$compile',
+        'LookUpInit', 'PlaybookRun', 'Wait', '$compile',
         '$state',
 
         function(
@@ -17,7 +17,7 @@ export default
             $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
             SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
             GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun,
-            Wait, CreateDialog, $compile, $state
+            Wait, $compile, $state
         ) {
 
             ClearScope();
@@ -92,142 +92,6 @@ export default
                     action: action,
                     actionText: 'DELETE'
                 });
-            };
-
-            $scope.copyJobTemplate = function(id, name){
-                var  element,
-                      buttons = [{
-                        "label": "Cancel",
-                        "onClick": function() {
-                            $(this).dialog('close');
-                        },
-                        "icon": "fa-times",
-                        "class": "btn btn-default",
-                        "id": "copy-close-button"
-                    },{
-                        "label": "Copy",
-                        "onClick": function() {
-                            copyAction();
-                            // setTimeout(function(){
-                            //     scope.$apply(function(){
-                            //         if(mode==='survey-taker'){
-                            //             scope.$emit('SurveyTakerCompleted');
-                            //         } else{
-                            //             scope.saveSurvey();
-                            //         }
-                            //     });
-                            // });
-                        },
-                        "icon":  "fa-copy",
-                        "class": "btn btn-primary",
-                        "id": "job-copy-button"
-                    }],
-                    copyAction = function () {
-                        // retrieve the copy of the job template object from the api, then overwrite the name and throw away the id
-                        Wait('start');
-                        var url = defaultUrl + id + '/';
-                        Rest.setUrl(url);
-                        Rest.get()
-                            .success(function (data) {
-                                data.name = $scope.new_copy_name;
-                                delete data.id;
-                                $scope.$emit('GoToCopy', data);
-                            })
-                            .error(function (data) {
-                                Wait('stop');
-                                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                            });
-                    };
-
-
-                CreateDialog({
-                    id: 'copy-job-modal',
-                    title: "Copy",
-                    scope: $scope,
-                    buttons: buttons,
-                    width: 500,
-                    height: 300,
-                    minWidth: 200,
-                    callback: 'CopyDialogReady'
-                });
-
-                $('#job_name').text(name);
-                $('#copy-job-modal').show();
-
-
-                if ($scope.removeCopyDialogReady) {
-                    $scope.removeCopyDialogReady();
-                }
-                $scope.removeCopyDialogReady = $scope.$on('CopyDialogReady', function() {
-                    //clear any old remaining text
-                    $scope.new_copy_name = "" ;
-                    $scope.copy_form.$setPristine();
-                    $('#copy-job-modal').dialog('open');
-                    $('#job-copy-button').attr('ng-disabled', "!copy_form.$valid");
-                    element = angular.element(document.getElementById('job-copy-button'));
-                    $compile(element)($scope);
-
-                });
-
-                if ($scope.removeGoToCopy) {
-                    $scope.removeGoToCopy();
-                }
-                $scope.removeGoToCopy = $scope.$on('GoToCopy', function(e, data) {
-                    var url = defaultUrl,
-                    old_survey_url = (data.related.survey_spec) ? data.related.survey_spec : "" ;
-                    Rest.setUrl(url);
-                    Rest.post(data)
-                        .success(function (data) {
-                            if(data.survey_enabled===true){
-                                $scope.$emit("CopySurvey", data, old_survey_url);
-                            }
-                            else {
-                                $('#copy-job-modal').dialog('close');
-                                Wait('stop');
-                                $location.path($location.path() + '/' + data.id);
-                            }
-
-                        })
-                        .error(function (data) {
-                            Wait('stop');
-                            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                        });
-                });
-
-                if ($scope.removeCopySurvey) {
-                    $scope.removeCopySurvey();
-                }
-                $scope.removeCopySurvey = $scope.$on('CopySurvey', function(e, new_data, old_url) {
-                    // var url = data.related.survey_spec;
-                    Rest.setUrl(old_url);
-                    Rest.get()
-                        .success(function (survey_data) {
-
-                            Rest.setUrl(new_data.related.survey_spec);
-                            Rest.post(survey_data)
-                            .success(function () {
-                                $('#copy-job-modal').dialog('close');
-                                Wait('stop');
-                                $location.path($location.path() + '/' + new_data.id);
-                            })
-                            .error(function (data) {
-                                Wait('stop');
-                                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Call to ' + new_data.related.survey_spec + ' failed. DELETE returned status: ' + status });
-                            });
-
-
-                        })
-                        .error(function (data) {
-                            Wait('stop');
-                            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + old_url + ' failed. DELETE returned status: ' + status });
-                        });
-
-                });
-
             };
 
             $scope.submitJob = function (id) {

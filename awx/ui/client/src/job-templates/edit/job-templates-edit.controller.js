@@ -389,17 +389,7 @@ export default
             });
 
             function saveCompleted() {
-                setTimeout(function() {
-                  $scope.$apply(function() {
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'job_templates') {
-                        ReturnToCaller();
-                    }
-                    else {
-                        ReturnToCaller(1);
-                    }
-                  });
-                }, 500);
+                $state.go('jobTemplates', null, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -505,7 +495,22 @@ export default
             };
 
             $scope.formCancel = function () {
-                $state.transitionTo('jobTemplates');
+                // the form was just copied in the previous state, it's safe to destroy on cancel
+                if ($state.params.copied){
+                    var defaultUrl = GetBasePath('job_templates') + $state.params.template_id;
+                    Rest.setUrl(defaultUrl);
+                    Rest.destroy()
+                        .success(function(res){
+                            $state.go('jobTemplates', null, {reload: true, notify:true});
+                        })
+                        .error(function(res, status){
+                            ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+                            msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
+                        });                
+                }
+                else {
+                    $state.go('jobTemplates');
+                }
             };
 
             // Related set: Add button
