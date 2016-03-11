@@ -41,6 +41,8 @@ from awx.main.access import * # noqa
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
+User.add_to_class('accessible_by', user_accessible_by)
+User.add_to_class('accessible_objects', user_accessible_objects)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
