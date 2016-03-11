@@ -16,7 +16,12 @@ def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
     Host = apps.get_model('main', "Host")
 
-    # TODO: Check to see if mongo connection works and mongo is on.
+    try:
+        n = FactVersion.objects.all().count()
+    except ConnectionError:
+        # TODO: Let the user know about the error.  Likely this is
+        # a new install and we just don't need to do this
+        return (0, 0)
 
     migrated_count = 0
     not_migrated_count = 0
