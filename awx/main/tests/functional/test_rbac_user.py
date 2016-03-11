@@ -36,9 +36,10 @@ def test_user_queryset(user):
     assert qs.count() == 1
 
 @pytest.mark.django_db
-def test_user_accessible_by(user, organization):
+def test_user_accessible_objects(user, organization):
     admin = user('admin', False)
     u = user('john', False)
+    assert User.accessible_objects(admin, {'read':True}).count() == 1
 
     organization.member_role.members.add(u)
     organization.admin_role.members.add(admin)
@@ -46,3 +47,30 @@ def test_user_accessible_by(user, organization):
 
     organization.member_role.members.remove(u)
     assert User.accessible_objects(admin, {'read':True}).count() == 1
+
+@pytest.mark.django_db
+def test_org_user_admin(user, organization):
+    admin = user('orgadmin')
+    member = user('orgmember')
+
+    organization.member_role.members.add(member)
+    assert not member.accessible_by(admin, {'write':True})
+
+    organization.admin_role.members.add(admin)
+    assert member.accessible_by(admin, {'write':True})
+
+    organization.admin_role.members.remove(admin)
+    assert not member.accessible_by(admin, {'write':True})
+
+@pytest.mark.django_db
+def test_org_user_removed(user, organization):
+    admin = user('orgadmin')
+    member = user('orgmember')
+
+    organization.admin_role.members.add(admin)
+    organization.member_role.members.add(member)
+
+    assert member.accessible_by(admin, {'write':True})
+
+    organization.member_role.members.remove(member)
+    assert not member.accessible_by(admin, {'write':True})

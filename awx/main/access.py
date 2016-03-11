@@ -24,7 +24,8 @@ from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
 
 __all__ = ['get_user_queryset', 'check_user_access',
-           'user_accessible_objects', 'user_accessible_by']
+           'user_accessible_objects', 'user_accessible_by',
+           'user_admin_role',]
 
 PERMISSION_TYPES = [
     PERM_INVENTORY_ADMIN,
@@ -74,6 +75,10 @@ def user_or_team(data):
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
     access_classes.append(access_class)
+
+@property
+def user_admin_role(self):
+    return Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=self.id)
 
 def user_accessible_objects(user, permissions):
     content_type = ContentType.objects.get_for_model(User)
