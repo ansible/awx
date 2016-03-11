@@ -130,13 +130,22 @@ def sync_superuser_status_to_rbac(sender, instance, **kwargs):
     else:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
-def create_user_resource(sender, **kwargs):
+def create_user_role(sender, **kwargs):
         instance = kwargs['instance']
         try:
-            UserResource.objects.get(user=instance)
-        except UserResource.DoesNotExist:
-            ur = UserResource.objects.create(user=instance)
-            ur.admin_role.members.add(instance)
+            Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=instance.id)
+        except Role.DoesNotExist:
+            role = Role.objects.create(
+                singleton_name = '%s-admin_role' % instance.username,
+                content_object = instance,
+            )
+            role.members.add(instance)
+            RolePermission.objects.create(
+                role = role,
+                resource = instance,
+                create=1, read=1, write=1, delete=1, update=1,
+                execute=1, scm_update=1, use=1,
+            )
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -158,7 +167,7 @@ post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
-post_save.connect(create_user_resource, sender=User)
+post_save.connect(create_user_role, sender=User)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.

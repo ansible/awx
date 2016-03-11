@@ -181,63 +181,49 @@ class ImplicitRoleField(models.ForeignKey):
     def bind_m2m_changed(self, _self, _role_class, cls):
         if not self.parent_role:
             return
+
         field_names = self.parent_role
         if type(field_names) is not list:
             field_names = [field_names]
 
-        found_m2m_field = False
         for field_name in field_names:
             if field_name.startswith('singleton:'):
                 continue
 
-            first_field_name = field_name.split('.')[0]
-            field = getattr(cls, first_field_name)
+            field_name, sep, field_attr = field_name.partition('.')
+            field = getattr(cls, field_name)
 
             if type(field) is ReverseManyRelatedObjectsDescriptor or \
                type(field) is ManyRelatedObjectsDescriptor:
-                if found_m2m_field:
-                    # This limitation is due to a lack of understanding on my part, the
-                    # trouble being that I can't seem to get m2m_changed to call anything that
-                    # encapsulates what field we're working with. So the workaround that I've
-                    # settled on for the time being is to simply iterate over the fields in the
-                    # m2m_update and look for the m2m map and update accordingly. This solution
-                    # is lame, I'd love for someone to show me the way to get the necessary
-                    # state down to the m2m_update callback. - anoek 2016-02-10
-                    raise Exception('Multiple ManyToMany fields not allowed in parent_role list')
-                if len(field_name.split('.')) != 2:
+
+                if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
 
-                found_m2m_field = True
-                self.m2m_field_name = first_field_name
-                self.m2m_field_attr = field_name.split('.',1)[1]
-
-                if type(field) is ReverseManyRelatedObjectsDescriptor:
-                    m2m_changed.connect(self.m2m_update, field.through)
+                reverse = type(field) is ReverseManyRelatedObjectsDescriptor
+                if reverse:
+                    m2m_changed.connect(self.m2m_update(field_attr, reverse), field.through)
                 else:
-                    m2m_changed.connect(self.m2m_update_related, field.related.through)
+                    m2m_changed.connect(self.m2m_update(field_attr, reverse), field.related.through)
 
+    def m2m_update(self, field_attr, _reverse):
+        def _m2m_update(self, sender, instance, action, reverse, model, pk_set, **kwargs):
+            if action == 'post_add' or action == 'pre_remove':
+                if _reverse:
+                    for pk in pk_set:
+                        obj = model.objects.get(pk=pk)
+                        if action == 'post_add':
+                            getattr(instance, self.name).children.add(getattr(obj, field_attr))
+                        if action == 'pre_remove':
+                            getattr(instance, self.name).children.remove(getattr(obj, field_attr))
 
-    def m2m_update_related(self, **kwargs):
-        kwargs['reverse'] = not kwargs['reverse']
-        self.m2m_update(**kwargs)
-
-    def m2m_update(self, sender, instance, action, reverse, model, pk_set, **kwargs):
-        if action == 'post_add' or action == 'pre_remove':
-            if reverse:
-                for pk in pk_set:
-                    obj = model.objects.get(pk=pk)
-                    if action == 'post_add':
-                        getattr(instance, self.name).children.add(getattr(obj, self.m2m_field_attr))
-                    if action == 'pre_remove':
-                        getattr(instance, self.name).children.remove(getattr(obj, self.m2m_field_attr))
-
-            else:
-                for pk in pk_set:
-                    obj = model.objects.get(pk=pk)
-                    if action == 'post_add':
-                        getattr(instance, self.name).parents.add(getattr(obj, self.m2m_field_attr))
-                    if action == 'pre_remove':
-                        getattr(instance, self.name).parents.remove(getattr(obj, self.m2m_field_attr))
+                else:
+                    for pk in pk_set:
+                        obj = model.objects.get(pk=pk)
+                        if action == 'post_add':
+                            getattr(instance, self.name).parents.add(getattr(obj, field_attr))
+                        if action == 'pre_remove':
+                            getattr(instance, self.name).parents.remove(getattr(obj, field_attr))
+        return _m2m_update
 
 
     def _post_init(self, instance, *args, **kwargs):

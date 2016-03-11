@@ -9,6 +9,8 @@ import logging
 # Django
 from django.db.models import F, Q
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.db.models.aggregates import Max
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -16,11 +18,13 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import ALL_PERMISSIONS
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
 
-__all__ = ['get_user_queryset', 'check_user_access']
+__all__ = ['get_user_queryset', 'check_user_access',
+           'user_accessible_objects', 'user_accessible_by']
 
 PERMISSION_TYPES = [
     PERM_INVENTORY_ADMIN,
@@ -70,6 +74,26 @@ def user_or_team(data):
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
     access_classes.append(access_class)
+
+def user_accessible_objects(user, permissions):
+    content_type = ContentType.objects.get_for_model(User)
+    qs = RolePermission.objects.filter(
+        content_type=content_type,
+        role__ancestors__members=user
+    )
+    for perm in permissions:
+        qs = qs.annotate(**{'max_' + perm: Max(perm)})
+        qs = qs.filter(**{'max_' + perm: int(permissions[perm])})
+    return qs
+
+def user_accessible_by(instance, user, permissions):
+    perms = get_user_permissions_on_resource(instance, user)
+    if perms is None:
+        return False
+    for k in permissions:
+        if k not in perms or perms[k] < permissions[k]:
+            return False
+    return True
 
 def get_user_queryset(user, model_class):
     '''
