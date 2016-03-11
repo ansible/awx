@@ -596,6 +596,15 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    # @paginated
+    # def get(self, *args, **kwargs):
+    #     # self.paginated_params = {'limit': limit, 'offset': offset, 'ordering': ordering}
+    #     limit = kwargs.pop('limit')
+    #     offset = kwargs.pop('offset')
+    #     ordering = kwargs.pop('ordering')
+    #         # qs[offset:offset + limit]
+    #     return (super(OrganizationList, self).get(*args, **kwargs), 5, None)
+
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
 
@@ -613,6 +622,75 @@ class OrganizationList(ListCreateAPIView):
 
         # Okay, create the organization as usual.
         return super(OrganizationList, self).create(request, *args, **kwargs)
+
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationList, self).get_serializer_context(*args, **kwargs)
+
+        if self.request is None:
+            return full_context
+
+        db_results = {}
+        org_qs = self.request.user.get_queryset(self.model)
+        org_id_list = org_qs.values('id')
+        if len(org_id_list) == 0:
+            return full_context
+
+        # Produce counts of Foreign Key relationships
+        db_results['inventories'] = self.request.user.get_queryset(Inventory)\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        db_results['teams'] = self.request.user.get_queryset(Team)\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        JT_reference = 'inventory__organization'
+        db_JT_results = self.request.user.get_queryset(JobTemplate)\
+            .values(JT_reference).annotate(Count(JT_reference)).\
+            order_by(JT_reference)
+
+        # Produce counts of m2m relationships
+        project_qs = self.request.user.get_queryset(Project)
+        db_results['projects'] = Organization.projects.through.objects\
+            .filter(
+                project_id__in=project_qs.values_list('pk', flat=True),
+                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        # TODO: When RBAC branch merges, change these to role relation
+        user_qs = self.request.user.get_queryset(User)
+        db_results['users'] = Organization.users.through.objects\
+            .filter(
+                user_id__in=user_qs.values_list('pk', flat=True),
+                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        db_results['admins'] = Organization.admins.through.objects\
+            .filter(
+                user_id__in=user_qs.values_list('pk', flat=True),
+                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        count_context = {}
+        for org in org_id_list:
+            org_id = org['id']
+            count_context[org_id] = {'inventories': 0, 'teams': 0, 'users': 0,
+                                     'job_templates': 0, 'admins': 0,
+                                     'projects': 0}
+
+        for res in db_results:
+            for entry in db_results[res]:
+                org_id = entry['organization']
+                count_context[org_id][res] = entry['organization__count']
+
+        for entry in db_JT_results:
+            org_id = entry[JT_reference]
+            count_context[org_id]['job_templates'] = entry['%s__count' % JT_reference]
+
+        full_context['counts'] = count_context
+
+        return full_context
 
 class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 

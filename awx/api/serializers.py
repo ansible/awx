@@ -798,6 +798,14 @@ class OrganizationSerializer(BaseSerializer):
         ))
         return res
 
+    def get_summary_fields(self, obj):
+        summary_dict = super(OrganizationSerializer, self).get_summary_fields(obj)
+        counts_dict = self.context.get('counts', None)
+        if counts_dict is not None and summary_dict is not None:
+            print 'counts_dict: ' + str(counts_dict)
+            summary_dict['counts'] = counts_dict[obj.id]
+        return summary_dict
+
 
 class ProjectOptionsSerializer(BaseSerializer):
 
