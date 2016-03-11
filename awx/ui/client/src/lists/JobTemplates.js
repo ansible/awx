@@ -71,7 +71,7 @@ export default
             },
             copy: {
                 label: 'Copy',
-                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
+                'ui-sref': 'jobTemplates.copy({id: job_template.id})',
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Copy template',
                 dataPlacement: 'top',
