@@ -42,5 +42,7 @@ def test_user_accessible_by(user, organization):
 
     organization.member_role.members.add(u)
     organization.admin_role.members.add(admin)
-
     assert User.accessible_objects(admin, {'read':True}).count() == 2
+
+    organization.member_role.members.remove(u)
+    assert User.accessible_objects(admin, {'read':True}).count() == 1

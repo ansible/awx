@@ -130,22 +130,39 @@ def sync_superuser_status_to_rbac(sender, instance, **kwargs):
     else:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
-def create_user_role(sender, **kwargs):
-        instance = kwargs['instance']
-        try:
-            Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=instance.id)
-        except Role.DoesNotExist:
-            role = Role.objects.create(
-                singleton_name = '%s-admin_role' % instance.username,
-                content_object = instance,
-            )
-            role.members.add(instance)
-            RolePermission.objects.create(
-                role = role,
-                resource = instance,
-                create=1, read=1, write=1, delete=1, update=1,
-                execute=1, scm_update=1, use=1,
-            )
+def get_user_admin_role(user):
+    return Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=user.id)
+
+def create_user_role(instance, **kwargs):
+    try:
+        get_user_admin_role(instance)
+    except Role.DoesNotExist:
+        role = Role.objects.create(
+            singleton_name = '%s-admin_role' % instance.username,
+            content_object = instance,
+        )
+        role.members.add(instance)
+        RolePermission.objects.create(
+            role = role,
+            resource = instance,
+            create=1, read=1, write=1, delete=1, update=1,
+            execute=1, scm_update=1, use=1,
+        )
+
+def org_admin_edit_members(instance, action, model, pk_set, **kwargs):
+    content_type = ContentType.objects.get_for_model(Organization)
+
+    if instance.content_type == content_type and \
+       instance.content_object.member_role.id == instance.id:
+        members = model.objects.filter(pk__in=pk_set).all()
+        if action == 'post_add':
+            for member in members:
+                user_admin_role = get_user_admin_role(member)
+                instance.content_object.admin_role.children.add(user_admin_role)
+        if action == 'pre_remove':
+            for member in members:
+                user_admin_role = get_user_admin_role(member)
+                instance.content_object.admin_role.children.remove(user_admin_role)
 
 pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -166,6 +183,7 @@ post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+m2m_changed.connect(org_admin_edit_members, Role.members.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
 
