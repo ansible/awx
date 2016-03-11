@@ -18,7 +18,6 @@ from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
 from awx.main.models.configuration import * # noqa
 from awx.main.models.rbac import * # noqa
-from awx.main.models.user import * # noqa
 from awx.main.models.mixins import * # noqa
 from awx.main.models.notifications import * # noqa
 from awx.main.models.fact import * # noqa
@@ -43,6 +42,7 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('accessible_by', user_accessible_by)
 User.add_to_class('accessible_objects', user_accessible_objects)
+User.add_to_class('admin_role', user_admin_role)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa

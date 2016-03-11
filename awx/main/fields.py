@@ -199,16 +199,21 @@ class ImplicitRoleField(models.ForeignKey):
                 if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
 
-                reverse = type(field) is ReverseManyRelatedObjectsDescriptor
-                if reverse:
-                    m2m_changed.connect(self.m2m_update(field_attr, reverse), field.through)
+                if type(field) is ReverseManyRelatedObjectsDescriptor:
+                    sender = field.through
                 else:
-                    m2m_changed.connect(self.m2m_update(field_attr, reverse), field.related.through)
+                    sender = field.related.through
+
+                reverse = type(field) is ManyRelatedObjectsDescriptor
+                m2m_changed.connect(self.m2m_update(field_attr, reverse), sender, weak=False)
 
     def m2m_update(self, field_attr, _reverse):
-        def _m2m_update(self, sender, instance, action, reverse, model, pk_set, **kwargs):
+        def _m2m_update(instance, action, model, pk_set, reverse, **kwargs):
             if action == 'post_add' or action == 'pre_remove':
                 if _reverse:
+                    reverse = not reverse
+
+                if reverse:
                     for pk in pk_set:
                         obj = model.objects.get(pk=pk)
                         if action == 'post_add':

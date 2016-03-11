@@ -1,24 +1,6 @@
 import pytest
 
-from awx.main.migrations import _rbac as rbac
 from awx.main.access import TeamAccess
-from django.apps import apps
-
-@pytest.mark.django_db
-def test_team_migration_user(team, user, permissions):
-    u = user('user', False)
-    team.users.add(u)
-    team.save()
-
-    # This gets setup by a signal handler, but we want to test the migration, so remove the user
-    team.member_role.members.remove(u)
-
-    assert not team.accessible_by(u, permissions['auditor'])
-
-    migrated = rbac.migrate_team(apps, None)
-
-    assert len(migrated) == 1
-    assert team.accessible_by(u, permissions['auditor'])
 
 @pytest.mark.django_db
 def test_team_access_superuser(team, user):

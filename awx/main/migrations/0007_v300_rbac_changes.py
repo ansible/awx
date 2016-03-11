@@ -180,10 +180,6 @@ class Migration(migrations.Migration):
             name='member_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
-        migrations.AlterUniqueTogether(
-            name='userresource',
-            unique_together=set([('user', 'admin_role')]),
-        ),
         migrations.AlterIndexTogether(
             name='rolepermission',
             index_together=set([('content_type', 'object_id')]),
