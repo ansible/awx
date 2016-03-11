@@ -69,7 +69,7 @@ def test_cant_delete_role(delete, admin):
     # Some day we might want to do this, but until that is speced out, lets
     # ensure we don't slip up and allow this implicitly through some helper or
     # another
-    response = delete(reverse('api:role_detail', args=(admin.resource.admin_role.id,)), admin)
+    response = delete(reverse('api:role_detail', args=(admin.admin_role.id,)), admin)
     assert response.status_code == 405
 
 

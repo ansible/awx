@@ -204,11 +204,15 @@ class ImplicitRoleField(models.ForeignKey):
                 else:
                     sender = field.related.through
 
-                m2m_changed.connect(self.m2m_update(field_attr), sender, weak=False)
+                reverse = type(field) is ManyRelatedObjectsDescriptor
+                m2m_changed.connect(self.m2m_update(field_attr, reverse), sender, weak=False)
 
-    def m2m_update(self, field_attr):
+    def m2m_update(self, field_attr, _reverse):
         def _m2m_update(instance, action, model, pk_set, reverse, **kwargs):
             if action == 'post_add' or action == 'pre_remove':
+                if _reverse:
+                    reverse = not reverse
+
                 if reverse:
                     for pk in pk_set:
                         obj = model.objects.get(pk=pk)
