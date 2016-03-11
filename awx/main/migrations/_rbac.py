@@ -1,14 +1,30 @@
+from django.contrib.contenttypes.models import ContentType
+
 from collections import defaultdict
 import _old_access as old_access
 
 def migrate_users(apps, schema_editor):
     migrations = list()
+
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
+    RolePermission = apps.get_model('main', "RolePermission")
 
     for user in User.objects.all():
-        ur = user.resource # implicitly creates the UserResource field if it didn't already exist
-        ur.admin_role.members.add(user)
+        try:
+            Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=user.id)
+        except Role.DoesNotExist:
+            role = Role.objects.create(
+                singleton_name = '%s-admin_role' % user.username,
+                content_object = user,
+            )
+            role.members.add(user)
+            RolePermission.objects.create(
+                role = role,
+                resource = user,
+                create=1, read=1, write=1, delete=1, update=1,
+                execute=1, scm_update=1, use=1,
+            )
 
         if user.is_superuser:
             Role.singleton('System Administrator').members.add(user)
