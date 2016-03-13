@@ -596,15 +596,6 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
-    # @paginated
-    # def get(self, *args, **kwargs):
-    #     # self.paginated_params = {'limit': limit, 'offset': offset, 'ordering': ordering}
-    #     limit = kwargs.pop('limit')
-    #     offset = kwargs.pop('offset')
-    #     ordering = kwargs.pop('ordering')
-    #         # qs[offset:offset + limit]
-    #     return (super(OrganizationList, self).get(*args, **kwargs), 5, None)
-
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
 
@@ -673,11 +664,16 @@ class OrganizationList(ListCreateAPIView):
             .annotate(Count('organization')).order_by('organization')
 
         count_context = {}
+        zeroed_dict = {'inventories': 0, 'teams': 0, 'users': 0,
+            'job_templates': 0, 'admins': 0, 'projects': 0}
         for org in org_id_list:
             org_id = org['id']
-            count_context[org_id] = {'inventories': 0, 'teams': 0, 'users': 0,
-                                     'job_templates': 0, 'admins': 0,
-                                     'projects': 0}
+            count_context[org_id] = zeroed_dict.copy()
+        if self.request.method == 'POST':
+            org_id = max([int(k) for k in count_context.keys()]) + 1
+            # org_id = instance = self.get_object().id
+            # self.request.data['id']
+            count_context[org_id] = zeroed_dict
 
         for res in db_results:
             for entry in db_results[res]:
