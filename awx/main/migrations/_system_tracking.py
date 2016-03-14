@@ -1,6 +1,7 @@
 
 from awx.fact.models import FactVersion
 from mongoengine.connection import ConnectionError
+from pymongo.errors import OperationFailure
 from django.conf import settings
 
 def drop_system_tracking_db():
@@ -11,6 +12,9 @@ def drop_system_tracking_db():
         # TODO: Log this. Not a deal-breaker. Just let the user know they
         # may need to manually drop/delete the database.
         pass
+    except OperationFailure:
+        # TODO: This means the database was up but something happened when we tried to query it
+        return pass
 
 def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
@@ -21,6 +25,9 @@ def migrate_facts(apps, schema_editor):
     except ConnectionError:
         # TODO: Let the user know about the error.  Likely this is
         # a new install and we just don't need to do this
+        return (0, 0)
+    except OperationFailure:
+        # TODO: This means the database was up but something happened when we tried to query it
         return (0, 0)
 
     migrated_count = 0
