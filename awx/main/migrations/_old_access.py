@@ -694,9 +694,9 @@ class ProjectAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         team_ids = set(Team.objects.filter(deprecated_users__in=[self.user]).values_list('id', flat=True))
-        qs = qs.filter(Q(created_by=self.user, organizations__isnull=True) |
-                       Q(organizations__deprecated_admins__in=[self.user], organizations__active=True) |
-                       Q(organizations__deprecated_users__in=[self.user], organizations__active=True) |
+        qs = qs.filter(Q(created_by=self.user, deprecated_organizations__isnull=True) |
+                       Q(deprecated_organizations__deprecated_admins__in=[self.user], deprecated_organizations__active=True) |
+                       Q(deprecated_organizations__deprecated_users__in=[self.user], deprecated_organizations__active=True) |
                        Q(teams__in=team_ids))
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
@@ -726,9 +726,9 @@ class ProjectAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
-        if obj.created_by == self.user and not obj.organizations.filter(active=True).count():
+        if obj.created_by == self.user and not obj.deprecated_organizations.filter(active=True).count():
             return True
-        if obj.organizations.filter(active=True, deprecated_admins__in=[self.user]).exists():
+        if obj.deprecated_organizations.filter(active=True, deprecated_admins__in=[self.user]).exists():
             return True
         return False
 
@@ -880,7 +880,7 @@ class JobTemplateAccess(BaseAccess):
             Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
         org_admin_ids = base_qs.filter(
-            Q(project__organizations__deprecated_admins__in=[self.user]) |
+            Q(project__deprecated_organizations__deprecated_admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__deprecated_admins__in=[self.user]))
         )
 
@@ -1097,7 +1097,7 @@ class JobAccess(BaseAccess):
             credential_id__in=credential_ids,
         )
         org_admin_ids = base_qs.filter(
-            Q(project__organizations__deprecated_admins__in=[self.user]) |
+            Q(project__deprecated_organizations__deprecated_admins__in=[self.user]) |
             (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__deprecated_admins__in=[self.user]))
         )
 

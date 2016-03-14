@@ -4,6 +4,7 @@ from awx.main.models import (
     Role,
     RolePermission,
     Organization,
+    Group,
 )
 
 
@@ -97,20 +98,24 @@ def test_team_symantics(organization, team, alice):
     assert organization.accessible_by(alice, {'read': True}) is False
 
 @pytest.mark.django_db
-def test_auto_m2m_adjuments(organization, project, alice):
+def test_auto_m2m_adjuments(organization, inventory, group, alice):
     'Ensures the auto role reparenting is working correctly through m2m maps'
-    organization.admin_role.members.add(alice)
-    assert project.accessible_by(alice, {'read': True}) is True
+    g1 = group(name='g1')
+    g1.admin_role.members.add(alice)
+    assert g1.accessible_by(alice, {'read': True}) is True
+    g2 = group(name='g2')
+    assert g2.accessible_by(alice, {'read': True}) is False
 
-    project.organizations.remove(organization)
-    assert project.accessible_by(alice, {'read': True}) is False
-    project.organizations.add(organization)
-    assert project.accessible_by(alice, {'read': True}) is True
+    g2.parents.add(g1)
+    assert g2.accessible_by(alice, {'read': True}) is True
+    g2.parents.remove(g1)
+    assert g2.accessible_by(alice, {'read': True}) is False
 
-    organization.projects.remove(project)
-    assert project.accessible_by(alice, {'read': True}) is False
-    organization.projects.add(project)
-    assert project.accessible_by(alice, {'read': True}) is True
+    g1.children.add(g2)
+    assert g2.accessible_by(alice, {'read': True}) is True
+    g1.children.remove(g2)
+    assert g2.accessible_by(alice, {'read': True}) is False
+
 
 @pytest.mark.django_db
 def test_auto_field_adjuments(organization, inventory, team, alice):
