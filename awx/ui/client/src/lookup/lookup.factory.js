@@ -175,6 +175,7 @@ export default ['Rest', 'ProcessErrors', 'generateList',
                     width: 600,
                     height: (instructions) ? 625 : 450,
                     minWidth: 500,
+                    resizable: false,
                     title: hdr,
                     id: 'LookupModal-dialog',
                     onClose: function() {
