@@ -38,10 +38,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
 
-    projects = models.ManyToManyField(
+    deprecated_projects = models.ManyToManyField(
         'Project',
         blank=True,
-        related_name='organizations',
+        related_name='deprecated_organizations',
     )
     admin_role = ImplicitRoleField(
         role_name='Organization Administrator',

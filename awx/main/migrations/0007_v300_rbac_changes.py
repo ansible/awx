@@ -184,4 +184,19 @@ class Migration(migrations.Migration):
             name='rolepermission',
             index_together=set([('content_type', 'object_id')]),
         ),
+        migrations.RenameField(
+            model_name='organization',
+            old_name='projects',
+            new_name='deprecated_projects',
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_projects',
+            field=models.ManyToManyField(related_name='deprecated_organizations', to='main.Project', blank=True),
+        ),
+        migrations.AddField(
+            model_name='project',
+            name='organization',
+            field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
+        ),
     ]

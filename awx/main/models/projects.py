@@ -198,6 +198,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         app_label = 'main'
         ordering = ('id',)
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='projects',
+    )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
         editable=False,
@@ -212,13 +219,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Project Administrator',
         role_description='May manage this project',
-        parent_role='organizations.admin_role',
+        parent_role='organization.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
         role_description='May read all settings associated with this project',
-        parent_role='organizations.auditor_role',
+        parent_role='organization.auditor_role',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
