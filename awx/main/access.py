@@ -1261,7 +1261,7 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
