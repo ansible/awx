@@ -11,16 +11,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='organization',
-            name='admins',
+        migrations.RenameField(
+            'Organization',
+            'admins',
+            'deprecated_admins',
         ),
-        migrations.RemoveField(
-            model_name='organization',
-            name='users',
+        migrations.RenameField(
+            'Organization',
+            'users',
+            'deprecated_users',
         ),
-        migrations.RemoveField(
-            model_name='team',
-            name='users',
+        migrations.RenameField(
+            'Team',
+            'users',
+            'deprecated_users',
         ),
     ]
