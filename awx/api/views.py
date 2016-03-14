@@ -641,8 +641,8 @@ class OrganizationList(ListCreateAPIView):
         #   the case of deleted (and purged) inventory
         db_JT_results = self.request.user.get_queryset(JobTemplate)\
             .filter(inventory_id__in=inv_qs.values_list('pk', flat=True))\
-            .values(JT_reference).annotate(Count(JT_reference)).\
-            order_by(JT_reference)
+            .values(JT_reference).annotate(Count(JT_reference))\
+            .order_by(JT_reference)
 
         # Produce counts of m2m relationships
         project_qs = self.request.user.get_queryset(Project)

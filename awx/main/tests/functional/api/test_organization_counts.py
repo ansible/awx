@@ -63,6 +63,7 @@ def test_new_org_zero_counts(user, post):
     new_org_list = post_response.render().data
     counts_dict = new_org_list['summary_fields']['counts']
 
+    assert post_response.status_code == 201
     assert counts_dict == {
         'users': 0,
         'admins': 0,
@@ -80,8 +81,6 @@ def test_two_organizations(resourced_organization, organizations, user, get):
     response = get(reverse('api:organization_list', args=[]), external_admin)
     org_id_full = resourced_organization.id
     org_id_zero = organization_zero.id
-    print ' ids: ' + str(org_id_full) + " : " + str(org_id_zero)
-    print ' counts_dict: ' + str(response.data['results'])
     counts = {}
     for i in range(2):
         org_id = response.data['results'][i]['id']
