@@ -802,8 +802,12 @@ class OrganizationSerializer(BaseSerializer):
         summary_dict = super(OrganizationSerializer, self).get_summary_fields(obj)
         counts_dict = self.context.get('counts', None)
         if counts_dict is not None and summary_dict is not None:
-            print 'counts_dict: ' + str(counts_dict)
-            summary_dict['counts'] = counts_dict[obj.id]
+            if obj.id not in counts_dict:
+                summary_dict['counts'] = {
+                    'inventories': 0, 'teams': 0, 'users': 0,
+                    'job_templates': 0, 'admins': 0, 'projects': 0}
+            else:
+                summary_dict['counts'] = counts_dict[obj.id]
         return summary_dict
 
 

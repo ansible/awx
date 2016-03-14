@@ -624,17 +624,23 @@ class OrganizationList(ListCreateAPIView):
         org_qs = self.request.user.get_queryset(self.model)
         org_id_list = org_qs.values('id')
         if len(org_id_list) == 0:
+            if self.request.method == 'POST':
+                full_context['counts'] = {}
             return full_context
 
         # Produce counts of Foreign Key relationships
-        db_results['inventories'] = self.request.user.get_queryset(Inventory)\
+        inv_qs = self.request.user.get_queryset(Inventory)
+        db_results['inventories'] = inv_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['teams'] = self.request.user.get_queryset(Team)\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
         JT_reference = 'inventory__organization'
+        # Extra filter is applied on the inventory, because this catches
+        #   the case of deleted (and purged) inventory
         db_JT_results = self.request.user.get_queryset(JobTemplate)\
+            .filter(inventory_id__in=inv_qs.values_list('pk', flat=True))\
             .values(JT_reference).annotate(Count(JT_reference)).\
             order_by(JT_reference)
 
@@ -664,16 +670,11 @@ class OrganizationList(ListCreateAPIView):
             .annotate(Count('organization')).order_by('organization')
 
         count_context = {}
-        zeroed_dict = {'inventories': 0, 'teams': 0, 'users': 0,
-            'job_templates': 0, 'admins': 0, 'projects': 0}
         for org in org_id_list:
             org_id = org['id']
-            count_context[org_id] = zeroed_dict.copy()
-        if self.request.method == 'POST':
-            org_id = max([int(k) for k in count_context.keys()]) + 1
-            # org_id = instance = self.get_object().id
-            # self.request.data['id']
-            count_context[org_id] = zeroed_dict
+            count_context[org_id] = {
+                'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
+                'admins': 0, 'projects': 0}
 
         for res in db_results:
             for entry in db_results[res]:
