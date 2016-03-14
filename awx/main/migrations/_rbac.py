@@ -1,5 +1,3 @@
-from django.db import connection, transaction, reset_queries
-from django.db.transaction import TransactionManagementError
 from django.contrib.contenttypes.models import ContentType
 
 from collections import defaultdict
@@ -150,7 +148,6 @@ def migrate_projects(apps, schema_editor):
                     project.organization = first_org
                     project.save()
                 else:
-                    print('Fork to %s ' % (org.name + ' - ' + original_project_name))
                     new_prj = Project.objects.create(
                         created                   = project.created,
                         description               = project.description,
@@ -172,33 +169,32 @@ def migrate_projects(apps, schema_editor):
                     job_templates = JobTemplate.objects.filter(inventory__organization=org).all()
                     for jt in job_templates:
                         jt.project = new_prj
-                        print('Updating jt to point to %s' % repr(new_prj))
                         jt.save()
 
     # Migrate permissions
     for project in [p for p in Project.objects.all()]:
-        if project.organization is not None and project.created_by is not None:
+        if project.organization is None and project.created_by is not None:
             project.admin_role.members.add(project.created_by)
-            migrations[original_project_name]['users'].add(project.created_by)
+            migrations[project.name]['users'].add(project.created_by)
 
         for team in project.teams.all():
             team.member_role.children.add(project.member_role)
-            migrations[original_project_name]['teams'].add(team)
+            migrations[project.name]['teams'].add(team)
 
         if project.organization is not None:
             for user in project.organization.deprecated_users.all():
                 project.member_role.members.add(user)
-                migrations[original_project_name]['users'].add(user)
+                migrations[project.name]['users'].add(user)
 
         for perm in Permission.objects.filter(project=project, active=True):
             # All perms at this level just imply a user or team can read
             if perm.team:
                 perm.team.member_role.children.add(project.member_role)
-                migrations[original_project_name]['teams'].add(perm.team)
+                migrations[project.name]['teams'].add(perm.team)
 
             if perm.user:
                 project.member_role.members.add(perm.user)
-                migrations[original_project_name]['users'].add(perm.user)
+                migrations[project.name]['users'].add(perm.user)
 
     return migrations
 
