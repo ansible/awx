@@ -205,7 +205,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
-    team_obj.users.add(user_obj)
+    team_obj.member_role.members.add(user_obj)
 
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
     response = get(url, user_obj)
@@ -247,7 +247,7 @@ def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
 def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team):
     user_admin = user('johnson', False)
     org2 = organizations(1)
-    org2[0].admins.add(user_admin)
+    org2[0].admin_role.members.add(user_admin)
 
     response = _test_user_access_control(hosts, fact_scans, get, user_admin, team)
 
