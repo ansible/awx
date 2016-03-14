@@ -887,9 +887,9 @@ var tower = angular.module('Tower', [
     }])
 
     .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state', 'GetBasePath',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state', 'GetBasePath',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
+        LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
             var sock;
 
             $rootScope.addPermission = function (scope) {
