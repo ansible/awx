@@ -16,7 +16,7 @@ def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, use
     joe = user('joe')
 
 
-    check_jobtemplate.project.organizations.all()[0].users.add(joe)
+    check_jobtemplate.project.organizations.all()[0].deprecated_users.add(joe)
 
     Permission(user=joe, inventory=check_jobtemplate.inventory, permission_type='read').save()
     Permission(user=joe, inventory=check_jobtemplate.inventory,
@@ -45,7 +45,7 @@ def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, us
     joe = user('joe')
 
 
-    deploy_jobtemplate.project.organizations.all()[0].users.add(joe)
+    deploy_jobtemplate.project.organizations.all()[0].deprecated_users.add(joe)
 
     Permission(user=joe, inventory=deploy_jobtemplate.inventory, permission_type='read').save()
     Permission(user=joe, inventory=deploy_jobtemplate.inventory,
@@ -73,11 +73,11 @@ def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, us
 def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate, organization, team, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
-    team.users.add(joe)
+    team.deprecated_users.add(joe)
     team.organization = organization
     team.save()
 
-    check_jobtemplate.project.organizations.all()[0].users.add(joe)
+    check_jobtemplate.project.organizations.all()[0].deprecated_users.add(joe)
 
     Permission(team=team, inventory=check_jobtemplate.inventory, permission_type='read').save()
     Permission(team=team, inventory=check_jobtemplate.inventory,
@@ -108,11 +108,11 @@ def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate
 def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplate, organization, team, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
-    team.users.add(joe)
+    team.deprecated_users.add(joe)
     team.organization = organization
     team.save()
 
-    deploy_jobtemplate.project.organizations.all()[0].users.add(joe)
+    deploy_jobtemplate.project.organizations.all()[0].deprecated_users.add(joe)
 
     Permission(team=team, inventory=deploy_jobtemplate.inventory, permission_type='read').save()
     Permission(team=team, inventory=deploy_jobtemplate.inventory,

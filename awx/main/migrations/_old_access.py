@@ -231,7 +231,7 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return bool(obj.organizations.filter(active=True, admins__in=[self.user]).exists())
+        return bool(obj.organizations.filter(active=True, deprecated_admins__in=[self.user]).exists())
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -242,7 +242,7 @@ class UserAccess(BaseAccess):
             # cannot delete the last active superuser
             return False
         return bool(self.user.is_superuser or
-                    obj.organizations.filter(active=True, admins__in=[self.user]).exists())
+                    obj.organizations.filter(active=True, deprecated_admins__in=[self.user]).exists())
 
 class OrganizationAccess(BaseAccess):
     '''
@@ -261,11 +261,11 @@ class OrganizationAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by')
         if self.user.is_superuser:
             return qs
-        return qs.filter(Q(admins__in=[self.user]) | Q(users__in=[self.user]))
+        return qs.filter(Q(deprecated_admins__in=[self.user]) | Q(deprecated_users__in=[self.user]))
 
     def can_change(self, obj, data):
         return bool(self.user.is_superuser or
-                    self.user in obj.admins.all())
+                    self.user in obj.deprecated_admins.all())
 
     def can_delete(self, obj):
         self.check_license(feature='multiple_organizations', check_expiration=False)
@@ -300,7 +300,7 @@ class InventoryAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         qs = qs.filter(organization__active=True)
-        admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
+        admin_of = qs.filter(organization__deprecated_admins__in=[self.user]).distinct()
         has_user_kw = dict(
             permissions__user__in=[self.user],
             permissions__permission_type__in=allowed,
@@ -310,7 +310,7 @@ class InventoryAccess(BaseAccess):
             has_user_kw['permissions__run_ad_hoc_commands'] = ad_hoc
         has_user_perms = qs.filter(**has_user_kw).distinct()
         has_team_kw = dict(
-            permissions__team__users__in=[self.user],
+            permissions__team__deprecated_users__in=[self.user],
             permissions__team__active=True,
             permissions__permission_type__in=allowed,
             permissions__active=True,
@@ -581,7 +581,7 @@ class CredentialAccess(BaseAccess):
             Q(user__organizations__id__in=orgs_as_admin_ids) |
             Q(user__admin_of_organizations__id__in=orgs_as_admin_ids) |
             Q(team__organization__id__in=orgs_as_admin_ids, team__active=True) |
-            Q(team__users__in=[self.user], team__active=True)
+            Q(team__deprecated_users__in=[self.user], team__active=True)
         )
 
     def can_add(self, data):
@@ -607,12 +607,12 @@ class CredentialAccess(BaseAccess):
         if obj.user:
             if self.user == obj.user:
                 return True
-            if obj.user.organizations.filter(active=True, admins__in=[self.user]).exists():
+            if obj.user.organizations.filter(active=True, deprecated_admins__in=[self.user]).exists():
                 return True
-            if obj.user.admin_of_organizations.filter(active=True, admins__in=[self.user]).exists():
+            if obj.user.admin_of_organizations.filter(active=True, deprecated_admins__in=[self.user]).exists():
                 return True
         if obj.team:
-            if self.user in obj.team.organization.admins.filter(is_active=True):
+            if self.user in obj.team.organization.deprecated_admins.filter(is_active=True):
                 return True
         return False
 
@@ -642,8 +642,8 @@ class TeamAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         return qs.filter(
-            Q(organization__admins__in=[self.user], organization__active=True) |
-            Q(users__in=[self.user])
+            Q(organization__deprecated_admins__in=[self.user], organization__active=True) |
+            Q(deprecated_users__in=[self.user])
         )
 
     def can_add(self, data):
@@ -663,7 +663,7 @@ class TeamAccess(BaseAccess):
             raise PermissionDenied('Unable to change organization on a team')
         if self.user.is_superuser:
             return True
-        if self.user in obj.organization.admins.all():
+        if self.user in obj.organization.deprecated_admins.all():
             return True
         return False
 
@@ -693,10 +693,10 @@ class ProjectAccess(BaseAccess):
         qs = qs.select_related('modified_by', 'credential', 'current_job', 'last_job')
         if self.user.is_superuser:
             return qs
-        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
+        team_ids = set(Team.objects.filter(deprecated_users__in=[self.user]).values_list('id', flat=True))
         qs = qs.filter(Q(created_by=self.user, organizations__isnull=True) |
-                       Q(organizations__admins__in=[self.user], organizations__active=True) |
-                       Q(organizations__users__in=[self.user], organizations__active=True) |
+                       Q(organizations__deprecated_admins__in=[self.user], organizations__active=True) |
+                       Q(organizations__deprecated_users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
@@ -728,7 +728,7 @@ class ProjectAccess(BaseAccess):
             return True
         if obj.created_by == self.user and not obj.organizations.filter(active=True).count():
             return True
-        if obj.organizations.filter(active=True, admins__in=[self.user]).exists():
+        if obj.organizations.filter(active=True, deprecated_admins__in=[self.user]).exists():
             return True
         return False
 
@@ -787,7 +787,7 @@ class PermissionAccess(BaseAccess):
             Q(user__admin_of_organizations__in=orgs_as_admin_ids) |
             Q(team__organization__in=orgs_as_admin_ids, team__active=True) |
             Q(user=self.user) |
-            Q(team__users__in=[self.user], team__active=True)
+            Q(team__deprecated_users__in=[self.user], team__active=True)
         )
 
     def can_add(self, data):
@@ -880,14 +880,14 @@ class JobTemplateAccess(BaseAccess):
             Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
         org_admin_ids = base_qs.filter(
-            Q(project__organizations__admins__in=[self.user]) |
-            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
+            Q(project__organizations__deprecated_admins__in=[self.user]) |
+            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__deprecated_admins__in=[self.user]))
         )
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
-        team_ids = Team.objects.filter(users__in=[self.user])
+        team_ids = Team.objects.filter(deprecated_users__in=[self.user])
 
         # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
@@ -983,7 +983,7 @@ class JobTemplateAccess(BaseAccess):
         # Otherwise, check for explicitly granted permissions to create job templates
         # for the project and inventory.
         permission_qs = Permission.objects.filter(
-            Q(user=self.user) | Q(team__users__in=[self.user]),
+            Q(user=self.user) | Q(team__deprecated_users__in=[self.user]),
             inventory=inventory,
             project=project,
             active=True,
@@ -1041,7 +1041,7 @@ class JobTemplateAccess(BaseAccess):
 
         # Otherwise check for explicitly granted permissions
         permission_qs = Permission.objects.filter(
-            Q(user=self.user) | Q(team__users__in=[self.user]),
+            Q(user=self.user) | Q(team__deprecated_users__in=[self.user]),
             inventory=obj.inventory,
             project=obj.project,
             active=True,
@@ -1097,13 +1097,13 @@ class JobAccess(BaseAccess):
             credential_id__in=credential_ids,
         )
         org_admin_ids = base_qs.filter(
-            Q(project__organizations__admins__in=[self.user]) |
-            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
+            Q(project__organizations__deprecated_admins__in=[self.user]) |
+            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__deprecated_admins__in=[self.user]))
         )
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        team_ids = Team.objects.filter(users__in=[self.user])
+        team_ids = Team.objects.filter(deprecated_users__in=[self.user])
 
         # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
@@ -1219,7 +1219,7 @@ class AdHocCommandAccess(BaseAccess):
             return qs
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        team_ids = set(Team.objects.filter(active=True, users__in=[self.user]).values_list('id', flat=True))
+        team_ids = set(Team.objects.filter(active=True, deprecated_users__in=[self.user]).values_list('id', flat=True))
 
         permission_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
@@ -1229,7 +1229,7 @@ class AdHocCommandAccess(BaseAccess):
         ).values_list('id', flat=True))
 
         inventory_qs = self.user.get_queryset(Inventory)
-        inventory_qs = inventory_qs.filter(Q(permissions__in=permission_ids) | Q(organization__admins__in=[self.user]))
+        inventory_qs = inventory_qs.filter(Q(permissions__in=permission_ids) | Q(organization__deprecated_admins__in=[self.user]))
         inventory_ids = set(inventory_qs.values_list('id', flat=True))
 
         qs = qs.filter(
@@ -1512,7 +1512,7 @@ class ActivityStreamAccess(BaseAccess):
         user_orgs = self.user.organizations.all()
 
         #Organization filter
-        qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
+        qs = qs.filter(Q(organization__deprecated_admins__in=[self.user]) | Q(organization__deprecated_users__in=[self.user]))
 
         #User filter
         qs = qs.filter(Q(user__pk=self.user.pk) |
@@ -1542,11 +1542,11 @@ class ActivityStreamAccess(BaseAccess):
                   Q(credential__user__organizations__in=user_admin_orgs) |
                   Q(credential__user__admin_of_organizations__in=user_admin_orgs) |
                   Q(credential__team__organization__in=user_admin_orgs) |
-                  Q(credential__team__users__in=[self.user]))
+                  Q(credential__team__deprecated_users__in=[self.user]))
 
         #Team Filter
-        qs.filter(Q(team__organization__admins__in=[self.user]) |
-                  Q(team__users__in=[self.user]))
+        qs.filter(Q(team__organization__deprecated_admins__in=[self.user]) |
+                  Q(team__deprecated_users__in=[self.user]))
 
         #Project Filter
         project_qs = self.user.get_queryset(Project)
@@ -1616,7 +1616,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
         if not self.user.is_superuser:
-            qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
+            qs = qs.filter(Q(organization__deprecated_admins__in=[self.user]) | Q(organization__deprecated_users__in=[self.user]))
         return qs
 
     def can_read(self, obj):

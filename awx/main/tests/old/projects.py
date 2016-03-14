@@ -75,10 +75,10 @@ class ProjectsTest(BaseTransactionTest):
         for x in self.organizations:
             # NOTE: superuser does not have to be explicitly added to admin group
             # x.admins.add(self.super_django_user)
-            x.users.add(self.super_django_user)
+            x.deprecated_users.add(self.super_django_user)
 
-        self.organizations[0].users.add(self.normal_django_user)
-        self.organizations[1].admins.add(self.normal_django_user)
+        self.organizations[0].deprecated_users.add(self.normal_django_user)
+        self.organizations[1].deprecated_admins.add(self.normal_django_user)
 
         self.team1 = Team.objects.create(
             name = 'team1', organization = self.organizations[0]
@@ -97,8 +97,8 @@ class ProjectsTest(BaseTransactionTest):
         self.team2.projects.add(self.projects[5])
         self.team1.save()
         self.team2.save()
-        self.team1.users.add(self.normal_django_user)
-        self.team2.users.add(self.other_django_user)
+        self.team1.deprecated_users.add(self.normal_django_user)
+        self.team2.deprecated_users.add(self.other_django_user)
 
     def test_playbooks(self):
         def write_test_file(project, name, content):
@@ -312,11 +312,11 @@ class ProjectsTest(BaseTransactionTest):
 
         # Verify that creatorship doesn't imply access if access is removed
         a_new_proj = self.make_project(created_by=self.other_django_user, playbook_content=TEST_PLAYBOOK)
-        self.organizations[0].admins.add(self.other_django_user)
+        self.organizations[0].deprecated_admins.add(self.other_django_user)
         self.organizations[0].projects.add(a_new_proj)
         proj_detail = reverse('api:project_detail', args=(a_new_proj.pk,))
         self.patch(proj_detail, data=dict(description="test"), expect=200, auth=self.get_other_credentials())
-        self.organizations[0].admins.remove(self.other_django_user)
+        self.organizations[0].deprecated_admins.remove(self.other_django_user)
         self.patch(proj_detail, data=dict(description="test_now"), expect=403, auth=self.get_other_credentials())
         self.delete(proj_detail, expect=403, auth=self.get_other_credentials())
         a_new_proj.delete()
@@ -337,7 +337,7 @@ class ProjectsTest(BaseTransactionTest):
         self.assertEquals(got['url'], reverse('api:team_detail', args=(self.team1.pk,)))
         got = self.get(team1, expect=200, auth=self.get_normal_credentials())
         got = self.get(team1, expect=403, auth=self.get_other_credentials())
-        self.team1.users.add(User.objects.get(username='other'))
+        self.team1.deprecated_users.add(User.objects.get(username='other'))
         self.team1.save()
         got = self.get(team1, expect=200, auth=self.get_other_credentials())
         got = self.get(team1, expect=403, auth=self.get_nobody_credentials())
@@ -421,8 +421,8 @@ class ProjectsTest(BaseTransactionTest):
 
         team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
         team_users = reverse('api:team_users_list', args=(team.pk,))
-        for x in team.users.all():
-            team.users.remove(x)
+        for x in team.deprecated_users.all():
+            team.deprecated_users.remove(x)
         team.save()
 
         # can list uses on teams
@@ -454,7 +454,7 @@ class ProjectsTest(BaseTransactionTest):
             self.post(team_users, data=y, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=y, expect=204, auth=self.get_normal_credentials())
 
-        self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 1) # Leaving just the super user we created
+        self.assertEquals(Team.objects.get(pk=team.pk).deprecated_users.count(), 1) # Leaving just the super user we created
 
         # =====================================================================
         # USER TEAMS
@@ -787,7 +787,7 @@ class ProjectsTest(BaseTransactionTest):
         # User is still a team member
         self.get(reverse('api:project_detail', args=(project.pk,)), expect=200, auth=self.get_other_credentials())
 
-        team.users.remove(self.other_django_user)
+        team.deprecated_users.remove(self.other_django_user)
 
         # User is no longer a team member and has no permissions
         self.get(reverse('api:project_detail', args=(project.pk,)), expect=403, auth=self.get_other_credentials())
@@ -1351,7 +1351,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'scm_url': scm_url,
         }
         org = self.make_organizations(self.super_django_user, 1)[0]
-        org.admins.add(self.normal_django_user)
+        org.deprecated_admins.add(self.normal_django_user)
         with self.current_user(self.super_django_user):
             del_proj = self.post(projects_url, project_data, expect=201)
             del_proj = Project.objects.get(pk=del_proj["id"])

@@ -54,12 +54,12 @@ class ScheduleTest(BaseTest):
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
-        self.organizations[0].admins.add(self.normal_django_user)
-        self.organizations[0].users.add(self.other_django_user)
-        self.organizations[0].users.add(self.normal_django_user)
+        self.organizations[0].deprecated_admins.add(self.normal_django_user)
+        self.organizations[0].deprecated_users.add(self.other_django_user)
+        self.organizations[0].deprecated_users.add(self.normal_django_user)
 
         self.diff_org_user = self.make_user('fred')
-        self.organizations[1].users.add(self.diff_org_user)
+        self.organizations[1].deprecated_users.add(self.diff_org_user)
 
         self.cloud_source = Credential.objects.create(kind='awx', user=self.super_django_user,
                                                       username='Dummy', password='Dummy')

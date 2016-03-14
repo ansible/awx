@@ -18,6 +18,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RenameField(
+            'Organization',
+            'admins',
+            'deprecated_admins',
+        ),
+        migrations.RenameField(
+            'Organization',
+            'users',
+            'deprecated_users',
+        ),
+        migrations.RenameField(
+            'Team',
+            'users',
+            'deprecated_users',
+        ),
+
         migrations.CreateModel(
             name='Role',
             fields=[

@@ -35,10 +35,10 @@ def migrate_organization(apps, schema_editor):
     migrations = defaultdict(list)
     organization = apps.get_model('main', "Organization")
     for org in organization.objects.all():
-        for admin in org.admins.all():
+        for admin in org.deprecated_admins.all():
             org.admin_role.members.add(admin)
             migrations[org.name].append(admin)
-        for user in org.users.all():
+        for user in org.deprecated_users.all():
             org.auditor_role.members.add(user)
             migrations[org.name].append(user)
     return migrations
@@ -47,7 +47,7 @@ def migrate_team(apps, schema_editor):
     migrations = defaultdict(list)
     team = apps.get_model('main', 'Team')
     for t in team.objects.all():
-        for user in t.users.all():
+        for user in t.deprecated_users.all():
             t.member_role.members.add(user)
             migrations[t.name].append(user)
     return migrations
@@ -143,7 +143,7 @@ def migrate_projects(apps, schema_editor):
 
         if project.organizations.count() > 0:
             for org in project.organizations.all():
-                for user in org.users.all():
+                for user in org.deprecated_users.all():
                     project.member_role.members.add(user)
                     migrations[project.name]['users'].add(user)
 
