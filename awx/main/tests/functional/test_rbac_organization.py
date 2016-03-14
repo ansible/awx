@@ -12,7 +12,7 @@ from django.apps import apps
 @pytest.mark.django_db
 def test_organization_migration_admin(organization, permissions, user):
     u = user('admin', False)
-    organization.admins.add(u)
+    organization.deprecated_admins.add(u)
 
     # Undo some automatic work that we're supposed to be testing with our migration
     organization.admin_role.members.remove(u)
@@ -26,7 +26,7 @@ def test_organization_migration_admin(organization, permissions, user):
 @pytest.mark.django_db
 def test_organization_migration_user(organization, permissions, user):
     u = user('user', False)
-    organization.users.add(u)
+    organization.deprecated_users.add(u)
 
     # Undo some automatic work that we're supposed to be testing with our migration
     organization.member_role.members.remove(u)
@@ -42,14 +42,14 @@ def test_organization_migration_user(organization, permissions, user):
 @pytest.mark.django_db
 def test_organization_access_superuser(cl, organization, user):
     access = OrganizationAccess(user('admin', True))
-    organization.users.add(user('user', False))
+    organization.deprecated_users.add(user('user', False))
 
     assert access.can_change(organization, None)
     assert access.can_delete(organization)
 
     org = access.get_queryset()[0]
-    assert len(org.admins.all()) == 0
-    assert len(org.users.all()) == 1
+    assert len(org.deprecated_admins.all()) == 0
+    assert len(org.deprecated_users.all()) == 1
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)

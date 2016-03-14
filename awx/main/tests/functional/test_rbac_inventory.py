@@ -81,7 +81,7 @@ def test_inventory_admin_team(inventory, permissions, user, team):
     u = user('admin', False)
     perm = Permission(team=team, inventory=inventory, permission_type='admin')
     perm.save()
-    team.users.add(u)
+    team.deprecated_users.add(u)
 
     assert inventory.accessible_by(u, permissions['admin']) is False
 
@@ -105,7 +105,7 @@ def test_inventory_auditor(inventory, permissions, user, team):
     u = user('auditor', False)
     perm = Permission(team=team, inventory=inventory, permission_type='read')
     perm.save()
-    team.users.add(u)
+    team.deprecated_users.add(u)
 
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
@@ -129,7 +129,7 @@ def test_inventory_updater(inventory, permissions, user, team):
     u = user('updater', False)
     perm = Permission(team=team, inventory=inventory, permission_type='write')
     perm.save()
-    team.users.add(u)
+    team.deprecated_users.add(u)
 
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
@@ -154,7 +154,7 @@ def test_inventory_executor(inventory, permissions, user, team):
     u = user('executor', False)
     perm = Permission(team=team, inventory=inventory, permission_type='read', run_ad_hoc_commands=True)
     perm.save()
-    team.users.add(u)
+    team.deprecated_users.add(u)
 
     assert inventory.accessible_by(u, permissions['admin']) is False
     assert inventory.accessible_by(u, permissions['auditor']) is False
