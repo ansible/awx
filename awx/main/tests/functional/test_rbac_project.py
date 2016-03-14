@@ -90,7 +90,7 @@ def test_project_migration():
     assert o2.projects.all()[0].jobtemplates.count() == 1
     assert o3.projects.all()[0].jobtemplates.count() == 0
 
-
+@pytest.mark.django_db
 def test_project_user_project(user_project, project, user):
     u = user('owner')
 
