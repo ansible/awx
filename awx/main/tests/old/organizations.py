@@ -88,12 +88,12 @@ class OrganizationsTest(BaseTest):
         #   nobody_user is a user not a member of any organizations
 
         for x in self.organizations:
-            x.admins.add(self.super_django_user)
-            x.users.add(self.super_django_user)
-            x.users.add(self.other_django_user)
+            x.deprecated_admins.add(self.super_django_user)
+            x.deprecated_users.add(self.super_django_user)
+            x.deprecated_users.add(self.other_django_user)
 
-        self.organizations[0].users.add(self.normal_django_user)
-        self.organizations[1].admins.add(self.normal_django_user)
+        self.organizations[0].deprecated_users.add(self.normal_django_user)
+        self.organizations[1].deprecated_admins.add(self.normal_django_user)
 
     def test_get_organization_list(self):
         url = reverse('api:organization_list')

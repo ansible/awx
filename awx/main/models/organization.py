@@ -38,6 +38,16 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
 
+    deprecated_users = models.ManyToManyField(
+        'auth.User',
+        blank=True,
+        related_name='organizations',
+    )
+    deprecated_admins = models.ManyToManyField(
+        'auth.User',
+        blank=True,
+        related_name='admin_of_organizations',
+    )
     deprecated_projects = models.ManyToManyField(
         'Project',
         blank=True,
@@ -86,6 +96,11 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
 
+    deprecated_users = models.ManyToManyField(
+        'auth.User',
+        blank=True,
+        related_name='teams',
+    )
     organization = models.ForeignKey(
         'Organization',
         blank=False,
