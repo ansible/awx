@@ -373,7 +373,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-<<<<<<< 3e32787490a4faf3899b1a5d125475e73521ef35
             state('inventories', {
                 url: '/inventories',
                 templateUrl: urlPrefix + 'partials/inventories.html',
@@ -384,22 +383,6 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     label: "INVENTORIES"
-=======
-            state('organizations', {
-                url: '/organizations',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'organization'
-                },
-                ncyBreadcrumb: {
-                    parent: function($scope) {
-                        $scope.$parent.$emit("ReloadOrgListView");
-                        return "setup";
-                    },
-                    label: "ORGANIZATIONS"
->>>>>>> Further modularization.
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -408,7 +391,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-<<<<<<< 3e32787490a4faf3899b1a5d125475e73521ef35
             state('inventories.add', {
                 url: '/add',
                 templateUrl: urlPrefix + 'partials/inventories.html',
@@ -416,15 +398,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: "inventories",
                     label: "CREATE INVENTORY"
-=======
-            state('organizations.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsAdd,
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "CREATE ORGANIZATION"
->>>>>>> Further modularization.
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -433,7 +406,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-<<<<<<< 3e32787490a4faf3899b1a5d125475e73521ef35
             state('inventories.edit', {
                 url: '/:inventory_id',
                 templateUrl: urlPrefix + 'partials/inventories.html',
@@ -456,18 +428,6 @@ var tower = angular.module('Tower', [
                     activityStream: true,
                     activityStreamTarget: 'inventory',
                     activityStreamId: 'inventory_id'
-=======
-            state('organizations.edit', {
-                url: '/:organization_id',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsEdit,
-                data: {
-                    activityStreamId: 'organization_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "{{name}}"
->>>>>>> Further modularization.
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
