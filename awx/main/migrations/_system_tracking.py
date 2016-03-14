@@ -14,7 +14,7 @@ def drop_system_tracking_db():
         pass
     except OperationFailure:
         # TODO: This means the database was up but something happened when we tried to query it
-        return pass
+        pass
 
 def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
