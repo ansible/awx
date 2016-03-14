@@ -47,9 +47,9 @@ class InventoryTest(BaseTest):
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 3)
-        self.organizations[0].admins.add(self.normal_django_user)
-        self.organizations[0].users.add(self.other_django_user)
-        self.organizations[0].users.add(self.normal_django_user)
+        self.organizations[0].deprecated_admins.add(self.normal_django_user)
+        self.organizations[0].deprecated_users.add(self.other_django_user)
+        self.organizations[0].deprecated_users.add(self.normal_django_user)
 
         self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
         self.inventory_b = Inventory.objects.create(name='inventory-b', description='bar', organization=self.organizations[1])
@@ -78,7 +78,7 @@ class InventoryTest(BaseTest):
         self.check_get_list(url, self.super_django_user, qs)
 
         # an org admin can list inventories but is filtered to what he adminsters
-        normal_qs = qs.filter(organization__admins__in=[self.normal_django_user])
+        normal_qs = qs.filter(organization__deprecated_admins__in=[self.normal_django_user])
         self.check_get_list(url, self.normal_django_user, normal_qs)
 
         # a user who is on a team who has a read permissions on an inventory can see filtered inventories
@@ -269,9 +269,9 @@ class InventoryTest(BaseTest):
 
     def test_inventory_access_deleted_permissions(self):
         temp_org = self.make_organizations(self.super_django_user, 1)[0]
-        temp_org.admins.add(self.normal_django_user)
-        temp_org.users.add(self.other_django_user)
-        temp_org.users.add(self.normal_django_user)
+        temp_org.deprecated_admins.add(self.normal_django_user)
+        temp_org.deprecated_users.add(self.other_django_user)
+        temp_org.deprecated_users.add(self.normal_django_user)
         temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
         temp_inv.groups.create(name='Delete Org Inventory Group')
 
@@ -1195,9 +1195,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.setup_instances()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.organization.admins.add(self.normal_django_user)
-        self.organization.users.add(self.other_django_user)
-        self.organization.users.add(self.normal_django_user)
+        self.organization.deprecated_admins.add(self.normal_django_user)
+        self.organization.deprecated_users.add(self.other_django_user)
+        self.organization.deprecated_users.add(self.normal_django_user)
         self.inventory = self.organization.inventories.create(name='Cloud Inventory')
         self.group = self.inventory.groups.create(name='Cloud Group')
         self.inventory2 = self.organization.inventories.create(name='Cloud Inventory 2')
