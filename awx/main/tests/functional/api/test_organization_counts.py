@@ -109,47 +109,36 @@ def test_two_organizations(resourced_organization, organizations, user, get):
     }
 
 @pytest.mark.django_db
-def test_overlapping_project(resourced_organization, organizations, user, get):
-    # Check correct results for two organizations are returned
+def test_JT_associated_with_project(organizations, project, user, get):
+    # Check that adding a project to an organization gets the project's JT
+    #  included in the organization's JT count
     external_admin = user('admin', True)
-    organization2 = organizations(1)[0]
-    the_project = resourced_organization.projects.all()[0]
-    organization2.projects.add(the_project)
-    organization2.projects.create(name="second-project",
-                                  description="test-proj-desc",
-                                  scm_type="git",
-                                  scm_url="https://github.com/jlaska/ansible-playbooks")
-    inventory = organization2.inventories.create(name="second-inventory")
-    organization2.projects.get(name="second-project").jobtemplates.create(
-        name="second-job-template",
-        inventory=inventory,
-        playbook="hello.yml"
-    )
+    two_orgs = organizations(2)
+    organization = two_orgs[0]
+    other_org = two_orgs[1]
+
+    unrelated_inv = other_org.inventories.create(name='not-in-organization')
+    project.jobtemplates.create(name="test-jt",
+                                description="test-job-template-desc",
+                                inventory=unrelated_inv,
+                                playbook="test_playbook.yml")
+    organization.projects.add(project)
 
     response = get(reverse('api:organization_list', args=[]), external_admin)
     assert response.status_code == 200
 
-    org_id_full = resourced_organization.id
-    org_id2 = organization2.id
+    org_id = organization.id
     counts = {}
     for i in range(2):
-        org_id = response.data['results'][i]['id']
-        counts[org_id] = response.data['results'][i]['summary_fields']['related_field_counts']
+        working_id = response.data['results'][i]['id']
+        counts[working_id] = response.data['results'][i]['summary_fields']['related_field_counts']
 
-    assert counts[org_id_full] == {
-        'users': 1,
-        'admins': 1,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 1,
-        'teams': 1
-    }
-    assert counts[org_id2] == {
+    assert counts[org_id] == {
         'users': 0,
         'admins': 0,
-        'job_templates': 2,
-        'projects': 2,
-        'inventories': 1,
+        'job_templates': 1,
+        'projects': 1,
+        'inventories': 0,
         'teams': 0
     }
-    assert False
+
