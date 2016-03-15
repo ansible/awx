@@ -107,7 +107,7 @@ def create_system_job_templates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0008_v300_rbac_drop_fields'),
+        ('main', '0007_v300_rbac_migrations'),
     ]
 
     operations = [
