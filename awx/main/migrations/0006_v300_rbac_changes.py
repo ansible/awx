@@ -88,6 +88,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='credential',
+            name='auditor_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
+            model_name='credential',
             name='usage_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),

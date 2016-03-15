@@ -16,6 +16,10 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin
+from awx.main.models.rbac import (
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
 
 __all__ = ['Credential']
 
@@ -158,8 +162,19 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     owner_role = ImplicitRoleField(
         role_name='Credential Owner',
         role_description='Owner of the credential',
-        parent_role='team.admin_role',
+        parent_role=[
+            'team.admin_role',
+            'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+        ],
         permissions = {'all': True}
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Credential Auditor',
+        role_description='Auditor of the credential',
+        parent_role=[
+            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        ],
+        permissions = {'read': True}
     )
     usage_role = ImplicitRoleField(
         role_name='Credential User',
