@@ -87,7 +87,7 @@ class AdHocCommand(UnifiedJob):
 
     def clean_inventory(self):
         inv = self.inventory
-        if not inv or not inv.active:
+        if not inv:
             raise ValidationError('Inventory is no longer available.')
         return inv
 
@@ -123,7 +123,7 @@ class AdHocCommand(UnifiedJob):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential and self.credential.active:
+        if self.credential:
             return self.credential.passwords_needed
         else:
             return []
@@ -164,14 +164,14 @@ class AdHocCommand(UnifiedJob):
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
-        count_hosts = Host.objects.filter(active=True, enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
+        count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate
         if not self.inventory:
             return []
-        inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
         inventory_sources_found = []
         dependencies = []
         for obj in active_tasks:

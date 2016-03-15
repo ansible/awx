@@ -79,11 +79,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     def __unicode__(self):
         return self.name
 
-    def mark_inactive(self, save=True):
-        for script in self.custom_inventory_scripts.all():
-            script.organization = None
-            script.save()
-        super(Organization, self).mark_inactive(save=save)
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):
@@ -134,14 +129,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self):
         return reverse('api:team_detail', args=(self.pk,))
-
-    def mark_inactive(self, save=True):
-        '''
-        When marking a team inactive we'll wipe out its credentials also
-        '''
-        for cred in self.credentials.all():
-            cred.mark_inactive()
-        super(Team, self).mark_inactive(save=save)
 
 
 class Permission(CommonModelNameNotUnique):
@@ -349,22 +336,6 @@ class AuthToken(BaseModel):
 
     def __unicode__(self):
         return self.key
-
-
-# Add mark_inactive method to User model.
-def user_mark_inactive(user, save=True):
-    '''Use instead of delete to rename and mark users inactive.'''
-    if user.is_active:
-        # Set timestamp to datetime.isoformat() but without the time zone
-        # offset to stay withint the 30 character username limit.
-        dtnow = tz_now()
-        deleted_ts = dtnow.strftime('%Y-%m-%dT%H:%M:%S.%f')
-        user.username = '_d_%s' % deleted_ts
-        user.is_active = False
-        if save:
-            user.save()
-
-User.add_to_class('mark_inactive', user_mark_inactive)
 
 
 # Add get_absolute_url method to User model if not present.

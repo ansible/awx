@@ -149,7 +149,7 @@ class JobOptions(BaseModel):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential and self.credential.active:
+        if self.credential:
             return self.credential.passwords_needed
         else:
             return []
@@ -357,7 +357,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         # Return all notifiers defined on the Job Template, on the Project, and on the Organization for each trigger type
         # TODO: Currently there is no org fk on project so this will need to be added once that is
         #       available after the rbac pr
-        base_notifiers = Notifier.objects.filter(active=True)
+        base_notifiers = Notifier.objects
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self, self.project]))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
@@ -493,7 +493,7 @@ class Job(UnifiedJob, JobOptions):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if self.inventory is None or self.project is None:
             return []
-        inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
         project_found = False
         inventory_sources_found = []
         dependencies = []
@@ -592,7 +592,7 @@ class Job(UnifiedJob, JobOptions):
         if not super(Job, self).can_start:
             return False
 
-        if not (self.credential and self.credential.active):
+        if not (self.credential):
             return False
 
         return True

@@ -73,7 +73,7 @@ def migrate_inventory(apps, schema_editor):
 
     for inventory in Inventory.objects.all():
         teams, users = [], []
-        for perm in Permission.objects.filter(inventory=inventory, active=True):
+        for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
             if perm.permission_type == 'admin':
@@ -186,7 +186,7 @@ def migrate_projects(apps, schema_editor):
                 project.member_role.members.add(user)
                 migrations[project.name]['users'].add(user)
 
-        for perm in Permission.objects.filter(project=project, active=True):
+        for perm in Permission.objects.filter(project=project):
             # All perms at this level just imply a user or team can read
             if perm.team:
                 perm.team.member_role.children.add(project.member_role)
@@ -253,7 +253,6 @@ def migrate_job_templates(apps, schema_editor):
         permission = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,
-            active=True,
             permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run'],
         )
 
