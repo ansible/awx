@@ -625,47 +625,43 @@ class OrganizationList(ListCreateAPIView):
         org_id_list = org_qs.values('id')
         if len(org_id_list) == 0:
             if self.request.method == 'POST':
-                full_context['counts'] = {}
+                full_context['related_field_counts'] = {}
             return full_context
 
-        # Produce counts of Foreign Key relationships
         inv_qs = self.request.user.get_queryset(Inventory)
+        project_qs = self.request.user.get_queryset(Project)
+        user_qs = self.request.user.get_queryset(User)
+
+        # Produce counts of Foreign Key relationships
         db_results['inventories'] = inv_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['teams'] = self.request.user.get_queryset(Team)\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
+        # TODO: When RBAC branch merges, change this to project relationship
         JT_reference = 'inventory__organization'
         # Extra filter is applied on the inventory, because this catches
         #   the case of deleted (and purged) inventory
-        db_JT_results = self.request.user.get_queryset(JobTemplate)\
-            .filter(inventory_id__in=inv_qs.values_list('pk', flat=True))\
+        db_results['job_templates'] = self.request.user.get_queryset(JobTemplate)\
+            .filter(inventory__in=inv_qs)\
             .values(JT_reference).annotate(Count(JT_reference))\
             .order_by(JT_reference)
 
         # Produce counts of m2m relationships
-        project_qs = self.request.user.get_queryset(Project)
         db_results['projects'] = Organization.projects.through.objects\
-            .filter(
-                project_id__in=project_qs.values_list('pk', flat=True),
-                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .filter(project__in=project_qs, organization__in=org_qs)\
             .values('organization')\
             .annotate(Count('organization')).order_by('organization')
 
         # TODO: When RBAC branch merges, change these to role relation
-        user_qs = self.request.user.get_queryset(User)
         db_results['users'] = Organization.users.through.objects\
-            .filter(
-                user_id__in=user_qs.values_list('pk', flat=True),
-                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .filter(user__in=user_qs, organization__in=org_qs)\
             .values('organization')\
             .annotate(Count('organization')).order_by('organization')
 
         db_results['admins'] = Organization.admins.through.objects\
-            .filter(
-                user_id__in=user_qs.values_list('pk', flat=True),
-                organization_id__in=org_qs.values_list('pk', flat=True))\
+            .filter(user__in=user_qs, organization__in=org_qs)\
             .values('organization')\
             .annotate(Count('organization')).order_by('organization')
 
@@ -677,15 +673,16 @@ class OrganizationList(ListCreateAPIView):
                 'admins': 0, 'projects': 0}
 
         for res in db_results:
+            if res == 'job_templates':
+                org_reference = JT_reference
+            else:
+                org_reference = 'organization'
             for entry in db_results[res]:
-                org_id = entry['organization']
-                count_context[org_id][res] = entry['organization__count']
+                org_id = entry[org_reference]
+                if org_id in count_context:
+                    count_context[org_id][res] = entry['%s__count' % org_reference]
 
-        for entry in db_JT_results:
-            org_id = entry[JT_reference]
-            count_context[org_id]['job_templates'] = entry['%s__count' % JT_reference]
-
-        full_context['counts'] = count_context
+        full_context['related_field_counts'] = count_context
 
         return full_context
 
