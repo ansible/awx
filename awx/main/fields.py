@@ -126,7 +126,8 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
         if self.permissions is not None:
             permissions = RolePermission(
                 role=role,
-                resource=instance
+                resource=instance,
+                auto_generated=True
             )
 
             if 'all' in self.permissions and self.permissions['all']:

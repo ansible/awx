@@ -133,6 +133,7 @@ def create_user_role(instance, **kwargs):
         RolePermission.objects.create(
             role = role,
             resource = instance,
+            auto_generated = True,
             create=1, read=1, write=1, delete=1, update=1,
             execute=1, scm_update=1, use=1,
         )

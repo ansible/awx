@@ -160,6 +160,7 @@ class RolePermission(CreatedModifiedModel):
     content_type = models.ForeignKey(ContentType, null=False, default=None)
     object_id = models.PositiveIntegerField(null=False, default=None)
     resource = GenericForeignKey('content_type', 'object_id')
+    auto_generated = models.BooleanField(default=False)
 
     create     = models.IntegerField(default = 0)
     read       = models.IntegerField(default = 0)
