@@ -104,249 +104,245 @@ class Command(BaseCommand):
         try:
 
             with transaction.atomic():
-                Role.pause_role_ancestor_rebuilding()
+                with batch_role_ancestor_rebuilding():
 
-                print('# Creating %d organizations' % n_organizations)
-                for i in xrange(n_organizations):
-                    sys.stdout.write('\r%d     ' % (i + 1))
-                    sys.stdout.flush()
-                    organizations.append(Organization.objects.create(name='%s Organization %d' % (prefix, i)))
-                print('')
-
-                print('# Creating %d users' % n_users)
-                org_idx = 0
-                for n in spread(n_users, n_organizations):
-                    for i in range(n):
-                        ids['user'] += 1
-                        user_id = ids['user']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, organizations[org_idx].name, i+ 1))
+                    print('# Creating %d organizations' % n_organizations)
+                    for i in xrange(n_organizations):
+                        sys.stdout.write('\r%d     ' % (i + 1))
                         sys.stdout.flush()
-                        user = User.objects.create(username='%suser-%d' % (prefix, user_id))
-                        organizations[org_idx].member_role.members.add(user)
-                        users.append(user)
-                    org_idx += 1
+                        organizations.append(Organization.objects.create(name='%s Organization %d' % (prefix, i)))
                     print('')
 
-                print('# Creating %d teams' % n_teams)
-                org_idx = 0
-                for n in spread(n_teams, n_organizations):
-                    org = organizations[org_idx]
-                    for i in range(n):
-                        ids['team'] += 1
-                        team_id = ids['team']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
-                        sys.stdout.flush()
-                        team = Team.objects.create(name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org)
-                        teams.append(team)
-                    org_idx += 1
-                    print('')
-
-                print('# Adding users to teams')
-                for org in organizations:
-                    org_teams = [t for t in org.teams.all()]
-                    org_users = [u for u in org.member_role.members.all()]
-                    print('  Spreading %d users accross %d teams for %s' % (len(org_users), len(org_teams), org.name))
-                    # Our normal spread for most users
-                    cur_user_idx = 0
-                    cur_team_idx = 0
-                    for n in spread(len(org_users), len(org_teams)):
-                        team = org_teams[cur_team_idx]
+                    print('# Creating %d users' % n_users)
+                    org_idx = 0
+                    for n in spread(n_users, n_organizations):
                         for i in range(n):
-                            if cur_user_idx < len(org_users):
-                                user = org_users[cur_user_idx]
-                                team.member_role.members.add(user)
-                            cur_user_idx += 1
-                        cur_team_idx += 1
+                            ids['user'] += 1
+                            user_id = ids['user']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, organizations[org_idx].name, i+ 1))
+                            sys.stdout.flush()
+                            user = User.objects.create(username='%suser-%d' % (prefix, user_id))
+                            organizations[org_idx].member_role.members.add(user)
+                            users.append(user)
+                        org_idx += 1
+                        print('')
 
-                    # First user gets added to all teams
-                    for team in org_teams:
-                        team.member_role.members.add(org_users[0])
+                    print('# Creating %d teams' % n_teams)
+                    org_idx = 0
+                    for n in spread(n_teams, n_organizations):
+                        org = organizations[org_idx]
+                        for i in range(n):
+                            ids['team'] += 1
+                            team_id = ids['team']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                            sys.stdout.flush()
+                            team = Team.objects.create(name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org)
+                            teams.append(team)
+                        org_idx += 1
+                        print('')
+
+                    print('# Adding users to teams')
+                    for org in organizations:
+                        org_teams = [t for t in org.teams.all()]
+                        org_users = [u for u in org.member_role.members.all()]
+                        print('  Spreading %d users accross %d teams for %s' % (len(org_users), len(org_teams), org.name))
+                        # Our normal spread for most users
+                        cur_user_idx = 0
+                        cur_team_idx = 0
+                        for n in spread(len(org_users), len(org_teams)):
+                            team = org_teams[cur_team_idx]
+                            for i in range(n):
+                                if cur_user_idx < len(org_users):
+                                    user = org_users[cur_user_idx]
+                                    team.member_role.members.add(user)
+                                cur_user_idx += 1
+                            cur_team_idx += 1
+
+                        # First user gets added to all teams
+                        for team in org_teams:
+                            team.member_role.members.add(org_users[0])
 
 
-                print('# Creating %d credentials for users' % (n_credentials - n_credentials // 2))
-                user_idx = 0
-                for n in spread(n_credentials - n_credentials // 2, n_users):
-                    user = users[user_idx]
-                    for i in range(n):
-                        ids['credential'] += 1
-                        sys.stdout.write('\r   %d     ' % (ids['credential']))
-                        sys.stdout.flush()
-                        credential_id = ids['credential']
-                        credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx), user=user)
-                        credentials.append(credential)
-                    user_idx += 1
-                print('')
-
-                print('# Creating %d credentials for teams' % (n_credentials // 2))
-                team_idx = 0
-                starting_credential_id = ids['credential']
-                for n in spread(n_credentials - n_credentials // 2, n_teams):
-                    team = teams[team_idx]
-                    for i in range(n):
-                        ids['credential'] += 1
-                        sys.stdout.write('\r   %d     ' % (ids['credential'] - starting_credential_id))
-                        sys.stdout.flush()
-                        credential_id = ids['credential']
-                        credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx), team=team)
-                        credentials.append(credential)
-                    team_idx += 1
-                print('')
-
-                print('# Creating %d projects' % n_projects)
-                org_idx = 0
-                for n in spread(n_projects, n_organizations):
-                    org = organizations[org_idx]
-                    for i in range(n):
-                        ids['project'] += 1
-                        project_id = ids['project']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
-                        sys.stdout.flush()
-                        project = Project.objects.create(name='%s Project %d Org %d' % (prefix, project_id, org_idx), organization=org)
-                        projects.append(project)
-
-                    org_idx += 1
+                    print('# Creating %d credentials for users' % (n_credentials - n_credentials // 2))
+                    user_idx = 0
+                    for n in spread(n_credentials - n_credentials // 2, n_users):
+                        user = users[user_idx]
+                        for i in range(n):
+                            ids['credential'] += 1
+                            sys.stdout.write('\r   %d     ' % (ids['credential']))
+                            sys.stdout.flush()
+                            credential_id = ids['credential']
+                            credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx), user=user)
+                            credentials.append(credential)
+                        user_idx += 1
                     print('')
 
-
-                print('# Creating %d inventories' % n_inventories)
-                org_idx = 0
-                for n in spread(n_inventories, min(n_inventories // 4 + 1, n_organizations)):
-                    org = organizations[org_idx]
-                    for i in range(n):
-                        ids['inventory'] += 1
-                        inventory_id = ids['inventory']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
-                        sys.stdout.flush()
-                        inventory = Inventory.objects.create(name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx), organization=org)
-                        inventories.append(inventory)
-
-                    org_idx += 1
+                    print('# Creating %d credentials for teams' % (n_credentials // 2))
+                    team_idx = 0
+                    starting_credential_id = ids['credential']
+                    for n in spread(n_credentials - n_credentials // 2, n_teams):
+                        team = teams[team_idx]
+                        for i in range(n):
+                            ids['credential'] += 1
+                            sys.stdout.write('\r   %d     ' % (ids['credential'] - starting_credential_id))
+                            sys.stdout.flush()
+                            credential_id = ids['credential']
+                            credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx), team=team)
+                            credentials.append(credential)
+                        team_idx += 1
                     print('')
 
+                    print('# Creating %d projects' % n_projects)
+                    org_idx = 0
+                    for n in spread(n_projects, n_organizations):
+                        org = organizations[org_idx]
+                        for i in range(n):
+                            ids['project'] += 1
+                            project_id = ids['project']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                            sys.stdout.flush()
+                            project = Project.objects.create(name='%s Project %d Org %d' % (prefix, project_id, org_idx), organization=org)
+                            projects.append(project)
 
-                print('# Creating %d inventory_groups' % n_inventory_groups)
-                inv_idx = 0
-                for n in spread(n_inventory_groups, n_inventories):
-                    inventory = inventories[inv_idx]
-                    parent_list = [None] * 3
-                    for i in range(n):
-                        ids['group'] += 1
-                        group_id = ids['group']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, inventory.name, i+ 1))
-                        sys.stdout.flush()
-                        group = Group.objects.create(
-                            name='%s Group %d Inventory %d' % (prefix, group_id, inv_idx),
-                            inventory=inventory,
-                        )
-                        # Have each group have up to 3 parent groups
-                        for parent_n in range(3):
-                            if i // 4 + parent_n < len(parent_list) and parent_list[i // 4 + parent_n]:
-                                group.parents.add(parent_list[i // 4 + parent_n])
-                        if parent_list[i // 4] is None:
-                            parent_list[i // 4] = group
-                        else:
-                            parent_list.append(group)
-                        inventory_groups.append(group)
-
-                    inv_idx += 1
-                    print('')
+                        org_idx += 1
+                        print('')
 
 
-                print('# Creating %d inventory_hosts' % n_inventory_hosts)
-                group_idx = 0
-                for n in spread(n_inventory_hosts, n_inventory_groups):
-                    group = inventory_groups[group_idx]
-                    for i in range(n):
-                        ids['host'] += 1
-                        host_id = ids['host']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i+ 1))
-                        sys.stdout.flush()
-                        host = Host.objects.create(name='%s Host %d Group %d' % (prefix, host_id, group_idx), inventory=group.inventory)
-                        # Add the host to up to 3 groups
-                        host.groups.add(group)
-                        for m in range(2):
-                            if group_idx + m < len(inventory_groups) and group.inventory.id == inventory_groups[group_idx + m].inventory.id:
-                                host.groups.add(inventory_groups[group_idx + m])
+                    print('# Creating %d inventories' % n_inventories)
+                    org_idx = 0
+                    for n in spread(n_inventories, min(n_inventories // 4 + 1, n_organizations)):
+                        org = organizations[org_idx]
+                        for i in range(n):
+                            ids['inventory'] += 1
+                            inventory_id = ids['inventory']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                            sys.stdout.flush()
+                            inventory = Inventory.objects.create(name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx), organization=org)
+                            inventories.append(inventory)
 
-                        inventory_hosts.append(host)
+                        org_idx += 1
+                        print('')
 
-                    group_idx += 1
-                    print('')
 
-                print('# Creating %d job_templates' % n_job_templates)
-                project_idx = 0
-                inv_idx = 0
-                for n in spread(n_job_templates, n_projects):
-                    project = projects[project_idx]
-                    for i in range(n):
-                        ids['job_template'] += 1
-                        job_template_id = ids['job_template']
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, project.name, i+ 1))
-                        sys.stdout.flush()
+                    print('# Creating %d inventory_groups' % n_inventory_groups)
+                    inv_idx = 0
+                    for n in spread(n_inventory_groups, n_inventories):
+                        inventory = inventories[inv_idx]
+                        parent_list = [None] * 3
+                        for i in range(n):
+                            ids['group'] += 1
+                            group_id = ids['group']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, inventory.name, i+ 1))
+                            sys.stdout.flush()
+                            group = Group.objects.create(
+                                name='%s Group %d Inventory %d' % (prefix, group_id, inv_idx),
+                                inventory=inventory,
+                            )
+                            # Have each group have up to 3 parent groups
+                            for parent_n in range(3):
+                                if i // 4 + parent_n < len(parent_list) and parent_list[i // 4 + parent_n]:
+                                    group.parents.add(parent_list[i // 4 + parent_n])
+                            if parent_list[i // 4] is None:
+                                parent_list[i // 4] = group
+                            else:
+                                parent_list.append(group)
+                            inventory_groups.append(group)
 
-                        inventory = None
-                        org_inv_count = project.organization.inventories.count()
-                        if org_inv_count > 0:
-                            inventory = project.organization.inventories.all()[inv_idx % org_inv_count]
-
-                        job_template = JobTemplate.objects.create(
-                            name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
-                            inventory=inventory,
-                            project=project,
-                        )
-                        job_templates.append(job_template)
                         inv_idx += 1
-                    project_idx += 1
-                    print('')
+                        print('')
 
-                print('# Creating %d jobs' % n_jobs)
-                group_idx = 0
-                job_template_idx = 0
-                for n in spread(n_jobs, n_job_templates):
-                    job_template = job_templates[job_template_idx]
-                    for i in range(n):
-                        sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
-                        sys.stdout.flush()
-                        job = Job.objects.create(job_template=job_template)
-                        jobs.append(job)
 
-                        if job_template.inventory:
-                            inv_groups = [g for g in job_template.inventory.groups.all()]
-                            if len(inv_groups):
-                                JobHostSummary.objects.bulk_create([
-                                    JobHostSummary(
-                                        job=job, host=h, host_name=h.name, processed=1,
-                                        created=now(), modified=now()
-                                    )
-                                    for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
-                                ])
+                    print('# Creating %d inventory_hosts' % n_inventory_hosts)
+                    group_idx = 0
+                    for n in spread(n_inventory_hosts, n_inventory_groups):
+                        group = inventory_groups[group_idx]
+                        for i in range(n):
+                            ids['host'] += 1
+                            host_id = ids['host']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i+ 1))
+                            sys.stdout.flush()
+                            host = Host.objects.create(name='%s Host %d Group %d' % (prefix, host_id, group_idx), inventory=group.inventory)
+                            # Add the host to up to 3 groups
+                            host.groups.add(group)
+                            for m in range(2):
+                                if group_idx + m < len(inventory_groups) and group.inventory.id == inventory_groups[group_idx + m].inventory.id:
+                                    host.groups.add(inventory_groups[group_idx + m])
+
+                            inventory_hosts.append(host)
+
                         group_idx += 1
-                    job_template_idx += 1
-                    if n:
                         print('')
 
-                print('# Creating %d job events' % n_job_events)
-                job_idx = 0
-                for n in spread(n_job_events, n_jobs):
-                    job = jobs[job_idx]
-                    sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
-                    sys.stdout.flush()
-                    JobEvent.objects.bulk_create([
-                        JobEvent(
-                            created=now(),
-                            modified=now(),
-                            job=job,
-                            event='runner_on_ok'
-                        )
-                        for i in range(n)
-                    ])
-                    job_idx += 1
-                    if n:
+                    print('# Creating %d job_templates' % n_job_templates)
+                    project_idx = 0
+                    inv_idx = 0
+                    for n in spread(n_job_templates, n_projects):
+                        project = projects[project_idx]
+                        for i in range(n):
+                            ids['job_template'] += 1
+                            job_template_id = ids['job_template']
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, project.name, i+ 1))
+                            sys.stdout.flush()
+
+                            inventory = None
+                            org_inv_count = project.organization.inventories.count()
+                            if org_inv_count > 0:
+                                inventory = project.organization.inventories.all()[inv_idx % org_inv_count]
+
+                            job_template = JobTemplate.objects.create(
+                                name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
+                                inventory=inventory,
+                                project=project,
+                            )
+                            job_templates.append(job_template)
+                            inv_idx += 1
+                        project_idx += 1
                         print('')
 
+                    print('# Creating %d jobs' % n_jobs)
+                    group_idx = 0
+                    job_template_idx = 0
+                    for n in spread(n_jobs, n_job_templates):
+                        job_template = job_templates[job_template_idx]
+                        for i in range(n):
+                            sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
+                            sys.stdout.flush()
+                            job = Job.objects.create(job_template=job_template)
+                            jobs.append(job)
 
+                            if job_template.inventory:
+                                inv_groups = [g for g in job_template.inventory.groups.all()]
+                                if len(inv_groups):
+                                    JobHostSummary.objects.bulk_create([
+                                        JobHostSummary(
+                                            job=job, host=h, host_name=h.name, processed=1,
+                                            created=now(), modified=now()
+                                        )
+                                        for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
+                                    ])
+                            group_idx += 1
+                        job_template_idx += 1
+                        if n:
+                            print('')
 
-                Role.unpause_role_ancestor_rebuilding()
+                    print('# Creating %d job events' % n_job_events)
+                    job_idx = 0
+                    for n in spread(n_job_events, n_jobs):
+                        job = jobs[job_idx]
+                        sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
+                        sys.stdout.flush()
+                        JobEvent.objects.bulk_create([
+                            JobEvent(
+                                created=now(),
+                                modified=now(),
+                                job=job,
+                                event='runner_on_ok'
+                            )
+                            for i in range(n)
+                        ])
+                        job_idx += 1
+                        if n:
+                            print('')
 
                 if options['pretend']:
                     raise Rollback()

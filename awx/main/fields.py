@@ -23,7 +23,7 @@ from django.db.transaction import TransactionManagementError
 
 
 # AWX
-from awx.main.models.rbac import RolePermission, Role
+from awx.main.models.rbac import RolePermission, Role, batch_role_ancestor_rebuilding
 
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField']
@@ -280,12 +280,11 @@ class ImplicitRoleField(models.ForeignKey):
             for parent in parents:
                 new_parents.add(parent)
 
-        Role.pause_role_ancestor_rebuilding()
-        for role in original_parents - new_parents:
-            this_role.parents.remove(role)
-        for role in new_parents - original_parents:
-            this_role.parents.add(role)
-        Role.unpause_role_ancestor_rebuilding()
+        with batch_role_ancestor_rebuilding():
+            for role in original_parents - new_parents:
+                this_role.parents.remove(role)
+            for role in new_parents - original_parents:
+                this_role.parents.add(role)
 
         setattr(self, '__original_parent_roles', new_parents)
 
