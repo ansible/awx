@@ -1637,7 +1637,7 @@ class InventoryScriptView(RetrieveAPIView):
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in obj.groups:
+            for group in obj.groups.all():
                 group_info = OrderedDict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
