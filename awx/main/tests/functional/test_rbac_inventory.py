@@ -1,7 +1,7 @@
 import pytest
 
 from awx.main.migrations import _rbac as rbac
-from awx.main.models import Permission
+from awx.main.models import Permission, Host
 from awx.main.access import InventoryAccess
 from django.apps import apps
 
@@ -230,5 +230,44 @@ def test_access_auditor(organization, inventory, user):
     assert not access.can_admin(inventory, {'organization': organization.id})
     assert not access.can_delete(inventory)
     assert not access.can_run_ad_hoc_commands(inventory)
+
+
+
+@pytest.mark.django_db
+def test_host_access(organization, inventory, user, group):
+    other_inventory = organization.inventories.create(name='other-inventory')
+    inventory_admin = user('inventory_admin', False)
+    my_group = group('my-group')
+    not_my_group = group('not-my-group')
+    group_admin = user('group_admin', False)
+
+
+    h1 = Host.objects.create(inventory=inventory, name='host1')
+    h2 = Host.objects.create(inventory=inventory, name='host2')
+    h1.groups.add(my_group)
+    h2.groups.add(not_my_group)
+
+    assert h1.accessible_by(inventory_admin, {'read': True}) is False
+    assert h1.accessible_by(group_admin, {'read': True}) is False
+
+    inventory.admin_role.members.add(inventory_admin)
+    my_group.admin_role.members.add(group_admin)
+
+    assert h1.accessible_by(inventory_admin, {'read': True})
+    assert h2.accessible_by(inventory_admin, {'read': True})
+    assert h1.accessible_by(group_admin, {'read': True})
+    assert h2.accessible_by(group_admin, {'read': True}) is False
+
+    my_group.hosts.remove(h1)
+
+    assert h1.accessible_by(inventory_admin, {'read': True})
+    assert h1.accessible_by(group_admin, {'read': True}) is False
+
+    h1.inventory = other_inventory
+    h1.save()
+
+    assert h1.accessible_by(inventory_admin, {'read': True}) is False
+    assert h1.accessible_by(group_admin, {'read': True}) is False
+
 
 
