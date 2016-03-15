@@ -362,9 +362,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.project.organizations.all())))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.project.organizations.all())))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.project.organizations.all())))
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.project.organization)))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.project.organization)))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.project.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
 class Job(UnifiedJob, JobOptions):

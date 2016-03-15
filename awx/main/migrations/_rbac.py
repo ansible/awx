@@ -131,9 +131,49 @@ def migrate_projects(apps, schema_editor):
 
     Project = apps.get_model('main', 'Project')
     Permission = apps.get_model('main', 'Permission')
+    JobTemplate = apps.get_model('main', 'JobTemplate')
 
-    for project in Project.objects.all():
-        if project.organizations.count() == 0 and project.created_by is not None:
+    # Migrate projects to single organizations, duplicating as necessary
+    for project in [p for p in Project.objects.all()]:
+        original_project_name = project.name
+        project_orgs = project.deprecated_organizations.distinct().all()
+
+        if project_orgs.count() > 1:
+            first_org = None
+            for org in project_orgs:
+                if first_org is None:
+                    # For the first org, re-use our existing Project object, so don't do the below duplication effort
+                    first_org = org
+                    project.name = first_org.name + ' - ' + original_project_name
+                    project.organization = first_org
+                    project.save()
+                else:
+                    new_prj = Project.objects.create(
+                        created                   = project.created,
+                        description               = project.description,
+                        name                      = org.name + ' - ' + original_project_name,
+                        old_pk                    = project.old_pk,
+                        created_by_id             = project.created_by_id,
+                        scm_type                  = project.scm_type,
+                        scm_url                   = project.scm_url,
+                        scm_branch                = project.scm_branch,
+                        scm_clean                 = project.scm_clean,
+                        scm_delete_on_update      = project.scm_delete_on_update,
+                        scm_delete_on_next_update = project.scm_delete_on_next_update,
+                        scm_update_on_launch      = project.scm_update_on_launch,
+                        scm_update_cache_timeout  = project.scm_update_cache_timeout,
+                        credential                = project.credential,
+                        organization              = org
+                    )
+                    migrations[original_project_name]['projects'].add(new_prj)
+                    job_templates = JobTemplate.objects.filter(inventory__organization=org).all()
+                    for jt in job_templates:
+                        jt.project = new_prj
+                        jt.save()
+
+    # Migrate permissions
+    for project in [p for p in Project.objects.all()]:
+        if project.organization is None and project.created_by is not None:
             project.admin_role.members.add(project.created_by)
             migrations[project.name]['users'].add(project.created_by)
 
@@ -141,11 +181,10 @@ def migrate_projects(apps, schema_editor):
             team.member_role.children.add(project.member_role)
             migrations[project.name]['teams'].add(team)
 
-        if project.organizations.count() > 0:
-            for org in project.organizations.all():
-                for user in org.deprecated_users.all():
-                    project.member_role.members.add(user)
-                    migrations[project.name]['users'].add(user)
+        if project.organization is not None:
+            for user in project.organization.deprecated_users.all():
+                project.member_role.members.add(user)
+                migrations[project.name]['users'].add(user)
 
         for perm in Permission.objects.filter(project=project, active=True):
             # All perms at this level just imply a user or team can read

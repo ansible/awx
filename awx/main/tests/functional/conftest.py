@@ -97,8 +97,9 @@ def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
                                  description="test-proj-desc",
                                  scm_type="git",
-                                 scm_url="https://github.com/jlaska/ansible-playbooks")
-    prj.organizations.add(organization)
+                                 scm_url="https://github.com/jlaska/ansible-playbooks",
+                                 organization=organization
+                                 )
     return prj
 
 @pytest.fixture
