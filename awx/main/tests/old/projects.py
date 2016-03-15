@@ -446,7 +446,7 @@ class ProjectsTest(BaseTransactionTest):
         self.post(team_users, data=dict(username='attempted_superuser_create', password='thepassword',
                   is_superuser=True), expect=201, auth=self.get_super_credentials())
 
-        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 5)
+        self.assertEqual(Team.objects.get(pk=team.pk).member_role.members.count(), 5)
 
         # can remove users from teams
         for x in all_users['results']:
