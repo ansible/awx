@@ -53,7 +53,7 @@ class ProjectOptions(models.Model):
             paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
                      if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
-            qs = Project.objects.filter(active=True)
+            qs = Project.objects
             used_paths = qs.values_list('local_path', flat=True)
             return [x for x in paths if x not in used_paths]
         else:
@@ -336,7 +336,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
 
     @property
     def needs_update_on_launch(self):
-        if self.active and self.scm_type and self.scm_update_on_launch:
+        if self.scm_type and self.scm_update_on_launch:
             if not self.last_job_run:
                 return True
             if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
@@ -345,7 +345,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
 
     @property
     def notifiers(self):
-        base_notifiers = Notifier.objects.filter(active=True)
+        base_notifiers = Notifier.objects
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))

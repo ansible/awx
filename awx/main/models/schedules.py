@@ -27,7 +27,7 @@ __all__ = ['Schedule']
 class ScheduleFilterMethods(object):
 
     def enabled(self, enabled=True):
-        return self.filter(enabled=enabled, active=enabled)
+        return self.filter(enabled=enabled)
 
     def before(self, dt):
         return self.filter(next_run__lt=dt)

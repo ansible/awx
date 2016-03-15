@@ -229,13 +229,18 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_west.users.add(self.user_iris)
 
         # The south team is no longer active having been folded into the east team
-        self.team_ops_south = self.org_ops.teams.create(
-            name='southerners',
-            created_by=self.user_sue,
-            active=False,
-        )
-        self.team_ops_south.projects.add(self.proj_prod)
-        self.team_ops_south.users.add(self.user_greg)
+        # FIXME: This code can be removed (probably)
+        #  - this case has been removed as we've gotten rid of the active flag, keeping
+        #    code around in case this has ramifications on some test failures.. if
+        #    you find this message and all tests are passing, then feel free to remove this
+        #    - anoek 2016-03-10
+        #self.team_ops_south = self.org_ops.teams.create(
+        #    name='southerners',
+        #    created_by=self.user_sue,
+        #    active=False,
+        #)
+        #self.team_ops_south.projects.add(self.proj_prod)
+        #self.team_ops_south.users.add(self.user_greg)
 
         # The north team is going to be deleted
         self.team_ops_north = self.org_ops.teams.create(
@@ -337,11 +342,18 @@ class BaseJobTestMixin(BaseTestMixin):
             password='Heading270',
             created_by = self.user_sue,
         )
-        self.cred_ops_south = self.team_ops_south.credentials.create(
-            username='south',
-            password='Heading180',
-            created_by = self.user_sue,
-        )
+
+
+        # FIXME: This code can be removed (probably)
+        #  - this case has been removed as we've gotten rid of the active flag, keeping
+        #    code around in case this has ramifications on some test failures.. if
+        #    you find this message and all tests are passing, then feel free to remove this
+        #    - anoek 2016-03-10
+        #self.cred_ops_south = self.team_ops_south.credentials.create(
+        #    username='south',
+        #    password='Heading180',
+        #    created_by = self.user_sue,
+        #)
 
         self.cred_ops_north = self.team_ops_north.credentials.create(
             username='north',

@@ -69,7 +69,7 @@ class InventoryTest(BaseTest):
 
     def test_get_inventory_list(self):
         url = reverse('api:inventory_list')
-        qs = Inventory.objects.filter(active=True).distinct()
+        qs = Inventory.objects.distinct()
 
         # Check list view with invalid authentication.
         self.check_invalid_auth(url)
@@ -226,6 +226,8 @@ class InventoryTest(BaseTest):
         self.inventory_a.groups.create(name='group-a')
         self.inventory_b.hosts.create(name='host-b')
         self.inventory_b.groups.create(name='group-b')
+        a_pk = self.inventory_a.pk
+        b_pk = self.inventory_b.pk
 
         # Check put to detail view with invalid authentication.
         self.check_invalid_auth(url_a, methods=('delete',))
@@ -248,24 +250,16 @@ class InventoryTest(BaseTest):
             self.delete(url_a, expect=204)
             self.delete(url_b, expect=403)
 
-        # Verify that the inventory is marked inactive, along with all its
-        # hosts and groups.
-        self.inventory_a = Inventory.objects.get(pk=self.inventory_a.pk)
-        self.assertFalse(self.inventory_a.active)
-        self.assertFalse(self.inventory_a.hosts.filter(active=True).count())
-        self.assertFalse(self.inventory_a.groups.filter(active=True).count())
+        # Verify that the inventory was deleted
+        assert Inventory.objects.filter(pk=a_pk).count() == 0
 
         # a super user can delete inventory records
         with self.current_user(self.super_django_user):
             self.delete(url_a, expect=404)
             self.delete(url_b, expect=204)
 
-        # Verify that the inventory is marked inactive, along with all its
-        # hosts and groups.
-        self.inventory_b = Inventory.objects.get(pk=self.inventory_b.pk)
-        self.assertFalse(self.inventory_b.active)
-        self.assertFalse(self.inventory_b.hosts.filter(active=True).count())
-        self.assertFalse(self.inventory_b.groups.filter(active=True).count())
+        # Verify that the inventory was deleted
+        assert Inventory.objects.filter(pk=b_pk).count() == 0
 
     def test_inventory_access_deleted_permissions(self):
         temp_org = self.make_organizations(self.super_django_user, 1)[0]
@@ -423,7 +417,7 @@ class InventoryTest(BaseTest):
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
                                      args=(Group.objects.get(name='nondel').pk,))
-        del_group.mark_inactive()
+        del_group.delete()
         nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
         self.post(del_children_url, data=nondel_detail, expect=403, auth=self.get_normal_credentials())
 
@@ -747,13 +741,11 @@ class InventoryTest(BaseTest):
         # removed group should be automatically marked inactive once it no longer has any parents.
         removed_group = Group.objects.get(pk=result['id'])
         self.assertTrue(removed_group.parents.count())
-        self.assertTrue(removed_group.active)
         for parent in removed_group.parents.all():
             parent_children_url = reverse('api:group_children_list', args=(parent.pk,))
             data = {'id': removed_group.pk, 'disassociate': 1}
             self.post(parent_children_url, data, expect=204, auth=self.get_super_credentials())
         removed_group = Group.objects.get(pk=result['id'])
-        #self.assertFalse(removed_group.active) # FIXME: Disabled for now because automatically deleting group with no parents is also disabled.
 
         # Removing a group from a hierarchy should migrate its children to the
         # parent.  The group itself will be deleted (marked inactive), and all
@@ -766,7 +758,6 @@ class InventoryTest(BaseTest):
         with self.current_user(self.super_django_user):
             self.post(url, data, expect=204)
         gx3 = Group.objects.get(pk=gx3.pk)
-        #self.assertFalse(gx3.active) # FIXME: Disabled for now....
         self.assertFalse(gx3 in gx2.children.all())
         #self.assertTrue(gx4 in gx2.children.all())
 
@@ -944,13 +935,10 @@ class InventoryTest(BaseTest):
         # Mark group C inactive. Its child groups and hosts should now also be
         # attached to group A. Group D hosts should be unchanged.  Group C
         # should also no longer have any group or host relationships.
-        g_c.mark_inactive()
+        g_c.delete()
         self.assertTrue(g_d in g_a.children.all())
         self.assertTrue(h_c in g_a.hosts.all())
         self.assertFalse(h_d in g_a.hosts.all())
-        self.assertFalse(g_c.parents.all())
-        self.assertFalse(g_c.children.all())
-        self.assertFalse(g_c.hosts.all())
 
     def test_safe_delete_recursion(self):
         # First hierarchy
@@ -989,11 +977,9 @@ class InventoryTest(BaseTest):
         self.assertTrue(other_sub_group in sub_group.children.all())
 
         # Now recursively remove its parent and the reference from subgroup should remain
-        other_top_group.mark_inactive_recursive()
-        other_top_group = Group.objects.get(pk=other_top_group.pk)
+        other_top_group.delete_recursive()
         self.assertTrue(s2 in sub_group.all_hosts.all())
         self.assertTrue(other_sub_group in sub_group.children.all())
-        self.assertFalse(other_top_group.active)
 
     def test_group_parents_and_children(self):
         # Test for various levels of group parent/child relations, with hosts,
@@ -1173,7 +1159,7 @@ class InventoryTest(BaseTest):
         # Delete recently added hosts and verify the count drops.
         hostnames4 = list('defg')
         for host in Host.objects.filter(name__in=hostnames4):
-            host.mark_inactive()
+            host.delete()
         with self.current_user(self.super_django_user):
             response = self.get(url)
         for n, d in enumerate(reversed(response['hosts'])):
@@ -1270,7 +1256,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             url = reverse('api:inventory_source_hosts_list', args=(inventory_source.pk,))
             response = self.get(url, expect=200)
             self.assertNotEqual(response['count'], 0)
-        for host in inventory.hosts.filter(active=True):
+        for host in inventory.hosts:
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
@@ -1284,12 +1270,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 url = reverse('api:host_inventory_sources_list', args=(host.pk,))
                 response = self.get(url, expect=200)
                 self.assertNotEqual(response['count'], 0)
-        for group in inventory.groups.filter(active=True):
+        for group in inventory.groups:
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(group.has_inventory_sources)
-            self.assertTrue(group.children.filter(active=True).exists() or
-                            group.hosts.filter(active=True).exists())
+            self.assertTrue(group.children.exists() or
+                            group.hosts.exists())
             # Make sure EC2 instance ID groups and RDS groups are excluded.
             if inventory_source.source == 'ec2' and not instance_id_group_ok:
                 self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
@@ -1307,7 +1293,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 self.assertNotEqual(response['count'], 0)
         # Try to set a source on a child group that was imported.  Should not
         # be allowed.
-        for group in inventory_source.group.children.filter(active=True):
+        for group in inventory_source.group.children:
             inv_src_2 = group.inventory_source
             inv_src_url2 = reverse('api:inventory_source_detail', args=(inv_src_2.pk,))
             with self.current_user(self.super_django_user):
@@ -1663,7 +1649,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.overwrite = True
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
-        for host in self.inventory.hosts.filter(active=True):
+        for host in self.inventory.hosts:
             self.assertEqual(host.variables_dict['ec2_instance_type'], instance_type)
 
         # Try invalid instance filters that should be ignored:
@@ -1797,12 +1783,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
         # Verify that only the desired groups are returned.
-        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        child_names = self.group.children.values_list('name', flat=True)
         self.assertTrue('ec2' in child_names)
         self.assertTrue('regions' in child_names)
-        self.assertTrue(self.group.children.get(name='regions').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='regions').children.count())
         self.assertTrue('types' in child_names)
-        self.assertTrue(self.group.children.get(name='types').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='types').children.count())
         self.assertFalse('keys' in child_names)
         self.assertFalse('security_groups' in child_names)
         self.assertFalse('tags' in child_names)
@@ -1819,27 +1805,27 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.check_inventory_source(inventory_source, initial=False, instance_id_group_ok=True)
         # Verify that only the desired groups are returned.
         # Skip vpcs as selected inventory may or may not have any.
-        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        child_names = self.group.children.values_list('name', flat=True)
         self.assertTrue('ec2' in child_names)
         self.assertFalse('tag_none' in child_names)
         self.assertTrue('regions' in child_names)
-        self.assertTrue(self.group.children.get(name='regions').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='regions').children.count())
         self.assertTrue('types' in child_names)
-        self.assertTrue(self.group.children.get(name='types').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='types').children.count())
         self.assertTrue('keys' in child_names)
-        self.assertTrue(self.group.children.get(name='keys').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='keys').children.count())
         self.assertTrue('security_groups' in child_names)
-        self.assertTrue(self.group.children.get(name='security_groups').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='security_groups').children.count())
         self.assertTrue('tags' in child_names)
-        self.assertTrue(self.group.children.get(name='tags').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='tags').children.count())
         # Only check for tag_none as a child of tags if there is a tag_none group;
         # the test inventory *may* have tags set for all hosts.
         if self.inventory.groups.filter(name='tag_none').exists():
             self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
         self.assertTrue('images' in child_names)
-        self.assertTrue(self.group.children.get(name='images').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='images').children.count())
         self.assertTrue('instances' in child_names)
-        self.assertTrue(self.group.children.get(name='instances').children.filter(active=True).count())
+        self.assertTrue(self.group.children.get(name='instances').children.count())
         # Sync again with overwrite set to False after renaming a group that
         # was created by the sync.  With overwrite false, the renamed group and
         # the original group (created again by the sync) will both exist.
@@ -1853,7 +1839,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.overwrite = False
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False, instance_id_group_ok=True)
-        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        child_names = self.group.children.values_list('name', flat=True)
         self.assertTrue(region_group_original_name in self.group.children.get(name='regions').children.values_list('name', flat=True))
         self.assertTrue(region_group.name in self.group.children.get(name='regions').children.values_list('name', flat=True))
         # Replacement text should not be left in inventory source name.

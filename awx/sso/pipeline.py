@@ -90,7 +90,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
             org = Organization.objects.get_or_create(name=org_name)[0]
         else:
             try:
-                org = Organization.objects.filter(active=True).order_by('pk')[0]
+                org = Organization.objects.order_by('pk')[0]
             except IndexError:
                 continue
 
@@ -126,7 +126,7 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
             org = Organization.objects.get_or_create(name=team_opts['organization'])[0]
         else:
             try:
-                org = Organization.objects.filter(active=True).order_by('pk')[0]
+                org = Organization.objects.order_by('pk')[0]
             except IndexError:
                 continue
 

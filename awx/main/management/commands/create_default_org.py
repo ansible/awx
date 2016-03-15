@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         # Create a default organization as the first superuser found.
         try:
-            superuser = User.objects.filter(is_superuser=True, is_active=True).order_by('pk')[0]
+            superuser = User.objects.filter(is_superuser=True).order_by('pk')[0]
         except IndexError:
             superuser = None
         with impersonate(superuser):

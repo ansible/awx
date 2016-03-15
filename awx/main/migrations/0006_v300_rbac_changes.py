@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         ('taggit', '0002_auto_20150616_2121'),
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0006_v300_active_flag_removal'),
+        ('main', '0005_v300_active_flag_removal'),
     ]
 
     operations = [
@@ -41,7 +41,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
                 ('name', models.CharField(max_length=512)),
                 ('singleton_name', models.TextField(default=None, unique=True, null=True, db_index=True)),
                 ('object_id', models.PositiveIntegerField(default=None, null=True)),

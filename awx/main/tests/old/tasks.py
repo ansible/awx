@@ -592,26 +592,8 @@ class RunJobTest(BaseJobExecutionTest):
         new_group.children.remove(self.group)
         new_group = Group.objects.get(pk=new_group.pk)
         self.assertFalse(new_group.has_active_failures)
-        # Mark host inactive (should clear flag on parent group and inventory)
-        self.host.mark_inactive()
-        self.group = Group.objects.get(pk=self.group.pk)
-        self.assertFalse(self.group.has_active_failures)
-        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
-        self.assertFalse(self.inventory.has_active_failures)
-        # Un-mark host as inactive (need to force update of flag on group and
-        # inventory)
-        host = self.host
-        host.name = '_'.join(host.name.split('_')[3:]) or 'undeleted host'
-        host.active = True
-        host.save()
-        host.update_computed_fields()
-        self.group = Group.objects.get(pk=self.group.pk)
-        self.assertTrue(self.group.has_active_failures)
-        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
-        self.assertTrue(self.inventory.has_active_failures)
-        # Delete host. (should clear flag)
+        # Delete host (should clear flag on parent group and inventory)
         self.host.delete()
-        self.host = None
         self.group = Group.objects.get(pk=self.group.pk)
         self.assertFalse(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
@@ -619,30 +601,7 @@ class RunJobTest(BaseJobExecutionTest):
 
     def test_update_has_active_failures_when_job_removed(self):
         job = self.test_run_job_that_fails()
-        # Mark job as inactive (should clear flags).
-        job.mark_inactive()
-        self.host = Host.objects.get(pk=self.host.pk)
-        self.assertFalse(self.host.has_active_failures)
-        self.group = Group.objects.get(pk=self.group.pk)
-        self.assertFalse(self.group.has_active_failures)
-        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
-        self.assertFalse(self.inventory.has_active_failures)
-        # Un-mark job as inactive (need to force update of flag)
-        job.active = True
-        job.save()
-        # Need to manually update last_job on host...
-        host = Host.objects.get(pk=self.host.pk)
-        host.last_job = job
-        host.last_job_host_summary = JobHostSummary.objects.get(job=job, host=host)
-        host.save()
-        self.inventory.update_computed_fields()
-        self.host = Host.objects.get(pk=self.host.pk)
-        self.assertTrue(self.host.has_active_failures)
-        self.group = Group.objects.get(pk=self.group.pk)
-        self.assertTrue(self.group.has_active_failures)
-        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
-        self.assertTrue(self.inventory.has_active_failures)
-        # Delete job entirely.
+        # Delete (should clear flags).
         job.delete()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertFalse(self.host.has_active_failures)
@@ -662,8 +621,8 @@ class RunJobTest(BaseJobExecutionTest):
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertEqual(self.host.last_job, job1)
         self.assertEqual(self.host.last_job_host_summary.job, job1)
-        # Mark job1 inactive (should update host.last_job to None).
-        job1.mark_inactive()
+        # Delete job1 (should update host.last_job to None).
+        job1.delete()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertEqual(self.host.last_job, None)
         self.assertEqual(self.host.last_job_host_summary, None)

@@ -637,8 +637,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Verify that the credential and inventory are null when they have
         # been deleted, can delete an ad hoc command without inventory or
         # credential.
-        self.credential.mark_inactive()
-        self.inventory.mark_inactive()
+        self.credential.delete()
+        self.inventory.delete()
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['credential'], None)
@@ -758,7 +758,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             tower_settings.AD_HOC_COMMANDS = ad_hoc_commands
 
         # Try to relaunch after the inventory has been marked inactive.
-        self.inventory.mark_inactive()
+        self.inventory.delete()
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['passwords_needed_to_start'], [])

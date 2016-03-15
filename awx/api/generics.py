@@ -7,7 +7,6 @@ import logging
 import time
 
 # Django
-from django.http import Http404
 from django.conf import settings
 from django.db import connection
 from django.shortcuts import get_object_or_404
@@ -415,9 +414,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             raise PermissionDenied()
 
         if parent_key:
-            # sub object has a ForeignKey to the parent, so we can't remove it
-            # from the set, only mark it as inactive.
-            sub.mark_inactive()
+            sub.delete()
         else:
             relationship.remove(sub)
 
@@ -457,17 +454,9 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.get_object()
-        # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if not getattr(obj, 'active', True):
-            raise Http404()
-        if not getattr(obj, 'is_active', True):
-            raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if hasattr(obj, 'mark_inactive'):
-            obj.mark_inactive()
-        else:
-            raise NotImplementedError('destroy() not implemented yet for %s' % obj)
+        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):

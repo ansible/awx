@@ -4,7 +4,6 @@ from awx.main.models import (
     Role,
     RolePermission,
     Organization,
-    Group,
 )
 
 
