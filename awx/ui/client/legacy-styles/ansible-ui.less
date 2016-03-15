@@ -634,6 +634,13 @@ dd {
               box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
   }
 
+  .form-control.ng-dirty.ng-invalid + .select2 .select2-selection,
+  .form-control.ng-dirty.ng-invalid + .select2 .select2-selection:focus {
+      border-color: rgba(255, 88, 80, 0.8) !important;
+      outline: 0 !important;
+      box-shadow: none !important;
+  }
+
   .form-control.ng-dirty.ng-pristine {
       border-color: @default-second-border;
       box-shadow: none;
@@ -2008,14 +2015,32 @@ tr td button i {
     box-shadow: none;
 }
 
+.form-control + .select2 .select2-selection {
+    border-color: @default-second-border !important;
+    background-color: #f6f6f6 !important;
+    color: @default-data-txt !important;
+    transition: border-color 0.3s !important;
+    box-shadow: none !important;
+}
+
 .form-control:active, .form-control:focus {
     box-shadow: none;
     border-color: #167ec4;
 }
 
+.form-control:active + .select2 .select2-selection, .form-control:focus + .select2 .select2-selection {
+    box-shadow: none !important;
+    border-color: #167ec4 !important;
+}
+
 .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
     box-shadow: none;
 }
+
+.form-control.ng-dirty.ng-invalid + .select2 .select2-selection, .form-control.ng-dirty.ng-invalid:focus + .select2 .select2-selection {
+    box-shadow: none !important;
+}
+
 
 .error {
     opacity: 1;
@@ -2040,4 +2065,8 @@ tr td button i {
 
 .select2-container--disabled {
     opacity: .35;
+}
+
+body.is-modalOpen {
+    overflow: hidden;
 }

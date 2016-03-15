@@ -1548,7 +1548,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
-
+                        if (options.mode === 'edit' && this.form.tabs) {
+                            html += "ng-show=\"" + this.form.name + "Selected\"; "
+                        }
                         html += ">\n";
 
                         if (this.form.horizontal) {
@@ -1723,32 +1725,52 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += "<tr class=\"List-tableHeaderRow\">\n";
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
-                    html += "<th class=\"List-tableHeader list-header\" id=\"" + collection.iterator + '-' + fld + "-header\" " +
-                        "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">" +
-                        collection.fields[fld].label;
-                    html += " <i class=\"";
-                    if (collection.fields[fld].key) {
-                        if (collection.fields[fld].desc) {
-                            html += "fa fa-sort-down";
-                        } else {
-                            html += "fa fa-sort-up";
-                        }
+                    html += "<th class=\"List-tableHeader list-header ";
+                    html += (collection.fields[fld].class) ? collection.fields[fld].class : "";
+                    html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
+
+                    if (!collection.fields[fld].noSort) {
+                        html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">"
                     } else {
-                        html += "fa fa-sort";
+                        html += ">";
                     }
-                    html += "\"></i></a></th>\n";
+
+
+                    html += collection.fields[fld].label;
+
+                    if (!collection.fields[fld].noSort) {
+                        html += " <i class=\"";
+
+
+                        if (collection.fields[fld].key) {
+                            if (collection.fields[fld].desc) {
+                                html += "fa fa-sort-down";
+                            } else {
+                                html += "fa fa-sort-up";
+                            }
+                        } else {
+                            html += "fa fa-sort";
+                        }
+                        html += "\"></i>"
+                    }
+
+                    html += "</a></th>\n";
                 }
-                html += "<th class=\"List-tableHeader\">Actions</th>\n";
+                if (collection.fieldActions) {
+                    html += "<th class=\"List-tableHeader List-tableHeader--actions\">Actions</th>\n";
+                }
                 html += "</tr>\n";
                 html += "</thead>";
                 html += "<tbody>\n";
 
-                html += "<tr class=\"List-tableHeaderRow\" ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
+                html += "<tr class=\"List-tableRow\" ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
                 html += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
                 html += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                 html += "id=\"{{ " + collection.iterator + ".id }}\">\n";
                 if (collection.index === undefined || collection.index !== false) {
-                    html += "<td class=\"List-tableCell\">{{ $index + ((" + collection.iterator + "_page - 1) * " +
+                    html += "<td class=\"List-tableCell";
+                    html += (collection.fields[fld].class) ? collection.fields[fld].class : "";
+                    html += "\">{{ $index + ((" + collection.iterator + "_page - 1) * " +
                         collection.iterator + "_page_size) + 1 }}.</td>\n";
                 }
                 cnt = 1;
@@ -1765,31 +1787,33 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 // Row level actions
-                html += "<td class=\"List-tableCell List-actionButtonCell actions\">";
-                for (act in collection.fieldActions) {
-                    fAction = collection.fieldActions[act];
-                    html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
-                    html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                    html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
-                    html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
-                    html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
-                    html += " class=\"List-actionButton ";
-                    html += (act === 'delete') ? "List-actionButton--delete" : "";
-                    html += "\"";
-                    html += ">";
-                    if (fAction.iconClass) {
-                        html += "<i class=\"" + fAction.iconClass + "\"></i>";
-                    } else {
-                        html += SelectIcon({
-                            action: act
-                        });
+                if (collection.fieldActions) {
+                    html += "<td class=\"List-tableCell List-actionButtonCell actions\">";
+                    for (act in collection.fieldActions) {
+                        fAction = collection.fieldActions[act];
+                        html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                        html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                        html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
+                        html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
+                        html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
+                        html += " class=\"List-actionButton ";
+                        html += (act === 'delete') ? "List-actionButton--delete" : "";
+                        html += "\"";
+                        html += ">";
+                        if (fAction.iconClass) {
+                            html += "<i class=\"" + fAction.iconClass + "\"></i>";
+                        } else {
+                            html += SelectIcon({
+                                action: act
+                            });
+                        }
+                        // html += SelectIcon({ action: act });
+                        //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
+                        html += "</button>";
                     }
-                    // html += SelectIcon({ action: act });
-                    //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
-                    html += "</button>";
+                    html += "</td>";
+                    html += "</tr>\n";
                 }
-                html += "</td>";
-                html += "</tr>\n";
 
                 // Message for loading
                 html += "<tr ng-show=\"" + collection.iterator + "Loading == true\">\n";

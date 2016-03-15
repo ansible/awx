@@ -87,7 +87,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
     assert 'description' in response.data['summary_fields']['host']
     assert 'host' in response.data['related']
     assert reverse('api:host_detail', args=(hosts[0].pk,)) == response.data['related']['host']
-  
+
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_content(hosts, fact_scans, get, user, fact_ansible_json):
@@ -103,7 +103,7 @@ def _test_search_by_module(hosts, fact_scans, get, user, fact_json, module_name)
         'module': module_name
     }
     (fact_known, response) = setup_common(hosts, fact_scans, get, user, module_name=module_name, get_params=params)
-   
+
     assert fact_json == json.loads(response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert module_name == response.data['module']
@@ -132,7 +132,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
-    team_obj.users.add(user_obj)
+    team_obj.member_role.members.add(user_obj)
 
     url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
     response = get(url, user_obj)
@@ -162,7 +162,7 @@ def test_super_user_ok(hosts, fact_scans, get, user, team):
 @pytest.mark.django_db
 def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
     user_admin = user('johnson', False)
-    organization.admins.add(user_admin)
+    organization.admin_role.members.add(user_admin)
 
     response = _test_user_access_control(hosts, fact_scans, get, user_admin, team)
 
@@ -174,7 +174,7 @@ def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
 def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team):
     user_admin = user('johnson', False)
     org2 = organizations(1)
-    org2[0].admins.add(user_admin)
+    org2[0].admin_role.members.add(user_admin)
 
     response = _test_user_access_control(hosts, fact_scans, get, user_admin, team)
 

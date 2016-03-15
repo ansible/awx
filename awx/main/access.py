@@ -1048,7 +1048,7 @@ class JobHostSummaryAccess(BaseAccess):
     model = JobHostSummary
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         qs = qs.select_related('job', 'job__job_template', 'host')
         if self.user.is_superuser:
             return qs
@@ -1073,7 +1073,7 @@ class JobEventAccess(BaseAccess):
     model = JobEvent
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         qs = qs.select_related('job', 'job__job_template', 'host', 'parent')
         qs = qs.prefetch_related('hosts', 'children')
 
@@ -1110,7 +1110,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
     model = UnifiedJobTemplate
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
@@ -1142,7 +1142,7 @@ class UnifiedJobAccess(BaseAccess):
     model = UnifiedJob
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         project_update_qs = self.user.get_queryset(ProjectUpdate)
         inventory_update_qs = self.user.get_queryset(InventoryUpdate).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_qs = self.user.get_queryset(Job)
@@ -1263,7 +1263,7 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.objects
         qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',

@@ -829,13 +829,6 @@ class ProjectPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectOrganizationsList(SubListCreateAttachDetachAPIView):
-
-    model = Organization
-    serializer_class = OrganizationSerializer
-    parent_model = Project
-    relationship = 'organizations'
-
 class ProjectTeamsList(SubListCreateAttachDetachAPIView):
 
     model = Team

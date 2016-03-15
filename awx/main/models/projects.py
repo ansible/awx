@@ -198,6 +198,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         app_label = 'main'
         ordering = ('id',)
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='projects',
+    )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
         editable=False,
@@ -212,13 +219,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Project Administrator',
         role_description='May manage this project',
-        parent_role='organizations.admin_role',
+        parent_role='organization.admin_role',
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
         role_description='May read all settings associated with this project',
-        parent_role='organizations.auditor_role',
+        parent_role='organization.auditor_role',
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
@@ -343,9 +350,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.organizations.all())))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.organizations.all())))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.organizations.all())))
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.organization)))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.organization)))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
     def get_absolute_url(self):

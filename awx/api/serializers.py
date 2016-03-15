@@ -924,7 +924,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
-            organizations = reverse('api:project_organizations_list', args=(obj.pk,)),
             teams = reverse('api:project_teams_list', args=(obj.pk,)),
             playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
             update = reverse('api:project_update_view', args=(obj.pk,)),
@@ -936,6 +935,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list',         args=(obj.pk,)),
         ))
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail',
+                                          args=(obj.organization.pk,))
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = reverse('api:project_update_detail',

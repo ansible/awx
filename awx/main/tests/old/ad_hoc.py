@@ -39,7 +39,7 @@ class BaseAdHocCommandTest(BaseJobExecutionTest):
             self.setup_instances()
             self.setup_users()
             self.organization = self.make_organizations(self.super_django_user, 1)[0]
-            self.organization.admins.add(self.normal_django_user)
+            self.organization.admin_role.members.add(self.normal_django_user)
             self.inventory = self.organization.inventories.create(name='test-inventory', description='description for test-inventory')
             self.host = self.inventory.hosts.create(name='host.example.com')
             self.host2 = self.inventory.hosts.create(name='host2.example.com')
