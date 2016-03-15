@@ -265,7 +265,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # Chuck is temporarily assigned to ops east team to help them running some playbooks
         # even though he's in a different group and org entirely he'll now see their job templates
-        self.team_ops_east.users.add(self.user_chuck)
+        self.team_ops_east.deprecated_users.add(self.user_chuck)
         with self.current_user(self.user_chuck):
             resp = self.get(url, expect=200)
             #print [x['name'] for x in resp['results']]

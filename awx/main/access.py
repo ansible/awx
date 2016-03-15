@@ -487,9 +487,11 @@ class InventorySourceAccess(BaseAccess):
     model = InventorySource
 
     def get_queryset(self):
-        qs = self.model.accessible_by(self.user, {'read':True})
+        qs = self.model.objects
         qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
-        return qs
+        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        return qs.filter(Q(inventory_id__in=inventory_ids) |
+                         Q(group__inventory_id__in=inventory_ids))
 
     def can_read(self, obj):
         if obj and obj.group:
