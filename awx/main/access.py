@@ -7,10 +7,9 @@ import sys
 import logging
 
 # Django
-from django.db.models import F, Q
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.aggregates import Max
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
