@@ -58,10 +58,7 @@ class InventoryTest(BaseTest):
 
         # create a permission here on the 'other' user so they have edit access on the org
         # we may add another permission type later.
-        self.perm_read = Permission.objects.create(
-            inventory       = self.inventory_b,
-            user            = self.other_django_user,
-            permission_type = 'read')
+        self.inventory_b.auditor_role.members.add(self.other_django_user)
 
     def tearDown(self):
         super(InventoryTest, self).tearDown()
@@ -78,11 +75,11 @@ class InventoryTest(BaseTest):
         self.check_get_list(url, self.super_django_user, qs)
 
         # an org admin can list inventories but is filtered to what he adminsters
-        normal_qs = qs.filter(organization__deprecated_admins__in=[self.normal_django_user])
+        normal_qs = qs.filter(organization__admin_role__members=self.normal_django_user)
         self.check_get_list(url, self.normal_django_user, normal_qs)
 
         # a user who is on a team who has a read permissions on an inventory can see filtered inventories
-        other_qs = qs.filter(permissions__user__in=[self.other_django_user])
+        other_qs = Inventory.accessible_objects(self.other_django_user, {'read': True}).distinct()
         self.check_get_list(url, self.other_django_user, other_qs)
 
         # a regular user not part of anything cannot see any inventories
@@ -269,18 +266,14 @@ class InventoryTest(BaseTest):
         temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
         temp_inv.groups.create(name='Delete Org Inventory Group')
 
-        temp_perm_read = Permission.objects.create(
-            inventory       = temp_inv,
-            user            = self.other_django_user,
-            permission_type = 'read'
-        )
+        temp_inv.auditor_role.members.add(self.other_django_user)
 
         reverse('api:organization_detail', args=(temp_org.pk,))
         inventory_detail = reverse('api:inventory_detail', args=(temp_inv.pk,))
-        permission_detail = reverse('api:permission_detail', args=(temp_perm_read.pk,))
+        auditor_role_users_list = reverse('api:role_users_list', args=(temp_inv.auditor_role.pk,))
 
         self.get(inventory_detail, expect=200, auth=self.get_other_credentials())
-        self.delete(permission_detail, expect=204, auth=self.get_super_credentials())
+        self.post(auditor_role_users_list, data={'disassociate': True, "id": self.other_django_user.id}, expect=204, auth=self.get_super_credentials())
         self.get(inventory_detail, expect=403, auth=self.get_other_credentials())
 
     def test_create_inventory_script(self):
@@ -335,10 +328,8 @@ class InventoryTest(BaseTest):
         self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions (on any inventory) can create hosts
-        Permission.objects.create(
-            user            = self.other_django_user,
-            inventory       = Inventory.objects.get(pk=inv.pk),
-            permission_type = PERM_INVENTORY_WRITE)
+
+        inv.admin_role.members.add(self.other_django_user)
         host_data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
 
         # Port should be split out into host variables, other variables kept intact.
@@ -393,11 +384,6 @@ class InventoryTest(BaseTest):
 
         # a normal user with inventory edit permissions (on any inventory) can create groups
         # already done!
-        #edit_perm = Permission.objects.create(
-        #     user            = self.other_django_user,
-        #     inventory       = Inventory.objects.get(pk=inv.pk),
-        #     permission_type = PERM_INVENTORY_WRITE
-        #)
         self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
 
         # hostnames must be unique inside an organization
@@ -417,9 +403,10 @@ class InventoryTest(BaseTest):
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
                                      args=(Group.objects.get(name='nondel').pk,))
+        assert(inv.accessible_by(self.normal_django_user, {'read': True}))
         del_group.delete()
         nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
-        self.post(del_children_url, data=nondel_detail, expect=403, auth=self.get_normal_credentials())
+        self.post(del_children_url, data=nondel_detail, expect=400, auth=self.get_normal_credentials())
 
 
         #################################################
@@ -656,11 +643,7 @@ class InventoryTest(BaseTest):
         gx5 = Group.objects.create(name='group-X5', inventory=inva)
         gx5.parents.add(gx4)
 
-        Permission.objects.create(
-            inventory       = inva,
-            user            = self.other_django_user,
-            permission_type = PERM_INVENTORY_WRITE
-        )
+        inva.admin_role.members.add(self.other_django_user)
 
         # data used for testing listing all hosts that are transitive members of a group
         g2 = Group.objects.get(name='web4')
