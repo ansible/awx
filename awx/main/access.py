@@ -830,7 +830,7 @@ class JobAccess(BaseAccess):
 
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        team_ids = Team.objects.filter(users__in=[self.user])
+        team_ids = Team.objects.filter(member_role__members=self.user)
 
         # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
@@ -944,7 +944,7 @@ class AdHocCommandAccess(BaseAccess):
             return qs
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        team_ids = set(Team.objects.filter( users__in=[self.user]).values_list('id', flat=True))
+        team_ids = set(Team.objects.filter(member_role__members=self.user).values_list('id', flat=True))
 
         permission_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
