@@ -63,6 +63,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
+                ('auto_generated', models.BooleanField(default=False)),
                 ('object_id', models.PositiveIntegerField(default=None)),
                 ('create', models.IntegerField(default=0)),
                 ('read', models.IntegerField(default=0)),
@@ -83,6 +84,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='owner_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='auditor_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
         migrations.AddField(

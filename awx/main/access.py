@@ -322,7 +322,7 @@ class InventoryAccess(BaseAccess):
     model = Inventory
 
     def get_queryset(self, allowed=None, ad_hoc=None):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = self.model.accessible_objects(self.user, {'read': True})
         qs = qs.select_related('created_by', 'modified_by', 'organization')
         return qs
 

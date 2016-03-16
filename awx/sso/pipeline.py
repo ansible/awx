@@ -98,12 +98,12 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
         remove = bool(org_opts.get('remove', False))
         admins_expr = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_expression(user, org.admins, admins_expr, remove_admins)
+        _update_m2m_from_expression(user, org.admin_role.members, admins_expr, remove_admins)
 
         # Update org users from expression(s).
         users_expr = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_expression(user, org.users, users_expr, remove_users)
+        _update_m2m_from_expression(user, org.member_role.members, users_expr, remove_users)
 
 
 def update_user_teams(backend, details, user=None, *args, **kwargs):
@@ -134,4 +134,4 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]
         users_expr = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', False))
-        _update_m2m_from_expression(user, team.users, users_expr, remove)
+        _update_m2m_from_expression(user, team.member_role.members, users_expr, remove)

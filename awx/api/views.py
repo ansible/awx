@@ -1555,7 +1555,7 @@ class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         return qs & parent.root_groups
 
 class BaseVariableData(RetrieveUpdateAPIView):
