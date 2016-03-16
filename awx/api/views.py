@@ -725,7 +725,7 @@ class TeamUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Team
-    relationship = 'users'
+    relationship = 'member_role.members'
 
 
 class TeamRolesList(SubListCreateAttachDetachAPIView):
