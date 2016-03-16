@@ -645,7 +645,7 @@ class ProjectAccess(BaseAccess):
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        qs = Organization.accessible_objects(self.uesr, ALL_PERMISSIONS)
+        qs = Organization.accessible_objects(self.user, ALL_PERMISSIONS)
         return bool(qs.count() > 0)
 
     def can_change(self, obj, data):
