@@ -1247,10 +1247,6 @@ class ActivityStreamAccess(BaseAccess):
         #Project Update Filter
         qs.filter(project_update__project__in=project_qs)
 
-        #Permission Filter
-        permission_qs = self.user.get_queryset(Permission)
-        qs.filter(permission__in=permission_qs)
-
         #Job Template Filter
         jobtemplate_qs = self.user.get_queryset(JobTemplate)
         qs.filter(job_template__in=jobtemplate_qs)
