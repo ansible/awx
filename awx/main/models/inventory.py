@@ -111,10 +111,12 @@ class Inventory(CommonModel, ResourceMixin):
     updater_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
+        permissions = {'read': True, 'update': True}
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
+        permissions = {'read': True, 'execute': True}
     )
 
     def get_absolute_url(self):
