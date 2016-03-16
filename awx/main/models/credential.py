@@ -34,6 +34,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
         ('openstack', _('OpenStack')),
+        ('openstack_v3', _('OpenStack V3')),
     ]
 
     BECOME_METHOD_CHOICES = [
@@ -210,9 +211,18 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         host = self.host or ''
         if not host and self.kind == 'vmware':
             raise ValidationError('Host required for VMware credential.')
-        if not host and self.kind == 'openstack':
+        if not host and self.kind in ('openstack', 'openstack_v3'):
             raise ValidationError('Host required for OpenStack credential.')
         return host
+
+    def clean_domain(self):
+        """For case of Keystone v3 identity service that requires a
+        `domain`, that a domain is provided.
+        """
+        domain = self.domain or ''
+        if not domain and self.kind == 'openstack_v3':
+            raise ValidationError('Domain required for OpenStack with Keystone v3.')
+        return domain
 
     def clean_username(self):
         username = self.username or ''
@@ -223,7 +233,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
                                   'credential.')
         if not username and self.kind == 'vmware':
             raise ValidationError('Username required for VMware credential.')
-        if not username and self.kind == 'openstack':
+        if not username and self.kind in ('openstack', 'openstack_v3'):
             raise ValidationError('Username required for OpenStack credential.')
         return username
 
@@ -235,13 +245,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             raise ValidationError('API key required for Rackspace credential.')
         if not password and self.kind == 'vmware':
             raise ValidationError('Password required for VMware credential.')
-        if not password and self.kind == 'openstack':
+        if not password and self.kind in ('openstack', 'openstack_v3'):
             raise ValidationError('Password or API key required for OpenStack credential.')
         return password
 
     def clean_project(self):
         project = self.project or ''
-        if self.kind == 'openstack' and not project:
+        if self.kind in ('openstack', 'openstack_v3') and not project:
             raise ValidationError('Project name required for OpenStack credential.')
         return project
 

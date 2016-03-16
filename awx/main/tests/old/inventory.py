@@ -2078,13 +2078,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
         if not all([api_url, api_user, api_password, api_project, api_domain]):
             self.skipTest("No test openstack v3 credentials defined")
         self.create_test_license_file()
-        credential = Credential.objects.create(kind='openstack',
+        credential = Credential.objects.create(kind='openstack_v3',
                                                host=api_url,
                                                username=api_user,
                                                password=api_password,
                                                project=api_project,
                                                domain=api_domain)
-        inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
+        inventory_source = self.update_inventory_source(self.group, source='openstack_v3', credential=credential)
         self.check_inventory_source(inventory_source)
         self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
 
@@ -2132,3 +2132,27 @@ class InventoryCredentialTest(BaseTest):
         self.assertIn('password', response)
         self.assertIn('host', response)
         self.assertIn('project', response)
+
+    def test_openstack_v3_create_ok(self):
+        data = {
+            'kind': 'openstack_v3',
+            'name': 'Best credential ever',
+            'username': 'some_user',
+            'password': 'some_password',
+            'project': 'some_project',
+            'host': 'some_host',
+            'domain': 'some_domain',
+        }
+        self.post(self.url, data=data, expect=201, auth=self.get_super_credentials())
+
+    def test_openstack_v3_create_fail_required_fields(self):
+        data = {
+            'kind': 'openstack_v3',
+            'name': 'Best credential ever',
+        }
+        response = self.post(self.url, data=data, expect=400, auth=self.get_super_credentials())
+        self.assertIn('username', response)
+        self.assertIn('password', response)
+        self.assertIn('host', response)
+        self.assertIn('project', response)
+        self.assertIn('domain', response)
