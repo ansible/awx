@@ -32,7 +32,10 @@ class ResourceMixin(models.Model):
         performant to resolve the resource in question then call
         `myresource.get_permissions(user)`.
         '''
+        return ResourceMixin._accessible_objects(cls, user, permissions)
 
+    @staticmethod
+    def _accessible_objects(cls, user, permissions):
         qs = cls.objects.filter(
             role_permissions__role__ancestors__members=user
         )

@@ -81,15 +81,7 @@ def user_admin_role(self):
     return Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=self.id)
 
 def user_accessible_objects(user, permissions):
-    content_type = ContentType.objects.get_for_model(User)
-    qs = RolePermission.objects.filter(
-        content_type=content_type,
-        role__ancestors__members=user
-    )
-    for perm in permissions:
-        qs = qs.annotate(**{'max_' + perm: Max(perm)})
-        qs = qs.filter(**{'max_' + perm: int(permissions[perm])})
-    return qs
+    return ResourceMixin._accessible_objects(User, user, permissions)
 
 def user_accessible_by(instance, user, permissions):
     perms = get_user_permissions_on_resource(instance, user)
@@ -236,7 +228,7 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = User.accessible_objects(self.user, {'read':True})
         return qs
 
     def can_add(self, data):
