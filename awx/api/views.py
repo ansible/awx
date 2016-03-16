@@ -633,14 +633,14 @@ class OrganizationUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'users'
+    relationship = 'member_role.members'
 
 class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'admins'
+    relationship = 'admin_role.members'
 
 class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 

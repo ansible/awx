@@ -299,7 +299,7 @@ class SubListAPIView(ListAPIView, ParentMixin):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()
-        sublist_qs = getattr(parent, self.relationship).distinct()
+        sublist_qs = getattrd(parent, self.relationship).distinct()
         return qs & sublist_qs
 
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
