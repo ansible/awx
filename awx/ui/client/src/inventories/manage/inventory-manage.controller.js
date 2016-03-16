@@ -10,7 +10,7 @@
  * @description This controller's for the Inventory page
  */
 
-import '../job-templates/main';
+import '../../job-templates/main';
 
 function InventoriesManage($log, $scope, $rootScope, $location,
     $state, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert,

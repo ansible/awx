@@ -10,7 +10,7 @@
  * @description This controller's for the Inventory page
  */
 
-import '../job-templates/main';
+import '../../job-templates/main';
 
 function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
