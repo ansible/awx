@@ -47,9 +47,9 @@ class InventoryTest(BaseTest):
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 3)
-        self.organizations[0].deprecated_admins.add(self.normal_django_user)
-        self.organizations[0].deprecated_users.add(self.other_django_user)
-        self.organizations[0].deprecated_users.add(self.normal_django_user)
+        self.organizations[0].admin_role.members.add(self.normal_django_user)
+        self.organizations[0].member_role.members.add(self.other_django_user)
+        self.organizations[0].member_role.members.add(self.normal_django_user)
 
         self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
         self.inventory_b = Inventory.objects.create(name='inventory-b', description='bar', organization=self.organizations[1])
@@ -263,9 +263,9 @@ class InventoryTest(BaseTest):
 
     def test_inventory_access_deleted_permissions(self):
         temp_org = self.make_organizations(self.super_django_user, 1)[0]
-        temp_org.deprecated_admins.add(self.normal_django_user)
-        temp_org.deprecated_users.add(self.other_django_user)
-        temp_org.deprecated_users.add(self.normal_django_user)
+        temp_org.admin_role.members.add(self.normal_django_user)
+        temp_org.member_role.members.add(self.other_django_user)
+        temp_org.member_role.members.add(self.normal_django_user)
         temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
         temp_inv.groups.create(name='Delete Org Inventory Group')
 
@@ -1181,9 +1181,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.setup_instances()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.organization.deprecated_admins.add(self.normal_django_user)
-        self.organization.deprecated_users.add(self.other_django_user)
-        self.organization.deprecated_users.add(self.normal_django_user)
+        self.organization.admin_role.members.add(self.normal_django_user)
+        self.organization.member_role.members.add(self.other_django_user)
+        self.organization.member_role.members.add(self.normal_django_user)
         self.inventory = self.organization.inventories.create(name='Cloud Inventory')
         self.group = self.inventory.groups.create(name='Cloud Group')
         self.inventory2 = self.organization.inventories.create(name='Cloud Inventory 2')
@@ -1540,16 +1540,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.post(inv_src_update_url, {}, expect=403)
         # If given read permission to the inventory, other user should be able
         # to see the inventory source and update view, but not start an update.
-        other_perms_url = reverse('api:user_permissions_list',
-                                  args=(self.other_django_user.pk,))
-        other_perms_data = {
-            'name': 'read only inventory permission for other',
-            'user': self.other_django_user.pk,
-            'inventory': self.inventory.pk,
-            'permission_type': 'read',
-        }
+        user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user(self.super_django_user):
-            self.post(other_perms_url, other_perms_data, expect=201)
+            self.post(user_roles_list_url, {"id": self.inventory.auditor_role.id}, expect=204)
         with self.current_user(self.other_django_user):
             self.get(inv_src_url, expect=200)
             response = self.get(inv_src_update_url, expect=200)
@@ -1557,14 +1550,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.post(inv_src_update_url, {}, expect=403)
         # Once given write permission, the normal user is able to update the
         # inventory source.
-        other_perms_data = {
-            'name': 'read-write inventory permission for other',
-            'user': self.other_django_user.pk,
-            'inventory': self.inventory.pk,
-            'permission_type': 'write',
-        }
         with self.current_user(self.super_django_user):
-            self.post(other_perms_url, other_perms_data, expect=201)
+            self.post(user_roles_list_url, {"id": self.inventory.admin_role.id}, expect=204)
         with self.current_user(self.other_django_user):
             self.get(inv_src_url, expect=200)
             response = self.get(inv_src_update_url, expect=200)
