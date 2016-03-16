@@ -1115,59 +1115,6 @@ class InventoryTest(BaseTest):
         self.assertEqual(response['hosts']['total'], 8)
         self.assertEqual(response['hosts']['failed'], 8)
 
-    def test_dashboard_inventory_graph_view(self):
-        url = reverse('api:dashboard_inventory_graph_view')
-        # Test with zero hosts.
-        with self.current_user(self.super_django_user):
-            response = self.get(url)
-        self.assertFalse(sum([x[1] for x in response['hosts']]))
-        # Create hosts in inventory_a, with created one day apart, and check
-        # the time series results.
-        dtnow = now()
-        hostnames = list('abcdefg')
-        for x in xrange(len(hostnames) - 1, -1, -1):
-            hostname = hostnames[x]
-            created = dtnow - datetime.timedelta(days=x, seconds=60)
-            self.inventory_a.hosts.create(name=hostname, created=created)
-        with self.current_user(self.super_django_user):
-            response = self.get(url)
-        for n, d in enumerate(reversed(response['hosts'])):
-            self.assertEqual(d[1], max(len(hostnames) - n, 0))
-        # Create more hosts a day apart in inventory_b and check the time
-        # series results.
-        hostnames2 = list('hijklmnop')
-        for x in xrange(len(hostnames2) - 1, -1, -1):
-            hostname = hostnames2[x]
-            created = dtnow - datetime.timedelta(days=x, seconds=120)
-            self.inventory_b.hosts.create(name=hostname, created=created)
-        with self.current_user(self.super_django_user):
-            response = self.get(url)
-        for n, d in enumerate(reversed(response['hosts'])):
-            self.assertEqual(d[1], max(len(hostnames2) - n, 0) + max(len(hostnames) - n, 0))
-        # Now create some hosts in inventory_a with the same hostnames already
-        # used in inventory_b; duplicate hostnames should only be counted the
-        # first time they were seen in inventory_b.
-        hostnames3 = list('lmnop')
-        for x in xrange(len(hostnames3) - 1, -1, -1):
-            hostname = hostnames3[x]
-            created = dtnow - datetime.timedelta(days=x, seconds=180)
-            self.inventory_a.hosts.create(name=hostname, created=created)
-        with self.current_user(self.super_django_user):
-            response = self.get(url)
-        for n, d in enumerate(reversed(response['hosts'])):
-            self.assertEqual(d[1], max(len(hostnames2) - n, 0) + max(len(hostnames) - n, 0))
-        # Delete recently added hosts and verify the count drops.
-        hostnames4 = list('defg')
-        for host in Host.objects.filter(name__in=hostnames4):
-            host.delete()
-        with self.current_user(self.super_django_user):
-            response = self.get(url)
-        for n, d in enumerate(reversed(response['hosts'])):
-            count = max(len(hostnames2) - n, 0) + max(len(hostnames) - n, 0)
-            if n == 0:
-                count -= 4
-            self.assertEqual(d[1], count)
-
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
