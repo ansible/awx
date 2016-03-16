@@ -134,11 +134,14 @@ def test_auto_field_adjuments(organization, inventory, team, alice):
 def test_implicit_deletes(alice):
     'Ensures implicit resources and roles delete themselves'
     delorg = Organization.objects.create(name='test-org')
+    child = Role.objects.create(name='child-role')
+    child.parents.add(delorg.admin_role)
     delorg.admin_role.members.add(alice)
 
     admin_role_id = delorg.admin_role.id
     auditor_role_id = delorg.auditor_role.id
 
+    assert child.ancestors.count() > 1
     assert Role.objects.filter(id=admin_role_id).count() == 1
     assert Role.objects.filter(id=auditor_role_id).count() == 1
     n_alice_roles = alice.roles.count()
@@ -152,6 +155,9 @@ def test_implicit_deletes(alice):
     assert alice.roles.count() == (n_alice_roles - 1)
     assert RolePermission.objects.filter(id=rp.id).count() == 0
     assert Role.singleton('System Administrator').children.count() == (n_system_admin_children - 1)
+    assert child.ancestors.count() == 1
+    assert child.ancestors.all()[0] == child
+
 
 @pytest.mark.django_db
 def test_content_object(user):

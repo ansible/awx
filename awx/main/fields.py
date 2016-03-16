@@ -293,4 +293,4 @@ class ImplicitRoleField(models.ForeignKey):
         children = [c for c in this_role.children.all()]
         this_role.delete()
         for child in children:
-            children.rebuild_role_ancestor_list()
+            child.rebuild_role_ancestor_list()
