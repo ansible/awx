@@ -1053,7 +1053,7 @@ class InventorySourceOptions(BaseModel):
         return ','.join(choices)
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     class Meta:
         app_label = 'main'
