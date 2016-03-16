@@ -56,27 +56,33 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 val.links = [];
                 val.links.push({
                     href: card.related.users,
-                    name: "USERS"
+                    name: "USERS",
+                    count: card.summary_fields.related_field_counts.users
                 });
                 val.links.push({
                     href: card.related.teams,
-                    name: "TEAMS"
+                    name: "TEAMS",
+                    count: card.summary_fields.related_field_counts.teams
                 });
                 val.links.push({
                     href: card.related.inventories,
-                    name: "INVENTORIES"
+                    name: "INVENTORIES",
+                    count: card.summary_fields.related_field_counts.inventories
                 });
                 val.links.push({
                     href: card.related.projects,
-                    name: "PROJECTS"
+                    name: "PROJECTS",
+                    count: card.summary_fields.related_field_counts.projects
                 });
                 val.links.push({
                     href: card.related.job_templates,
-                    name: "JOB TEMPLATES"
+                    name: "JOB TEMPLATES",
+                    count: card.summary_fields.related_field_counts.job_templates
                 });
                 val.links.push({
                     href: card.related.admins,
-                    name: "ADMINS"
+                    name: "ADMINS",
+                    count: card.summary_fields.related_field_counts.admins
                 });
                 return val;
             });

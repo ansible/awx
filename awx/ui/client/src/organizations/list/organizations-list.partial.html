@@ -47,7 +47,7 @@
                 <div class="OrgCards-link" ng-repeat="link in card.links">
                     <span class="badge List-titleBadge
                         OrgCards-linkBadge">
-                        0
+                        {{ link.count }}
                     </span>
                     <a class="OrgCards-linkName"
                         ng-href="{{ link.href }}">
