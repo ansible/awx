@@ -1256,7 +1256,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             url = reverse('api:inventory_source_hosts_list', args=(inventory_source.pk,))
             response = self.get(url, expect=200)
             self.assertNotEqual(response['count'], 0)
-        for host in inventory.hosts:
+        for host in inventory.hosts.all():
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
@@ -1636,7 +1636,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source.overwrite = True
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
-        for host in self.inventory.hosts:
+        for host in self.inventory.hosts.all():
             self.assertEqual(host.variables_dict['ec2_instance_type'], instance_type)
 
         # Try invalid instance filters that should be ignored:
