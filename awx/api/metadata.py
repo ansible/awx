@@ -1,6 +1,8 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+from collections import OrderedDict
+
 # Django
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
@@ -10,6 +12,7 @@ from django.utils.encoding import force_text
 from rest_framework import exceptions
 from rest_framework import metadata
 from rest_framework import serializers
+from rest_framework.relations import RelatedField
 from rest_framework.request import clone_request
 
 # Ansible Tower
@@ -37,9 +40,20 @@ class Metadata(metadata.SimpleMetadata):
         return field_info
 
     def get_field_info(self, field):
-        field_info = super(Metadata, self).get_field_info(field)
-        if hasattr(field, 'choices') and field.choices:
-            field_info = self._render_read_only_choices(field, field_info)
+        field_info = OrderedDict()
+        field_info['type'] = self.label_lookup[field]
+        field_info['required'] = getattr(field, 'required', False)
+
+        text_attrs = [
+            'read_only', 'label', 'help_text',
+            'min_length', 'max_length',
+            'min_value', 'max_value'
+        ]
+
+        for attr in text_attrs:
+            value = getattr(field, attr, None)
+            if value is not None and value != '':
+                field_info[attr] = force_text(value, strings_only=True)
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
@@ -48,20 +62,17 @@ class Metadata(metadata.SimpleMetadata):
         except serializers.SkipField:
             pass
 
+        if getattr(field, 'child', None):
+            field_info['child'] = self.get_field_info(field.child)
+        elif getattr(field, 'fields', None):
+            field_info['children'] = self.get_serializer_info(field)
+
+        if hasattr(field, 'choices') and not isinstance(field, RelatedField):
+            field_info['choices'] = [(choice_value, choice_name) for choice_value, choice_name in field.choices.items()]
+
         # Indicate if a field is write-only.
         if getattr(field, 'write_only', False):
             field_info['write_only'] = True
-
-        # Update choices to be a list of 2-tuples instead of list of dicts with
-        # value/display_name.
-        if 'choices' in field_info:
-            choices = []
-            for choice in field_info['choices']:
-                if isinstance(choice, dict):
-                    choices.append((choice.get('value'), choice.get('display_name')))
-                else:
-                    choices.append(choice)
-            field_info['choices'] = choices
 
         # Special handling of inventory source_region choices that vary based on
         # selected inventory source.
