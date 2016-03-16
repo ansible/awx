@@ -819,47 +819,11 @@ class JobAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
             return qs
+
         credential_ids = self.user.get_queryset(Credential)
-        base_qs = qs.filter(
+        return qs.filter(
             credential_id__in=credential_ids,
-        )
-        org_admin_ids = base_qs.filter(
-            Q(project__organizations__admins__in=[self.user]) |
-            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        )
-
-        allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
-        allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        team_ids = Team.objects.filter(member_role__members=self.user)
-
-        # TODO: I think the below queries can be combined
-        deploy_permissions_ids = Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=allowed_deploy,
-        )
-        check_permissions_ids = Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=allowed_check,
-        )
-
-        perm_deploy_ids = base_qs.filter(
-            job_type=PERM_INVENTORY_DEPLOY,
-            inventory__permissions__in=deploy_permissions_ids,
-            project__permissions__in=deploy_permissions_ids,
-            inventory__permissions__pk=F('project__permissions__pk'),
-        )
-
-        perm_check_ids = base_qs.filter(
-            job_type=PERM_INVENTORY_CHECK,
-            inventory__permissions__in=check_permissions_ids,
-            project__permissions__in=check_permissions_ids,
-            inventory__permissions__pk=F('project__permissions__pk'),
-        )
-
-        return base_qs.filter(
-            Q(id__in=org_admin_ids) |
-            Q(id__in=perm_deploy_ids) |
-            Q(id__in=perm_check_ids)
+            job_template__in=JobTemplate.accessible_objects(self.user, {'read': True})
         )
 
     def can_add(self, data):
