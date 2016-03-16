@@ -944,21 +944,11 @@ class AdHocCommandAccess(BaseAccess):
             return qs
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        team_ids = set(Team.objects.filter(member_role__members=self.user).values_list('id', flat=True))
-
-        permission_ids = set(Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-            run_ad_hoc_commands=True,
-        ).values_list('id', flat=True))
-
-        inventory_qs = self.user.get_queryset(Inventory)
-        inventory_qs = inventory_qs.filter(Q(permissions__in=permission_ids) | Q(organization__admins__in=[self.user]))
-        inventory_ids = set(inventory_qs.values_list('id', flat=True))
+        inventory_qs = Inventory.accessible_objects(self.user, {'read': True, 'execute': True})
 
         qs = qs.filter(
             credential_id__in=credential_ids,
-            inventory_id__in=inventory_ids,
+            inventory__in=inventory_qs,
         )
         return qs
 
