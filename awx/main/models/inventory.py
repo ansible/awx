@@ -547,6 +547,7 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     @transaction.atomic
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
+        from awx.main.tasks import update_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
 
 
