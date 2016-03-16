@@ -158,18 +158,39 @@ def grant_host_access_to_group_roles(instance, action, model, reverse, pk_set, *
 
     if action == 'post_add':
         def grant(host, group):
-            RolePermission.objects.create(resource=host, role=group.admin_role, auto_generated=True,
-                create=1, read=1, write=1, delete=1, update=1,
-                execute=1, scm_update=1, use=1,
+            RolePermission.objects.create(
+                resource=host,
+                role=group.admin_role,
+                auto_generated=True,
+                create=1,
+                read=1, write=1,
+                delete=1,
+                update=1,
+                execute=1,
+                scm_update=1,
+                use=1,
             )
-            RolePermission.objects.create(resource=host, role=group.auditor_role, auto_generated=True,
+            RolePermission.objects.create(
+                resource=host,
+                role=group.auditor_role,
+                auto_generated=True,
                 read=1,
             )
-            RolePermission.objects.create(resource=host, role=group.updater_role, auto_generated=True,
-                read=1, write=1, create=1, use=1
+            RolePermission.objects.create(
+                resource=host,
+                role=group.updater_role,
+                auto_generated=True,
+                read=1,
+                write=1,
+                create=1,
+                use=1
             )
-            RolePermission.objects.create(resource=host, role=group.executor_role, auto_generated=True,
-                read=1, execute=1
+            RolePermission.objects.create(
+                resource=host,
+                role=group.executor_role,
+                auto_generated=True,
+                read=1,
+                execute=1
             )
 
         if reverse:
@@ -183,6 +204,7 @@ def grant_host_access_to_group_roles(instance, action, model, reverse, pk_set, *
 
     if action == 'pre_remove':
         host_content_type = ContentType.objects.get_for_model(Host)
+
         def remove_grant(host, group):
             RolePermission.objects.filter(
                 content_type = host_content_type,
