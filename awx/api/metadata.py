@@ -21,24 +21,6 @@ from awx.main.models import InventorySource, Notifier
 
 class Metadata(metadata.SimpleMetadata):
 
-    # DRF 3.3 doesn't render choices for read-only fields
-    #
-    # We want to render choices for read-only fields
-    #
-    # Note: This works in conjuction with logic in serializers.py that sets
-    # field property editable=True before calling DRF build_standard_field()
-    # Note: Consider expanding this rendering for more than just choices fields
-    def _render_read_only_choices(self, field, field_info):
-        if field_info.get('read_only') and hasattr(field, 'choices'):
-            field_info['choices'] = [
-                {
-                    'value': choice_value,
-                    'display_name': force_text(choice_name, strings_only=True)
-                }
-                for choice_value, choice_name in field.choices.items()
-            ]
-        return field_info
-
     def get_field_info(self, field):
         field_info = OrderedDict()
         field_info['type'] = self.label_lookup[field]
