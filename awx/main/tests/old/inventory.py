@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import glob
 import json
 import os
@@ -14,7 +13,6 @@ import time
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # noqa
@@ -1200,7 +1198,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 url = reverse('api:host_inventory_sources_list', args=(host.pk,))
                 response = self.get(url, expect=200)
                 self.assertNotEqual(response['count'], 0)
-        for group in inventory.groups:
+        for group in inventory.groups.all():
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(group.has_inventory_sources)
@@ -1223,7 +1221,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 self.assertNotEqual(response['count'], 0)
         # Try to set a source on a child group that was imported.  Should not
         # be allowed.
-        for group in inventory_source.group.children:
+        for group in inventory_source.group.children.all():
             inv_src_2 = group.inventory_source
             inv_src_url2 = reverse('api:inventory_source_detail', args=(inv_src_2.pk,))
             with self.current_user(self.super_django_user):
