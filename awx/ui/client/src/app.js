@@ -432,61 +432,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            // state('organizations', {
-            //     url: '/organizations',
-            //     templateUrl: urlPrefix + 'partials/organizations.html',
-            //     controller: OrganizationsList,
-            //     data: {
-            //         activityStream: true,
-            //         activityStreamTarget: 'organization'
-            //     },
-            //     ncyBreadcrumb: {
-            //         parent: function($scope) {
-            //             $scope.$parent.$emit("ReloadOrgListView");
-            //             return "setup";
-            //         },
-            //         label: "ORGANIZATIONS"
-            //     },
-            //     resolve: {
-            //         features: ['FeaturesService', function(FeaturesService) {
-            //             return FeaturesService.get();
-            //         }]
-            //     }
-            // }).
-
-            // state('organizations.add', {
-            //     url: '/add',
-            //     templateUrl: urlPrefix + 'partials/organizations.crud.html',
-            //     controller: OrganizationsAdd,
-            //     ncyBreadcrumb: {
-            //         parent: "organizations",
-            //         label: "CREATE ORGANIZATION"
-            //     },
-            //     resolve: {
-            //         features: ['FeaturesService', function(FeaturesService) {
-            //             return FeaturesService.get();
-            //         }]
-            //     }
-            // }).
-            //
-            // state('organizations.edit', {
-            //     url: '/:organization_id',
-            //     templateUrl: urlPrefix + 'partials/organizations.crud.html',
-            //     controller: OrganizationsEdit,
-            //     data: {
-            //         activityStreamId: 'organization_id'
-            //     },
-            //     ncyBreadcrumb: {
-            //         parent: "organizations",
-            //         label: "{{name}}"
-            //     },
-            //     resolve: {
-            //         features: ['FeaturesService', function(FeaturesService) {
-            //             return FeaturesService.get();
-            //         }]
-            //     }
-            // }).
-
             state('organizationAdmins', {
                 url: '/organizations/:organization_id/admins',
                 templateUrl: urlPrefix + 'partials/organizations.html',
