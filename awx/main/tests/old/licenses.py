@@ -19,7 +19,7 @@ class LicenseTests(BaseTest):
         self.setup_users()
         u = self.super_django_user
         org = Organization.objects.create(name='o1', created_by=u)
-        org.deprecated_admins.add(self.normal_django_user)
+        org.admin_role.members.add(self.normal_django_user)
         self.inventory = Inventory.objects.create(name='hi', organization=org, created_by=u)
         Host.objects.create(name='a1', inventory=self.inventory, created_by=u)
         Host.objects.create(name='a2', inventory=self.inventory, created_by=u)
