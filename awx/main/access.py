@@ -1142,7 +1142,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'read', obj.unified_job_template)
         else:
             return False
 
@@ -1152,7 +1153,7 @@ class ScheduleAccess(BaseAccess):
         pk = get_pk_from_dict(data, 'unified_job_template')
         obj = get_object_or_400(UnifiedJobTemplate, pk=pk)
         if obj:
-            return obj.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            return self.user.can_access(type(obj), 'change', obj, None)
         else:
             return False
 
@@ -1160,7 +1161,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
@@ -1168,7 +1170,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
