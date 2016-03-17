@@ -566,8 +566,6 @@ class CredentialAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
-        if not self.can_add(data):
-            return False
         return obj.accessible_by(self.user, {'read':True, 'update': True, 'delete':True})
 
     def can_delete(self, obj):

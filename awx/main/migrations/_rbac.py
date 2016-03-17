@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
@@ -55,31 +53,44 @@ def migrate_team(apps, schema_editor):
             migrations[t.name].append(user)
     return migrations
 
+def attrfunc(attr_path):
+    '''attrfunc returns a function that will
+    attempt to use the attr_path to access the attribute
+    of an instance that is passed in to the returned function.
+
+    Example:
+        get_org = attrfunc('inventory.organization')
+        org = get_org(JobTemplateInstance)
+    '''
+    def attr(inst):
+        return reduce(getattr, [inst] + attr_path.split('.'))
+    return attr
+
 def _update_credential_parents(org, cred):
     org.admin_role.children.add(cred.owner_role)
     org.member_role.children.add(cred.usage_role)
     cred.user, cred.team = None, None
     cred.save()
 
-def _discover_credentials(insts, cred, org_path='organization'):
+def _discover_credentials(instances, cred, orgfunc):
     '''_discover_credentials will find shared credentials across
     organizations. If a shared credential is found, it will duplicate
     the credential, ensure the proper role permissions are added to the new
     credential, and update any references from the old to the newly created
     credential.
-    '''
-    def get_org(inst):
-        fields = org_path.split('.')
-        for field in fields:
-            inst = getattr(inst, field)
-        return inst
 
+    instances is a list of all objects that were matched when filtered
+    with cred.
+
+    orgfunc is a function that when called with an instance from instances
+    will produce an Organization object.
+    '''
     orgs = defaultdict(list)
-    for inst in insts:
-        orgs[get_org(inst)].append(inst)
+    for inst in instances:
+        orgs[orgfunc(inst)].append(inst)
 
     if len(orgs) == 1:
-        _update_credential_parents(insts[0].inventory.organization, cred)
+        _update_credential_parents(instances[0].inventory.organization, cred)
     else:
         for pos, org in enumerate(orgs):
             if pos == 0:
@@ -100,30 +111,25 @@ def migrate_credential(apps, schema_editor):
     Project = apps.get_model('main', 'Project')
     InventorySource = apps.get_model('main', 'InventorySource')
 
-
+    migrated = []
     for cred in Credential.objects.all():
-        jts = JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all()
-        if jts is not None:
-            if len(jts) == 1:
-                _update_credential_parents(jts[0].inventory.organization, cred)
-            else:
-                _discover_credentials(jts, cred, org_path='inventory.organization')
-            continue
+        migrated.append(cred)
 
-        invs = InventorySource.objects.filter(credential=cred).all()
-        if invs is not None:
-            if len(invs) == 1:
-                _update_credential_parents(invs[0].inventory.organization, cred)
+        results = (JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all() or
+                   InventorySource.objects.filter(credential=cred).all())
+        if results:
+            if len(results) == 1:
+                _update_credential_parents(results[0].inventory.organization, cred)
             else:
-                _discover_credentials(invs, cred, org_path='inventory.organization')
+                _discover_credentials(results, cred, attrfunc('inventory.organization'))
             continue
 
         projs = Project.objects.filter(credential=cred).all()
-        if projs is not None:
+        if projs:
             if len(projs) == 1:
                 _update_credential_parents(projs[0].organization, cred)
             else:
-                _discover_credentials(projs, cred, org_path='organization')
+                _discover_credentials(projs, cred, attrfunc('organization'))
             continue
 
         if cred.team is not None:
@@ -140,6 +146,7 @@ def migrate_credential(apps, schema_editor):
             cred.save()
 
         # no match found, log
+    return migrated
 
 
 def migrate_inventory(apps, schema_editor):

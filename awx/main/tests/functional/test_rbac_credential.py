@@ -3,6 +3,7 @@ import pytest
 from awx.main.access import CredentialAccess
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate
+from awx.main.models.inventory import InventorySource
 from awx.main.migrations import _rbac as rbac
 from django.apps import apps
 from django.contrib.auth.models import User
@@ -50,9 +51,6 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
     credential.team = team
     credential.save()
 
-    # No permissions pre-migration
-    team.admin_role.children.remove(credential.owner_role)
-    team.member_role.children.remove(credential.usage_role)
     assert not credential.accessible_by(u, permissions['usage'])
 
     # Usage permissions post migration
@@ -77,17 +75,15 @@ def test_credential_access_admin(user, team, credential):
     access = CredentialAccess(u)
 
     assert access.can_add({'user': u.pk})
-    assert access.can_add({'team': team.pk})
-
     assert not access.can_change(credential, {'user': u.pk})
 
-    # unowned credential can be deleted
-    assert access.can_delete(credential)
+    # unowned credential is superuser only
+    assert not access.can_delete(credential)
 
     # credential is now part of a team
     # that is part of an organization
     # that I am an admin for
-    credential.team = team
+    credential.owner_role.parents.add(team.admin_role)
     credential.save()
     credential.owner_role.rebuild_role_ancestor_list()
 
@@ -164,17 +160,47 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
     assert not access.can_change(jts[0].credential, {'organization': org.pk})
 
 @pytest.mark.django_db
-def test_cred_single_org():
-    pass
+def test_cred_inventory_source(user, inventory, credential):
+    u = user('member', False)
+    inventory.organization.member_role.members.add(u)
+
+    InventorySource.objects.create(
+        name="test-inv-src",
+        credential=credential,
+        inventory=inventory,
+    )
+
+    assert not credential.accessible_by(u, {'use':True})
+
+    rbac.migrate_credential(apps, None)
+    assert credential.accessible_by(u, {'use':True})
 
 @pytest.mark.django_db
-def test_cred_created_by_multi_org():
-    pass
+def test_cred_project(user, credential, project):
+    u = user('member', False)
+    project.organization.member_role.members.add(u)
+    project.credential = credential
+    project.save()
+
+    assert not credential.accessible_by(u, {'use':True})
+
+    rbac.migrate_credential(apps, None)
+    assert credential.accessible_by(u, {'use':True})
 
 @pytest.mark.django_db
-def test_cred_no_org():
-    pass
+def test_cred_no_org(user, credential):
+    su = user('su', True)
+    access = CredentialAccess(su)
+    assert access.can_change(credential, {'user': su.pk})
 
 @pytest.mark.django_db
-def test_cred_team():
-    pass
+def test_cred_team(user, team, credential):
+    u = user('a', False)
+    team.member_role.members.add(u)
+    credential.team = team
+    credential.save()
+
+    assert not credential.accessible_by(u, {'use':True})
+
+    rbac.migrate_credential(apps, None)
+    assert credential.accessible_by(u, {'use':True})
