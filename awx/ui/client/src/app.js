@@ -27,6 +27,7 @@ import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
+import organizations from './organizations/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
@@ -50,7 +51,9 @@ import lookUpHelper from './lookup/main';
 import JobTemplates from './job-templates/main';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
-import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
+import OrganizationsList from './organizations/list/organizations-list.controller';
+import OrganizationsAdd from './organizations/add/organizations-add.controller';
+import OrganizationsEdit from './organizations/edit/organizations-edit.controller';
 import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from './controllers/Inventories';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
@@ -85,6 +88,7 @@ var tower = angular.module('Tower', [
     browserData.name,
     systemTracking.name,
     inventoryScripts.name,
+    organizations.name,
     permissions.name,
     managementJobs.name,
     setupMenu.name,
@@ -420,61 +424,6 @@ var tower = angular.module('Tower', [
                     activityStream: true,
                     activityStreamTarget: 'inventory',
                     activityStreamId: 'inventory_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations', {
-                url: '/organizations',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'organization'
-                },
-                ncyBreadcrumb: {
-                    parent: function($scope) {
-                        $scope.$parent.$emit("ReloadOrgListView");
-                        return "setup";
-                    },
-                    label: "ORGANIZATIONS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsAdd,
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "CREATE ORGANIZATION"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations.edit', {
-                url: '/:organization_id',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsEdit,
-                data: {
-                    activityStreamId: 'organization_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "{{name}}"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
