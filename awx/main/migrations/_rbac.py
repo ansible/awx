@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 from collections import defaultdict
+from awx.main.utils import getattrd
 import _old_access as old_access
 
 def migrate_users(apps, schema_editor):
@@ -63,7 +64,7 @@ def attrfunc(attr_path):
         org = get_org(JobTemplateInstance)
     '''
     def attr(inst):
-        return reduce(getattr, [inst] + attr_path.split('.'))
+        return getattrd(inst, attr_path)
     return attr
 
 def _update_credential_parents(org, cred):
@@ -96,10 +97,15 @@ def _discover_credentials(instances, cred, orgfunc):
             if pos == 0:
                 _update_credential_parents(org, cred)
             else:
-                cred.pk, cred.user, cred.team = None, None, None
+                # Create a new credential
+                cred.pk = None
                 cred.save()
+
+                # Unlink the old information from the new credential
+                cred.user, cred.team = None, None
                 cred.owner_role, cred.usage_role = None, None
                 cred.save()
+
                 for i in orgs[org]:
                     i.credential = cred
                     i.save()
@@ -135,14 +141,12 @@ def migrate_credential(apps, schema_editor):
         if cred.team is not None:
             cred.team.admin_role.children.add(cred.owner_role)
             cred.team.member_role.children.add(cred.usage_role)
-            cred.user = None
-            cred.team = None
+            cred.user, cred.team = None, None
             cred.save()
 
         elif cred.user is not None:
             cred.user.admin_role.children.add(cred.owner_role)
-            cred.user = None
-            cred.team = None
+            cred.user, cred.team = None, None
             cred.save()
 
         # no match found, log
