@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.access import CredentialAccess
 from awx.main.models.credential import Credential
+from awx.main.models.jobs import JobTemplate
 from awx.main.migrations import _rbac as rbac
 from django.apps import apps
 from django.contrib.auth.models import User
@@ -96,3 +97,84 @@ def test_credential_access_admin(user, team, credential):
 
     # should have can_change access as org-admin
     assert access.can_change(credential, {'user': u.pk})
+
+@pytest.mark.django_db
+def test_cred_job_template(user, deploy_jobtemplate):
+    a = user('admin', False)
+    org = deploy_jobtemplate.project.organization
+    org.admin_role.members.add(a)
+
+    cred = deploy_jobtemplate.credential
+    cred.user = user('john', False)
+    cred.save()
+
+    access = CredentialAccess(a)
+    rbac.migrate_credential(apps, None)
+    assert access.can_change(cred, {'organization': org.pk})
+
+    org.admin_role.members.remove(a)
+    assert not access.can_change(cred, {'organization': org.pk})
+
+@pytest.mark.django_db
+def test_cred_multi_job_template_single_org(user, deploy_jobtemplate):
+    a = user('admin', False)
+    org = deploy_jobtemplate.project.organization
+    org.admin_role.members.add(a)
+
+    cred = deploy_jobtemplate.credential
+    cred.user = user('john', False)
+    cred.save()
+
+    access = CredentialAccess(a)
+    rbac.migrate_credential(apps, None)
+    assert access.can_change(cred, {'organization': org.pk})
+
+    org.admin_role.members.remove(a)
+    assert not access.can_change(cred, {'organization': org.pk})
+
+@pytest.mark.django_db
+def test_single_cred_multi_job_template_multi_org(user, organizations, credential):
+    orgs = organizations(2)
+    jts = []
+    for org in orgs:
+        inv = org.inventories.create(name="inv-%d" % org.pk)
+        jt = JobTemplate.objects.create(
+            inventory=inv,
+            credential=credential,
+            name="test-jt-org-%d" % org.pk,
+            job_type='check',
+        )
+        jts.append(jt)
+
+    a = user('admin', False)
+    orgs[0].admin_role.members.add(a)
+    orgs[1].admin_role.members.add(a)
+
+    access = CredentialAccess(a)
+    rbac.migrate_credential(apps, None)
+
+    for jt in jts:
+        jt.refresh_from_db()
+
+    assert jts[0].credential != jts[1].credential
+    assert access.can_change(jts[0].credential, {'organization': org.pk})
+    assert access.can_change(jts[1].credential, {'organization': org.pk})
+
+    orgs[0].admin_role.members.remove(a)
+    assert not access.can_change(jts[0].credential, {'organization': org.pk})
+
+@pytest.mark.django_db
+def test_cred_single_org():
+    pass
+
+@pytest.mark.django_db
+def test_cred_created_by_multi_org():
+    pass
+
+@pytest.mark.django_db
+def test_cred_no_org():
+    pass
+
+@pytest.mark.django_db
+def test_cred_team():
+    pass

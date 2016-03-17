@@ -1,4 +1,7 @@
+import logging
+
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
 from collections import defaultdict
 import _old_access as old_access
@@ -52,18 +55,117 @@ def migrate_team(apps, schema_editor):
             migrations[t.name].append(user)
     return migrations
 
+def _update_jt_creds(jts, cred):
+    for i, jt in enumerate(jts):
+        if i == 0:
+            jt.inventory.organization.admin_role.children.add(cred.owner_role)
+            continue
+
+        cred.pk = None
+        cred.user = None
+        cred.save()
+
+        jt.credential = cred
+        jt.inventory.organization.admin_role.children.add(cred.owner_role)
+        jt.save()
+
+def _update_proj_creds(projects, cred):
+    for i, proj in enumerate(projects):
+        if i == 0:
+            proj.organization.admin_role.children.add(cred.owner_role)
+            continue
+
+        cred.pk = None
+        cred.user = None
+        cred.save()
+
+        proj.credential = cred
+        proj.organization.admin_role.children.add(cred.owner_role)
+        proj.save()
+
+def _handle_single_cred(org, cred):
+    org.admin_role.children.add(cred.owner_role)
+    org.member_role.children.add(cred.usage_role)
+    cred.user, cred.team = None, None
+    cred.save()
+
+def _handle_multi_cred(insts, cred, org_path='organization'):
+    def get_org(inst):
+        fields = org_path.split('.')
+        for field in fields:
+            inst = getattr(inst, field)
+        return inst
+
+    orgs = defaultdict(list)
+    for inst in insts:
+        orgs[get_org(inst)].append(inst)
+
+    if len(orgs) == 1:
+        _handle_single_cred(insts[0].inventory.organization, cred)
+    else:
+        for pos, org in enumerate(orgs):
+            if pos == 0:
+                _handle_single_cred(org, cred)
+            else:
+                cred.pk, cred.user, cred.team = None, None, None
+                cred.save()
+                cred.owner_role, cred.usage_role = None, None
+                cred.save()
+
+                for i in orgs[org]:
+                    i.credential = cred
+                    i.save()
+
+                _handle_single_cred(org, cred)
+
+
 def migrate_credential(apps, schema_editor):
-    migrations = defaultdict(list)
-    credential = apps.get_model('main', "Credential")
-    for cred in credential.objects.all():
-        if cred.user:
-            cred.owner_role.members.add(cred.user)
-            migrations[cred.name].append(cred.user)
-        elif cred.team:
-            cred.owner_role.parents.add(cred.team.admin_role)
-            cred.usage_role.parents.add(cred.team.member_role)
-            migrations[cred.name].append(cred.team)
-    return migrations
+    Credential = apps.get_model('main', "Credential")
+    JobTemplate = apps.get_model('main', 'JobTemplate')
+    Project = apps.get_model('main', 'Project')
+    InventorySource = apps.get_model('main', 'InventorySource')
+
+
+    for cred in Credential.objects.all():
+        jts = JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all()
+        if jts is not None:
+            if len(jts) == 1:
+                _handle_single_cred(jts[0].inventory.organization, cred)
+            else:
+                _handle_multi_cred(jts, cred, org_path='inventory.organization')
+            continue
+
+        invs = InventorySource.objects.filter(credential=cred).all()
+        if invs is not None:
+            if len(invs) == 1:
+                _single_cred(invs[0].inventory.organization, cred)
+            else:
+                _multi_cred(invs, cred, org_path='inventory.organization')
+            continue
+
+        projs = Project.objects.filter(credential=cred).all()
+        if projs is not None:
+            if len(projs) == 1:
+                _single_cred(projs[0].organization, cred)
+            else:
+                _multi_cred(projs, cred, org_path='organization')
+            continue
+
+        if cred.team is not None:
+            cred.team.admin_role.children.add(cred.owner_role)
+            cred.team.member_role.children.add(cred.usage_role)
+            cred.user = None
+            cred.team = None
+            cred.save()
+
+        elif cred.user is not None:
+            cred.user.admin_role.children.add(cred.owner_role)
+            cred.user = None
+            cred.team = None
+            cred.save()
+
+        # no match found, log
+
 
 def migrate_inventory(apps, schema_editor):
     migrations = defaultdict(dict)
