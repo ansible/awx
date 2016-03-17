@@ -55,41 +55,19 @@ def migrate_team(apps, schema_editor):
             migrations[t.name].append(user)
     return migrations
 
-def _update_jt_creds(jts, cred):
-    for i, jt in enumerate(jts):
-        if i == 0:
-            jt.inventory.organization.admin_role.children.add(cred.owner_role)
-            continue
-
-        cred.pk = None
-        cred.user = None
-        cred.save()
-
-        jt.credential = cred
-        jt.inventory.organization.admin_role.children.add(cred.owner_role)
-        jt.save()
-
-def _update_proj_creds(projects, cred):
-    for i, proj in enumerate(projects):
-        if i == 0:
-            proj.organization.admin_role.children.add(cred.owner_role)
-            continue
-
-        cred.pk = None
-        cred.user = None
-        cred.save()
-
-        proj.credential = cred
-        proj.organization.admin_role.children.add(cred.owner_role)
-        proj.save()
-
-def _handle_single_cred(org, cred):
+def _update_credential_parents(org, cred):
     org.admin_role.children.add(cred.owner_role)
     org.member_role.children.add(cred.usage_role)
     cred.user, cred.team = None, None
     cred.save()
 
-def _handle_multi_cred(insts, cred, org_path='organization'):
+def _discover_credentials(insts, cred, org_path='organization'):
+    '''_discover_credentials will find shared credentials across
+    organizations. If a shared credential is found, it will duplicate
+    the credential, ensure the proper role permissions are added to the new
+    credential, and update any references from the old to the newly created
+    credential.
+    '''
     def get_org(inst):
         fields = org_path.split('.')
         for field in fields:
@@ -101,23 +79,20 @@ def _handle_multi_cred(insts, cred, org_path='organization'):
         orgs[get_org(inst)].append(inst)
 
     if len(orgs) == 1:
-        _handle_single_cred(insts[0].inventory.organization, cred)
+        _update_credential_parents(insts[0].inventory.organization, cred)
     else:
         for pos, org in enumerate(orgs):
             if pos == 0:
-                _handle_single_cred(org, cred)
+                _update_credential_parents(org, cred)
             else:
                 cred.pk, cred.user, cred.team = None, None, None
                 cred.save()
                 cred.owner_role, cred.usage_role = None, None
                 cred.save()
-
                 for i in orgs[org]:
                     i.credential = cred
                     i.save()
-
-                _handle_single_cred(org, cred)
-
+                _update_credential_parents(org, cred)
 
 def migrate_credential(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
@@ -130,25 +105,25 @@ def migrate_credential(apps, schema_editor):
         jts = JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all()
         if jts is not None:
             if len(jts) == 1:
-                _handle_single_cred(jts[0].inventory.organization, cred)
+                _update_credential_parents(jts[0].inventory.organization, cred)
             else:
-                _handle_multi_cred(jts, cred, org_path='inventory.organization')
+                _discover_credentials(jts, cred, org_path='inventory.organization')
             continue
 
         invs = InventorySource.objects.filter(credential=cred).all()
         if invs is not None:
             if len(invs) == 1:
-                _single_cred(invs[0].inventory.organization, cred)
+                _update_credential_parents(invs[0].inventory.organization, cred)
             else:
-                _multi_cred(invs, cred, org_path='inventory.organization')
+                _discover_credentials(invs, cred, org_path='inventory.organization')
             continue
 
         projs = Project.objects.filter(credential=cred).all()
         if projs is not None:
             if len(projs) == 1:
-                _single_cred(projs[0].organization, cred)
+                _update_credential_parents(projs[0].organization, cred)
             else:
-                _multi_cred(projs, cred, org_path='organization')
+                _discover_credentials(projs, cred, org_path='organization')
             continue
 
         if cred.team is not None:
