@@ -8,7 +8,7 @@ import jsonbfield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0003_v300_changes'),
+        ('main', '0003_v300_notification_changes'),
     ]
 
     operations = [
