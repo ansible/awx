@@ -111,10 +111,12 @@ class Inventory(CommonModel, ResourceMixin):
     updater_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
+        permissions = {'read': True, 'update': True}
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
+        permissions = {'read': True, 'execute': True}
     )
 
     def get_absolute_url(self):
@@ -545,6 +547,7 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     @transaction.atomic
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
+        from awx.main.tasks import update_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
 
 
@@ -1051,7 +1054,7 @@ class InventorySourceOptions(BaseModel):
         return ','.join(choices)
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions, ResourceMixin):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     class Meta:
         app_label = 'main'

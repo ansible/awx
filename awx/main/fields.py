@@ -243,17 +243,25 @@ class ImplicitRoleField(models.ForeignKey):
 
     def _calc_original_parents(self, instance):
         if not hasattr(self, '__original_parent_roles'):
-            setattr(self, '__original_parent_roles', []) # do not just self.__original_parent_roles=[], it's not the same here
-            paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
-            original_parent_roles = set()
-            for path in paths:
-                if path.startswith("singleton:"):
-                    parents = [Role.singleton(path[10:])]
-                else:
-                    parents = resolve_role_field(instance, path)
-                for parent in parents:
-                    original_parent_roles.add(parent)
+            setattr(self, '__original_parent_roles', set()) # do not just self.__original_parent_roles=[], it's not the same here, apparently.
+            # NOTE: The above setattr is required to be called bofore
+            # _resolve_parent_roles because we can end up recursing, so the enclosing
+            # if not hasattr protects against this.
+            original_parent_roles = self._resolve_parent_roles(instance)
             setattr(self, '__original_parent_roles', original_parent_roles)
+
+    def _resolve_parent_roles(self, instance):
+        paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
+        parent_roles = set()
+        for path in paths:
+            if path.startswith("singleton:"):
+                parents = [Role.singleton(path[10:])]
+            else:
+                parents = resolve_role_field(instance, path)
+            for parent in parents:
+                parent_roles.add(parent)
+        return parent_roles
+
 
     def _post_save(self, instance, created, *args, **kwargs):
         # Ensure that our field gets initialized after our first save
@@ -269,16 +277,8 @@ class ImplicitRoleField(models.ForeignKey):
             self._calc_original_parents(instance)
             return
 
-        paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
         original_parents = getattr(self, '__original_parent_roles')
-        new_parents = set()
-        for path in paths:
-            if path.startswith("singleton:"):
-                parents = [Role.singleton(path[10:])]
-            else:
-                parents = resolve_role_field(instance, path)
-            for parent in parents:
-                new_parents.add(parent)
+        new_parents = self._resolve_parent_roles(instance)
 
         with batch_role_ancestor_rebuilding():
             for role in original_parents - new_parents:
