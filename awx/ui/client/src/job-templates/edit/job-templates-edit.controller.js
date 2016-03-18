@@ -21,6 +21,7 @@ export default
         'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
         'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
         'PlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
+        'ToggleNotification', 'NotificationsListInit',
         function(
             $filter, $scope, $rootScope, $compile,
             $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -30,7 +31,7 @@ export default
             Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
             JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
             SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2
+            CreateSelect2, ToggleNotification, NotificationsListInit
         ) {
 
             ClearScope();
@@ -57,6 +58,12 @@ export default
             SurveyControllerInit({
                 scope: $scope,
                 parent_scope: $scope,
+                id: id
+            });
+
+            NotificationsListInit({
+                scope: $scope,
+                url: GetBasePath('job_templates'),
                 id: id
             });
 
@@ -120,6 +127,24 @@ export default
                   }
 
               }
+            };
+
+            $scope.toggleNotification = function(event, notifier_id, column) {
+                var notifier = this.notification;
+                try {
+                    $(event.target).tooltip('hide');
+                }
+                catch(e) {
+                    // ignore
+                }
+                ToggleNotification({
+                    scope: $scope,
+                    url: defaultUrl,
+                    id: id,
+                    notifier: notifier,
+                    column: column,
+                    callback: 'NotificationRefresh'
+                });
             };
 
             $scope.toggleScanInfo = function() {
@@ -506,7 +531,7 @@ export default
                         .error(function(res, status){
                             ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
                             msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
-                        });                
+                        });
                 }
                 else {
                     $state.go('jobTemplates');

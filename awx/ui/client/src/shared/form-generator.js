@@ -1155,6 +1155,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.readonly) ? "readonly " : "";
                         html += (field.integer) ? "integer " : "";
                         html += (field.disabled) ? "data-disabled=\"true\" " : "";
+                        html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+                            field.awRequiredWhen.variable + "\" " : "";
                         html += " >\n";
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
@@ -1217,13 +1219,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         html += "<div class=\"checkbox\">\n";
-                        html += "<label ";
-                        html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
-                        //html += "for=\"" + fld + '">';
-                        html += ">";
+                        html += "<label>";
                         html += buildCheckbox(this.form, field, fld, undefined, false);
                         html += (field.icon) ? Icon(field.icon) : "";
-                        html += '<span class=\"Form-inputLabel\">' + field.label + "</span>";
+                        if (field.labelBind) {
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                        } else {
+                            html += "<span class=\"Form-inputLabel\">" + field.label + "</span>";
+                        }
+                        // html += '<span class=\"Form-inputLabel\">' + field.label + "</span>";
+
+                        // html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+
                         html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +

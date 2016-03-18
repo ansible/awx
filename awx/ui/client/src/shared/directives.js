@@ -342,7 +342,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     var viewValue = elm.val(), label, validity = true;
                     if ( scope[attrs.awRequiredWhen] && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
                         $(elm).attr('required','required');
-                        if ($(elm).hasClass('lookup')) {
+                        if ($(elm).hasClass('lookup') || $(elm).hasClass('ui-spinner-input')) {
                             $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
                         }
                         else {

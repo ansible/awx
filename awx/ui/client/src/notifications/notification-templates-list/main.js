@@ -8,8 +8,8 @@ import route from './list.route';
 import controller from './list.controller';
 
 export default
-    angular.module('notificationsList', [])
-        .controller('notificationsListController', controller)
+    angular.module('notificationTemplatesList', [])
+        .controller('notificationTemplatesListController', controller)
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route);
         }]);

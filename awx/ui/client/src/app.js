@@ -112,6 +112,7 @@ var tower = angular.module('Tower', [
     JobTemplates.name,
     portalMode.name,
     search.name,
+    'ngToast',
     'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -210,15 +211,22 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
+    .config(['ngToastProvider', function(ngToastProvider) {
+        ngToastProvider.configure({
+            animation: 'slide',
+            dismissOnTimeout: true,
+            timeout: 4000
+        });
+    }])
     .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider', '$urlMatcherFactoryProvider',
         function ($stateProvider, $urlRouterProvider, $breadcrumbProvider, $urlMatcherFactoryProvider) {
-            $urlMatcherFactoryProvider.strictMode(false)
+            $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
-            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details')
+            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
             // $urlRouterProvider.otherwise("/home");
             $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");

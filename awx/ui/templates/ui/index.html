@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/nvd3/build/nv.d3.css"  type="text/css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/ngToast/dist/ngToast.min.css"  type="text/css">
 
   <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
@@ -40,6 +41,7 @@
 
   <main-menu></main-menu>
   <bread-crumb></bread-crumb>
+  <toast></toast>
 
     <div class="container-fluid" id="content-container">
       <div class="row">
@@ -219,7 +221,7 @@
 
   <div class="overlay"></div>
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
-</div> 
+</div>
 <tower-footer></tower-footer>
   <script>
         // HACK: Need this to support global-dependent

@@ -122,7 +122,7 @@ export default
                     ask: false,
                     clear: false,
                     hasShowInputButton: true,
-                    apiField: 'passwowrd',
+                    apiField: 'password',
                     subForm: 'credentialSubForm'
                 },
                 security_token: {

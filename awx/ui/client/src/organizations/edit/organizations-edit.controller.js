@@ -7,16 +7,17 @@
 export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
-    'ClearScope', 'GetBasePath', 'Wait', '$state',
+    'ClearScope', 'GetBasePath', 'Wait', '$state', 'NotificationsListInit',
+    'ToggleNotification',
     function($scope, $rootScope, $compile, $location, $log,
         $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
         RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
-        Wait, $state) {
+        Wait, $state, NotificationsListInit, ToggleNotification) {
 
         ClearScope();
 
         // Inject dynamic view
-        var form = OrganizationForm,
+        var form = OrganizationForm(),
             generator = GenerateForm,
             defaultUrl = GetBasePath('organizations'),
             base = $location.path().replace(/^\//, '').split('/')[0],
@@ -42,6 +43,11 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                 $scope.search(relatedSets[set].iterator);
             }
             Wait('stop');
+            NotificationsListInit({
+                scope: $scope,
+                url: defaultUrl,
+                id: id
+            });
         });
 
         // Retrieve detail record and prepopulate the form
@@ -66,6 +72,7 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                         };
                     }
                 }
+
                 angular.extend(relatedSets, form
                     .relatedSets(data.related));
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
@@ -79,6 +86,23 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                     msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
             });
 
+        $scope.toggleNotification = function(event, id, column) {
+            var notifier = this.notification;
+            try {
+                $(event.target).tooltip('hide');
+            }
+            catch(e) {
+                // ignore
+            }
+            ToggleNotification({
+                scope: $scope,
+                url: defaultUrl,
+                id: $scope.organization_id,
+                notifier: notifier,
+                column: column,
+                callback: 'NotificationRefresh'
+            });
+        };
 
         // Save changes to the parent
         $scope.formSave = function () {
@@ -150,4 +174,4 @@ export default ['$scope', '$rootScope', '$compile', '$location',
 
         };
 }
-]
+];

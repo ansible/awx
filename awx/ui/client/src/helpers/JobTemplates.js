@@ -127,7 +127,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   scope.setCallbackHelp();
 
                                   scope.callback_url = scope.callback_server_path + ((data.related.callback) ? data.related.callback :
-                                                                                     GetBasePath('job_templates') + id + '/callback/');
+                                  GetBasePath('job_templates') + id + '/callback/');
                                   master.callback_url = scope.callback_url;
 
                                   scope.can_edit = data.summary_fields.can_edit;
