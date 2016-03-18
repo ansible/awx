@@ -4,6 +4,7 @@ from awx.main.models import (
     Role,
     RolePermission,
     Organization,
+    Project,
 )
 
 
@@ -194,4 +195,49 @@ def test_hierarchy_rebuilding():
     # hierarchy is built after both A and C are updated.
     assert X.is_ancestor_of(D) is False
 
+
+@pytest.mark.django_db
+def test_auto_parenting():
+    org1 = Organization.objects.create(name='org1')
+    org2 = Organization.objects.create(name='org2')
+
+    prj1 = Project.objects.create(name='prj1')
+    prj2 = Project.objects.create(name='prj2')
+
+    assert org1.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org1.admin_role.is_ancestor_of(prj2.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj2.admin_role) is False
+
+    prj1.organization = org1
+    prj1.save()
+
+    assert org1.admin_role.is_ancestor_of(prj1.admin_role)
+    assert org1.admin_role.is_ancestor_of(prj2.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj2.admin_role) is False
+
+    prj2.organization = org1
+    prj2.save()
+
+    assert org1.admin_role.is_ancestor_of(prj1.admin_role)
+    assert org1.admin_role.is_ancestor_of(prj2.admin_role)
+    assert org2.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj2.admin_role) is False
+
+    prj1.organization = org2
+    prj1.save()
+
+    assert org1.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org1.admin_role.is_ancestor_of(prj2.admin_role)
+    assert org2.admin_role.is_ancestor_of(prj1.admin_role)
+    assert org2.admin_role.is_ancestor_of(prj2.admin_role) is False
+
+    prj2.organization = org2
+    prj2.save()
+
+    assert org1.admin_role.is_ancestor_of(prj1.admin_role) is False
+    assert org1.admin_role.is_ancestor_of(prj2.admin_role) is False
+    assert org2.admin_role.is_ancestor_of(prj1.admin_role)
+    assert org2.admin_role.is_ancestor_of(prj2.admin_role)
 
