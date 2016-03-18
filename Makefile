@@ -804,7 +804,7 @@ docker-compose-test:
 MACHINE?=default
 docker-clean:
 	rm -f awx/lib/.deps_built
-	rm -f awx/lib/site-packages
+	rm -rf awx/lib/site-packages
 	eval $$(docker-machine env $(MACHINE))
 	docker stop $$(docker ps -a -q)
 	-docker rm $$(docker ps -f name=tools_tower -a -q)
