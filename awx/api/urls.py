@@ -230,12 +230,16 @@ system_job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/launch/$',                    'system_job_template_launch'),
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'system_job_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'system_job_template_schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',         'system_job_template_notifiers_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',         'system_job_template_notifiers_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'system_job_template_notifiers_success_list'),
 )
 
 system_job_urls = patterns('awx.api.views',
     url(r'^$',                                          'system_job_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'system_job_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'system_job_cancel'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'system_job_notifications_list'),
 )
 
 notifier_urls = patterns('awx.api.views',

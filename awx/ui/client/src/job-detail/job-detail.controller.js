@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -12,23 +12,22 @@
 
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile',
-        '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait', 'Rest',
+        '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
         'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
         'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
-        'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM',
-        'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer',
+        'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer',
         'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
-        'EditSchedule', 'ParseTypeChange',
+        'EditSchedule', 'ParseTypeChange', 'JobDetailService', 'EventViewer',
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
-            $log, ClearScope, GetBasePath, Wait, Rest, ProcessErrors,
+            $log, ClearScope, GetBasePath, Wait, ProcessErrors,
             SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph,
             LoadHostSummary, ReloadHostSummaryList, JobIsFinished,
-            SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob,
+            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
             PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
-            fieldLabels, EditSchedule, ParseTypeChange
+            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService, EventViewer
         ) {
             ClearScope();
 
@@ -283,15 +282,15 @@ export default
                 scope.removeInitialLoadComplete();
             }
             scope.removeInitialLoadComplete = scope.$on('InitialLoadComplete', function() {
-                var url;
                 Wait('stop');
 
                 if (JobIsFinished(scope)) {
                     scope.liveEventProcessing = false; // signal that event processing is over and endless scroll
                     scope.pauseLiveEvents = false;      // should be enabled
-                    url = scope.job.related.job_events + '?event=playbook_on_stats';
-                    Rest.setUrl(url);
-                    Rest.get()
+                    var params = {
+                        event: 'playbook_on_stats'
+                    };
+                    JobDetailService.getRelatedJobEvents(scope.job.id, params)
                         .success(function(data) {
                             if (data.results.length > 0) {
                                 LoadHostSummary({
@@ -327,11 +326,11 @@ export default
             }
             scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
                 if(scope.job){
-                    var url = scope.job.related.job_host_summaries + '?';
-                    url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
-
-                    Rest.setUrl(url);
-                    Rest.get()
+                    var params = {
+                        page_size: scope.hostSummariesMaxRows,
+                        order: 'host_name'
+                    };
+                    JobDetailService.getJobHostSummaries(scope.job.id, params)
                         .success(function(data) {
                             scope.next_host_summaries = data.next;
                             if (data.results.length > 0) {
@@ -357,10 +356,6 @@ export default
                                 };
                             });
                             scope.$emit('InitialLoadComplete');
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + url + '. GET returned: ' + status });
                         });
                 }
 
@@ -373,17 +368,17 @@ export default
                 if (scope.activeTask) {
 
                     var play = scope.jobData.plays[scope.activePlay],
-                        task, // = play.tasks[scope.activeTask],
-                        url;
+                        task;
                     if(play){
                       task = play.tasks[scope.activeTask];
                     }
                     if (play && task) {
-                        url = scope.job.related.job_events + '?parent=' + task.id + '&';
-                        url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
-
-                        Rest.setUrl(url);
-                        Rest.get()
+                        var params = {
+                            parent: task.id,
+                            event__startswith: 'runner',
+                            page_size: scope.hostResultsMaxRows 
+                        };
+                        JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
                                 var idx, event, status, status_text, item, msg;
                                 if (data.results.length > 0) {
@@ -450,10 +445,6 @@ export default
                                     }
                                 }
                                 scope.$emit('LoadHostSummaries');
-                            })
-                            .error(function(data, status) {
-                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Call to ' + url + '. GET returned: ' + status });
                             });
                     } else {
                         scope.$emit('LoadHostSummaries');
@@ -468,14 +459,15 @@ export default
             }
             scope.removeLoadTasks = scope.$on('LoadTasks', function() {
                 if (scope.activePlay) {
-                    var play = scope.jobData.plays[scope.activePlay], url;
+                    var play = scope.jobData.plays[scope.activePlay];
 
                     if (play) {
-                        url = scope.job.url + 'job_tasks/?event_id=' + play.id;
-                        url += '&page_size=' + scope.tasksMaxRows + '&order=id';
-
-                        Rest.setUrl(url);
-                        Rest.get()
+                        var params = {
+                            event_id: play.id,
+                            page_size: scope.tasksMaxRows,
+                            order: 'id'
+                        }
+                        JobDetailService.getJobTasks(scope.job.id, params)
                             .success(function(data) {
                                 scope.next_tasks = data.next;
                                 if (data.results.length > 0) {
@@ -585,12 +577,10 @@ export default
                 scope.host_summary.failed = 0;
                 scope.host_summary.total = 0;
                 scope.jobData.plays = {};
-
-                var url = scope.job.url  + 'job_plays/?order_by=id';
-                url += '&page_size=' + scope.playsMaxRows + '&order_by=id';
-
-                Rest.setUrl(url);
-                Rest.get()
+                var params = {
+                    order_by: 'id'
+                };
+                JobDetailService.getJobPlays(scope.job.id, params)
                     .success( function(data) {
                         scope.next_plays = data.next;
                         if (data.results.length > 0) {
@@ -681,10 +671,6 @@ export default
                             scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
                         }
                         scope.$emit('LoadTasks', events_url);
-                    })
-                    .error( function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
                     });
             });
 
@@ -702,8 +688,7 @@ export default
                 scope.LoadHostSummaries = true;
 
                 // Load the job record
-                Rest.setUrl(GetBasePath('jobs') + job_id + '/');
-                Rest.get()
+                JobDetailService.getJob(job_id)
                     .success(function(data) {
                         var i;
                         scope.job = data;
@@ -1177,8 +1162,7 @@ export default
                 if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_plays) {
                     $('#playsMoreRows').fadeIn();
                     scope.playsLoading = true;
-                    Rest.setUrl(scope.next_plays);
-                    Rest.get()
+                    JobDetailService.getNextPage(scope.next_plays)
                         .success( function(data) {
                             scope.next_plays = data.next;
                             data.results.forEach(function(event, idx) {
@@ -1243,8 +1227,7 @@ export default
                 if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_tasks) {
                     $('#tasksMoreRows').fadeIn();
                     scope.tasksLoading = true;
-                    Rest.setUrl(scope.next_tasks);
-                    Rest.get()
+                    JobDetailService.getNextPage(scope.next_tasks)
                         .success(function(data) {
                             scope.next_tasks = data.next;
                             data.results.forEach(function(event, idx) {
@@ -1315,8 +1298,7 @@ export default
                 if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_results) {
                     $('#hostResultsMoreRows').fadeIn();
                     scope.hostResultsLoading = true;
-                    Rest.setUrl(scope.next_host_results);
-                    Rest.get()
+                    JobDetailService.getNextPage(scope.next_host_results)
                         .success(function(data) {
                             scope.next_host_results = data.next;
                             data.results.forEach(function(row) {
@@ -1387,8 +1369,7 @@ export default
                 // check for more hosts when user scrolls to bottom of host summaries list...
                 if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_summaries) {
                     scope.hostSummariesLoading = true;
-                    Rest.setUrl(scope.next_host_summaries);
-                    Rest.get()
+                    JobDetailService.getNextPage(scope.next_host_summaries)
                         .success(function(data) {
                             scope.next_host_summaries = data.next;
                             data.results.forEach(function(row) {

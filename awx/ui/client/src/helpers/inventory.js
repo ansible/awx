@@ -139,7 +139,7 @@ export default
                     minWidth: 400,
                     title: 'Inventory Properties',
                     id: 'inventory-edit-modal-dialog',
-                    clonseOnEscape: false,
+                    closeOnEscape: false,
                     form: form_scope.inventory_form,
                     onClose: function() {
                         Wait('stop');
