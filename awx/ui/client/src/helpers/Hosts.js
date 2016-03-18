@@ -487,7 +487,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                               minWidth: 400,
                               title: 'Host Properties',
                               id: 'host-modal-dialog',
-                              clonseOnEscape: false,
+                              closeOnEscape: false,
                               form: form_scope.host_form,
                               onClose: function() {
                                   Wait('stop');

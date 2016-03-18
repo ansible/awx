@@ -1085,6 +1085,13 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
     def cache_timeout_blocked(self):
         return False
 
+    @property
+    def notifiers(self):
+        base_notifiers = Notifier.objects.filter(active=True)
+        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self]))
+        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self]))
+        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self]))
+        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
 
 class SystemJob(UnifiedJob, SystemJobOptions):

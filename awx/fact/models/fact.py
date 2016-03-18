@@ -35,7 +35,7 @@ def _get_db_monkeypatched(cls):
                 password=settings.MONGO_PASSWORD,
                 tz_aware=settings.USE_TZ)
         register_key_transform(get_db())
-    except ConnectionError:
+    except (ConnectionError, AttributeError):
         logger.info('Failed to establish connect to MongoDB')
     return get_db(cls._meta.get("db_alias", "default"))
 
