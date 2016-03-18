@@ -57,20 +57,6 @@ access_registry = {
 }
 
 
-def user_or_team(data):
-    try:
-        if 'user' in data:
-            pk = get_pk_from_dict(data, 'user')
-            return get_object_or_400(User, pk=pk), None
-        elif 'team' in data:
-            pk = get_pk_from_dict(data, 'team')
-            return None, get_object_or_400(Team, pk=pk)
-        else:
-            return None, None
-    except ParseError:
-        return None, None
-
-
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
     access_classes.append(access_class)
@@ -557,27 +543,27 @@ class CredentialAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        user, team = user_or_team(data)
-        if user is None and team is None:
-            return False
-
-        if user is not None:
+        if 'user' in data:
+            pk = get_pk_from_dict(data, 'user')
+            user = get_object_or_400(User, pk=pk)
             return user.accessible_by(self.user, {'write': True})
-        if team is not None:
-            return team.accessible_by(self.user, {'write':True})
+        elif 'organization' in data:
+            pk = get_pk_from_dict(data, 'organization')
+            org = get_object_or_400(Organization, pk=pk)
+            return org.accessible_by(self.user, {'write': True})
+
+        return False
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
-        if not self.can_add(data):
-            return False
         return obj.accessible_by(self.user, {'read':True, 'update': True, 'delete':True})
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
         # shouldn't ever end up with those.
-        if obj.user is None and obj.team is None:
-            return True
+        #if obj.user is None and obj.team is None:
+        #    return True
         return self.can_change(obj, None)
 
 class TeamAccess(BaseAccess):

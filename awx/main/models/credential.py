@@ -163,8 +163,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         role_name='Credential Owner',
         role_description='Owner of the credential',
         parent_role=[
-            'team.admin_role',
-            'user.admin_role',
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
         permissions = {'all': True}
@@ -180,8 +178,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     usage_role = ImplicitRoleField(
         role_name='Credential User',
         role_description='May use this credential, but not read sensitive portions or modify it',
-        parent_role= 'team.member_role',
-        permissions = {'read': True, 'use': True}
+        permissions = {'use': True}
     )
 
     @property
