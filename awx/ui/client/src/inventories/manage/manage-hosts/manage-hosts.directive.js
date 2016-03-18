@@ -17,9 +17,9 @@ export default ['templateUrl',
             link: function(scope, element, attrs) {
 
             },
-    //        controller: manageHostsController,
-    //        controllerAs: 'vm',
-    //        bindToController: true
+           controller: manageHostsController,
+           controllerAs: 'vm',
+           bindToController: true
         };
     }
 ];

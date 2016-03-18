@@ -5,16 +5,18 @@
  *************************************************/
 
 function manageHostDirectiveController($q, $rootScope, $scope, $state,
-    $stateParams, $compile, Rest, ProcessErrors,
+    $stateParams, $compile, ScopePass, Rest, ProcessErrors,
     CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit,
     PaginateInit, GetRootGroups) {
 
-        var vm = this;
+    var vm = this;
+    console.info(ScopePass);
 
-    };
+};
 
 export default ['$q', '$rootScope', '$scope', '$state', '$stateParams',
-    'ScopePass', '$compile', 'Rest', 'ProcessErrors', 'CreateDialog',
+    'ScopePass', '$compile', 'ScopePass', 'Rest', 'ProcessErrors', 'CreateDialog',
     'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
-    'PaginateInit', 'GetRootGroups', manageHostDirectiveController
+    'PaginateInit', 'GetRootGroups',
+    manageHostDirectiveController
 ];

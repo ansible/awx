@@ -437,12 +437,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-         'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
+         'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize', 'ScopePass',
          function($rootScope, $location, $log, $stateParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
                   GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, ToJSON,
-                  ParseVariableString, CreateDialog, TextareaResize) {
+                  ParseVariableString, CreateDialog, TextareaResize, ScopePass) {
                       return function(params) {
-
+                          ScopePass.set(params);
+                          var passing = ScopePass.get();
+                          console.info(passing);
                           var parent_scope = params.host_scope,
                           group_scope = params.group_scope,
                           host_id = params.host_id,
