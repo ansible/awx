@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0006_v300_changes'),
+        ('main', '0006_v300_create_system_job_templates'),
     ]
 
     operations = [
