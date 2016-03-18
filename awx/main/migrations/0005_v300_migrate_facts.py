@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0007_v300_rbac_migrations'),
+        ('main', '0004_v300_fact_changes'),
     ]
 
     operations = [
