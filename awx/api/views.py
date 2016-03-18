@@ -288,8 +288,7 @@ class DashboardView(APIView):
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
         data = OrderedDict()
-        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view'),
-                           'inventory_graph': reverse('api:dashboard_inventory_graph_view')}
+        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view')}
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
@@ -434,49 +433,6 @@ class DashboardJobsGraphView(APIView):
             dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()),
                                                      element[1]])
         return Response(dashboard_data)
-
-class DashboardInventoryGraphView(APIView):
-
-    view_name = "Dashboard Inventory Graphs"
-    new_in_200 = True
-
-    def get(self, request, format=None):
-        period = request.query_params.get('period', 'month')
-
-        end_date = now()
-        if period == 'month':
-            start_date = end_date - dateutil.relativedelta.relativedelta(months=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'week':
-            start_date = end_date - dateutil.relativedelta.relativedelta(weeks=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'day':
-            start_date = end_date - dateutil.relativedelta.relativedelta(days=1)
-            start_date = start_date.replace(minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(hours=1)
-        else:
-            raise ParseError(u'Unknown period "%s"' % force_text(period))
-
-        host_stats = []
-        date = start_date
-        while date < end_date:
-            next_date = date + delta
-            # Find all hosts that existed at end of intevral that are still
-            # active or were deleted after the end of interval.  Slow but
-            # accurate; haven't yet found a better way to do it.
-            hosts_qs = Host.objects.filter(created__lt=next_date)
-            hosts_qs = hosts_qs.filter(Q(active=True) | Q(active=False, modified__gte=next_date))
-            hostnames = set()
-            for name, active in hosts_qs.values_list('name', 'active').iterator():
-                if not active:
-                    name = re.sub(r'^_deleted_.*?_', '', name)
-                hostnames.add(name)
-            host_stats.append((time.mktime(date.timetuple()), len(hostnames)))
-            date = next_date
-
-        return Response({'hosts': host_stats})
 
 
 class ScheduleList(ListAPIView):
@@ -633,16 +589,16 @@ class OrganizationUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'users'
+    relationship = 'member_role.members'
 
 class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'admins'
+    relationship = 'admin_role.members'
 
-class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
+class OrganizationProjectsList(SubListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
@@ -725,7 +681,7 @@ class TeamUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Team
-    relationship = 'users'
+    relationship = 'member_role.members'
 
 
 class TeamRolesList(SubListCreateAttachDetachAPIView):
@@ -1481,7 +1437,7 @@ class GroupAllHostsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
 

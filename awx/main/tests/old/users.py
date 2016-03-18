@@ -100,7 +100,7 @@ class AuthTokenProxyTest(BaseTest):
         self.setup_users()
         self.setup_instances()
         self.organizations = self.make_organizations(self.super_django_user, 2)
-        self.organizations[0].deprecated_admins.add(self.normal_django_user)
+        self.organizations[0].admin_role.members.add(self.normal_django_user)
 
         self.assertIn('REMOTE_ADDR', settings.REMOTE_HOST_HEADERS)
         self.assertIn('REMOTE_HOST', settings.REMOTE_HOST_HEADERS)
@@ -174,10 +174,10 @@ class UsersTest(BaseTest):
         super(UsersTest, self).setUp()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
-        self.organizations[0].deprecated_admins.add(self.normal_django_user)
-        self.organizations[0].deprecated_users.add(self.other_django_user)
-        self.organizations[0].deprecated_users.add(self.normal_django_user)
-        self.organizations[1].deprecated_users.add(self.other_django_user)
+        self.organizations[0].admin_role.members.add(self.normal_django_user)
+        self.organizations[0].member_role.members.add(self.other_django_user)
+        self.organizations[0].member_role.members.add(self.normal_django_user)
+        self.organizations[1].member_role.members.add(self.other_django_user)
 
     def test_user_creation_fails_without_password(self):
         url = reverse('api:user_list')

@@ -7,10 +7,9 @@ import sys
 import logging
 
 # Django
-from django.db.models import F, Q
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.aggregates import Max
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -67,15 +66,7 @@ def user_admin_role(self):
     return Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=self.id)
 
 def user_accessible_objects(user, permissions):
-    content_type = ContentType.objects.get_for_model(User)
-    qs = RolePermission.objects.filter(
-        content_type=content_type,
-        role__ancestors__members=user
-    )
-    for perm in permissions:
-        qs = qs.annotate(**{'max_' + perm: Max(perm)})
-        qs = qs.filter(**{'max_' + perm: int(permissions[perm])})
-    return qs
+    return ResourceMixin._accessible_objects(User, user, permissions)
 
 def user_accessible_by(instance, user, permissions):
     perms = get_user_permissions_on_resource(instance, user)
@@ -222,7 +213,7 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        qs = User.accessible_objects(self.user, {'read':True})
         return qs
 
     def can_add(self, data):
@@ -639,7 +630,7 @@ class ProjectAccess(BaseAccess):
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        qs = Organization.accessible_objects(self.uesr, ALL_PERMISSIONS)
+        qs = Organization.accessible_objects(self.user, ALL_PERMISSIONS)
         return bool(qs.count() > 0)
 
     def can_change(self, obj, data):
@@ -813,47 +804,11 @@ class JobAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
             return qs
+
         credential_ids = self.user.get_queryset(Credential)
-        base_qs = qs.filter(
+        return qs.filter(
             credential_id__in=credential_ids,
-        )
-        org_admin_ids = base_qs.filter(
-            Q(project__organizations__admins__in=[self.user]) |
-            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
-        )
-
-        allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
-        allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        team_ids = Team.objects.filter(users__in=[self.user])
-
-        # TODO: I think the below queries can be combined
-        deploy_permissions_ids = Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=allowed_deploy,
-        )
-        check_permissions_ids = Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=allowed_check,
-        )
-
-        perm_deploy_ids = base_qs.filter(
-            job_type=PERM_INVENTORY_DEPLOY,
-            inventory__permissions__in=deploy_permissions_ids,
-            project__permissions__in=deploy_permissions_ids,
-            inventory__permissions__pk=F('project__permissions__pk'),
-        )
-
-        perm_check_ids = base_qs.filter(
-            job_type=PERM_INVENTORY_CHECK,
-            inventory__permissions__in=check_permissions_ids,
-            project__permissions__in=check_permissions_ids,
-            inventory__permissions__pk=F('project__permissions__pk'),
-        )
-
-        return base_qs.filter(
-            Q(id__in=org_admin_ids) |
-            Q(id__in=perm_deploy_ids) |
-            Q(id__in=perm_check_ids)
+            job_template__in=JobTemplate.accessible_objects(self.user, {'read': True})
         )
 
     def can_add(self, data):
@@ -938,21 +893,11 @@ class AdHocCommandAccess(BaseAccess):
             return qs
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        team_ids = set(Team.objects.filter( users__in=[self.user]).values_list('id', flat=True))
-
-        permission_ids = set(Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
-            permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-            run_ad_hoc_commands=True,
-        ).values_list('id', flat=True))
-
-        inventory_qs = self.user.get_queryset(Inventory)
-        inventory_qs = inventory_qs.filter(Q(permissions__in=permission_ids) | Q(organization__admins__in=[self.user]))
-        inventory_ids = set(inventory_qs.values_list('id', flat=True))
+        inventory_qs = Inventory.accessible_objects(self.user, {'read': True, 'execute': True})
 
         qs = qs.filter(
             credential_id__in=credential_ids,
-            inventory_id__in=inventory_ids,
+            inventory__in=inventory_qs,
         )
         return qs
 
@@ -1183,7 +1128,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'read', obj.unified_job_template)
         else:
             return False
 
@@ -1193,7 +1139,7 @@ class ScheduleAccess(BaseAccess):
         pk = get_pk_from_dict(data, 'unified_job_template')
         obj = get_object_or_400(UnifiedJobTemplate, pk=pk)
         if obj:
-            return obj.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            return self.user.can_access(type(obj), 'change', obj, None)
         else:
             return False
 
@@ -1201,7 +1147,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
@@ -1209,7 +1156,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            return obj.unified_job_template.accessible_by(self.user, {'read':True, 'update':True, 'write':True})
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
@@ -1286,10 +1234,6 @@ class ActivityStreamAccess(BaseAccess):
 
         #Project Update Filter
         qs.filter(project_update__project__in=project_qs)
-
-        #Permission Filter
-        permission_qs = self.user.get_queryset(Permission)
-        qs.filter(permission__in=permission_qs)
 
         #Job Template Filter
         jobtemplate_qs = self.user.get_queryset(JobTemplate)
