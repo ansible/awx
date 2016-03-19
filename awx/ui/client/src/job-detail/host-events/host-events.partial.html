@@ -1,0 +1,59 @@
+<div id="HostEvents" class="HostEvents modal fade"	role="dialog">
+	<div class="modal-dialog modal-lg">	
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="HostEvents-header">
+					<span class="HostEvents-title">HOST EVENTS</span>
+				<!-- Close -->
+					<button ng-click="goBack()" type="button" class="close">
+						<i class="fa fa-times"></i>
+					</button>
+				</div>
+				<div class="HostEvents-form--container">
+				<form ng-submit="search()" class="form-inline HostEvents-search--form">
+					<!-- Search -->
+					<div class="form-group" >
+						<div class="input-group">
+							<input type="text" ng-model="searchStr" class="form-control" placeholder="SEARCH">
+							<span ng-click="search()" type="submit" class="input-group-addon btn btn-default"><i class="fa fa-search"></i></span>
+						</div>
+					</div>
+				</form>
+
+				<select class="HostEvents-select">
+					    <option class="HostEvents-select--option" value="{{filter}}" ng-repeat="filter in filters">{{filter}}</option>
+				</select>
+				</div>
+				<!-- event results table -->
+				<div class="table-responsive">
+					<table class="table">
+					<!-- column labels -->
+					<th class="HostEvents-table--header">STATUS</th>
+					<th class="HostEvents-table--header">HOST</th>
+					<th class="HostEvents-table--header">PLAY</th>
+					<th class="HostEvents-table--header">TASK</th>
+					<!-- result rows -->
+					<tr class="HostEvents-table--row" ng-repeat="event in results track by $index">
+						<td class=HostEvents-table--cell>
+							<!-- status circles -->
+							<a class="HostEvents-status">
+								<i class="fa fa-circle"  ng-class="processStatus(event, $index)"></i>
+							</a>
+							{{event.status}}
+						</td>
+						<td class=HostEvents-table--cell>{{event.host_name}}</td>
+						<td class=HostEvents-table--cell>{{event.play}}</td>
+						<td class=HostEvents-table--cell>{{event.task}}</td>
+					</tr>
+					</table>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- pagination -->
+				
+				<button ng-click="goBack()" class="btn btn-default pull-right HostEvents-close">OK</button>
+
+			</div>
+		</div>
+	</div>
+</div>

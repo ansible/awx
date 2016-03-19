@@ -12,7 +12,6 @@ import Credentials from "./helpers/Credentials";
 import EventViewer from "./helpers/EventViewer";
 import Events from "./helpers/Events";
 import Groups from "./helpers/Groups";
-import HostEventsViewer from "./helpers/HostEventsViewer";
 import Hosts from "./helpers/Hosts";
 import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
@@ -46,7 +45,6 @@ export
         EventViewer,
         Events,
         Groups,
-        HostEventsViewer,
         Hosts,
         JobDetail,
         JobSubmission,
