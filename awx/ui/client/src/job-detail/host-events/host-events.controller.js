@@ -77,8 +77,8 @@
  		if (filter == 'ok'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				host_name: $stateParams.hostName, 
- 				event: 'runner_on_ok'
- 				// add param changed: false if 'ok' shouldn't display changed hosts
+ 				event: 'runner_on_ok',
+ 				changed: false
  				})
  				.success(function(res){
  					$scope.results = res.results;
