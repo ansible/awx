@@ -20,6 +20,16 @@
 	display: block;
 	width: 100%;
 }
+.License-submit--success.ng-hide-add, .License-submit--success.ng-hide-remove {
+  transition: all ease-in-out 0.5s;
+}
+.License-submit--success{
+	opacity: 1;
+  	transition: all ease-in-out 0.5s;
+}
+.License-submit--success.ng-hide{
+	opacity: 0;
+}
 .License-eula textarea{
 	width: 100%;
 	height: 300px;
@@ -33,6 +43,9 @@
 .License-field{
 	.OnePlusTwo-left--detailsRow;
 }
+.License-field + .License-field {
+    margin-top: 20px;
+}
 .License-greenText{
 	color: @submit-button-bg;
 }
@@ -40,16 +53,16 @@
 	color: #d9534f;
 }
 .License-fields{
-	.OnePlusTwo-left--details;	
+	.OnePlusTwo-left--details;
 }
 .License-details {
-	.OnePlusTwo-left--panel(600px);
+	.OnePlusTwo-left--panel(650px);
 }
 .License-titleText {
 	.OnePlusTwo-panelHeader;
 }
 .License-management{
-	.OnePlusTwo-right--panel(600px);
+	.OnePlusTwo-right--panel(650px);
 }
 .License-submit--container{
 	height: 33px;
@@ -59,8 +72,25 @@
 	margin: 0 10px 0 0;
 }
 .License-file--container {
-	margin: 20px 0 20px 0;
 	input[type=file] {
 	display: none;
 	}
+}
+.License-upgradeText {
+	margin: 20px 0px;
+}
+.License-body {
+	margin-top: 25px;
+}
+.License-subTitleText {
+	text-transform: uppercase;
+	margin: 20px 0px 5px 0px;
+	color: @default-interface-txt;
+}
+.License-helperText {
+	color: @default-interface-txt;
+}
+.License-input--fake{
+	border-top-right-radius: 4px !important;
+	border-bottom-right-radius: 4px !important;
 }

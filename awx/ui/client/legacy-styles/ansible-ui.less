@@ -44,7 +44,8 @@
 @import "text-label.less";
 @import "./bootstrap-datepicker.less";
 @import "awx/ui/client/src/shared/branding/colors.default.less";
-
+// Bootstrap default overrides
+@import "awx/ui/client/src/shared/bootstrap-settings.less";
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
 body.modal-open {
@@ -919,15 +920,11 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Display list actions next to search widget */
 .list-actions {
-  text-align: right;
+    text-align: right;
 
-  button {
-    margin-left: 4px;
-  }
-
-  .fa-lg {
-    vertical-align: -8%;
-  }
+    .fa-lg {
+        vertical-align: -8%;
+    }
 }
 
 .jqui-accordion {
@@ -1950,11 +1947,6 @@ tr td button i {
     .inputCompactMobile {
         margin-bottom: 15px;
     }
-}
-
-button.dropdown-toggle,
-.input-group-btn {
-    z-index: 1;
 }
 
 #login-modal-body {

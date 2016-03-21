@@ -303,7 +303,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
 
             // Generate the list
-            view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-3', secondWidget: true, activityStream: true, scope: scope });
+            view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;

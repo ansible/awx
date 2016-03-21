@@ -32,6 +32,7 @@ from django.http import HttpResponse
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -53,7 +54,7 @@ from social.backends.utils import load_backends
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
-from awx.main.tasks import mongodb_control, send_notifications
+from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
@@ -273,7 +274,6 @@ class ApiV1ConfigView(APIView):
 
         # Only stop mongod if license removal succeeded
         if has_error is None:
-            mongodb_control.delay('stop')
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
@@ -613,6 +613,78 @@ class OrganizationList(ListCreateAPIView):
 
         # Okay, create the organization as usual.
         return super(OrganizationList, self).create(request, *args, **kwargs)
+
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationList, self).get_serializer_context(*args, **kwargs)
+
+        if self.request is None:
+            return full_context
+
+        db_results = {}
+        org_qs = self.request.user.get_queryset(self.model)
+        org_id_list = org_qs.values('id')
+        if len(org_id_list) == 0:
+            if self.request.method == 'POST':
+                full_context['related_field_counts'] = {}
+            return full_context
+
+        inv_qs = self.request.user.get_queryset(Inventory)
+        project_qs = self.request.user.get_queryset(Project)
+        user_qs = self.request.user.get_queryset(User)
+
+        # Produce counts of Foreign Key relationships
+        db_results['inventories'] = inv_qs\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        db_results['teams'] = self.request.user.get_queryset(Team)\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        # TODO: When RBAC branch merges, change this to project relationship
+        JT_reference = 'inventory__organization'
+        # Extra filter is applied on the inventory, because this catches
+        #   the case of deleted (and purged) inventory
+        db_results['job_templates'] = self.request.user.get_queryset(JobTemplate)\
+            .filter(inventory__in=inv_qs)\
+            .values(JT_reference).annotate(Count(JT_reference))\
+            .order_by(JT_reference)
+
+        # Produce counts of m2m relationships
+        db_results['projects'] = Organization.projects.through.objects\
+            .filter(project__in=project_qs, organization__in=org_qs)\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        # TODO: When RBAC branch merges, change these to role relation
+        db_results['users'] = Organization.users.through.objects\
+            .filter(user__in=user_qs, organization__in=org_qs)\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        db_results['admins'] = Organization.admins.through.objects\
+            .filter(user__in=user_qs, organization__in=org_qs)\
+            .values('organization')\
+            .annotate(Count('organization')).order_by('organization')
+
+        count_context = {}
+        for org in org_id_list:
+            org_id = org['id']
+            count_context[org_id] = {
+                'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
+                'admins': 0, 'projects': 0}
+
+        for res in db_results:
+            if res == 'job_templates':
+                org_reference = JT_reference
+            else:
+                org_reference = 'organization'
+            for entry in db_results[res]:
+                org_id = entry[org_reference]
+                if org_id in count_context:
+                    count_context[org_id][res] = entry['%s__count' % org_reference]
+
+        full_context['related_field_counts'] = count_context
+
+        return full_context
 
 class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1270,7 +1342,17 @@ class HostActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
-class HostFactVersionsList(ListAPIView, ParentMixin):
+class SystemTrackingEnforcementMixin(APIView):
+    '''
+    Use check_permissions instead of initial() because it's in the OPTION's path as well
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled("system_tracking"):
+            raise LicenseForbids("Your license does not permit use "
+                                 "of system tracking.")
+        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
+
+class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
 
     model = Fact
     serializer_class = FactVersionSerializer
@@ -1278,10 +1360,6 @@ class HostFactVersionsList(ListAPIView, ParentMixin):
     new_in_220 = True
 
     def get_queryset(self):
-        if not feature_enabled("system_tracking"):
-            raise LicenseForbids("Your license does not permit use "
-                                 "of system tracking.")
-
         from_spec = self.request.query_params.get('from', None)
         to_spec = self.request.query_params.get('to', None)
         module_spec = self.request.query_params.get('module', None)
@@ -1299,7 +1377,7 @@ class HostFactVersionsList(ListAPIView, ParentMixin):
         queryset = self.get_queryset() or []
         return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
-class HostFactCompareView(SubDetailAPIView):
+class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
     model = Fact
     new_in_220 = True
@@ -1307,11 +1385,6 @@ class HostFactCompareView(SubDetailAPIView):
     serializer_class = FactSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
         datetime_spec = request.query_params.get('datetime', None)
         module_spec = request.query_params.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
@@ -1906,8 +1979,11 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not obj.survey_enabled:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # Sanity check: Are surveys available on this license?
+        # If not, do not allow them to be used.
+        if not feature_enabled('surveys'):
+            raise LicenseForbids('Your license does not allow '
+                                 'adding surveys.')
         return Response(obj.survey_spec)
 
     def post(self, request, *args, **kwargs):
@@ -2004,6 +2080,7 @@ class JobTemplateCallback(GenericAPIView):
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
     serializer_class = EmptySerializer
+    parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [FormParser]
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -2217,6 +2294,27 @@ class SystemJobTemplateJobsList(SubListAPIView):
     parent_model = SystemJobTemplate
     relationship = 'jobs'
     parent_key = 'system_job_template'
+
+class SystemJobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_any'
+
+class SystemJobTemplateNotifiersErrorList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_error'
+
+class SystemJobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = Notifier
+    serializer_class = NotifierSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notifiers_success'
 
 class JobList(ListCreateAPIView):
 
@@ -2898,6 +2996,12 @@ class SystemJobCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class SystemJobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = SystemJob
+    relationship = 'notifications'
 
 class UnifiedJobTemplateList(ListAPIView):
 

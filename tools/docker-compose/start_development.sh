@@ -20,8 +20,7 @@ else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
 
-rm -rf /tower_devel/ansible_tower.egg-info
-cp -R /tmp/ansible_tower.egg-info /tower_devel/
+cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
 
 # Check if we need to build dependencies
 if [ -f "awx/lib/.deps_built" ]; then

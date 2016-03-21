@@ -67,12 +67,12 @@ class FactCacheReceiver(object):
         self.timestamp = datetime.fromtimestamp(date_key, None)
 
         # Update existing Fact entry
-        fact_obj = Fact.get_host_fact(host_obj.id, module_name, self.timestamp)
-        if fact_obj:
+        try:
+            fact_obj = Fact.objects.get(host__id=host_obj.id, module=module_name, timestamp=self.timestamp)
             fact_obj.facts = facts
             fact_obj.save()
             logger.info('Updated existing fact <%s>' % (fact_obj.id))
-        else:
+        except Fact.DoesNotExist:
             # Create new Fact entry
             fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
             logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))

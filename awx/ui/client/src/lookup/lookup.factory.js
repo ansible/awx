@@ -177,6 +177,7 @@ export default ['Rest', 'ProcessErrors', 'generateList',
                     minWidth: 500,
                     title: hdr,
                     id: 'LookupModal-dialog',
+                    resizable: false,
                     onClose: function() {
                         setTimeout(function() {
                             scope.$apply(function() {

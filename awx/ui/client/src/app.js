@@ -27,9 +27,11 @@ import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
 import inventoryScripts from './inventory-scripts/main';
+import organizations from './organizations/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
+import notifications from './notifications/main';
 
 // modules
 import about from './about/main';
@@ -46,10 +48,12 @@ import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import lookUpHelper from './lookup/main';
-import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
+import JobTemplates from './job-templates/main';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
-import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
+import OrganizationsList from './organizations/list/organizations-list.controller';
+import OrganizationsAdd from './organizations/add/organizations-add.controller';
+import OrganizationsEdit from './organizations/edit/organizations-edit.controller';
 import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from './controllers/Inventories';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
@@ -64,7 +68,6 @@ import './shared/directives';
 import './shared/filters';
 import './shared/InventoryTree';
 import './shared/Socket';
-import './job-templates/main';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
@@ -76,7 +79,7 @@ __deferLoadIfEnabled();
 /*#endif#*/
 
 var tower = angular.module('Tower', [
-    // 'ngAnimate',
+    //'ngAnimate',
     'ngSanitize',
     'ngCookies',
     about.name,
@@ -85,6 +88,7 @@ var tower = angular.module('Tower', [
     browserData.name,
     systemTracking.name,
     inventoryScripts.name,
+    organizations.name,
     permissions.name,
     managementJobs.name,
     setupMenu.name,
@@ -98,7 +102,9 @@ var tower = angular.module('Tower', [
     activityStream.name,
     footer.name,
     jobDetail.name,
+    notifications.name,
     standardOut.name,
+    JobTemplates.name,
     'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -295,52 +301,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('jobTemplates', {
-                url: '/job_templates',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'job_template'
-                },
-                ncyBreadcrumb: {
-                    label: "JOB TEMPLATES"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobTemplates.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                ncyBreadcrumb: {
-                    parent: "jobTemplates",
-                    label: "CREATE JOB TEMPLATE"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('jobTemplates.edit', {
-                url: '/:template_id',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
-                data: {
-                    activityStreamId: 'template_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
             state('projects', {
                 url: '/projects',
                 templateUrl: urlPrefix + 'partials/projects.html',
@@ -456,28 +416,6 @@ var tower = angular.module('Tower', [
                 }
             }).
 
-            state('inventoryJobTemplateAdd', {
-                url: '/inventories/:inventory_id/job_templates/add',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventoryJobTemplateEdit', {
-                url: '/inventories/:inventory_id/job_templates/:template_id',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
             state('inventoryManage', {
                 url: '/inventories/:inventory_id/manage?groups',
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
@@ -486,61 +424,6 @@ var tower = angular.module('Tower', [
                     activityStream: true,
                     activityStreamTarget: 'inventory',
                     activityStreamId: 'inventory_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations', {
-                url: '/organizations',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'organization'
-                },
-                ncyBreadcrumb: {
-                    parent: function($scope) {
-                        $scope.$parent.$emit("ReloadOrgListView");
-                        return "setup";
-                    },
-                    label: "ORGANIZATIONS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsAdd,
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "CREATE ORGANIZATION"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('organizations.edit', {
-                url: '/:organization_id',
-                templateUrl: urlPrefix + 'partials/organizations.crud.html',
-                controller: OrganizationsEdit,
-                data: {
-                    activityStreamId: 'organization_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "organizations",
-                    label: "{{name}}"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -882,13 +765,13 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense', 
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', '$state', 'CheckLicense',
         '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
         'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService',
         function (
-            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense, 
+            $q, $compile, $cookieStore, $rootScope, $log, $state, CheckLicense,
             $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-            LoadConfig, Store, ShowSocketHelp, pendoService) 
+            LoadConfig, Store, ShowSocketHelp, pendoService)
             {
             var sock;
 
@@ -975,7 +858,7 @@ var tower = angular.module('Tower', [
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if ($state.is('jobDetail')) {
+                            } if ($state.is('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
                             } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);

@@ -221,29 +221,6 @@ export default
                     dataTitle: 'Prompt for Extra Variables',
                     dataContainer: "body"
                 },
-                survey_enabled: {
-                    label: 'Enable Survey',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    awFeature: 'surveys',
-                    ngChange: "surveyEnabled()",
-                    ngHide: "job_type.value === 'scan'",
-                    column: 2,
-                    awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Enable Survey',
-                    dataContainer: "body"
-                },
-                create_survey: {
-                    type: 'custom',
-                    column: 2,
-                    ngHide: "job_type.value === 'scan'" ,
-                    control: '<button type="button" class="btn btn-sm btn-primary" id="job_templates_create_survey_btn" ng-show="survey_enabled" ng-click="addSurvey()"><i class="fa fa-pencil"></i>   Create Survey</button>'+
-                            '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
-                            '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'+
-                            '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or uncheck the Enable Survey box to disable the survey. </div>'
-                },
                 become_enabled: {
                   label: 'Enable Privilege Escalation',
                   type: 'checkbox',
@@ -294,6 +271,13 @@ export default
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
+                },
+                survey: {
+                    type: 'custom',
+                    column: 2,
+                    ngHide: "job_type.value === 'scan'" ,
+                    control: '<button type="button" class="btn btn-sm Form-buttonDefault" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
+                            '<button type="button" class="btn btn-sm Form-buttonDefault" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
                 }
             },
 

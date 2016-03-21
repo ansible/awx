@@ -21,6 +21,15 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         // Open up a socket for events depending on the type of job
         function openSockets() {
+            if ($state.current.name == 'jobDetail') {
+                       $log.debug("socket watching on job_events-" + job_id);
+                       $rootScope.event_socket.on("job_events-" + job_id, function() {
+                           $log.debug("socket fired on job_events-" + job_id);
+                           if (api_complete) {
+                               event_queue++;
+                           }
+                       });
+                   }
             if ($state.current.name == 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
                 $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
@@ -108,7 +117,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         function getNextSection() {
             // get the next range of data from the API
             var start = loaded_sections[loaded_sections.length - 1].end, url;
-            url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
+            url = $scope.stdoutEndpoint + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
             $('#stdoutMoreRowsBottom').fadeIn();
             Rest.setUrl(url);
             Rest.get()

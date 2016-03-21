@@ -10,30 +10,30 @@ export default
                 element,
                 target = (mode==='survey-taker') ? 'password-modal' : "survey-modal-dialog",
                 buttons = [{
-                "label": "Cancel",
-                "onClick": function() {
-                    scope.cancelSurvey(this);
-                },
-                "icon": "fa-times",
-                "class": "btn btn-default",
-                "id": "survey-close-button"
-            },{
-                "label": (mode==='survey-taker') ? "Launch" : "Save" ,
-                "onClick": function() {
-                    setTimeout(function(){
-                        scope.$apply(function(){
-                            if(mode==='survey-taker'){
-                                scope.$emit('SurveyTakerCompleted');
-                            } else{
-                                scope.saveSurvey();
-                            }
+                    "label": "Cancel",
+                    "onClick": function() {
+                        scope.cancelSurvey(this);
+                    },
+                    "icon": "fa-times",
+                    "class": "btn btn-default",
+                    "id": "survey-close-button"
+                },{
+                    "label": (mode==='survey-taker') ? "Launch" : "Save" ,
+                    "onClick": function() {
+                        setTimeout(function(){
+                            scope.$apply(function(){
+                                if(mode==='survey-taker'){
+                                    scope.$emit('SurveyTakerCompleted');
+                                } else{
+                                    scope.saveSurvey();
+                                }
+                            });
                         });
-                    });
-                },
-                "icon":  (mode==='survey-taker') ? "fa-rocket" : "fa-check",
-                "class": "btn btn-primary",
-                "id": "survey-save-button"
-            }];
+                    },
+                    "icon":  (mode==='survey-taker') ? "fa-rocket" : "fa-check",
+                    "class": "btn btn-primary",
+                    "id": "survey-save-button"
+                }];
 
             CreateDialog({
                 id: target,
@@ -84,4 +84,3 @@ ShowFactory.$inject =
         'Empty',
         '$compile'
     ];
-

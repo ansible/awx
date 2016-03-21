@@ -1,4 +1,6 @@
-<span ng-repeat="(name, options) in list.actions">
+<span ng-repeat="(name, options) in list.actions" class="List-action" ng-hide="isHiddenByOptions(options) ||
+            hiddenOnCurrentPage(options.basePaths) ||
+            hiddenInCurrentMode(options.mode)">
     <!-- TODO: Unfortunately, the data-tip-watch attribute is not loaded for
     some reason -->
     <button
@@ -12,9 +14,6 @@
         data-title="{{options.dataTitle}}"
         ng-disabled="{{options.ngDisabled}}"
         ng-click="$eval(options.ngClick)"
-        ng-hide="isHiddenByOptions(options) ||
-                    hiddenOnCurrentPage(options.basePaths) ||
-                    hiddenInCurrentMode(options.mode)"
         toolbar="true"
         aw-feature="{{options.awFeature}}">
         <span ng-bind-html="options.buttonContent"></span>

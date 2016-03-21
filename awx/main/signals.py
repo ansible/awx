@@ -393,8 +393,10 @@ def activity_stream_associate(sender, instance, **kwargs):
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
             object2 = camelcase_to_underscore(obj2.__name__)
-            # Skip recording any inventory source changes here.
+            # Skip recording any inventory source, or system job template changes here.
             if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
+                continue
+            if isinstance(obj1, SystemJobTemplate) or isinstance(obj2_actual, SystemJobTemplate):
                 continue
             activity_entry = ActivityStream(
                 operation=action,
