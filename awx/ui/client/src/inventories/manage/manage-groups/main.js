@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-import route from './manage-hosts.route';
-import manageHostsDirective from './directive/manage-hosts.directive';
+import route from './manage-groups.route';
+import manageGroupsDirective from './directive/manage-groups.directive';
 
 export default
-    angular.module('manage-hosts', [])
-    .directive('manageHosts', manageHostsDirective)
+    angular.module('manage-groups', [])
+    .directive('manageGroups', manageGroupsDirective)
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route.edit);
             $stateExtender.addState(route.add);

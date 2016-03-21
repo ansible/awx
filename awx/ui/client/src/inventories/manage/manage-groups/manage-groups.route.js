@@ -9,15 +9,15 @@ import {
 
 export default {
     edit: {
-        name: 'inventoryManage.editHost',
-        route: '/:host_id/editHost',
-        templateUrl: templateUrl('inventories/manage/manage-hosts/manage-hosts'),
+        name: 'inventoryManage.editGroup',
+        route: '/:group_id/editGroup',
+        templateUrl: templateUrl('inventories/manage/manage-groups/manage-groups'),
         data: {
-            host_id: 'host_id',
+            group_id: 'group_id',
             mode: 'edit'
         },
         ncyBreadcrumb: {
-            label: "INVENTORY EDIT HOSTS"
+            label: "INVENTORY EDIT GROUPS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -27,14 +27,14 @@ export default {
     },
 
     add: {
-        name: 'inventoryManage.addHost',
-        route: '/addHost',
-        templateUrl: templateUrl('inventories/manage/manage-hosts/manage-hosts'),
+        name: 'inventoryManage.addGroup',
+        route: '/addGroup',
+        templateUrl: templateUrl('inventories/manage/manage-groups/manage-groups'),
+        ncyBreadcrumb: {
+            label: "INVENTORY ADD GROUP"
+        },
         data: {
             mode: 'add'
-        },
-        ncyBreadcrumb: {
-            label: "INVENTORY ADD HOST"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {

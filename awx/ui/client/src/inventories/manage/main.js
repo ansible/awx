@@ -5,15 +5,15 @@
  *************************************************/
 
 import route from './inventory-manage.route';
-import controller from './inventory-manage.controller';
 
-import manageHostsDirective from './manage-hosts/manage-hosts.directive';
-import manageHostsRoute from './manage-hosts/manage-hosts.route';
+import manageHosts from './manage-hosts/main';
+import manageGroups from './manage-groups/main';
 
 export default
-angular.module('inventoryManage', [])
-    .directive('manageHosts', manageHostsDirective)
+angular.module('inventoryManage', [
+        manageHosts.name,
+        manageGroups.name
+    ])
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(route);
-        $stateExtender.addState(manageHostsRoute);
     }]);

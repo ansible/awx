@@ -18,7 +18,7 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
     EditInventoryProperties, ToggleHostEnabled, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog,
-    GroupsCopy, HostsCopy, $stateParams) {
+    GroupsCopy, HostsCopy, $stateParams, ParamPass) {
 
     var PreviousSearchParams,
         url,
@@ -335,22 +335,38 @@ function InventoriesManage($log, $scope, $rootScope, $location,
 
     $scope.createGroup = function () {
         PreviousSearchParams = Store('group_current_search_params');
-        GroupsEdit({
+        // GroupsEdit({
+        //     scope: $scope,
+        //     inventory_id: $scope.inventory.id,
+        //     group_id: $scope.selected_group_id,
+        //     mode: 'add'
+        // });
+        var params = {
             scope: $scope,
             inventory_id: $scope.inventory.id,
             group_id: $scope.selected_group_id,
             mode: 'add'
-        });
+        }
+        ParamPass.set(params);
+        $state.go('inventoryManage.addGroup');
     };
 
     $scope.editGroup = function (id) {
         PreviousSearchParams = Store('group_current_search_params');
-        GroupsEdit({
+        // GroupsEdit({
+        //     scope: $scope,
+        //     inventory_id: $scope.inventory.id,
+        //     group_id: id,
+        //     mode: 'edit'
+        // });
+        var params = {
             scope: $scope,
             inventory_id: $scope.inventory.id,
             group_id: id,
             mode: 'edit'
-        });
+        }
+        ParamPass.set(params);
+        $state.go('inventoryManage.editGroup', {group_id: id});
     };
 
     // Launch inventory sync
@@ -416,24 +432,44 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     };
 
     hostScope.createHost = function () {
-        HostsEdit({
+        // HostsEdit({
+        //     host_scope: hostScope,
+        //     group_scope: $scope,
+        //     mode: 'add',
+        //     host_id: null,
+        //     selected_group_id: $scope.selected_group_id,
+        //     inventory_id: $scope.inventory.id
+        // });
+
+        var params = {
             host_scope: hostScope,
             group_scope: $scope,
             mode: 'add',
             host_id: null,
             selected_group_id: $scope.selected_group_id,
             inventory_id: $scope.inventory.id
-        });
+        }
+        ParamPass.set(params);
+        $state.go('inventoryManage.addHost');
     };
 
     hostScope.editHost = function (host_id) {
-        HostsEdit({
+        // HostsEdit({
+        //     host_scope: hostScope,
+        //     group_scope: $scope,
+        //     mode: 'edit',
+        //     host_id: host_id,
+        //     inventory_id: $scope.inventory.id
+        // });
+        var params = {
             host_scope: hostScope,
             group_scope: $scope,
             mode: 'edit',
             host_id: host_id,
             inventory_id: $scope.inventory.id
-        });
+        }
+        ParamPass.set(params);
+        $state.go('inventoryManage.editHost', {host_id: host_id});
     };
 
     hostScope.deleteHost = function (host_id, host_name) {
@@ -526,5 +562,5 @@ export default [
         'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
         'EditInventoryProperties', 'ToggleHostEnabled', 'ShowJobSummary',
         'InventoryGroupsHelp', 'HelpDialog', 'GroupsCopy',
-        'HostsCopy', '$stateParams', InventoriesManage,
+        'HostsCopy', '$stateParams', 'ParamPass', InventoriesManage,
 ];
