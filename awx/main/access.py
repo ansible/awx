@@ -198,12 +198,10 @@ class BaseAccess(object):
 class UserAccess(BaseAccess):
     '''
     I can see user records when:
-     - I'm a superuser.
-     - I'm that user.
-     - I'm an org admin (org admins should be able to see all users, in order
-       to add those users to the org).
-     - I'm in an org with that user.
-     - I'm on a team with that user.
+     - I'm a useruser
+     - I'm in a role with them (such as in an organization or team)
+     - They are in a role which includes a role of mine
+     - I am in a role that includes a role of theirs
     I can change some fields for a user (mainly password) when I am that user.
     I can change all fields for a user (admin access) or delete when:
      - I'm a superuser.
@@ -213,8 +211,17 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        qs = User.accessible_objects(self.user, {'read':True})
-        return qs
+        if self.user.is_superuser:
+            return User.objects
+
+        viewable_users_set = set()
+        viewable_users_set.update(self.user.roles.values_list('ancestors__members__id', flat=True))
+        viewable_users_set.update(self.user.roles.values_list('descendents__members__id', flat=True))
+
+        return User.objects.filter(id__in=viewable_users_set)
+        #qs = User.objects.filter(self.user, {'read':True})
+        #qs = User.objects.
+        #return qs
 
     def can_add(self, data):
         if data is not None and 'is_superuser' in data:
