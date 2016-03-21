@@ -202,12 +202,12 @@ class UserAccess(BaseAccess):
         qs = self.model.objects.distinct()
         if self.user.is_superuser:
             return qs
-        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.all().exists():
+        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.deprecated_admin_of_organizations.all().exists():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |
-            Q(organizations__in=self.user.admin_of_organizations) |
-            Q(organizations__in=self.user.organizations) |
+            Q(organizations__in=self.user.deprecated_admin_of_organizations) |
+            Q(organizations__in=self.user.deprecated_organizations) |
             Q(teams__in=self.user.teams)
         ).distinct()
 
@@ -216,7 +216,7 @@ class UserAccess(BaseAccess):
             if to_python_boolean(data['is_superuser'], allow_none=True) and not self.user.is_superuser:
                 return False
         return bool(self.user.is_superuser or
-                    self.user.admin_of_organizations.exists())
+                    self.user.deprecated_admin_of_organizations.exists())
 
     def can_change(self, obj, data):
         if data is not None and 'is_superuser' in data:
@@ -231,7 +231,7 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return bool(obj.organizations.filter(deprecated_admins__in=[self.user]).exists())
+        return bool(obj.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists())
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -242,7 +242,7 @@ class UserAccess(BaseAccess):
             # cannot delete the last active superuser
             return False
         return bool(self.user.is_superuser or
-                    obj.organizations.filter(deprecated_admins__in=[self.user]).exists())
+                    obj.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists())
 
 class OrganizationAccess(BaseAccess):
     '''
@@ -326,7 +326,7 @@ class InventoryAccess(BaseAccess):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return bool(self.user.is_superuser or
-                        self.user.admin_of_organizations.exists())
+                        self.user.deprecated_admin_of_organizations.exists())
         # Otherwise, verify that the user has access to change the parent
         # organization of this inventory.
         if self.user.is_superuser:
@@ -568,11 +568,11 @@ class CredentialAccess(BaseAccess):
             return qs
 
         # Get the list of organizations for which the user is an admin
-        orgs_as_admin_ids = set(self.user.admin_of_organizations.values_list('id', flat=True))
+        orgs_as_admin_ids = set(self.user.deprecated_admin_of_organizations.values_list('id', flat=True))
         return qs.filter(
             Q(user=self.user) |
-            Q(user__organizations__id__in=orgs_as_admin_ids) |
-            Q(user__admin_of_organizations__id__in=orgs_as_admin_ids) |
+            Q(user__deprecated_organizations__id__in=orgs_as_admin_ids) |
+            Q(user__deprecated_admin_of_organizations__id__in=orgs_as_admin_ids) |
             Q(team__organization__id__in=orgs_as_admin_ids) |
             Q(team__deprecated_users__in=[self.user])
         )
@@ -600,9 +600,9 @@ class CredentialAccess(BaseAccess):
         if obj.user:
             if self.user == obj.user:
                 return True
-            if obj.user.organizations.filter(deprecated_admins__in=[self.user]).exists():
+            if obj.user.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists():
                 return True
-            if obj.user.admin_of_organizations.filter(deprecated_admins__in=[self.user]).exists():
+            if obj.user.deprecated_admin_of_organizations.filter(deprecated_admins__in=[self.user]).exists():
                 return True
         if obj.team:
             if self.user in obj.team.organization.deprecated_admins.all():
@@ -710,7 +710,7 @@ class ProjectAccess(BaseAccess):
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        if self.user.admin_of_organizations.exists():
+        if self.user.deprecated_admin_of_organizations.exists():
             return True
         return False
 
@@ -772,10 +772,10 @@ class PermissionAccess(BaseAccess):
                                'project')
         if self.user.is_superuser:
             return qs
-        orgs_as_admin_ids = set(self.user.admin_of_organizations.values_list('id', flat=True))
+        orgs_as_admin_ids = set(self.user.deprecated_admin_of_organizations.values_list('id', flat=True))
         return qs.filter(
-            Q(user__organizations__in=orgs_as_admin_ids) |
-            Q(user__admin_of_organizations__in=orgs_as_admin_ids) |
+            Q(user__deprecated_organizations__in=orgs_as_admin_ids) |
+            Q(user__deprecated_admin_of_organizations__in=orgs_as_admin_ids) |
             Q(team__organization__in=orgs_as_admin_ids) |
             Q(user=self.user) |
             Q(team__deprecated_users__in=[self.user])
@@ -1492,16 +1492,16 @@ class ActivityStreamAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
 
-        user_admin_orgs = self.user.admin_of_organizations.all()
-        user_orgs = self.user.organizations.all()
+        user_admin_orgs = self.user.deprecated_admin_of_organizations.all()
+        user_orgs = self.user.deprecated_organizations.all()
 
         #Organization filter
         qs = qs.filter(Q(organization__deprecated_admins__in=[self.user]) | Q(organization__deprecated_users__in=[self.user]))
 
         #User filter
         qs = qs.filter(Q(user__pk=self.user.pk) |
-                       Q(user__organizations__in=user_admin_orgs) |
-                       Q(user__organizations__in=user_orgs))
+                       Q(user__deprecated_organizations__in=user_admin_orgs) |
+                       Q(user__deprecated_organizations__in=user_orgs))
 
         #Inventory filter
         inventory_qs = self.user.get_queryset(Inventory)
@@ -1523,8 +1523,8 @@ class ActivityStreamAccess(BaseAccess):
 
         #Credential Update Filter
         qs.filter(Q(credential__user=self.user) |
-                  Q(credential__user__organizations__in=user_admin_orgs) |
-                  Q(credential__user__admin_of_organizations__in=user_admin_orgs) |
+                  Q(credential__user__deprecated_organizations__in=user_admin_orgs) |
+                  Q(credential__user__deprecated_admin_of_organizations__in=user_admin_orgs) |
                   Q(credential__team__organization__in=user_admin_orgs) |
                   Q(credential__team__deprecated_users__in=[self.user]))
 
@@ -1606,7 +1606,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     def can_read(self, obj):
         if self.user.is_superuser:
             return True
-        return bool(obj.organization in self.user.organizations.all() or obj.organization in self.user.admin_of_organizations.all())
+        return bool(obj.organization in self.user.deprecated_organizations.all() or obj.organization in self.user.deprecated_admin_of_organizations.all())
 
     def can_add(self, data):
         if self.user.is_superuser:

@@ -41,12 +41,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     deprecated_users = models.ManyToManyField(
         'auth.User',
         blank=True,
-        related_name='organizations',
+        related_name='depreceated_organizations',
     )
     deprecated_admins = models.ManyToManyField(
         'auth.User',
         blank=True,
-        related_name='admin_of_organizations',
+        related_name='depreceated_admin_of_organizations',
     )
     deprecated_projects = models.ManyToManyField(
         'Project',
