@@ -26,6 +26,11 @@ from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
 from awx.main.fields import ImplicitRoleField
 from awx.main.conf import tower_settings
+from awx.main.models.rbac import (
+    ALL_PERMISSIONS,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -222,13 +227,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         parent_role=[
             'organization.admin_role',
             'teams.member_role',
+            'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
         role_description='May read all settings associated with this project',
-        parent_role='organization.auditor_role',
+        parent_role=[
+            'organization.auditor_role',
+            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        ],
         permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
