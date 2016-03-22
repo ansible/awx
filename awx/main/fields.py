@@ -155,9 +155,9 @@ class ImplicitRoleField(models.ForeignKey):
                     for pk in pk_set:
                         obj = model.objects.get(pk=pk)
                         if action == 'post_add':
-                            getattr(instance, self.name).children.add(getattr(obj, field_attr))
+                            getattr(instance, field_attr).children.add(getattr(obj, self.name))
                         if action == 'pre_remove':
-                            getattr(instance, self.name).children.remove(getattr(obj, field_attr))
+                            getattr(instance, field_attr).children.remove(getattr(obj, self.name))
 
                 else:
                     for pk in pk_set:
