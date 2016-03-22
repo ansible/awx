@@ -219,7 +219,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Project Administrator',
         role_description='May manage this project',
-        parent_role='organization.admin_role',
+        parent_role=[
+            'organization.admin_role',
+            'teams.member_role',
+        ],
         permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
