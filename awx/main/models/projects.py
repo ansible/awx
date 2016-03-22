@@ -27,7 +27,6 @@ from awx.main.utils import update_scm_url
 from awx.main.fields import ImplicitRoleField
 from awx.main.conf import tower_settings
 from awx.main.models.rbac import (
-    ALL_PERMISSIONS,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
