@@ -47,6 +47,16 @@ User.add_to_class('accessible_objects', user_accessible_objects)
 User.add_to_class('admin_role', user_admin_role)
 User.add_to_class('role_permissions', GenericRelation('main.RolePermission'))
 
+@property
+def user_get_organizations(user):
+    return Organization.objects.filter(member_role__members=user)
+@property
+def user_get_admin_of_organizations(user):
+    return Organization.objects.filter(admin_role__members=user)
+
+User.add_to_class('organizations', user_get_organizations)
+User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
+
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
 

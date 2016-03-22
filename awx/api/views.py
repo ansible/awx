@@ -1006,7 +1006,7 @@ class UserTeamsList(ListAPIView):
 
     def get_queryset(self):
         u = User.objects.get(pk=self.kwargs['pk'])
-        if not u.accessible_by(self.request.user, {'read': True}):
+        if not u.can_access(User, 'read', self.request.user):
             raise PermissionDenied()
         return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
 
@@ -1065,12 +1065,26 @@ class UserOrganizationsList(SubListAPIView):
     parent_model = User
     relationship = 'organizations'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(member_role__members=parent)
+        return my_qs & user_qs
+
 class UserAdminOfOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(admin_role__members=parent)
+        return my_qs & user_qs
 
 class UserActivityStreamList(SubListAPIView):
 
