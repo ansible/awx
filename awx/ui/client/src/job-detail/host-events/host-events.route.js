@@ -7,9 +7,12 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'jobDetail.hostEvents',
+    name: 'jobDetail.host-events',
     url: '/host-events/:hostName?:filter',
     controller: 'HostEventsController',
+    params: {
+        page_size: 10
+    },
     templateUrl: templateUrl('job-detail/host-events/host-events'),
     onExit: function(){
         // close the modal

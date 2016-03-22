@@ -6,42 +6,33 @@
 
  export default 
  	['$stateParams', '$scope', '$rootScope', '$state', 'Wait',
- 	 'JobDetailService', 'CreateSelect2', 'PaginateInit',
+ 	 'JobDetailService', 'CreateSelect2',
  	function($stateParams, $scope, $rootScope, $state, Wait,
- 	 JobDetailService, CreateSelect2, PaginateInit){
+ 	 JobDetailService, CreateSelect2){
 
- 	
+ 	// pagination not implemented yet, but it'll depend on this
+ 	$scope.page_size = $stateParams.page_size;
+
+ 	$scope.activeFilter = $stateParams.filter || null;
+
  	$scope.search = function(){
  		Wait('start');
  		if ($scope.searchStr == undefined){
  			return
  		}
- 		// The API treats params as AND query
- 		// We should discuss the possibility of an OR array
-
- 		// search play description
-	 	/*
-	 		JobDetailService.getRelatedJobEvents($stateParams.id, {
-	 		play: $scope.searchStr})
-	 			.success(function(res){
-	 				results.push(res.results);
-	 		});
-	 	*/
- 		// search host name
+ 		//http://docs.ansible.com/ansible-tower/latest/html/towerapi/intro.html#filtering
+ 		// SELECT WHERE host_name LIKE str OR WHERE play LIKE str OR WHERE task LIKE str AND host_name NOT ""
+ 		// selecting non-empty host_name fields prevents us from displaying non-runner events, like playbook_on_task_start
 	 	JobDetailService.getRelatedJobEvents($stateParams.id, {
-	 		host_name: $scope.searchStr})
+	 		or__host_name__icontains: $scope.searchStr,
+	 		or__play__icontains: $scope.searchStr,
+	 		or__task__icontains: $scope.searchStr,
+	 		not__host_name: "" ,
+	 		page_size: $scope.pageSize})
 	 			.success(function(res){
 	 				$scope.results = res.results;
-	 				Wait('Stop')
+	 				Wait('stop')
 	 	});
- 		// search task
- 		/*
-	 	JobDetailService.getRelatedJobEvents($stateParams.id, {
-	 		task: $scope.searchStr})
-	 			.success(function(res){
-	 				results.push(res.results);
-	 	});
-	 	*/
  	};
 
  	$scope.filters = ['all', 'changed', 'failed', 'ok', 'unreachable', 'skipped'];
@@ -49,7 +40,9 @@
  	var filter = function(filter){
  		Wait('start');
  		if (filter == 'all'){
-	 		return JobDetailService.getRelatedJobEvents($stateParams.id, {host_name: $stateParams.hostName})
+	 		return JobDetailService.getRelatedJobEvents($stateParams.id, {
+	 			host_name: $stateParams.hostName,
+	 			page_size: $scope.pageSize})
 	 			.success(function(res){
 	 				$scope.results = res.results;
 	 				Wait('stop');
@@ -154,17 +147,17 @@
  		if ($stateParams.filter){
  			filter($stateParams.filter).success(function(res){
 	 				$scope.results = res.results;
-	 				PaginateInit({ scope: $scope, list: defaultUrl });
 	 				Wait('stop');
 	 				$('#HostEvents').modal('show');
-
-
 	 		});;
  		}
  		else{
  			Wait('start');
-	 		JobDetailService.getRelatedJobEvents($stateParams.id, {host_name: $stateParams.hostName})
+	 		JobDetailService.getRelatedJobEvents($stateParams.id, {
+	 			host_name: $stateParams.hostName,
+	 			page_size: $stateParams.page_size})
 	 			.success(function(res){
+	 				$scope.pagination = res;
 	 				$scope.results = res.results;
 	 				Wait('stop');
 	 				$('#HostEvents').modal('show');

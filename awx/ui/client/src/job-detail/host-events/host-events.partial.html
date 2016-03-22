@@ -6,7 +6,7 @@
 					<span class="HostEvents-title">HOST EVENTS</span>
 				<!-- Close -->
 					<button ng-click="goBack()" type="button" class="close">
-						<i class="fa fa-times"></i>
+						<i class="fa fa fa-times-circle"></i>
 					</button>
 				</div>
 				<div class="HostEvents-form--container">
@@ -21,19 +21,19 @@
 				</form>
 
 				<select class="HostEvents-select">
-					    <option class="HostEvents-select--option" value="{{filter}}" ng-repeat="filter in filters">{{filter}}</option>
+					    <option ng-selected="filter == activeFilter" class="HostEvents-select--option" value="{{filter}}" ng-repeat="filter in filters">{{filter}}</option>
 				</select>
 				</div>
 				<!-- event results table -->
 				<div class="table-responsive">
 					<table class="table">
 					<!-- column labels -->
-					<th class="HostEvents-table--header">STATUS</th>
-					<th class="HostEvents-table--header">HOST</th>
-					<th class="HostEvents-table--header">PLAY</th>
-					<th class="HostEvents-table--header">TASK</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">STATUS</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">HOST</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">PLAY</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">TASK</th>
 					<!-- result rows -->
-					<tr class="HostEvents-table--row" ng-repeat="event in results track by $index">
+					<tr class="HostEvents-table--row" ng-repeat="event in results track by $index" modal-paginate="event in results | page_size: page_size">
 						<td class=HostEvents-table--cell>
 							<!-- status circles -->
 							<a class="HostEvents-status">
@@ -45,12 +45,17 @@
 						<td class=HostEvents-table--cell>{{event.play}}</td>
 						<td class=HostEvents-table--cell>{{event.task}}</td>
 					</tr>
+					<tr ng-show="results.length == 0" class="HostEvents-table--row">
+						<td class=HostEvents-table--cell>
+						No results were found.
+						</td>
+					</tr>
 					</table>
 				</div>
 			</div>
 			<div class="modal-footer">
 				<!-- pagination -->
-				
+				<!-- close -->
 				<button ng-click="goBack()" class="btn btn-default pull-right HostEvents-close">OK</button>
 
 			</div>

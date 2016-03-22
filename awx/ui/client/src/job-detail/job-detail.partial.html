@@ -422,13 +422,13 @@
                                     <tbody>
                                         <tr class="List-tableRow" ng-repeat="host in summaryList = (hosts) track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
                                             <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                                <a ui-sref="jobDetail.hostEvents({hostName: host.name, hostId: host.id})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
                                             </td>
                                             <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
-                                                <a ui-sref="jobDetail.hostEvents({hostName: host.name, hostId: host.id, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                                                <a ui-sref="jobDetail.hostEvents({hostName: host.name, hostId: host.id, filter: 'changed'})"  aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                                                <a ui-sref="jobDetail.hostEvents({hostName: host.name, hostId: host.id, filter: 'unreachable'})"  aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
-                                                <a ui-sref="jobDetail.hostEvents({hostName: host.name, hostId: host.id, filter: 'failed'})"  aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'changed'})"  aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'unreachable'})"  aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'failed'})"  aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
                                             </td>
                                         </tr>
                                         <tr ng-show="summaryList.length === 0 && waiting">
