@@ -1598,16 +1598,15 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
+            survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,))
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
-        if obj.survey_enabled:
-            res['survey_spec'] = reverse('api:job_template_survey_spec', args=(obj.pk,))
         return res
 
     def get_summary_fields(self, obj):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
-        if obj.survey_enabled and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
+        if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
         if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
