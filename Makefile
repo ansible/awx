@@ -361,14 +361,14 @@ check: flake8 pep8 # pyflakes pylint
 
 # Run all API unit tests.
 test:
-	py.test awx/main/tests awx/api/tests awx/fact/tests
+	py.test awx/main/tests awx/api/tests
 
 test_unit:
 	py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests awx/fact/tests
+	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
