@@ -849,7 +849,10 @@ class JobAccess(BaseAccess):
         return obj.status == 'new' and self.can_read(obj) and self.can_add(data)
 
     def can_delete(self, obj):
-        return self.can_read(obj)
+        # Allow org admins and superusers to delete jobs
+        if self.user.is_superuser:
+            return True
+        return obj.inventory.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_start(self, obj):
         self.check_license()

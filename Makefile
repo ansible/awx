@@ -368,7 +368,7 @@ test_unit:
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests awx/fact/tests
+	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
