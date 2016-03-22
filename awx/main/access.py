@@ -630,6 +630,8 @@ class ProjectAccess(BaseAccess):
     model = Project
 
     def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects
         qs = self.model.accessible_objects(self.user, {'read':True})
         qs = qs.select_related('modified_by', 'credential', 'current_job', 'last_job')
         return qs
@@ -661,6 +663,8 @@ class ProjectUpdateAccess(BaseAccess):
     model = ProjectUpdate
 
     def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects
         qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
         project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
