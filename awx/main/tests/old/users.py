@@ -319,7 +319,7 @@ class UsersTest(BaseTest):
         self.normal_django_user.delete()
         response = self.get(user_me_url, expect=401, auth=auth_token2,
                             remote_addr=remote_addr)
-        self.assertEqual(response['detail'], 'User inactive or deleted')
+        assert response['detail'] == 'Invalid token'
 
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):
 
@@ -412,13 +412,13 @@ class UsersTest(BaseTest):
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data2['count'], 4)
         # Unless the setting ORG_ADMINS_CAN_SEE_ALL_USERS is False, in which case
-        # he can only see users in his org
+        # he can only see users in his org, and the system admin
         settings.ORG_ADMINS_CAN_SEE_ALL_USERS = False
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data2['count'], 2)
+        self.assertEquals(data2['count'], 3)
         # Other use can only see users in his org.
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(data1['count'], 2)
+        self.assertEquals(data1['count'], 3)
         # Normal user can no longer see all users after the organization he
         # admins is marked inactive, nor can he see any other users that were
         # in that org, so he only sees himself.
@@ -426,13 +426,16 @@ class UsersTest(BaseTest):
         data3 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data3['count'], 1)
 
-    def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
-        user_pk = self.normal_django_user.pk
-        url = reverse('api:user_detail', args=(user_pk,))
-        self.delete(url, expect=204, auth=self.get_super_credentials())
-        self.get(url, expect=404, auth=self.get_super_credentials())
-        obj = User.objects.get(pk=user_pk)
-        self.assertEquals(obj.is_active, False)
+    # Test no longer relevant since we've moved away from active / inactive.
+    # However there was talk about keeping is_active for users, so this test will
+    # be relevant if that comes to pass. - anoek 2016-03-22
+    # def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
+    #     user_pk = self.normal_django_user.pk
+    #     url = reverse('api:user_detail', args=(user_pk,))
+    #     self.delete(url, expect=204, auth=self.get_super_credentials())
+    #     self.get(url, expect=404, auth=self.get_super_credentials())
+    #     obj = User.objects.get(pk=user_pk)
+    #     self.assertEquals(obj.is_active, False)
 
     def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
         url1 = reverse('api:user_detail', args=(self.super_django_user.pk,))
@@ -754,96 +757,13 @@ class UsersTest(BaseTest):
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 
-        # Verify difference between normal AND filter vs. filtering with
-        # chain__ prefix.
-        url = '%s?organizations__name__startswith=org0&organizations__name__startswith=org1' % base_url
-        qs = base_qs.filter(Q(organizations__name__startswith='org0'),
-                            Q(organizations__name__startswith='org1'))
-        self.assertFalse(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-        url = '%s?chain__organizations__name__startswith=org0&chain__organizations__name__startswith=org1' % base_url
-        qs = base_qs.filter(organizations__name__startswith='org0')
-        qs = qs.filter(organizations__name__startswith='org1')
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by related organization not present.
-        url = '%s?organizations=None' % base_url
-        qs = base_qs.filter(organizations=None)
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-        url = '%s?organizations__isnull=true' % base_url
-        qs = base_qs.filter(organizations__isnull=True)
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by related organization present.
-        url = '%s?organizations__isnull=0' % base_url
-        qs = base_qs.filter(organizations__isnull=False)
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by related organizations name.
-        url = '%s?organizations__name__startswith=org' % base_url
-        qs = base_qs.filter(organizations__name__startswith='org')
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by related organizations admins username.
-        url = '%s?organizationsadmin_role__members__username__startswith=norm' % base_url
-        qs = base_qs.filter(organizationsadmin_role__members__username__startswith='norm')
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
         # Filter by username with __in list.
         url = '%s?username__in=normal,admin' % base_url
         qs = base_qs.filter(username__in=('normal', 'admin'))
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 
-        # Filter by organizations with __in list.
-        url = '%s?organizations__in=%d,0' % (base_url, self.organizations[0].pk)
-        qs = base_qs.filter(organizations__in=(self.organizations[0].pk, 0))
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Exclude by organizations with __in list.
-        url = '%s?not__organizations__in=%d,0' % (base_url, self.organizations[0].pk)
-        qs = base_qs.exclude(organizations__in=(self.organizations[0].pk, 0))
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by organizations created timestamp (passing only a date).
-        url = '%s?organizations__created__gt=2013-01-01' % base_url
-        qs = base_qs.filter(organizations__created__gt=datetime.date(2013, 1, 1))
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by organizations created timestamp (passing datetime).
-        url = '%s?organizations__created__lt=%s' % (base_url, urllib.quote_plus('2037-03-07 12:34:56'))
-        qs = base_qs.filter(organizations__created__lt=datetime.datetime(2037, 3, 7, 12, 34, 56))
-        self.assertTrue(qs.count())
-        self.check_get_list(url, self.super_django_user, qs)
-
-        # Filter by organizations created timestamp (invalid datetime value).
-        url = '%s?organizations__created__gt=yesterday' % base_url
-        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
-
-        # Filter by organizations created year (valid django lookup, but not
-        # allowed via API).
-        url = '%s?organizations__created__year=2013' % base_url
-        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
-
-        # Filter by invalid field.
         url = '%s?email_address=nobody@example.com' % base_url
-        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
-
-        # Filter by invalid field across lookups.
-        url = '%s?organizations__member_role.members__teams__laser=green' % base_url
-        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
-
-        # Filter by invalid relation within lookups.
-        url = '%s?organizations__member_role.members__llamas__name=freddie' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
         # Filter by invalid query string field names.
