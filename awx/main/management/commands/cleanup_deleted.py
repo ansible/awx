@@ -111,8 +111,6 @@ class Command(BaseCommand):
 
         n_deleted_items = 0
         n_deleted_items += self.cleanup_model(User)
-        for model in self.get_models(PrimordialModel):
-            n_deleted_items += self.cleanup_model(model)
 
         if not self.dry_run:
             self.logger.log(99, "Removed %d items", n_deleted_items)

@@ -1,0 +1,118 @@
+<div id="add-permissions-modal" class="AddPermissions modal fade">
+    <div class="AddPermissions-backDrop is-loggedOut"></div>
+    <div class="AddPermissions-dialog">
+        <div class="AddPermissions-content is-loggedOut">
+            <div class="AddPermissions-header">
+                <div class="List-header">
+                    <div class="List-title">
+                        <div class="List-titleText ng-binding">
+                            {{ object.name }}
+                            <div class="List-titleLockup"></div>
+                            Add Permissions
+                        </div>
+                    </div>
+                    <div class="Form-exitHolder">
+                        <button class="Form-exit" ng-click="closeModal()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="AddPermissions-body">
+                <div class="AddPermissions-directions">
+                    <span class="AddPermissions-directionNumber">
+                        1.
+                    </span>
+                    Please select Users / Teams from the lists below.
+                </div>
+
+                <div class="Form-tabHolder">
+                    <div id="users_tab" class="Form-tab"
+                        ng-click="toggleFormTabs('users')"
+                        ng-class="{'is-selected': usersSelected }">
+                        Users
+                    </div>
+                    <div id="teams_tab" class="Form-tab"
+                        ng-click="toggleFormTabs('teams')"
+                        ng-class="{'is-selected': teamsSelected }"
+                    >
+                        Teams
+                    </div>
+                </div>
+
+                <div class="AddPermissions-list" ng-show="usersSelected">
+                    <add-permissions-list type="users">
+                    </add-permissions-list>
+                </div>
+                <div class="AddPermissions-list" ng-show="teamsSelected">
+                    <add-permissions-list type="teams">
+                    </add-permissions-list>
+                </div>
+
+                <div class="AddPermissions-separator"
+                    ng-show="allSelected && allSelected.length > 0"></div>
+
+                <div class="AddPermissions-directions"
+                    ng-show="allSelected && allSelected.length > 0">
+                    <span class="AddPermissions-directionNumber">
+                        2.
+                    </span>
+                    Please assign roles to the selected users/teams
+                    <div class="AddPermissions-keyToggle"
+                        ng-class="{'is-active': showKeyPane}"
+                        ng-click="toggleKeyPane()">
+                        Key
+                    </div>
+                </div>
+                <div class="AddPermissions-keyPane"
+                    ng-show="showKeyPane">
+                    <div class="AddPermissions-keyRow"
+                        ng-repeat="key in roleKey">
+                        <div class="AddPermissions-keyName">
+                            {{ key.name }}
+                        </div>
+                        <div class="AddPermissions-keyDescription">
+                            {{ key.description || "No description provided" }}
+                        </div>
+                    </div>
+                </div>
+                <form name="userForm" novalidate>
+                    <ng-form name="userRoleForm">
+                    <div class="AddPermissions-roleRow"
+                        ng-repeat="obj in allSelected">
+                        <div class="AddPermissions-roleName">
+                            <span class="AddPermissions-roleNameVal">
+                                {{ obj.name }}
+                            </span>
+                            <span class="AddPermissions-roleType">
+                                {{ obj.type }}
+                            </span>
+                        </div>
+                        <role-select class="AddPermissions-roleSelect">
+                        </role-select>
+                        <button class="AddPermissions-roleRemove"
+                            ng-click="removeObject(obj)">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    </ng-form>
+                </form>
+            </div>
+            <div class="AddPermissions-footer">
+                <div class="buttons Form-buttons AddPermissions-buttons">
+                    <button type="button"
+                        class="btn btn-sm Form-saveButton"
+                        ng-click="updatePermissions()"
+                        ng-disabled="userRoleForm.$invalid || !allSelected || !allSelected.length">
+                        Save
+                    </button>
+                    <button type="button"
+                        class="btn btn-sm Form-cancelButton"
+                        ng-click="closeModal()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+   </div>
+</div>

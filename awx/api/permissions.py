@@ -103,11 +103,7 @@ class ModelAccessPermission(permissions.BasePermission):
         if not request.user or request.user.is_anonymous():
             return False
 
-        # Don't allow inactive users (and respond with a 403).
-        if not request.user.is_active:
-            raise PermissionDenied('your account is inactive')
-
-        # Always allow superusers (as long as they are active).
+        # Always allow superusers
         if getattr(view, 'always_allow_superuser', True) and request.user.is_superuser:
             return True
 
@@ -121,6 +117,7 @@ class ModelAccessPermission(permissions.BasePermission):
         check_method = getattr(self, 'check_%s_permissions' % request.method.lower(), None)
         result = check_method and check_method(request, view, obj)
         if not result:
+            print('Yarr permission denied: %s %s %s' % (request.method, repr(view), repr(obj),)) # TODO: XXX: This shouldn't have been committed but anoek is sloppy, remove me after we're done fixing bugs
             raise PermissionDenied()
 
         return result
@@ -161,8 +158,6 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
             raise PermissionDenied()
         elif not host_config_key:
             raise PermissionDenied()
-        elif obj and not obj.active:
-            raise PermissionDenied()
         elif obj and obj.host_config_key != host_config_key:
             raise PermissionDenied()
         else:
@@ -182,7 +177,7 @@ class TaskPermission(ModelAccessPermission):
         # Verify that the ID present in the auth token is for a valid, active
         # unified job.
         try:
-            unified_job = UnifiedJob.objects.get(active=True, status='running',
+            unified_job = UnifiedJob.objects.get(status='running',
                                                  pk=int(request.auth.split('-')[0]))
         except (UnifiedJob.DoesNotExist, TypeError):
             return False

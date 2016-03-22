@@ -66,68 +66,68 @@ class BaseJobTestMixin(BaseTestMixin):
         # Alex is Sue's IT assistant who can also administer all of the
         # organizations.
         self.user_alex = self.make_user('alex')
-        self.org_eng.admins.add(self.user_alex)
-        self.org_sup.admins.add(self.user_alex)
-        self.org_ops.admins.add(self.user_alex)
+        self.org_eng.admin_role.members.add(self.user_alex)
+        self.org_sup.admin_role.members.add(self.user_alex)
+        self.org_ops.admin_role.members.add(self.user_alex)
 
         # Bob is the head of engineering.  He's an admin for engineering, but
         # also a user within the operations organization (so he can see the
         # results if things go wrong in production).
         self.user_bob = self.make_user('bob')
-        self.org_eng.admins.add(self.user_bob)
-        self.org_ops.users.add(self.user_bob)
+        self.org_eng.admin_role.members.add(self.user_bob)
+        self.org_ops.member_role.members.add(self.user_bob)
 
         # Chuck is the lead engineer.  He has full reign over engineering, but
         # no other organizations.
         self.user_chuck = self.make_user('chuck')
-        self.org_eng.admins.add(self.user_chuck)
+        self.org_eng.admin_role.members.add(self.user_chuck)
 
         # Doug is the other engineer working under Chuck.  He can write
         # playbooks and check them, but Chuck doesn't quite think he's ready to
         # run them yet.  Poor Doug.
         self.user_doug = self.make_user('doug')
-        self.org_eng.users.add(self.user_doug)
+        self.org_eng.member_role.members.add(self.user_doug)
 
         # Juan is another engineer working under Chuck.  He has a little more freedom
         # to run playbooks but can't create job templates
         self.user_juan = self.make_user('juan')
-        self.org_eng.users.add(self.user_juan)
+        self.org_eng.member_role.members.add(self.user_juan)
 
         # Hannibal is Chuck's right-hand man.  Chuck usually has him create the job
         # templates that the rest of the team will use
         self.user_hannibal = self.make_user('hannibal')
-        self.org_eng.users.add(self.user_hannibal)
+        self.org_eng.member_role.members.add(self.user_hannibal)
 
         # Eve is the head of support.  She can also see what goes on in
         # operations to help them troubleshoot problems.
         self.user_eve = self.make_user('eve')
-        self.org_sup.admins.add(self.user_eve)
-        self.org_ops.users.add(self.user_eve)
+        self.org_sup.admin_role.members.add(self.user_eve)
+        self.org_ops.member_role.members.add(self.user_eve)
 
         # Frank is the other support guy.
         self.user_frank = self.make_user('frank')
-        self.org_sup.users.add(self.user_frank)
+        self.org_sup.member_role.members.add(self.user_frank)
 
         # Greg is the head of operations.
         self.user_greg = self.make_user('greg')
-        self.org_ops.admins.add(self.user_greg)
+        self.org_ops.admin_role.members.add(self.user_greg)
 
         # Holly is an operations engineer.
         self.user_holly = self.make_user('holly')
-        self.org_ops.users.add(self.user_holly)
+        self.org_ops.member_role.members.add(self.user_holly)
 
         # Iris is another operations engineer.
         self.user_iris = self.make_user('iris')
-        self.org_ops.users.add(self.user_iris)
+        self.org_ops.member_role.members.add(self.user_iris)
 
         # Randall and Billybob are new ops interns that ops uses to test
         # their playbooks and inventory
         self.user_randall = self.make_user('randall')
-        self.org_ops.users.add(self.user_randall)
+        self.org_ops.member_role.members.add(self.user_randall)
 
         # He works with Randall
         self.user_billybob = self.make_user('billybob')
-        self.org_ops.users.add(self.user_billybob)
+        self.org_ops.member_role.members.add(self.user_billybob)
 
         # Jim is the newest intern. He can login, but can't do anything quite yet
         # except make everyone else fresh coffee.
@@ -218,24 +218,29 @@ class BaseJobTestMixin(BaseTestMixin):
             created_by=self.user_sue)
         self.team_ops_east.projects.add(self.proj_prod)
         self.team_ops_east.projects.add(self.proj_prod_east)
-        self.team_ops_east.users.add(self.user_greg)
-        self.team_ops_east.users.add(self.user_holly)
+        self.team_ops_east.member_role.members.add(self.user_greg)
+        self.team_ops_east.member_role.members.add(self.user_holly)
         self.team_ops_west = self.org_ops.teams.create(
             name='westerners',
             created_by=self.user_sue)
         self.team_ops_west.projects.add(self.proj_prod)
         self.team_ops_west.projects.add(self.proj_prod_west)
-        self.team_ops_west.users.add(self.user_greg)
-        self.team_ops_west.users.add(self.user_iris)
+        self.team_ops_west.member_role.members.add(self.user_greg)
+        self.team_ops_west.member_role.members.add(self.user_iris)
 
         # The south team is no longer active having been folded into the east team
-        self.team_ops_south = self.org_ops.teams.create(
-            name='southerners',
-            created_by=self.user_sue,
-            active=False,
-        )
-        self.team_ops_south.projects.add(self.proj_prod)
-        self.team_ops_south.users.add(self.user_greg)
+        # FIXME: This code can be removed (probably)
+        #  - this case has been removed as we've gotten rid of the active flag, keeping
+        #    code around in case this has ramifications on some test failures.. if
+        #    you find this message and all tests are passing, then feel free to remove this
+        #    - anoek 2016-03-10
+        #self.team_ops_south = self.org_ops.teams.create(
+        #    name='southerners',
+        #    created_by=self.user_sue,
+        #    active=False,
+        #)
+        #self.team_ops_south.projects.add(self.proj_prod)
+        #self.team_ops_south.member_role.members.add(self.user_greg)
 
         # The north team is going to be deleted
         self.team_ops_north = self.org_ops.teams.create(
@@ -243,7 +248,7 @@ class BaseJobTestMixin(BaseTestMixin):
             created_by=self.user_sue,
         )
         self.team_ops_north.projects.add(self.proj_prod)
-        self.team_ops_north.users.add(self.user_greg)
+        self.team_ops_north.member_role.members.add(self.user_greg)
 
         # The testers team are interns that can only check playbooks but can't
         # run them
@@ -252,8 +257,8 @@ class BaseJobTestMixin(BaseTestMixin):
             created_by=self.user_sue,
         )
         self.team_ops_testers.projects.add(self.proj_prod)
-        self.team_ops_testers.users.add(self.user_randall)
-        self.team_ops_testers.users.add(self.user_billybob)
+        self.team_ops_testers.member_role.members.add(self.user_randall)
+        self.team_ops_testers.member_role.members.add(self.user_billybob)
 
         # Each user has his/her own set of credentials.
         from awx.main.tests.data.ssh import (TEST_SSH_KEY_DATA,
@@ -337,11 +342,18 @@ class BaseJobTestMixin(BaseTestMixin):
             password='Heading270',
             created_by = self.user_sue,
         )
-        self.cred_ops_south = self.team_ops_south.credentials.create(
-            username='south',
-            password='Heading180',
-            created_by = self.user_sue,
-        )
+
+
+        # FIXME: This code can be removed (probably)
+        #  - this case has been removed as we've gotten rid of the active flag, keeping
+        #    code around in case this has ramifications on some test failures.. if
+        #    you find this message and all tests are passing, then feel free to remove this
+        #    - anoek 2016-03-10
+        #self.cred_ops_south = self.team_ops_south.credentials.create(
+        #    username='south',
+        #    password='Heading180',
+        #    created_by = self.user_sue,
+        #)
 
         self.cred_ops_north = self.team_ops_north.credentials.create(
             username='north',

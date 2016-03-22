@@ -54,12 +54,12 @@ class ScheduleTest(BaseTest):
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
-        self.organizations[0].admins.add(self.normal_django_user)
-        self.organizations[0].users.add(self.other_django_user)
-        self.organizations[0].users.add(self.normal_django_user)
+        self.organizations[0].admin_role.members.add(self.normal_django_user)
+        self.organizations[0].member_role.members.add(self.other_django_user)
+        self.organizations[0].member_role.members.add(self.normal_django_user)
 
         self.diff_org_user = self.make_user('fred')
-        self.organizations[1].users.add(self.diff_org_user)
+        self.organizations[1].member_role.members.add(self.diff_org_user)
 
         self.cloud_source = Credential.objects.create(kind='awx', user=self.super_django_user,
                                                       username='Dummy', password='Dummy')
@@ -71,11 +71,7 @@ class ScheduleTest(BaseTest):
         self.first_inventory_source.source = 'ec2'
         self.first_inventory_source.save()
 
-        Permission.objects.create(
-            inventory       = self.first_inventory,
-            user            = self.other_django_user,
-            permission_type = 'read'
-        )
+        self.first_inventory.auditor_role.members.add(self.other_django_user)
 
         self.second_inventory = Inventory.objects.create(name='test_inventory_2', description='for org 0', organization=self.organizations[0])
         self.second_inventory.hosts.create(name='host_2')
@@ -139,11 +135,7 @@ class ScheduleTest(BaseTest):
             self.post(first_url, data=unauth_schedule, expect=403)
 
         #give normal user write access and then they can post
-        Permission.objects.create(
-            user = self.other_django_user,
-            inventory = self.first_inventory,
-            permission_type = PERM_INVENTORY_WRITE
-        )
+        self.first_inventory.admin_role.members.add(self.other_django_user)
         auth_schedule = unauth_schedule
         with self.current_user(self.other_django_user):
             self.post(first_url, data=auth_schedule, expect=201)

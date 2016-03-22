@@ -59,8 +59,8 @@ class ProjectsTest(BaseTransactionTest):
             self.organizations[1].projects.add(project)
         for project in self.projects[9:10]:
             self.organizations[2].projects.add(project)
-        self.organizations[0].projects.add(self.projects[-1])
-        self.organizations[9].projects.add(self.projects[-2])
+        #self.organizations[0].projects.add(self.projects[-1])
+        #self.organizations[9].projects.add(self.projects[-2])
 
         # get the URL for various organization records
         self.a_detail_url  = "%s%s" % (self.collection(), self.organizations[0].pk)
@@ -75,10 +75,10 @@ class ProjectsTest(BaseTransactionTest):
         for x in self.organizations:
             # NOTE: superuser does not have to be explicitly added to admin group
             # x.admins.add(self.super_django_user)
-            x.users.add(self.super_django_user)
+            x.member_role.members.add(self.super_django_user)
 
-        self.organizations[0].users.add(self.normal_django_user)
-        self.organizations[1].admins.add(self.normal_django_user)
+        self.organizations[0].member_role.members.add(self.normal_django_user)
+        self.organizations[1].admin_role.members.add(self.normal_django_user)
 
         self.team1 = Team.objects.create(
             name = 'team1', organization = self.organizations[0]
@@ -89,7 +89,9 @@ class ProjectsTest(BaseTransactionTest):
         )
 
         # create some teams in the first org
-        self.team1.projects.add(self.projects[0])
+        #self.team1.projects.add(self.projects[0])
+        self.projects[0].teams.add(self.team1)
+        #self.team1.projects.add(self.projects[0])
         self.team2.projects.add(self.projects[1])
         self.team2.projects.add(self.projects[2])
         self.team2.projects.add(self.projects[3])
@@ -97,8 +99,8 @@ class ProjectsTest(BaseTransactionTest):
         self.team2.projects.add(self.projects[5])
         self.team1.save()
         self.team2.save()
-        self.team1.users.add(self.normal_django_user)
-        self.team2.users.add(self.other_django_user)
+        self.team1.member_role.members.add(self.normal_django_user)
+        self.team2.member_role.members.add(self.other_django_user)
 
     def test_playbooks(self):
         def write_test_file(project, name, content):
@@ -162,14 +164,14 @@ class ProjectsTest(BaseTransactionTest):
                          set(Project.get_local_path_choices()))
 
         # return local paths are only the ones not used by any active project.
-        qs = Project.objects.filter(active=True)
+        qs = Project.objects
         used_paths = qs.values_list('local_path', flat=True)
         self.assertFalse(set(response['project_local_paths']) & set(used_paths))
         for project in self.projects:
             local_path = project.local_path
             response = self.get(url, expect=200, auth=self.get_super_credentials())
             self.assertTrue(local_path not in response['project_local_paths'])
-            project.mark_inactive()
+            project.delete()
             response = self.get(url, expect=200, auth=self.get_super_credentials())
             self.assertTrue(local_path in response['project_local_paths'])
 
@@ -215,7 +217,7 @@ class ProjectsTest(BaseTransactionTest):
         self.assertEquals(results['count'], 10)
         # org admin
         results = self.get(projects, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(results['count'], 9)
+        self.assertEquals(results['count'], 6)
         # user on a team
         results = self.get(projects, expect=200, auth=self.get_other_credentials())
         self.assertEquals(results['count'], 5)
@@ -296,31 +298,6 @@ class ProjectsTest(BaseTransactionTest):
         got = self.get(proj_playbooks, expect=200, auth=self.get_super_credentials())
         self.assertEqual(got, self.projects[2].playbooks)
 
-        # can list member organizations for projects
-        proj_orgs = reverse('api:project_organizations_list', args=(self.projects[0].pk,))
-        # only usable as superuser
-        got = self.get(proj_orgs, expect=200, auth=self.get_normal_credentials())
-        got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
-        self.get(proj_orgs, expect=403, auth=self.get_other_credentials())
-        self.assertEquals(got['count'], 1)
-        self.assertEquals(got['results'][0]['url'], reverse('api:organization_detail', args=(self.organizations[0].pk,)))
-
-        # post to create new org associated with this project.
-        self.post(proj_orgs, data={'name': 'New Org'}, expect=201, auth=self.get_super_credentials())
-        got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(got['count'], 2)
-
-        # Verify that creatorship doesn't imply access if access is removed
-        a_new_proj = self.make_project(created_by=self.other_django_user, playbook_content=TEST_PLAYBOOK)
-        self.organizations[0].admins.add(self.other_django_user)
-        self.organizations[0].projects.add(a_new_proj)
-        proj_detail = reverse('api:project_detail', args=(a_new_proj.pk,))
-        self.patch(proj_detail, data=dict(description="test"), expect=200, auth=self.get_other_credentials())
-        self.organizations[0].admins.remove(self.other_django_user)
-        self.patch(proj_detail, data=dict(description="test_now"), expect=403, auth=self.get_other_credentials())
-        self.delete(proj_detail, expect=403, auth=self.get_other_credentials())
-        a_new_proj.delete()
-
         # =====================================================================
         # TEAMS
 
@@ -337,7 +314,7 @@ class ProjectsTest(BaseTransactionTest):
         self.assertEquals(got['url'], reverse('api:team_detail', args=(self.team1.pk,)))
         got = self.get(team1, expect=200, auth=self.get_normal_credentials())
         got = self.get(team1, expect=403, auth=self.get_other_credentials())
-        self.team1.users.add(User.objects.get(username='other'))
+        self.team1.member_role.members.add(User.objects.get(username='other'))
         self.team1.save()
         got = self.get(team1, expect=200, auth=self.get_other_credentials())
         got = self.get(team1, expect=403, auth=self.get_nobody_credentials())
@@ -402,7 +379,7 @@ class ProjectsTest(BaseTransactionTest):
         # =====================================================================
         # TEAM PROJECTS
 
-        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter( organization__pk=self.organizations[1].pk)[0]
         team_projects = reverse('api:team_projects_list', args=(team.pk,))
 
         p1 = self.projects[0]
@@ -419,10 +396,10 @@ class ProjectsTest(BaseTransactionTest):
         # =====================================================================
         # TEAMS USER MEMBERSHIP
 
-        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter( organization__pk=self.organizations[1].pk)[0]
         team_users = reverse('api:team_users_list', args=(team.pk,))
-        for x in team.users.all():
-            team.users.remove(x)
+        for x in team.member_role.members.all():
+            team.member_role.members.remove(x)
         team.save()
 
         # can list uses on teams
@@ -446,7 +423,7 @@ class ProjectsTest(BaseTransactionTest):
         self.post(team_users, data=dict(username='attempted_superuser_create', password='thepassword',
                   is_superuser=True), expect=201, auth=self.get_super_credentials())
 
-        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 5)
+        self.assertEqual(Team.objects.get(pk=team.pk).member_role.members.count(), all_users['count'] + 1)
 
         # can remove users from teams
         for x in all_users['results']:
@@ -454,7 +431,7 @@ class ProjectsTest(BaseTransactionTest):
             self.post(team_users, data=y, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=y, expect=204, auth=self.get_normal_credentials())
 
-        self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 1) # Leaving just the super user we created
+        self.assertEquals(Team.objects.get(pk=team.pk).member_role.members.count(), 1) # Leaving just the super user we created
 
         # =====================================================================
         # USER TEAMS
@@ -465,9 +442,12 @@ class ProjectsTest(BaseTransactionTest):
         self.get(url, expect=401)
         self.get(url, expect=401, auth=self.get_invalid_credentials())
         self.get(url, expect=403, auth=self.get_nobody_credentials())
-        other.organizations.add(Organization.objects.get(pk=self.organizations[1].pk))
+        self.organizations[1].member_role.members.add(other)
         # Normal user can only see some teams that other user is a part of,
         # since normal user is not an admin of that organization.
+        my_teams1 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        my_teams2 = self.get(url, expect=200, auth=self.get_other_credentials())
+
         my_teams1 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(my_teams1['count'], 1)
         # Other user should be able to see all his own teams.
@@ -622,7 +602,7 @@ class ProjectsTest(BaseTransactionTest):
         # Test post as organization admin where team is part of org, but user
         # creating credential is not a member of the team.  UI may pass user
         # as an empty string instead of None.
-        normal_org = self.normal_django_user.admin_of_organizations.all()[0]
+        normal_org = self.organizations[1] # normal user is an admin of this
         org_team = normal_org.teams.create(name='new empty team')
         with self.current_user(self.normal_django_user):
             data = {
@@ -787,7 +767,7 @@ class ProjectsTest(BaseTransactionTest):
         # User is still a team member
         self.get(reverse('api:project_detail', args=(project.pk,)), expect=200, auth=self.get_other_credentials())
 
-        team.users.remove(self.other_django_user)
+        team.member_role.members.remove(self.other_django_user)
 
         # User is no longer a team member and has no permissions
         self.get(reverse('api:project_detail', args=(project.pk,)), expect=403, auth=self.get_other_credentials())
@@ -1262,7 +1242,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
         # Test that we can delete project updates.
-        for pu in project.project_updates.filter(active=True):
+        for pu in project.project_updates.all():
             pu_url = reverse('api:project_update_detail', args=(pu.pk,))
             with self.current_user(self.super_django_user):
                 self.delete(pu_url, expect=204)
@@ -1351,7 +1331,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'scm_url': scm_url,
         }
         org = self.make_organizations(self.super_django_user, 1)[0]
-        org.admins.add(self.normal_django_user)
+        org.admin_role.members.add(self.normal_django_user)
         with self.current_user(self.super_django_user):
             del_proj = self.post(projects_url, project_data, expect=201)
             del_proj = Project.objects.get(pk=del_proj["id"])

@@ -3,6 +3,7 @@
 
 # Django
 from django.conf import settings # noqa
+from django.contrib.contenttypes.fields import GenericRelation
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -17,6 +18,8 @@ from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
 from awx.main.models.configuration import * # noqa
+from awx.main.models.rbac import * # noqa
+from awx.main.models.mixins import * # noqa
 from awx.main.models.notifications import * # noqa
 from awx.main.models.fact import * # noqa
 
@@ -35,8 +38,14 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User # noqa
 from awx.main.access import * # noqa
+
+
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
+User.add_to_class('accessible_by', user_accessible_by)
+User.add_to_class('accessible_objects', user_accessible_objects)
+User.add_to_class('admin_role', user_admin_role)
+User.add_to_class('role_permissions', GenericRelation('main.RolePermission'))
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa

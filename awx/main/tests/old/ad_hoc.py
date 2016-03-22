@@ -39,7 +39,7 @@ class BaseAdHocCommandTest(BaseJobExecutionTest):
             self.setup_instances()
             self.setup_users()
             self.organization = self.make_organizations(self.super_django_user, 1)[0]
-            self.organization.admins.add(self.normal_django_user)
+            self.organization.admin_role.members.add(self.normal_django_user)
             self.inventory = self.organization.inventories.create(name='test-inventory', description='description for test-inventory')
             self.host = self.inventory.hosts.create(name='host.example.com')
             self.host2 = self.inventory.hosts.create(name='host2.example.com')
@@ -459,30 +459,19 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         self.check_get_list(url, 'nobody', qs)
         self.check_get_list(url, None, qs, expect=401)
 
-        # Explicitly give other user admin permission on the inventory (still
+        # Explicitly give other user updater permission on the inventory (still
         # not allowed to run ad hoc commands).
-        user_perm_url = reverse('api:user_permissions_list', args=(self.other_django_user.pk,))
-        user_perm_data = {
-            'name': 'Allow Other to Admin Inventory',
-            'inventory': self.inventory.pk,
-            'permission_type': 'admin',
-        }
+        user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_perm_url, user_perm_data, expect=201)
-            user_perm_id = response['id']
+            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
         with self.current_user('other'):
             self.run_test_ad_hoc_command(expect=403)
         self.check_get_list(url, 'other', qs)
 
-        # Update permission to allow other user to run ad hoc commands. Fails
+        # Add executor role permissions to other. Fails
         # when other user can't read credential.
-        user_perm_url = reverse('api:permission_detail', args=(user_perm_id,))
-        user_perm_data.update({
-            'name': 'Allow Other to Admin Inventory and Run Ad Hoc Commands',
-            'run_ad_hoc_commands': True,
-        })
         with self.current_user('admin'):
-            response = self.patch(user_perm_url, user_perm_data, expect=200)
+            response = self.post(user_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
         with self.current_user('other'):
             self.run_test_ad_hoc_command(expect=403)
 
@@ -496,15 +485,9 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         self.check_get_list(url, 'other', qs)
 
         # Explicitly give nobody user read permission on the inventory.
-        user_perm_url = reverse('api:user_permissions_list', args=(self.nobody_django_user.pk,))
-        user_perm_data = {
-            'name': 'Allow Nobody to Read Inventory',
-            'inventory': self.inventory.pk,
-            'permission_type': 'read',
-        }
+        nobody_roles_list_url = reverse('api:user_roles_list', args=(self.nobody_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_perm_url, user_perm_data, expect=201)
-            user_perm_id = response['id']
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.auditor_role.id}, expect=204)
         with self.current_user('nobody'):
             self.run_test_ad_hoc_command(credential=other_cred.pk, expect=403)
         self.check_get_list(url, 'other', qs)
@@ -520,13 +503,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
 
         # Give the nobody user the run_ad_hoc_commands flag, and can now see
         # the one ad hoc command previously run.
-        user_perm_url = reverse('api:permission_detail', args=(user_perm_id,))
-        user_perm_data.update({
-            'name': 'Allow Nobody to Read Inventory and Run Ad Hoc Commands',
-            'run_ad_hoc_commands': True,
-        })
         with self.current_user('admin'):
-            response = self.patch(user_perm_url, user_perm_data, expect=200)
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
         qs = AdHocCommand.objects.filter(credential_id=nobody_cred.pk)
         self.assertEqual(qs.count(), 1)
         self.check_get_list(url, 'nobody', qs)
@@ -637,8 +615,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Verify that the credential and inventory are null when they have
         # been deleted, can delete an ad hoc command without inventory or
         # credential.
-        self.credential.mark_inactive()
-        self.inventory.mark_inactive()
+        self.credential.delete()
+        self.inventory.delete()
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['credential'], None)
@@ -758,7 +736,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             tower_settings.AD_HOC_COMMANDS = ad_hoc_commands
 
         # Try to relaunch after the inventory has been marked inactive.
-        self.inventory.mark_inactive()
+        self.inventory.delete()
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['passwords_needed_to_start'], [])
@@ -947,7 +925,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.delete(url, expect=405)
         with self.current_user('normal'):
             response = self.get(url, expect=200)
-            #self.assertEqual(response['count'], 1) # FIXME: Enable once activity stream RBAC is fixed.
+            self.assertEqual(response['count'], 1)
             self.post(url, {}, expect=405)
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
@@ -1026,29 +1004,17 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Create another unrelated inventory permission with run_ad_hoc_commands
         # set; this tests an edge case in the RBAC query where we'll return
         # can_run_ad_hoc_commands = True when we shouldn't.
-        nobody_perm_url = reverse('api:user_permissions_list', args=(self.nobody_django_user.pk,))
-        nobody_perm_data = {
-            'name': 'Allow Nobody to Read Inventory',
-            'inventory': self.inventory.pk,
-            'permission_type': 'read',
-            'run_ad_hoc_commands': True,
-        }
+        nobody_roles_list_url = reverse('api:user_roles_list', args=(self.nobody_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(nobody_perm_url, nobody_perm_data, expect=201)
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
 
         # Create a credential for the other user and explicitly give other
         # user admin permission on the inventory (still not allowed to run ad
         # hoc commands; can get the list but can't see any items).
         other_cred = self.create_test_credential(user=self.other_django_user)
-        user_perm_url = reverse('api:user_permissions_list', args=(self.other_django_user.pk,))
-        user_perm_data = {
-            'name': 'Allow Other to Admin Inventory',
-            'inventory': self.inventory.pk,
-            'permission_type': 'admin',
-        }
+        user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_perm_url, user_perm_data, expect=201)
-            user_perm_id = response['id']
+            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)
@@ -1058,13 +1024,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
 
         # Update permission to allow other user to run ad hoc commands.  Can
         # only see his own ad hoc commands (because of credential permission).
-        user_perm_url = reverse('api:permission_detail', args=(user_perm_id,))
-        user_perm_data.update({
-            'name': 'Allow Other to Admin Inventory and Run Ad Hoc Commands',
-            'run_ad_hoc_commands': True,
-        })
         with self.current_user('admin'):
-            response = self.patch(user_perm_url, user_perm_data, expect=200)
+            response = self.post(user_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)

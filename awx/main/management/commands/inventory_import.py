@@ -53,13 +53,13 @@ class MemObject(object):
     '''
     Common code shared between in-memory groups and hosts.
     '''
-    
+
     def __init__(self, name, source_dir):
         assert name, 'no name'
         assert source_dir, 'no source dir'
         self.name = name
         self.source_dir = source_dir
-    
+
     def load_vars(self, base_path):
         all_vars = {}
         files_found = 0
@@ -107,7 +107,7 @@ class MemGroup(MemObject):
         group_vars = os.path.join(source_dir, 'group_vars', self.name)
         self.variables = self.load_vars(group_vars)
         logger.debug('Loaded group: %s', self.name)
-        
+
     def child_group_by_name(self, name, loader):
         if name == 'all':
             return
@@ -266,7 +266,7 @@ class BaseLoader(object):
             logger.debug('Filtering group %s', name)
             return None
         if name not in self.all_group.all_groups:
-            group = MemGroup(name, self.source_dir) 
+            group = MemGroup(name, self.source_dir)
             if not child:
                 all_group.add_child_group(group)
             self.all_group.all_groups[name] = group
@@ -315,7 +315,7 @@ class IniLoader(BaseLoader):
                             for t in tokens[1:]:
                                 k,v = t.split('=', 1)
                                 host.variables[k] = v
-                        group.add_host(host) 
+                        group.add_host(host)
                 elif input_mode == 'children':
                     group.child_group_by_name(line, self)
                 elif input_mode == 'vars':
@@ -328,7 +328,7 @@ class IniLoader(BaseLoader):
 # from API documentation:
 #
 # if called with --list, inventory outputs like so:
-#        
+#
 # {
 #    "databases"   : {
 #        "hosts"   : [ "host1.example.com", "host2.example.com" ],
@@ -581,7 +581,7 @@ class Command(NoArgsCommand):
     def _get_instance_id(self, from_dict, default=''):
         '''
         Retrieve the instance ID from the given dict of host variables.
-        
+
         The instance ID variable may be specified as 'foo.bar', in which case
         the lookup will traverse into nested dicts, equivalent to:
 
@@ -633,7 +633,7 @@ class Command(NoArgsCommand):
         else:
             q = dict(name=self.inventory_name)
         try:
-            self.inventory = Inventory.objects.filter(active=True).get(**q)
+            self.inventory = Inventory.objects.get(**q)
         except Inventory.DoesNotExist:
             raise CommandError('Inventory with %s = %s cannot be found' % q.items()[0])
         except Inventory.MultipleObjectsReturned:
@@ -648,8 +648,7 @@ class Command(NoArgsCommand):
         if inventory_source_id:
             try:
                 self.inventory_source = InventorySource.objects.get(pk=inventory_source_id,
-                                                                    inventory=self.inventory,
-                                                                    active=True)
+                                                                    inventory=self.inventory)
             except InventorySource.DoesNotExist:
                 raise CommandError('Inventory source with id=%s not found' %
                                    inventory_source_id)
@@ -669,7 +668,6 @@ class Command(NoArgsCommand):
                     source_path=os.path.abspath(self.source),
                     overwrite=self.overwrite,
                     overwrite_vars=self.overwrite_vars,
-                    active=True,
                 )
                 self.inventory_update = self.inventory_source.create_inventory_update(
                     job_args=json.dumps(sys.argv),
@@ -703,7 +701,7 @@ class Command(NoArgsCommand):
                 host_qs = self.inventory_source.group.all_hosts
             else:
                 host_qs = self.inventory.hosts.all()
-            host_qs = host_qs.filter(active=True, instance_id='',
+            host_qs = host_qs.filter(instance_id='',
                                      variables__contains=self.instance_id_var.split('.')[0])
             for host in host_qs:
                 instance_id = self._get_instance_id(host.variables_dict)
@@ -740,7 +738,7 @@ class Command(NoArgsCommand):
             hosts_qs = self.inventory_source.group.all_hosts
             # FIXME: Also include hosts from inventory_source.managed_hosts?
         else:
-            hosts_qs = self.inventory.hosts.filter(active=True)
+            hosts_qs = self.inventory.hosts
         # Build list of all host pks, remove all that should not be deleted.
         del_host_pks = set(hosts_qs.values_list('pk', flat=True))
         if self.instance_id_var:
@@ -765,7 +763,7 @@ class Command(NoArgsCommand):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for host in hosts_qs.filter(pk__in=del_pks):
                 host_name = host.name
-                host.mark_inactive()
+                host.delete()
                 self.logger.info('Deleted host "%s"', host_name)
         if settings.SQL_DEBUG:
             self.logger.warning('host deletions took %d queries for %d hosts',
@@ -785,7 +783,7 @@ class Command(NoArgsCommand):
             groups_qs = self.inventory_source.group.all_children
             # FIXME: Also include groups from inventory_source.managed_groups?
         else:
-            groups_qs = self.inventory.groups.filter(active=True)
+            groups_qs = self.inventory.groups
         # Build list of all group pks, remove those that should not be deleted.
         del_group_pks = set(groups_qs.values_list('pk', flat=True))
         all_group_names = self.all_group.all_groups.keys()
@@ -799,7 +797,8 @@ class Command(NoArgsCommand):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for group in groups_qs.filter(pk__in=del_pks):
                 group_name = group.name
-                group.mark_inactive(recompute=False)
+                with ignore_inventory_computed_fields():
+                    group.delete()
                 self.logger.info('Group "%s" deleted', group_name)
         if settings.SQL_DEBUG:
             self.logger.warning('group deletions took %d queries for %d groups',
@@ -821,10 +820,10 @@ class Command(NoArgsCommand):
         if self.inventory_source.group:
             db_groups = self.inventory_source.group.all_children
         else:
-            db_groups = self.inventory.groups.filter(active=True)
+            db_groups = self.inventory.groups
         for db_group in db_groups:
             # Delete child group relationships not present in imported data.
-            db_children = db_group.children.filter(active=True)
+            db_children = db_group.children
             db_children_name_pk_map = dict(db_children.values_list('name', 'pk'))
             mem_children = self.all_group.all_groups[db_group.name].children
             for mem_group in mem_children:
@@ -839,7 +838,7 @@ class Command(NoArgsCommand):
                                      db_child.name, db_group.name)
             # FIXME: Inventory source group relationships
             # Delete group/host relationships not present in imported data.
-            db_hosts = db_group.hosts.filter(active=True)
+            db_hosts = db_group.hosts
             del_host_pks = set(db_hosts.values_list('pk', flat=True))
             mem_hosts = self.all_group.all_groups[db_group.name].hosts
             all_mem_host_names = [h.name for h in mem_hosts if not h.instance_id]
@@ -860,7 +859,7 @@ class Command(NoArgsCommand):
                 del_pks = del_host_pks[offset:(offset + self._batch_size)]
                 for db_host in db_hosts.filter(pk__in=del_pks):
                     group_host_count += 1
-                    if db_host not in db_group.hosts.filter(active=True):
+                    if db_host not in db_group.hosts:
                         continue
                     db_group.hosts.remove(db_host)
                     self.logger.info('Host "%s" removed from group "%s"',
@@ -1036,7 +1035,7 @@ class Command(NoArgsCommand):
         all_host_pks = sorted(mem_host_pk_map.keys())
         for offset in xrange(0, len(all_host_pks), self._batch_size):
             host_pks = all_host_pks[offset:(offset + self._batch_size)]
-            for db_host in self.inventory.hosts.filter(active=True, pk__in=host_pks):
+            for db_host in self.inventory.hosts.filter( pk__in=host_pks):
                 if db_host.pk in host_pks_updated:
                     continue
                 mem_host = mem_host_pk_map[db_host.pk]
@@ -1048,7 +1047,7 @@ class Command(NoArgsCommand):
         all_instance_ids = sorted(mem_host_instance_id_map.keys())
         for offset in xrange(0, len(all_instance_ids), self._batch_size):
             instance_ids = all_instance_ids[offset:(offset + self._batch_size)]
-            for db_host in self.inventory.hosts.filter(active=True, instance_id__in=instance_ids):
+            for db_host in self.inventory.hosts.filter( instance_id__in=instance_ids):
                 if db_host.pk in host_pks_updated:
                     continue
                 mem_host = mem_host_instance_id_map[db_host.instance_id]
@@ -1060,7 +1059,7 @@ class Command(NoArgsCommand):
         all_host_names = sorted(mem_host_name_map.keys())
         for offset in xrange(0, len(all_host_names), self._batch_size):
             host_names = all_host_names[offset:(offset + self._batch_size)]
-            for db_host in self.inventory.hosts.filter(active=True, name__in=host_names):
+            for db_host in self.inventory.hosts.filter( name__in=host_names):
                 if db_host.pk in host_pks_updated:
                     continue
                 mem_host = mem_host_name_map[db_host.name]
@@ -1297,7 +1296,7 @@ class Command(NoArgsCommand):
                 except CommandError as e:
                     self.mark_license_failure(save=True)
                     raise e
-     
+
                 if self.inventory_source.group:
                     inv_name = 'group "%s"' % (self.inventory_source.group.name)
                 else:
@@ -1336,7 +1335,7 @@ class Command(NoArgsCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
-            
+
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
         elif exc:

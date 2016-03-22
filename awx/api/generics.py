@@ -7,7 +7,6 @@ import logging
 import time
 
 # Django
-from django.http import Http404
 from django.conf import settings
 from django.db import connection
 from django.shortcuts import get_object_or_404
@@ -26,6 +25,7 @@ from rest_framework import views
 # AWX
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
+from awx.api.serializers import ResourceAccessListElementSerializer
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -33,6 +33,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
            'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
            'SubDetailAPIView',
+           'ResourceAccessList',
            'ParentMixin',]
 
 logger = logging.getLogger('awx.api.generics')
@@ -298,7 +299,7 @@ class SubListAPIView(ListAPIView, ParentMixin):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()
-        sublist_qs = getattr(parent, self.relationship).distinct()
+        sublist_qs = getattrd(parent, self.relationship).distinct()
         return qs & sublist_qs
 
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
@@ -348,7 +349,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         # object deserialized
         obj = serializer.save()
         serializer = self.get_serializer(instance=obj)
-    
+
         headers = {'Location': obj.get_absolute_url()}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -359,7 +360,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     def attach(self, request, *args, **kwargs):
         created = False
         parent = self.get_parent_object()
-        relationship = getattr(parent, self.relationship)
+        relationship = getattrd(parent, self.relationship)
         sub_id = request.data.get('id', None)
         data = request.data
 
@@ -378,7 +379,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         # Retrive the sub object (whether created or by ID).
         sub = get_object_or_400(self.model, pk=sub_id)
-            
+
         # Verify we have permission to attach.
         if not request.user.can_access(self.parent_model, 'attach', parent, sub,
                                        self.relationship, data,
@@ -405,7 +406,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         parent = self.get_parent_object()
         parent_key = getattr(self, 'parent_key', None)
-        relationship = getattr(parent, self.relationship)
+        relationship = getattrd(parent, self.relationship)
         sub = get_object_or_400(self.model, pk=sub_id)
 
         if not request.user.can_access(self.parent_model, 'unattach', parent,
@@ -413,9 +414,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             raise PermissionDenied()
 
         if parent_key:
-            # sub object has a ForeignKey to the parent, so we can't remove it
-            # from the set, only mark it as inactive.
-            sub.mark_inactive()
+            sub.delete()
         else:
             relationship.remove(sub)
 
@@ -455,17 +454,9 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.get_object()
-        # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if not getattr(obj, 'active', True):
-            raise Http404()
-        if not getattr(obj, 'is_active', True):
-            raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if hasattr(obj, 'mark_inactive'):
-            obj.mark_inactive()
-        else:
-            raise NotImplementedError('destroy() not implemented yet for %s' % obj)
+        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
@@ -473,3 +464,20 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView
 
 class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass
+
+
+class ResourceAccessList(ListAPIView):
+
+    serializer_class = ResourceAccessListElementSerializer
+
+    def get_queryset(self):
+        self.object_id = self.kwargs['pk']
+        resource_model = getattr(self, 'resource_model')
+        obj = resource_model.objects.get(pk=self.object_id)
+
+        roles = set([p.role for p in obj.role_permissions.all()])
+        ancestors = set()
+        for r in roles:
+            ancestors.update(set(r.ancestors.all()))
+        return User.objects.filter(roles__in=list(ancestors))
+

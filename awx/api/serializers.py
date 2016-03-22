@@ -16,6 +16,7 @@ import yaml
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
@@ -36,6 +37,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
@@ -90,6 +92,46 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 
+def reverseGenericForeignKey(content_object):
+    '''
+    Computes a reverse for a GenericForeignKey field.
+
+    Returns a dictionary of the form
+        { '<type>': reverse(<type detail>) }
+    for example
+        { 'organization': '/api/v1/organizations/1/' }
+    '''
+
+    ret = {}
+    if type(content_object) is Organization:
+        ret['organization'] = reverse('api:organization_detail', args=(content_object.pk,))
+    if type(content_object) is User:
+        ret['user'] = reverse('api:user_detail', args=(content_object.pk,))
+    if type(content_object) is Team:
+        ret['team'] = reverse('api:team_detail', args=(content_object.pk,))
+    if type(content_object) is Project:
+        ret['project'] = reverse('api:project_detail', args=(content_object.pk,))
+    if type(content_object) is Inventory:
+        ret['inventory'] = reverse('api:inventory_detail', args=(content_object.pk,))
+    if type(content_object) is Host:
+        ret['host'] = reverse('api:host_detail', args=(content_object.pk,))
+    if type(content_object) is Group:
+        ret['group'] = reverse('api:group_detail', args=(content_object.pk,))
+    if type(content_object) is InventorySource:
+        ret['inventory_source'] = reverse('api:inventory_source_detail', args=(content_object.pk,))
+    if type(content_object) is Credential:
+        ret['credential'] = reverse('api:credential_detail', args=(content_object.pk,))
+    if type(content_object) is JobTemplate:
+        ret['job_template'] = reverse('api:job_template_detail', args=(content_object.pk,))
+    if type(content_object) is Role:
+        ret['role'] = reverse('api:role_detail', args=(content_object.pk,))
+    if type(content_object) is Job:
+        ret['job'] = reverse('api:job_detail', args=(content_object.pk,))
+    if type(content_object) is JobEvent:
+        ret['job_event'] = reverse('api:job_event_detail', args=(content_object.pk,))
+    return ret
+
+
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
     Custom metaclass to enable attribute inheritance from Meta objects on
@@ -122,7 +164,7 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
                 'foo': {'required': False, 'default': ''},
                 'bar': {'label': 'New Label for Bar'},
             }
-            
+
             # The resulting value of extra_kwargs would be:
             extra_kwargs = {
                 'foo': {'required': False, 'default': ''},
@@ -210,7 +252,7 @@ class BaseSerializer(serializers.ModelSerializer):
     # make certain fields read only
     created       = serializers.SerializerMethodField()
     modified      = serializers.SerializerMethodField()
-    active        = serializers.SerializerMethodField()
+
 
     def get_type(self, obj):
         return get_type_for_model(self.Meta.model)
@@ -245,9 +287,9 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def get_related(self, obj):
         res = OrderedDict()
-        if getattr(obj, 'created_by', None) and obj.created_by.is_active:
+        if getattr(obj, 'created_by', None):
             res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
-        if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
+        if getattr(obj, 'modified_by', None):
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
         return res
 
@@ -272,10 +314,6 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 if fkval == obj:
                     continue
-                if hasattr(fkval, 'active') and not fkval.active:
-                    continue
-                if hasattr(fkval, 'is_active') and not fkval.is_active:
-                    continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
                     fval = getattr(fkval, field, None)
@@ -291,14 +329,32 @@ class BaseSerializer(serializers.ModelSerializer):
             # Can be raised by the reverse accessor for a OneToOneField.
             except ObjectDoesNotExist:
                 pass
-        if getattr(obj, 'created_by', None) and obj.created_by.is_active:
+        if getattr(obj, 'created_by', None):
             summary_fields['created_by'] = OrderedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['created_by'][field] = getattr(obj.created_by, field)
-        if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
+        if getattr(obj, 'modified_by', None):
             summary_fields['modified_by'] = OrderedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
+
+        # RBAC summary fields
+        request = self.context.get('request', None)
+        if request and isinstance(obj, ResourceMixin) and request.user.is_authenticated():
+            summary_fields['permissions'] = obj.get_permissions(request.user)
+        roles = {}
+        for field in obj._meta.get_fields():
+            if type(field) is ImplicitRoleField:
+                role = getattr(obj, field.name)
+                #roles[field.name] = RoleSerializer(data=role).to_representation(role)
+                roles[field.name] = {
+                    'id': role.id,
+                    'name': role.name,
+                    'description': role.description,
+                    'url': role.get_absolute_url(),
+                }
+        if len(roles) > 0:
+            summary_fields['roles'] = roles
         return summary_fields
 
     def get_created(self, obj):
@@ -317,14 +373,6 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.modified
 
-    def get_active(self, obj):
-        if obj is None:
-            return False
-        elif isinstance(obj, User):
-            return obj.is_active
-        else:
-            return obj.active
-
     def build_standard_field(self, field_name, model_field):
 
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
@@ -332,7 +380,7 @@ class BaseSerializer(serializers.ModelSerializer):
         #
         # This logic is to force rendering choice's on an uneditable field.
         # Note: Consider expanding this rendering for more than just choices fields
-        # Note: This logic works in conjuction with 
+        # Note: This logic works in conjuction with
         if hasattr(model_field, 'choices') and model_field.choices:
             was_editable = model_field.editable
             model_field.editable = True
@@ -473,6 +521,10 @@ class BaseSerializer(serializers.ModelSerializer):
             raise ValidationError(d)
         return attrs
 
+    def to_representation(self, obj):
+        ret = super(BaseSerializer, self).to_representation(obj)
+        return ret
+
 
 class EmptySerializer(serializers.Serializer):
     pass
@@ -499,11 +551,11 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
-        if obj.current_job and obj.current_job.active:
+        if obj.current_job:
             res['current_job'] = obj.current_job.get_absolute_url()
-        if obj.last_job and obj.last_job.active:
+        if obj.last_job:
             res['last_job'] = obj.last_job.get_absolute_url()
-        if obj.next_schedule and obj.next_schedule.active:
+        if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url()
         return res
 
@@ -558,9 +610,9 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(UnifiedJobSerializer, self).get_related(obj)
-        if obj.unified_job_template and obj.unified_job_template.active:
+        if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
-        if obj.schedule and obj.schedule.active:
+        if obj.schedule:
             res['schedule'] = obj.schedule.get_absolute_url()
         if isinstance(obj, ProjectUpdate):
             res['stdout'] = reverse('api:project_update_stdout', args=(obj.pk,))
@@ -739,8 +791,9 @@ class UserSerializer(BaseSerializer):
             admin_of_organizations = reverse('api:user_admin_of_organizations_list', args=(obj.pk,)),
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
-            permissions            = reverse('api:user_permissions_list',         args=(obj.pk,)),
+            roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
+            access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
         ))
         return res
 
@@ -795,6 +848,7 @@ class OrganizationSerializer(BaseSerializer):
             notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:organization_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:organization_notifiers_error_list', args=(obj.pk,)),
+            access_list = reverse('api:organization_access_list',         args=(obj.pk,)),
         ))
         return res
 
@@ -819,7 +873,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
-        if obj.credential and obj.credential.active:
+        if obj.credential:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         return res
@@ -848,7 +902,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(ProjectOptionsSerializer, self).to_representation(obj)
-        if obj is not None and 'credential' in ret and (not obj.credential or not obj.credential.active):
+        if obj is not None and 'credential' in ret and not obj.credential:
             ret['credential'] = None
         return ret
 
@@ -869,7 +923,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
-            organizations = reverse('api:project_organizations_list', args=(obj.pk,)),
             teams = reverse('api:project_teams_list', args=(obj.pk,)),
             playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
             update = reverse('api:project_update_view', args=(obj.pk,)),
@@ -879,7 +932,11 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
+            access_list = reverse('api:project_access_list',         args=(obj.pk,)),
         ))
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail',
+                                          args=(obj.organization.pk,))
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = reverse('api:project_update_detail',
@@ -978,15 +1035,16 @@ class InventorySerializer(BaseSerializerWithVariables):
             job_templates = reverse('api:inventory_job_template_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
+            access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
-        if obj.organization and obj.organization.active:
+        if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
     def to_representation(self, obj):
         ret = super(InventorySerializer, self).to_representation(obj)
-        if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
+        if obj is not None and 'organization' in ret and not obj.organization:
             ret['organization'] = None
         return ret
 
@@ -1041,11 +1099,11 @@ class HostSerializer(BaseSerializerWithVariables):
             fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
             #single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
         ))
-        if obj.inventory and obj.inventory.active:
+        if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.last_job and obj.last_job.active:
+        if obj.last_job:
             res['last_job'] = reverse('api:job_detail', args=(obj.last_job.pk,))
-        if obj.last_job_host_summary and obj.last_job_host_summary.job.active:
+        if obj.last_job_host_summary:
             res['last_job_host_summary'] = reverse('api:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         return res
 
@@ -1061,7 +1119,7 @@ class HostSerializer(BaseSerializerWithVariables):
             'name': j.job.job_template.name if j.job.job_template is not None else "",
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.filter(job__active=True).select_related('job__job_template').order_by('-created')[:5]]})
+        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]]})
         return d
 
     def _get_host_port_from_name(self, name):
@@ -1110,11 +1168,11 @@ class HostSerializer(BaseSerializerWithVariables):
         ret = super(HostSerializer, self).to_representation(obj)
         if not obj:
             return ret
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'last_job' in ret and (not obj.last_job or not obj.last_job.active):
+        if 'last_job' in ret and not obj.last_job:
             ret['last_job'] = None
-        if 'last_job_host_summary' in ret and (not obj.last_job_host_summary or not obj.last_job_host_summary.job.active):
+        if 'last_job_host_summary' in ret and not obj.last_job_host_summary:
             ret['last_job_host_summary'] = None
         return ret
 
@@ -1148,9 +1206,10 @@ class GroupSerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
+            access_list = reverse('api:group_access_list',         args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
-        if obj.inventory and obj.inventory.active:
+        if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.inventory_source:
             res['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,))
@@ -1163,7 +1222,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def to_representation(self, obj):
         ret = super(GroupSerializer, self).to_representation(obj)
-        if obj is not None and 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if obj is not None and 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         return ret
 
@@ -1179,7 +1238,7 @@ class GroupTreeSerializer(GroupSerializer):
     def get_children(self, obj):
         if obj is None:
             return {}
-        children_qs = obj.children.filter(active=True)
+        children_qs = obj.children
         children_qs = children_qs.select_related('inventory')
         children_qs = children_qs.prefetch_related('inventory_source')
         return GroupTreeSerializer(children_qs, many=True).data
@@ -1244,7 +1303,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
 
-        if obj.organization and obj.organization.active:
+        if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
@@ -1257,10 +1316,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
-        if obj.credential and obj.credential.active:
+        if obj.credential:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        if obj.source_script and obj.source_script.active:
+        if obj.source_script:
             res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
         return res
 
@@ -1305,7 +1364,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         ret = super(InventorySourceOptionsSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+        if 'credential' in ret and not obj.credential:
             ret['credential'] = None
         return ret
 
@@ -1336,9 +1395,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             notifiers_success = reverse('api:inventory_source_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:inventory_source_notifiers_error_list', args=(obj.pk,)),
         ))
-        if obj.inventory and obj.inventory.active:
+        if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.group and obj.group.active:
+        if obj.group:
             res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
         # Backwards compatibility.
         if obj.current_update:
@@ -1353,9 +1412,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'group' in ret and (not obj.group or not obj.group.active):
+        if 'group' in ret and not obj.group:
             ret['group'] = None
         return ret
 
@@ -1409,72 +1468,77 @@ class TeamSerializer(BaseSerializer):
             projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
             users        = reverse('api:team_users_list',       args=(obj.pk,)),
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
-            permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
+            roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
+            access_list  = reverse('api:team_access_list',      args=(obj.pk,)),
         ))
-        if obj.organization and obj.organization.active:
+        if obj.organization:
             res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
 
     def to_representation(self, obj):
         ret = super(TeamSerializer, self).to_representation(obj)
-        if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
+        if obj is not None and 'organization' in ret and not obj.organization:
             ret['organization'] = None
         return ret
 
 
-class PermissionSerializer(BaseSerializer):
+
+class RoleSerializer(BaseSerializer):
 
     class Meta:
-        model = Permission
-        fields = ('*', 'user', 'team', 'project', 'inventory',
-                  'permission_type', 'run_ad_hoc_commands')
+        model = Role
+        fields = ('*',)
 
     def get_related(self, obj):
-        res = super(PermissionSerializer, self).get_related(obj)
-        if obj.user and obj.user.is_active:
-            res['user']        = reverse('api:user_detail', args=(obj.user.pk,))
-        if obj.team and obj.team.active:
-            res['team']        = reverse('api:team_detail', args=(obj.team.pk,))
-        if obj.project and obj.project.active:
-            res['project']     = reverse('api:project_detail', args=(obj.project.pk,))
-        if obj.inventory and obj.inventory.active:
-            res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        return res
-
-    def validate(self, attrs):
-        # Can only set either user or team.
-        user = attrs.get('user', self.instance and self.instance.user or None)
-        team = attrs.get('team', self.instance and self.instance.team or None)
-        if user and team:
-            raise serializers.ValidationError('permission can only be assigned'
-                                              ' to a user OR a team, not both')
-        # Cannot assign admit/read/write permissions for a project.
-        permission_type = attrs.get('permission_type', self.instance and self.instance.permission_type or None)
-        project = attrs.get('project', self.instance and self.instance.project or None)
-        if permission_type in ('admin', 'read', 'write') and project:
-            raise serializers.ValidationError('project cannot be assigned for '
-                                              'inventory-only permissions')
-        # Project is required when setting deployment permissions.
-        if permission_type in ('run', 'check') and not project:
-            raise serializers.ValidationError('project is required when '
-                                              'assigning deployment permissions')
-
-        return super(PermissionSerializer, self).validate(attrs)
-
-    def to_representation(self, obj):
-        ret = super(PermissionSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        if 'user' in ret and (not obj.user or not obj.user.is_active):
-            ret['user'] = None
-        if 'team' in ret and (not obj.team or not obj.team.active):
-            ret['team'] = None
-        if 'project' in ret and (not obj.project or not obj.project.active):
-            ret['project'] = None
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
-            ret['inventory'] = None
+        ret = super(RoleSerializer, self).get_related(obj)
+        ret['users'] = reverse('api:role_users_list', args=(obj.pk,))
+        ret['teams'] = reverse('api:role_teams_list', args=(obj.pk,))
+        try:
+            if obj.content_object:
+                ret.update(reverseGenericForeignKey(obj.content_object))
+        except AttributeError:
+            # AttributeError's happen if our content_object is pointing at
+            # a model that no longer exists. This is dirty data and ideally
+            # doesn't exist, but in case it does, let's not puke.
+            pass
         return ret
+
+
+
+class ResourceAccessListElementSerializer(UserSerializer):
+
+    def to_representation(self, user):
+        ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
+        object_id = self.context['view'].object_id
+        obj = self.context['view'].resource_model.objects.get(pk=object_id)
+
+        if 'summary_fields' not in ret:
+            ret['summary_fields'] = {}
+        ret['summary_fields']['permissions'] = get_user_permissions_on_resource(obj, user)
+
+        def format_role_perm(role):
+            role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
+            try:
+                role_dict['resource_name'] = role.content_object.name
+                role_dict['resource_type'] = role.content_type.name
+                role_dict['related'] = reverseGenericForeignKey(role.content_object)
+            except:
+                pass
+
+            return { 'role': role_dict, 'permissions': get_role_permissions_on_resource(obj, role)}
+
+        content_type = ContentType.objects.get_for_model(obj)
+        direct_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__id')
+        direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
+        ret['summary_fields']['direct_access'] = [format_role_perm(r) for r in direct_access_roles]
+
+        all_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__ancestors__id')
+        indirect_access_roles = user.roles.filter(id__in=all_permissive_role_ids).exclude(id__in=direct_permissive_role_ids).all()
+        ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles]
+        return ret
+
+
 
 
 class CredentialSerializer(BaseSerializer):
@@ -1498,9 +1562,9 @@ class CredentialSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(CredentialSerializer, self).to_representation(obj)
-        if obj is not None and 'user' in ret and (not obj.user or not obj.user.is_active):
+        if obj is not None and 'user' in ret and not obj.user:
             ret['user'] = None
-        if obj is not None and 'team' in ret and (not obj.team or not obj.team.active):
+        if obj is not None and 'team' in ret and not obj.team:
             ret['team'] = None
         return ret
 
@@ -1519,7 +1583,8 @@ class CredentialSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
         res.update(dict(
-            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,))
+            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
+            access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
         if obj.user:
             res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
@@ -1538,13 +1603,13 @@ class JobOptionsSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
-        if obj.inventory and obj.inventory.active:
+        if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.project and obj.project.active:
+        if obj.project:
             res['project'] = reverse('api:project_detail', args=(obj.project.pk,))
-        if obj.credential and obj.credential.active:
+        if obj.credential:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
-        if obj.cloud_credential and obj.cloud_credential.active:
+        if obj.cloud_credential:
             res['cloud_credential'] = reverse('api:credential_detail',
                                               args=(obj.cloud_credential.pk,))
         return res
@@ -1553,15 +1618,15 @@ class JobOptionsSerializer(BaseSerializer):
         ret = super(JobOptionsSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'project' in ret and (not obj.project or not obj.project.active):
+        if 'project' in ret and not obj.project:
             ret['project'] = None
             if 'playbook' in ret:
                 ret['playbook'] = ''
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+        if 'credential' in ret and not obj.credential:
             ret['credential'] = None
-        if 'cloud_credential' in ret and (not obj.cloud_credential or not obj.cloud_credential.active):
+        if 'cloud_credential' in ret and not obj.cloud_credential:
             ret['cloud_credential'] = None
         return ret
 
@@ -1598,6 +1663,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
+            access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1623,7 +1689,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         else:
             d['can_copy'] = False
             d['can_edit'] = False
-        d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-created')[:10]]
+        d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.order_by('-created')[:10]]
         return d
 
     def validate(self, attrs):
@@ -1654,7 +1720,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
             notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
         ))
-        if obj.job_template and obj.job_template.active:
+        if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail',
                                           args=(obj.job_template.pk,))
         if obj.can_start or True:
@@ -1699,7 +1765,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         ret = super(JobSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
+        if 'job_template' in ret and not obj.job_template:
             ret['job_template'] = None
 
         if obj.job_template and obj.job_template.survey_enabled:
@@ -1754,7 +1820,7 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
-        # Check for passwords needed 
+        # Check for passwords needed
         needed = self.get_passwords_needed_to_start(obj)
         provided = dict([(field, data.get(field, '')) for field in needed])
         if not all(provided.values()):
@@ -1763,11 +1829,11 @@ class JobRelaunchSerializer(JobSerializer):
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        if not obj.credential or obj.credential.active is False:
+        if not obj.credential:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
+        if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
-        if obj.inventory is None or not obj.inventory.active:
+        if obj.inventory is None:
             raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
@@ -1807,9 +1873,9 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(AdHocCommandSerializer, self).get_related(obj)
-        if obj.inventory and obj.inventory.active:
+        if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.credential and obj.credential.active:
+        if obj.credential:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
         res.update(dict(
             events  = reverse('api:ad_hoc_command_ad_hoc_command_events_list', args=(obj.pk,)),
@@ -1821,9 +1887,9 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
     def to_representation(self, obj):
         ret = super(AdHocCommandSerializer, self).to_representation(obj)
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+        if 'credential' in ret and not obj.credential:
             ret['credential'] = None
         # For the UI, only module_name is returned for name, instead of the
         # longer module name + module_args format.
@@ -1879,7 +1945,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
-        if obj.system_job_template and obj.system_job_template.active:
+        if obj.system_job_template:
             res['system_job_template'] = reverse('api:system_job_template_detail',
                                                  args=(obj.system_job_template.pk,))
             res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
@@ -2018,7 +2084,7 @@ class JobLaunchSerializer(BaseSerializer):
         }
 
     def get_credential_needed_to_start(self, obj):
-        return not (obj and obj.credential and obj.credential.active)
+        return not (obj and obj.credential)
 
     def get_survey_enabled(self, obj):
         if obj:
@@ -2031,7 +2097,7 @@ class JobLaunchSerializer(BaseSerializer):
         data = self.context.get('data')
 
         credential = attrs.get('credential', obj and obj.credential or None)
-        if not credential or not credential.active:
+        if not credential:
             errors['credential'] = 'Credential not provided'
 
         # fill passwords dict with request data passwords
@@ -2062,9 +2128,9 @@ class JobLaunchSerializer(BaseSerializer):
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
 
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
+        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
             errors['project'] = 'Job Template Project is missing or undefined'
-        if obj.inventory is None or not obj.inventory.active:
+        if obj.inventory is None:
             errors['inventory'] = 'Job Template Inventory is missing or undefined'
 
         if errors:
@@ -2100,7 +2166,7 @@ class NotifierSerializer(BaseSerializer):
             test = reverse('api:notifier_test', args=(obj.pk,)),
             notifications = reverse('api:notifier_notification_list', args=(obj.pk,)),
         ))
-        if obj.organization and obj.organization.active:
+        if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
@@ -2158,7 +2224,7 @@ class ScheduleSerializer(BaseSerializer):
         res.update(dict(
             unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
         ))
-        if obj.unified_job_template and obj.unified_job_template.active:
+        if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
@@ -2385,8 +2451,6 @@ class AuthTokenSerializer(serializers.Serializer):
         if username and password:
             user = authenticate(username=username, password=password)
             if user:
-                if not user.is_active:
-                    raise serializers.ValidationError('User account is disabled.')
                 attrs['user'] = user
                 return attrs
             else:
@@ -2396,7 +2460,7 @@ class AuthTokenSerializer(serializers.Serializer):
 
 
 class FactVersionSerializer(BaseFactSerializer):
-    
+
     class Meta:
         model = Fact
         fields = ('related', 'module', 'timestamp')

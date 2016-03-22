@@ -88,12 +88,12 @@ class OrganizationsTest(BaseTest):
         #   nobody_user is a user not a member of any organizations
 
         for x in self.organizations:
-            x.admins.add(self.super_django_user)
-            x.users.add(self.super_django_user)
-            x.users.add(self.other_django_user)
+            x.admin_role.members.add(self.super_django_user)
+            x.member_role.members.add(self.super_django_user)
+            x.member_role.members.add(self.other_django_user)
 
-        self.organizations[0].users.add(self.normal_django_user)
-        self.organizations[1].admins.add(self.normal_django_user)
+        self.organizations[0].member_role.members.add(self.normal_django_user)
+        self.organizations[1].admin_role.members.add(self.normal_django_user)
 
     def test_get_organization_list(self):
         url = reverse('api:organization_list')
@@ -136,7 +136,7 @@ class OrganizationsTest(BaseTest):
         # no admin rights? get empty list
         with self.current_user(self.other_django_user):
             response = self.get(url, expect=200)
-            self.check_pagination_and_size(response, self.other_django_user.organizations.count(), previous=None, next=None)
+            self.check_pagination_and_size(response, len(self.organizations), previous=None, next=None)
 
         # not a member of any orgs? get empty list
         with self.current_user(self.nobody_django_user):
@@ -283,14 +283,14 @@ class OrganizationsTest(BaseTest):
         # find projects attached to the first org
         projects0_url = orgs['results'][0]['related']['projects']
         projects1_url = orgs['results'][1]['related']['projects']
-        projects2_url = orgs['results'][2]['related']['projects']
 
         # get all the projects on the first org
         projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
         a_project = projects0['results'][-1]
 
         # attempt to add the project to the 7th org and see what happens
-        self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
+        #self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
+        self.post(projects1_url, a_project, expect=400, auth=self.get_super_credentials())
         projects1 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 3)
 
@@ -300,32 +300,19 @@ class OrganizationsTest(BaseTest):
 
         # test that by posting a pk + disassociate: True we can remove a relationship
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 6)
+        self.assertEquals(projects1['count'], 5)
         a_project['disassociate'] = True
-        self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
+        self.post(projects1_url, a_project, expect=400, auth=self.get_super_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 5)
 
         a_project = projects1['results'][-1]
         a_project['disassociate'] = 1
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.post(projects1_url, a_project, expect=204, auth=self.get_normal_credentials())
+        self.post(projects1_url, a_project, expect=400, auth=self.get_normal_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 4)
+        self.assertEquals(projects1['count'], 5)
 
-        new_project_a = self.make_projects(self.normal_django_user, 1)[0]
-        new_project_b = self.make_projects(self.other_django_user, 1)[0]
-
-        # admin of org can add projects that he can read
-        self.post(projects1_url, dict(id=new_project_a.pk), expect=204, auth=self.get_normal_credentials())
-        # but not those he cannot
-        self.post(projects1_url, dict(id=new_project_b.pk), expect=403, auth=self.get_normal_credentials())
-
-        # and can't post a project he can read to an org he cannot
-        # self.post(projects2_url, dict(id=new_project_a.pk), expect=403, auth=self.get_normal_credentials())
-
-        # and can't do post a project he can read to an organization he cannot
-        self.post(projects2_url, dict(id=new_project_a.pk), expect=403, auth=self.get_normal_credentials())
 
 
     def test_post_item_subobjects_users(self):
@@ -342,7 +329,7 @@ class OrganizationsTest(BaseTest):
 
         # post a completely new user to verify we can add users to the subcollection directly
         new_user = dict(username='NewUser9000', password='NewPassword9000')
-        which_org = self.normal_django_user.admin_of_organizations.all()[0]
+        which_org = Organization.accessible_objects(self.normal_django_user, {'read': True, 'write': True})[0]
         url = reverse('api:organization_users_list', args=(which_org.pk,))
         self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
 
@@ -436,10 +423,8 @@ class OrganizationsTest(BaseTest):
         self.delete(urls[0], expect=204, auth=self.get_super_credentials())
 
         # check that when we have deleted an object it comes back 404 via GET
-        # but that it's still in the database as inactive
         self.get(urls[1], expect=404, auth=self.get_normal_credentials())
-        org1 = Organization.objects.get(pk=urldata1['id'])
-        self.assertEquals(org1.active, False)
+        assert Organization.objects.filter(pk=urldata1['id']).count() == 0
 
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())

@@ -183,7 +183,7 @@ TEST_SURVEY_REQUIREMENTS = '''
 }
 '''
 
-class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
+class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
     JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields',
                            'created', 'modified', 'name', 'description',
@@ -265,7 +265,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # Chuck is temporarily assigned to ops east team to help them running some playbooks
         # even though he's in a different group and org entirely he'll now see their job templates
-        self.team_ops_east.users.add(self.user_chuck)
+        self.team_ops_east.deprecated_users.add(self.user_chuck)
         with self.current_user(self.user_chuck):
             resp = self.get(url, expect=200)
             #print [x['name'] for x in resp['results']]
@@ -492,7 +492,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_doug):
             self.get(detail_url, expect=403)
 
-class JobTest(BaseJobTestMixin, django.test.TestCase):
+class JobTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
     def test_get_job_list(self):
         url = reverse('api:job_list')
@@ -1083,7 +1083,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
 
-class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
+class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateSurveyTest, self).setUp()
         # TODO: Test non-enterprise license

@@ -22,8 +22,14 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.notifications import Notifier
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
+from awx.main.fields import ImplicitRoleField
 from awx.main.conf import tower_settings
+from awx.main.models.rbac import (
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -51,7 +57,7 @@ class ProjectOptions(models.Model):
             paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
                      if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
-            qs = Project.objects.filter(active=True)
+            qs = Project.objects
             used_paths = qs.values_list('local_path', flat=True)
             return [x for x in paths if x not in used_paths]
         else:
@@ -187,7 +193,7 @@ class ProjectOptions(models.Model):
         return sorted(results, key=lambda x: smart_str(x).lower())
 
 
-class Project(UnifiedJobTemplate, ProjectOptions):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
@@ -196,6 +202,13 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         app_label = 'main'
         ordering = ('id',)
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='projects',
+    )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
         editable=False,
@@ -206,6 +219,36 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Project Administrator',
+        role_description='May manage this project',
+        parent_role=[
+            'organization.admin_role',
+            'teams.member_role',
+            'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+        ],
+        permissions = {'all': True}
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Project Auditor',
+        role_description='May read all settings associated with this project',
+        parent_role=[
+            'organization.auditor_role',
+            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        ],
+        permissions = {'read': True}
+    )
+    member_role = ImplicitRoleField(
+        role_name='Project Member',
+        role_description='Implies membership within this project',
+        permissions = {'read': True}
+    )
+    scm_update_role = ImplicitRoleField(
+        role_name='Project Updater',
+        role_description='May update this project from the source control management system',
+        parent_role='admin_role',
+        permissions = {'scm_update': True}
     )
 
     @classmethod
@@ -301,10 +344,10 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) > now():
             return True
         return False
-    
+
     @property
     def needs_update_on_launch(self):
-        if self.active and self.scm_type and self.scm_update_on_launch:
+        if self.scm_type and self.scm_update_on_launch:
             if not self.last_job_run:
                 return True
             if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
@@ -313,14 +356,14 @@ class Project(UnifiedJobTemplate, ProjectOptions):
 
     @property
     def notifiers(self):
-        base_notifiers = Notifier.objects.filter(active=True)
+        base_notifiers = Notifier.objects
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.organizations.all())))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.organizations.all())))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.organizations.all())))
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.organization)))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.organization)))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
     def get_absolute_url(self):
