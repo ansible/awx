@@ -214,7 +214,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or request.user.admin_of_organizations.count():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).count():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -999,13 +999,16 @@ class UserMeList(ListAPIView):
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
 
-class UserTeamsList(SubListAPIView):
+class UserTeamsList(ListAPIView):
 
-    model = Team
+    model = User
     serializer_class = TeamSerializer
-    parent_model = User
-    relationship = 'teams'
 
+    def get_queryset(self):
+        u = User.objects.get(pk=self.kwargs['pk'])
+        if not u.accessible_by(self.request.user, {'read': True}):
+            raise PermissionDenied()
+        return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
 
 class UserRolesList(SubListCreateAttachDetachAPIView):
 
@@ -1043,8 +1046,9 @@ class UserProjectsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(teams__in=parent.teams.distinct())
+        my_qs = Project.accessible_objects(self.request.user, {'read': True})
+        user_qs = Project.accessible_objects(parent, {'read': True})
+        return my_qs & user_qs
 
 class UserCredentialsList(SubListCreateAttachDetachAPIView):
 

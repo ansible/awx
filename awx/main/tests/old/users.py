@@ -790,8 +790,8 @@ class UsersTest(BaseTest):
         self.check_get_list(url, self.super_django_user, qs)
 
         # Filter by related organizations admins username.
-        url = '%s?organizations__deprecated_admins__username__startswith=norm' % base_url
-        qs = base_qs.filter(organizations__deprecated_admins__username__startswith='norm')
+        url = '%s?organizationsadmin_role__members__username__startswith=norm' % base_url
+        qs = base_qs.filter(organizationsadmin_role__members__username__startswith='norm')
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 
@@ -839,11 +839,11 @@ class UsersTest(BaseTest):
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
         # Filter by invalid field across lookups.
-        url = '%s?organizations__deprecated_users__teams__laser=green' % base_url
+        url = '%s?organizations__member_role.members__teams__laser=green' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
         # Filter by invalid relation within lookups.
-        url = '%s?organizations__deprecated_users__llamas__name=freddie' % base_url
+        url = '%s?organizations__member_role.members__llamas__name=freddie' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
         # Filter by invalid query string field names.
@@ -1020,13 +1020,13 @@ class LdapTest(BaseTest):
         for org_name, org_result in settings.AUTH_LDAP_ORGANIZATION_MAP_RESULT.items():
             org = Organization.objects.get(name=org_name)
             if org_result.get('admins', False):
-                self.assertTrue(user in org.deprecated_admins.all())
+                self.assertTrue(user in org.admin_role.members.all())
             else:
-                self.assertFalse(user in org.deprecated_admins.all())
+                self.assertFalse(user in org.admin_role.members.all())
             if org_result.get('users', False):
-                self.assertTrue(user in org.deprecated_users.all())
+                self.assertTrue(user in org.member_role.members.all())
             else:
-                self.assertFalse(user in org.deprecated_users.all())
+                self.assertFalse(user in org.member_role.members.all())
         # Try again with different test mapping.
         self.use_test_setting('ORGANIZATION_MAP', {},
                               from_name='ORGANIZATION_MAP_2')
@@ -1038,13 +1038,13 @@ class LdapTest(BaseTest):
         for org_name, org_result in settings.AUTH_LDAP_ORGANIZATION_MAP_RESULT.items():
             org = Organization.objects.get(name=org_name)
             if org_result.get('admins', False):
-                self.assertTrue(user in org.deprecated_admins.all())
+                self.assertTrue(user in org.admin_role.members.all())
             else:
-                self.assertFalse(user in org.deprecated_admins.all())
+                self.assertFalse(user in org.admin_role.members.all())
             if org_result.get('users', False):
-                self.assertTrue(user in org.deprecated_users.all())
+                self.assertTrue(user in org.member_role.members.all())
             else:
-                self.assertFalse(user in org.deprecated_users.all())
+                self.assertFalse(user in org.member_role.members.all())
 
     def test_ldap_team_mapping(self):
         for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
@@ -1062,9 +1062,9 @@ class LdapTest(BaseTest):
         for team_name, team_result in settings.AUTH_LDAP_TEAM_MAP_RESULT.items():
             team = Team.objects.get(name=team_name)
             if team_result.get('users', False):
-                self.assertTrue(user in team.deprecated_users.all())
+                self.assertTrue(user in team.member_role.members.all())
             else:
-                self.assertFalse(user in team.deprecated_users.all())
+                self.assertFalse(user in team.member_role.members.all())
         # Try again with different test mapping.
         self.use_test_setting('TEAM_MAP', {}, from_name='TEAM_MAP_2')
         self.use_test_setting('TEAM_MAP_RESULT', {},
@@ -1075,9 +1075,9 @@ class LdapTest(BaseTest):
         for team_name, team_result in settings.AUTH_LDAP_TEAM_MAP_RESULT.items():
             team = Team.objects.get(name=team_name)
             if team_result.get('users', False):
-                self.assertTrue(user in team.deprecated_users.all())
+                self.assertTrue(user in team.member_role.members.all())
             else:
-                self.assertFalse(user in team.deprecated_users.all())
+                self.assertFalse(user in team.member_role.members.all())
 
     def test_prevent_changing_ldap_user_fields(self):
         for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',

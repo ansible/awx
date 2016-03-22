@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Django
-from django.db import connection
 from django.db.models.signals import (
     post_init,
     pre_save,
@@ -18,10 +17,6 @@ from django.db.models.fields.related import (
     ManyRelatedObjectsDescriptor,
     ReverseManyRelatedObjectsDescriptor,
 )
-
-from django.core.exceptions import FieldError
-from django.db.transaction import TransactionManagementError
-
 
 # AWX
 from awx.main.models.rbac import RolePermission, Role, batch_role_ancestor_rebuilding
@@ -155,9 +150,9 @@ class ImplicitRoleField(models.ForeignKey):
                     for pk in pk_set:
                         obj = model.objects.get(pk=pk)
                         if action == 'post_add':
-                            getattr(instance, self.name).children.add(getattr(obj, field_attr))
+                            getattr(instance, field_attr).children.add(getattr(obj, self.name))
                         if action == 'pre_remove':
-                            getattr(instance, self.name).children.remove(getattr(obj, field_attr))
+                            getattr(instance, field_attr).children.remove(getattr(obj, self.name))
 
                 else:
                     for pk in pk_set:
@@ -182,8 +177,9 @@ class ImplicitRoleField(models.ForeignKey):
         if role:
             return role
         role = Role.objects.create(
-                name=self.role_name,
-                description=self.role_description)
+            name=self.role_name,
+            description=self.role_description
+        )
         setattr(instance, self.name, role)
 
     def _patch_role_content_object_and_grant_permissions(self, instance):

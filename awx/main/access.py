@@ -198,12 +198,10 @@ class BaseAccess(object):
 class UserAccess(BaseAccess):
     '''
     I can see user records when:
-     - I'm a superuser.
-     - I'm that user.
-     - I'm an org admin (org admins should be able to see all users, in order
-       to add those users to the org).
-     - I'm in an org with that user.
-     - I'm on a team with that user.
+     - I'm a useruser
+     - I'm in a role with them (such as in an organization or team)
+     - They are in a role which includes a role of mine
+     - I am in a role that includes a role of theirs
     I can change some fields for a user (mainly password) when I am that user.
     I can change all fields for a user (admin access) or delete when:
      - I'm a superuser.
@@ -213,8 +211,17 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        qs = User.accessible_objects(self.user, {'read':True})
-        return qs
+        if self.user.is_superuser:
+            return User.objects
+
+        viewable_users_set = set()
+        viewable_users_set.update(self.user.roles.values_list('ancestors__members__id', flat=True))
+        viewable_users_set.update(self.user.roles.values_list('descendents__members__id', flat=True))
+
+        return User.objects.filter(id__in=viewable_users_set)
+        #qs = User.objects.filter(self.user, {'read':True})
+        #qs = User.objects.
+        #return qs
 
     def can_add(self, data):
         if data is not None and 'is_superuser' in data:
@@ -237,7 +244,7 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return obj.accessible_by(self.user, {'create': True, 'write':True, 'update':True, 'read':True})
+        return Organization.objects.filter(member_role__members=obj, admin_role__members=self.user).exists()
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -623,6 +630,8 @@ class ProjectAccess(BaseAccess):
     model = Project
 
     def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects
         qs = self.model.accessible_objects(self.user, {'read':True})
         qs = qs.select_related('modified_by', 'credential', 'current_job', 'last_job')
         return qs
@@ -654,6 +663,8 @@ class ProjectUpdateAccess(BaseAccess):
     model = ProjectUpdate
 
     def get_queryset(self):
+        if self.user.is_superuser:
+            return self.model.objects
         qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
         project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
