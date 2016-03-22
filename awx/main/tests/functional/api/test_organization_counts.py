@@ -8,9 +8,8 @@ def resourced_organization(organization, project, team, inventory, user):
     member_user = user('org-member')
 
     # Associate one resource of every type with the organization
-    organization.users.add(member_user)
-    organization.admins.add(admin_user)
-    organization.projects.add(project)
+    organization.member_role.members.add(member_user)
+    organization.admin_role.members.add(admin_user)
     # organization.teams.create(name='org-team')
     # inventory = organization.inventories.create(name="associated-inv")
     project.jobtemplates.create(name="test-jt",
@@ -41,17 +40,17 @@ def test_org_counts_admin(resourced_organization, user, get):
 def test_org_counts_member(resourced_organization, get):
     # Check that a non-admin user can only see the full project and
     #   user count, consistent with the RBAC rules
-    member_user = resourced_organization.users.get(username='org-member')
+    member_user = resourced_organization.member_role.members.get(username='org-member')
     response = get(reverse('api:organization_list', args=[]), member_user)
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
 
     assert counts == {
-        'users': 1,  # User can see themselves
-        'admins': 0,
+        'users': 1,  # Policy is that members can see other users and admins
+        'admins': 1,
         'job_templates': 0,
-        'projects': 1,  # Projects are shared with all the organization
+        'projects': 0,
         'inventories': 0,
         'teams': 0
     }
@@ -118,20 +117,20 @@ def test_JT_associated_with_project(organizations, project, user, get):
     other_org = two_orgs[1]
 
     unrelated_inv = other_org.inventories.create(name='not-in-organization')
+    organization.projects.add(project)
     project.jobtemplates.create(name="test-jt",
                                 description="test-job-template-desc",
                                 inventory=unrelated_inv,
                                 playbook="test_playbook.yml")
-    organization.projects.add(project)
 
     response = get(reverse('api:organization_list', args=[]), external_admin)
     assert response.status_code == 200
 
     org_id = organization.id
     counts = {}
-    for i in range(2):
-        working_id = response.data['results'][i]['id']
-        counts[working_id] = response.data['results'][i]['summary_fields']['related_field_counts']
+    for org_json in response.data['results']:
+        working_id = org_json['id']
+        counts[working_id] = org_json['summary_fields']['related_field_counts']
 
     assert counts[org_id] == {
         'users': 0,
