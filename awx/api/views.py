@@ -1006,7 +1006,7 @@ class UserTeamsList(ListAPIView):
 
     def get_queryset(self):
         u = User.objects.get(pk=self.kwargs['pk'])
-        if not u.can_access(User, 'read', self.request.user):
+        if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
         return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
 
