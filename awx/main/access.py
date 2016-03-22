@@ -1509,7 +1509,21 @@ class NotificationAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         return qs
-    
+
+class LabelAccess(BaseAccess):
+    '''
+    I can see/use a Label if I have permission to
+    '''
+    model = Label
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        if self.user.is_superuser:
+            return qs
+        return qs
+
+    def can_delete(self, obj):
+        return False
 
 class ActivityStreamAccess(BaseAccess):
     '''
@@ -1712,3 +1726,4 @@ register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
 register_access(Notifier, NotifierAccess)
 register_access(Notification, NotificationAccess)
+register_access(Label, LabelAccess)

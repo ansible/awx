@@ -16,6 +16,7 @@ from django.conf import settings
 # AWX
 from awx.main.models.projects import Project
 from awx.main.models.organization import Organization, Permission
+from awx.main.models.jobs import JobTemplate
 from awx.main.models.base import PERM_INVENTORY_READ
 from awx.main.models.ha import Instance
 from awx.main.models.fact import Fact
@@ -263,4 +264,15 @@ def team(organization):
 @pytest.fixture
 def permission_inv_read(organization, inventory, team):
     return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
+
+
+@pytest.fixture
+def job_template_labels(organization):
+    jt = JobTemplate(name='test-job_template')
+    jt.save()
+
+    jt.labels.create(name="label-1", organization=organization)
+    jt.labels.create(name="label-2", organization=organization)
+
+    return jt
 
