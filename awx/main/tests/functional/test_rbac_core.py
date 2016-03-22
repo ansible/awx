@@ -241,3 +241,20 @@ def test_auto_parenting():
     assert org2.admin_role.is_ancestor_of(prj1.admin_role)
     assert org2.admin_role.is_ancestor_of(prj2.admin_role)
 
+@pytest.mark.django_db
+def test_auto_m2m_parenting(team, project, user):
+    u = user('some-user')
+    team.member_role.members.add(u)
+
+    assert project.accessible_by(u, {'read': True}) is False
+
+    project.teams.add(team)
+    assert project.accessible_by(u, {'read': True})
+    project.teams.remove(team)
+    assert project.accessible_by(u, {'read': True}) is False
+
+    team.projects.add(project)
+    assert project.accessible_by(u, {'read': True})
+    team.projects.remove(project)
+    assert project.accessible_by(u, {'read': True}) is False
+
