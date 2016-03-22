@@ -1047,8 +1047,9 @@ class UserProjectsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(teams__in=parent.teams.distinct())
+        my_qs = Project.accessible_objects(self.request.user, {'read': True})
+        user_qs = Project.accessible_objects(parent, {'read': True})
+        return my_qs & user_qs
 
 class UserCredentialsList(SubListCreateAttachDetachAPIView):
 
