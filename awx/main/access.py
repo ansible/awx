@@ -244,7 +244,7 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return obj.accessible_by(self.user, {'create': True, 'write':True, 'update':True, 'read':True})
+        return Organization.objects.filter(member_role__members=obj, admin_role__members=self.user).exists()
 
     def can_delete(self, obj):
         if obj == self.user:
