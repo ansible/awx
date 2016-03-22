@@ -207,13 +207,7 @@ class OrganizationsTest(BaseTest):
         self.assertEquals(org1_users['count'], 2)
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(org1_users['count'], 2)
-        print(org1_users)
-        print('-----')
-        print(org1_users_url)
-        org = Organization.objects.get(id=45)
-        print(org.member_role.members.all())
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_other_credentials())
-        print(org1_users)
         self.assertEquals(org1_users['count'], 2)
 
     def test_get_item_subobjects_admins(self):
