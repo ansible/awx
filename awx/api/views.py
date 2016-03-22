@@ -999,13 +999,17 @@ class UserMeList(ListAPIView):
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
 
-class UserTeamsList(SubListAPIView):
+class UserTeamsList(ListAPIView):
 
-    model = Team
+    model = User
     serializer_class = TeamSerializer
-    parent_model = User
-    relationship = 'teams'
 
+    def get_queryset(self):
+        u = User.objects.get(pk=self.kwargs['pk'])
+        if not u.accessible_by(self.request.user, {'read': True}):
+            raise PermissionDenied()
+        return Team.accessible_objects(self.request.user, {'read': True}) \
+                .filter(member_role__members=u)
 
 class UserRolesList(SubListCreateAttachDetachAPIView):
 
