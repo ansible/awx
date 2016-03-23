@@ -117,7 +117,6 @@ class ModelAccessPermission(permissions.BasePermission):
         check_method = getattr(self, 'check_%s_permissions' % request.method.lower(), None)
         result = check_method and check_method(request, view, obj)
         if not result:
-            print('Yarr permission denied: %s %s %s' % (request.method, repr(view), repr(obj),)) # TODO: XXX: This shouldn't have been committed but anoek is sloppy, remove me after we're done fixing bugs
             raise PermissionDenied()
 
         return result
