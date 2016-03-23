@@ -169,7 +169,7 @@ export default
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'openstack_v3'",
                     awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
@@ -243,7 +243,7 @@ export default
                 "password": {
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'",
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack' || kind.value == 'openstack_v3'",
                     addRequired: false,
                     editRequired: false,
                     ask: false,
@@ -338,7 +338,7 @@ export default
                 "project": {
                     labelBind: 'projectLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'gce' || kind.value == 'openstack'",
+                    ngShow: "kind.value == 'gce' || kind.value == 'openstack' || kind.value == 'openstack_v3'",
                     awPopOverWatch: "projectPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Project ID',
@@ -348,6 +348,23 @@ export default
                     editRequired: false,
                     awRequiredWhen: {
                         variable: 'project_required',
+                        init: false
+                    },
+                    subForm: 'credentialSubForm'
+                },
+                "domain": {
+                    labelBind: 'domainLabel',
+                    type: 'text',
+                    ngShow: "kind.value == 'openstack_v3'",
+                    awPopOverWatch: "domainPopOver",
+                    awPopOver: "set in helpers/credentials",
+                    dataTitle: 'Domain Name',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    addRequired: false,
+                    editRequired: false,
+                    awRequiredWhen: {
+                        variable: 'domain_required',
                         init: false
                     },
                     subForm: 'credentialSubForm'

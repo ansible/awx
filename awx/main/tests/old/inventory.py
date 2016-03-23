@@ -2068,6 +2068,26 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.check_inventory_source(inventory_source)
         self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
 
+    def test_update_from_openstack_v3(self):
+        # Check that update works with Keystone v3 identity service
+        api_url = getattr(settings, 'TEST_OPENSTACK_HOST_V3', '')
+        api_user = getattr(settings, 'TEST_OPENSTACK_USER', '')
+        api_password = getattr(settings, 'TEST_OPENSTACK_PASSWORD', '')
+        api_project = getattr(settings, 'TEST_OPENSTACK_PROJECT', '')
+        api_domain = getattr(settings, 'TEST_OPENSTACK_DOMAIN', '')
+        if not all([api_url, api_user, api_password, api_project, api_domain]):
+            self.skipTest("No test openstack v3 credentials defined")
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='openstack_v3',
+                                               host=api_url,
+                                               username=api_user,
+                                               password=api_password,
+                                               project=api_project,
+                                               domain=api_domain)
+        inventory_source = self.update_inventory_source(self.group, source='openstack_v3', credential=credential)
+        self.check_inventory_source(inventory_source)
+        self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
+
     def test_update_from_azure(self):
         source_username = getattr(settings, 'TEST_AZURE_USERNAME', '')
         source_key_data = getattr(settings, 'TEST_AZURE_KEY_DATA', '')
@@ -2112,3 +2132,27 @@ class InventoryCredentialTest(BaseTest):
         self.assertIn('password', response)
         self.assertIn('host', response)
         self.assertIn('project', response)
+
+    def test_openstack_v3_create_ok(self):
+        data = {
+            'kind': 'openstack_v3',
+            'name': 'Best credential ever',
+            'username': 'some_user',
+            'password': 'some_password',
+            'project': 'some_project',
+            'host': 'some_host',
+            'domain': 'some_domain',
+        }
+        self.post(self.url, data=data, expect=201, auth=self.get_super_credentials())
+
+    def test_openstack_v3_create_fail_required_fields(self):
+        data = {
+            'kind': 'openstack_v3',
+            'name': 'Best credential ever',
+        }
+        response = self.post(self.url, data=data, expect=400, auth=self.get_super_credentials())
+        self.assertIn('username', response)
+        self.assertIn('password', response)
+        self.assertIn('host', response)
+        self.assertIn('project', response)
+        self.assertIn('domain', response)

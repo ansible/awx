@@ -1484,7 +1484,8 @@ class CredentialSerializer(BaseSerializer):
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
-                  'password', 'security_token', 'project', 'ssh_key_data', 'ssh_key_unlock',
+                  'password', 'security_token', 'project', 'domain',
+                  'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 

@@ -706,12 +706,14 @@ class RunJob(BaseTask):
                 if credential.ssh_key_data not in (None, ''):
                     private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
 
-        if job.cloud_credential and job.cloud_credential.kind == 'openstack':
+        if job.cloud_credential and job.cloud_credential.kind in ('openstack', 'openstack_v3'):
             credential = job.cloud_credential
             openstack_auth = dict(auth_url=credential.host,
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             openstack_data = {
                 'clouds': {
                     'devstack': {
@@ -796,7 +798,7 @@ class RunJob(BaseTask):
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
-        elif cloud_cred and cloud_cred.kind == 'openstack':
+        elif cloud_cred and cloud_cred.kind in ('openstack', 'openstack_v3'):
             env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
 
         # Set environment variables related to scan jobs
@@ -1145,12 +1147,14 @@ class RunInventoryUpdate(BaseTask):
             credential = inventory_update.credential
             return dict(cloud_credential=decrypt_field(credential, 'ssh_key_data'))
 
-        if inventory_update.source == 'openstack':
+        if inventory_update.source in ('openstack', 'openstack_v3'):
             credential = inventory_update.credential
             openstack_auth = dict(auth_url=credential.host,
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
@@ -1298,7 +1302,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
             env['GCE_ZONE'] = inventory_update.source_regions
-        elif inventory_update.source == 'openstack':
+        elif inventory_update.source in ('openstack', 'openstack_v3'):
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
@@ -1340,6 +1344,11 @@ class RunInventoryUpdate(BaseTask):
             # We need to reference the source's code frequently, assign it
             # to a shorter variable. :)
             src = inventory_update.source
+
+            # OpenStack V3 has everything in common with OpenStack aside
+            # from one extra parameter, so share these resources between them.
+            if src == 'openstack_v3':
+                src = 'openstack'
 
             # Get the path to the inventory plugin, and append it to our
             # arguments.
