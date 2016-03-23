@@ -55,10 +55,10 @@ import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
 import OrganizationsAdd from './organizations/add/organizations-add.controller';
 import OrganizationsEdit from './organizations/edit/organizations-edit.controller';
-import InventoriesAdd from './inventory/inventory-add.controller';
-import InventoriesEdit from './inventory/inventory-edit.controller';
-import InventoriesList from './inventory/inventory-list.controller';
-import InventoriesManage from './inventory/inventory-manage.controller';
+import InventoriesAdd from './inventories/add/inventory-add.controller';
+import InventoriesEdit from './inventories/edit/inventory-edit.controller';
+import InventoriesList from './inventories/list/inventory-list.controller';
+import InventoriesManage from './inventories/manage/inventory-manage.controller';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
@@ -366,69 +366,6 @@ var tower = angular.module('Tower', [
                 url: '/projects/:project_id/organizations/add',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories', {
-                url: '/inventories',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'inventory'
-                },
-                ncyBreadcrumb: {
-                    label: "INVENTORIES"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesAdd,
-                ncyBreadcrumb: {
-                    parent: "inventories",
-                    label: "CREATE INVENTORY"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories.edit', {
-                url: '/:inventory_id',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesEdit,
-                data: {
-                    activityStreamId: 'inventory_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventoryManage', {
-                url: '/inventories/:inventory_id/manage?groups',
-                templateUrl: urlPrefix + 'partials/inventory-manage.html',
-                controller: InventoriesManage,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'inventory',
-                    activityStreamId: 'inventory_id'
-                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
