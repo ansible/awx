@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import urllib
 from mock import patch
 
