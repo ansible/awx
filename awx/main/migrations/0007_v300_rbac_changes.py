@@ -220,15 +220,15 @@ class Migration(migrations.Migration):
             name='organization',
             field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
         ),
-        migrations.AddField(
-            model_name='credential',
-            name='deprecated_team',
-            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to='main.Team', null=True),
+        migrations.RenameField(
+            'Credential',
+            'team',
+            'deprecated_team',
         ),
-        migrations.AddField(
-            model_name='credential',
-            name='deprecated_user',
-            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+        migrations.RenameField(
+            'Credential',
+            'user',
+            'deprecated_user',
         ),
         migrations.AlterField(
             model_name='organization',
@@ -248,13 +248,5 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='credential',
             unique_together=set([]),
-        ),
-        migrations.RemoveField(
-            model_name='credential',
-            name='team',
-        ),
-        migrations.RemoveField(
-            model_name='credential',
-            name='user',
         ),
     ]
