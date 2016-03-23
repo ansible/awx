@@ -142,12 +142,12 @@ class BaseJobTestMixin(BaseTestMixin):
         self.org_eng.projects.add(self.proj_dev)
         self.proj_test = self.make_project('test', 'testing branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_test)
+        #self.org_eng.projects.add(self.proj_test) # No more multi org projects
         self.org_sup.projects.add(self.proj_test)
         self.proj_prod = self.make_project('prod', 'production branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_prod)
-        self.org_sup.projects.add(self.proj_prod)
+        #self.org_eng.projects.add(self.proj_prod) # No more multi org projects
+        #self.org_sup.projects.add(self.proj_prod) # No more multi org projects
         self.org_ops.projects.add(self.proj_prod)
 
         # Operations also has 2 additional projects specific to the east/west
