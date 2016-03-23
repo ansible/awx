@@ -90,13 +90,13 @@ class ProjectsTest(BaseTransactionTest):
 
         # create some teams in the first org
         #self.team1.projects.add(self.projects[0])
-        self.projects[0].teams.add(self.team1)
+        self.projects[0].admin_role.parents.add(self.team1.member_role)
         #self.team1.projects.add(self.projects[0])
-        self.team2.projects.add(self.projects[1])
-        self.team2.projects.add(self.projects[2])
-        self.team2.projects.add(self.projects[3])
-        self.team2.projects.add(self.projects[4])
-        self.team2.projects.add(self.projects[5])
+        self.team2.member_role.children.add(self.projects[1].admin_role)
+        self.team2.member_role.children.add(self.projects[2].admin_role)
+        self.team2.member_role.children.add(self.projects[3].admin_role)
+        self.team2.member_role.children.add(self.projects[4].admin_role)
+        self.team2.member_role.children.add(self.projects[5].admin_role)
         self.team1.save()
         self.team2.save()
         self.team1.member_role.members.add(self.normal_django_user)
@@ -383,7 +383,7 @@ class ProjectsTest(BaseTransactionTest):
         team_projects = reverse('api:team_projects_list', args=(team.pk,))
 
         p1 = self.projects[0]
-        team.projects.add(p1)
+        team.member_role.children.add(p1.admin_role)
         team.save()
 
         got = self.get(team_projects, expect=200, auth=self.get_super_credentials())
