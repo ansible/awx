@@ -25,8 +25,8 @@ def resourced_organization(organization, project, team, inventory, user):
 def test_org_counts_detail_view(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
     external_admin = user('admin', True)
-    response = get(reverse('api:organization_detail', args=[resourced_organization.pk]),
-                           external_admin)
+    response = get(reverse('api:organization_detail',
+                   args=[resourced_organization.pk]), external_admin)
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
