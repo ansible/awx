@@ -775,20 +775,34 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(type(self), self).post(request, *args, **kwargs)
 
-class TeamProjectsList(SubListCreateAttachDetachAPIView):
+class TeamProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Team
-    relationship = 'projects'
 
-class TeamCredentialsList(SubListCreateAttachDetachAPIView):
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
+        user_qs = Project.accessible_objects(self.request.user, {'read': True})
+        return team_qs & user_qs
+
+
+class TeamCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = Team
-    relationship = 'credentials'
-    parent_key = 'team'
+
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
+        return team_creds & visible_creds
+
 
 class TeamActivityStreamList(SubListAPIView):
 
@@ -1041,7 +1055,6 @@ class UserProjectsList(SubListAPIView):
     model = Project
     serializer_class = ProjectSerializer
     parent_model = User
-    relationship = 'projects'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1050,13 +1063,19 @@ class UserProjectsList(SubListAPIView):
         user_qs = Project.accessible_objects(parent, {'read': True})
         return my_qs & user_qs
 
-class UserCredentialsList(SubListCreateAttachDetachAPIView):
+class UserCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = User
-    relationship = 'credentials'
-    parent_key = 'user'
+
+    def get_queryset(self):
+        user = self.get_parent_object()
+        self.check_parent_access(user)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        user_creds = Credential.accessible_objects(user, {'read': True})
+        return user_creds & visible_creds
 
 class UserOrganizationsList(SubListAPIView):
 
