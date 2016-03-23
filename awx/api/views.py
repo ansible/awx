@@ -2142,7 +2142,7 @@ class JobTemplateCallback(GenericAPIView):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
         matches = set()
-        for host in qs:
+        for host in qs.all():
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
@@ -2152,7 +2152,7 @@ class JobTemplateCallback(GenericAPIView):
         if len(matches) == 1:
             return matches
         # Try to resolve forward addresses for each host to find matches.
-        for host in qs:
+        for host in qs.all():
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host:
