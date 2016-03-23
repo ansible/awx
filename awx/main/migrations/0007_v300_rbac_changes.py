@@ -33,6 +33,11 @@ class Migration(migrations.Migration):
             'users',
             'deprecated_users',
         ),
+        migrations.RenameField(
+            'Team',
+            'projects',
+            'deprecated_projects',
+        ),
 
         migrations.CreateModel(
             name='Role',

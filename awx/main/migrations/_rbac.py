@@ -265,7 +265,7 @@ def migrate_projects(apps, schema_editor):
             project.admin_role.members.add(project.created_by)
             migrations[project.name]['users'].add(project.created_by)
 
-        for team in project.teams.all():
+        for team in project.deprecated_teams.all():
             team.member_role.children.add(project.member_role)
             migrations[project.name]['teams'].add(team)
 
