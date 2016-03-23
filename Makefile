@@ -265,30 +265,21 @@ requirements requirements_ansible requirements_dev requirements_jenkins: %: real
 real-requirements_ansible: virtualenv
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-	fi; \
-	pip install -r requirements/requirements_ansible.txt; \
-	if [ "$(VENV_BASE)" ]; then \
-		deactivate; \
-	fi
+	fi && \
+	pip install -r requirements/requirements_ansible.txt
 
 # Install third-party requirements needed for Tower's environment.
 real-requirements: requirements_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
+	fi && \
 	pip install -r requirements/requirements.txt; \
-	if [ "$(VENV_BASE)" ]; then \
-		deactivate; \
-	fi
 
 real-requirements_dev: requirements_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	pip install -r requirements/requirements_dev.txt; \
-	if [ "$(VENV_BASE)" ]; then \
-		deactivate; \
-	fi
+	fi && \
+	pip install -r requirements/requirements_dev.txt
 
 # Install third-party requirements needed for running unittests in jenkins
 real-requirements_jenkins:
@@ -859,7 +850,7 @@ build:
 	$(PYTHON) setup.py build
 
 install:
-	export SCL_PREFIX
+	export SCL_PREFIX HTTPD_SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
 # Docker Compose Development environment

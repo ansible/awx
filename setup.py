@@ -19,19 +19,20 @@ else:
 
 # Path prefix for when we're running under a software collection
 scl_prefix = os.getenv('SCL_PREFIX', '')
+httpd_scl_prefix = os.getenv('HTTPD_SCL_PREFIX', scl_prefix)
 
 # Paths we'll use later
-etcpath = scl_prefix + "/etc/tower"
+etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
+bindir = "/usr/bin"
 sharedir = scl_prefix + "/usr/share/awx"
-bindir = scl_prefix + "/usr/bin"
 docdir = scl_prefix + "/usr/share/doc/ansible-tower"
 munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
 if os.path.exists("/etc/debian_version"):
     sysinit = scl_prefix + "/etc/init.d"
-    webconfig  = scl_prefix + "/etc/apache2/conf.d"
+    webconfig  = httpd_scl_prefix + "/etc/apache2/conf.d"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
@@ -39,7 +40,7 @@ if os.path.exists("/etc/debian_version"):
     sosconfig = "/usr/share/sosreport/sos/plugins"
 else:
     sysinit = scl_prefix + "/etc/rc.d/init.d"
-    webconfig  = scl_prefix + "/etc/httpd/conf.d"
+    webconfig  = httpd_scl_prefix + "/etc/httpd/conf.d"
     shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"
@@ -139,7 +140,8 @@ setup(
                                     "tools/munin_monitors/mongo_mem",
                                     "tools/munin_monitors/mongo_ops"]),
         ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
-        ("%s" % bindir, ["tools/scripts/ansible-tower-service"]),
+        ("%s" % bindir, ["tools/scripts/ansible-tower-service",
+                         "tools/scripts/tower-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'egg_info': {
@@ -148,6 +150,9 @@ setup(
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',
+        },
+        'build_scripts': {
+            'executable': '/usr/bin/tower-python',
         },
     },
 )

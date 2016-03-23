@@ -34,7 +34,7 @@ os-client-config==1.14.0
 os-diskconfig-python-novaclient-ext==0.1.3
 os-networksv2-python-novaclient-ext==0.25
 os-virtual-interfacesv2-python-novaclient-ext==0.19
-pbr==0.11.1
+pbr==1.8.1
 oslo.config==3.3.0
 oslo.i18n==3.2.0
 oslo.serialization==2.2.0
