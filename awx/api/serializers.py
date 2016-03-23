@@ -1547,7 +1547,7 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
+        fields = ('*', 'deprecated_user', 'deprecated_team', 'kind', 'cloud', 'host', 'username',
                   'password', 'security_token', 'project', 'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
@@ -1562,21 +1562,16 @@ class CredentialSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(CredentialSerializer, self).to_representation(obj)
-        if obj is not None and 'user' in ret and not obj.user:
-            ret['user'] = None
-        if obj is not None and 'team' in ret and not obj.team:
-            ret['team'] = None
+        if obj is not None and 'deprecated_user' in ret and not obj.deprecated_user:
+            ret['deprecated_user'] = None
+        if obj is not None and 'deprecated_team' in ret and not obj.deprecated_team:
+            ret['deprecated_team'] = None
         return ret
 
     def validate(self, attrs):
-        # If creating a credential from a view that automatically sets the
-        # parent_key (user or team), set the other value to None.
-        view = self.context.get('view', None)
-        parent_key = getattr(view, 'parent_key', None)
-        if parent_key == 'user':
-            attrs['team'] = None
-        if parent_key == 'team':
-            attrs['user'] = None
+        # Ensure old style assignment for user/team is always None
+        attrs['deprecated_user'] = None
+        attrs['deprecated_team'] = None
 
         return super(CredentialSerializer, self).validate(attrs)
 

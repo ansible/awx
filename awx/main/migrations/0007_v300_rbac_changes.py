@@ -220,4 +220,41 @@ class Migration(migrations.Migration):
             name='organization',
             field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name='credential',
+            name='deprecated_team',
+            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to='main.Team', null=True),
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='deprecated_user',
+            field=models.ForeignKey(related_name='deprecated_credentials', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_admins',
+            field=models.ManyToManyField(related_name='deprecated_admin_of_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='team',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_teams', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name='credential',
+            unique_together=set([]),
+        ),
+        migrations.RemoveField(
+            model_name='credential',
+            name='team',
+        ),
+        migrations.RemoveField(
+            model_name='credential',
+            name='user',
+        ),
     ]
