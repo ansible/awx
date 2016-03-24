@@ -1,9 +1,8 @@
 <div class="tab-pane" id="jobs-detail">
     <div ng-cloak id="htmlTemplate" class="JobDetail">
-
+    <div ui-view></div>
         <!--beginning of job-detail-container (left side) -->
         <div id="job-detail-container" class="JobDetail-leftSide" ng-class="{'JobDetail-stdoutActionButton--active': stdoutFullScreen}">
-
             <!--beginning of results-->
             <div id="job-results-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
                 <div class="JobDetail-panelHeader">
@@ -423,13 +422,13 @@
                                     <tbody>
                                         <tr class="List-tableRow" ng-repeat="host in summaryList = (hosts) track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
                                             <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                                <a href="" ng-click="hostEventsViewer(host.id, host.name)" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
                                             </td>
                                             <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
-                                                <a href="" ng-click="hostEventsViewer(host.id, host.name, 'ok')" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                                                <a href="" ng-click="hostEventsViewer(host.id, host.name, 'changed')" aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                                                <a href="" ng-click="hostEventsViewer(host.id, host.name, 'unreachable')" aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
-                                                <a href="" ng-click="hostEventsViewer(host.id, host.name, 'failed')" aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'changed'})"  aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'unreachable'})"  aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'failed'})"  aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
                                             </td>
                                         </tr>
                                         <tr ng-show="summaryList.length === 0 && waiting">
@@ -482,40 +481,6 @@
 </div>
 
     <div ng-include="'/static/partials/eventviewer.html'"></div>
-
-    <div id="host-events-modal-dialog" style="display:none;">
-        <div id="search-form" class="form-inline">
-            <div class="form-group" style="position:relative;">
-                <label>Search</label>
-                <div class="search-name" style="display:inline-block; position:relative;">
-                    <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" ng-keypress="searchEventKeyPress($event)" >
-                    <div id="search-all-input-icons">
-                        <a class="search-icon" ng-show="!eventsSearchActive" ng-click="searchEvents()"><i class="fa fa-search"></i></a>
-                        <a class="search-icon" ng-show="eventsSearchActive" ng-click="host_events_search_name=''; searchEvents()"><i class="fa fa-times"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group" id="status-field">
-                <label>Status</label>
-                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name" ng-change="searchEvents()"
-                    ng-options="opt.name for opt in host_events_status_options track by opt.value"></select>
-            </div>
-            <div class="form-group" id="search-indicator" ng-show="hostViewSearching"><i class="fa fa-lg fa-spin fa-cog"></i></div>
-        </div>
-        <!-- lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500" -->
-        <div id="host-events-table">
-            <table id="fixed-table-header" class="table">
-                <thead>
-                    <tr><th class="col-md-3">Status</th>
-                        <th class="col-md-3">Host</th>
-                        <th class="col-md-3">Play</th>
-                        <th class="col-md-3">Task</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="host-events" lr-infinite-scroll="hostEventsScrollDown" scroll-threshold="10" time-threshold="500"></div>
-        </div>
-   </div>
 
    <div id="host-modal-dialog" style="display: none;" class="dialog-content"></div>
 
