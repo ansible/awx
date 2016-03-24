@@ -70,7 +70,7 @@ def attrfunc(attr_path):
 def _update_credential_parents(org, cred):
     org.admin_role.children.add(cred.owner_role)
     org.member_role.children.add(cred.usage_role)
-    cred.user, cred.team = None, None
+    cred.deprecated_user, cred.deprecated_team = None, None
     cred.save()
 
 def _discover_credentials(instances, cred, orgfunc):
@@ -102,7 +102,7 @@ def _discover_credentials(instances, cred, orgfunc):
                 cred.save()
 
                 # Unlink the old information from the new credential
-                cred.user, cred.team = None, None
+                cred.deprecated_user, cred.deprecated_team = None, None
                 cred.owner_role, cred.usage_role = None, None
                 cred.save()
 
@@ -138,15 +138,15 @@ def migrate_credential(apps, schema_editor):
                 _discover_credentials(projs, cred, attrfunc('organization'))
             continue
 
-        if cred.team is not None:
-            cred.team.admin_role.children.add(cred.owner_role)
-            cred.team.member_role.children.add(cred.usage_role)
-            cred.user, cred.team = None, None
+        if cred.deprecated_team is not None:
+            cred.deprecated_team.admin_role.children.add(cred.owner_role)
+            cred.deprecated_team.member_role.children.add(cred.usage_role)
+            cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
 
-        elif cred.user is not None:
-            cred.user.admin_role.children.add(cred.owner_role)
-            cred.user, cred.team = None, None
+        elif cred.deprecated_user is not None:
+            cred.deprecated_user.admin_role.children.add(cred.owner_role)
+            cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
 
         # no match found, log

@@ -225,4 +225,33 @@ class Migration(migrations.Migration):
             name='organization',
             field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
         ),
+        migrations.RenameField(
+            'Credential',
+            'team',
+            'deprecated_team',
+        ),
+        migrations.RenameField(
+            'Credential',
+            'user',
+            'deprecated_user',
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_admins',
+            field=models.ManyToManyField(related_name='deprecated_admin_of_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='team',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_teams', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name='credential',
+            unique_together=set([]),
+        ),
     ]

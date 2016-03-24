@@ -2,11 +2,14 @@
 from django.db import models
 from django.db.models.aggregates import Max
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User # noqa
 
 # AWX
 from awx.main.models.rbac import (
     get_user_permissions_on_resource,
     get_role_permissions_on_resource,
+    Role,
 )
 
 
@@ -20,7 +23,7 @@ class ResourceMixin(models.Model):
     role_permissions = GenericRelation('main.RolePermission')
 
     @classmethod
-    def accessible_objects(cls, user, permissions):
+    def accessible_objects(cls, accessor, permissions):
         '''
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
@@ -32,13 +35,22 @@ class ResourceMixin(models.Model):
         performant to resolve the resource in question then call
         `myresource.get_permissions(user)`.
         '''
-        return ResourceMixin._accessible_objects(cls, user, permissions)
+        return ResourceMixin._accessible_objects(cls, accessor, permissions)
 
     @staticmethod
-    def _accessible_objects(cls, user, permissions):
-        qs = cls.objects.filter(
-            role_permissions__role__ancestors__members=user
-        )
+    def _accessible_objects(cls, accessor, permissions):
+        if type(accessor) == User:
+            qs = cls.objects.filter(
+                role_permissions__role__ancestors__members=accessor
+            )
+        else:
+            accessor_type = ContentType.objects.get_for_model(accessor)
+            roles = Role.objects.filter(content_type__pk=accessor_type.id,
+                                        object_id=accessor.id)
+            qs = cls.objects.filter(
+                role_permissions__role__ancestors__in=roles
+            )
+
         for perm in permissions:
             qs = qs.annotate(**{'max_' + perm: Max('role_permissions__' + perm)})
             qs = qs.filter(**{'max_' + perm: int(permissions[perm])})

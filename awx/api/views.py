@@ -820,11 +820,11 @@ class TeamActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
+
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(team=parent) |
-                         Q(project__in=parent.projects.all()) |
-                         Q(credential__in=parent.credentials.all()) |
-                         Q(permission__in=parent.permissions.all()))
+                         Q(project__in=Project.accessible_objects(parent, {'read':True})) |
+                         Q(credential__in=Credential.accessible_objects(parent, {'read':True})))
 
 class TeamAccessList(ResourceAccessList):
 
