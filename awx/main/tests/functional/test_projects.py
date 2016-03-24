@@ -10,7 +10,7 @@ from awx.main.models import Project
 # Project listing and visibility tests
 #
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_project_list(get, project_factory, admin, alice, bob):
     'List of projects a user has access to, filtered by projects you can also see'
 
@@ -41,7 +41,7 @@ def test_user_project_list(get, project_factory, admin, alice, bob):
     assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_team_project_list(get, project_factory, team_factory, admin, alice, bob):
     'List of projects a team has access to, filtered by projects you can also see'
     team1 = team_factory('team1')
@@ -98,7 +98,7 @@ def test_team_project_list(get, project_factory, team_factory, admin, alice, bob
 
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_create_project(post, organization, org_admin, org_member, admin, rando):
     test_list = [rando, org_member, org_admin, admin]
     expected_status_codes = [403, 403, 201, 201]
@@ -116,12 +116,12 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando)
             assert not Project.objects.filter(name='Project %d' % i, organization=organization).exists()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_cant_create_project_without_org(post, organization, org_admin, org_member, admin, rando):
     assert post(reverse('api:project_list'), { 'name': 'Project foo', }, admin).status_code == 400
     assert post(reverse('api:project_list'), { 'name': 'Project foo', 'organization': None}, admin).status_code == 400
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_create_project_through_org_link(post, organization, org_admin, org_member, admin, rando):
     test_list = [rando, org_member, org_admin, admin]
     expected_status_codes = [403, 403, 201, 201]
