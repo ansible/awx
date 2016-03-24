@@ -1588,10 +1588,6 @@ class CredentialSerializer(BaseSerializer):
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
-        if obj.user:
-            res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
-        if obj.team:
-            res['team'] = reverse('api:team_detail', args=(obj.team.pk,))
         return res
 
 
