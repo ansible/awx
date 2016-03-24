@@ -15,7 +15,7 @@ export default
         '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
         'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
         'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
-        'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer',
+        'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
         'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
         'EditSchedule', 'ParseTypeChange', 'JobDetailService', 'EventViewer',
@@ -25,7 +25,7 @@ export default
             SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph,
             LoadHostSummary, ReloadHostSummaryList, JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
-            PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts,
+            PlaybookRun, LoadPlays, LoadTasks, LoadHosts,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
             fieldLabels, EditSchedule, ParseTypeChange, JobDetailService, EventViewer
         ) {
@@ -43,7 +43,7 @@ export default
             scope.parseType = 'yaml';
             scope.previousTaskFailed = false;
             $scope.stdoutFullScreen = false;
-
+        
             scope.$watch('job_status', function(job_status) {
                 if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
                     scope.previousTaskFailed = true;
@@ -1398,17 +1398,6 @@ export default
                                 msg: 'Call to ' + scope.next_host_summaries + '. GET returned: ' + status });
                         });
                 }
-            };
-
-            scope.hostEventsViewer = function(id, name, status) {
-                HostEventsViewer({
-                    scope: scope,
-                    id: id,
-                    name: name,
-                    url: scope.job.related.job_events,
-                    job_id: scope.job.id,
-                    status: status
-                });
             };
 
             scope.refresh = function(){

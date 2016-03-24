@@ -11,7 +11,9 @@ export default function($stateProvider){
                     resolve: state.resolve,
                     params: state.params,
                     data: state.data,
-                    ncyBreadcrumb: state.ncyBreadcrumb
+                    ncyBreadcrumb: state.ncyBreadcrumb,
+                    onEnter: state.onEnter,
+                    onExit: state.onExit
                 });
             }
         };

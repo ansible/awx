@@ -1332,7 +1332,11 @@ class TowerSettingsAccess(BaseAccess):
 
 class RoleAccess(BaseAccess):
     '''
-    TODO: XXX: Needs implemenation
+    - I can see roles when
+      - I am a super user
+      - I am a member of that role
+      - The role is a descdendent role of a role I am a member of
+      - The role is an implicit role of an object that I can see a role of.
     '''
 
     model = Role
@@ -1340,10 +1344,25 @@ class RoleAccess(BaseAccess):
     def get_queryset(self):
         if self.user.is_superuser:
             return self.model.objects.all()
-        return self.model.accessible_objects(self.user, {'read':True})
+        return Role.objects.none()
 
     def can_change(self, obj, data):
         return self.user.is_superuser
+
+    def can_read(self, obj):
+        if not obj:
+            return False
+        if self.user.is_superuser:
+            return True
+
+        if obj.object_id:
+            sister_roles = Role.objects.filter(
+                content_type = obj.content_type,
+                object_id = obj.object_id
+            )
+        else:
+            sister_roles = obj
+        return self.user.roles.filter(descendents__in=sister_roles).exists()
 
     def can_add(self, obj, data):
         # Unsupported for now
@@ -1365,6 +1384,9 @@ class RoleAccess(BaseAccess):
     def can_delete(self, obj):
         # Unsupported for now
         return False
+
+
+
 
 
 register_access(User, UserAccess)
