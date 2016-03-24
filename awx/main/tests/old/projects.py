@@ -22,11 +22,11 @@ from django.utils.timezone import now
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTransactionTest
 from awx.main.tests.data.ssh import (
-    TEST_SSH_KEY_DATA,
+    #TEST_SSH_KEY_DATA,
     TEST_SSH_KEY_DATA_LOCKED,
     TEST_SSH_KEY_DATA_UNLOCK,
-    TEST_OPENSSH_KEY_DATA,
-    TEST_OPENSSH_KEY_DATA_LOCKED,
+    #TEST_OPENSSH_KEY_DATA,
+    #TEST_OPENSSH_KEY_DATA_LOCKED,
 )
 from awx.main.utils import decrypt_field, update_scm_url
 
