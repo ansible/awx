@@ -1665,11 +1665,8 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
-<<<<<<< HEAD
             access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
-=======
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,))
->>>>>>> ddd163c21bb6b6a2c83f90cb38421d201f936130
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
