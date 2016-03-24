@@ -142,12 +142,12 @@ class BaseJobTestMixin(BaseTestMixin):
         self.org_eng.projects.add(self.proj_dev)
         self.proj_test = self.make_project('test', 'testing branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_test)
+        #self.org_eng.projects.add(self.proj_test) # No more multi org projects
         self.org_sup.projects.add(self.proj_test)
         self.proj_prod = self.make_project('prod', 'production branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_prod)
-        self.org_sup.projects.add(self.proj_prod)
+        #self.org_eng.projects.add(self.proj_prod) # No more multi org projects
+        #self.org_sup.projects.add(self.proj_prod) # No more multi org projects
         self.org_ops.projects.add(self.proj_prod)
 
         # Operations also has 2 additional projects specific to the east/west
@@ -216,15 +216,15 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_east = self.org_ops.teams.create(
             name='easterners',
             created_by=self.user_sue)
-        self.team_ops_east.projects.add(self.proj_prod)
-        self.team_ops_east.projects.add(self.proj_prod_east)
+        self.team_ops_east.member_role.children.add(self.proj_prod.admin_role)
+        self.team_ops_east.member_role.children.add(self.proj_prod_east.admin_role)
         self.team_ops_east.member_role.members.add(self.user_greg)
         self.team_ops_east.member_role.members.add(self.user_holly)
         self.team_ops_west = self.org_ops.teams.create(
             name='westerners',
             created_by=self.user_sue)
-        self.team_ops_west.projects.add(self.proj_prod)
-        self.team_ops_west.projects.add(self.proj_prod_west)
+        self.team_ops_west.member_role.children.add(self.proj_prod.admin_role)
+        self.team_ops_west.member_role.children.add(self.proj_prod_west.admin_role)
         self.team_ops_west.member_role.members.add(self.user_greg)
         self.team_ops_west.member_role.members.add(self.user_iris)
 
@@ -239,7 +239,7 @@ class BaseJobTestMixin(BaseTestMixin):
         #    created_by=self.user_sue,
         #    active=False,
         #)
-        #self.team_ops_south.projects.add(self.proj_prod)
+        #self.team_ops_south.member_role.children.add(self.proj_prod.admin_role)
         #self.team_ops_south.member_role.members.add(self.user_greg)
 
         # The north team is going to be deleted
@@ -247,7 +247,7 @@ class BaseJobTestMixin(BaseTestMixin):
             name='northerners',
             created_by=self.user_sue,
         )
-        self.team_ops_north.projects.add(self.proj_prod)
+        self.team_ops_north.member_role.children.add(self.proj_prod.admin_role)
         self.team_ops_north.member_role.members.add(self.user_greg)
 
         # The testers team are interns that can only check playbooks but can't
@@ -256,7 +256,7 @@ class BaseJobTestMixin(BaseTestMixin):
             name='testers',
             created_by=self.user_sue,
         )
-        self.team_ops_testers.projects.add(self.proj_prod)
+        self.team_ops_testers.member_role.children.add(self.proj_prod.admin_role)
         self.team_ops_testers.member_role.members.add(self.user_randall)
         self.team_ops_testers.member_role.members.add(self.user_billybob)
 

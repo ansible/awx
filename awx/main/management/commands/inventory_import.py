@@ -821,7 +821,7 @@ class Command(NoArgsCommand):
             db_groups = self.inventory_source.group.all_children
         else:
             db_groups = self.inventory.groups
-        for db_group in db_groups:
+        for db_group in db_groups.all():
             # Delete child group relationships not present in imported data.
             db_children = db_group.children
             db_children_name_pk_map = dict(db_children.values_list('name', 'pk'))

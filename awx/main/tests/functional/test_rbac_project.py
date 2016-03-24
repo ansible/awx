@@ -147,7 +147,7 @@ def test_project_team(user, team, project):
     member = user('member')
 
     team.deprecated_users.add(member)
-    project.teams.add(team)
+    project.deprecated_teams.add(team)
 
     assert project.accessible_by(nonmember, {'read': True}) is False
     assert project.accessible_by(member, {'read': True}) is False

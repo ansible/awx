@@ -669,6 +669,7 @@ class OrganizationProjectsList(SubListCreateAPIView):
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
+    parent_key = 'organization'
 
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 
@@ -769,20 +770,34 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(type(self), self).post(request, *args, **kwargs)
 
-class TeamProjectsList(SubListCreateAttachDetachAPIView):
+class TeamProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Team
-    relationship = 'projects'
 
-class TeamCredentialsList(SubListCreateAttachDetachAPIView):
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
+        user_qs = Project.accessible_objects(self.request.user, {'read': True})
+        return team_qs & user_qs
+
+
+class TeamCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = Team
-    relationship = 'credentials'
-    parent_key = 'team'
+
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
+        return team_creds & visible_creds
+
 
 class TeamActivityStreamList(SubListAPIView):
 
@@ -1000,7 +1015,7 @@ class UserTeamsList(ListAPIView):
 
     def get_queryset(self):
         u = User.objects.get(pk=self.kwargs['pk'])
-        if not u.accessible_by(self.request.user, {'read': True}):
+        if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
         return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
 
@@ -1035,7 +1050,6 @@ class UserProjectsList(SubListAPIView):
     model = Project
     serializer_class = ProjectSerializer
     parent_model = User
-    relationship = 'projects'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1044,13 +1058,19 @@ class UserProjectsList(SubListAPIView):
         user_qs = Project.accessible_objects(parent, {'read': True})
         return my_qs & user_qs
 
-class UserCredentialsList(SubListCreateAttachDetachAPIView):
+class UserCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = User
-    relationship = 'credentials'
-    parent_key = 'user'
+
+    def get_queryset(self):
+        user = self.get_parent_object()
+        self.check_parent_access(user)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        user_creds = Credential.accessible_objects(user, {'read': True})
+        return user_creds & visible_creds
 
 class UserOrganizationsList(SubListAPIView):
 
@@ -1059,12 +1079,26 @@ class UserOrganizationsList(SubListAPIView):
     parent_model = User
     relationship = 'organizations'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(member_role__members=parent)
+        return my_qs & user_qs
+
 class UserAdminOfOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(admin_role__members=parent)
+        return my_qs & user_qs
 
 class UserActivityStreamList(SubListAPIView):
 
@@ -2122,7 +2156,7 @@ class JobTemplateCallback(GenericAPIView):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
         matches = set()
-        for host in qs:
+        for host in qs.all():
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
@@ -2132,7 +2166,7 @@ class JobTemplateCallback(GenericAPIView):
         if len(matches) == 1:
             return matches
         # Try to resolve forward addresses for each host to find matches.
-        for host in qs:
+        for host in qs.all():
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host:

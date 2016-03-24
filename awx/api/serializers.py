@@ -915,7 +915,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
@@ -932,7 +932,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
-            access_list = reverse('api:project_access_list',         args=(obj.pk,)),
+            access_list = reverse('api:project_access_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -945,6 +945,12 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             res['last_update'] = reverse('api:project_update_detail',
                                          args=(obj.last_update.pk,))
         return res
+
+    def validate(self, attrs):
+        if 'organization' not in attrs or type(attrs['organization']) is not Organization:
+            raise serializers.ValidationError('Missing organization')
+        return super(ProjectSerializer, self).validate(attrs)
+
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):

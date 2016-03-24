@@ -21,6 +21,7 @@ from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import ALL_PERMISSIONS
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
+from awx.main.conf import tower_settings
 
 __all__ = ['get_user_queryset', 'check_user_access',
            'user_accessible_objects', 'user_accessible_by',
@@ -212,6 +213,9 @@ class UserAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser:
+            return User.objects
+
+        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.exists():
             return User.objects
 
         viewable_users_set = set()
