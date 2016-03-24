@@ -2,6 +2,7 @@ import mock # noqa
 import pytest
 
 from django.core.urlresolvers import reverse
+from awx.main.models import Project
 
 
 
@@ -95,3 +96,38 @@ def test_team_project_list(get, project_factory, team_factory, admin, alice, bob
     # alice should see all projects they can see when viewing an admin
     assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
 
+
+
+@pytest.mark.django_db
+def test_create_project(post, organization, org_admin, org_member, admin, rando):
+    test_list = [rando, org_member, org_admin, admin]
+    expected_status_codes = [403, 403, 201, 201]
+
+    for i, u in enumerate(test_list):
+        result = post(reverse('api:project_list'), {
+            'name': 'Project %d' % i,
+            'organization': organization.id,
+        }, u)
+        assert result.status_code == expected_status_codes[i]
+        if expected_status_codes[i] == 201:
+            assert Project.objects.filter(name='Project %d' % i, organization=organization).exists()
+        else:
+            assert not Project.objects.filter(name='Project %d' % i, organization=organization).exists()
+
+@pytest.mark.django_db
+def test_create_project_through_org_link(post, organization, org_admin, org_member, admin, rando):
+    test_list = [rando, org_member, org_admin, admin]
+    expected_status_codes = [403, 403, 201, 201]
+
+    for i, u in enumerate(test_list):
+        result = post(reverse('api:organization_projects_list', args=(organization.id,)), {
+            'name': 'Project %d' % i,
+        }, u)
+        assert result.status_code == expected_status_codes[i]
+        if expected_status_codes[i] == 201:
+            prj = Project.objects.get(name='Project %d' % i)
+            print(prj.organization)
+            Project.objects.get(name='Project %d' % i, organization=organization)
+            assert Project.objects.filter(name='Project %d' % i, organization=organization).exists()
+        else:
+            assert not Project.objects.filter(name='Project %d' % i, organization=organization).exists()

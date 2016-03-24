@@ -168,6 +168,24 @@ def bob(user):
     return user('bob', False)
 
 @pytest.fixture
+def rando(user):
+    "Rando, the random user that doesn't have access to anything"
+    return user('rando', False)
+
+@pytest.fixture
+def org_admin(user, organization):
+    ret = user('org-admin', False)
+    organization.admin_role.members.add(ret)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
+def org_member(user, organization):
+    ret = user('org-member', False)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
 def organizations(instance):
     def rf(organization_count=1):
         orgs = []

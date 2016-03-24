@@ -669,6 +669,7 @@ class OrganizationProjectsList(SubListCreateAPIView):
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
+    parent_key = 'organization'
 
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 

@@ -915,7 +915,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
