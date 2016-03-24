@@ -946,6 +946,12 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def validate(self, attrs):
+        if 'organization' not in attrs or type(attrs['organization']) is not Organization:
+            raise serializers.ValidationError('Missing organization')
+        return super(ProjectSerializer, self).validate(attrs)
+
+
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
