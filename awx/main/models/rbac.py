@@ -16,6 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 # AWX
+from django.contrib.auth.models import User # noqa
 from awx.main.models.base import * # noqa
 
 __all__ = [
@@ -195,10 +196,17 @@ def get_user_permissions_on_resource(resource, user):
     access.
     '''
 
+    if type(user) == User:
+        roles = user.roles.all()
+    else:
+        accessor_type = ContentType.objects.get_for_model(user)
+        roles = Role.objects.filter(content_type__pk=accessor_type.id,
+                                    object_id=user.id)
+
     qs = RolePermission.objects.filter(
         content_type=ContentType.objects.get_for_model(resource),
         object_id=resource.id,
-        role__ancestors__in=user.roles.all()
+        role__ancestors__in=roles,
     )
 
     res = qs = qs.aggregate(
