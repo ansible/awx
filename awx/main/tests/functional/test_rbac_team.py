@@ -1,6 +1,7 @@
 import pytest
 
 from awx.main.access import TeamAccess
+from awx.main.models import Project
 
 @pytest.mark.django_db
 def test_team_access_superuser(team, user):
@@ -47,4 +48,26 @@ def test_team_access_member(organization, team, user):
     t = access.get_queryset()[0]
     assert len(t.member_role.members.all()) == 1
     assert len(t.organization.admin_role.members.all()) == 0
+
+@pytest.mark.django_db
+def test_team_accessible_by(team, user, project):
+    u = user('team_member', False)
+
+    team.member_role.children.add(project.member_role)
+    assert project.accessible_by(team, {'read':True})
+    assert not project.accessible_by(u, {'read':True})
+
+    team.member_role.members.add(u)
+    assert project.accessible_by(u, {'read':True})
+
+@pytest.mark.django_db
+def test_team_accessible_objects(team, user, project):
+    u = user('team_member', False)
+
+    team.member_role.children.add(project.member_role)
+    assert len(Project.accessible_objects(team, {'read':True})) == 1
+    assert not Project.accessible_objects(u, {'read':True})
+
+    team.member_role.members.add(u)
+    assert len(Project.accessible_objects(u, {'read':True})) == 1
 
