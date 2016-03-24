@@ -642,6 +642,31 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationDetail, self).get_serializer_context(*args, **kwargs)
+
+        if not hasattr(self, 'kwargs'):
+            return full_context
+        org_id = int(self.kwargs['pk'])
+
+        org_counts = {}
+        user_qs = self.request.user.get_queryset(User)
+        org_counts['users'] = user_qs.filter(organizations__id=org_id).count()
+        org_counts['admins'] = user_qs.filter(admin_of_organizations__id=org_id).count()
+        org_counts['inventories'] = self.request.user.get_queryset(Inventory).filter(
+            organization__id=org_id).count()
+        org_counts['teams'] = self.request.user.get_queryset(Team).filter(
+            organization__id=org_id).count()
+        org_counts['projects'] = self.request.user.get_queryset(Project).filter(
+            organizations__id=org_id).count()
+        org_counts['job_templates'] = self.request.user.get_queryset(JobTemplate).filter(
+            inventory__organization__id=org_id).count()
+
+        full_context['related_field_counts'] = {}
+        full_context['related_field_counts'][org_id] = org_counts
+
+        return full_context
+
 class OrganizationInventoriesList(SubListAPIView):
 
     model = Inventory

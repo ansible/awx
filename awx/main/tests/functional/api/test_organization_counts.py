@@ -19,6 +19,25 @@ def resourced_organization(organization, project, team, inventory, user):
 
     return organization
 
+
+@pytest.mark.django_db
+def test_org_counts_detail_view(resourced_organization, user, get):
+    # Check that all types of resources are counted by a superuser
+    external_admin = user('admin', True)
+    response = get(reverse('api:organization_detail',
+                   args=[resourced_organization.pk]), external_admin)
+    assert response.status_code == 200
+
+    counts = response.data['summary_fields']['related_field_counts']
+    assert counts == {
+        'users': 1,
+        'admins': 1,
+        'job_templates': 1,
+        'projects': 1,
+        'inventories': 1,
+        'teams': 1
+    }
+
 @pytest.mark.django_db
 @pytest.mark.skipif("True") # XXX: This needs to be implemented
 def test_org_counts_admin(resourced_organization, user, get):
