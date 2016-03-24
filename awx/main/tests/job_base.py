@@ -342,7 +342,7 @@ class BaseJobTestMixin(BaseTestMixin):
             password='holly rocks',
             created_by=self.user_sue,
         )
-        self.cred_holly.usage_role.memebers.add(self.user_holly)
+        self.cred_holly.usage_role.members.add(self.user_holly)
 
         self.cred_iris = Credential.objects.create(
             username='iris',
