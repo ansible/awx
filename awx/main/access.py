@@ -1340,7 +1340,7 @@ class RoleAccess(BaseAccess):
     def get_queryset(self):
         if self.user.is_superuser:
             return self.model.objects.all()
-        return self.model.accessible_objects(self.user, {'read':True})
+        return Role.objects.filter(ancestors__in=self.user.roles.all())
 
     def can_change(self, obj, data):
         return self.user.is_superuser
