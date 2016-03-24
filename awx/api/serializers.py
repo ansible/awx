@@ -932,7 +932,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
-            access_list = reverse('api:project_access_list',         args=(obj.pk,)),
+            access_list = reverse('api:project_access_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
