@@ -650,17 +650,21 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        user_qs = self.request.user.get_queryset(User)
-        org_counts['users'] = user_qs.filter(organizations__id=org_id).count()
-        org_counts['admins'] = user_qs.filter(admin_of_organizations__id=org_id).count()
-        org_counts['inventories'] = self.request.user.get_queryset(Inventory).filter(
+        access_kwargs = {'accessor': self.request.user, 'permissions': {"read": True}}
+        direct_counts = Organization.objects.filter(id=org_id).annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('users', 'admins')
+
+        org_counts = direct_counts[0]
+        org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['teams'] = self.request.user.get_queryset(Team).filter(
+        org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['projects'] = self.request.user.get_queryset(Project).filter(
-            organizations__id=org_id).count()
-        org_counts['job_templates'] = self.request.user.get_queryset(JobTemplate).filter(
-            inventory__organization__id=org_id).count()
+        org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
+            project__organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts
