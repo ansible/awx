@@ -183,7 +183,6 @@ var tower = angular.module('Tower', [
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'EventViewerHelper',
-    'HostEventsViewerHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',

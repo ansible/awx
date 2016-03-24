@@ -196,7 +196,7 @@ class BaseCallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
-                if 'res' in event_data \
+                if 'res' in event_data and hasattr(event_data['res'], 'get') \
                         and event_data['res'].get('_ansible_no_log', False):
                     res = event_data['res']
                     if 'stdout' in res and res['stdout']:
@@ -271,16 +271,19 @@ class BaseCallbackModule(object):
                         ignore_errors=ignore_errors)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_failed', host=result._host.name,
                         res=result._result, task=result._task,
-                        ignore_errors=ignore_errors)
+                        ignore_errors=ignore_errors, event_loop=event_is_loop)
 
     def runner_on_ok(self, host, res):
         self._log_event('runner_on_ok', host=host, res=res)
 
     def v2_runner_on_ok(self, result):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_ok', host=result._host.name,
-                        task=result._task, res=result._result)
+                        task=result._task, res=result._result,
+                        event_loop=event_is_loop)
 
     def runner_on_error(self, host, msg):
         self._log_event('runner_on_error', host=host, msg=msg)
@@ -292,8 +295,9 @@ class BaseCallbackModule(object):
         self._log_event('runner_on_skipped', host=host, item=item)
 
     def v2_runner_on_skipped(self, result):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_skipped', host=result._host.name,
-                        task=result._task)
+                        task=result._task, event_loop=event_is_loop)
 
     def runner_on_unreachable(self, host, res):
         self._log_event('runner_on_unreachable', host=host, res=res)
@@ -326,6 +330,18 @@ class BaseCallbackModule(object):
     def v2_runner_on_file_diff(self, result, diff):
         self._log_event('runner_on_file_diff', host=result._host.name,
                         task=result._task, diff=diff)
+
+    def v2_runner_item_on_ok(self, result):
+        self._log_event('runner_item_on_ok', res=result._result, host=result._host.name,
+                        task=result._task)
+
+    def v2_runner_item_on_failed(self, result):
+        self._log_event('runner_item_on_failed', res=result._result, host=result._host.name,
+                        task=result._task)
+
+    def v2_runner_item_on_skipped(self, result):
+        self._log_event('runner_item_on_skipped', res=result._result, host=result._host.name,
+                        task=result._task)
 
     @staticmethod
     @statsd.timer('terminate_ssh_control_masters')

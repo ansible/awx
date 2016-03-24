@@ -361,7 +361,7 @@ check: flake8 pep8 # pyflakes pylint
 
 # Run all API unit tests.
 test:
-	py.test awx/main/tests awx/api/tests awx/fact/tests
+	py.test awx/main/tests awx/api/tests
 
 test_unit:
 	py.test awx/main/tests/unit

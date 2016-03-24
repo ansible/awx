@@ -62,6 +62,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
+                 scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
                  scope.key_hint= "drag and drop an SSH private key file on the field below";
@@ -69,9 +70,11 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.password_required = false;
                  scope.hostLabel = '';
                  scope.projectLabel = '';
+                 scope.domainLabel = '';
                  scope.project_required = false;
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
+                 scope.domainPopOver = "<p>The domain name</p>";
                  scope.hostPopOver = "<p>The host value</p>";
 
                  if (!Empty(scope.kind)) {
@@ -133,6 +136,22 @@ angular.module('CredentialsHelper', ['Utilities'])
                                  " as the username.</p>";
                              scope.hostPopOver = "<p>The host to authenticate with." +
                                  "<br />For example, https://openstack.business.com/v2.0/";
+                         case 'openstack_v3':
+                             scope.hostLabel = "Host (Authentication URL)";
+                             scope.projectLabel = "Project (Tenet Name/ID)";
+                             scope.domainLabel = "Domain Name";
+                             scope.password_required = true;
+                             scope.project_required = true;
+                             scope.domain_required = true;
+                             scope.host_required = true;
+                             scope.username_required = true;
+                             scope.projectPopOver = "<p>This is the tenant name " +
+                                 "or tenant id. This value is usually the same " +
+                                 " as the username.</p>";
+                             scope.hostPopOver = "<p>The host to authenticate with." +
+                                 "<br />For example, https://openstack.business.com/v3</p>";
+                             scope.domainPopOver = "<p>Domain used for Keystone v3 " +
+                                 "<br />identity service.</p>";
                          break;
                      }
                  }

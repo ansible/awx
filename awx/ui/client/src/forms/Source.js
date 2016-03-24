@@ -169,7 +169,8 @@ export default
                     label: 'Source Variables', //"{{vars_label}}" ,
 
                     ngShow: "source && (source.value == 'vmware' || " +
-                                        "source.value == 'openstack')",
+                                        "source.value == 'openstack' || " +
+                                        "source.value == 'openstack_v3')",
                     type: 'textarea',
                     addRequired: false,
                     class: 'Form-textAreaLabel',

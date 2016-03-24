@@ -1,0 +1,82 @@
+@import "awx/ui/client/src/shared/branding/colors.less";
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
+.HostEvents .modal-footer{
+	border: 0;
+	margin-top: 0px;
+	padding-top: 5px;
+}
+.HostEvents-status--ok{
+	color: @green;
+}
+.HostEvents-status--unreachable{
+	color: @unreachable;
+}
+.HostEvents-status--changed{
+	color: @changed;
+}
+.HostEvents-status--failed{
+	color: @warning;
+}
+.HostEvents-status--skipped{
+	color: @skipped;
+}
+.HostEvents-search--form{
+	max-width: 420px;
+	display: inline-block;
+}
+.HostEvents-close{
+	width: 70px;
+}
+.HostEvents-filter--form{
+	padding-top: 15px;
+	padding-bottom: 15px;
+	float: right;
+	display: inline-block;
+}
+.HostEvents .modal-body{
+	padding: 20px;
+}
+.HostEvents .select2-container{
+	text-transform: capitalize;
+	max-width: 220px;
+	float: right;
+}
+.HostEvents-form--container{
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+.HostEvents-title{
+ 	color: @default-interface-txt;
+ 	font-weight: 600;
+}
+.HostEvents-status i {
+	padding-right: 10px;
+}
+.HostEvents-table--header {
+    height: 30px;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+    color: @default-interface-txt;
+    background-color: @default-list-header-bg;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom-width: 0px;
+}
+.HostEvents-table--header:first-of-type{
+       border-top-left-radius: 5px;
+}
+.HostEvents-table--header:last-of-type{
+       border-top-right-radius: 5px;
+}
+.HostEvents-table--row{
+	color: @default-data-txt;
+	border: 0 !important;
+}
+.HostEvents-table--row:nth-child(odd){
+	background: @default-tertiary-bg;
+}
+.HostEvents-table--cell{
+	border: 0 !important;
+}
