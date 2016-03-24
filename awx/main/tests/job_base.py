@@ -391,7 +391,7 @@ class BaseJobTestMixin(BaseTestMixin):
             password='HeadingNone',
             created_by = self.user_sue,
         )
-        self.team_ops_testers.member_role.children(self.cred_ops_test.usage_role)
+        self.team_ops_testers.member_role.children.add(self.cred_ops_test.usage_role)
 
         self.ops_east_permission = Permission.objects.create(
             inventory       = self.inv_ops_east,
