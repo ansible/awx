@@ -3311,12 +3311,11 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
     serializer_class = UserSerializer
     parent_model = Role
     relationship = 'members'
-    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
     def get_queryset(self):
-        # XXX: Access control
-        role = Role.objects.get(pk=self.kwargs['pk'])
+        role = self.get_parent_object()
+        self.check_parent_access(role)
         return role.members
 
     def post(self, request, *args, **kwargs):
