@@ -17,30 +17,26 @@ if os.getenv('OFFICIAL', 'no') == 'yes':
 else:
     build_timestamp = '-' + os.getenv("BUILD", datetime.datetime.now().strftime('0.git%Y%m%d%H%M'))
 
-# Path prefix for when we're running under a software collection
-scl_prefix = os.getenv('SCL_PREFIX', '')
-httpd_scl_prefix = os.getenv('HTTPD_SCL_PREFIX', scl_prefix)
-
 # Paths we'll use later
 etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 bindir = "/usr/bin"
-sharedir = scl_prefix + "/usr/share/awx"
-docdir = scl_prefix + "/usr/share/doc/ansible-tower"
+sharedir = "/usr/share/awx"
+docdir = "/usr/share/doc/ansible-tower"
 munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
 if os.path.exists("/etc/debian_version"):
-    sysinit = scl_prefix + "/etc/init.d"
-    webconfig  = httpd_scl_prefix + "/etc/apache2/conf.d"
+    sysinit = "/etc/init.d"
+    webconfig  = "/etc/apache2/conf.d"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
     # debian/<package>.links will create symlinks to support both versions
     sosconfig = "/usr/share/sosreport/sos/plugins"
 else:
-    sysinit = scl_prefix + "/etc/rc.d/init.d"
-    webconfig  = httpd_scl_prefix + "/etc/httpd/conf.d"
+    sysinit = "/etc/rc.d/init.d"
+    webconfig  = "/etc/httpd/conf.d"
     shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"

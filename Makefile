@@ -168,7 +168,6 @@ endif
 .DEFAULT_GOAL := build
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
-	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -259,32 +258,33 @@ virtualenv:
 		fi; \
 	fi
 
-# Install runtime, development and jenkins requirements
-requirements requirements_ansible requirements_dev requirements_jenkins: %: real-%
-
-real-requirements_ansible: virtualenv
+requirements_ansible:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
 	fi && \
 	pip install -r requirements/requirements_ansible.txt
 
 # Install third-party requirements needed for Tower's environment.
-real-requirements: requirements_ansible
+requirements_tower:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi && \
 	pip install -r requirements/requirements.txt; \
 
-real-requirements_dev: requirements_ansible
+requirements_tower_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi && \
 	pip install -r requirements/requirements_dev.txt
 
 # Install third-party requirements needed for running unittests in jenkins
-real-requirements_jenkins:
+requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
 	$(NPM_BIN) install csslint jshint
+
+requirements: virtualenv requirements_ansible requirements_tower
+
+requirements_dev: virtualenv requirements_ansible requirements_tower_dev
 
 # "Install" ansible-tower package in development mode.
 develop:
