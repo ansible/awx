@@ -547,7 +547,7 @@ class CredentialAccess(BaseAccess):
         permitted to see.
         """
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('created_by', 'modified_by', 'user', 'team')
+        qs = qs.select_related('created_by', 'modified_by')
         return qs
 
     def can_add(self, data):
