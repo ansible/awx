@@ -236,6 +236,7 @@ class ProjectsTest(BaseTransactionTest):
             'scm_update_on_launch': '',
             'scm_delete_on_update': None,
             'scm_clean': False,
+            'organization': self.organizations[0].pk,
         }
         # Adding a project with scm_type=None should work, but scm_type will be
         # changed to an empty string.  Other boolean fields should accept null
@@ -502,7 +503,10 @@ class ProjectUpdatesTest(BaseTransactionTest):
                     kw[field.replace('scm_key_', 'ssh_key_')] = kwargs.pop(field)
                 else:
                     kw[field.replace('scm_', '')] = kwargs.pop(field)
+            u = kw['user']
+            del kw['user']
             credential = Credential.objects.create(**kw)
+            credential.owner_role.members.add(u)
             kwargs['credential'] = credential
         project = Project.objects.create(**kwargs)
         project_path = project.get_project_path(check_if_exists=False)
@@ -952,11 +956,13 @@ class ProjectUpdatesTest(BaseTransactionTest):
             self.skipTest('no public git repo defined for https!')
         projects_url = reverse('api:project_list')
         credentials_url = reverse('api:credential_list')
+        org = self.make_organizations(self.super_django_user, 1)[0]
         # Test basic project creation without a credential.
         project_data = {
             'name': 'my public git project over https',
             'scm_type': 'git',
             'scm_url': scm_url,
+            'organization': org.id,
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=201)
@@ -965,6 +971,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'name': 'my local git project',
             'scm_type': 'git',
             'scm_url': 'file:///path/to/repo.git',
+            'organization': org.id,
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=400)
@@ -984,6 +991,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'scm_type': 'git',
             'scm_url': scm_url,
             'credential': credential_id,
+            'organization': org.id,
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=201)
@@ -1004,6 +1012,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'scm_type': 'git',
             'scm_url': scm_url,
             'credential': ssh_credential_id,
+            'organization': org.id,
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=400)
@@ -1013,6 +1022,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             'scm_type': 'git',
             'scm_url': 'ssh://git@github.com/ansible/ansible.github.com.git',
             'credential': credential_id,
+            'organization': org.id,
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=201)
@@ -1023,12 +1033,13 @@ class ProjectUpdatesTest(BaseTransactionTest):
         if not all([scm_url]):
             self.skipTest('no public git repo defined for https!')
         projects_url = reverse('api:project_list')
+        org = self.make_organizations(self.super_django_user, 1)[0]
         project_data = {
             'name': 'my public git project over https',
             'scm_type': 'git',
             'scm_url': scm_url,
+            'organization': org.id,
         }
-        org = self.make_organizations(self.super_django_user, 1)[0]
         org.admin_role.members.add(self.normal_django_user)
         with self.current_user(self.super_django_user):
             del_proj = self.post(projects_url, project_data, expect=201)
@@ -1406,8 +1417,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.group = self.inventory.groups.create(name='test-group',
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
-        self.credential = Credential.objects.create(name='test-creds',
-                                                    user=self.super_django_user)
+        self.credential = Credential.objects.create(name='test-creds')
+        self.credential.owner_role.members.add(self.super_django_user)
         self.project = self.create_project(
             name='my public git project over https',
             scm_type='git',
@@ -1442,8 +1453,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.group = self.inventory.groups.create(name='test-group',
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
-        self.credential = Credential.objects.create(name='test-creds',
-                                                    user=self.super_django_user)
+        self.credential = Credential.objects.create(name='test-creds')
+        self.credential.owner_role.members.add(self.super_django_user)
         self.project = self.create_project(
             name='my private git project over https',
             scm_type='git',

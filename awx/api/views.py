@@ -642,6 +642,35 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationDetail, self).get_serializer_context(*args, **kwargs)
+
+        if not hasattr(self, 'kwargs'):
+            return full_context
+        org_id = int(self.kwargs['pk'])
+
+        org_counts = {}
+        access_kwargs = {'accessor': self.request.user, 'permissions': {"read": True}}
+        direct_counts = Organization.objects.filter(id=org_id).annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('users', 'admins')
+
+        org_counts = direct_counts[0]
+        org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
+            project__organization__id=org_id).count()
+
+        full_context['related_field_counts'] = {}
+        full_context['related_field_counts'][org_id] = org_counts
+
+        return full_context
+
 class OrganizationInventoriesList(SubListAPIView):
 
     model = Inventory

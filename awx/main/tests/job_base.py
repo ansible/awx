@@ -384,14 +384,14 @@ class BaseJobTestMixin(BaseTestMixin):
             password='Heading0',
             created_by = self.user_sue,
         )
-        self.team_ops_north.member_role.children.add(self.cred_ops_north.usage_role)
+        self.team_ops_north.member_role.children.add(self.cred_ops_north.owner_role)
 
         self.cred_ops_test = Credential.objects.create(
             username='testers',
             password='HeadingNone',
             created_by = self.user_sue,
         )
-        self.team_ops_testers.member_role.children(self.cred_ops_test.usage_role)
+        self.team_ops_testers.member_role.children.add(self.cred_ops_test.usage_role)
 
         self.ops_east_permission = Permission.objects.create(
             inventory       = self.inv_ops_east,
