@@ -384,7 +384,7 @@ class BaseJobTestMixin(BaseTestMixin):
             password='Heading0',
             created_by = self.user_sue,
         )
-        self.team_ops_north.member_role.children.add(self.cred_ops_north.usage_role)
+        self.team_ops_north.member_role.children.add(self.cred_ops_north.owner_role)
 
         self.cred_ops_test = Credential.objects.create(
             username='testers',
