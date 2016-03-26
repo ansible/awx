@@ -553,6 +553,11 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def get_queryset(self):
+        qs = Organization.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        return qs
+
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
 
@@ -766,6 +771,11 @@ class TeamList(ListCreateAPIView):
     model = Team
     serializer_class = TeamSerializer
 
+    def get_queryset(self):
+        qs = Team.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        return qs
+
 class TeamDetail(RetrieveUpdateDestroyAPIView):
 
     model = Team
@@ -865,6 +875,17 @@ class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        projects_qs = Project.accessible_objects(self.request.user, {'read': True})
+        projects_qs = projects_qs.select_related(
+            'organization',
+            'admin_role',
+            'auditor_role',
+            'member_role',
+            'scm_update_role',
+        )
+        return projects_qs
 
     def get(self, request, *args, **kwargs):
         # Not optimal, but make sure the project status and last_updated fields
@@ -1247,6 +1268,11 @@ class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+
+    def get_queryset(self):
+        qs = Inventory.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'updater_role', 'executor_role')
+        return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
