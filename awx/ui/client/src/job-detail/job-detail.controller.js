@@ -27,7 +27,7 @@ export default
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
             PlaybookRun, LoadPlays, LoadTasks, LoadHosts,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
-            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService,
+            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService
         ) {
             ClearScope();
 

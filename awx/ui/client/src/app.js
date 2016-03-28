@@ -180,7 +180,6 @@ var tower = angular.module('Tower', [
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'EventViewerHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
