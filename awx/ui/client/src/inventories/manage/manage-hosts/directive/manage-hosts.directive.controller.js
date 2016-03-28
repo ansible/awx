@@ -41,7 +41,7 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
         });
     generator.reset();
 
-    var name = scope.name;
+
     scope.parseType = 'yaml';
 
     // Retrieve detail record and prepopulate the form
@@ -68,7 +68,6 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
                 }
                 scope.variable_url = data.related.variable_data;
                 scope.has_inventory_sources = data.has_inventory_sources;
-                //scope.$emit('hostVariablesLoaded');
             })
             .error(function(data, status) {
                 ProcessErrors(parent_scope, data, status, form, {
@@ -172,10 +171,12 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
         $state.go('inventoryManage');
     };
 
+
+
     angular.extend(vm, {
         cancelPanel: cancelPanel,
-        name: name,
         saveHost: saveHost,
+				mode: mode
     });
 }
 

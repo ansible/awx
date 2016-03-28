@@ -1,17 +1,25 @@
 <div>
-    <div class="Form-exitHolder">
-        <button class="Form-exit" ng-click="vm.cancelPanel()">
-            <i class="fa fa-times-circle"></i>
-        </button>
+  <div class="Form-header" ng-if="vm.mode === 'add'">
+    <div class="Form-title ng-binding" >Create Host</div>
+		<div class="Form-exitHolder">
+			<button class="Form-exit" ng-click="vm.cancelPanel()">
+				<i class="fa fa-times-circle"></i>
+			</button>
+		</div>
+  </div>
+	<div class="Form-exitHolder" ng-if="vm.mode === 'edit'">
+		<button class="Form-exit" ng-click="vm.cancelPanel()">
+			<i class="fa fa-times-circle"></i>
+		</button>
+	</div>
+
+  <div id="host-panel-form"></div>
+  <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+    <div class="ui-dialog-buttonset">
+      <button type="button" class="btn btn-primary Form-saveButton" id="Inventory-hostManage--okButton" ng-click="vm.saveHost()">
+        Save</button>
+      <button type="button" class="btn btn-default Form-cancelButton" id="Inventory-hostManage--cancelButton" ng-click="vm.cancelPanel()">
+        Cancel</button>
     </div>
-    <div id="host-panel-form">
-    </div>
-    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
-        <div class="ui-dialog-buttonset">
-            <button type="button" class="btn btn-primary Form-saveButton" id="Inventory-hostManage--okButton" ng-click="vm.saveHost()">
-                Save</button>
-            <button type="button" class="btn btn-default Form-cancelButton" id="Inventory-hostManage--cancelButton" ng-click="vm.cancelPanel()">
-                Cancel</button>
-        </div>
-    </div>
+  </div>
 </div>
