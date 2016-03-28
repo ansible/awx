@@ -1626,6 +1626,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             d['can_copy'] = False
             d['can_edit'] = False
         d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-created')[:10]]
+        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
         return d
 
     def validate(self, attrs):
@@ -1666,6 +1667,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        d = super(JobSerializer, self).get_summary_fields(obj)
+        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
+        return d
 
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
