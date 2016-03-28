@@ -265,14 +265,16 @@ def team(organization):
 def permission_inv_read(organization, inventory, team):
     return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
 
-
 @pytest.fixture
-def job_template_labels(organization):
+def job_template(organization):
     jt = JobTemplate(name='test-job_template')
     jt.save()
 
-    jt.labels.create(name="label-1", organization=organization)
-    jt.labels.create(name="label-2", organization=organization)
-
     return jt
 
+@pytest.fixture
+def job_template_labels(organization, job_template):
+    job_template.labels.create(name="label-1", organization=organization)
+    job_template.labels.create(name="label-2", organization=organization)
+
+    return job_template
