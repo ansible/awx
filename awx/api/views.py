@@ -2100,6 +2100,14 @@ class JobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
     parent_model = JobTemplate
     relationship = 'notifiers_success'
 
+class JobTemplateLabelList(SubListCreateAttachDetachAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    parent_model = JobTemplate
+    relationship = 'labels'
+    parent_key = 'job_template'
+
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
@@ -2357,6 +2365,14 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
+
+class JobLabelList(SubListAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    parent_model = Job
+    relationship = 'labels'
+    parent_key = 'job'
 
 class JobActivityStreamList(SubListAPIView):
 
@@ -3171,6 +3187,18 @@ class NotificationDetail(RetrieveAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
+    new_in_300 = True
+
+class LabelList(ListCreateAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    new_in_300 = True
+
+class LabelDetail(RetrieveUpdateAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
     new_in_300 = True
 
 class ActivityStreamList(SimpleListAPIView):

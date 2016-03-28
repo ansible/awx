@@ -310,11 +310,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
-        save_unified_job = kwargs.pop('save', True)
         unified_job_class = self._get_unified_job_class()
         parent_field_name = unified_job_class._get_parent_field_name()
         kwargs.pop('%s_id' % parent_field_name, None)
         create_kwargs = {}
+        m2m_fields = {}
         create_kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
             # Foreign keys can be specified as field_name or field_name_id.
@@ -332,14 +332,25 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             elif field_name in kwargs:
                 if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
                     create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
+                # We can't get a hold of django.db.models.fields.related.ManyRelatedManager to compare
+                # so this is the next best thing.
+                elif kwargs[field_name].__class__.__name__ is 'ManyRelatedManager':
+                    m2m_fields[field_name] = kwargs[field_name]
                 else:
                     create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
-                create_kwargs[field_name] = getattr(self, field_name)
+                field_obj = self._meta.get_field_by_name(field_name)[0]
+                # Many to Many can be specified as field_name
+                if isinstance(field_obj, models.ManyToManyField):
+                    m2m_fields[field_name] = getattr(self, field_name)
+                else:
+                    create_kwargs[field_name] = getattr(self, field_name)
         new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
         unified_job = unified_job_class(**new_kwargs)
-        if save_unified_job:
-            unified_job.save()
+        unified_job.save()
+        for field_name, src_field_value in m2m_fields.iteritems():
+            dest_field = getattr(unified_job, field_name)
+            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
 
