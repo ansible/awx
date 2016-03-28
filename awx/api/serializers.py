@@ -2222,7 +2222,7 @@ class LabelSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(LabelSerializer, self).get_related(obj)
-        if obj.organization and obj.organization.active:
+        if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 

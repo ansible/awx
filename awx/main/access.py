@@ -1210,7 +1210,7 @@ class LabelAccess(BaseAccess):
     model = Label
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.objects.distinct()
         if self.user.is_superuser:
             return qs
         return qs
