@@ -33,16 +33,18 @@ export default
             });
 
             // flatten Ansible's passed-through response
-            result.event_data = {};
-            Object.keys(data.event_data.res).forEach(function(key, index){
-                if (ignored.indexOf(key) > -1) {
-                    return
-                }
-                else{
-                    //console.log(key, data.event_data.res[key])
-                    result.event_data[key] = data.event_data.res[key];
-                }
-            });
+            try{
+                result.event_data = {};
+                Object.keys(data.event_data.res).forEach(function(key, index){
+                    if (ignored.indexOf(key) > -1) {
+                        return
+                    }
+                    else{
+                        result.event_data[key] = data.event_data.res[key];
+                    }
+                });
+            }
+            catch(err){result.event_data = null;}
 
             return result
         },

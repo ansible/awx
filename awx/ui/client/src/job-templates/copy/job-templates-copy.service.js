@@ -23,7 +23,8 @@
  			set: function(data){
 	 			var defaultUrl = GetBasePath('job_templates');
 	 			Rest.setUrl(defaultUrl);
-	 			data.results[0].name = data.results[0].name + ' ' + moment().format('h:mm:ss a'); // 2:49:11 pm
+	 			var name = this.buildName(data.results[0].name)
+	 			data.results[0].name = name + ' @ ' + moment().format('h:mm:ss a'); // 2:49:11 pm
 	 			return Rest.post(data.results[0])
 	 				.success(function(res){
 	 					return res
@@ -32,6 +33,10 @@
 						ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
 	                	msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
 	 				});
+ 			},
+ 			buildName: function(name){
+ 				var result = name.split('@')[0];
+ 				return result
  			}
  		}
  	}

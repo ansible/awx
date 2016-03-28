@@ -44,7 +44,7 @@
  			$state.go('jobDetail.host-event.details', {eventId: id})
  		};
 
- 		$scope.goPrevious = function(){
+ 		$scope.goPrev = function(){
  			var index = $scope.getActiveHostIndex() - 1;
  			var id = $scope.hostResults[index].id;
  			$state.go('jobDetail.host-event.details', {eventId: id}) 		
