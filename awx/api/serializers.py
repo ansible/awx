@@ -1597,10 +1597,11 @@ class JobOptionsSerializer(BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task')
+                  'skip_tags', 'start_at_task',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
+        res['labels'] = reverse('api:job_template_label_list', args=(obj.pk,))
         if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.project:
@@ -1662,7 +1663,8 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
             access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
-            survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,))
+            survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
+            labels = reverse('api:job_template_label_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1716,6 +1718,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
             notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
+            labels = reverse('api:job_label_list', args=(obj.pk,)),
         ))
         if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail',
@@ -2208,6 +2211,19 @@ class NotificationSerializer(BaseSerializer):
         res.update(dict(
             notifier = reverse('api:notifier_detail', args=(obj.notifier.pk,)),
         ))
+        return res
+
+
+class LabelSerializer(BaseSerializer):
+
+    class Meta:
+        model = Label
+        fields = ('*', '-description', 'organization')
+
+    def get_related(self, obj):
+        res = super(LabelSerializer, self).get_related(obj)
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
 class ScheduleSerializer(BaseSerializer):
