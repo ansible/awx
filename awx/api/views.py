@@ -133,6 +133,7 @@ class ApiV1RootView(APIView):
         data['schedules'] = reverse('api:schedule_list')
         data['notifiers'] = reverse('api:notifier_list')
         data['notifications'] = reverse('api:notification_list')
+        data['labels'] = reverse('api:label_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
