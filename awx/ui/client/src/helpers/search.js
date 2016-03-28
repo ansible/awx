@@ -392,9 +392,6 @@ export default
                         scope[iterator + 'HoldInput' + modifier] = true;
                         if ($('#search-widget-container' + modifier) &&
                             list.fields[scope[iterator + 'SearchField' + modifier]] && !list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
-
-                            // if the search widget exists and its value is not an object, add its parameters to the query
-
                             if (scope[iterator + 'SearchValue' + modifier]) {
                                 // if user typed a value in the input box, show the reset link
                                 scope[iterator + 'ShowStartBtn' + modifier] = false;

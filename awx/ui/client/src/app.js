@@ -51,6 +51,7 @@ import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import lookUpHelper from './lookup/main';
 import JobTemplates from './job-templates/main';
+import search from './search/main';
 import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
@@ -109,6 +110,7 @@ var tower = angular.module('Tower', [
     standardOut.name,
     access.name,
     JobTemplates.name,
+    search.name,
     'templates',
     'Utilities',
     'OrganizationFormDefinition',

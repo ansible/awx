@@ -98,9 +98,9 @@
 
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
-export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
+export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'getSearchHtml',
         'Column', 'DropDown', 'NavigationLink', 'SelectIcon',
-    function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
+    function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, getSearchHtml, Column, DropDown, NavigationLink,
         SelectIcon) {
             return {
 
@@ -362,38 +362,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
                     html += "</div>";
                     if (options.showSearch=== undefined || options.showSearch === true) {
-                        // Only show the search bar if we are loading results or if we have at least 1 base result
-                        html += "<div class=\"row List-searchRow\" ng-show=\"" + list.iterator + "Loading == true || " + list.iterator + "_active_search == true || (" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows > 0)\">\n";
-                        if (options.searchSize) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: options.searchSize,
-                                searchWidgets: list.searchWidgets
-                            });
-                        } else if (options.mode === 'summary') {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-6'
-                            });
-                        } else if (options.mode === 'lookup' || options.id !== undefined) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-8'
-                            });
-                        } else {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true
-                            });
-                        }
-                        html += "</div><!-- row -->\n";
+                        html += getSearchHtml
+                            .inject(getSearchHtml.getList(list),
+                                getSearchHtml.getEndpoint(list));
 
                         // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                         html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == true && " + list.name + ".length == 0\">\n";
