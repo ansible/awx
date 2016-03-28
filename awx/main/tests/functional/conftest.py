@@ -400,3 +400,14 @@ def fact_services_json():
 def permission_inv_read(organization, inventory, team):
     return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
 
+
+@pytest.fixture
+def job_template_labels(organization):
+    jt = JobTemplate(name='test-job_template')
+    jt.save()
+
+    jt.labels.create(name="label-1", organization=organization)
+    jt.labels.create(name="label-2", organization=organization)
+
+    return jt
+

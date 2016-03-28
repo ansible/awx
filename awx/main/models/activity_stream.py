@@ -55,6 +55,7 @@ class ActivityStream(models.Model):
     custom_inventory_script = models.ManyToManyField("CustomInventoryScript", blank=True)
     notifier = models.ManyToManyField("Notifier", blank=True)
     notification = models.ManyToManyField("Notification", blank=True)
+    label = models.ManyToManyField("Label", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))
