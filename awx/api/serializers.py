@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
 # from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text, smart_text
+from django.utils.encoding import force_text
 from django.utils.text import capfirst
 
 # Django REST Framework
