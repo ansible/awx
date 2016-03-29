@@ -22,6 +22,4 @@ class Pagination(pagination.PageNumberPagination):
             return None
         url = self.request and self.request.get_full_path() or ''
         page_number = self.page.previous_page_number()
-        if page_number == 1:
-            return remove_query_param(url, self.page_query_param)
         return replace_query_param(url, self.page_query_param, page_number)
