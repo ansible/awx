@@ -127,7 +127,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'openstack':
                              scope.hostLabel = "Host (Authentication URL)";
-                             scope.projectLabel = "Project (Tenant Name/ID)";
+                             scope.projectLabel = "Project (Tenant Name)";
                              scope.domainLabel = "Domain Name (optional)";
                              scope.password_required = true;
                              scope.project_required = true;
