@@ -1071,7 +1071,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
             'current_job',
         )
         qs = qs.prefetch_related(
-            'project',
+            #'project',
             'inventory',
             'credential',
             'cloud_credential',

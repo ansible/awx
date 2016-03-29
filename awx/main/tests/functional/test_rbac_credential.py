@@ -14,9 +14,8 @@ def test_credential_migration_user(credential, user, permissions):
     credential.deprecated_user = u
     credential.save()
 
-    migrated = rbac.migrate_credential(apps, None)
+    rbac.migrate_credential(apps, None)
 
-    assert len(migrated) == 1
     assert credential.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
@@ -38,10 +37,9 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     team.member_role.children.remove(credential.usage_role)
     assert not credential.accessible_by(u, permissions['admin'])
 
-    migrated = rbac.migrate_credential(apps, None)
+    rbac.migrate_credential(apps, None)
 
     # Admin permissions post migration
-    assert len(migrated) == 1
     assert credential.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
@@ -54,8 +52,7 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
     assert not credential.accessible_by(u, permissions['usage'])
 
     # Usage permissions post migration
-    migrated = rbac.migrate_credential(apps, None)
-    assert len(migrated) == 1
+    rbac.migrate_credential(apps, None)
     assert credential.accessible_by(u, permissions['usage'])
 
 def test_credential_access_superuser():
