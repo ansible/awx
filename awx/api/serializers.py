@@ -367,6 +367,7 @@ class BaseSerializer(serializers.ModelSerializer):
 
         # Update the message used for the unique validator to use capitalized
         # verbose name; keeps unique message the same as with DRF 2.x.
+        opts = self.Meta.model._meta.concrete_model._meta
         for validator in field_kwargs.get('validators', []):
             if isinstance(validator, validators.UniqueValidator):
                 unique_error_message = model_field.error_messages.get('unique', None)
