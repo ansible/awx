@@ -43,11 +43,13 @@ $(function() {
     $('.description').addClass('prettyprint').parent().css('float', 'none');
     $('.hidden a.hide-description').prependTo('.description');
     $('a.hide-description').click(function() {
+      $(this).tooltip('hide');
       $('.description').slideUp('fast');
       return false;
     });
     $('.hidden a.toggle-description').appendTo('.page-header h1');
     $('a.toggle-description').click(function() {
+      $(this).tooltip('hide');
       $('.description').slideToggle('fast');
       return false;
     });
@@ -68,6 +70,7 @@ $(function() {
   });
 
   $('a.resize').click(function() {
+    $(this).tooltip('hide');
     if ($(this).find('span.glyphicon-resize-full').size()) {
       $(this).find('span.glyphicon').addClass('glyphicon-resize-small').removeClass('glyphicon-resize-full');
       $('.container').addClass('container-fluid').removeClass('container');
