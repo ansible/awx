@@ -107,7 +107,9 @@
  	});
 
  	var init = function(){
+ 		$scope.hostName = $stateParams.hostName;
  		// create filter dropdown
+ 		console.log($stateParams)
  		CreateSelect2({
  			element: '.HostEvents-select',
  			multiple: false

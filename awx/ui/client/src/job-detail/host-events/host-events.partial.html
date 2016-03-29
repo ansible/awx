@@ -3,7 +3,7 @@
 		<div class="modal-content">
 			<div class="modal-body">
 				<div class="HostEvents-header">
-					<span class="HostEvents-title">HOST EVENTS</span>
+					<span class="HostEvents-title">HOST EVENTS | {{hostName}}</span>
 				<!-- Close -->
 					<button ui-sref="jobDetail" type="button" class="close">
 						<i class="fa fa fa-times-circle"></i>
@@ -29,7 +29,6 @@
 					<table class="table">
 					<!-- column labels -->
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">STATUS</th>
-					<th ng-hide="results.length == 0" class="HostEvents-table--header">HOST</th>
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">PLAY</th>
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">TASK</th>
 					<!-- result rows -->
@@ -41,7 +40,6 @@
 							</a>
 							{{event.status}}
 						</td>
-						<td class=HostEvents-table--cell>{{event.host_name}}</td>
 						<td class=HostEvents-table--cell>{{event.play}}</td>
 						<td class=HostEvents-table--cell>{{event.task}}</td>
 					</tr>
