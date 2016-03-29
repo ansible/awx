@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
 # from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text, smart_text
+from django.utils.encoding import force_text
 from django.utils.text import capfirst
 
 # Django REST Framework
@@ -326,7 +326,6 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.active
 
     def build_standard_field(self, field_name, model_field):
-
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
         # when a Model's editable field is set to False. The short circuit skips choice rendering.
         #
@@ -342,27 +341,6 @@ class BaseSerializer(serializers.ModelSerializer):
             model_field.editable = was_editable
             if was_editable is False:
                 field_kwargs['read_only'] = True
-
-        # Update help text for common fields.
-        opts = self.Meta.model._meta.concrete_model._meta
-        if field_name == 'id':
-            field_kwargs.setdefault('help_text', 'Database ID for this %s.' % smart_text(opts.verbose_name))
-        elif field_name == 'name':
-            field_kwargs['help_text'] = 'Name of this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'description':
-            field_kwargs['help_text'] = 'Optional description of this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'type':
-            field_kwargs['help_text'] = 'Data type for this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'url':
-            field_kwargs['help_text'] = 'URL for this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'related':
-            field_kwargs['help_text'] = 'Data structure with URLs of related resources.'
-        elif field_name == 'summary_fields':
-            field_kwargs['help_text'] = 'Data structure with name/description for related resources.'
-        elif field_name == 'created':
-            field_kwargs['help_text'] = 'Timestamp when this %s was created.' % smart_text(opts.verbose_name)
-        elif field_name == 'modified':
-            field_kwargs['help_text'] = 'Timestamp when this %s was last modified.' % smart_text(opts.verbose_name)
 
         # Pass model field default onto the serializer field if field is not read-only.
         if model_field.has_default() and not field_kwargs.get('read_only', False):
@@ -389,6 +367,7 @@ class BaseSerializer(serializers.ModelSerializer):
 
         # Update the message used for the unique validator to use capitalized
         # verbose name; keeps unique message the same as with DRF 2.x.
+        opts = self.Meta.model._meta.concrete_model._meta
         for validator in field_kwargs.get('validators', []):
             if isinstance(validator, validators.UniqueValidator):
                 unique_error_message = model_field.error_messages.get('unique', None)
