@@ -3,7 +3,7 @@
 
 # Django REST Framework
 from rest_framework import pagination
-from rest_framework.utils.urls import remove_query_param, replace_query_param
+from rest_framework.utils.urls import replace_query_param
 
 
 class Pagination(pagination.PageNumberPagination):
