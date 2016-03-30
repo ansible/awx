@@ -644,7 +644,7 @@ class ProjectAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         qs = Organization.accessible_objects(self.user, ALL_PERMISSIONS)
-        return bool(qs.count() > 0)
+        return qs.exists()
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
