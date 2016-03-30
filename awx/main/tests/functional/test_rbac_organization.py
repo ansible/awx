@@ -18,9 +18,8 @@ def test_organization_migration_admin(organization, permissions, user):
     organization.admin_role.members.remove(u)
     assert not organization.accessible_by(u, permissions['admin'])
 
-    migrations = rbac.migrate_organization(apps, None)
+    rbac.migrate_organization(apps, None)
 
-    assert len(migrations) == 1
     assert organization.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
@@ -32,9 +31,8 @@ def test_organization_migration_user(organization, permissions, user):
     organization.member_role.members.remove(u)
     assert not organization.accessible_by(u, permissions['auditor'])
 
-    migrations = rbac.migrate_organization(apps, None)
+    rbac.migrate_organization(apps, None)
 
-    assert len(migrations) == 1
     assert organization.accessible_by(u, permissions['auditor'])
 
 

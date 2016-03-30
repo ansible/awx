@@ -31,9 +31,8 @@ def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, use
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    migrations = rbac.migrate_job_templates(apps, None)
+    rbac.migrate_job_templates(apps, None)
 
-    assert len(migrations[check_jobtemplate.name]['users']) == 1
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
     assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
@@ -60,9 +59,8 @@ def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, us
     assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    migrations = rbac.migrate_job_templates(apps, None)
+    rbac.migrate_job_templates(apps, None)
 
-    assert len(migrations[deploy_jobtemplate.name]['users']) == 1
     assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
@@ -93,10 +91,8 @@ def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    migrations = rbac.migrate_job_templates(apps, None)
+    rbac.migrate_job_templates(apps, None)
 
-    assert len(migrations[check_jobtemplate.name]['users']) == 0
-    assert len(migrations[check_jobtemplate.name]['teams']) == 1
     assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
 
@@ -128,10 +124,8 @@ def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplat
     assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    migrations = rbac.migrate_job_templates(apps, None)
+    rbac.migrate_job_templates(apps, None)
 
-    assert len(migrations[deploy_jobtemplate.name]['users']) == 0
-    assert len(migrations[deploy_jobtemplate.name]['teams']) == 1
     assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
     assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is True
 

@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
@@ -5,16 +7,34 @@ from collections import defaultdict
 from awx.main.utils import getattrd
 import _old_access as old_access
 
-def migrate_users(apps, schema_editor):
-    migrations = list()
+logger = logging.getLogger(__name__)
 
+def log_migration(wrapped):
+    '''setup the logging mechanism for each migration method
+    as it runs, Django resets this, so we use a decorator
+    to re-add the handler for each method.
+    '''
+    handler = logging.FileHandler("tower_rbac_migrations.log", mode="a")
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+
+    def wrapper(*args, **kwargs):
+        logger.handlers = []
+        logger.addHandler(handler)
+        return wrapped(*args, **kwargs)
+    return wrapper
+
+@log_migration
+def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
     RolePermission = apps.get_model('main', "RolePermission")
 
-    for user in User.objects.all():
+    for user in User.objects.iterator():
         try:
             Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=user.id)
+            logger.info("found existing role for user: %s", user.username)
         except Role.DoesNotExist:
             role = Role.objects.create(
                 singleton_name = '%s-admin_role' % user.username,
@@ -27,32 +47,30 @@ def migrate_users(apps, schema_editor):
                 create=1, read=1, write=1, delete=1, update=1,
                 execute=1, scm_update=1, use=1,
             )
+            logger.info("migrating to new role for user: %s", user.username)
 
         if user.is_superuser:
             Role.singleton('System Administrator').members.add(user)
-            migrations.append(user)
-    return migrations
+            logger.warning("added superuser: %s", user.username)
 
+@log_migration
 def migrate_organization(apps, schema_editor):
-    migrations = defaultdict(list)
-    organization = apps.get_model('main', "Organization")
-    for org in organization.objects.all():
+    Organization = apps.get_model('main', "Organization")
+    for org in Organization.objects.iterator():
         for admin in org.deprecated_admins.all():
             org.admin_role.members.add(admin)
-            migrations[org.name].append(admin)
+            logger.info("added admin: %s, %s" % (org.name, admin.username))
         for user in org.deprecated_users.all():
             org.auditor_role.members.add(user)
-            migrations[org.name].append(user)
-    return migrations
+            logger.info("added auditor: %s, %s" % (org.name, user.username))
 
+@log_migration
 def migrate_team(apps, schema_editor):
-    migrations = defaultdict(list)
-    team = apps.get_model('main', 'Team')
-    for t in team.objects.all():
+    Team = apps.get_model('main', 'Team')
+    for t in Team.objects.iterator():
         for user in t.deprecated_users.all():
             t.member_role.members.add(user)
-            migrations[t.name].append(user)
-    return migrations
+            logger.info("team: %s, added user: %s" % (t.name, user.username))
 
 def attrfunc(attr_path):
     '''attrfunc returns a function that will
@@ -111,16 +129,14 @@ def _discover_credentials(instances, cred, orgfunc):
                     i.save()
                 _update_credential_parents(org, cred)
 
+@log_migration
 def migrate_credential(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
     JobTemplate = apps.get_model('main', 'JobTemplate')
     Project = apps.get_model('main', 'Project')
     InventorySource = apps.get_model('main', 'InventorySource')
 
-    migrated = []
-    for cred in Credential.objects.all():
-        migrated.append(cred)
-
+    for cred in Credential.objects.iterator():
         results = (JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all() or
                    InventorySource.objects.filter(credential=cred).all())
         if results:
@@ -128,6 +144,7 @@ def migrate_credential(apps, schema_editor):
                 _update_credential_parents(results[0].inventory.organization, cred)
             else:
                 _discover_credentials(results, cred, attrfunc('inventory.organization'))
+            logger.info("added Credential(name=%s, kind=%s, host=%s) at organization level" % (cred.name, cred.kind, cred.host))
             continue
 
         projs = Project.objects.filter(credential=cred).all()
@@ -136,6 +153,7 @@ def migrate_credential(apps, schema_editor):
                 _update_credential_parents(projs[0].organization, cred)
             else:
                 _discover_credentials(projs, cred, attrfunc('organization'))
+            logger.info("added Credential(name=%s, kind=%s, host=%s) at organization level" % (cred.name, cred.kind, cred.host))
             continue
 
         if cred.deprecated_team is not None:
@@ -143,24 +161,22 @@ def migrate_credential(apps, schema_editor):
             cred.deprecated_team.member_role.children.add(cred.usage_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
-
+            logger.info("added Credential(name=%s, kind=%s, host=%s) at user level" % (cred.name, cred.kind, cred.host))
         elif cred.deprecated_user is not None:
             cred.deprecated_user.admin_role.children.add(cred.owner_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
+            logger.info("added Credential(name=%s, kind=%s, host=%s) at user level" % (cred.name, cred.kind, cred.host, ))
+        else:
+            logger.warning("orphaned credential found Credential(name=%s, kind=%s, host=%s), superuser only" % (cred.name, cred.kind, cred.host, ))
 
-        # no match found, log
-    return migrated
 
-
+@log_migration
 def migrate_inventory(apps, schema_editor):
-    migrations = defaultdict(dict)
-
     Inventory = apps.get_model('main', 'Inventory')
     Permission = apps.get_model('main', 'Permission')
 
-    for inventory in Inventory.objects.all():
-        teams, users = [], []
+    for inventory in Inventory.objects.iterator():
         for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
@@ -187,19 +203,16 @@ def migrate_inventory(apps, schema_editor):
                     perm.team.member_role.children.add(role)
                 if execrole:
                     perm.team.member_role.children.add(execrole)
-
-                teams.append(perm.team)
+                logger.info('added Team(%s) access to Inventory(%s)' % (perm.team.name, inventory.name))
 
             if perm.user:
                 if role:
                     role.members.add(perm.user)
                 if execrole:
                     execrole.members.add(perm.user)
-                users.append(perm.user)
-        migrations[inventory.name]['teams'] = teams
-        migrations[inventory.name]['users'] = users
-    return migrations
+                logger.info('added User(%s) access to Inventory(%s)' % (perm.user.username, inventory.name))
 
+@log_migration
 def migrate_projects(apps, schema_editor):
     '''
     I can see projects when:
@@ -215,14 +228,12 @@ def migrate_projects(apps, schema_editor):
      X I am an admin in an organization associated with the project.
      X I created the project but it isn't associated with an organization
     '''
-    migrations = defaultdict(lambda: defaultdict(set))
-
     Project = apps.get_model('main', 'Project')
     Permission = apps.get_model('main', 'Permission')
     JobTemplate = apps.get_model('main', 'JobTemplate')
 
     # Migrate projects to single organizations, duplicating as necessary
-    for project in [p for p in Project.objects.all()]:
+    for project in Project.objects.iterator():
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
@@ -253,41 +264,39 @@ def migrate_projects(apps, schema_editor):
                         credential                = project.credential,
                         organization              = org
                     )
-                    migrations[original_project_name]['projects'].add(new_prj)
+                    logger.warning('cloning Project(%s) onto %s as Project(%s)' % (original_project_name, org, new_prj))
                     job_templates = JobTemplate.objects.filter(inventory__organization=org).all()
                     for jt in job_templates:
                         jt.project = new_prj
                         jt.save()
 
     # Migrate permissions
-    for project in [p for p in Project.objects.all()]:
+    for project in Project.objects.iterator():
         if project.organization is None and project.created_by is not None:
             project.admin_role.members.add(project.created_by)
-            migrations[project.name]['users'].add(project.created_by)
+            logger.warn('adding Project(%s) admin: %s' % (project.name, project.created_by.username))
 
         for team in project.deprecated_teams.all():
             team.member_role.children.add(project.member_role)
-            migrations[project.name]['teams'].add(team)
+            logger.info('adding Team(%s) access for Project(%s)' % (team.name, project.name))
 
         if project.organization is not None:
             for user in project.organization.deprecated_users.all():
                 project.member_role.members.add(user)
-                migrations[project.name]['users'].add(user)
+                logger.info('adding Organization(%s) member access to Project(%s)' % (project.organization.name, project.name))
 
         for perm in Permission.objects.filter(project=project):
             # All perms at this level just imply a user or team can read
             if perm.team:
                 perm.team.member_role.children.add(project.member_role)
-                migrations[project.name]['teams'].add(perm.team)
+                logger.info('adding Team(%s) access for Project(%s)' % (perm.team.name, project.name))
 
             if perm.user:
                 project.member_role.members.add(perm.user)
-                migrations[project.name]['users'].add(perm.user)
-
-    return migrations
+                logger.info('adding User(%s) access for Project(%s)' % (perm.user.username, project.name))
 
 
-
+@log_migration
 def migrate_job_templates(apps, schema_editor):
     '''
     NOTE: This must be run after orgs, inventory, projects, credential, and
@@ -330,30 +339,27 @@ def migrate_job_templates(apps, schema_editor):
 
     '''
 
-    migrations = defaultdict(lambda: defaultdict(set))
-
     User = apps.get_model('auth', 'User')
     JobTemplate = apps.get_model('main', 'JobTemplate')
     Team = apps.get_model('main', 'Team')
     Permission = apps.get_model('main', 'Permission')
 
-    for jt in JobTemplate.objects.all():
+    for jt in JobTemplate.objects.iterator():
         permission = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,
             permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run'],
         )
 
-        for team in Team.objects.all():
+        for team in Team.objects.iterator():
             if permission.filter(team=team).exists():
                 team.member_role.children.add(jt.executor_role)
-                migrations[jt.name]['teams'].add(team)
+                logger.info('adding Team(%s) access to JobTemplate(%s)' % (team.name, jt.name))
 
-
-        for user in User.objects.all():
+        for user in User.objects.iterator():
             if permission.filter(user=user).exists():
                 jt.executor_role.members.add(user)
-                migrations[jt.name]['users'].add(user)
+                logger.info('adding User(%s) access to JobTemplate(%s)' % (user.username, jt.name))
 
             if jt.accessible_by(user, {'execute': True}):
                 # If the job template is already accessible by the user, because they
@@ -363,7 +369,4 @@ def migrate_job_templates(apps, schema_editor):
 
             if old_access.check_user_access(user, jt.__class__, 'start', jt, False):
                 jt.executor_role.members.add(user)
-                migrations[jt.name]['users'].add(user)
-
-
-    return migrations
+                logger.info('adding User(%s) access to JobTemplate(%s)' % (user.username, jt.name))
