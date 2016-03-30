@@ -521,10 +521,6 @@ class BaseSerializer(serializers.ModelSerializer):
             raise ValidationError(d)
         return attrs
 
-    def to_representation(self, obj):
-        ret = super(BaseSerializer, self).to_representation(obj)
-        return ret
-
 
 class EmptySerializer(serializers.Serializer):
     pass
