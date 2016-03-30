@@ -341,7 +341,7 @@ export default
                     ngShow: "kind.value == 'gce' || kind.value == 'openstack'",
                     awPopOverWatch: "projectPopOver",
                     awPopOver: "set in helpers/credentials",
-                    dataTitle: 'Project ID',
+                    dataTitle: 'Project Name',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
@@ -356,8 +356,12 @@ export default
                     labelBind: 'domainLabel',
                     type: 'text',
                     ngShow: "kind.value == 'openstack'",
-                    awPopOver: "<p>Domain used for Keystone v3 <br />identity service.</p>",
-                    dataTitle: 'Domain Name (optional)',
+                    awPopOver: "<p>OpenStack domains define administrative " +
+                    "boundaries. It is only needed for Keystone v3 authentication URLs. " +
+                    "Common scenarios include:<ul><li><b>v2 URLs</b> - leave blank</li>" +
+                    "<li><b>v3 default</b> - set to 'default'</br></li>" +
+                    "<li><b>v3 multi-domain</b> - your domain name</p></li></ul></p>",
+                    dataTitle: 'Domain Name',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
