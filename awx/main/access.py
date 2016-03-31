@@ -1054,12 +1054,16 @@ class UnifiedJobTemplateAccess(BaseAccess):
             'last_job',
             'current_job',
         )
-        qs = qs.prefetch_related(
-            #'project',
-            'inventory',
-            'credential',
-            'cloud_credential',
-        )
+
+        # WISH - sure would be nice if the following worked, but it does not.
+        # In the future, as django and polymorphic libs are upgraded, try again.
+
+        #qs = qs.prefetch_related(
+        #    'project',
+        #    'inventory',
+        #    'credential',
+        #    'cloud_credential',
+        #)
 
         return qs.all()
 
@@ -1089,20 +1093,26 @@ class UnifiedJobAccess(BaseAccess):
         )
         qs = qs.prefetch_related(
             'unified_job_template',
-            'project',
-            'inventory',
-            'credential',
-            'job_template',
-            'inventory_source',
-            'cloud_credential',
-            'project___credential',
-            'inventory_source___credential',
-            'inventory_source___inventory',
-            'job_template__inventory',
-            'job_template__project',
-            'job_template__credential',
-            'job_template__cloud_credential',
         )
+
+        # WISH - sure would be nice if the following worked, but it does not.
+        # In the future, as django and polymorphic libs are upgraded, try again.
+
+        #qs = qs.prefetch_related(
+        #    'project',
+        #    'inventory',
+        #    'credential',
+        #    'job_template',
+        #    'inventory_source',
+        #    'cloud_credential',
+        #    'project___credential',
+        #    'inventory_source___credential',
+        #    'inventory_source___inventory',
+        #    'job_template__inventory',
+        #    'job_template__project',
+        #    'job_template__credential',
+        #    'job_template__cloud_credential',
+        #)
         return qs.all()
 
 class ScheduleAccess(BaseAccess):
