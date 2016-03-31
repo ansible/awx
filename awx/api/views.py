@@ -1087,7 +1087,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        return super(type(self), self).post(request, *args, **kwargs)
+        return super(UserRolesList, self).post(request, *args, **kwargs)
 
     def check_parent_access(self, parent=None):
         # We hide roles that shouldn't be seen in our queryset
