@@ -453,7 +453,7 @@ function manageGroupsDirectiveController($filter, $rootScope, $location, $log, $
     // Cancel
     modal_scope.cancelPanel = function() {
         Wait('stop');
-        $state.go('inventoryManage', {}, {reload: true})
+        $state.go('inventoryManage', {}, {reload: true});
     };
 
     // Save
@@ -539,7 +539,7 @@ function manageGroupsDirectiveController($filter, $rootScope, $location, $log, $
     angular.extend(vm, {
         cancelPanel : modal_scope.cancelPanel,
         saveGroup: modal_scope.saveGroup
-    })
+    });
 }
 
 export default ['$filter', '$rootScope', '$location', '$log', '$stateParams', '$compile', '$state', '$scope', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
