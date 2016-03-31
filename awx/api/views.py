@@ -729,7 +729,7 @@ class OrganizationActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
 
 class OrganizationNotifiersList(SubListCreateAttachDetachAPIView):
 
@@ -807,7 +807,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        return super(type(self), self).post(request, *args, **kwargs)
+        return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 class TeamProjectsList(SubListAPIView):
 
@@ -854,7 +854,7 @@ class TeamActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(TeamActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -949,7 +949,7 @@ class ProjectActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ProjectActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1166,7 +1166,7 @@ class UserActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(UserActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1236,7 +1236,7 @@ class CredentialActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(CredentialActivityStreamList, self).get(request, *args, **kwargs)
 
 class CredentialAccessList(ResourceAccessList):
 
@@ -1300,7 +1300,7 @@ class InventoryActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventoryActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1420,7 +1420,7 @@ class HostActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(HostActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1623,7 +1623,7 @@ class GroupActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(GroupActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1874,7 +1874,7 @@ class InventorySourceActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
 
 class InventorySourceNotifiersAnyList(SubListCreateAttachDetachAPIView):
 
@@ -2138,7 +2138,7 @@ class JobTemplateActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
 
 class JobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
 
@@ -2457,7 +2457,7 @@ class JobActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobActivityStreamList, self).get(request, *args, **kwargs)
 
 class JobStart(GenericAPIView):
 
@@ -3071,7 +3071,7 @@ class AdHocCommandActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class SystemJobList(ListCreateAPIView):
@@ -3282,7 +3282,7 @@ class ActivityStreamList(SimpleListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class ActivityStreamDetail(RetrieveAPIView):
@@ -3299,7 +3299,7 @@ class ActivityStreamDetail(RetrieveAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
 
 class SettingsList(ListCreateAPIView):
 
@@ -3407,7 +3407,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        return super(type(self), self).post(request, *args, **kwargs)
+        return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
 class RoleTeamsList(ListAPIView):
