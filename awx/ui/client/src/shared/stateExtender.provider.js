@@ -13,7 +13,8 @@ export default function($stateProvider){
                     data: state.data,
                     ncyBreadcrumb: state.ncyBreadcrumb,
                     onEnter: state.onEnter,
-                    onExit: state.onExit
+                    onExit: state.onExit,
+                    views: state.views
                 });
             }
         };

@@ -35,7 +35,6 @@ export default
                 ngClick: 'addScanJobTemplate()',
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
-                ngHide: 'portalMode===true',
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ADD'
             }

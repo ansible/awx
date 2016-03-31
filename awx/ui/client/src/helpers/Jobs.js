@@ -75,13 +75,7 @@ export default
                 scope.viewJobDetails = function(job) {
 
                     var goToJobDetails = function(state) {
-                        if(scope.$parent.portalMode===true){
-                            var url = $state.href(state, {id: job.id});
-                            $window.open(url, '_blank');
-                        }
-                        else {
-                            $state.go(state, {id: job.id});
-                        }
+                        $state.go(state, {id: job.id});
                     }
 
                     switch(job.type) {

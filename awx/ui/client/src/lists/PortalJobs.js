@@ -9,10 +9,9 @@ export default
     angular.module('PortalJobsListDefinition', [])
     .value( 'PortalJobsList', {
 
-        name: 'portal_jobs',
-        iterator: 'portal_job',
+        name: 'jobs',
+        iterator: 'job',
         editTitle: 'Jobs',
-        'class': 'table-condensed',
         index: false,
         hover: true,
         well: true,
@@ -22,8 +21,8 @@ export default
             status: {
                 label: '',
                 columnClass: 'List-staticColumn--smallStatus',
-                dataTitle: "{{ portal_job.status_popover_title }}",
-                icon: 'icon-job-{{ portal_job.status }}',
+                dataTitle: "{{ job.status_popover_title }}",
+                icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
                 searchable: true,
                 nosort: true,
@@ -46,10 +45,11 @@ export default
             },
             */
             name: {
+                key: true,
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
                 defaultSearchField: true,
-                linkTo: '/#/jobs/{{portal_job.id}}'
+                linkTo: '/#/jobs/{{job.id}}'
             },
             started: {
                 label: 'Started',
@@ -57,7 +57,7 @@ export default
                 searchable: false,
                 filter: "longDate",
                 nosort: true,
-                columnClass: "col-lg-4 col-md-4 col-sm-3 hidden-xs"
+                columnClass: "col-lg-4 col-md-4 col-sm-3"
             }
         },
 
