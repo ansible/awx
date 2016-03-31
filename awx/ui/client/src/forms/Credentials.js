@@ -169,7 +169,7 @@ export default
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'openstack_v3'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
                     awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
@@ -243,7 +243,7 @@ export default
                 "password": {
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack' || kind.value == 'openstack_v3'",
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'",
                     addRequired: false,
                     editRequired: false,
                     ask: false,
@@ -338,10 +338,10 @@ export default
                 "project": {
                     labelBind: 'projectLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'gce' || kind.value == 'openstack' || kind.value == 'openstack_v3'",
+                    ngShow: "kind.value == 'gce' || kind.value == 'openstack'",
                     awPopOverWatch: "projectPopOver",
                     awPopOver: "set in helpers/credentials",
-                    dataTitle: 'Project ID',
+                    dataTitle: 'Project Name',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
@@ -355,18 +355,17 @@ export default
                 "domain": {
                     labelBind: 'domainLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'openstack_v3'",
-                    awPopOverWatch: "domainPopOver",
-                    awPopOver: "set in helpers/credentials",
+                    ngShow: "kind.value == 'openstack'",
+                    awPopOver: "<p>OpenStack domains define administrative " +
+                    "boundaries. It is only needed for Keystone v3 authentication URLs. " +
+                    "Common scenarios include:<ul><li><b>v2 URLs</b> - leave blank</li>" +
+                    "<li><b>v3 default</b> - set to 'default'</br></li>" +
+                    "<li><b>v3 multi-domain</b> - your domain name</p></li></ul></p>",
                     dataTitle: 'Domain Name',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
                     editRequired: false,
-                    awRequiredWhen: {
-                        variable: 'domain_required',
-                        init: false
-                    },
                     subForm: 'credentialSubForm'
                 },
                 "vault_password": {

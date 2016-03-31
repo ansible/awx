@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -25,6 +25,11 @@ export default {
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
-        }]
+        }],
+        hosts: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
+             return JobDetailService.getRelatedJobEvents($stateParams.id, {
+                host_name: $stateParams.hostName
+            }).success(function(res){ return res.results[0]})
+         }]
     }
 };

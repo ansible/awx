@@ -1,0 +1,20 @@
+<div>
+    <div class="Form-exitHolder">
+        <button class="Form-exit" ng-click="vm.cancelPanel()">
+            <i class="fa fa-times-circle"></i>
+        </button>
+    </div>
+    <div id="group-manage-panel">
+			<div id="properties-tab"></div>
+	    <div id="sources-tab"></div>
+		</div>
+
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+        <div class="ui-dialog-buttonset">
+            <button type="button" class="btn btn-primary Form-saveButton" id="Inventory-groupManage--okButton" ng-click="vm.saveGroup()">
+                Save</button>
+            <button type="button" class="btn btn-default Form-cancelButton" id="Inventory-groupManage--cancelButton" ng-click="vm.cancelPanel()">
+                Cancel</button>
+        </div>
+    </div>
+</div>

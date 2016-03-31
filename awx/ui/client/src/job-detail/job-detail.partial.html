@@ -343,7 +343,9 @@
                             <table class="table">
                                 <tbody>
                                     <tr class="List-tableRow cursor-pointer" ng-class-odd="'List-tableRow--oddRow'" ng-class-even="'List-tableRow--evenRow'" ng-repeat="result in results = (hostResults) track by $index">
-                                        <td class="List-tableCell col-lg-4 col-md-3 col-sm-3 col-xs-3 status-column"><a ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="JobDetail-statusIcon fa icon-job-{{ result.status }}"></i><span ng-show="result.status_text != 'Unreachable'">{{ result.name }}</span><i ng-show="result.status_text == 'Unreachable'" class="JobDetail-statusIcon fa icon-job-unreachable"></i><span ng-show="result.status_text == 'Unreachable'">{{ result.name }}</span></a></td>
+                                        <td class="List-tableCell col-lg-4 col-md-3 col-sm-3 col-xs-3 status-column">
+                                        <a ui-sref="jobDetail.host-event.details({eventId: result.id, hostResults: hostResults})" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="JobDetail-statusIcon fa icon-job-{{ result.status }}"></i><span ng-show="result.status_text != 'Unreachable'">{{ result.name }}</span><i ng-show="result.status_text == 'Unreachable'" class="JobDetail-statusIcon fa icon-job-unreachable"></i><span ng-show="result.status_text == 'Unreachable'">{{ result.name }}</span></a>
+                                        </td>
                                         <td class="List-tableCell col-lg-3 col-md-4 col-sm-3 col-xs-3 item-column">{{ result.item }}</td>
                                         <td class="List-tableCell col-lg-3 col-md-4 col-sm-3 col-xs-3">{{ result.msg }}</td>
                                     </tr>
@@ -422,7 +424,7 @@
                                     <tbody>
                                         <tr class="List-tableRow" ng-repeat="host in summaryList = (hosts) track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
                                             <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                                <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
                                             </td>
                                             <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
                                                 <a ui-sref="jobDetail.host-events({hostName: host.name, hostId: host.id, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
@@ -479,8 +481,6 @@
         <!--end of stdout-->
     </div>
 </div>
-
-    <div ng-include="'/static/partials/eventviewer.html'"></div>
 
    <div id="host-modal-dialog" style="display: none;" class="dialog-content"></div>
 

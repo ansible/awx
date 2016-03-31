@@ -36,7 +36,7 @@ class AdHocCommand(UnifiedJob):
 
     job_type = models.CharField(
         max_length=64,
-        choices=JOB_TYPE_CHOICES,
+        choices=AD_HOC_JOB_TYPE_CHOICES,
         default='run',
     )
     inventory = models.ForeignKey(

@@ -9,7 +9,6 @@ import './lists';
 
 import Children from "./helpers/Children";
 import Credentials from "./helpers/Credentials";
-import EventViewer from "./helpers/EventViewer";
 import Events from "./helpers/Events";
 import Groups from "./helpers/Groups";
 import Hosts from "./helpers/Hosts";
@@ -42,7 +41,6 @@ import ActivityStreamHelper from "./helpers/ActivityStream";
 export
     {   Children,
         Credentials,
-        EventViewer,
         Events,
         Groups,
         Hosts,

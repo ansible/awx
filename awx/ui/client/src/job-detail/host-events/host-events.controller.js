@@ -6,13 +6,14 @@
 
  export default 
  	['$stateParams', '$scope', '$rootScope', '$state', 'Wait',
- 	 'JobDetailService', 'CreateSelect2',
+ 	 'JobDetailService', 'CreateSelect2', 'hosts',
  	function($stateParams, $scope, $rootScope, $state, Wait,
- 	 JobDetailService, CreateSelect2){
+ 	 JobDetailService, CreateSelect2, hosts){
 
  	// pagination not implemented yet, but it'll depend on this
  	$scope.page_size = $stateParams.page_size;
 
+ 	$scope.processEventStatus = JobDetailService.processEventStatus;
  	$scope.activeFilter = $stateParams.filter || null;
 
  	$scope.search = function(){
@@ -39,6 +40,7 @@
 
  	var filter = function(filter){
  		Wait('start');
+
  		if (filter == 'all'){
 	 		return JobDetailService.getRelatedJobEvents($stateParams.id, {
 	 			host_name: $stateParams.hostName,
@@ -104,47 +106,17 @@
  	 	filter($('.HostEvents-select').val());
  	});
 
- 	$scope.processStatus = function(event, $index){
- 		// the stack for which status to display is
- 		// unreachable > failed > changed > ok
- 		// uses the API's runner events and convenience properties .failed .changed to determine status. 
- 		// see: job_event_callback.py
- 		if (event.event == 'runner_on_unreachable'){
- 			$scope.results[$index].status = 'Unreachable';
- 			return 'HostEvents-status--unreachable'
- 		}
- 		// equiv to 'runner_on_error' && 'runner on failed'
- 		if (event.failed){
-  			$scope.results[$index].status = 'Failed';
- 			return 'HostEvents-status--failed'
- 		}
- 		// catch the changed case before ok, because both can be true
- 		if (event.changed){
- 			$scope.results[$index].status = 'Changed';
- 			return 'HostEvents-status--changed'
- 		}
- 		if (event.event == 'runner_on_ok'){
- 			$scope.results[$index].status = 'OK';
- 			return 'HostEvents-status--ok'
- 		}
- 		if (event.event == 'runner_on_skipped'){
- 			$scope.results[$index].status = 'Skipped';
- 			return 'HostEvents-status--skipped'
- 		}
- 		else{
- 			// study a case where none of these apply
- 		}
- 	};
-
-
  	var init = function(){
+ 		$scope.hostName = $stateParams.hostName;
  		// create filter dropdown
+ 		console.log($stateParams)
  		CreateSelect2({
  			element: '.HostEvents-select',
  			multiple: false
  		});
  		// process the filter if one was passed
  		if ($stateParams.filter){
+ 			Wait('start');
  			filter($stateParams.filter).success(function(res){
 	 				$scope.results = res.results;
 	 				Wait('stop');
@@ -152,25 +124,11 @@
 	 		});;
  		}
  		else{
- 			Wait('start');
-	 		JobDetailService.getRelatedJobEvents($stateParams.id, {
-	 			host_name: $stateParams.hostName,
-	 			page_size: $stateParams.page_size})
-	 			.success(function(res){
-	 				$scope.pagination = res;
-	 				$scope.results = res.results;
-	 				Wait('stop');
-	 				$('#HostEvents').modal('show');
-
-	 		});
+ 			$scope.results = hosts.data.results;
+	 		$('#HostEvents').modal('show');
  		}	
  	};
 
- 	$scope.goBack = function(){
- 		// go back to the job details state
- 		// we're leaning on $stateProvider's onExit to close the modal
- 		$state.go('jobDetail');
- 	};
 
  	init();
 
