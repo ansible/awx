@@ -1219,50 +1219,57 @@ class ActivityStreamAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
+
+        # All of these filters are noops and tests fail when we do qs =
+        # qs.filter for them, so we need to figure out what the intent was,
+        # fix this up, and add some tests to enforce the expected behavior
+        #  - anoek - 2016-03-31
+        '''
         #Inventory filter
         inventory_qs = self.user.get_queryset(Inventory)
-        qs = qs.filter(inventory__in=inventory_qs)
+        qs.filter(inventory__in=inventory_qs)
 
         #Host filter
-        qs = qs.filter(host__inventory__in=inventory_qs)
+        qs.filter(host__inventory__in=inventory_qs)
 
         #Group filter
-        qs = qs.filter(group__inventory__in=inventory_qs)
+        qs.filter(group__inventory__in=inventory_qs)
 
         #Inventory Source Filter
-        qs = qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
+        qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
                        Q(inventory_source__group__inventory__in=inventory_qs))
 
         #Inventory Update Filter
-        qs = qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
+        qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
                        Q(inventory_update__inventory_source__group__inventory__in=inventory_qs))
 
         #Credential Update Filter
         credential_qs = self.user.get_queryset(Credential)
-        qs = qs.filter(credential__in=credential_qs)
+        qs.filter(credential__in=credential_qs)
 
         #Team Filter
         team_qs = self.user.get_queryset(Team)
-        qs = qs.filter(team__in=team_qs)
+        qs.filter(team__in=team_qs)
 
         #Project Filter
         project_qs = self.user.get_queryset(Project)
-        qs = qs.filter(project__in=project_qs)
+        qs.filter(project__in=project_qs)
 
         #Project Update Filter
-        qs = qs.filter(project_update__project__in=project_qs)
+        qs.filter(project_update__project__in=project_qs)
 
         #Job Template Filter
         jobtemplate_qs = self.user.get_queryset(JobTemplate)
-        qs = qs.filter(job_template__in=jobtemplate_qs)
+        qs.filter(job_template__in=jobtemplate_qs)
 
         #Job Filter
         job_qs = self.user.get_queryset(Job)
-        qs = qs.filter(job__in=job_qs)
+        qs.filter(job__in=job_qs)
 
         # Ad Hoc Command Filter
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
-        qs = qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
+        qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
+        '''
 
         return qs.all()
 
