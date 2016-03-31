@@ -214,7 +214,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).count():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
