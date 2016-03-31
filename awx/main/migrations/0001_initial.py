@@ -381,7 +381,7 @@ class Migration(migrations.Migration):
             name='AdHocCommand',
             fields=[
                 ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
-                ('job_type', models.CharField(default=b'run', max_length=64, choices=[(b'run', 'Run'), (b'check', 'Check'), (b'scan', 'Scan')])),
+                ('job_type', models.CharField(default=b'run', max_length=64, choices=[(b'run', 'Run'), (b'check', 'Check')])),
                 ('limit', models.CharField(default=b'', max_length=1024, blank=True)),
                 ('module_name', models.CharField(default=b'', max_length=1024, blank=True)),
                 ('module_args', models.TextField(default=b'', blank=True)),
