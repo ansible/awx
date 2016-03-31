@@ -214,7 +214,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).count():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -1087,7 +1087,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        return super(type(self), self).post(request, *args, **kwargs)
+        return super(UserRolesList, self).post(request, *args, **kwargs)
 
     def check_parent_access(self, parent=None):
         # We hide roles that shouldn't be seen in our queryset
@@ -3422,7 +3422,7 @@ class RoleTeamsList(ListAPIView):
     def get_queryset(self):
         # TODO: Check
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return Team.objects.filter(member_role__children__in=[role])
+        return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
         # Forbid implicit role creation here
