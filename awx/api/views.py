@@ -3422,7 +3422,7 @@ class RoleTeamsList(ListAPIView):
     def get_queryset(self):
         # TODO: Check
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return Team.objects.filter(member_role__children__in=[role])
+        return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
         # Forbid implicit role creation here
