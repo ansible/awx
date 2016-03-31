@@ -60,7 +60,8 @@ def test_project_migration():
 
     c1 = Credential.objects.create(name='c1')
 
-    p1 = Project.objects.create(name='p1', credential=c1)
+    project_name = unicode("\xc3\xb4", "utf-8")
+    p1 = Project.objects.create(name=project_name, credential=c1)
     p1.deprecated_organizations.add(o1, o2, o3)
 
     i1 = Inventory.objects.create(name='i1', organization=o1)
