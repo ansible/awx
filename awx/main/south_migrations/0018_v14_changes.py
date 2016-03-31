@@ -13,7 +13,7 @@ class Migration(DataMigration):
         # and orm['appname.ModelName'] for models in other applications.
         
         # Refresh has_active_failures for all hosts.
-        for host in orm.Host.objects:
+        for host in orm.Host.objects.filter(active=True):
             has_active_failures = bool(host.last_job_host_summary and
                                        host.last_job_host_summary.job.active and
                                        host.last_job_host_summary.failed)
@@ -30,9 +30,9 @@ class Migration(DataMigration):
             for subgroup in group.children.exclude(pk__in=except_group_pks):
                 qs = qs | get_all_hosts_for_group(subgroup, except_group_pks)
             return qs
-        for group in orm.Group.objects:
+        for group in orm.Group.objects.filter(active=True):
             all_hosts = get_all_hosts_for_group(group)
-            failed_hosts = all_hosts.filter(
+            failed_hosts = all_hosts.filter(active=True,
                                             last_job_host_summary__job__active=True,
                                             last_job_host_summary__failed=True)
             hosts_with_active_failures = failed_hosts.count()
@@ -49,8 +49,8 @@ class Migration(DataMigration):
         
         # Now update has_active_failures and hosts_with_active_failures for all
         # inventories.
-        for inventory in orm.Inventory.objects:
-            failed_hosts = inventory.hosts.filter( has_active_failures=True)
+        for inventory in orm.Inventory.objects.filter(active=True):
+            failed_hosts = inventory.hosts.filter(active=True, has_active_failures=True)
             hosts_with_active_failures = failed_hosts.count()
             has_active_failures = bool(hosts_with_active_failures)
             changed = False
