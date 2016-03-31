@@ -238,7 +238,7 @@ def migrate_projects(apps, schema_editor):
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
-        if project_orgs.count() > 1:
+        if len(project_orgs) > 1:
             first_org = None
             for org in project_orgs:
                 if first_org is None:
