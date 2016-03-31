@@ -67,7 +67,7 @@ def resolve_role_field(obj, field):
 
     if len(field_components) == 1:
         if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role:
-            raise Exception(smart_text('{} refers to a {}, not an ImplicitRoleField or Role').format(field, type(obj)))
+            raise Exception(smart_text('{} refers to a {}, not an ImplicitRoleField or Role'.format(field, type(obj))))
         ret.append(obj)
     else:
         if type(obj) is ManyRelatedObjectsDescriptor:
