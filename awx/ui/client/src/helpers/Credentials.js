@@ -74,7 +74,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
-                 scope.domainPopOver = "<p>The domain name</p>";
                  scope.hostPopOver = "<p>The host value</p>";
 
                  if (!Empty(scope.kind)) {
@@ -126,32 +125,17 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'openstack':
                              scope.hostLabel = "Host (Authentication URL)";
-                             scope.projectLabel = "Project (Tenet Name/ID)";
-                             scope.password_required = true;
-                             scope.project_required = true;
-                             scope.host_required = true;
-                             scope.username_required = true;
-                             scope.projectPopOver = "<p>This is the tenant name " +
-                                 "or tenant id. This value is usually the same " +
-                                 " as the username.</p>";
-                             scope.hostPopOver = "<p>The host to authenticate with." +
-                                 "<br />For example, https://openstack.business.com/v2.0/";
-                         case 'openstack_v3':
-                             scope.hostLabel = "Host (Authentication URL)";
-                             scope.projectLabel = "Project (Tenet Name/ID)";
+                             scope.projectLabel = "Project (Tenant Name)";
                              scope.domainLabel = "Domain Name";
                              scope.password_required = true;
                              scope.project_required = true;
-                             scope.domain_required = true;
                              scope.host_required = true;
                              scope.username_required = true;
-                             scope.projectPopOver = "<p>This is the tenant name " +
-                                 "or tenant id. This value is usually the same " +
+                             scope.projectPopOver = "<p>This is the tenant name. " +
+                                 " This value is usually the same " +
                                  " as the username.</p>";
                              scope.hostPopOver = "<p>The host to authenticate with." +
-                                 "<br />For example, https://openstack.business.com/v3</p>";
-                             scope.domainPopOver = "<p>Domain used for Keystone v3 " +
-                                 "<br />identity service.</p>";
+                                 "<br />For example, https://openstack.business.com/v2.0/";
                          break;
                      }
                  }

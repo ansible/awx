@@ -748,7 +748,6 @@ class InventorySourceOptions(BaseModel):
         ('azure',  _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
         ('openstack', _('OpenStack')),
-        ('openstack_v3', _('OpenStack V3')),
         ('custom', _('Custom Script')),
     ]
 
@@ -976,11 +975,6 @@ class InventorySourceOptions(BaseModel):
     def get_openstack_region_choices(self):
         """I don't think openstack has regions"""
         return [('all', 'All')]
-
-    @classmethod
-    def get_openstack_v3_region_choices(self):
-        """Defer to the behavior of openstack"""
-        return self.get_openstack_region_choices()
 
     def clean_credential(self):
         if not self.source:

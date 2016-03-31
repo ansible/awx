@@ -305,8 +305,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                         field_id: 'source_extra_vars', onReady: callback });
                     }
                     if(scope.source.value==="vmware" ||
-                        scope.source.value==="openstack" ||
-                        scope.source.value==="openstack_v3"){
+                        scope.source.value==="openstack"){
                         scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
                         ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
                                         field_id: 'source_inventory_variables', onReady: callback });
@@ -316,8 +315,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                         scope.source.value==='gce' ||
                         scope.source.value === 'azure' ||
                         scope.source.value === 'vmware' ||
-                        scope.source.value === 'openstack' ||
-                        scope.source.value === 'openstack_v3') {
+                        scope.source.value === 'openstack') {
                         if (scope.source.value === 'ec2') {
                             kind = 'aws';
                         } else {
@@ -926,8 +924,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                        ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                                                        field_id: 'source_source_vars', onReady: waitStop });
                                    } else if (sources_scope.source && (sources_scope.source.value === 'vmware' ||
-                                                                       sources_scope.source.value === 'openstack' ||
-                                                                       sources_scope.source.value === 'openstack_v3')) {
+                                                                       sources_scope.source.value === 'openstack')) {
                                        Wait('start');
                                        ParseTypeChange({ scope: sources_scope, variable: 'inventory_variables', parse_variable: SourceForm.fields.inventory_variables.parseTypeName,
                                                        field_id: 'source_inventory_variables', onReady: waitStop });
@@ -1306,8 +1303,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                }
 
                                if (sources_scope.source && (sources_scope.source.value === 'vmware' ||
-                                                            sources_scope.source.value === 'openstack' ||
-                                                            sources_scope.source.value === 'openstack_v3')) {
+                                                            sources_scope.source.value === 'openstack')) {
                                    data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.inventory_variables, true);
                                }
 

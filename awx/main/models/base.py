@@ -61,7 +61,7 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_JOBTEMPLATE_CREATE, _('Create a Job Template')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'openstack', 'openstack_v3', 'custom']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'openstack', 'custom']
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),

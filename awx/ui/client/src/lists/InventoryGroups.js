@@ -51,9 +51,6 @@ export default
                 },{
                     name: "OpenStack",
                     value: "openstack"
-                },{
-                    name: "OpenStack V3",
-                    value: "openstack_v3"
                 }],
                 sourceModel: 'inventory_source',
                 sourceField: 'source',
@@ -62,7 +59,7 @@ export default
             has_external_source: {
                 label: 'Has external source?',
                 searchType: 'in',
-                searchValue: 'ec2,rax,vmware,azure,gce,openstack,openstack_v3',
+                searchValue: 'ec2,rax,vmware,azure,gce,openstack',
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'source'
