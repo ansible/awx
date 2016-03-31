@@ -2211,15 +2211,15 @@ class JobTemplateCallback(GenericAPIView):
             return set()
         # Find the host objects to search for a match.
         obj = self.get_object()
-        qs = obj.inventory.hosts
+        hosts = obj.inventory.hosts.all()
         # First try for an exact match on the name.
         try:
-            return set([qs.get(name__in=remote_hosts)])
+            return set([hosts.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
         matches = set()
-        for host in qs.all():
+        for host in hosts:
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
@@ -2228,8 +2228,9 @@ class JobTemplateCallback(GenericAPIView):
                 matches.add(host)
         if len(matches) == 1:
             return matches
+
         # Try to resolve forward addresses for each host to find matches.
-        for host in qs.all():
+        for host in hosts:
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host:
@@ -3376,7 +3377,7 @@ class RoleList(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Role.objects
+            return Role.objects.all()
         return Role.visible_roles(self.request.user)
 
 
@@ -3399,7 +3400,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
     def get_queryset(self):
         role = self.get_parent_object()
         self.check_parent_access(role)
-        return role.members
+        return role.members.all()
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
@@ -3455,7 +3456,7 @@ class RoleParentsList(SubListAPIView):
         # XXX: This should be the intersection between the roles of the user
         # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.parents
+        return role.parents.all()
 
 class RoleChildrenList(SubListAPIView):
 

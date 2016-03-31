@@ -468,7 +468,7 @@ class InventorySourceAccess(BaseAccess):
     model = InventorySource
 
     def get_queryset(self):
-        qs = self.model.objects
+        qs = self.model.objects.all()
         qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
         inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
         return qs.filter(Q(inventory_id__in=inventory_ids) |
