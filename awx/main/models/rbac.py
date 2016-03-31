@@ -136,11 +136,8 @@ class Role(CommonModelNameNotUnique):
 
     @staticmethod
     def singleton(name):
-        try:
-            return Role.objects.get(singleton_name=name)
-        except Role.DoesNotExist:
-            ret = Role.objects.create(singleton_name=name, name=name)
-            return ret
+        role, _ = Role.objects.get_or_create(singleton_name=name, name=name)
+        return role
 
     def is_ancestor_of(self, role):
         return role.ancestors.filter(id=self.id).exists()
