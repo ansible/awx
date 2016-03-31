@@ -24,7 +24,7 @@ import {Home, HomeGroups, HomeHosts} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
-import {PortalController} from './controllers/Portal';
+import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
@@ -109,6 +109,7 @@ var tower = angular.module('Tower', [
     standardOut.name,
     access.name,
     JobTemplates.name,
+    portalMode.name,
     'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -283,20 +284,6 @@ var tower = angular.module('Tower', [
                 controller: JobsListController,
                 ncyBreadcrumb: {
                     label: "JOBS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('portal', {
-                url: '/portal',
-                templateUrl: urlPrefix + 'partials/portal.html',
-                controller: PortalController,
-                ncyBreadcrumb: {
-                    label: "PORTAL"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
@@ -828,7 +815,7 @@ var tower = angular.module('Tower', [
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
                             } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
-                            } else if ($state.is('portal')) {
+                            } else if ($state.is('portalMode')) {
                                 $rootScope.$emit('JobStatusChange-portal', data);
                             } else if ($state.is('projects')) {
                                 $rootScope.$emit('JobStatusChange-projects', data);

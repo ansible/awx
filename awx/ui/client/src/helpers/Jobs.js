@@ -381,8 +381,7 @@ export default
                 mode: 'edit',
                 id: id,
                 scope: scope,
-                showSearch: false,
-                title: false
+                showSearch: false
             });
 
             SearchInit({

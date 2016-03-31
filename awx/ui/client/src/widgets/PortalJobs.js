@@ -24,6 +24,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             choicesCount = 0,
             listCount = 0,
             jobs_scope = scope.$new(true),
+            pageSize = 12,
             max_rows,
             user,
             html, e,
@@ -56,7 +57,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 list: PortalJobsList,
                 id: 'active-jobs',
                 url: url , //GetBasePath('jobs')+'?created_by='+user,
-                pageSize: max_rows,
+                pageSize: pageSize,
                 spinner: true
             });
 
@@ -71,7 +72,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
         scope.removeChoicesReady = scope.$on('choicesReady', function() {
             choicesCount++;
             if (choicesCount === 2) {
-                setPortalJobsHeight();
+                //setPortalJobsHeight();
                 scope.$emit('buildJobsList');
             }
         });
@@ -136,6 +137,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
 
 
      // Set the height of each container and calc max number of rows containers can hold
+     /*
         function setPortalJobsHeight() {
             var docw = $(window).width(),
                 box_height, available_height, search_row, page_row, height, header, row_height;
@@ -191,9 +193,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             scope[PortalJobTemplateList.iterator + 'PageSize'] = max_rows;
             scope.changePageSize(PortalJobTemplateList.name, PortalJobTemplateList.iterator, false);
         }
-
-
-
+        */
     };
 }
 ]);

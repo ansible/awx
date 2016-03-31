@@ -16,6 +16,7 @@ export default
         index: false,
         hover: true,
         well: true,
+        listTitle: 'Jobs',
 
         fields: {
             status: {
@@ -34,39 +35,31 @@ export default
                     { name: "Canceled", value: "canceled" }
                 ]
             },
+            /*
             id: {
                 label: 'ID',
                 key: true,
                 noLink: true, //undocumented: 'key' above will automatically made the fields a link, but 'noLink' will override this setting
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
+                columnClass: 'col-xs-2 List-staticColumnAdjacent',
             },
+            */
             name: {
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
-                defaultSearchField: true
+                defaultSearchField: true,
+                linkTo: '/#/jobs/{{portal_job.id}}'
             },
             started: {
                 label: 'Started',
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                columnClass: "col-lg-4 col-md-4 col-sm-3 xs-hidden"
+                nosort: true,
+                columnClass: "col-lg-4 col-md-4 col-sm-3 hidden-xs"
             }
         },
 
-        actions: { },
-
-        fieldActions: {
-
-            columnClass: 'col-lg-3 col-md-4 col-sm-3 col-xs-4',
-
-            job_details: {
-                mode: 'all',
-                ngClick: "viewJobDetails(portal_job)",
-                awToolTip: 'View job details',
-                dataPlacement: 'top'
-            }
-        }
+        actions: { }
     });

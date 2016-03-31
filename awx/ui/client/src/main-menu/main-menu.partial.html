@@ -59,6 +59,14 @@
             </span>
         </a>
         <a class="MainMenu-item"
+            id="main_menu_setup_mobile_link"
+            ui-sref="portalMode"
+            ng-class="{'is-currentRoute' : isCurrentRoute('portalMode')}">
+            <span class="MainMenu-itemText">
+                PORTAL MODE
+            </span>
+        </a>
+        <a class="MainMenu-item"
             id="main_menu_docs_mobile_link"
             ng-href="http://docs.ansible.com/ansible-tower/"
             target="_blank">
@@ -127,7 +135,7 @@
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_setup_link"
-        ng-href="/#/setup"
+        ui-href="/#/setup"
         ng-class="{'is-currentRoute' : isCurrentRoute('setup'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Settings"
         data-placement="bottom"
@@ -135,6 +143,18 @@
         data-container="body">
         <i class="MainMenu-itemImage MainMenu-itemImage--settings fa fa-cog"
             alt="Settings">
+        </i>
+    </a>
+    <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
+        id="main_menu_portal_link"
+        ng-href="/#/portal"
+        ng-class="{'is-currentRoute' : isCurrentRoute('portalMode'), 'is-loggedOut' : !$root.current_user.username}"
+        aw-tool-tip="Portal Mode"
+        data-placement="bottom"
+        data-trigger="hover"
+        data-container="body">
+        <i class="MainMenu-itemImage MainMenu-itemImage--settings fa fa-columns"
+            alt="Portal Mode">
         </i>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"

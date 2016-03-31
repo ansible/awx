@@ -19,12 +19,13 @@
  *
  *
 */
-export function PortalController($scope, $compile, $stateParams, $rootScope, $location, $log, Wait, ClearScope, Rest, GetBasePath, ProcessErrors,
+export function PortalModeController($scope, $compile, $stateParams, $rootScope, $location, $log, Wait, ClearScope, Rest, GetBasePath, ProcessErrors,
     PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
         ClearScope('portal');
 
         var jobs_scope,
+        pageSize = 12,
         list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
@@ -43,6 +44,7 @@ export function PortalController($scope, $compile, $stateParams, $rootScope, $lo
             });
 
             $scope.job_templatePageSize = $scope.getMaxRows();
+            console.log($scope.job_templatePageSize);
 
             SearchInit({
                 scope: $scope,
@@ -54,7 +56,7 @@ export function PortalController($scope, $compile, $stateParams, $rootScope, $lo
                 scope: $scope,
                 list: list,
                 url: defaultUrl,
-                pageSize: $scope.job_templatePageSize
+                pageSize: pageSize
             });
 
             $scope.search(list.iterator);
@@ -137,6 +139,6 @@ export function PortalController($scope, $compile, $stateParams, $rootScope, $lo
 
     }
 
-PortalController.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors',
+PortalModeController.$inject = ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors',
     'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];
