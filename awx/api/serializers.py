@@ -38,7 +38,7 @@ from polymorphic import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
@@ -92,7 +92,7 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 
-def reverseGenericForeignKey(content_object):
+def reverse_gfk(content_object):
     '''
     Computes a reverse for a GenericForeignKey field.
 
@@ -101,34 +101,11 @@ def reverseGenericForeignKey(content_object):
     for example
         { 'organization': '/api/v1/organizations/1/' }
     '''
-
     ret = {}
-    if type(content_object) is Organization:
-        ret['organization'] = reverse('api:organization_detail', args=(content_object.pk,))
-    if type(content_object) is User:
-        ret['user'] = reverse('api:user_detail', args=(content_object.pk,))
-    if type(content_object) is Team:
-        ret['team'] = reverse('api:team_detail', args=(content_object.pk,))
-    if type(content_object) is Project:
-        ret['project'] = reverse('api:project_detail', args=(content_object.pk,))
-    if type(content_object) is Inventory:
-        ret['inventory'] = reverse('api:inventory_detail', args=(content_object.pk,))
-    if type(content_object) is Host:
-        ret['host'] = reverse('api:host_detail', args=(content_object.pk,))
-    if type(content_object) is Group:
-        ret['group'] = reverse('api:group_detail', args=(content_object.pk,))
-    if type(content_object) is InventorySource:
-        ret['inventory_source'] = reverse('api:inventory_source_detail', args=(content_object.pk,))
-    if type(content_object) is Credential:
-        ret['credential'] = reverse('api:credential_detail', args=(content_object.pk,))
-    if type(content_object) is JobTemplate:
-        ret['job_template'] = reverse('api:job_template_detail', args=(content_object.pk,))
-    if type(content_object) is Role:
-        ret['role'] = reverse('api:role_detail', args=(content_object.pk,))
-    if type(content_object) is Job:
-        ret['job'] = reverse('api:job_detail', args=(content_object.pk,))
-    if type(content_object) is JobEvent:
-        ret['job_event'] = reverse('api:job_event_detail', args=(content_object.pk,))
+    try:
+        ret[camelcase_to_underscore(content_object.__class__.__name__)] = content_object.get_absolute_url()
+    except AttributeError:
+        pass
     return ret
 
 
@@ -1498,7 +1475,7 @@ class RoleSerializer(BaseSerializer):
         ret['teams'] = reverse('api:role_teams_list', args=(obj.pk,))
         try:
             if obj.content_object:
-                ret.update(reverseGenericForeignKey(obj.content_object))
+                ret.update(reverse_gfk(obj.content_object))
         except AttributeError:
             # AttributeError's happen if our content_object is pointing at
             # a model that no longer exists. This is dirty data and ideally
@@ -1524,7 +1501,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
-                role_dict['related'] = reverseGenericForeignKey(role.content_object)
+                role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
 
