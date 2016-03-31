@@ -92,7 +92,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
     }
 
     (host, response) = setup_common(hosts, fact_scans, get, user, epoch=epoch, get_params=search)
-    
+
     results = response.data['results']
     assert 'related' in results[0]
     assert 'timestamp' in results[0]
@@ -118,12 +118,12 @@ def test_basic_options_fields(hosts, fact_scans, options, user):
 @pytest.mark.django_db
 def test_related_fact_view(hosts, fact_scans, get, user):
     epoch = timezone.now()
-    
+
     (host, response) = setup_common(hosts, fact_scans, get, user, epoch=epoch)
     facts_known = Fact.get_timeline(host.id)
     assert 9 == len(facts_known)
     assert 9 == len(response.data['results'])
-   
+
     for i, fact_known in enumerate(facts_known):
         check_url(response.data['results'][i]['related']['fact_view'], fact_known, fact_known.module)
 
@@ -131,12 +131,12 @@ def test_related_fact_view(hosts, fact_scans, get, user):
 @pytest.mark.django_db
 def test_multiple_hosts(hosts, fact_scans, get, user):
     epoch = timezone.now()
-    
+
     (host, response) = setup_common(hosts, fact_scans, get, user, epoch=epoch, host_count=3)
     facts_known = Fact.get_timeline(host.id)
     assert 9 == len(facts_known)
     assert 9 == len(response.data['results'])
-   
+
     for i, fact_known in enumerate(facts_known):
         check_url(response.data['results'][i]['related']['fact_view'], fact_known, fact_known.module)
 
@@ -153,7 +153,7 @@ def test_param_to_from(hosts, fact_scans, get, user):
     facts_known = Fact.get_timeline(host.id, ts_from=search['from'], ts_to=search['to'])
     assert 9 == len(facts_known)
     assert 9 == len(response.data['results'])
-  
+
     check_response_facts(facts_known, response)
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
@@ -168,7 +168,7 @@ def test_param_module(hosts, fact_scans, get, user):
     facts_known = Fact.get_timeline(host.id, module=search['module'])
     assert 3 == len(facts_known)
     assert 3 == len(response.data['results'])
-   
+
     check_response_facts(facts_known, response)
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
@@ -183,7 +183,7 @@ def test_param_from(hosts, fact_scans, get, user):
     facts_known = Fact.get_timeline(host.id, ts_from=search['from'])
     assert 3 == len(facts_known)
     assert 3 == len(response.data['results'])
-   
+
     check_response_facts(facts_known, response)
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
@@ -198,14 +198,14 @@ def test_param_to(hosts, fact_scans, get, user):
     facts_known = Fact.get_timeline(host.id, ts_to=search['to'])
     assert 6 == len(facts_known)
     assert 6 == len(response.data['results'])
-   
+
     check_response_facts(facts_known, response)
 
 def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
-    team_obj.users.add(user_obj)
+    team_obj.member_role.members.add(user_obj)
 
     url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
     response = get(url, user_obj)
@@ -235,7 +235,7 @@ def test_super_user_ok(hosts, fact_scans, get, user, team):
 @pytest.mark.django_db
 def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
     user_admin = user('johnson', False)
-    organization.admins.add(user_admin)
+    organization.admin_role.members.add(user_admin)
 
     response = _test_user_access_control(hosts, fact_scans, get, user_admin, team)
 
@@ -247,7 +247,7 @@ def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
 def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team):
     user_admin = user('johnson', False)
     org2 = organizations(1)
-    org2[0].admins.add(user_admin)
+    org2[0].admin_role.members.add(user_admin)
 
     response = _test_user_access_control(hosts, fact_scans, get, user_admin, team)
 

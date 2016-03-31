@@ -26,19 +26,6 @@ class MongoFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         return queryset
 
-class ActiveOnlyBackend(BaseFilterBackend):
-    '''
-    Filter to show only objects where is_active/active is True.
-    '''
-
-    def filter_queryset(self, request, queryset, view):
-        for field in queryset.model._meta.fields:
-            if field.name == 'is_active':
-                queryset = queryset.filter(is_active=True)
-            elif field.name == 'active':
-                queryset = queryset.filter(active=True)
-        return queryset
-
 class TypeFilterBackend(BaseFilterBackend):
     '''
     Filter on type field now returned with all objects.
@@ -166,12 +153,12 @@ class FieldLookupBackend(BaseFilterBackend):
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
-                
+
                 # HACK: Make job event filtering by host name mostly work even
                 # when not capturing job event hosts M2M.
                 if queryset.model._meta.object_name == 'JobEvent' and key.startswith('hosts__name'):
                     key = key.replace('hosts__name', 'or__host__name')
-                    or_filters.append((False, 'host__name__isnull', True))                 
+                    or_filters.append((False, 'host__name__isnull', True))
 
                 # Custom __int filter suffix (internal use only).
                 q_int = False

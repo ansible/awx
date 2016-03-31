@@ -15,8 +15,6 @@ from django.conf import settings
 
 # AWX
 from awx.main.models.projects import Project
-from awx.main.models.organization import Organization, Permission
-from awx.main.models.jobs import JobTemplate
 from awx.main.models.base import PERM_INVENTORY_READ
 from awx.main.models.ha import Instance
 from awx.main.models.fact import Fact
@@ -25,6 +23,19 @@ from rest_framework.test import (
     APIRequestFactory,
     force_authenticate,
 )
+
+from awx.main.models.credential import Credential
+from awx.main.models.jobs import JobTemplate
+from awx.main.models.inventory import (
+    Group,
+)
+from awx.main.models.organization import (
+    Organization,
+    Permission,
+    Team,
+)
+
+from awx.main.models.rbac import Role
 
 '''
 Disable all django model signals.
@@ -54,6 +65,176 @@ def user():
             user.save()
         return user
     return u
+
+@pytest.fixture
+def check_jobtemplate(project, inventory, credential):
+    return \
+        JobTemplate.objects.create(
+            job_type='check',
+            project=project,
+            inventory=inventory,
+            credential=credential,
+            name='check-job-template'
+        )
+
+@pytest.fixture
+def deploy_jobtemplate(project, inventory, credential):
+    return \
+        JobTemplate.objects.create(
+            job_type='run',
+            project=project,
+            inventory=inventory,
+            credential=credential,
+            name='deploy-job-template'
+        )
+
+@pytest.fixture
+def team(organization):
+    return organization.teams.create(name='test-team')
+
+@pytest.fixture
+@mock.patch.object(Project, "update", lambda self, **kwargs: None)
+def project(instance, organization):
+    prj = Project.objects.create(name="test-proj",
+                                 description="test-proj-desc",
+                                 scm_type="git",
+                                 scm_url="https://github.com/jlaska/ansible-playbooks",
+                                 organization=organization
+                                 )
+    return prj
+
+@pytest.fixture
+def project_factory(organization):
+    def factory(name):
+        try:
+            prj = Project.objects.get(name=name)
+        except Project.DoesNotExist:
+            prj = Project.objects.create(name=name,
+                                         description="description for " + name,
+                                         scm_type="git",
+                                         scm_url="https://github.com/jlaska/ansible-playbooks",
+                                         organization=organization
+                                         )
+        return prj
+    return factory
+
+@pytest.fixture
+def team_factory(organization):
+    def factory(name):
+        try:
+            t = Team.objects.get(name=name)
+        except Team.DoesNotExist:
+            t = Team.objects.create(name=name,
+                                    description="description for " + name,
+                                    organization=organization)
+        return t
+    return factory
+
+@pytest.fixture
+def user_project(user):
+    owner = user('owner')
+    return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
+
+@pytest.fixture
+def instance(settings):
+    return Instance.objects.create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
+
+@pytest.fixture
+def organization(instance):
+    return Organization.objects.create(name="test-org", description="test-org-desc")
+
+@pytest.fixture
+def credential():
+    return Credential.objects.create(kind='aws', name='test-cred')
+
+@pytest.fixture
+def inventory(organization):
+    return organization.inventories.create(name="test-inv")
+
+@pytest.fixture
+def role():
+    return Role.objects.create(name='role')
+
+@pytest.fixture
+def admin(user):
+    return user('admin', True)
+
+@pytest.fixture
+def alice(user):
+    return user('alice', False)
+
+@pytest.fixture
+def bob(user):
+    return user('bob', False)
+
+@pytest.fixture
+def rando(user):
+    "Rando, the random user that doesn't have access to anything"
+    return user('rando', False)
+
+@pytest.fixture
+def org_admin(user, organization):
+    ret = user('org-admin', False)
+    organization.admin_role.members.add(ret)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
+def org_member(user, organization):
+    ret = user('org-member', False)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
+def organizations(instance):
+    def rf(organization_count=1):
+        orgs = []
+        for i in xrange(0, organization_count):
+            o = Organization.objects.create(name="test-org-%d" % i, description="test-org-desc")
+            orgs.append(o)
+        return orgs
+    return rf
+
+@pytest.fixture
+def group(inventory):
+    def g(name):
+        try:
+            return Group.objects.get(name=name, inventory=inventory)
+        except:
+            return Group.objects.create(inventory=inventory, name=name)
+    return g
+
+@pytest.fixture
+def hosts(group):
+    group1 = group('group-1')
+
+    def rf(host_count=1):
+        hosts = []
+        for i in xrange(0, host_count):
+            name = '%s-host-%s' % (group1.name, i)
+            (host, created) = group1.inventory.hosts.get_or_create(name=name)
+            if created:
+                group1.hosts.add(host)
+            hosts.append(host)
+        return hosts
+    return rf
+
+
+
+
+@pytest.fixture
+def permissions():
+    return {
+        'admin':{'create':True, 'read':True, 'write':True,
+                 'update':True, 'delete':True, 'scm_update':True, 'execute':True, 'use':True,},
+
+        'auditor':{'read':True, 'create':False, 'write':False,
+                   'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':False,},
+
+        'usage':{'read':False, 'create':False, 'write':False,
+                 'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
+    }
+
 
 @pytest.fixture
 def post():
@@ -174,54 +355,12 @@ def options():
         return response
     return rf
 
-@pytest.fixture
-def instance(settings):
-    return Instance.objects.create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
 
-@pytest.fixture
-def organization(instance):
-    return Organization.objects.create(name="test-org", description="test-org-desc")
-
-@pytest.fixture
-@mock.patch.object(Project, "update", lambda self, **kwargs: None)
-def project(instance):
-    return Project.objects.create(name="test-proj",
-                                  description="test-proj-desc",
-                                  scm_type="git",
-                                  scm_url="https://github.com/jlaska/ansible-playbooks")
-@pytest.fixture
-def organizations(instance):
-    def rf(organization_count=1):
-        orgs = []
-        for i in xrange(0, organization_count):
-            o = Organization.objects.create(name="test-org-%d" % i, description="test-org-desc")
-            orgs.append(o)
-        return orgs
-    return rf
-
-@pytest.fixture
-def inventory(organization):
-    return organization.inventories.create(name="test-inv")
-
-@pytest.fixture
-def group(inventory):
-    return inventory.groups.create(name='group-1')
-
-@pytest.fixture
-def hosts(group):
-    def rf(host_count=1):
-        hosts = []
-        for i in xrange(0, host_count):
-            name = '%s-host-%s' % (group.name, i)
-            (host, created) = group.inventory.hosts.get_or_create(name=name)
-            if created:
-                group.hosts.add(host)
-            hosts.append(host)
-        return hosts
-    return rf
 
 @pytest.fixture
 def fact_scans(group, fact_ansible_json, fact_packages_json, fact_services_json):
+    group1 = group('group-1')
+
     def rf(fact_scans=1, timestamp_epoch=timezone.now()):
         facts_json = {}
         facts = []
@@ -233,7 +372,7 @@ def fact_scans(group, fact_ansible_json, fact_packages_json, fact_services_json)
         facts_json['services'] = fact_services_json
 
         for i in xrange(0, fact_scans):
-            for host in group.hosts.all():
+            for host in group1.hosts.all():
                 for module_name in module_names:
                     facts.append(Fact.objects.create(host=host, timestamp=timestamp_current, module=module_name, facts=facts_json[module_name]))
             timestamp_current += timedelta(days=1)
@@ -256,10 +395,6 @@ def fact_packages_json():
 @pytest.fixture
 def fact_services_json():
     return _fact_json('services')
-
-@pytest.fixture
-def team(organization):
-    return organization.teams.create(name='test-team')
 
 @pytest.fixture
 def permission_inv_read(organization, inventory, team):

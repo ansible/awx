@@ -151,6 +151,17 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 editRequired: false,
                 subForm: 'sourceSubForm'
             },
+            organization: {
+                label: 'Organization',
+                type: 'lookup',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                ngClick: 'lookUpOrganization()',
+                awRequiredWhen: {
+                    variable: "organizationrequired",
+                    init: "true"
+                }
+            },
             credential: {
                 label: 'SCM Credential',
                 type: 'lookup',
@@ -234,138 +245,45 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         },
 
         related: {
-            organizations: {
+            permissions: {
                 type: 'collection',
-                title: 'Organizations',
-                iterator: 'organization',
+                title: 'Permissions',
+                iterator: 'permission',
                 index: false,
                 open: false,
-
+                searchType: 'select',
                 actions: {
                     add: {
-                        ngClick: "add('organizations')",
+                        ngClick: "addPermission",
                         label: 'Add',
-                        awToolTip: 'Add an organization',
+                        awToolTip: 'Add a permission',
                         actionClass: 'btn List-buttonSubmit',
                         buttonContent: '&#43; ADD'
                     }
                 },
 
                 fields: {
-                    name: {
+                    username: {
                         key: true,
-                        label: 'Name'
+                        label: 'User',
+                        linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
-                    description: {
-                        label: 'Description'
-                    }
-                },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "edit('organizations', organization.id, organization.name)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit the organization',
-                        'class': 'btn btn-default'
-                    },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "delete('organizations', organization.id, organization.name, 'organization')",
-                        icon: 'icon-trash',
-                        "class": 'btn-danger',
-                        awToolTip: 'Delete the organization'
-                    }
-                }
-            },
-
-            schedules: {
-                type: 'collection',
-                title: 'Schedules',
-                iterator: 'schedule',
-                index: false,
-                open: false,
-
-                actions: {
-                    refresh: {
-                        mode: 'all',
-                        awToolTip: "Refresh the page",
-                        ngClick: "refreshSchedules()",
-                        actionClass: 'btn List-buttonDefault',
-                        buttonContent: 'REFRESH',
-                        ngHide: 'scheduleLoading == false && schedule_active_search == false && schedule_total_rows < 1'
-                    },
-                    add: {
-                        mode: 'all',
-                        ngClick: 'addSchedule()',
-                        awToolTip: 'Add a new schedule',
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD'
-                    }
-                },
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name',
-                        ngClick: "editSchedule(schedule.id)",
-                        columnClass: "col-md-3 col-sm-3 col-xs-3"
-                    },
-                    dtstart: {
-                        label: 'First Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 hidden-xs"
-                    },
-                    next_run: {
-                        label: 'Next Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 col-xs-3"
-                    },
-                    dtend: {
-                        label: 'Final Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 hidden-xs"
-                    }
-                },
-                fieldActions: {
-                    "play": {
-                        mode: "all",
-                        ngClick: "toggleSchedule($event, schedule.id)",
-                        awToolTip: "{{ schedule.play_tip }}",
-                        dataTipWatch: "schedule.play_tip",
-                        iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
-                        dataPlacement: "top"
-                    },
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "editSchedule(schedule.id)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit schedule',
-                        dataPlacement: 'top'
-                    },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "deleteSchedule(schedule.id)",
-                        icon: 'icon-trash',
-                        awToolTip: 'Delete schedule',
-                        dataPlacement: 'top'
+                    role: {
+                        label: 'Role',
+                        type: 'role',
+                        noSort: true,
+                        class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
                     }
                 }
             }
-
         },
 
         relatedSets: function(urls) {
             return {
-                organizations: {
-                    iterator: 'organization',
-                    url: urls.organizations
-                },
-                schedules: {
-                    iterator: 'schedule',
-                    url: urls.schedules
+                permissions: {
+                    iterator: 'permission',
+                    url: urls.access_list
                 }
             };
         }

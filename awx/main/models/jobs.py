@@ -28,6 +28,9 @@ from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
 from awx.main.conf import tower_settings
+from awx.main.fields import ImplicitRoleField
+from awx.main.models.mixins import ResourceMixin
+
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -150,12 +153,12 @@ class JobOptions(BaseModel):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential and self.credential.active:
+        if self.credential:
             return self.credential.passwords_needed
         else:
             return []
 
-class JobTemplate(UnifiedJobTemplate, JobOptions):
+class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -183,6 +186,23 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     survey_spec = JSONField(
         blank=True,
         default={},
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Job Template Administrator',
+        role_description='Full access to all settings',
+        parent_role='project.admin_role',
+        permissions = {'all': True}
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Job Template Auditor',
+        role_description='Read-only access to all settings',
+        parent_role='project.auditor_role',
+        permissions = {'read': True}
+    )
+    executor_role = ImplicitRoleField(
+        role_name='Job Template Runner',
+        role_description='May run the job template',
+        permissions = {'read': True, 'execute': True}
     )
 
     @classmethod
@@ -342,14 +362,14 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         # Return all notifiers defined on the Job Template, on the Project, and on the Organization for each trigger type
         # TODO: Currently there is no org fk on project so this will need to be added once that is
         #       available after the rbac pr
-        base_notifiers = Notifier.objects.filter(active=True)
+        base_notifiers = Notifier.objects
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self, self.project]))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors__in=self.project.organizations.all())))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success__in=self.project.organizations.all())))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any__in=self.project.organizations.all())))
+        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.project.organization)))
+        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.project.organization)))
+        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.project.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
 class Job(UnifiedJob, JobOptions):
@@ -478,7 +498,7 @@ class Job(UnifiedJob, JobOptions):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if self.inventory is None or self.project is None:
             return []
-        inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
         project_found = False
         inventory_sources_found = []
         dependencies = []
@@ -577,7 +597,7 @@ class Job(UnifiedJob, JobOptions):
         if not super(Job, self).can_start:
             return False
 
-        if not (self.credential and self.credential.active):
+        if not (self.credential):
             return False
 
         return True

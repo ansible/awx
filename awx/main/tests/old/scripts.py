@@ -87,9 +87,11 @@ class InventoryScriptTest(BaseScriptTest):
                 host = inventory.hosts.create(name='host-%02d-%02d.example.com' % (n, x),
                                               inventory=inventory,
                                               variables=variables)
-                if x in (3, 7):
-                    host.mark_inactive()
+                #if x in (3, 7):
+                #    host.delete()
+                #    continue
                 hosts.append(host)
+
 
             # add localhost just to make sure it's thrown into all (Ansible github bug)
             local = inventory.hosts.create(name='localhost', inventory=inventory, variables={})
@@ -105,8 +107,9 @@ class InventoryScriptTest(BaseScriptTest):
                 group = inventory.groups.create(name='group-%d' % x,
                                                 inventory=inventory,
                                                 variables=variables)
-                if x == 2:
-                    group.mark_inactive()
+                #if x == 2:
+                #    #group.delete()
+                #    #continue
                 groups.append(group)
                 group.hosts.add(hosts[x])
                 group.hosts.add(hosts[x + 5])
@@ -115,6 +118,13 @@ class InventoryScriptTest(BaseScriptTest):
                 if x == 4:
                     group.hosts.add(local)
             self.groups.extend(groups)
+
+            hosts[3].delete()
+            hosts[7].delete()
+            groups[2].delete()
+
+
+
 
     def tearDown(self):
         super(InventoryScriptTest, self).tearDown()
@@ -144,12 +154,11 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_list_with_inventory_id_as_argument(self):
         inventory = self.inventories[0]
-        self.assertTrue(inventory.active)
         rc, stdout, stderr = self.run_inventory_script(list=True,
                                                        inventory=inventory.pk)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        groups = inventory.groups.filter(active=True)
+        groups = inventory.groups
         groupnames = [ x for x in groups.values_list('name', flat=True)]
 
         # it's ok for all to be here because due to an Ansible inventory workaround
@@ -161,20 +170,17 @@ class InventoryScriptTest(BaseScriptTest):
         # variable data or parent/child relationships.
         for k,v in data.items():
             if k != 'all':
-                self.assertTrue(isinstance(v, dict))
-                self.assertTrue(isinstance(v['children'], (list,tuple)))
-                self.assertTrue(isinstance(v['hosts'], (list,tuple)))
-                self.assertTrue(isinstance(v['vars'], (dict)))
-                group = inventory.groups.get(active=True, name=k)
-                hosts = group.hosts.filter(active=True)
+                assert isinstance(v, dict)
+                assert isinstance(v['children'], (list,tuple))
+                assert isinstance(v['hosts'], (list,tuple))
+                assert isinstance(v['vars'], (dict))
+                group = inventory.groups.get(name=k)
+                hosts = group.hosts
                 hostnames = hosts.values_list('name', flat=True)
                 self.assertEqual(set(v['hosts']), set(hostnames))
             else:
-                self.assertTrue(v['hosts'] == ['localhost'])
+                assert v['hosts'] == ['host-00-02.example.com', 'localhost']
 
-        for group in inventory.groups.filter(active=False):
-            self.assertFalse(group.name in data.keys(),
-                             'deleted group %s should not be in data' % group)
         # Command line argument for inventory ID should take precedence over
         # environment variable.
         inventory_pks = set(map(lambda x: x.pk, self.inventories))
@@ -187,43 +193,41 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_list_with_inventory_id_in_environment(self):
         inventory = self.inventories[1]
-        self.assertTrue(inventory.active)
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        groups = inventory.groups.filter(active=True)
+        groups = inventory.groups
         groupnames = list(groups.values_list('name', flat=True)) + ['all']
         self.assertEqual(set(data.keys()), set(groupnames))
         # Groups for this inventory should have hosts, variable data, and one
         # parent/child relationship.
         for k,v in data.items():
-            self.assertTrue(isinstance(v, dict))
+            assert isinstance(v, dict)
             if k == 'all':
                 self.assertEqual(v.get('vars', {}), inventory.variables_dict)
                 continue
-            group = inventory.groups.get(active=True, name=k)
-            hosts = group.hosts.filter(active=True)
+            group = inventory.groups.get(name=k)
+            hosts = group.hosts
             hostnames = hosts.values_list('name', flat=True)
             self.assertEqual(set(v.get('hosts', [])), set(hostnames))
             if group.variables:
                 self.assertEqual(v.get('vars', {}), group.variables_dict)
             if k == 'group-3':
-                children = group.children.filter(active=True)
+                children = group.children
                 childnames = children.values_list('name', flat=True)
                 self.assertEqual(set(v.get('children', [])), set(childnames))
             else:
-                self.assertTrue(len(v['children']) == 0)
+                assert len(v['children']) == 0
 
     def test_list_with_hostvars_inline(self):
         inventory = self.inventories[1]
-        self.assertTrue(inventory.active)
         rc, stdout, stderr = self.run_inventory_script(list=True,
                                                        inventory=inventory.pk,
                                                        hostvars=True)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        groups = inventory.groups.filter(active=True)
+        groups = inventory.groups
         groupnames = list(groups.values_list('name', flat=True))
         groupnames.extend(['all', '_meta'])
         self.assertEqual(set(data.keys()), set(groupnames))
@@ -231,28 +235,28 @@ class InventoryScriptTest(BaseScriptTest):
         # Groups for this inventory should have hosts, variable data, and one
         # parent/child relationship.
         for k,v in data.items():
-            self.assertTrue(isinstance(v, dict))
+            assert isinstance(v, dict)
             if k == 'all':
                 self.assertEqual(v.get('vars', {}), inventory.variables_dict)
                 continue
             if k == '_meta':
                 continue
-            group = inventory.groups.get(active=True, name=k)
-            hosts = group.hosts.filter(active=True)
+            group = inventory.groups.get(name=k)
+            hosts = group.hosts
             hostnames = hosts.values_list('name', flat=True)
             all_hostnames.update(hostnames)
-            self.assertEqual(set(v.get('hosts', [])), set(hostnames))
+            assert set(v.get('hosts', [])) == set(hostnames)
             if group.variables:
-                self.assertEqual(v.get('vars', {}), group.variables_dict)
+                assert v.get('vars', {}) == group.variables_dict
             if k == 'group-3':
-                children = group.children.filter(active=True)
+                children = group.children
                 childnames = children.values_list('name', flat=True)
-                self.assertEqual(set(v.get('children', [])), set(childnames))
+                assert set(v.get('children', [])) == set(childnames)
             else:
-                self.assertTrue(len(v['children']) == 0)
+                assert len(v['children']) == 0
         # Check hostvars in ['_meta']['hostvars'] dict.
         for hostname in all_hostnames:
-            self.assertTrue(hostname in data['_meta']['hostvars'])
+            assert hostname in data['_meta']['hostvars']
             host = inventory.hosts.get(name=hostname)
             self.assertEqual(data['_meta']['hostvars'][hostname],
                              host.variables_dict)
@@ -262,13 +266,12 @@ class InventoryScriptTest(BaseScriptTest):
                                                        inventory=inventory.pk)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        self.assertTrue('_meta' in data)
+        assert '_meta' in data
 
     def test_valid_host(self):
         # Host without variable data.
         inventory = self.inventories[0]
-        self.assertTrue(inventory.active)
-        host = inventory.hosts.filter(active=True)[2]
+        host = inventory.hosts.all()[2]
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(host=host.name)
         self.assertEqual(rc, 0, stderr)
@@ -276,8 +279,7 @@ class InventoryScriptTest(BaseScriptTest):
         self.assertEqual(data, {})
         # Host with variable data.
         inventory = self.inventories[1]
-        self.assertTrue(inventory.active)
-        host = inventory.hosts.filter(active=True)[4]
+        host = inventory.hosts.all()[4]
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(host=host.name)
         self.assertEqual(rc, 0, stderr)
@@ -287,8 +289,7 @@ class InventoryScriptTest(BaseScriptTest):
     def test_invalid_host(self):
         # Valid host, but not part of the specified inventory.
         inventory = self.inventories[0]
-        self.assertTrue(inventory.active)
-        host = Host.objects.filter(active=True).exclude(inventory=inventory)[0]
+        host = Host.objects.exclude(inventory=inventory)[0]
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(host=host.name)
         self.assertNotEqual(rc, 0, stderr)
@@ -320,16 +321,15 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_with_deleted_inventory(self):
         inventory = self.inventories[0]
-        inventory.mark_inactive()
-        self.assertFalse(inventory.active)
-        os.environ['INVENTORY_ID'] = str(inventory.pk)
+        pk = inventory.pk
+        inventory.delete()
+        os.environ['INVENTORY_ID'] = str(pk)
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
         self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_without_list_or_host_argument(self):
         inventory = self.inventories[0]
-        self.assertTrue(inventory.active)
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script()
         self.assertNotEqual(rc, 0, stderr)
@@ -337,7 +337,6 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_with_both_list_and_host_arguments(self):
         inventory = self.inventories[0]
-        self.assertTrue(inventory.active)
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(list=True, host='blah')
         self.assertNotEqual(rc, 0, stderr)
@@ -345,8 +344,7 @@ class InventoryScriptTest(BaseScriptTest):
 
     def test_with_disabled_hosts(self):
         inventory = self.inventories[1]
-        self.assertTrue(inventory.active)
-        for host in inventory.hosts.filter(active=True, enabled=True):
+        for host in inventory.hosts.filter(enabled=True):
             host.enabled = False
             host.save(update_fields=['enabled'])
         os.environ['INVENTORY_ID'] = str(inventory.pk)
@@ -354,49 +352,49 @@ class InventoryScriptTest(BaseScriptTest):
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        groups = inventory.groups.filter(active=True)
+        groups = inventory.groups
         groupnames = list(groups.values_list('name', flat=True)) + ['all']
         self.assertEqual(set(data.keys()), set(groupnames))
         for k,v in data.items():
-            self.assertTrue(isinstance(v, dict))
+            assert isinstance(v, dict)
             if k == 'all':
                 self.assertEqual(v.get('vars', {}), inventory.variables_dict)
                 continue
-            group = inventory.groups.get(active=True, name=k)
-            hosts = group.hosts.filter(active=True, enabled=True)
+            group = inventory.groups.get(name=k)
+            hosts = group.hosts.filter(enabled=True)
             hostnames = hosts.values_list('name', flat=True)
             self.assertEqual(set(v.get('hosts', [])), set(hostnames))
             self.assertFalse(hostnames)
             if group.variables:
                 self.assertEqual(v.get('vars', {}), group.variables_dict)
             if k == 'group-3':
-                children = group.children.filter(active=True)
+                children = group.children
                 childnames = children.values_list('name', flat=True)
                 self.assertEqual(set(v.get('children', [])), set(childnames))
             else:
-                self.assertTrue(len(v['children']) == 0)
+                assert len(v['children']) == 0
         # Load inventory list with all hosts.
         rc, stdout, stderr = self.run_inventory_script(list=True, all=True)
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
-        groups = inventory.groups.filter(active=True)
+        groups = inventory.groups
         groupnames = list(groups.values_list('name', flat=True)) + ['all']
         self.assertEqual(set(data.keys()), set(groupnames))
         for k,v in data.items():
-            self.assertTrue(isinstance(v, dict))
+            assert isinstance(v, dict)
             if k == 'all':
                 self.assertEqual(v.get('vars', {}), inventory.variables_dict)
                 continue
-            group = inventory.groups.get(active=True, name=k)
-            hosts = group.hosts.filter(active=True)
+            group = inventory.groups.get(name=k)
+            hosts = group.hosts
             hostnames = hosts.values_list('name', flat=True)
             self.assertEqual(set(v.get('hosts', [])), set(hostnames))
-            self.assertTrue(hostnames)
+            assert hostnames
             if group.variables:
                 self.assertEqual(v.get('vars', {}), group.variables_dict)
             if k == 'group-3':
-                children = group.children.filter(active=True)
+                children = group.children
                 childnames = children.values_list('name', flat=True)
                 self.assertEqual(set(v.get('children', [])), set(childnames))
             else:
-                self.assertTrue(len(v['children']) == 0)
+                assert len(v['children']) == 0

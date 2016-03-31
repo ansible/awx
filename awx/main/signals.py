@@ -8,7 +8,7 @@ import threading
 import json
 
 # Django
-from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
+from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
 # Django-CRUM
@@ -27,9 +27,8 @@ __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
 
-# Update has_active_failures for inventory/groups when a Host/Group is deleted
-# or marked inactive, when a Host-Group or Group-Group relationship is updated,
-# or when a Job is deleted or marked inactive.
+# Update has_active_failures for inventory/groups when a Host/Group is deleted,
+# when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
 
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
@@ -69,7 +68,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     else:
         sender_name = unicode(sender._meta.verbose_name)
     if kwargs['signal'] == post_save:
-        if sender == Job and instance.active:
+        if sender == Job:
             return
         sender_action = 'saved'
     elif kwargs['signal'] == post_delete:
@@ -92,7 +91,6 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         return
     instance = kwargs['instance']
     if ('created' in kwargs and kwargs['created']) or \
-       (hasattr(instance, '_saved_active_state') and instance._saved_active_state != instance.active) or \
        kwargs['signal'] == post_delete:
         pass
     else:
@@ -108,34 +106,172 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         if inventory is not None:
             update_inventory_computed_fields.delay(inventory.id, True)
 
-def store_initial_active_state(sender, **kwargs):
-    instance = kwargs['instance']
-    if instance.id is not None:
-        instance._saved_active_state = sender.objects.get(id=instance.id).active
+def rebuild_role_ancestor_list(reverse, model, instance, pk_set, **kwargs):
+    'When a role parent is added or removed, update our role hierarchy list'
+    if reverse:
+        for id in pk_set:
+            model.objects.get(id=id).rebuild_role_ancestor_list()
     else:
-        instance._saved_active_state = True
+        instance.rebuild_role_ancestor_list()
 
-pre_save.connect(store_initial_active_state, sender=Host)
+def sync_superuser_status_to_rbac(instance, **kwargs):
+    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
+    if instance.is_superuser:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
+    else:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
+def create_user_role(instance, **kwargs):
+    try:
+        instance.admin_role
+    except Role.DoesNotExist:
+        role = Role.objects.create(
+            singleton_name = '%s-admin_role' % instance.username,
+            content_object = instance,
+        )
+        role.members.add(instance)
+        RolePermission.objects.create(
+            role = role,
+            resource = instance,
+            auto_generated = True,
+            create=1, read=1, write=1, delete=1, update=1,
+            execute=1, scm_update=1, use=1,
+        )
+
+def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
+    content_type = ContentType.objects.get_for_model(Organization)
+
+    if reverse:
+        return
+    else:
+        if instance.content_type == content_type and \
+           instance.content_object.member_role.id == instance.id:
+            items = model.objects.filter(pk__in=pk_set).all()
+            for user in items:
+                if action == 'post_add':
+                    instance.content_object.admin_role.children.add(user.admin_role)
+                if action == 'pre_remove':
+                    instance.content_object.admin_role.children.remove(user.admin_role)
+
+def grant_host_access_to_group_roles(instance, action, model, reverse, pk_set, **kwargs):
+    'Add/remove RolePermission entries for Group roles that contain this host'
+
+    if action == 'post_add':
+        def grant(host, group):
+            RolePermission.objects.create(
+                resource=host,
+                role=group.admin_role,
+                auto_generated=True,
+                create=1,
+                read=1, write=1,
+                delete=1,
+                update=1,
+                execute=1,
+                scm_update=1,
+                use=1,
+            )
+            RolePermission.objects.create(
+                resource=host,
+                role=group.auditor_role,
+                auto_generated=True,
+                read=1,
+            )
+            RolePermission.objects.create(
+                resource=host,
+                role=group.updater_role,
+                auto_generated=True,
+                read=1,
+                write=1,
+                create=1,
+                use=1
+            )
+            RolePermission.objects.create(
+                resource=host,
+                role=group.executor_role,
+                auto_generated=True,
+                read=1,
+                execute=1
+            )
+
+        if reverse:
+            host = instance
+            for group_id in pk_set:
+                grant(host, Group.objects.get(id=group_id))
+        else:
+            group = instance
+            for host_id in pk_set:
+                grant(Host.objects.get(id=host_id), group)
+
+    if action == 'pre_remove':
+        host_content_type = ContentType.objects.get_for_model(Host)
+
+        def remove_grant(host, group):
+            RolePermission.objects.filter(
+                content_type = host_content_type,
+                object_id = host.id,
+                auto_generated = True,
+                role__in = [group.admin_role, group.updater_role, group.auditor_role, group.executor_role]
+            ).delete()
+
+        if reverse:
+            host = instance
+            for group_id in pk_set:
+                remove_grant(host, Group.objects.get(id=group_id))
+        else:
+            group = instance
+            for host_id in pk_set:
+                remove_grant(Host.objects.get(id=host_id), group)
+
+
+def grant_host_access_to_inventory(instance, **kwargs):
+    'Add/remove RolePermission entries for the Inventory that contains this host'
+    host_content_type = ContentType.objects.get_for_model(Host)
+    inventory_content_type = ContentType.objects.get_for_model(Inventory)
+
+    # Clear out any existing perms.. in case we switched inventory or something
+    qs = RolePermission.objects.filter(
+        content_type=host_content_type,
+        object_id=instance.id,
+        auto_generated=True,
+        role__content_type=inventory_content_type
+    )
+    if qs.count() == 1 and qs[0].role.object_id == instance.inventory.id:
+        # No change
+        return
+    qs.delete()
+
+    RolePermission.objects.create(
+        resource=instance,
+        role=instance.inventory.admin_role,
+        auto_generated=True,
+        create=1, read=1, write=1, delete=1, update=1,
+        execute=1, scm_update=1, use=1,
+    )
+
+
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-pre_save.connect(store_initial_active_state, sender=Group)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
-pre_save.connect(store_initial_active_state, sender=InventorySource)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-pre_save.connect(store_initial_active_state, sender=Job)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
+m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+m2m_changed.connect(org_admin_edit_members, Role.members.through)
+m2m_changed.connect(grant_host_access_to_group_roles, Group.hosts.through)
+post_save.connect(grant_host_access_to_inventory, Host)
+post_save.connect(sync_superuser_status_to_rbac, sender=User)
+post_save.connect(create_user_role, sender=User)
 
-# Migrate hosts, groups to parent group(s) whenever a group is deleted or
-# marked as inactive.
+
+# Migrate hosts, groups to parent group(s) whenever a group is deleted
 
 @receiver(pre_delete, sender=Group)
 def save_related_pks_before_group_delete(sender, **kwargs):
@@ -158,80 +294,28 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
     with ignore_inventory_group_removal():
         with ignore_inventory_computed_fields():
             if parents_pks:
-                for parent_group in Group.objects.filter(pk__in=parents_pks, active=True):
-                    for child_host in Host.objects.filter(pk__in=hosts_pks, active=True):
+                for parent_group in Group.objects.filter(pk__in=parents_pks):
+                    for child_host in Host.objects.filter(pk__in=hosts_pks):
                         logger.debug('adding host %s to parent %s after group deletion',
                                      child_host, parent_group)
                         parent_group.hosts.add(child_host)
-                    for child_group in Group.objects.filter(pk__in=children_pks, active=True):
+                    for child_group in Group.objects.filter(pk__in=children_pks):
                         logger.debug('adding group %s to parent %s after group deletion',
                                      child_group, parent_group)
                         parent_group.children.add(child_group)
                 inventory_pk = getattr(instance, '_saved_inventory_pk', None)
                 if inventory_pk:
                     try:
-                        inventory = Inventory.objects.get(pk=inventory_pk, active=True)
+                        inventory = Inventory.objects.get(pk=inventory_pk)
                         inventory.update_computed_fields()
                     except Inventory.DoesNotExist:
                         pass
 
-@receiver(pre_save, sender=Group)
-def save_related_pks_before_group_marked_inactive(sender, **kwargs):
-    if getattr(_inventory_updates, 'is_removing', False):
-        return
-    instance = kwargs['instance']
-    if not instance.pk or instance.active:
-        return
-    instance._saved_inventory_pk = instance.inventory.pk
-    instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
-    instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
-    instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
-    instance._saved_inventory_source_pk = instance.inventory_source.pk
 
-@receiver(post_save, sender=Group)
-def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
-    if getattr(_inventory_updates, 'is_removing', False):
-        return
-    instance = kwargs['instance']
-    if instance.active:
-        return
-    parents_pks = getattr(instance, '_saved_parents_pks', [])
-    hosts_pks = getattr(instance, '_saved_hosts_pks', [])
-    children_pks = getattr(instance, '_saved_children_pks', [])
-    with ignore_inventory_group_removal():
-        with ignore_inventory_computed_fields():
-            if parents_pks:
-                for parent_group in Group.objects.filter(pk__in=parents_pks, active=True):
-                    for child_host in Host.objects.filter(pk__in=hosts_pks, active=True):
-                        logger.debug('moving host %s to parent %s after marking group %s inactive',
-                                     child_host, parent_group, instance)
-                        parent_group.hosts.add(child_host)
-                    for child_group in Group.objects.filter(pk__in=children_pks, active=True):
-                        logger.debug('moving group %s to parent %s after marking group %s inactive',
-                                     child_group, parent_group, instance)
-                        parent_group.children.add(child_group)
-                    parent_group.children.remove(instance)
-            inventory_source_pk = getattr(instance, '_saved_inventory_source_pk', None)
-            if inventory_source_pk:
-                try:
-                    inventory_source = InventorySource.objects.get(pk=inventory_source_pk, active=True)
-                    inventory_source.mark_inactive()
-                except InventorySource.DoesNotExist:
-                    pass
-            inventory_pk = getattr(instance, '_saved_inventory_pk', None)
-        if not getattr(_inventory_updates, 'is_updating', False):
-            if inventory_pk:
-                try:
-                    inventory = Inventory.objects.get(pk=inventory_pk, active=True)
-                    inventory.update_computed_fields()
-                except Inventory.DoesNotExist:
-                    pass
-
-# Update host pointers to last_job and last_job_host_summary when a job is
-# marked inactive or deleted.
+# Update host pointers to last_job and last_job_host_summary when a job is deleted
 
 def _update_host_last_jhs(host):
-    jhs_qs = JobHostSummary.objects.filter(job__active=True, host__pk=host.pk)
+    jhs_qs = JobHostSummary.objects.filter(host__pk=host.pk)
     try:
         jhs = jhs_qs.order_by('-job__pk')[0]
     except IndexError:
@@ -247,19 +331,10 @@ def _update_host_last_jhs(host):
     if update_fields:
         host.save(update_fields=update_fields)
 
-@receiver(post_save, sender=Job)
-def update_host_last_job_when_job_marked_inactive(sender, **kwargs):
-    instance = kwargs['instance']
-    if instance.active:
-        return
-    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
-    for host in hosts_qs:
-        _update_host_last_jhs(host)
-
 @receiver(pre_delete, sender=Job)
 def save_host_pks_before_job_delete(sender, **kwargs):
     instance = kwargs['instance']
-    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
+    hosts_qs = Host.objects.filter( last_job__pk=instance.pk)
     instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
 
 @receiver(post_delete, sender=Job)
@@ -302,7 +377,6 @@ model_serializer_mapping = {
     Credential: CredentialSerializer,
     Team: TeamSerializer,
     Project: ProjectSerializer,
-    Permission: PermissionSerializer,
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
@@ -337,11 +411,6 @@ def activity_stream_update(sender, instance, **kwargs):
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
-        return
-
-    # Handle the AWX mark-inactive for delete event
-    if hasattr(instance, 'active') and not instance.active:
-        activity_stream_delete(sender, instance, **kwargs)
         return
 
     new = instance

@@ -210,17 +210,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             self.next_job_run = related_schedules[0].next_run
             self.save(update_fields=['next_schedule', 'next_job_run'])
 
-    def mark_inactive(self, save=True):
-        '''
-        When marking a unified job template inactive, also mark its schedules
-        inactive.
-        '''
-        for schedule in self.schedules.filter(active=True):
-            schedule.mark_inactive()
-            schedule.enabled = False
-            schedule.save()
-        super(UnifiedJobTemplate, self).mark_inactive(save=save)
-
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.

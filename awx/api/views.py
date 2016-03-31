@@ -131,6 +131,7 @@ class ApiV1RootView(APIView):
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
+        data['roles'] = reverse('api:role_list')
         data['notifiers'] = reverse('api:notifier_list')
         data['notifications'] = reverse('api:notification_list')
         data['labels'] = reverse('api:label_list')
@@ -214,7 +215,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -287,8 +288,7 @@ class DashboardView(APIView):
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
         data = OrderedDict()
-        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view'),
-                           'inventory_graph': reverse('api:dashboard_inventory_graph_view')}
+        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view')}
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
@@ -434,49 +434,6 @@ class DashboardJobsGraphView(APIView):
                                                      element[1]])
         return Response(dashboard_data)
 
-class DashboardInventoryGraphView(APIView):
-
-    view_name = "Dashboard Inventory Graphs"
-    new_in_200 = True
-
-    def get(self, request, format=None):
-        period = request.query_params.get('period', 'month')
-
-        end_date = now()
-        if period == 'month':
-            start_date = end_date - dateutil.relativedelta.relativedelta(months=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'week':
-            start_date = end_date - dateutil.relativedelta.relativedelta(weeks=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'day':
-            start_date = end_date - dateutil.relativedelta.relativedelta(days=1)
-            start_date = start_date.replace(minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(hours=1)
-        else:
-            raise ParseError(u'Unknown period "%s"' % force_text(period))
-
-        host_stats = []
-        date = start_date
-        while date < end_date:
-            next_date = date + delta
-            # Find all hosts that existed at end of intevral that are still
-            # active or were deleted after the end of interval.  Slow but
-            # accurate; haven't yet found a better way to do it.
-            hosts_qs = Host.objects.filter(created__lt=next_date)
-            hosts_qs = hosts_qs.filter(Q(active=True) | Q(active=False, modified__gte=next_date))
-            hostnames = set()
-            for name, active in hosts_qs.values_list('name', 'active').iterator():
-                if not active:
-                    name = re.sub(r'^_deleted_.*?_', '', name)
-                hostnames.add(name)
-            host_stats.append((time.mktime(date.timetuple()), len(hostnames)))
-            date = next_date
-
-        return Response({'hosts': host_stats})
-
 
 class ScheduleList(ListAPIView):
 
@@ -572,7 +529,7 @@ class AuthTokenView(APIView):
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
-                # Get user un-expired tokens that are not invalidated that are 
+                # Get user un-expired tokens that are not invalidated that are
                 # over the configured limit.
                 # Mark them as invalid and inform the user
                 invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
@@ -597,6 +554,11 @@ class OrganizationList(ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def get_queryset(self):
+        qs = Organization.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        return qs
+
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
 
@@ -608,7 +570,7 @@ class OrganizationList(ListCreateAPIView):
         # by the license, then we are only willing to create this organization
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
-                self.model.objects.filter(active=True).count() > 0):
+                self.model.objects.exists()):
             raise LicenseForbids('Your Tower license only permits a single '
                                  'organization to exist.')
 
@@ -622,49 +584,37 @@ class OrganizationList(ListCreateAPIView):
             return full_context
 
         db_results = {}
-        org_qs = self.request.user.get_queryset(self.model)
+        org_qs = self.model.accessible_objects(self.request.user, {"read": True})
         org_id_list = org_qs.values('id')
         if len(org_id_list) == 0:
             if self.request.method == 'POST':
                 full_context['related_field_counts'] = {}
             return full_context
 
-        inv_qs = self.request.user.get_queryset(Inventory)
-        project_qs = self.request.user.get_queryset(Project)
-        user_qs = self.request.user.get_queryset(User)
+        inv_qs = Inventory.accessible_objects(self.request.user, {"read": True})
+        project_qs = Project.accessible_objects(self.request.user, {"read": True})
 
         # Produce counts of Foreign Key relationships
         db_results['inventories'] = inv_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
-        db_results['teams'] = self.request.user.get_queryset(Team)\
+        db_results['teams'] = Team.accessible_objects(
+            self.request.user, {"read": True}).values('organization').annotate(
+            Count('organization')).order_by('organization')
+
+        JT_reference = 'project__organization'
+        db_results['job_templates'] = JobTemplate.accessible_objects(
+            self.request.user, {"read": True}).values(JT_reference).annotate(
+            Count(JT_reference)).order_by(JT_reference)
+
+        db_results['projects'] = project_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
-        # TODO: When RBAC branch merges, change this to project relationship
-        JT_reference = 'inventory__organization'
-        # Extra filter is applied on the inventory, because this catches
-        #   the case of deleted (and purged) inventory
-        db_results['job_templates'] = self.request.user.get_queryset(JobTemplate)\
-            .filter(inventory__in=inv_qs)\
-            .values(JT_reference).annotate(Count(JT_reference))\
-            .order_by(JT_reference)
-
-        # Produce counts of m2m relationships
-        db_results['projects'] = Organization.projects.through.objects\
-            .filter(project__in=project_qs, organization__in=org_qs)\
-            .values('organization')\
-            .annotate(Count('organization')).order_by('organization')
-
-        # TODO: When RBAC branch merges, change these to role relation
-        db_results['users'] = Organization.users.through.objects\
-            .filter(user__in=user_qs, organization__in=org_qs)\
-            .values('organization')\
-            .annotate(Count('organization')).order_by('organization')
-
-        db_results['admins'] = Organization.admins.through.objects\
-            .filter(user__in=user_qs, organization__in=org_qs)\
-            .values('organization')\
-            .annotate(Count('organization')).order_by('organization')
+        # Other members and admins of organization are always viewable
+        db_results['users'] = org_qs.annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('id', 'users', 'admins')
 
         count_context = {}
         for org in org_id_list:
@@ -676,11 +626,17 @@ class OrganizationList(ListCreateAPIView):
         for res in db_results:
             if res == 'job_templates':
                 org_reference = JT_reference
+            elif res == 'users':
+                org_reference = 'id'
             else:
                 org_reference = 'organization'
             for entry in db_results[res]:
                 org_id = entry[org_reference]
                 if org_id in count_context:
+                    if res == 'users':
+                        count_context[org_id]['admins'] = entry['admins']
+                        count_context[org_id]['users'] = entry['users']
+                        continue
                     count_context[org_id][res] = entry['%s__count' % org_reference]
 
         full_context['related_field_counts'] = count_context
@@ -700,17 +656,21 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        user_qs = self.request.user.get_queryset(User)
-        org_counts['users'] = user_qs.filter(organizations__id=org_id).count()
-        org_counts['admins'] = user_qs.filter(admin_of_organizations__id=org_id).count()
-        org_counts['inventories'] = self.request.user.get_queryset(Inventory).filter(
+        access_kwargs = {'accessor': self.request.user, 'permissions': {"read": True}}
+        direct_counts = Organization.objects.filter(id=org_id).annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('users', 'admins')
+
+        org_counts = direct_counts[0]
+        org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['teams'] = self.request.user.get_queryset(Team).filter(
+        org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['projects'] = self.request.user.get_queryset(Project).filter(
-            organizations__id=org_id).count()
-        org_counts['job_templates'] = self.request.user.get_queryset(JobTemplate).filter(
-            inventory__organization__id=org_id).count()
+        org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
+            project__organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts
@@ -729,21 +689,22 @@ class OrganizationUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'users'
+    relationship = 'member_role.members'
 
 class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'admins'
+    relationship = 'admin_role.members'
 
-class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
+class OrganizationProjectsList(SubListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
+    parent_key = 'organization'
 
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 
@@ -769,7 +730,7 @@ class OrganizationActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
 
 class OrganizationNotifiersList(SubListCreateAttachDetachAPIView):
 
@@ -800,10 +761,21 @@ class OrganizationNotifiersSuccessList(SubListCreateAttachDetachAPIView):
     parent_model = Organization
     relationship = 'notifiers_success'
 
+class OrganizationAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Organization
+    new_in_300 = True
+
 class TeamList(ListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer
+
+    def get_queryset(self):
+        qs = Team.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        return qs
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
 
@@ -815,41 +787,57 @@ class TeamUsersList(SubListCreateAttachDetachAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Team
-    relationship = 'users'
+    relationship = 'member_role.members'
 
-class TeamPermissionsList(SubListCreateAttachDetachAPIView):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class TeamRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
     parent_model = Team
-    relationship = 'permissions'
-    parent_key = 'team'
+    relationship='member_role.children'
 
     def get_queryset(self):
-        # FIXME: Default get_queryset should handle this.
         team = Team.objects.get(pk=self.kwargs['pk'])
-        base = Permission.objects.filter(team = team)
-        #if Team.can_user_administrate(self.request.user, team, None):
-        if self.request.user.can_access(Team, 'change', team, None):
-            return base
-        elif team.users.filter(pk=self.request.user.pk).count() > 0:
-            return base
-        raise PermissionDenied()
+        return team.member_role.children.filter(id__in=Role.visible_roles(self.request.user))
 
-class TeamProjectsList(SubListCreateAttachDetachAPIView):
+    # XXX: Need to enforce permissions
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(TeamRolesList, self).post(request, *args, **kwargs)
+
+class TeamProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Team
-    relationship = 'projects'
 
-class TeamCredentialsList(SubListCreateAttachDetachAPIView):
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
+        user_qs = Project.accessible_objects(self.request.user, {'read': True})
+        return team_qs & user_qs
+
+
+class TeamCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = Team
-    relationship = 'credentials'
-    parent_key = 'team'
+
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
+        return team_creds & visible_creds
+
 
 class TeamActivityStreamList(SubListAPIView):
 
@@ -867,27 +855,43 @@ class TeamActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(TeamActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
+
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(team=parent) |
-                         Q(project__in=parent.projects.all()) |
-                         Q(credential__in=parent.credentials.all()) |
-                         Q(permission__in=parent.permissions.all()))
+                         Q(project__in=Project.accessible_objects(parent, {'read':True})) |
+                         Q(credential__in=Credential.accessible_objects(parent, {'read':True})))
 
+class TeamAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Team
+    new_in_300 = True
 
 class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
 
+    def get_queryset(self):
+        projects_qs = Project.accessible_objects(self.request.user, {'read': True})
+        projects_qs = projects_qs.select_related(
+            'organization',
+            'admin_role',
+            'auditor_role',
+            'member_role',
+            'scm_update_role',
+        )
+        return projects_qs
+
     def get(self, request, *args, **kwargs):
         # Not optimal, but make sure the project status and last_updated fields
         # are up to date here...
-        projects_qs = Project.objects.filter(active=True)
+        projects_qs = Project.objects
         projects_qs = projects_qs.select_related('current_job', 'last_job')
         for project in projects_qs:
             project._set_status_and_last_job_run()
@@ -911,13 +915,6 @@ class ProjectPlaybooks(RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectPlaybooksSerializer
-
-class ProjectOrganizationsList(SubListCreateAttachDetachAPIView):
-
-    model = Organization
-    serializer_class = OrganizationSerializer
-    parent_model = Project
-    relationship = 'organizations'
 
 class ProjectTeamsList(SubListCreateAttachDetachAPIView):
 
@@ -953,7 +950,7 @@ class ProjectActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ProjectActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1042,6 +1039,12 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     parent_model = Project
     relationship = 'notifications'
 
+class ProjectAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Project
+    new_in_300 = True
+
 class UserList(ListCreateAPIView):
 
     model = User
@@ -1056,41 +1059,69 @@ class UserMeList(ListAPIView):
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
 
-class UserTeamsList(SubListAPIView):
+class UserTeamsList(ListAPIView):
 
-    model = Team
+    model = User
     serializer_class = TeamSerializer
-    parent_model = User
-    relationship = 'teams'
 
-class UserPermissionsList(SubListCreateAttachDetachAPIView):
+    def get_queryset(self):
+        u = User.objects.get(pk=self.kwargs['pk'])
+        if not self.request.user.can_access(User, 'read', u):
+            raise PermissionDenied()
+        return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class UserRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
     parent_model = User
-    relationship = 'permissions'
-    parent_key = 'user'
+    relationship='roles'
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        #u = User.objects.get(pk=self.kwargs['pk'])
+        return Role.visible_roles(self.request.user).filter(members__in=[int(self.kwargs['pk']), ])
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(UserRolesList, self).post(request, *args, **kwargs)
+
+    def check_parent_access(self, parent=None):
+        # We hide roles that shouldn't be seen in our queryset
+        return True
+
+
 
 class UserProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = User
-    relationship = 'projects'
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(teams__in=parent.teams.distinct())
+        my_qs = Project.accessible_objects(self.request.user, {'read': True})
+        user_qs = Project.accessible_objects(parent, {'read': True})
+        return my_qs & user_qs
 
-class UserCredentialsList(SubListCreateAttachDetachAPIView):
+class UserCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = User
-    relationship = 'credentials'
-    parent_key = 'user'
+
+    def get_queryset(self):
+        user = self.get_parent_object()
+        self.check_parent_access(user)
+
+        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        user_creds = Credential.accessible_objects(user, {'read': True})
+        return user_creds & visible_creds
 
 class UserOrganizationsList(SubListAPIView):
 
@@ -1099,12 +1130,26 @@ class UserOrganizationsList(SubListAPIView):
     parent_model = User
     relationship = 'organizations'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(member_role__members=parent)
+        return my_qs & user_qs
+
 class UserAdminOfOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        user_qs = Organization.objects.filter(admin_role__members=parent)
+        return my_qs & user_qs
 
 class UserActivityStreamList(SubListAPIView):
 
@@ -1122,7 +1167,7 @@ class UserActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(UserActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1158,9 +1203,13 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
             raise PermissionDenied('Cannot delete user')
-        for own_credential in Credential.objects.filter(user=obj):
-            own_credential.mark_inactive()
         return super(UserDetail, self).destroy(request, *args, **kwargs)
+
+class UserAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = User
+    new_in_300 = True
 
 class CredentialList(ListCreateAPIView):
 
@@ -1188,12 +1237,13 @@ class CredentialActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(CredentialActivityStreamList, self).get(request, *args, **kwargs)
 
-class PermissionDetail(RetrieveUpdateDestroyAPIView):
+class CredentialAccessList(ResourceAccessList):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+    model = User # needs to be User for AccessLists's
+    resource_model = Credential
+    new_in_300 = True
 
 class InventoryScriptList(ListCreateAPIView):
 
@@ -1219,6 +1269,11 @@ class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+
+    def get_queryset(self):
+        qs = Inventory.accessible_objects(self.request.user, {'read': True})
+        qs = qs.select_related('admin_role', 'auditor_role', 'updater_role', 'executor_role')
+        return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1246,13 +1301,19 @@ class InventoryActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventoryActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+class InventoryAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Inventory
+    new_in_300 = True
 
 class InventoryJobTemplateList(SubListAPIView):
 
@@ -1360,7 +1421,7 @@ class HostActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(HostActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1396,7 +1457,7 @@ class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMi
             to_spec = dateutil.parser.parse(to_spec)
 
         host_obj = self.get_parent_object()
-        
+
         return Fact.get_timeline(host_obj.id, module=module_spec, ts_from=from_spec, ts_to=to_spec)
 
     def list(self, *args, **kwargs):
@@ -1452,7 +1513,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
-        parent.mark_inactive()
+        parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
@@ -1475,8 +1536,8 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
                                        sub, self.relationship):
             raise PermissionDenied()
 
-        if sub.parents.filter(active=True).exclude(pk=parent.pk).count() == 0:
-            sub.mark_inactive()
+        if sub.parents.exclude(pk=parent.pk).count() == 0:
+            sub.delete()
         else:
             relationship.remove(sub)
 
@@ -1535,7 +1596,7 @@ class GroupAllHostsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
 
@@ -1563,7 +1624,7 @@ class GroupActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(GroupActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1578,16 +1639,17 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if not getattr(obj, 'active', True):
-            raise Http404()
-        if not getattr(obj, 'is_active', True):
-            raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if hasattr(obj, 'mark_inactive'):
-            obj.mark_inactive_recursive()
+        obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class GroupAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Group
+    new_in_300 = True
+
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
@@ -1608,7 +1670,7 @@ class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         return qs & parent.root_groups
 
 class BaseVariableData(RetrieveUpdateAPIView):
@@ -1646,9 +1708,9 @@ class InventoryScriptView(RetrieveAPIView):
         hostvars = bool(request.query_params.get('hostvars', ''))
         show_all = bool(request.query_params.get('all', ''))
         if show_all:
-            hosts_q = dict(active=True)
+            hosts_q = dict()
         else:
-            hosts_q = dict(active=True, enabled=True)
+            hosts_q = dict(enabled=True)
         if hostname:
             host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
@@ -1666,8 +1728,7 @@ class InventoryScriptView(RetrieveAPIView):
                 all_group['hosts'] = groupless_hosts
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=obj.id, group__active=True,
-                                  host__inventory_id=obj.id, host__active=True)
+            group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
             if 'enabled' in hosts_q:
                 group_hosts_kw['host__enabled'] = hosts_q['enabled']
             group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
@@ -1680,8 +1741,8 @@ class InventoryScriptView(RetrieveAPIView):
 
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=obj.id, from_group__active=True,
-                to_group__inventory_id=obj.id, to_group__active=True,
+                from_group__inventory_id=obj.id,
+                to_group__inventory_id=obj.id,
             )
             group_parents_qs = group_parents_qs.order_by('from_group__name')
             group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
@@ -1691,7 +1752,7 @@ class InventoryScriptView(RetrieveAPIView):
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in obj.groups.filter(active=True):
+            for group in obj.groups.all():
                 group_info = OrderedDict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
@@ -1737,9 +1798,9 @@ class InventoryTreeView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
-        group_children_map = inventory.get_group_children_map(active=True)
-        root_group_pks = inventory.root_groups.filter(active=True).order_by('name').values_list('pk', flat=True)
-        groups_qs = inventory.groups.filter(active=True)
+        group_children_map = inventory.get_group_children_map()
+        root_group_pks = inventory.root_groups.order_by('name').values_list('pk', flat=True)
+        groups_qs = inventory.groups
         groups_qs = groups_qs.select_related('inventory')
         groups_qs = groups_qs.prefetch_related('inventory_source')
         all_group_data = GroupSerializer(groups_qs, many=True).data
@@ -1814,7 +1875,7 @@ class InventorySourceActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
 
 class InventorySourceNotifiersAnyList(SubListCreateAttachDetachAPIView):
 
@@ -1943,7 +2004,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if obj:
             for p in obj.passwords_needed_to_start:
                 data[p] = u''
-            if obj.credential and obj.credential.active:
+            if obj.credential:
                 data.pop('credential', None)
             else:
                 data['credential'] = None
@@ -2078,7 +2139,7 @@ class JobTemplateActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
 
 class JobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
 
@@ -2151,15 +2212,15 @@ class JobTemplateCallback(GenericAPIView):
             return set()
         # Find the host objects to search for a match.
         obj = self.get_object()
-        qs = obj.inventory.hosts.filter(active=True)
+        hosts = obj.inventory.hosts.all()
         # First try for an exact match on the name.
         try:
-            return set([qs.get(name__in=remote_hosts)])
+            return set([hosts.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
         matches = set()
-        for host in qs:
+        for host in hosts:
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
@@ -2168,8 +2229,9 @@ class JobTemplateCallback(GenericAPIView):
                 matches.add(host)
         if len(matches) == 1:
             return matches
+
         # Try to resolve forward addresses for each host to find matches.
-        for host in qs:
+        for host in hosts:
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host:
@@ -2211,7 +2273,7 @@ class JobTemplateCallback(GenericAPIView):
         # match again.
         inventory_sources_already_updated = []
         if len(matching_hosts) != 1:
-            inventory_sources = job_template.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+            inventory_sources = job_template.inventory.inventory_sources.filter( update_on_launch=True)
             inventory_update_pks = set()
             for inventory_source in inventory_sources:
                 if inventory_source.needs_update_on_launch:
@@ -2277,6 +2339,12 @@ class JobTemplateJobsList(SubListCreateAPIView):
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
+
+class JobTemplateAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = JobTemplate
+    new_in_300 = True
 
 class SystemJobTemplateList(ListAPIView):
 
@@ -2391,7 +2459,7 @@ class JobActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobActivityStreamList, self).get(request, *args, **kwargs)
 
 class JobStart(GenericAPIView):
 
@@ -3005,7 +3073,7 @@ class AdHocCommandActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class SystemJobList(ListCreateAPIView):
@@ -3077,7 +3145,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-        
+
         if request.accepted_renderer.format in ('html', 'api', 'json'):
             content_format = request.query_params.get('content_format', 'html')
             content_encoding = request.query_params.get('content_encoding', None)
@@ -3216,7 +3284,7 @@ class ActivityStreamList(SimpleListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class ActivityStreamDetail(RetrieveAPIView):
@@ -3233,7 +3301,7 @@ class ActivityStreamDetail(RetrieveAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
 
 class SettingsList(ListCreateAPIView):
 
@@ -3299,6 +3367,115 @@ class SettingsReset(APIView):
         if settings_key is not None:
             TowerSettings.objects.filter(key=settings_key).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RoleList(ListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Role.objects.all()
+        return Role.visible_roles(self.request.user)
+
+
+class RoleDetail(RetrieveAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+
+class RoleUsersList(SubListCreateAttachDetachAPIView):
+
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Role
+    relationship = 'members'
+    new_in_300 = True
+
+    def get_queryset(self):
+        role = self.get_parent_object()
+        self.check_parent_access(role)
+        return role.members.all()
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(RoleUsersList, self).post(request, *args, **kwargs)
+
+
+class RoleTeamsList(ListAPIView):
+
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Role
+    relationship = 'member_role.parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        # TODO: Check
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return Team.objects.filter(member_role__children=role)
+
+    def post(self, request, pk, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg='Role "id" field is missing')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        team = Team.objects.get(pk=sub_id)
+        if request.data.get('disassociate', None):
+            team.member_role.children.remove(role)
+        else:
+            team.member_role.children.add(role)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # XXX attach/detach needs to ensure we have the appropriate perms
+
+
+class RoleParentsList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        # XXX: This should be the intersection between the roles of the user
+        # and the roles that the requesting user has access to see
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return role.parents.all()
+
+class RoleChildrenList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'children'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        # XXX: This should be the intersection between the roles of the user
+        # and the roles that the requesting user has access to see
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return role.children
+
+
+
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

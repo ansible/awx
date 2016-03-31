@@ -50,7 +50,7 @@ from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
 from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            ignore_inventory_computed_fields, emit_websocket_notification,
+                            emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -108,17 +108,6 @@ def run_administrative_checks(self):
                   "Ansible Tower license will expire soon",
                   tower_admin_emails,
                   fail_silently=True)
-
-@task()
-def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
-    from awx.main.signals import disable_activity_stream
-    with ignore_inventory_computed_fields():
-        with disable_activity_stream():
-            for group in groups:
-                Group.objects.get(id=group).mark_inactive(skip_active_check=True)
-            for host in hosts:
-                Host.objects.get(id=host).mark_inactive(skip_active_check=True)
-    update_inventory_computed_fields(inventory)
 
 @task(bind=True)
 def tower_periodic_scheduler(self):
@@ -885,12 +874,12 @@ class RunJob(BaseTask):
             'tower_job_id': job.pk,
             'tower_job_launch_type': job.launch_type,
         }
-        if job.job_template and job.job_template.active:
+        if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
                 'tower_job_template_name': job.job_template.name,
             })
-        if job.created_by and job.created_by.is_active:
+        if job.created_by:
             extra_vars.update({
                 'tower_user_id': job.created_by.pk,
                 'tower_user_name': job.created_by.username,
@@ -1385,7 +1374,7 @@ class RunInventoryUpdate(BaseTask):
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
-            if inventory_update.source_script is None or not inventory_update.source_script.active:
+            if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()

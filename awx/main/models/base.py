@@ -208,15 +208,6 @@ class PasswordFieldsModel(BaseModel):
     def _password_field_allows_ask(self, field):
         return False # Override in subclasses if needed.
 
-    def mark_inactive(self, save=True):
-        '''
-        When marking a password model inactive we'll clear sensitive fields
-        '''
-        for sensitive_field in self.PASSWORD_FIELDS:
-            setattr(self, sensitive_field, "")
-        self.save()
-        super(PasswordFieldsModel, self).mark_inactive(save=save)
-
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
@@ -278,28 +269,8 @@ class PrimordialModel(CreatedModifiedModel):
         editable=False,
         on_delete=models.SET_NULL,
     )
-    active = models.BooleanField(
-        default=True,
-        editable=False,
-    )
 
     tags = TaggableManager(blank=True)
-
-    def mark_inactive(self, save=True, update_fields=None, skip_active_check=False):
-        '''Use instead of delete to rename and mark inactive.'''
-        update_fields = update_fields or []
-        if skip_active_check or self.active:
-            dtnow = now()
-            if 'name' in self._meta.get_all_field_names():
-                self.name   = "_deleted_%s_%s" % (dtnow.isoformat(), self.name)
-                if 'name' not in update_fields:
-                    update_fields.append('name')
-            self.active = False
-            if 'active' not in update_fields:
-                update_fields.append('active')
-            if save:
-                self.save(update_fields=update_fields)
-        return update_fields
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])

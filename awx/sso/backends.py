@@ -210,11 +210,11 @@ def on_populate_user(sender, **kwargs):
         remove = bool(org_opts.get('remove', False))
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_groups(user, ldap_user, org.admins, admins_opts,
+        _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
                                 remove_admins)
         users_opts = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_groups(user, ldap_user, org.users, users_opts,
+        _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts,
                                 remove_users)
 
     # Update team membership based on group memberships.
@@ -226,7 +226,7 @@ def on_populate_user(sender, **kwargs):
         team, created = Team.objects.get_or_create(name=team_name, organization=org)
         users_opts = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', False))
-        _update_m2m_from_groups(user, ldap_user, team.users, users_opts,
+        _update_m2m_from_groups(user, ldap_user, team.member_role.users, users_opts,
                                 remove)
 
     # Update user profile to store LDAP DN.

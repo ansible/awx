@@ -16,14 +16,20 @@ from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
-from awx.main.fields import AutoOneToOneField
+from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import * # noqa
+from awx.main.models.rbac import (
+    ALL_PERMISSIONS,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
+from awx.main.models.mixins import ResourceMixin
 from awx.main.conf import tower_settings
 
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 
 
-class Organization(CommonModel, NotificationFieldsModel):
+class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     '''
     An organization is the basic unit of multi-tenancy divisions
     '''
@@ -32,21 +38,40 @@ class Organization(CommonModel, NotificationFieldsModel):
         app_label = 'main'
         ordering = ('name',)
 
-    users = models.ManyToManyField(
+    deprecated_users = models.ManyToManyField(
         'auth.User',
         blank=True,
-        related_name='organizations',
+        related_name='deprecated_organizations',
     )
-    admins = models.ManyToManyField(
+    deprecated_admins = models.ManyToManyField(
         'auth.User',
         blank=True,
-        related_name='admin_of_organizations',
+        related_name='deprecated_admin_of_organizations',
     )
-    projects = models.ManyToManyField(
+    deprecated_projects = models.ManyToManyField(
         'Project',
         blank=True,
-        related_name='organizations',
+        related_name='deprecated_organizations',
     )
+    admin_role = ImplicitRoleField(
+        role_name='Organization Administrator',
+        role_description='May manage all aspects of this organization',
+        parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+        permissions = ALL_PERMISSIONS,
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Organization Auditor',
+        role_description='May read all settings associated with this organization',
+        parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        permissions = {'read': True}
+    )
+    member_role = ImplicitRoleField(
+        role_name='Organization Member',
+        role_description='A member of this organization',
+        parent_role='admin_role',
+        permissions = {'read': True}
+    )
+
 
     def get_absolute_url(self):
         return reverse('api:organization_detail', args=(self.pk,))
@@ -54,14 +79,9 @@ class Organization(CommonModel, NotificationFieldsModel):
     def __unicode__(self):
         return self.name
 
-    def mark_inactive(self, save=True):
-        for script in self.custom_inventory_scripts.all():
-            script.organization = None
-            script.save()
-        super(Organization, self).mark_inactive(save=save)
 
 
-class Team(CommonModelNameNotUnique):
+class Team(CommonModelNameNotUnique, ResourceMixin):
     '''
     A team is a group of users that work on common projects.
     '''
@@ -71,10 +91,10 @@ class Team(CommonModelNameNotUnique):
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
 
-    users = models.ManyToManyField(
+    deprecated_users = models.ManyToManyField(
         'auth.User',
         blank=True,
-        related_name='teams',
+        related_name='deprecated_teams',
     )
     organization = models.ForeignKey(
         'Organization',
@@ -83,26 +103,41 @@ class Team(CommonModelNameNotUnique):
         on_delete=models.SET_NULL,
         related_name='teams',
     )
-    projects = models.ManyToManyField(
+    deprecated_projects = models.ManyToManyField(
         'Project',
         blank=True,
-        related_name='teams',
+        related_name='deprecated_teams',
+    )
+    admin_role = ImplicitRoleField(
+        role_name='Team Administrator',
+        role_description='May manage this team',
+        parent_role='organization.admin_role',
+        permissions = ALL_PERMISSIONS,
+    )
+    auditor_role = ImplicitRoleField(
+        role_name='Team Auditor',
+        role_description='May read all settings associated with this team',
+        parent_role='organization.auditor_role',
+        permissions = {'read': True}
+    )
+    member_role = ImplicitRoleField(
+        role_name='Team Member',
+        role_description='A member of this team',
+        parent_role='admin_role',
+        permissions = {'read':True},
     )
 
     def get_absolute_url(self):
         return reverse('api:team_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True):
-        '''
-        When marking a team inactive we'll wipe out its credentials also
-        '''
-        for cred in self.credentials.all():
-            cred.mark_inactive()
-        super(Team, self).mark_inactive(save=save)
 
 class Permission(CommonModelNameNotUnique):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.
+
+    NOTE: This class is deprecated, permissions and access is to be handled by
+    our new RBAC system. This class should be able to be safely removed after a 3.0.0
+    migration. - anoek 2016-01-28
     '''
 
     class Meta:
@@ -174,7 +209,7 @@ class Profile(CreatedModifiedModel):
     )
 
 """
-Since expiration and session expiration is event driven a token could be 
+Since expiration and session expiration is event driven a token could be
 invalidated for both reasons. Further, we only support a single reason for a
 session token being invalid. For this case, mark the token as expired.
 
@@ -198,7 +233,7 @@ class AuthToken(BaseModel):
 
     class Meta:
         app_label = 'main'
-    
+
     key = models.CharField(max_length=40, primary_key=True)
     user = models.ForeignKey('auth.User', related_name='auth_tokens',
                              on_delete=models.CASCADE)
@@ -301,22 +336,6 @@ class AuthToken(BaseModel):
 
     def __unicode__(self):
         return self.key
-
-
-# Add mark_inactive method to User model.
-def user_mark_inactive(user, save=True):
-    '''Use instead of delete to rename and mark users inactive.'''
-    if user.is_active:
-        # Set timestamp to datetime.isoformat() but without the time zone
-        # offset to stay withint the 30 character username limit.
-        dtnow = tz_now()
-        deleted_ts = dtnow.strftime('%Y-%m-%dT%H:%M:%S.%f')
-        user.username = '_d_%s' % deleted_ts
-        user.is_active = False
-        if save:
-            user.save()
-            
-User.add_to_class('mark_inactive', user_mark_inactive)
 
 
 # Add get_absolute_url method to User model if not present.

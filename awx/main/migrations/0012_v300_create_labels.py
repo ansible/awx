@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0007_v300_credential_domain_field'),
+        ('main', '0011_v300_credential_domain_field'),
     ]
 
     operations = [
@@ -23,7 +23,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
                 ('name', models.CharField(max_length=512)),
                 ('created_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('modified_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),

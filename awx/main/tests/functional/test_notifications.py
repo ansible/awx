@@ -69,7 +69,7 @@ def test_encrypted_subfields(get, post, user, organization):
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
     with mock.patch.object(notifier_actual.notification_class, "send_messages", assert_send):
         notifier_actual.send("Test", {'body': "Test"})
-        
+
 @pytest.mark.django_db
 def test_inherited_notifiers(get, post, user, organization, project):
     u = user('admin-poster', True)
@@ -86,7 +86,6 @@ def test_inherited_notifiers(get, post, user, organization, project):
                         u)
         assert response.status_code == 201
         notifiers.append(response.data['id'])
-    organization.projects.add(project)
     i = Inventory.objects.create(name='test', organization=organization)
     i.save()
     g = Group.objects.create(name='test', inventory=i)
@@ -109,7 +108,6 @@ def test_inherited_notifiers(get, post, user, organization, project):
 @pytest.mark.django_db
 def test_notifier_merging(get, post, user, organization, project, notifier):
     user('admin-poster', True)
-    organization.projects.add(project)
     organization.notifiers_any.add(notifier)
     project.notifiers_any.add(notifier)
     assert len(project.notifiers['any']) == 1

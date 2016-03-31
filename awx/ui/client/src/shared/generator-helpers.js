@@ -449,6 +449,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
+            } else if (field.type === 'role') {
+                html += "<td class=\"List-tableCell\"><role-list class=\"RoleList\"></role-list></td>";
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
@@ -520,7 +522,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                                 list: list,
                                 field: field,
                                 fld: fld,
-                                base: base
+                                base: field.linkBase || base
                             }) + ' ';
                         });
                     }
@@ -532,7 +534,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                             list: list,
                             field: field,
                             fld: fld,
-                            base: base
+                            base: field.linkBase || base
                         });
                     }
                 }
@@ -633,6 +635,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         var iterator = params.iterator,
             form = params.template,
             size = params.size,
+            mini = params.mini,
             includeSize = (params.includeSize === undefined) ? true : params.includeSize,
             ngShow = (params.ngShow) ? params.ngShow : false,
             i, html = '',
@@ -666,6 +669,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             if (includeSize) {
                 html += "<div class=\"List-searchWidget ";
+                html += (mini) ? "List-searchWidget--compact " : "";
                 html += (size) ? size : "col-lg-4 col-md-8 col-sm-12 col-xs-12";
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
             }

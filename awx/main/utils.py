@@ -30,7 +30,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict']
+           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -523,4 +523,22 @@ def timedelta_total_seconds(timedelta):
     return (
         timedelta.microseconds + 0.0 +
         (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+
+
+class NoDefaultProvided(object):
+    pass
+
+def getattrd(obj, name, default=NoDefaultProvided):
+    """
+    Same as getattr(), but allows dot notation lookup
+    Discussed in:
+    http://stackoverflow.com/questions/11975781
+    """
+
+    try:
+        return reduce(getattr, name.split("."), obj)
+    except AttributeError:
+        if default != NoDefaultProvided:
+            return default
+        raise
 
