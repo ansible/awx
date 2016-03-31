@@ -151,6 +151,17 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 editRequired: false,
                 subForm: 'sourceSubForm'
             },
+            organization: {
+                label: 'Organization',
+                type: 'lookup',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                ngClick: 'lookUpOrganization()',
+                awRequiredWhen: {
+                    variable: "organizationrequired",
+                    init: "true"
+                }
+            },
             credential: {
                 label: 'SCM Credential',
                 type: 'lookup',
@@ -234,50 +245,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         },
 
         related: {
-            organizations: {
-                type: 'collection',
-                title: 'Organizations',
-                iterator: 'organization',
-                index: false,
-                open: false,
-
-                actions: {
-                    add: {
-                        ngClick: "add('organizations')",
-                        label: 'Add',
-                        awToolTip: 'Add an organization',
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD'
-                    }
-                },
-
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name'
-                    },
-                    description: {
-                        label: 'Description'
-                    }
-                },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "edit('organizations', organization.id, organization.name)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit the organization',
-                        'class': 'btn btn-default'
-                    },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "delete('organizations', organization.id, organization.name, 'organization')",
-                        icon: 'icon-trash',
-                        "class": 'btn-danger',
-                        awToolTip: 'Delete the organization'
-                    }
-                }
-            },
             permissions: {
                 type: 'collection',
                 title: 'Permissions',
@@ -314,13 +281,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
 
         relatedSets: function(urls) {
             return {
-                organizations: {
-                    iterator: 'organization',
-                    url: urls.organizations
-                },
                 permissions: {
                     iterator: 'permission',
-                    url: urls.resource_access_list
+                    url: urls.access_list
                 }
             };
         }
