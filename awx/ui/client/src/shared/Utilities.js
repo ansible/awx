@@ -871,4 +871,20 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
         };
     }
-]);
+])
+.factory('ParamPass', function() {
+    var savedData = undefined;
+
+    function set(data) {
+        savedData = data;
+    }
+
+    function get() {
+        return savedData;
+    }
+
+    return {
+        set: set,
+        get: get
+    }
+});
