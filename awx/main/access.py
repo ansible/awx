@@ -213,19 +213,16 @@ class UserAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser:
-            return User.objects
+            return User.objects.all()
 
         if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.exists():
-            return User.objects
+            return User.objects.all()
 
         viewable_users_set = set()
         viewable_users_set.update(self.user.roles.values_list('ancestors__members__id', flat=True))
         viewable_users_set.update(self.user.roles.values_list('descendents__members__id', flat=True))
 
         return User.objects.filter(id__in=viewable_users_set)
-        #qs = User.objects.filter(self.user, {'read':True})
-        #qs = User.objects.
-        #return qs
 
     def can_add(self, data):
         if data is not None and 'is_superuser' in data:
@@ -275,8 +272,7 @@ class OrganizationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('created_by', 'modified_by')
-        return qs
+        return qs.select_related('created_by', 'modified_by').all()
 
     def can_change(self, obj, data):
         if self.user.is_superuser:
@@ -311,8 +307,7 @@ class InventoryAccess(BaseAccess):
 
     def get_queryset(self, allowed=None, ad_hoc=None):
         qs = self.model.accessible_objects(self.user, {'read': True})
-        qs = qs.select_related('created_by', 'modified_by', 'organization')
-        return qs
+        return qs.select_related('created_by', 'modified_by', 'organization').all()
 
     def can_read(self, obj):
         return obj.accessible_by(self.user, {'read': True})
@@ -369,8 +364,7 @@ class HostAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'last_job__job_template',
                                'last_job_host_summary__job')
-        qs = qs.prefetch_related('groups')
-        return qs
+        return qs.prefetch_related('groups').all()
 
     def can_read(self, obj):
         return obj and obj.inventory.accessible_by(self.user, {'read':True})
@@ -422,8 +416,7 @@ class GroupAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.accessible_objects(self.user, {'read':True})
         qs = qs.select_related('created_by', 'modified_by', 'inventory')
-        qs = qs.prefetch_related('parents', 'children', 'inventory_source')
-        return qs
+        return qs.prefetch_related('parents', 'children', 'inventory_source').all()
 
     def can_read(self, obj):
         return obj and obj.inventory.accessible_by(self.user, {'read':True})
@@ -547,8 +540,7 @@ class CredentialAccess(BaseAccess):
         permitted to see.
         """
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('created_by', 'modified_by')
-        return qs
+        return qs.select_related('created_by', 'modified_by').all()
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -592,8 +584,7 @@ class TeamAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('created_by', 'modified_by', 'organization')
-        return qs
+        return qs.select_related('created_by', 'modified_by', 'organization').all()
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -635,10 +626,9 @@ class ProjectAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser:
-            return self.model.objects
+            return self.model.objects.all()
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('modified_by', 'credential', 'current_job', 'last_job')
-        return qs
+        return qs.select_related('modified_by', 'credential', 'current_job', 'last_job').all()
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -668,7 +658,7 @@ class ProjectUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser:
-            return self.model.objects
+            return self.model.objects.all()
         qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
         project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
@@ -697,9 +687,8 @@ class JobTemplateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.accessible_objects(self.user, {'read':True})
-        qs = qs.select_related('created_by', 'modified_by', 'inventory', 'project',
-                               'credential', 'cloud_credential', 'next_schedule')
-        return qs
+        return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
+                                 'credential', 'cloud_credential', 'next_schedule').all()
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
@@ -818,7 +807,7 @@ class JobAccess(BaseAccess):
                                'project', 'credential', 'cloud_credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
-            return qs
+            return qs.all()
 
         credential_ids = self.user.get_queryset(Credential)
         return qs.filter(
@@ -908,16 +897,13 @@ class AdHocCommandAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'credential')
         if self.user.is_superuser:
-            return qs
+            return qs.all()
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
         inventory_qs = Inventory.accessible_objects(self.user, {'read': True, 'execute': True})
 
-        qs = qs.filter(
-            credential_id__in=credential_ids,
-            inventory__in=inventory_qs,
-        )
-        return qs
+        return qs.filter(credential_id__in=credential_ids,
+                         inventory__in=inventory_qs)
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
@@ -970,12 +956,11 @@ class AdHocCommandEventAccess(BaseAccess):
         qs = qs.select_related('ad_hoc_command', 'host')
 
         if self.user.is_superuser:
-            return qs
+            return qs.all()
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         host_qs = self.user.get_queryset(Host)
-        qs = qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
-                       ad_hoc_command__in=ad_hoc_command_qs)
-        return qs
+        return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
+                         ad_hoc_command__in=ad_hoc_command_qs)
 
     def can_add(self, data):
         return False
@@ -997,7 +982,7 @@ class JobHostSummaryAccess(BaseAccess):
         qs = self.model.objects
         qs = qs.select_related('job', 'job__job_template', 'host')
         if self.user.is_superuser:
-            return qs
+            return qs.all()
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
         return qs.filter(job__in=job_qs, host__in=host_qs)
@@ -1029,12 +1014,11 @@ class JobEventAccess(BaseAccess):
                         event_data__contains='"module_name": "async_status"')
 
         if self.user.is_superuser:
-            return qs
+            return qs.all()
+
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
-        qs = qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
-                       job__in=job_qs)
-        return qs
+        return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs), job__in=job_qs)
 
     def can_add(self, data):
         return False
@@ -1077,7 +1061,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
             'cloud_credential',
         )
 
-        return qs
+        return qs.all()
 
 class UnifiedJobAccess(BaseAccess):
     '''
@@ -1119,7 +1103,7 @@ class UnifiedJobAccess(BaseAccess):
             'job_template__credential',
             'job_template__cloud_credential',
         )
-        return qs
+        return qs.all()
 
 class ScheduleAccess(BaseAccess):
     '''
@@ -1133,7 +1117,7 @@ class ScheduleAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by')
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
-            return qs
+            return qs.all()
         job_template_qs = self.user.get_queryset(JobTemplate)
         inventory_source_qs = self.user.get_queryset(InventorySource)
         project_qs = self.user.get_queryset(Project)
@@ -1186,10 +1170,7 @@ class NotifierAccess(BaseAccess):
     model = Notifier
 
     def get_queryset(self):
-        qs = self.model.objects.distinct()
-        if self.user.is_superuser:
-            return qs
-        return qs
+        return self.model.objects.distinct().all()
 
 class NotificationAccess(BaseAccess):
     '''
@@ -1198,10 +1179,7 @@ class NotificationAccess(BaseAccess):
     model = Notification
 
     def get_queryset(self):
-        qs = self.model.objects.distinct()
-        if self.user.is_superuser:
-            return qs
-        return qs
+        return self.model.objects.distinct().all()
 
 class LabelAccess(BaseAccess):
     '''
@@ -1210,10 +1188,7 @@ class LabelAccess(BaseAccess):
     model = Label
 
     def get_queryset(self):
-        qs = self.model.objects.distinct()
-        if self.user.is_superuser:
-            return qs
-        return qs
+        return self.model.objects.distinct().all()
 
     def can_delete(self, obj):
         return False
@@ -1232,54 +1207,54 @@ class ActivityStreamAccess(BaseAccess):
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
                                  'permission', 'job_template', 'job')
         if self.user.is_superuser:
-            return qs
+            return qs.all()
 
         #Inventory filter
         inventory_qs = self.user.get_queryset(Inventory)
-        qs.filter(inventory__in=inventory_qs)
+        qs = qs.filter(inventory__in=inventory_qs)
 
         #Host filter
-        qs.filter(host__inventory__in=inventory_qs)
+        qs = qs.filter(host__inventory__in=inventory_qs)
 
         #Group filter
-        qs.filter(group__inventory__in=inventory_qs)
+        qs = qs.filter(group__inventory__in=inventory_qs)
 
         #Inventory Source Filter
-        qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
-                  Q(inventory_source__group__inventory__in=inventory_qs))
+        qs = qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
+                       Q(inventory_source__group__inventory__in=inventory_qs))
 
         #Inventory Update Filter
-        qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
-                  Q(inventory_update__inventory_source__group__inventory__in=inventory_qs))
+        qs = qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
+                       Q(inventory_update__inventory_source__group__inventory__in=inventory_qs))
 
         #Credential Update Filter
         credential_qs = self.user.get_queryset(Credential)
-        qs.filter(credential__in=credential_qs)
+        qs = qs.filter(credential__in=credential_qs)
 
         #Team Filter
         team_qs = self.user.get_queryset(Team)
-        qs.filter(team__in=team_qs)
+        qs = qs.filter(team__in=team_qs)
 
         #Project Filter
         project_qs = self.user.get_queryset(Project)
-        qs.filter(project__in=project_qs)
+        qs = qs.filter(project__in=project_qs)
 
         #Project Update Filter
-        qs.filter(project_update__project__in=project_qs)
+        qs = qs.filter(project_update__project__in=project_qs)
 
         #Job Template Filter
         jobtemplate_qs = self.user.get_queryset(JobTemplate)
-        qs.filter(job_template__in=jobtemplate_qs)
+        qs = qs.filter(job_template__in=jobtemplate_qs)
 
         #Job Filter
         job_qs = self.user.get_queryset(Job)
-        qs.filter(job__in=job_qs)
+        qs = qs.filter(job__in=job_qs)
 
         # Ad Hoc Command Filter
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
-        qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
+        qs = qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
 
-        return qs
+        return qs.all()
 
     def can_add(self, data):
         return False
@@ -1296,8 +1271,8 @@ class CustomInventoryScriptAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser:
-            return self.model.objects.distinct()
-        return self.model.accessible_by(self.user, {'read':True})
+            return self.model.objects.distinct().all()
+        return self.model.accessible_objects(self.user, {'read':True}).all()
 
     def can_read(self, obj):
         if self.user.is_superuser:
