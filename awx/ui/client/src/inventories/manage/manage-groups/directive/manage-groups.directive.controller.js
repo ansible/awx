@@ -68,13 +68,15 @@ function manageGroupsDirectiveController($filter, $rootScope, $location, $log, $
     elem = document.getElementById('group-manage-panel');
     $compile(elem)(modal_scope);
 
+    $scope.parseType = 'yaml';
+
     var form_scope =
         generator.inject(GroupForm, {
             mode: mode,
             id: 'properties-tab',
             related: false,
             scope: properties_scope,
-            cancelButton: false
+            cancelButton: false,
         });
     var source_form_scope =
         generator.inject(SourceForm, {
@@ -114,6 +116,13 @@ function manageGroupsDirectiveController($filter, $rootScope, $location, $log, $
         modal_scope.removeLoadSourceData();
     }
     modal_scope.removeLoadSourceData = modal_scope.$on('LoadSourceData', function() {
+        ParseTypeChange({
+            scope: form_scope,
+            variable: 'variables',
+            parse_variable: 'parseType',
+            field_id: 'group_variables'
+        });
+
         if (sources_scope.source_url) {
             // get source data
             Rest.setUrl(sources_scope.source_url);
@@ -239,6 +248,7 @@ function manageGroupsDirectiveController($filter, $rootScope, $location, $log, $
                             opts: opts
                         });
                     }
+
                     sources_scope.group_update_url = data.related.update;
                 })
                 .error(function(data, status) {

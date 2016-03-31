@@ -335,12 +335,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
 
     $scope.createGroup = function () {
         PreviousSearchParams = Store('group_current_search_params');
-        // GroupsEdit({
-        //     scope: $scope,
-        //     inventory_id: $scope.inventory.id,
-        //     group_id: $scope.selected_group_id,
-        //     mode: 'add'
-        // });
         var params = {
             scope: $scope,
             inventory_id: $scope.inventory.id,
@@ -353,12 +347,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
 
     $scope.editGroup = function (id) {
         PreviousSearchParams = Store('group_current_search_params');
-        // GroupsEdit({
-        //     scope: $scope,
-        //     inventory_id: $scope.inventory.id,
-        //     group_id: id,
-        //     mode: 'edit'
-        // });
         var params = {
             scope: $scope,
             inventory_id: $scope.inventory.id,
@@ -432,15 +420,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     };
 
     hostScope.createHost = function () {
-        // HostsEdit({
-        //     host_scope: hostScope,
-        //     group_scope: $scope,
-        //     mode: 'add',
-        //     host_id: null,
-        //     selected_group_id: $scope.selected_group_id,
-        //     inventory_id: $scope.inventory.id
-        // });
-
         var params = {
             host_scope: hostScope,
             group_scope: $scope,
@@ -454,13 +433,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     };
 
     hostScope.editHost = function (host_id) {
-        // HostsEdit({
-        //     host_scope: hostScope,
-        //     group_scope: $scope,
-        //     mode: 'edit',
-        //     host_id: host_id,
-        //     inventory_id: $scope.inventory.id
-        // });
         var params = {
             host_scope: hostScope,
             group_scope: $scope,
@@ -489,19 +461,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
             host_id: id
         });
     };
-
-    /*hostScope.restoreSearch = function() {
-        SearchInit({
-            scope: hostScope,
-            set: PreviousSearchParams.set,
-            list: PreviousSearchParams.list,
-            url: PreviousSearchParams.defaultUrl,
-            iterator: PreviousSearchParams.iterator,
-            sort_order: PreviousSearchParams.sort_order,
-            setWidgets: false
-        });
-        hostScope.search('host');
-    };*/
 
     hostScope.toggleHostEnabled = function (host_id, external_source) {
         ToggleHostEnabled({

@@ -40,9 +40,16 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
             cancelButton: false
         });
     generator.reset();
+    console.info(angular.element(document.getElementById('host_variables')));
 
+    $scope.parseType = 'yaml';
+    ParseTypeChange({
+        scope: form_scope,
+        variable: 'variables',
+        parse_variable: 'parseType',
+        field_id: 'host_variables'
+    });
 
-    scope.parseType = 'yaml';
 
     // Retrieve detail record and prepopulate the form
     if (mode === 'edit') {
@@ -170,8 +177,6 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
         }
         $state.go('inventoryManage');
     };
-
-
 
     angular.extend(vm, {
         cancelPanel: cancelPanel,

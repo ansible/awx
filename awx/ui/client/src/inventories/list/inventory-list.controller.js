@@ -14,7 +14,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
     $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
     generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait,
-    EditInventoryProperties, Find, Empty, $state) {
+    Find, Empty, $state) {
 
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
@@ -301,10 +301,6 @@ function InventoriesList($scope, $rootScope, $location, $log,
 
     };
 
-    $scope.editInventoryProperties = function (inventory_id) {
-        EditInventoryProperties({ scope: $scope, inventory_id: inventory_id });
-    };
-
     $scope.addInventory = function () {
         $state.go('inventories.add');
     };
@@ -365,5 +361,4 @@ function InventoriesList($scope, $rootScope, $location, $log,
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList',
     'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
-    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait',
-    'EditInventoryProperties', 'Find', 'Empty', '$state', InventoriesList];
+    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', InventoriesList];

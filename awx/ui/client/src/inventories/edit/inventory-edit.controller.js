@@ -10,8 +10,6 @@
  * @description This controller's for the Inventory page
  */
 
-import '../../job-templates/main';
-
 function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
@@ -30,7 +28,6 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         fld, json_data, data,
         relatedSets = {};
 
-    form.well = true;
     form.formLabelSize = null;
     form.formFieldSize = null;
     $scope.inventory_id = inventory_id;

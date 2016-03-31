@@ -10,8 +10,6 @@
  * @description This controller's for the Inventory page
  */
 
-import '../../job-templates/main';
-
 function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, InventoryForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
@@ -25,7 +23,6 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
         form = InventoryForm(),
         generator = GenerateForm;
 
-    form.well = true;
     form.formLabelSize = null;
     form.formFieldSize = null;
 
