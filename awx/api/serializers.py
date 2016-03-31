@@ -101,12 +101,12 @@ def reverse_gfk(content_object):
     for example
         { 'organization': '/api/v1/organizations/1/' }
     '''
-    ret = {}
-    try:
-        ret[camelcase_to_underscore(content_object.__class__.__name__)] = content_object.get_absolute_url()
-    except AttributeError:
-        pass
-    return ret
+    if content_object is None or not hasattr(content_object, 'get_absolute_url'):
+        return {}
+
+    return {
+        camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url()
+    }
 
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
