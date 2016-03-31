@@ -40,16 +40,6 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
             cancelButton: false
         });
     generator.reset();
-    console.info(angular.element(document.getElementById('host_variables')));
-
-    $scope.parseType = 'yaml';
-    ParseTypeChange({
-        scope: form_scope,
-        variable: 'variables',
-        parse_variable: 'parseType',
-        field_id: 'host_variables'
-    });
-
 
     // Retrieve detail record and prepopulate the form
     if (mode === 'edit') {
@@ -75,6 +65,12 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
                 }
                 scope.variable_url = data.related.variable_data;
                 scope.has_inventory_sources = data.has_inventory_sources;
+                scope.parseType = 'yaml';
+                ParseTypeChange({
+                    scope: scope,
+                    field_id: 'host_variables',
+                });
+
             })
             .error(function(data, status) {
                 ProcessErrors(parent_scope, data, status, form, {
@@ -99,6 +95,12 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
                 scope.variables = '---';
                 defaultUrl = data.related.hosts;
                 //scope.$emit('hostVariablesLoaded');
+                scope.parseType = 'yaml';
+                ParseTypeChange({
+                    scope: scope,
+                    field_id: 'host_variables',
+                });
+
             })
             .error(function(data, status) {
                 ProcessErrors(parent_scope, data, status, form, {
