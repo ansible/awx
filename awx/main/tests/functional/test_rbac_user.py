@@ -9,7 +9,9 @@ from awx.main.models import Role
 
 @pytest.mark.django_db
 def test_user_admin(user_project, project, user):
-    joe = user('joe', is_superuser = False)
+    username = unicode("\xc3\xb4", "utf-8")
+
+    joe = user(username, is_superuser = False)
     admin = user('admin', is_superuser = True)
     sa = Role.singleton('System Administrator')
 
