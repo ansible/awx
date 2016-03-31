@@ -1,0 +1,69 @@
+@import "awx/ui/client/src/shared/branding/colors.less";
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
+
+.HostEvent .modal-footer{
+	border: 0;
+	margin-top: 0px;
+	padding-top: 5px;
+}
+.HostEvent-controls{
+	float: right;
+	button {
+		margin-left: 10px;
+	}
+}
+.HostEvent-status--ok{
+	color: @green;
+}
+.HostEvent-status--unreachable{
+	color: @unreachable;
+}
+.HostEvent-status--changed{
+	color: @changed;
+}
+.HostEvent-status--failed{
+	color: @default-err;
+}
+.HostEvent-status--skipped{
+	color: @skipped;
+}
+.HostEvent-title{
+ 	color: @default-interface-txt;
+ 	font-weight: 600;	
+}
+.HostEvent .modal-body{
+    max-height: 500px;
+    overflow-y: auto;
+	padding: 20px;
+}
+.HostEvent-nav{
+	padding-top: 12px;
+	padding-bottom: 12px;
+}
+.HostEvent-field{
+	margin-bottom: 8px;
+}
+.HostEvent-field--label{
+	.OnePlusTwo-left--detailsLabel;
+	width: 80px;
+	margin-right: 20px;
+	font-size: 12px;
+}
+.HostEvent-field{
+	.OnePlusTwo-left--detailsRow;
+}
+.HostEvent-field--content{
+	.OnePlusTwo-left--detailsContent;
+}
+.HostEvent-details--left, .HostEvent-details--right{
+	vertical-align:top;
+	width:270px;
+	display: inline-block;
+
+}
+.HostEvent-details--right{
+	.HostEvent-field--label{
+		width: 170px;
+	}
+}

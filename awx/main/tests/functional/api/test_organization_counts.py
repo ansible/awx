@@ -128,6 +128,7 @@ def test_two_organizations(resourced_organization, organizations, user, get):
         'teams': 0
     }
 
+@pytest.mark.skip(reason="resolution planned for after RBAC merge")
 @pytest.mark.django_db
 @pytest.mark.skipif("True") # XXX: This needs to be implemented
 def test_JT_associated_with_project(organizations, project, user, get):

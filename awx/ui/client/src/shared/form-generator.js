@@ -1394,13 +1394,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         "ng-if=is_superuser>Admin</span>";
                 }
                 html += "</div>\n";
+                if(options.cancelButton !== undefined && options.cancelButton === false) {
+                    html += "<div class=\"Form-exitHolder\">";
+                    html += "</div>";
+                } else {
+                    html += "<div class=\"Form-exitHolder\">";
+                    html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
+                    html += "<i class=\"fa fa-times-circle\"></i>";
+                    html += "</button></div>\n";
+                }
+                    html += "</div>\n"; //end of Form-header
 
-                html += "<div class=\"Form-exitHolder\">";
-                html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
-                html += "<i class=\"fa fa-times-circle\"></i>";
-                html += "</button></div>\n";
 
-                html += "</div>\n"; //end of Form-header
 
                 if (this.form.tabs) {
                     var collection;

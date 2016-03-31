@@ -18,7 +18,7 @@ export default
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
         'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
-        'EditSchedule', 'ParseTypeChange', 'JobDetailService', 'EventViewer',
+        'EditSchedule', 'ParseTypeChange', 'JobDetailService',
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
             $log, ClearScope, GetBasePath, Wait, ProcessErrors,
@@ -27,7 +27,7 @@ export default
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
             PlaybookRun, LoadPlays, LoadTasks, LoadHosts,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
-            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService, EventViewer
+            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService
         ) {
             ClearScope();
 
@@ -1117,17 +1117,6 @@ export default
                         scope: scope
                     });
                 }
-            };
-
-            scope.viewHostResults = function(id) {
-                EventViewer({
-                    scope: scope,
-                    url: scope.job.related.job_events,
-                    parent_id: scope.selectedTask,
-                    event_id: id,
-                    index: this.$index,
-                    title: 'Host Event'
-                });
             };
 
             if (scope.removeDeleteFinished) {

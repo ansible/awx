@@ -6,7 +6,7 @@ from collections import OrderedDict
 # Django
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, smart_text
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -36,6 +36,25 @@ class Metadata(metadata.SimpleMetadata):
             value = getattr(field, attr, None)
             if value is not None and value != '':
                 field_info[attr] = force_text(value, strings_only=True)
+
+        # Update help text for common fields.
+        serializer = getattr(field, 'parent', None)
+        if serializer:
+            field_help_text = {
+                'id': 'Database ID for this {}.',
+                'name': 'Name of this {}.',
+                'description': 'Optional description of this {}.',
+                'type': 'Data type for this {}.',
+                'url': 'URL for this {}.',
+                'related': 'Data structure with URLs of related resources.',
+                'summary_fields': 'Data structure with name/description for related resources.',
+                'created': 'Timestamp when this {} was created.',
+                'modified': 'Timestamp when this {} was last modified.',
+            }
+            if field.field_name in field_help_text:
+                opts = serializer.Meta.model._meta.concrete_model._meta
+                verbose_name = smart_text(opts.verbose_name)
+                field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
@@ -77,7 +96,7 @@ class Metadata(metadata.SimpleMetadata):
 
         # Update type of fields returned...
         if field.field_name == 'type':
-            field_info['type'] = 'multiple choice'
+            field_info['type'] = 'choice'
         elif field.field_name == 'url':
             field_info['type'] = 'string'
         elif field.field_name in ('related', 'summary_fields'):

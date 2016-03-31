@@ -26,6 +26,7 @@ import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Cr
 import {JobsListController} from './controllers/Jobs';
 import {PortalController} from './controllers/Portal';
 import systemTracking from './system-tracking/main';
+import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
 import permissions from './permissions/main';
@@ -55,7 +56,7 @@ import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
 import OrganizationsAdd from './organizations/add/organizations-add.controller';
 import OrganizationsEdit from './organizations/edit/organizations-edit.controller';
-import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from './controllers/Inventories';
+import {InventoriesAdd, InventoriesEdit, InventoriesList, InventoriesManage} from './inventories/main';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
@@ -88,6 +89,7 @@ var tower = angular.module('Tower', [
     RestServices.name,
     browserData.name,
     systemTracking.name,
+    inventories.name,
     inventoryScripts.name,
     organizations.name,
     permissions.name,
@@ -182,7 +184,6 @@ var tower = angular.module('Tower', [
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'EventViewerHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
@@ -213,6 +214,8 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
+            // route to the details pane of /job/:id/host-event/:eventId if no other child specified
+            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details')
             // $urlRouterProvider.otherwise("/home");
             $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");
@@ -363,69 +366,6 @@ var tower = angular.module('Tower', [
                 url: '/projects/:project_id/organizations/add',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories', {
-                url: '/inventories',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'inventory'
-                },
-                ncyBreadcrumb: {
-                    label: "INVENTORIES"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesAdd,
-                ncyBreadcrumb: {
-                    parent: "inventories",
-                    label: "CREATE INVENTORY"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventories.edit', {
-                url: '/:inventory_id',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesEdit,
-                data: {
-                    activityStreamId: 'inventory_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('inventoryManage', {
-                url: '/inventories/:inventory_id/manage?groups',
-                templateUrl: urlPrefix + 'partials/inventory-manage.html',
-                controller: InventoriesManage,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'inventory',
-                    activityStreamId: 'inventory_id'
-                },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
