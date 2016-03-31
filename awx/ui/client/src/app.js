@@ -180,7 +180,6 @@ var tower = angular.module('Tower', [
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'EventViewerHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
@@ -211,6 +210,8 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
+            // route to the details pane of /job/:id/host-event/:eventId if no other child specified
+            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details')
             // $urlRouterProvider.otherwise("/home");
             $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");

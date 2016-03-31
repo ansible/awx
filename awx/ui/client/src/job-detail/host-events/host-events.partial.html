@@ -3,9 +3,9 @@
 		<div class="modal-content">
 			<div class="modal-body">
 				<div class="HostEvents-header">
-					<span class="HostEvents-title">HOST EVENTS</span>
+					<span class="HostEvents-title">HOST EVENTS | {{hostName}}</span>
 				<!-- Close -->
-					<button ng-click="goBack()" type="button" class="close">
+					<button ui-sref="jobDetail" type="button" class="close">
 						<i class="fa fa fa-times-circle"></i>
 					</button>
 				</div>
@@ -29,7 +29,6 @@
 					<table class="table">
 					<!-- column labels -->
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">STATUS</th>
-					<th ng-hide="results.length == 0" class="HostEvents-table--header">HOST</th>
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">PLAY</th>
 					<th ng-hide="results.length == 0" class="HostEvents-table--header">TASK</th>
 					<!-- result rows -->
@@ -37,11 +36,10 @@
 						<td class=HostEvents-table--cell>
 							<!-- status circles -->
 							<a class="HostEvents-status">
-								<i class="fa fa-circle"  ng-class="processStatus(event, $index)"></i>
+								<i class="fa fa-circle"  ng-class="processEventStatus(event)"></i>
 							</a>
 							{{event.status}}
 						</td>
-						<td class=HostEvents-table--cell>{{event.host_name}}</td>
 						<td class=HostEvents-table--cell>{{event.play}}</td>
 						<td class=HostEvents-table--cell>{{event.task}}</td>
 					</tr>
@@ -56,7 +54,7 @@
 			<div class="modal-footer">
 				<!-- pagination -->
 				<!-- close -->
-				<button ng-click="goBack()" class="btn btn-default pull-right HostEvents-close">OK</button>
+				<button ui-sref="jobDetail" class="btn btn-default pull-right HostEvents-close">OK</button>
 
 			</div>
 		</div>

@@ -1,0 +1,36 @@
+<div id="HostEvent" class="HostEvent modal fade" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		<!-- modal body -->
+		<div class="modal-body">
+			<div class="HostEvent-header">
+				<span class="HostEvent-title">HOST EVENT</span>
+				<!-- close -->
+				<button ui-sref="jobDetail" type="button" class="close">
+					<i class="fa fa-times-circle"></i>
+				</button>
+			</div>
+			<div class="HostEvent-nav">
+				<!-- view navigation buttons -->
+				<button ui-sref="jobDetail.host-event.details" type="button" class="btn btn-sm btn-default" >Details</button>
+				<button ui-sref="jobDetail.host-event.json" type="button" class="btn btn-sm btn-default ">JSON</button>
+				<button ng-show="event.stdout" ui-sref="jobDetail.host-event.stdout" type="button" class="btn btn-sm btn-default ">Standard Out</button>
+				<button ng-show="event.timing" ui-sref="jobDetail.host-event.timing" type="button" class="btn btn-sm btn-default ">Timing</button>
+
+			</div>
+			<div class="HostEvent-body">
+			<!-- views -->
+			<div ui-view></div>
+			</div>
+
+			<!-- controls -->
+			<div class="HostEvent-controls">
+				<button ng-show="showPrev()" ng-click="goPrev()"
+				class="btn btn-sm btn-default">Prev</button>
+				<button ng-show="showNext()"ng-click="goNext()" class="btn btn-sm btn-default">Next</button>
+				<button ui-sref="jobDetail" class="btn btn-sm btn-default" ng-show="true" >Close</button>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>
