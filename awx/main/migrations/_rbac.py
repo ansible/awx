@@ -15,7 +15,7 @@ def log_migration(wrapped):
     as it runs, Django resets this, so we use a decorator
     to re-add the handler for each method.
     '''
-    handler = logging.FileHandler("tower_rbac_migrations.log", mode="a", encoding="UTF-8")
+    handler = logging.FileHandler("/tmp/tower_rbac_migrations.log", mode="a", encoding="UTF-8")
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
