@@ -177,25 +177,28 @@ def migrate_inventory(apps, schema_editor):
     Inventory = apps.get_model('main', 'Inventory')
     Permission = apps.get_model('main', 'Permission')
 
+    def role_from_permission():
+        if perm.permission_type == 'admin':
+            return inventory.admin_role
+        elif perm.permission_type == 'read':
+            return inventory.auditor_role
+        elif perm.permission_type == 'write':
+            return inventory.updater_role
+        elif perm.permission_type == 'check' or perm.permission_type == 'run':
+            # These permission types are handled differntly in RBAC now, nothing to migrate.
+            return False
+        else:
+            return None
+
     for inventory in Inventory.objects.iterator():
         for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
-            if perm.permission_type == 'admin':
-                role = inventory.admin_role
-                pass
-            elif perm.permission_type == 'read':
-                role = inventory.auditor_role
-                pass
-            elif perm.permission_type == 'write':
-                role = inventory.updater_role
-                pass
-            elif perm.permission_type == 'check':
-                pass
-            elif perm.permission_type == 'run':
-                pass
-            else:
+
+            role = role_from_permission()
+            if role is None:
                 raise Exception(smart_text(u'Unhandled permission type for inventory: {}'.format( perm.permission_type)))
+
             if perm.run_ad_hoc_commands:
                 execrole = inventory.executor_role
 
