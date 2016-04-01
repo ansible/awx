@@ -1631,7 +1631,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         return res
 
     def _recent_jobs(self, obj):
-        return [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.filter(active=True).order_by('-created')[:10]]
+        return [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.all().order_by('-created')[:10]]
 
     def get_summary_fields(self, obj):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
