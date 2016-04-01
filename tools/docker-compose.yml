@@ -6,7 +6,6 @@ tower:
   links:
     - postgres
     - redis
-    - mongo
     - graphite
   volumes:
     - ../:/tower_devel
@@ -18,17 +17,6 @@ redis:
   image: redis:3.0.1
   # ports:
   #   - 6379:6379
-mongo:
-  image: mongo:3.0
-  # ports:
-  #   - 27017:27017
-dockerui:
-  image: dockerui/dockerui
-  ports:
-    - "9000:9000"
-  privileged: true
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
 graphite:
   image: hopsoft/graphite-statsd
   ports:

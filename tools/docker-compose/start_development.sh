@@ -4,7 +4,6 @@ set +x
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=redis port=6379" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=mongo port=27017" all
 
 # In case Tower in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
 /etc/init.d/ssh start
