@@ -208,7 +208,7 @@ class UserAccess(BaseAccess):
             Q(pk=self.user.pk) |
             Q(organizations__in=self.user.deprecated_admin_of_organizations) |
             Q(organizations__in=self.user.deprecated_organizations) |
-            Q(teams__in=self.user.teams)
+            Q(deprecated_teams__in=self.user.deprecated_teams)
         ).distinct()
 
     def can_add(self, data):
@@ -690,7 +690,7 @@ class ProjectAccess(BaseAccess):
         qs = qs.filter(Q(created_by=self.user, deprecated_organizations__isnull=True) |
                        Q(deprecated_organizations__deprecated_admins__in=[self.user]) |
                        Q(deprecated_organizations__deprecated_users__in=[self.user]) |
-                       Q(teams__in=team_ids))
+                       Q(deprecated_teams__in=team_ids))
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 

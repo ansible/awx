@@ -265,7 +265,7 @@ def test_remove_user_to_role(post, admin, role):
     post(url, {'disassociate': True, 'id': admin.id}, admin)
     assert role.members.filter(id=admin.id).count() == 0
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
@@ -275,12 +275,13 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, org_admin)
+    res =post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, org_admin)
 
+    print(res.data)
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
@@ -295,7 +296,7 @@ def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemp
 
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')
@@ -305,12 +306,13 @@ def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemp
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
     res = post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, rando)
+    print(res.data)
     assert res.status_code == 403
 
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')

@@ -134,8 +134,8 @@ inventory_source_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'inventory_source_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',         'inventory_source_notifiers_any_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',         'inventory_source_notifiers_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',             'inventory_source_notifiers_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',           'inventory_source_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'inventory_source_notifiers_success_list'),
 )
 
@@ -171,16 +171,17 @@ role_urls = patterns('awx.api.views',
 job_template_urls = patterns('awx.api.views',
     url(r'^$',                                          'job_template_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'job_template_detail'),
-    url(r'^(?P<pk>[0-9]+)/launch/$',                     'job_template_launch'),
+    url(r'^(?P<pk>[0-9]+)/launch/$',                    'job_template_launch'),
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'job_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/callback/$',                  'job_template_callback'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/survey_spec/$',               'job_template_survey_spec'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_template_activity_stream_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',         'job_template_notifiers_any_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',         'job_template_notifiers_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',             'job_template_notifiers_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',           'job_template_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'job_template_notifiers_success_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'job_template_access_list'),
+    url(r'^(?P<pk>[0-9]+)/labels/$',                    'job_template_label_list'),
 )
 
 job_urls = patterns('awx.api.views',
@@ -196,6 +197,7 @@ job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'job_stdout'),
     url(r'^(?P<pk>[0-9]+)/notifications/$',             'job_notifications_list'),
+    url(r'^(?P<pk>[0-9]+)/labels/$',                    'job_label_list'),
 )
 
 job_host_summary_urls = patterns('awx.api.views',
@@ -230,8 +232,8 @@ system_job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/launch/$',                    'system_job_template_launch'),
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'system_job_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'system_job_template_schedules_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',         'system_job_template_notifiers_any_list'),
-    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',         'system_job_template_notifiers_error_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_any/$',             'system_job_template_notifiers_any_list'),
+    url(r'^(?P<pk>[0-9]+)/notifiers_error/$',           'system_job_template_notifiers_error_list'),
     url(r'^(?P<pk>[0-9]+)/notifiers_success/$',         'system_job_template_notifiers_success_list'),
 )
 
@@ -245,13 +247,18 @@ system_job_urls = patterns('awx.api.views',
 notifier_urls = patterns('awx.api.views',
     url(r'^$',                                          'notifier_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'notifier_detail'),
-    url(r'^(?P<pk>[0-9]+)/test/$',                           'notifier_test'),
+    url(r'^(?P<pk>[0-9]+)/test/$',                      'notifier_test'),
     url(r'^(?P<pk>[0-9]+)/notifications/$',             'notifier_notification_list'),
 )
 
 notification_urls = patterns('awx.api.views',
     url(r'^$',                                          'notification_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'notification_detail'),
+)
+
+label_urls = patterns('awx.api.views',
+    url(r'^$',                                          'label_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'label_detail'),
 )
 
 schedule_urls = patterns('awx.api.views',
@@ -266,8 +273,8 @@ activity_stream_urls = patterns('awx.api.views',
 )
 
 settings_urls = patterns('awx.api.views',
-                         url(r'^$',                                          'settings_list'),
-                         url(r'^reset/$',                                    'settings_reset'))
+                         url(r'^$',                     'settings_list'),
+                         url(r'^reset/$',               'settings_reset'))
 
 v1_urls = patterns('awx.api.views',
     url(r'^$',                      'api_v1_root_view'),
@@ -277,7 +284,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^authtoken/$',            'auth_token_view'),
     url(r'^me/$',                   'user_me_list'),
     url(r'^dashboard/$',            'dashboard_view'),
-    url(r'^dashboard/graphs/jobs/$',     'dashboard_jobs_graph_view'),
+    url(r'^dashboard/graphs/jobs/$','dashboard_jobs_graph_view'),
     url(r'^settings/',              include(settings_urls)),
     url(r'^schedules/',             include(schedule_urls)),
     url(r'^organizations/',         include(organization_urls)),
@@ -303,7 +310,8 @@ v1_urls = patterns('awx.api.views',
     url(r'^system_jobs/',           include(system_job_urls)),
     url(r'^notifiers/',             include(notifier_urls)),
     url(r'^notifications/',         include(notification_urls)),
-    url(r'^unified_job_templates/$', 'unified_job_template_list'),
+    url(r'^labels/',                include(label_urls)),
+    url(r'^unified_job_templates/$','unified_job_template_list'),
     url(r'^unified_jobs/$',         'unified_job_list'),
     url(r'^activity_stream/',       include(activity_stream_urls)),
 )

@@ -11,12 +11,11 @@ from django.contrib.auth.models import User
 @pytest.mark.django_db
 def test_credential_migration_user(credential, user, permissions):
     u = user('user', False)
-    credential.user = u
+    credential.deprecated_user = u
     credential.save()
 
-    migrated = rbac.migrate_credential(apps, None)
+    rbac.migrate_credential(apps, None)
 
-    assert len(migrated) == 1
     assert credential.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
@@ -29,7 +28,7 @@ def test_credential_usage_role(credential, user, permissions):
 def test_credential_migration_team_member(credential, team, user, permissions):
     u = user('user', False)
     team.admin_role.members.add(u)
-    credential.team = team
+    credential.deprecated_team = team
     credential.save()
 
 
@@ -38,24 +37,22 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     team.member_role.children.remove(credential.usage_role)
     assert not credential.accessible_by(u, permissions['admin'])
 
-    migrated = rbac.migrate_credential(apps, None)
+    rbac.migrate_credential(apps, None)
 
     # Admin permissions post migration
-    assert len(migrated) == 1
     assert credential.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
     u = user('user', False)
     team.member_role.members.add(u)
-    credential.team = team
+    credential.deprecated_team = team
     credential.save()
 
     assert not credential.accessible_by(u, permissions['usage'])
 
     # Usage permissions post migration
-    migrated = rbac.migrate_credential(apps, None)
-    assert len(migrated) == 1
+    rbac.migrate_credential(apps, None)
     assert credential.accessible_by(u, permissions['usage'])
 
 def test_credential_access_superuser():
@@ -88,7 +85,7 @@ def test_credential_access_admin(user, team, credential):
     credential.owner_role.rebuild_role_ancestor_list()
 
     cred = Credential.objects.create(kind='aws', name='test-cred')
-    cred.team = team
+    cred.deprecated_team = team
     cred.save()
 
     # should have can_change access as org-admin
@@ -101,7 +98,7 @@ def test_cred_job_template(user, deploy_jobtemplate):
     org.admin_role.members.add(a)
 
     cred = deploy_jobtemplate.credential
-    cred.user = user('john', False)
+    cred.deprecated_user = user('john', False)
     cred.save()
 
     access = CredentialAccess(a)
@@ -118,7 +115,7 @@ def test_cred_multi_job_template_single_org(user, deploy_jobtemplate):
     org.admin_role.members.add(a)
 
     cred = deploy_jobtemplate.credential
-    cred.user = user('john', False)
+    cred.deprecated_user = user('john', False)
     cred.save()
 
     access = CredentialAccess(a)
@@ -197,7 +194,7 @@ def test_cred_no_org(user, credential):
 def test_cred_team(user, team, credential):
     u = user('a', False)
     team.member_role.members.add(u)
-    credential.team = team
+    credential.deprecated_team = team
     credential.save()
 
     assert not credential.accessible_by(u, {'use':True})

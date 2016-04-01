@@ -1,0 +1,62 @@
+<div id="HostEvents" class="HostEvents modal fade"	role="dialog">
+	<div class="modal-dialog modal-lg">	
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="HostEvents-header">
+					<span class="HostEvents-title">HOST EVENTS | {{hostName}}</span>
+				<!-- Close -->
+					<button ui-sref="jobDetail" type="button" class="close">
+						<i class="fa fa fa-times-circle"></i>
+					</button>
+				</div>
+				<div class="HostEvents-form--container">
+				<form ng-submit="search()" class="form-inline HostEvents-search--form">
+					<!-- Search -->
+					<div class="form-group" >
+						<div class="input-group">
+							<input type="text" ng-model="searchStr" class="form-control" placeholder="SEARCH">
+							<span ng-click="search()" type="submit" class="input-group-addon btn btn-default"><i class="fa fa-search"></i></span>
+						</div>
+					</div>
+				</form>
+
+				<select class="HostEvents-select">
+					    <option ng-selected="filter == activeFilter" class="HostEvents-select--option" value="{{filter}}" ng-repeat="filter in filters">{{filter}}</option>
+				</select>
+				</div>
+				<!-- event results table -->
+				<div class="table-responsive">
+					<table class="table">
+					<!-- column labels -->
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">STATUS</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">PLAY</th>
+					<th ng-hide="results.length == 0" class="HostEvents-table--header">TASK</th>
+					<!-- result rows -->
+					<tr class="HostEvents-table--row" ng-repeat="event in results track by $index" modal-paginate="event in results | page_size: page_size">
+						<td class=HostEvents-table--cell>
+							<!-- status circles -->
+							<a class="HostEvents-status">
+								<i class="fa fa-circle"  ng-class="processEventStatus(event)"></i>
+							</a>
+							{{event.status}}
+						</td>
+						<td class=HostEvents-table--cell>{{event.play}}</td>
+						<td class=HostEvents-table--cell>{{event.task}}</td>
+					</tr>
+					<tr ng-show="results.length == 0" class="HostEvents-table--row">
+						<td class=HostEvents-table--cell>
+						No results were found.
+						</td>
+					</tr>
+					</table>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- pagination -->
+				<!-- close -->
+				<button ui-sref="jobDetail" class="btn btn-default pull-right HostEvents-close">OK</button>
+
+			</div>
+		</div>
+	</div>
+</div>

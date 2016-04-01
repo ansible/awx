@@ -480,25 +480,7 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
                     url: $scope.current_url
                 });
 
-                var id = data.id,
-                    url = GetBasePath('projects') + id + '/organizations/',
-                    org = { id: $scope.organization };
-                Rest.setUrl(url);
-                Rest.post(org)
-                    .success(function () {
-                        Wait('stop');
-                        $rootScope.flashMessage = "New project successfully created!";
-                        if (base === 'projects') {
-                            ReturnToCaller();
-                        }
-                        else {
-                            ReturnToCaller(1);
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                            msg: 'Failed to add organization to project. POST returned status: ' + status });
-                    });
+                $state.go("^");
             })
             .error(function (data, status) {
                 Wait('stop');

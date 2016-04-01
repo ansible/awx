@@ -32,6 +32,7 @@ from awx.main.models.inventory import (
 from awx.main.models.organization import (
     Organization,
     Permission,
+    Team,
 )
 
 from awx.main.models.rbac import Role
@@ -103,6 +104,33 @@ def project(instance, organization):
     return prj
 
 @pytest.fixture
+def project_factory(organization):
+    def factory(name):
+        try:
+            prj = Project.objects.get(name=name)
+        except Project.DoesNotExist:
+            prj = Project.objects.create(name=name,
+                                         description="description for " + name,
+                                         scm_type="git",
+                                         scm_url="https://github.com/jlaska/ansible-playbooks",
+                                         organization=organization
+                                         )
+        return prj
+    return factory
+
+@pytest.fixture
+def team_factory(organization):
+    def factory(name):
+        try:
+            t = Team.objects.get(name=name)
+        except Team.DoesNotExist:
+            t = Team.objects.create(name=name,
+                                    description="description for " + name,
+                                    organization=organization)
+        return t
+    return factory
+
+@pytest.fixture
 def user_project(user):
     owner = user('owner')
     return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
@@ -138,6 +166,24 @@ def alice(user):
 @pytest.fixture
 def bob(user):
     return user('bob', False)
+
+@pytest.fixture
+def rando(user):
+    "Rando, the random user that doesn't have access to anything"
+    return user('rando', False)
+
+@pytest.fixture
+def org_admin(user, organization):
+    ret = user('org-admin', False)
+    organization.admin_role.members.add(ret)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
+def org_member(user, organization):
+    ret = user('org-member', False)
+    organization.member_role.members.add(ret)
+    return ret
 
 @pytest.fixture
 def organizations(instance):
@@ -353,4 +399,15 @@ def fact_services_json():
 @pytest.fixture
 def permission_inv_read(organization, inventory, team):
     return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
+
+
+@pytest.fixture
+def job_template_labels(organization):
+    jt = JobTemplate(name='test-job_template')
+    jt.save()
+
+    jt.labels.create(name="label-1", organization=organization)
+    jt.labels.create(name="label-2", organization=organization)
+
+    return jt
 

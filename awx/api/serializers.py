@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
 # from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text, smart_text
+from django.utils.encoding import force_text
 from django.utils.text import capfirst
 
 # Django REST Framework
@@ -38,7 +38,7 @@ from polymorphic import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
@@ -92,7 +92,7 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 
-def reverseGenericForeignKey(content_object):
+def reverse_gfk(content_object):
     '''
     Computes a reverse for a GenericForeignKey field.
 
@@ -101,35 +101,12 @@ def reverseGenericForeignKey(content_object):
     for example
         { 'organization': '/api/v1/organizations/1/' }
     '''
+    if content_object is None or not hasattr(content_object, 'get_absolute_url'):
+        return {}
 
-    ret = {}
-    if type(content_object) is Organization:
-        ret['organization'] = reverse('api:organization_detail', args=(content_object.pk,))
-    if type(content_object) is User:
-        ret['user'] = reverse('api:user_detail', args=(content_object.pk,))
-    if type(content_object) is Team:
-        ret['team'] = reverse('api:team_detail', args=(content_object.pk,))
-    if type(content_object) is Project:
-        ret['project'] = reverse('api:project_detail', args=(content_object.pk,))
-    if type(content_object) is Inventory:
-        ret['inventory'] = reverse('api:inventory_detail', args=(content_object.pk,))
-    if type(content_object) is Host:
-        ret['host'] = reverse('api:host_detail', args=(content_object.pk,))
-    if type(content_object) is Group:
-        ret['group'] = reverse('api:group_detail', args=(content_object.pk,))
-    if type(content_object) is InventorySource:
-        ret['inventory_source'] = reverse('api:inventory_source_detail', args=(content_object.pk,))
-    if type(content_object) is Credential:
-        ret['credential'] = reverse('api:credential_detail', args=(content_object.pk,))
-    if type(content_object) is JobTemplate:
-        ret['job_template'] = reverse('api:job_template_detail', args=(content_object.pk,))
-    if type(content_object) is Role:
-        ret['role'] = reverse('api:role_detail', args=(content_object.pk,))
-    if type(content_object) is Job:
-        ret['job'] = reverse('api:job_detail', args=(content_object.pk,))
-    if type(content_object) is JobEvent:
-        ret['job_event'] = reverse('api:job_event_detail', args=(content_object.pk,))
-    return ret
+    return {
+        camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url()
+    }
 
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
@@ -374,7 +351,6 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.modified
 
     def build_standard_field(self, field_name, model_field):
-
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
         # when a Model's editable field is set to False. The short circuit skips choice rendering.
         #
@@ -390,27 +366,6 @@ class BaseSerializer(serializers.ModelSerializer):
             model_field.editable = was_editable
             if was_editable is False:
                 field_kwargs['read_only'] = True
-
-        # Update help text for common fields.
-        opts = self.Meta.model._meta.concrete_model._meta
-        if field_name == 'id':
-            field_kwargs.setdefault('help_text', 'Database ID for this %s.' % smart_text(opts.verbose_name))
-        elif field_name == 'name':
-            field_kwargs['help_text'] = 'Name of this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'description':
-            field_kwargs['help_text'] = 'Optional description of this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'type':
-            field_kwargs['help_text'] = 'Data type for this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'url':
-            field_kwargs['help_text'] = 'URL for this %s.' % smart_text(opts.verbose_name)
-        elif field_name == 'related':
-            field_kwargs['help_text'] = 'Data structure with URLs of related resources.'
-        elif field_name == 'summary_fields':
-            field_kwargs['help_text'] = 'Data structure with name/description for related resources.'
-        elif field_name == 'created':
-            field_kwargs['help_text'] = 'Timestamp when this %s was created.' % smart_text(opts.verbose_name)
-        elif field_name == 'modified':
-            field_kwargs['help_text'] = 'Timestamp when this %s was last modified.' % smart_text(opts.verbose_name)
 
         # Pass model field default onto the serializer field if field is not read-only.
         if model_field.has_default() and not field_kwargs.get('read_only', False):
@@ -437,6 +392,7 @@ class BaseSerializer(serializers.ModelSerializer):
 
         # Update the message used for the unique validator to use capitalized
         # verbose name; keeps unique message the same as with DRF 2.x.
+        opts = self.Meta.model._meta.concrete_model._meta
         for validator in field_kwargs.get('validators', []):
             if isinstance(validator, validators.UniqueValidator):
                 unique_error_message = model_field.error_messages.get('unique', None)
@@ -520,10 +476,6 @@ class BaseSerializer(serializers.ModelSerializer):
                 d[k] = map(force_text, v2)
             raise ValidationError(d)
         return attrs
-
-    def to_representation(self, obj):
-        ret = super(BaseSerializer, self).to_representation(obj)
-        return ret
 
 
 class EmptySerializer(serializers.Serializer):
@@ -915,7 +867,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
                   'scm_update_cache_timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
@@ -932,7 +884,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
             notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
-            access_list = reverse('api:project_access_list',         args=(obj.pk,)),
+            access_list = reverse('api:project_access_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -945,6 +897,12 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             res['last_update'] = reverse('api:project_update_detail',
                                          args=(obj.last_update.pk,))
         return res
+
+    def validate(self, attrs):
+        if 'organization' not in attrs or type(attrs['organization']) is not Organization:
+            raise serializers.ValidationError('Missing organization')
+        return super(ProjectSerializer, self).validate(attrs)
+
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
@@ -1496,7 +1454,7 @@ class RoleSerializer(BaseSerializer):
         ret['teams'] = reverse('api:role_teams_list', args=(obj.pk,))
         try:
             if obj.content_object:
-                ret.update(reverseGenericForeignKey(obj.content_object))
+                ret.update(reverse_gfk(obj.content_object))
         except AttributeError:
             # AttributeError's happen if our content_object is pointing at
             # a model that no longer exists. This is dirty data and ideally
@@ -1522,7 +1480,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
-                role_dict['related'] = reverseGenericForeignKey(role.content_object)
+                role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
 
@@ -1547,8 +1505,9 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
-                  'password', 'security_token', 'project', 'ssh_key_data', 'ssh_key_unlock',
+        fields = ('*', 'deprecated_user', 'deprecated_team', 'kind', 'cloud', 'host', 'username',
+                  'password', 'security_token', 'project', 'domain',
+                  'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password')
 
@@ -1562,21 +1521,16 @@ class CredentialSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(CredentialSerializer, self).to_representation(obj)
-        if obj is not None and 'user' in ret and not obj.user:
-            ret['user'] = None
-        if obj is not None and 'team' in ret and not obj.team:
-            ret['team'] = None
+        if obj is not None and 'deprecated_user' in ret and not obj.deprecated_user:
+            ret['deprecated_user'] = None
+        if obj is not None and 'deprecated_team' in ret and not obj.deprecated_team:
+            ret['deprecated_team'] = None
         return ret
 
     def validate(self, attrs):
-        # If creating a credential from a view that automatically sets the
-        # parent_key (user or team), set the other value to None.
-        view = self.context.get('view', None)
-        parent_key = getattr(view, 'parent_key', None)
-        if parent_key == 'user':
-            attrs['team'] = None
-        if parent_key == 'team':
-            attrs['user'] = None
+        # Ensure old style assignment for user/team is always None
+        attrs['deprecated_user'] = None
+        attrs['deprecated_team'] = None
 
         return super(CredentialSerializer, self).validate(attrs)
 
@@ -1586,10 +1540,6 @@ class CredentialSerializer(BaseSerializer):
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
-        if obj.user:
-            res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
-        if obj.team:
-            res['team'] = reverse('api:team_detail', args=(obj.team.pk,))
         return res
 
 
@@ -1599,10 +1549,11 @@ class JobOptionsSerializer(BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task')
+                  'skip_tags', 'start_at_task',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
+        res['labels'] = reverse('api:job_template_label_list', args=(obj.pk,))
         if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.project:
@@ -1664,16 +1615,16 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
             notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
             access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
+            survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
+            labels = reverse('api:job_template_label_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
-        if obj.survey_enabled:
-            res['survey_spec'] = reverse('api:job_template_survey_spec', args=(obj.pk,))
         return res
 
     def get_summary_fields(self, obj):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
-        if obj.survey_enabled and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
+        if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
         if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
@@ -1690,6 +1641,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             d['can_copy'] = False
             d['can_edit'] = False
         d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.order_by('-created')[:10]]
+        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
         return d
 
     def validate(self, attrs):
@@ -1719,6 +1671,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
             notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
+            labels = reverse('api:job_label_list', args=(obj.pk,)),
         ))
         if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail',
@@ -1729,6 +1682,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        d = super(JobSerializer, self).get_summary_fields(obj)
+        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
+        return d
 
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
@@ -2211,6 +2169,19 @@ class NotificationSerializer(BaseSerializer):
         res.update(dict(
             notifier = reverse('api:notifier_detail', args=(obj.notifier.pk,)),
         ))
+        return res
+
+
+class LabelSerializer(BaseSerializer):
+
+    class Meta:
+        model = Label
+        fields = ('*', '-description', 'organization')
+
+    def get_related(self, obj):
+        res = super(LabelSerializer, self).get_related(obj)
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
 class ScheduleSerializer(BaseSerializer):

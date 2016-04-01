@@ -60,7 +60,8 @@ def test_project_migration():
 
     c1 = Credential.objects.create(name='c1')
 
-    p1 = Project.objects.create(name='p1', credential=c1)
+    project_name = unicode("\xc3\xb4", "utf-8")
+    p1 = Project.objects.create(name=project_name, credential=c1)
     p1.deprecated_organizations.add(o1, o2, o3)
 
     i1 = Inventory.objects.create(name='i1', organization=o1)
@@ -99,9 +100,7 @@ def test_project_user_project(user_project, project, user):
 
     assert user_project.accessible_by(u, {'read': True}) is False
     assert project.accessible_by(u, {'read': True}) is False
-    migrations = rbac.migrate_projects(apps, None)
-    assert len(migrations[user_project.name]['users']) == 1
-    assert len(migrations[user_project.name]['teams']) == 0
+    rbac.migrate_projects(apps, None)
     assert user_project.accessible_by(u, {'read': True}) is True
     assert project.accessible_by(u, {'read': True}) is False
 
@@ -113,11 +112,8 @@ def test_project_accessible_by_sa(user, project):
 
     assert project.accessible_by(u, {'read': True}) is False
     rbac.migrate_organization(apps, None)
-    su_migrations = rbac.migrate_users(apps, None)
-    migrations = rbac.migrate_projects(apps, None)
-    assert len(su_migrations) == 1
-    assert len(migrations[project.name]['users']) == 0
-    assert len(migrations[project.name]['teams']) == 0
+    rbac.migrate_users(apps, None)
+    rbac.migrate_projects(apps, None)
     print(project.admin_role.ancestors.all())
     print(project.admin_role.ancestors.all())
     assert project.accessible_by(u, {'read': True, 'write': True}) is True
@@ -134,10 +130,8 @@ def test_project_org_members(user, organization, project):
     organization.deprecated_users.add(member)
 
     rbac.migrate_organization(apps, None)
-    migrations = rbac.migrate_projects(apps, None)
+    rbac.migrate_projects(apps, None)
 
-    assert len(migrations[project.name]['users']) == 1
-    assert len(migrations[project.name]['teams']) == 0
     assert project.accessible_by(admin, {'read': True, 'write': True}) is True
     assert project.accessible_by(member, {'read': True})
 
@@ -147,17 +141,15 @@ def test_project_team(user, team, project):
     member = user('member')
 
     team.deprecated_users.add(member)
-    project.teams.add(team)
+    project.deprecated_teams.add(team)
 
     assert project.accessible_by(nonmember, {'read': True}) is False
     assert project.accessible_by(member, {'read': True}) is False
 
     rbac.migrate_team(apps, None)
     rbac.migrate_organization(apps, None)
-    migrations = rbac.migrate_projects(apps, None)
+    rbac.migrate_projects(apps, None)
 
-    assert len(migrations[project.name]['users']) == 0
-    assert len(migrations[project.name]['teams']) == 1
     assert project.accessible_by(member, {'read': True}) is True
     assert project.accessible_by(nonmember, {'read': True}) is False
 
@@ -174,7 +166,6 @@ def test_project_explicit_permission(user, team, project, organization):
     assert project.accessible_by(u, {'read': True}) is False
 
     rbac.migrate_organization(apps, None)
-    migrations = rbac.migrate_projects(apps, None)
+    rbac.migrate_projects(apps, None)
 
-    assert len(migrations[project.name]['users']) == 1
     assert project.accessible_by(u, {'read': True}) is True

@@ -103,10 +103,10 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.SET_NULL,
         related_name='teams',
     )
-    projects = models.ManyToManyField(
+    deprecated_projects = models.ManyToManyField(
         'Project',
         blank=True,
-        related_name='teams',
+        related_name='deprecated_teams',
     )
     admin_role = ImplicitRoleField(
         role_name='Team Administrator',

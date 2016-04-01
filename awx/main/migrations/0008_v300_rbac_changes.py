@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         ('taggit', '0002_auto_20150616_2121'),
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0006_v300_active_flag_removal'),
+        ('main', '0007_v300_active_flag_removal'),
     ]
 
     operations = [
@@ -32,6 +32,11 @@ class Migration(migrations.Migration):
             'Team',
             'users',
             'deprecated_users',
+        ),
+        migrations.RenameField(
+            'Team',
+            'projects',
+            'deprecated_projects',
         ),
 
         migrations.CreateModel(
@@ -219,5 +224,34 @@ class Migration(migrations.Migration):
             model_name='project',
             name='organization',
             field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
+        ),
+        migrations.RenameField(
+            'Credential',
+            'team',
+            'deprecated_team',
+        ),
+        migrations.RenameField(
+            'Credential',
+            'user',
+            'deprecated_user',
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_admins',
+            field=models.ManyToManyField(related_name='deprecated_admin_of_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='organization',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_organizations', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='team',
+            name='deprecated_users',
+            field=models.ManyToManyField(related_name='deprecated_teams', to=settings.AUTH_USER_MODEL, blank=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name='credential',
+            unique_together=set([]),
         ),
     ]

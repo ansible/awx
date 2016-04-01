@@ -7,7 +7,7 @@ import re
 # Django
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
 # AWX
@@ -56,24 +56,23 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     class Meta:
         app_label = 'main'
-        unique_together = [('user', 'team', 'kind', 'name')]
         ordering = ('kind', 'name')
 
-    user = models.ForeignKey(
+    deprecated_user = models.ForeignKey(
         'auth.User',
         null=True,
         default=None,
         blank=True,
         on_delete=models.CASCADE,
-        related_name='credentials',
+        related_name='deprecated_credentials',
     )
-    team = models.ForeignKey(
+    deprecated_team = models.ForeignKey(
         'Team',
         null=True,
         default=None,
         blank=True,
         on_delete=models.CASCADE,
-        related_name='credentials',
+        related_name='deprecated_credentials',
     )
     kind = models.CharField(
         max_length=32,
@@ -119,6 +118,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         max_length=100,
         verbose_name=_('Project'),
         help_text=_('The identifier for the project.'),
+    )
+    domain = models.CharField(
+        blank=True,
+        default='',
+        max_length=100,
+        verbose_name=_('Domain'),
+        help_text=_('The identifier for the domain.'),
     )
     ssh_key_data = models.TextField(
         blank=True,
@@ -234,6 +240,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             raise ValidationError('Host required for OpenStack credential.')
         return host
 
+    def clean_domain(self):
+        return self.domain or ''
+
     def clean_username(self):
         username = self.username or ''
         if not username and self.kind == 'aws':
@@ -294,56 +303,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         return self.ssh_key_unlock
 
     def clean(self):
-        if self.user and self.team:
+        if self.deprecated_user and self.deprecated_team:
             raise ValidationError('Credential cannot be assigned to both a user and team')
-
-    def _validate_unique_together_with_null(self, unique_check, exclude=None):
-        # Based on existing Django model validation code, except it doesn't
-        # skip the check for unique violations when a field is None.  See:
-        # https://github.com/django/django/blob/stable/1.5.x/django/db/models/base.py#L792
-        errors = {}
-        model_class = self.__class__
-        if set(exclude or []) & set(unique_check):
-            return
-        lookup_kwargs = {}
-        for field_name in unique_check:
-            f = self._meta.get_field(field_name)
-            lookup_value = getattr(self, f.attname)
-            if f.primary_key and not self._state.adding:
-                # no need to check for unique primary key when editing
-                continue
-            lookup_kwargs[str(field_name)] = lookup_value
-        if len(unique_check) != len(lookup_kwargs):
-            return
-        qs = model_class._default_manager.filter(**lookup_kwargs)
-        # Exclude the current object from the query if we are editing an
-        # instance (as opposed to creating a new one)
-        # Note that we need to use the pk as defined by model_class, not
-        # self.pk. These can be different fields because model inheritance
-        # allows single model to have effectively multiple primary keys.
-        # Refs #17615.
-        model_class_pk = self._get_pk_val(model_class._meta)
-        if not self._state.adding and model_class_pk is not None:
-            qs = qs.exclude(pk=model_class_pk)
-        if qs.exists():
-            key = NON_FIELD_ERRORS
-            errors.setdefault(key, []).append(self.unique_error_message(model_class, unique_check))
-        if errors:
-            raise ValidationError(errors)
-
-    def validate_unique(self, exclude=None):
-        errors = {}
-        try:
-            super(Credential, self).validate_unique(exclude)
-        except ValidationError, e:
-            errors = e.update_error_dict(errors)
-        try:
-            unique_fields = ('user', 'team', 'kind', 'name')
-            self._validate_unique_together_with_null(unique_fields, exclude)
-        except ValidationError, e:
-            errors = e.update_error_dict(errors)
-        if errors:
-            raise ValidationError(errors)
 
     def _password_field_allows_ask(self, field):
         return bool(self.kind == 'ssh' and field != 'ssh_key_data')
@@ -357,17 +318,17 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         # changed.
         if self.pk:
             cred_before = Credential.objects.get(pk=self.pk)
-            if self.user and self.team:
+            if self.deprecated_user and self.deprecated_team:
                 # If the user changed, remove the previously assigned team.
                 if cred_before.user != self.user:
-                    self.team = None
-                    if 'team' not in update_fields:
-                        update_fields.append('team')
+                    self.deprecated_team = None
+                    if 'deprecated_team' not in update_fields:
+                        update_fields.append('deprecated_team')
                 # If the team changed, remove the previously assigned user.
-                elif cred_before.team != self.team:
-                    self.user = None
-                    if 'user' not in update_fields:
-                        update_fields.append('user')
+                elif cred_before.deprecated_team != self.deprecated_team:
+                    self.deprecated_user = None
+                    if 'deprecated_user' not in update_fields:
+                        update_fields.append('deprecated_user')
         # Set cloud flag based on credential kind.
         cloud = self.kind in CLOUD_PROVIDERS + ('aws',)
         if self.cloud != cloud:

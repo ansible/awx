@@ -137,7 +137,7 @@ class CallbackReceiver(object):
                                               'playbook_on_import_for_host',
                                               'playbook_on_not_import_for_host'):
                         parent = job_parent_events.get('playbook_on_play_start', None)
-                    elif message['event'].startswith('runner_on_'):
+                    elif message['event'].startswith('runner_on_') or message['event'].startswith('runner_item_on_'):
                         list_parents = []
                         list_parents.append(job_parent_events.get('playbook_on_setup', None))
                         list_parents.append(job_parent_events.get('playbook_on_task_start', None))

@@ -9,10 +9,8 @@ import './lists';
 
 import Children from "./helpers/Children";
 import Credentials from "./helpers/Credentials";
-import EventViewer from "./helpers/EventViewer";
 import Events from "./helpers/Events";
 import Groups from "./helpers/Groups";
-import HostEventsViewer from "./helpers/HostEventsViewer";
 import Hosts from "./helpers/Hosts";
 import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
@@ -43,10 +41,8 @@ import ActivityStreamHelper from "./helpers/ActivityStream";
 export
     {   Children,
         Credentials,
-        EventViewer,
         Events,
         Groups,
-        HostEventsViewer,
         Hosts,
         JobDetail,
         JobSubmission,

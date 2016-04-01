@@ -3,7 +3,6 @@
 
 # Django
 from django.db.models.signals import (
-    post_init,
     pre_save,
     post_save,
     post_delete,
@@ -17,6 +16,7 @@ from django.db.models.fields.related import (
     ManyRelatedObjectsDescriptor,
     ReverseManyRelatedObjectsDescriptor,
 )
+from django.utils.encoding import smart_text
 
 # AWX
 from awx.main.models.rbac import RolePermission, Role, batch_role_ancestor_rebuilding
@@ -67,7 +67,7 @@ def resolve_role_field(obj, field):
 
     if len(field_components) == 1:
         if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role:
-            raise Exception('%s refers to a %s, not an ImplicitRoleField or Role' % (field, str(type(obj))))
+            raise Exception(smart_text('{} refers to a {}, not an ImplicitRoleField or Role'.format(field, type(obj))))
         ret.append(obj)
     else:
         if type(obj) is ManyRelatedObjectsDescriptor:
@@ -105,7 +105,6 @@ class ImplicitRoleField(models.ForeignKey):
             setattr(cls, '__implicit_role_fields', [])
         getattr(cls, '__implicit_role_fields').append(self)
 
-        post_init.connect(self._post_init, cls, True, dispatch_uid='implicit-role-post-init')
         pre_save.connect(self._pre_save, cls, True, dispatch_uid='implicit-role-pre-save')
         post_save.connect(self._post_save, cls, True, dispatch_uid='implicit-role-post-save')
         post_delete.connect(self._post_delete, cls, True)
@@ -163,15 +162,6 @@ class ImplicitRoleField(models.ForeignKey):
                             getattr(instance, self.name).parents.remove(getattr(obj, field_attr))
         return _m2m_update
 
-
-    def _post_init(self, instance, *args, **kwargs):
-        original_parent_roles = dict()
-        if instance.pk:
-            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                original_parent_roles[implicit_role_field.name] = implicit_role_field._resolve_parent_roles(instance)
-
-        setattr(instance, '__original_parent_roles', original_parent_roles)
-
     def _create_role_instance_if_not_exists(self, instance):
         role = getattr(instance, self.name, None)
         if role:
@@ -212,6 +202,15 @@ class ImplicitRoleField(models.ForeignKey):
     def _pre_save(self, instance, *args, **kwargs):
         for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
             implicit_role_field._create_role_instance_if_not_exists(instance)
+
+        original_parent_roles = dict()
+        if instance.pk:
+            original = instance.__class__.objects.get(pk=instance.pk)
+            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+                original_parent_roles[implicit_role_field.name] = implicit_role_field._resolve_parent_roles(original)
+
+        setattr(instance, '__original_parent_roles', original_parent_roles)
+
 
     def _post_save(self, instance, created, *args, **kwargs):
         if created:

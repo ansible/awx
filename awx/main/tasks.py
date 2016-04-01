@@ -378,6 +378,10 @@ class BaseTask(Task):
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
             for name, data in private_data.iteritems():
+                # OpenSSH formatted keys must have a trailing newline to be
+                # accepted by ssh-add.
+                if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
+                    data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
                 if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
@@ -701,6 +705,8 @@ class RunJob(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             openstack_data = {
                 'clouds': {
                     'devstack': {
@@ -1140,6 +1146,8 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.

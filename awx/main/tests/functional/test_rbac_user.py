@@ -9,7 +9,9 @@ from awx.main.models import Role
 
 @pytest.mark.django_db
 def test_user_admin(user_project, project, user):
-    joe = user('joe', is_superuser = False)
+    username = unicode("\xc3\xb4", "utf-8")
+
+    joe = user(username, is_superuser = False)
     admin = user('admin', is_superuser = True)
     sa = Role.singleton('System Administrator')
 
@@ -20,12 +22,11 @@ def test_user_admin(user_project, project, user):
     assert sa.members.filter(id=joe.id).exists() is False
     assert sa.members.filter(id=admin.id).exists() is False
 
-    migrations = rbac.migrate_users(apps, None)
+    rbac.migrate_users(apps, None)
 
     # The migration should add the admin back in
     assert sa.members.filter(id=joe.id).exists() is False
     assert sa.members.filter(id=admin.id).exists() is True
-    assert len(migrations) == 1
 
 @pytest.mark.django_db
 def test_user_queryset(user):

@@ -142,12 +142,12 @@ class BaseJobTestMixin(BaseTestMixin):
         self.org_eng.projects.add(self.proj_dev)
         self.proj_test = self.make_project('test', 'testing branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_test)
+        #self.org_eng.projects.add(self.proj_test) # No more multi org projects
         self.org_sup.projects.add(self.proj_test)
         self.proj_prod = self.make_project('prod', 'production branch',
                                            self.user_sue, TEST_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_prod)
-        self.org_sup.projects.add(self.proj_prod)
+        #self.org_eng.projects.add(self.proj_prod) # No more multi org projects
+        #self.org_sup.projects.add(self.proj_prod) # No more multi org projects
         self.org_ops.projects.add(self.proj_prod)
 
         # Operations also has 2 additional projects specific to the east/west
@@ -216,15 +216,15 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_east = self.org_ops.teams.create(
             name='easterners',
             created_by=self.user_sue)
-        self.team_ops_east.projects.add(self.proj_prod)
-        self.team_ops_east.projects.add(self.proj_prod_east)
+        self.team_ops_east.member_role.children.add(self.proj_prod.admin_role)
+        self.team_ops_east.member_role.children.add(self.proj_prod_east.admin_role)
         self.team_ops_east.member_role.members.add(self.user_greg)
         self.team_ops_east.member_role.members.add(self.user_holly)
         self.team_ops_west = self.org_ops.teams.create(
             name='westerners',
             created_by=self.user_sue)
-        self.team_ops_west.projects.add(self.proj_prod)
-        self.team_ops_west.projects.add(self.proj_prod_west)
+        self.team_ops_west.member_role.children.add(self.proj_prod.admin_role)
+        self.team_ops_west.member_role.children.add(self.proj_prod_west.admin_role)
         self.team_ops_west.member_role.members.add(self.user_greg)
         self.team_ops_west.member_role.members.add(self.user_iris)
 
@@ -239,7 +239,7 @@ class BaseJobTestMixin(BaseTestMixin):
         #    created_by=self.user_sue,
         #    active=False,
         #)
-        #self.team_ops_south.projects.add(self.proj_prod)
+        #self.team_ops_south.member_role.children.add(self.proj_prod.admin_role)
         #self.team_ops_south.member_role.members.add(self.user_greg)
 
         # The north team is going to be deleted
@@ -247,7 +247,7 @@ class BaseJobTestMixin(BaseTestMixin):
             name='northerners',
             created_by=self.user_sue,
         )
-        self.team_ops_north.projects.add(self.proj_prod)
+        self.team_ops_north.member_role.children.add(self.proj_prod.admin_role)
         self.team_ops_north.member_role.members.add(self.user_greg)
 
         # The testers team are interns that can only check playbooks but can't
@@ -256,7 +256,7 @@ class BaseJobTestMixin(BaseTestMixin):
             name='testers',
             created_by=self.user_sue,
         )
-        self.team_ops_testers.projects.add(self.proj_prod)
+        self.team_ops_testers.member_role.children.add(self.proj_prod.admin_role)
         self.team_ops_testers.member_role.members.add(self.user_randall)
         self.team_ops_testers.member_role.members.add(self.user_billybob)
 
@@ -264,17 +264,21 @@ class BaseJobTestMixin(BaseTestMixin):
         from awx.main.tests.data.ssh import (TEST_SSH_KEY_DATA,
                                              TEST_SSH_KEY_DATA_LOCKED,
                                              TEST_SSH_KEY_DATA_UNLOCK)
-        self.cred_sue = self.user_sue.credentials.create(
+        self.cred_sue = Credential.objects.create(
             username='sue',
             password=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
-        self.cred_sue_ask = self.user_sue.credentials.create(
+        self.cred_sue.owner_role.members.add(self.user_sue)
+
+        self.cred_sue_ask = Credential.objects.create(
             username='sue',
             password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_sue_ask_many = self.user_sue.credentials.create(
+        self.cred_sue_ask.owner_role.members.add(self.user_sue)
+
+        self.cred_sue_ask_many = Credential.objects.create(
             username='sue',
             password='ASK',
             become_method='sudo',
@@ -284,23 +288,31 @@ class BaseJobTestMixin(BaseTestMixin):
             ssh_key_unlock='ASK',
             created_by=self.user_sue,
         )
-        self.cred_bob = self.user_bob.credentials.create(
+        self.cred_sue_ask_many.owner_role.members.add(self.user_sue)
+
+        self.cred_bob = Credential.objects.create(
             username='bob',
             password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_chuck = self.user_chuck.credentials.create(
+        self.cred_bob.usage_role.members.add(self.user_bob)
+
+        self.cred_chuck = Credential.objects.create(
             username='chuck',
             ssh_key_data=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
-        self.cred_doug = self.user_doug.credentials.create(
+        self.cred_chuck.usage_role.members.add(self.user_chuck)
+
+        self.cred_doug = Credential.objects.create(
             username='doug',
             password='doug doesn\'t mind his password being saved. this '
                      'is why we dont\'t let doug actually run jobs.',
             created_by=self.user_sue,
         )
-        self.cred_eve = self.user_eve.credentials.create(
+        self.cred_doug.usage_role.members.add(self.user_doug)
+
+        self.cred_eve = Credential.objects.create(
             username='eve',
             password='ASK',
             become_method='sudo',
@@ -308,40 +320,52 @@ class BaseJobTestMixin(BaseTestMixin):
             become_password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_frank = self.user_frank.credentials.create(
+        self.cred_eve.usage_role.members.add(self.user_eve)
+
+        self.cred_frank = Credential.objects.create(
             username='frank',
             password='fr@nk the t@nk',
             created_by=self.user_sue,
         )
-        self.cred_greg = self.user_greg.credentials.create(
+        self.cred_frank.usage_role.members.add(self.user_frank)
+
+        self.cred_greg = Credential.objects.create(
             username='greg',
             ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
             ssh_key_unlock='ASK',
             created_by=self.user_sue,
         )
-        self.cred_holly = self.user_holly.credentials.create(
+        self.cred_greg.usage_role.members.add(self.user_greg)
+
+        self.cred_holly = Credential.objects.create(
             username='holly',
             password='holly rocks',
             created_by=self.user_sue,
         )
-        self.cred_iris = self.user_iris.credentials.create(
+        self.cred_holly.usage_role.members.add(self.user_holly)
+
+        self.cred_iris = Credential.objects.create(
             username='iris',
             password='ASK',
             created_by=self.user_sue,
         )
+        self.cred_iris.usage_role.members.add(self.user_iris)
 
         # Each operations team also has shared credentials they can use.
-        self.cred_ops_east = self.team_ops_east.credentials.create(
+        self.cred_ops_east = Credential.objects.create(
             username='east',
             ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
             ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
             created_by = self.user_sue,
         )
-        self.cred_ops_west = self.team_ops_west.credentials.create(
+        self.team_ops_east.member_role.children.add(self.cred_ops_east.usage_role)
+
+        self.cred_ops_west = Credential.objects.create(
             username='west',
             password='Heading270',
             created_by = self.user_sue,
         )
+        self.team_ops_west.member_role.children.add(self.cred_ops_west.usage_role)
 
 
         # FIXME: This code can be removed (probably)
@@ -355,17 +379,19 @@ class BaseJobTestMixin(BaseTestMixin):
         #    created_by = self.user_sue,
         #)
 
-        self.cred_ops_north = self.team_ops_north.credentials.create(
+        self.cred_ops_north = Credential.objects.create(
             username='north',
             password='Heading0',
             created_by = self.user_sue,
         )
+        self.team_ops_north.member_role.children.add(self.cred_ops_north.owner_role)
 
-        self.cred_ops_test = self.team_ops_testers.credentials.create(
+        self.cred_ops_test = Credential.objects.create(
             username='testers',
             password='HeadingNone',
             created_by = self.user_sue,
         )
+        self.team_ops_testers.member_role.children.add(self.cred_ops_test.usage_role)
 
         self.ops_east_permission = Permission.objects.create(
             inventory       = self.inv_ops_east,

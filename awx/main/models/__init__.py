@@ -22,6 +22,7 @@ from awx.main.models.rbac import * # noqa
 from awx.main.models.mixins import * # noqa
 from awx.main.models.notifications import * # noqa
 from awx.main.models.fact import * # noqa
+from awx.main.models.label import * # noqa
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
@@ -46,6 +47,16 @@ User.add_to_class('accessible_by', user_accessible_by)
 User.add_to_class('accessible_objects', user_accessible_objects)
 User.add_to_class('admin_role', user_admin_role)
 User.add_to_class('role_permissions', GenericRelation('main.RolePermission'))
+
+@property
+def user_get_organizations(user):
+    return Organization.objects.filter(member_role__members=user)
+@property
+def user_get_admin_of_organizations(user):
+    return Organization.objects.filter(admin_role__members=user)
+
+User.add_to_class('organizations', user_get_organizations)
+User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
@@ -73,3 +84,4 @@ activity_stream_registrar.connect(CustomInventoryScript)
 activity_stream_registrar.connect(TowerSettings)
 activity_stream_registrar.connect(Notifier)
 activity_stream_registrar.connect(Notification)
+activity_stream_registrar.connect(Label)

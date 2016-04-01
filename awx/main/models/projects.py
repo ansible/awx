@@ -225,7 +225,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         role_description='May manage this project',
         parent_role=[
             'organization.admin_role',
-            'teams.member_role',
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
         permissions = {'all': True}

@@ -1502,9 +1502,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test ec2 credentials defined!')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='aws',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password)
+        credential.owner_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1588,10 +1588,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test ec2 sts credentials defined!')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='aws',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password,
                                                security_token=source_token)
+        credential.owner_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1610,10 +1610,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
         source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='aws',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password,
                                                security_token="BADTOKEN")
+        credential.owner_role.members.add(self.super_django_user)
+
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1645,9 +1646,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test ec2 credentials defined!')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='aws',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password)
+        credential.owner_role.members.add(self.super_django_user)
         group = self.group
         group.name = 'AWS Inventory'
         group.save()
@@ -1772,9 +1773,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test rackspace credentials defined!')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='rax',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password)
+        credential.owner_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'DFW'
@@ -1824,10 +1825,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test vmware credentials defined!')
         self.create_test_license_file()
         credential = Credential.objects.create(kind='vmware',
-                                               user=self.super_django_user,
                                                username=source_username,
                                                password=source_password,
                                                host=source_host)
+        credential.owner_role.members.add(self.super_django_user)
         inventory_source = self.update_inventory_source(self.group,
                                                         source='vmware', credential=credential)
         # Check first without instance_id set (to import by name only).
@@ -1965,6 +1966,26 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=api_user,
                                                password=api_password,
                                                project=api_project)
+        inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
+        self.check_inventory_source(inventory_source)
+        self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
+
+    def test_update_from_openstack_with_domain(self):
+        # Check that update works with Keystone v3 identity service
+        api_url = getattr(settings, 'TEST_OPENSTACK_HOST_V3', '')
+        api_user = getattr(settings, 'TEST_OPENSTACK_USER', '')
+        api_password = getattr(settings, 'TEST_OPENSTACK_PASSWORD', '')
+        api_project = getattr(settings, 'TEST_OPENSTACK_PROJECT', '')
+        api_domain = getattr(settings, 'TEST_OPENSTACK_DOMAIN', '')
+        if not all([api_url, api_user, api_password, api_project, api_domain]):
+            self.skipTest("No test openstack credentials defined with a domain")
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='openstack',
+                                               host=api_url,
+                                               username=api_user,
+                                               password=api_password,
+                                               project=api_project,
+                                               domain=api_domain)
         inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
         self.check_inventory_source(inventory_source)
         self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())

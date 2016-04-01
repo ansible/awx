@@ -172,7 +172,8 @@ class Command(BaseCommand):
                             sys.stdout.write('\r   %d     ' % (ids['credential']))
                             sys.stdout.flush()
                             credential_id = ids['credential']
-                            credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx), user=user)
+                            credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx))
+                            credential.owner_role.members.add(user)
                             credentials.append(credential)
                         user_idx += 1
                     print('')
@@ -187,7 +188,8 @@ class Command(BaseCommand):
                             sys.stdout.write('\r   %d     ' % (ids['credential'] - starting_credential_id))
                             sys.stdout.flush()
                             credential_id = ids['credential']
-                            credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx), team=team)
+                            credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx))
+                            credential.owner_role.parents.add(team.member_role)
                             credentials.append(credential)
                         team_idx += 1
                     print('')

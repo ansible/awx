@@ -197,6 +197,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
                            'last_job_failed', 'survey_enabled')
 
     def test_get_job_template_list(self):
+        self.skipTest('This test makes assumptions about projects being multi-org and needs to be updated/rewritten')
         url = reverse('api:job_template_list')
         qs = JobTemplate.objects.distinct()
         fields = self.JOB_TEMPLATE_FIELDS
@@ -280,13 +281,20 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.assertFalse('south' in [x['username'] for x in all_credentials['results']])
 
         url2 = reverse('api:team_detail', args=(self.team_ops_north.id,))
-        # Sue shouldn't be able to see the north credential once deleting its team
-        with self.current_user(self.user_sue):
+        # Greg shouldn't be able to see the north credential once deleting its team
+        with self.current_user(self.user_greg):
+            all_credentials = self.get(url, expect=200)
+            self.assertTrue('north' in [x['username'] for x in all_credentials['results']])
             self.delete(url2, expect=204)
             all_credentials = self.get(url, expect=200)
             self.assertFalse('north' in [x['username'] for x in all_credentials['results']])
+        # Sue can still see the credential, she's a super user
+        with self.current_user(self.user_sue):
+            all_credentials = self.get(url, expect=200)
+            self.assertTrue('north' in [x['username'] for x in all_credentials['results']])
 
     def test_post_job_template_list(self):
+        self.skipTest('This test makes assumptions about projects being multi-org and needs to be updated/rewritten')
         url = reverse('api:job_template_list')
         data = dict(
             name         = 'new job template',
@@ -460,6 +468,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # FIXME: Check other credentials and optional fields.
 
     def test_post_scan_job_template(self):
+        self.skipTest('This test makes assumptions about projects being multi-org and needs to be updated/rewritten')
         url = reverse('api:job_template_list')
         data = dict(
             name = 'scan job template 1',
