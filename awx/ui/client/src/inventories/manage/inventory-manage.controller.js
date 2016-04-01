@@ -309,7 +309,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     $scope.restoreSearch = function() {
         // Restore search params and related stuff, plus refresh
         // groups and hosts lists
-        console.info('the set', PreviousSearchParams.set);
         SearchInit({
             scope: $scope,
             set: PreviousSearchParams.set,

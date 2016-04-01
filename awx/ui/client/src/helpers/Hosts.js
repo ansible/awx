@@ -825,9 +825,7 @@ return function(params) {
         scope.name = host.name;
         scope.copy_choice = "copy";
         d = angular.element(document.getElementById('host-copy-dialog'));
-        console.info('hosts helper compile scope', d, scope);
         $compile(d)(scope);
-        console.info('compiled', $compile(d)(scope));
         CreateDialog({
             id: 'host-copy-dialog',
             scope: scope,
