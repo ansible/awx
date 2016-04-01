@@ -132,7 +132,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
-    LookUpInit, UserList, TeamList, GetBasePath, GetChoices, Empty, KindChange,
+    LookUpInit, OrganizationList, GetBasePath, GetChoices, Empty, KindChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
 
     ClearScope();
@@ -173,25 +173,53 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         multiple: false
     });
 
+    $scope.canShareCredential = false;
+
+    if ($rootScope.current_user.is_superuser) {
+        $scope.canShareCredential = true;
+    } else {
+        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`)
+        Rest.get()
+            .success(function(data) {
+                $scope.canShareCredential = (data.count) ? true : false;
+            });
+    }
+
+
+    var orgUrl = ($rootScope.current_user.is_superuser) ?
+        GetBasePath("organizations") :
+        $rootScope.current_user.url + "admin_of_organizations?";
+
+    // TODO: create LookUpInit for organizations
     LookUpInit({
         scope: $scope,
+        url: orgUrl,
         form: form,
-        current_item: (!Empty($stateParams.user_id)) ? $stateParams.user_id : null,
-        list: UserList,
-        field: 'user',
+        list: OrganizationList,
+        field: 'organization',
         input_type: 'radio',
         autopopulateLookup: false
     });
 
-    LookUpInit({
-        scope: $scope,
-        form: form,
-        current_item: (!Empty($stateParams.team_id)) ? $stateParams.team_id : null,
-        list: TeamList,
-        field: 'team',
-        input_type: 'radio',
-        autopopulateLookup: false
-    });
+    // LookUpInit({
+    //     scope: $scope,
+    //     form: form,
+    //     current_item: (!Empty($stateParams.user_id)) ? $stateParams.user_id : null,
+    //     list: UserList,
+    //     field: 'user',
+    //     input_type: 'radio',
+    //     autopopulateLookup: false
+    // });
+    //
+    // LookUpInit({
+    //     scope: $scope,
+    //     form: form,
+    //     current_item: (!Empty($stateParams.team_id)) ? $stateParams.team_id : null,
+    //     list: TeamList,
+    //     field: 'team',
+    //     input_type: 'radio',
+    //     autopopulateLookup: false
+    // });
 
     if (!Empty($stateParams.user_id)) {
         // Get the username based on incoming route
@@ -252,8 +280,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     };
 
     // Handle Owner change
-    $scope.ownerChange = function () {
-        OwnerChange({ scope: $scope });
+    $scope.shareableChange = function () {
+        console.log("TODO: implement shareable change");
     };
 
     $scope.formCancel = function () {
@@ -305,7 +333,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
-    'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList',
+    'SearchInit', 'PaginateInit', 'LookUpInit', 'OrganizationList',
     'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
     'FormSave', '$state', 'CreateSelect2'
 ];
