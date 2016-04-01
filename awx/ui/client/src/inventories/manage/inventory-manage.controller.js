@@ -309,6 +309,7 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     $scope.restoreSearch = function() {
         // Restore search params and related stuff, plus refresh
         // groups and hosts lists
+        console.info('the set', PreviousSearchParams.set);
         SearchInit({
             scope: $scope,
             set: PreviousSearchParams.set,
@@ -400,10 +401,16 @@ function InventoriesManage($log, $scope, $rootScope, $location,
 
     $scope.copyGroup = function(id) {
         PreviousSearchParams = Store('group_current_search_params');
-        GroupsCopy({
-            scope: $scope,
-            group_id: id
-        });
+        // GroupsCopy({
+        //     scope: $scope,
+        //     group_id: id
+        // });
+				var params = {
+					scope: $scope
+				}
+				ParamPass.set(params);
+                $location.search('groups', null);
+				$state.go('inventoryManage.copy.group', {group_id: id});
     };
 
     $scope.deleteGroup = function (id) {
@@ -455,11 +462,21 @@ function InventoriesManage($log, $scope, $rootScope, $location,
 
     hostScope.copyHost = function(id) {
         PreviousSearchParams = Store('group_current_search_params');
-        HostsCopy({
-            group_scope: $scope,
-            host_scope: hostScope,
-            host_id: id
-        });
+        // HostsCopy({
+        //     group_scope: $scope,
+        //     host_scope: hostScope,
+        //     host_id: id
+        // });
+
+		var params = {
+			group_scope: $scope,
+			host_scope: hostScope,
+			host_id: id
+		}
+
+		ParamPass.set(params);
+
+        $state.go('inventoryManage.copy.host', {host_id: id});
     };
 
     hostScope.toggleHostEnabled = function (host_id, external_source) {

@@ -11,7 +11,7 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
     var vm = this;
 
     var params = ParamPass.get();
-    if(params === undefined) {
+    if (params === undefined) {
         params = {};
         params.host_scope = $scope.$new();
         params.group_scope = $scope.$new();
@@ -29,7 +29,7 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
         relatedSets = {},
         url, form_scope;
 
-        var host_id = $stateParams.host_id || undefined;
+    var host_id = $stateParams.host_id || undefined;
 
     form_scope =
         generator.inject(HostForm, {
@@ -94,6 +94,11 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
                 scope.enabled = true;
                 scope.variables = '---';
                 defaultUrl = data.related.hosts;
+                scope.parseType = 'yaml';
+                 ParseTypeChange({
+                     scope: scope,
+                    field_id: 'host_variables',
+                 });
                 //scope.$emit('hostVariablesLoaded');
                 scope.parseType = 'yaml';
                 ParseTypeChange({
@@ -183,7 +188,7 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
     angular.extend(vm, {
         cancelPanel: cancelPanel,
         saveHost: saveHost,
-				mode: mode
+        mode: mode
     });
 }
 

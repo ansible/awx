@@ -882,7 +882,9 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
     }
 
     function get() {
-        return savedData;
+				var returnData = savedData;
+				savedData = undefined;
+        return returnData;
     }
 
     return {
