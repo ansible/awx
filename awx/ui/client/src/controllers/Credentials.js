@@ -178,7 +178,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     if ($rootScope.current_user.is_superuser) {
         $scope.canShareCredential = true;
     } else {
-        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`)
+        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
         Rest.get()
             .success(function(data) {
                 $scope.canShareCredential = (data.count) ? true : false;
@@ -190,7 +190,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         GetBasePath("organizations") :
         $rootScope.current_user.url + "admin_of_organizations?";
 
-    // TODO: create LookUpInit for organizations
+    // Create LookUpInit for organizations
     LookUpInit({
         scope: $scope,
         url: orgUrl,
@@ -200,26 +200,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         input_type: 'radio',
         autopopulateLookup: false
     });
-
-    // LookUpInit({
-    //     scope: $scope,
-    //     form: form,
-    //     current_item: (!Empty($stateParams.user_id)) ? $stateParams.user_id : null,
-    //     list: UserList,
-    //     field: 'user',
-    //     input_type: 'radio',
-    //     autopopulateLookup: false
-    // });
-    //
-    // LookUpInit({
-    //     scope: $scope,
-    //     form: form,
-    //     current_item: (!Empty($stateParams.team_id)) ? $stateParams.team_id : null,
-    //     list: TeamList,
-    //     field: 'team',
-    //     input_type: 'radio',
-    //     autopopulateLookup: false
-    // });
 
     if (!Empty($stateParams.user_id)) {
         // Get the username based on incoming route
@@ -277,11 +257,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope[form.name + '_form'].$valid) {
             FormSave({ scope: $scope, mode: 'add' });
         }
-    };
-
-    // Handle Owner change
-    $scope.shareableChange = function () {
-        console.log("TODO: implement shareable change");
     };
 
     $scope.formCancel = function () {
@@ -342,7 +317,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
-    GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
+    GetBasePath, GetChoices, KindChange, OrganizationList, LookUpInit, Empty,
     OwnerChange, FormSave, Wait, $state, CreateSelect2) {
 
     ClearScope();
@@ -357,6 +332,18 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
+
+    $scope.canShareCredential = false;
+
+    if ($rootScope.current_user.is_superuser) {
+        $scope.canShareCredential = true;
+    } else {
+        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+        Rest.get()
+            .success(function(data) {
+                $scope.canShareCredential = (data.count) ? true : false;
+            });
+    }
 
     function setAskCheckboxes() {
         var fld, i;
@@ -387,22 +374,20 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         $scope.removeCredentialLoaded();
     }
     $scope.removeCredentialLoaded = $scope.$on('credentialLoaded', function () {
-        LookUpInit({
-            scope: $scope,
-            form: form,
-            current_item: (!Empty($scope.user_id)) ? $scope.user_id : null,
-            list: UserList,
-            field: 'user',
-            input_type: 'radio'
-        });
+        var orgUrl = ($rootScope.current_user.is_superuser) ?
+            GetBasePath("organizations") :
+            $rootScope.current_user.url + "admin_of_organizations?";
 
+        // create LookUpInit for organizations
         LookUpInit({
             scope: $scope,
+            url: orgUrl,
             form: form,
-            current_item: (!Empty($scope.team_id)) ? $scope.team_id : null,
-            list: TeamList,
+            current_item: $scope.organization,
+            list: OrganizationList,
+            field: 'organization',
             input_type: 'radio',
-            field: 'team'
+            autopopulateLookup: false
         });
 
         setAskCheckboxes();
@@ -658,6 +643,6 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-    'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
+    'KindChange', 'OrganizationList', 'LookUpInit', 'Empty', 'OwnerChange',
     'FormSave', 'Wait', '$state', 'CreateSelect2'
 ];
