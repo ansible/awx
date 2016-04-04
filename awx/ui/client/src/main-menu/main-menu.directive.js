@@ -1,36 +1,14 @@
 /* jshint unused: vars */
 
 export default
-    [   '$location', 'templateUrl', '$rootScope', function($location, templateUrl, $rootScope) {
+    [   '$state', 'templateUrl', '$rootScope', function($state, templateUrl, $rootScope) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('main-menu/main-menu'),
             link: function(scope, element, attrs) {
-                // check to see if this is the current route
-                scope.isCurrentRoute = function(route) {
-                    if ($location.url().split('/')[1] === route) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                };
 
-                // check to see if the current route is the currently
-                // logged in user
-                scope.isCurrentRouteUser = function() {
-                    if ($rootScope && $rootScope.current_user) {
-                        if ($location.url().split('/')[1] === 'users') {
-                            if ($location.url().split('/')[2] === ($rootScope.current_user.id + "")) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
+                scope.isCurrentState = function(name){
+                    return $state.current.name == name
                 };
 
                 // set up the user tooltip

@@ -1,0 +1,11 @@
+<div id="portal-container-jobs" class="Panel">
+	<div class="btn-group PortalMode-filter">
+	    <button ng-class="{'btn-primary ': activeFilter == 'user',
+	    'btn-default' : activeFilter != 'user' }" 
+	    ng-click='filterUser()' class="btn btn-xs">My Jobs</button>
+	    <button ng-class="{'btn-primary' : activeFilter == 'all',
+	    'btn-default' : activeFilter != 'all'}" ng-click='filterAll()' class="btn btn-xs btn-default">All Jobs</button>
+	</div>
+        <div id="portal-jobs" >
+        </div>
+</div>

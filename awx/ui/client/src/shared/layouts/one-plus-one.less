@@ -1,0 +1,53 @@
+/*
+* Large resolution 1/2 + 1/2 width panels
+* Small resolution: 100% width panels, stacked
+* Options: static height, custom breakpoint
+*/
+
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
+
+.OnePlusOne-container(@height: 100%; @breakpoint: 900px){
+	height: @height;
+	display: flex;
+	flex-diration: row;
+	@media screen and(max-width: @breakpoint){
+		flex-direction: column;
+	}
+}
+
+.OnePlusOne-panel--left(@height: 100%; @breakpoint: 900px){
+	flex: 1 1;
+	height: @height;
+	width: 100%;
+	margin-right: 20px;
+	.Panel{
+		height: 100%;
+	}
+	@media screen and (max-width @breakpoint){
+		margin-right: 0px;
+		height: inherit;
+	}
+}
+
+.OnePlusOne-panel--right(@height: 100%; @breakpoint: 900px){
+	flex: 1 1;
+	height: @height;
+	width: 100%;
+	margin-right: 0px;
+	.Panel{
+		height: 100%;
+	}
+	@media screen and (max-width @breakpoint){
+		height: inherit;
+	}
+}
+
+.OnePlusOne-panelHeader{
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+	display: flex;
+}
