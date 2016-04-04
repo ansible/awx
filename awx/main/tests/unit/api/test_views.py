@@ -16,7 +16,7 @@ class TestApiV1RootView:
             'authtoken',
             'ping',
             'config',
-            'settings',
+            #'settings',
             'me',
             'dashboard',
             'organizations',
