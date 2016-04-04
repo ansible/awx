@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_text
 from django.db.models import Q
 
@@ -31,6 +30,7 @@ def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
     RolePermission = apps.get_model('main', "RolePermission")
+    ContentType = apps.get_model('contenttypes', "ContentType")
 
     for user in User.objects.iterator():
         try:

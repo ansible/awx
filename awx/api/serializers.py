@@ -1565,6 +1565,14 @@ class JobOptionsSerializer(BaseSerializer):
                                               args=(obj.cloud_credential.pk,))
         return res
 
+    def _summary_field_labels(self, obj):
+        return [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
+
+    def get_summary_fields(self, obj):
+        res = super(JobOptionsSerializer, self).get_summary_fields(obj)
+        res['labels'] = self._summary_field_labels(obj)
+        return res
+
     def to_representation(self, obj):
         ret = super(JobOptionsSerializer, self).to_representation(obj)
         if obj is None:
@@ -1622,6 +1630,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
 
+    def _recent_jobs(self, obj):
+        return [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.all().order_by('-created')[:10]]
+
     def get_summary_fields(self, obj):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
@@ -1640,8 +1651,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         else:
             d['can_copy'] = False
             d['can_edit'] = False
-        d['recent_jobs'] = [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.order_by('-created')[:10]]
-        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
+        d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
     def validate(self, attrs):
@@ -1682,11 +1692,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
-
-    def get_summary_fields(self, obj):
-        d = super(JobSerializer, self).get_summary_fields(obj)
-        d['labels'] = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
-        return d
 
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
@@ -2134,6 +2139,10 @@ class NotifierSerializer(BaseSerializer):
         incorrect_type_fields = []
         if 'notification_configuration' not in attrs:
             return attrs
+        if self.context['view'].kwargs:
+            object_actual = self.context['view'].get_object()
+        else:
+            object_actual = None
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
                 missing_fields.append(field)
@@ -2144,8 +2153,8 @@ class NotifierSerializer(BaseSerializer):
             if not type(field_val) in expected_types:
                 incorrect_type_fields.append((field, field_type))
                 continue
-            if field_type == "password" and field_val.startswith('$encrypted$'):
-                missing_fields.append(field)
+            if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
+                attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
         error_list = []
         if missing_fields:
             error_list.append("Missing required fields for Notification Configuration: {}".format(missing_fields))
