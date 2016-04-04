@@ -2139,6 +2139,10 @@ class NotifierSerializer(BaseSerializer):
         incorrect_type_fields = []
         if 'notification_configuration' not in attrs:
             return attrs
+        if self.context['view'].kwargs:
+            object_actual = self.context['view'].get_object()
+        else:
+            object_actual = None
         for field in notification_class.init_parameters:
             if field not in attrs['notification_configuration']:
                 missing_fields.append(field)
@@ -2149,8 +2153,8 @@ class NotifierSerializer(BaseSerializer):
             if not type(field_val) in expected_types:
                 incorrect_type_fields.append((field, field_type))
                 continue
-            if field_type == "password" and field_val.startswith('$encrypted$'):
-                missing_fields.append(field)
+            if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
+                attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
         error_list = []
         if missing_fields:
             error_list.append("Missing required fields for Notification Configuration: {}".format(missing_fields))
