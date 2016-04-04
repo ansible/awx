@@ -68,6 +68,8 @@ class Notifier(CommonModel):
         update_fields = kwargs.get('update_fields', [])
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
                             self.notification_class.init_parameters):
+            if self.notification_configuration[field].startswith("$encrypted$"):
+                continue
             if new_instance:
                 value = self.notification_configuration[field]
                 setattr(self, '_saved_{}_{}'.format("config", field), value)
@@ -84,7 +86,6 @@ class Notifier(CommonModel):
                                 self.notification_class.init_parameters):
                 saved_value = getattr(self, '_saved_{}_{}'.format("config", field), '')
                 self.notification_configuration[field] = saved_value
-                #setattr(self.notification_configuration, field, saved_value)
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')
             self.save(update_fields=update_fields)
