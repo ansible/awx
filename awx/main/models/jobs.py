@@ -194,6 +194,22 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         blank=True,
         default=False,
     )
+    ask_limit_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_tags_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_job_type_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_inventory_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
 
     survey_enabled = models.BooleanField(
         default=False,

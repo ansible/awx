@@ -27,6 +27,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             project      = self.proj_dev.pk,
             credential   = self.cred_sue.pk,
             playbook     = self.proj_dev.playbooks[0],
+            ask_variables_on_launch = True,
         )
         self.data_no_cred = dict(
             name         = 'launched job template no credential',

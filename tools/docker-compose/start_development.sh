@@ -19,7 +19,8 @@ else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
 
-cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
+# will remove before PR lands
+cp -fR /tmp/ansible_tower.egg-info /tower_devel/ || true
 
 # Check if we need to build dependencies
 #if [ -f "awx/lib/.deps_built" ]; then

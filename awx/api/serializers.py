@@ -1673,7 +1673,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled')
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
+                  'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
+                  'survey_enabled', 'become_enabled')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -1730,10 +1732,16 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.ReadOnlyField()
     ask_variables_on_launch = serializers.ReadOnlyField()
+    ask_limit_on_launch = serializers.ReadOnlyField()
+    ask_tags_on_launch = serializers.ReadOnlyField()
+    ask_job_type_on_launch = serializers.ReadOnlyField()
+    ask_inventory_on_launch = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch')
+        fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
+                  'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
+                  'ask_inventory_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -2102,9 +2110,13 @@ class JobLaunchSerializer(BaseSerializer):
     class Meta:
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
-                  'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
+                  'ask_variables_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
+                  'ask_inventory_on_launch', 'ask_limit_on_launch',
+                  'survey_enabled', 'variables_needed_to_start',
                   'credential', 'credential_needed_to_start',)
-        read_only_fields = ('ask_variables_on_launch',)
+        read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
+                            'ask_tags_on_launch', 'ask_job_type_on_launch',
+                            'ask_inventory_on_launch')
         extra_kwargs = {
             'credential': {
                 'write_only': True,
@@ -2164,7 +2176,9 @@ class JobLaunchSerializer(BaseSerializer):
         if errors:
             raise serializers.ValidationError(errors)
 
+        JT_extra_vars = obj.extra_vars
         attrs = super(JobLaunchSerializer, self).validate(attrs)
+        obj.extra_vars = JT_extra_vars
         return attrs
 
 class NotifierSerializer(BaseSerializer):
