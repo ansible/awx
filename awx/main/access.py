@@ -881,7 +881,7 @@ class SystemJobAccess(BaseAccess):
     '''
     model = SystemJob
 
-class AdHocCommandAccess(BaseAccess):
+class AdHocCommandAccess(BaseAccess): 
     '''
     I can only see/run ad hoc commands when:
     - I am a superuser.
@@ -1193,15 +1193,39 @@ class NotificationAccess(BaseAccess):
 
 class LabelAccess(BaseAccess):
     '''
-    I can see/use a Label if I have permission to
+    I can see/use a Label if I have permission to associated organization
     '''
     model = Label
 
     def get_queryset(self):
-        return self.model.objects.distinct().all()
+        if self.user.is_superuser:
+            return self.model.objects.all()
+        return self.model.objects.filter(
+            organization__in=Organization.accessible_objects(self.user, {'read': True})
+        )
+
+    def can_read(self, obj):
+        if self.user.is_superuser:
+            return True
+        return obj.organization and obj.organization.accessible_by(self.user, {'read': True})
+
+    def can_add(self, data):
+        if self.user.is_superuser:
+            return True
+        if not data or '_method' in data:  # So the browseable API will work?
+            return True
+
+        org_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=org_pk)
+        return org.accessible_by(self.user, {'read': True})
+
+    def can_change(self, obj, data):
+        if self.user.is_superuser:
+            return True
+        return obj.organization and obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_delete(self, obj):
-        return False
+        return self.can_change(obj, None)
 
 class ActivityStreamAccess(BaseAccess):
     '''
