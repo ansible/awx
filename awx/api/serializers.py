@@ -2134,6 +2134,14 @@ class NotifierSerializer(BaseSerializer):
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
 
+    def _recent_notifications(self, obj):
+        return [{'id': x.id, 'status': x.status, 'created': x.created} for x in obj.notifications.all().order_by('-created')[:5]]
+
+    def get_summary_fields(self, obj):
+        d = super(NotifierSerializer, self).get_summary_fields(obj)
+        d['recent_notifications'] = self._recent_notifications(obj)
+        return d
+
     def validate(self, attrs):
         notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
