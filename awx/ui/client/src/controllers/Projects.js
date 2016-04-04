@@ -516,7 +516,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath,
     ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
     GetChoices, Empty, DebugForm, Wait, SchedulesControllerInit,
-    SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2) {
+    SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2,
+    OrganizationList) {
 
     ClearScope('htmlTemplate');
 
@@ -590,6 +591,15 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             input_type: 'radio'
         });
 
+        LookUpInit({
+            scope: $scope,
+            form: form,
+            current_item: $scope.organization,
+            list: OrganizationList,
+            field: 'organization',
+            input_type: 'radio'
+        });
+
         $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
         $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
         $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
@@ -623,9 +633,9 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                             master[fld] = data[fld];
                         }
                     }
-                    if (fld !== 'organization' && form.fields[fld].sourceModel &&
-                        data.summary_fields && data.summary_fields[form.fields[fld].sourceModel]) {
-                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                    if (form.fields[fld].sourceModel && data.summary_fields &&
+                        data.summary_fields[form.fields[fld].sourceModel]) {
+                          $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                             data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                         master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                             data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
@@ -810,5 +820,5 @@ ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     'ClearScope', 'GetBasePath', 'ReturnToCaller', 'GetProjectPath',
     'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'SchedulesControllerInit', 'SchedulesListInit',
-    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2'
+    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2', 'OrganizationList'
 ];
