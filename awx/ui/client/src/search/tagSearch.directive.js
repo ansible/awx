@@ -9,6 +9,7 @@ export default
                 scope: {
                   list: '@',
                   endpoint: '@',
+                  set: '@',
                   iterator: '@'
                 },
                 controller: tagSearchController,

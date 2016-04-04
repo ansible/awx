@@ -3,13 +3,6 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         // JSONify passed field elements that can be searched
         $scope.list = JSON.parse($scope.list);
 
-        // Hotfix: GetBasePath to work with inventories
-        $scope.$watch("endpoint", function(val) {
-            if (val === 'inventories') {
-                $scope.endpoint = 'inventory';
-            }
-        });
-
         // Grab options for the left-dropdown of the searchbar
         tagSearchService.getSearchTypes($scope.list, $scope.endpoint)
             .then(function(searchTypes) {
@@ -39,10 +32,10 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         };
 
         $scope.updateSearch = function(tags) {
-            var iterator = $scope.$parent.list.iterator;
+            var iterator = $scope.iterator;
             var pageSize = $scope
                 .$parent[iterator + "_page_size"];
-            var set = $scope.$parent.list.name;
+            var set = $scope.set;
             var listScope = $scope.$parent;
             var url = tagSearchService
                 .updateFilteredUrl($scope.endpoint, tags, pageSize);

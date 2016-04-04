@@ -78,7 +78,7 @@ export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
 
         if (needsRequest.length) {
             // make the options request to reutrn the typeOptions
-            Rest.setUrl(GetBasePath(basePath));
+            Rest.setUrl(basePath);
             Rest.options()
                 .success(function (data) {
                     var options = data.actions.GET;
@@ -108,7 +108,7 @@ export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
 
     // returns the url with filter params
     this.updateFilteredUrl = function(basePath, tags, pageSize) {
-        return GetBasePath(basePath) + "?" +
+        return basePath + "?" +
             (tags || []).map(function (t) {
                 return t.url;
             }).join("&") + "&page_size=" + pageSize;

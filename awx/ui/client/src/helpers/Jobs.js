@@ -368,20 +368,11 @@ export default
                 spinner = (params.spinner === undefined) ? true : params.spinner,
                 e, html, key;
 
-            // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
-            html = SearchWidget({
-                iterator: list.iterator,
-                template: params.list,
-                includeSize: false
-            });
-            e = angular.element(document.getElementById(id + '-search-container')).append(html);
-            $compile(e)(scope);
-
             GenerateList.inject(list, {
                 mode: 'edit',
                 id: id,
                 scope: scope,
-                showSearch: false,
+                showSearch: true,
                 title: false
             });
 
@@ -408,9 +399,6 @@ export default
                 JobsControllerInit({ scope: scope, parent_scope: parent_scope });
                 JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
                 parent_scope.$emit('listLoaded');
-                // setTimeout(function(){
-                //     scope.$apply();
-                // }, 300);
             });
 
             if (base === 'jobs' && list.name === 'all_jobs') {

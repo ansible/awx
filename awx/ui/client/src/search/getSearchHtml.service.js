@@ -1,13 +1,15 @@
-export default [function() {
+export default ['GetBasePath', function(GetBasePath) {
     // given the list, return the fields that need searching
     this.getList = function(list) {
+        var f = _.clone(list.fields);
         return JSON.stringify(Object
-            .keys(list.fields)
+            .keys(f)
             .filter(function(i) {
-                return (list.fields[i]
+                return (f[i]
                     .searchable !== false);
             }).map(function(i) {
-                return {[i]: list.fields[i]};
+                delete f[i].awToolTip;
+                return {[i]: f[i]};
             }).reduce(function (acc, i) {
                 var key = Object.keys(i);
                 acc[key] = i[key];
@@ -17,14 +19,19 @@ export default [function() {
 
     // given the list config object, return the basepath
     this.getEndpoint = function(list) {
-        return list.basePath || list.name;
+        var endPoint = (list.basePath || list.name);
+        if (endPoint === 'inventories') {
+            endPoint = 'inventory';
+        }
+        return GetBasePath(endPoint);
     };
 
     // inject the directive with the list and endpoint
-    this.inject = function(list, endpoint) {
+    this.inject = function(list, endpoint, set, iterator) {
         return "<tag-search list='" + list +
             "' endpoint='" + endpoint +
-            "'></tag-search>";
+            "' set='" + set +
+            "' iterator='" + iterator + "'></tag-search>";
     };
 
     return this;

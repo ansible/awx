@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
     'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton',
+    'Store', 'ActionButton', 'getSearchHtml', '$state',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget,
         PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton) {
+        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml, $state) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -1692,28 +1692,38 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<strong>Hint: </strong>" + collection.instructions + "\n";
                     html += "</div>\n";
                 }
+                var rootID = $location.$$path.split("/")[2];
+                var endpoint = "/api/v1/" + collection.basePath
+                    .replace(":id", rootID);
+                var tagSearch = getSearchHtml
+                    .inject(getSearchHtml.getList(collection),
+                        endpoint, itm, collection.iterator);
 
-                //html += "<div class=\"well\">\n";
-                html += "<div class=\"row List-searchRow\">\n";
+                var actionButtons = "";
+                Object.keys(collection.actions || {})
+                    .forEach(act => {
+                        actionButtons += ActionButton(collection
+                            .actions[act]);
+                    });
 
-                html += SearchWidget({
-                    iterator: collection.iterator,
-                    template: collection,
-                    mini: true,
-                    ngShow: collection.iterator + "Loading == true || " + collection.iterator + "_active_search == true || (" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows > 0)"
-                });
-
-                html += "<div class=\"col-lg-8\">\n";
-                html += "<div class=\"list-actions\">\n";
-
-                for (act in collection.actions) {
-                    action = collection.actions[act];
-                    html += ActionButton(action);
-                }
-
-                html += "</div>\n";
-                html += "</div>\n";
-                html += "</div><!-- row -->\n";
+                html += `
+<div class=\"row\">
+    <div class=\"col-lg-8\"
+        ng-show=\"${collection.iterator}Loading == true ||
+            ${collection.iterator}_active_search == true || (
+                ${collection.iterator}Loading == false &&
+                ${collection.iterator}_active_search == false &&
+                ${collection.iterator}_total_rows > 0
+            )\">
+        ${tagSearch}
+    </div>
+    <div class=\"col-lg-4\">
+        <div class=\"list-actions\">
+            ${actionButtons}
+        </div>
+    </div>
+</div>
+                `;
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                 html += "<div class=\"row\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == true && " + itm + ".length == 0\">\n";
