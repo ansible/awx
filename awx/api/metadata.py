@@ -177,3 +177,10 @@ class Metadata(metadata.SimpleMetadata):
             metadata['search_fields'] = view.search_fields
 
         return metadata
+
+class RoleMetadata(Metadata):
+    def determine_metadata(self, request, view):
+        metadata = super(RoleMetadata, self).determine_metadata(request, view)
+        if 'actions' in metadata:
+            metadata['actions'].pop('POST')
+        return metadata

@@ -67,6 +67,7 @@ from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
+from awx.api.metadata import RoleMetadata
 from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
 
@@ -795,6 +796,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    metadata_class = RoleMetadata
     parent_model = Team
     relationship='member_role.children'
 
@@ -1075,6 +1077,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
     serializer_class = RoleSerializer
+    metadata_class = RoleMetadata
     parent_model = User
     relationship='roles'
     permission_classes = (IsAuthenticated,)

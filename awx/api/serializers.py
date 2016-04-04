@@ -1446,7 +1446,8 @@ class RoleSerializer(BaseSerializer):
 
     class Meta:
         model = Role
-        fields = ('*',)
+        fields = ('*', 'description', 'name')
+        read_only_fields = ('description', 'name')
 
     def get_related(self, obj):
         ret = super(RoleSerializer, self).get_related(obj)
