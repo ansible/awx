@@ -46,7 +46,7 @@ TEST_TOWER_SETTINGS_MANIFEST = {
 }
 
 @override_settings(TOWER_SETTINGS_MANIFEST=TEST_TOWER_SETTINGS_MANIFEST)
-class SettingsTest(BaseTest):
+class SettingsPlaceholder(BaseTest):
 
     def setUp(self):
         super(SettingsTest, self).setUp()
