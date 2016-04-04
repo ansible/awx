@@ -43,6 +43,10 @@ class ResourceMixin(models.Model):
             qs = cls.objects.filter(
                 role_permissions__role__ancestors__members=accessor
             )
+        elif type(accessor) == Role:
+            qs = cls.objects.filter(
+                role_permissions__role__ancestors=accessor
+            )
         else:
             accessor_type = ContentType.objects.get_for_model(accessor)
             roles = Role.objects.filter(content_type__pk=accessor_type.id,

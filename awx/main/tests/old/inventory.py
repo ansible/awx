@@ -2003,34 +2003,3 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.check_inventory_source(inventory_source)
         self.assertFalse(self.group.all_hosts.filter(instance_id='').exists())
 
-
-class InventoryCredentialTest(BaseTest):
-    def setUp(self):
-        super(InventoryCredentialTest, self).setUp()
-        #self.start_redis()
-        self.setup_instances()
-        self.setup_users()
-
-        self.url = reverse('api:credential_list')
-
-    def test_openstack_create_ok(self):
-        data = {
-            'kind': 'openstack',
-            'name': 'Best credential ever',
-            'username': 'some_user',
-            'password': 'some_password',
-            'project': 'some_project',
-            'host': 'some_host',
-        }
-        self.post(self.url, data=data, expect=201, auth=self.get_super_credentials())
-
-    def test_openstack_create_fail_required_fields(self):
-        data = {
-            'kind': 'openstack',
-            'name': 'Best credential ever',
-        }
-        response = self.post(self.url, data=data, expect=400, auth=self.get_super_credentials())
-        self.assertIn('username', response)
-        self.assertIn('password', response)
-        self.assertIn('host', response)
-        self.assertIn('project', response)

@@ -542,20 +542,12 @@ class CredentialAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, {'read':True})
         return qs.select_related('created_by', 'modified_by').all()
 
+    def can_read(self, obj):
+        return obj.accessible_by(self.user, {'read': True})
+
     def can_add(self, data):
-        if self.user.is_superuser:
-            return True
-
-        if 'user' in data:
-            pk = get_pk_from_dict(data, 'user')
-            user = get_object_or_400(User, pk=pk)
-            return user.accessible_by(self.user, {'write': True})
-        elif 'organization' in data:
-            pk = get_pk_from_dict(data, 'organization')
-            org = get_object_or_400(Organization, pk=pk)
-            return org.accessible_by(self.user, {'write': True})
-
-        return False
+        # Access enforced in our view where we have context enough to make a decision
+        return True
 
     def can_change(self, obj, data):
         if self.user.is_superuser:

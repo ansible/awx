@@ -93,6 +93,13 @@ def team(organization):
     return organization.teams.create(name='test-team')
 
 @pytest.fixture
+def team_member(user, team):
+    ret = user('team-member', False)
+    team.member_role.members.add(ret)
+    return ret
+
+
+@pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def project(instance, organization):
     prj = Project.objects.create(name="test-proj",

@@ -1506,7 +1506,7 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'deprecated_user', 'deprecated_team', 'kind', 'cloud', 'host', 'username',
+        fields = ('*', 'kind', 'cloud', 'host', 'username',
                   'password', 'security_token', 'project', 'domain',
                   'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
@@ -1519,21 +1519,6 @@ class CredentialSerializer(BaseSerializer):
             field_kwargs['required'] = False
             field_kwargs['default'] = ''
         return field_class, field_kwargs
-
-    def to_representation(self, obj):
-        ret = super(CredentialSerializer, self).to_representation(obj)
-        if obj is not None and 'deprecated_user' in ret and not obj.deprecated_user:
-            ret['deprecated_user'] = None
-        if obj is not None and 'deprecated_team' in ret and not obj.deprecated_team:
-            ret['deprecated_team'] = None
-        return ret
-
-    def validate(self, attrs):
-        # Ensure old style assignment for user/team is always None
-        attrs['deprecated_user'] = None
-        attrs['deprecated_team'] = None
-
-        return super(CredentialSerializer, self).validate(attrs)
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
