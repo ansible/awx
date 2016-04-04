@@ -13,7 +13,7 @@
         <a class="MainMenu-item"
             id="main_menu_projects_mobile_link"
             href="/#/projects"
-            ng-class="{'is-currentRoute' : isCurrentRoute('projects')}">
+            ng-class="{'is-currentRoute' : isCurrentState('projects')}">
             <span class="MainMenu-itemText">
                 PROJECTS
             </span>
@@ -21,7 +21,7 @@
         <a class="MainMenu-item"
             id="main_menu_inventories_mobile_link"
             href="/#/inventories"
-            ng-class="{'is-currentRoute' : isCurrentRoute('inventories')}">
+            ng-class="{'is-currentRoute' : isCurrentState('inventories')}">
             <span class="MainMenu-itemText">
                 INVENTORIES
             </span>
@@ -29,7 +29,7 @@
         <a class="MainMenu-item"
             id="main_menu_job_templates_mobile_link"
             href="/#/job_templates"
-            ng-class="{'is-currentRoute' : isCurrentRoute('job_templates')}">
+            ng-class="{'is-currentRoute' : isCurrentState('jobTemplates')}">
             <span class="MainMenu-itemText">
                 JOB TEMPLATES
             </span>
@@ -37,7 +37,7 @@
         <a class="MainMenu-item"
             id="main_menu_jobs_mobile_link"
             href="/#/jobs"
-            ng-class="{'is-currentRoute' : isCurrentRoute('jobs')}">
+            ng-class="{'is-currentRoute' : isCurrentState('jobs')}">
             <span class="MainMenu-itemText">
                 JOBS
             </span>
@@ -45,7 +45,7 @@
         <a class="MainMenu-item"
             id="main_menu_current_user_mobile_link"
             ng-href="/#/users/{{ $root.current_user.id }}"
-            ng-class="{'is-currentRoute' : isCurrentRouteUser()}">
+            ng-class="{'is-currentRoute' : isCurrentState('users.edit')}">
             <span class="MainMenu-itemText">
                 VIEW USER PAGE FOR {{ $root.current_user.username | uppercase }}
             </span>
@@ -53,7 +53,7 @@
         <a class="MainMenu-item"
             id="main_menu_setup_mobile_link"
             ng-href="/#/setup"
-            ng-class="{'is-currentRoute' : isCurrentRoute('setup')}">
+            ng-class="{'is-currentRoute' : isCurrentState('setup')}">
             <span class="MainMenu-itemText">
                 SETTINGS
             </span>
@@ -61,7 +61,7 @@
         <a class="MainMenu-item"
             id="main_menu_setup_mobile_link"
             ui-sref="portalMode"
-            ng-class="{'is-currentRoute' : isCurrentRoute('portalMode')}">
+            ng-class="{'is-currentRoute' : isCurrentState('portalMode')}">
             <span class="MainMenu-itemText">
                 PORTAL MODE
             </span>
@@ -77,7 +77,7 @@
         <a class="MainMenu-item"
             id="main_menu_logout_mobile_link"
             ng-href="/#/logout"
-            ng-class="{'is-currentRoute' : isCurrentRoute('logout')}">
+            ng-class="{'is-currentRoute' : isCurrentState('logout')}">
             <span class="MainMenu-itemText">
                 LOG OUT
             </span>
@@ -88,7 +88,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_projects_link"
         href="/#/projects"
-        ng-class="{'is-currentRoute' : isCurrentRoute('projects'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('projects'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             PROJECTS
         </span>
@@ -96,7 +96,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_inventories_link"
         href="/#/inventories"
-        ng-class="{'is-currentRoute' : isCurrentRoute('inventories'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             INVENTORIES
         </span>
@@ -104,7 +104,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_job_templates_link"
         href="/#/job_templates"
-        ng-class="{'is-currentRoute' : isCurrentRoute('job_templates'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             JOB TEMPLATES
         </span>
@@ -112,7 +112,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left MainMenu-item--lastLeft"
         id="main_menu_jobs_link"
         href="/#/jobs"
-        ng-class="{'is-currentRoute' : isCurrentRoute('jobs'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('jobs'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             JOBS
         </span>
@@ -120,7 +120,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--user MainMenu-item--right"
         id="main_menu_current_user_link"
         ng-href="/#/users/{{ $root.current_user.id }}"
-        ng-class="{'is-currentRoute' : isCurrentRouteUser(), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('users.edit'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="{{currentUserTip}}"
         aw-tip-watch="currentUserTip"
         data-placement="bottom"
@@ -136,7 +136,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_setup_link"
         ng-href="/#/setup"
-        ng-class="{'is-currentRoute' : isCurrentRoute('setup'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('setup'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Settings"
         data-placement="bottom"
         data-trigger="hover"
@@ -148,7 +148,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_portal_link"
         ng-href="/#/portal"
-        ng-class="{'is-currentRoute' : isCurrentRoute('portalMode'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('portalMode'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Portal Mode"
         data-placement="bottom"
         data-trigger="hover"
@@ -173,7 +173,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_logout_link"
         ng-href="/#/logout"
-        ng-class="{'is-currentRoute' : isCurrentRoute('logout'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('logout'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Log Out"
         data-placement="bottom"
         data-trigger="hover"

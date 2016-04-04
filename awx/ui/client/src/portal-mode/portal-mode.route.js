@@ -5,9 +5,11 @@ import {PortalModeJobsController} from './portal-mode-jobs.controller';
 // Using multiple named views requires a parent layout
 // https://github.com/angular-ui/ui-router/wiki/Multiple-Named-Views
 export default {
-    abstract: true,
 	name: 'portalMode',
     url: '/portal',
+    ncyBreadcrumb: {
+        label: "PORTAL MODE"
+    },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();

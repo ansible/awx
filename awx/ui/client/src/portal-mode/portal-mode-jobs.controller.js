@@ -4,8 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-export function PortalModeJobsController($scope, $rootScope, GetBasePath, GenerateList, PortalJobsList, SearchInit,
+export function PortalModeJobsController($scope, $state, $rootScope, GetBasePath, GenerateList, PortalJobsList, SearchInit,
 	PaginateInit){
+
 	var list = PortalJobsList,
 	view = GenerateList,
 	// show user jobs by default
@@ -55,5 +56,5 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
 	init();
 }
 
-PortalModeJobsController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobsList', 'SearchInit',
+PortalModeJobsController.$inject = ['$scope', '$state', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobsList', 'SearchInit',
 	'PaginateInit']
