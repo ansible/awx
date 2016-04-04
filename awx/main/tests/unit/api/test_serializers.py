@@ -76,14 +76,14 @@ class TestJobTemplateSerializerGetRelated(GetRelatedMixin):
 class TestJobTemplateSerializerGetSummaryFields(GetSummaryFieldsMixin):
     def test__recent_jobs(self, mocker, job_template, jobs):
 
-        job_template.jobs.filter = mocker.MagicMock(**{'order_by.return_value': jobs})
-        job_template.jobs.filter.return_value = job_template.jobs.filter
+        job_template.jobs.all = mocker.MagicMock(**{'order_by.return_value': jobs})
+        job_template.jobs.all.return_value = job_template.jobs.all
 
         serializer = JobTemplateSerializer()
         recent_jobs = serializer._recent_jobs(job_template)
 
-        job_template.jobs.filter.assert_called_with(active=True)
-        job_template.jobs.filter.order_by.assert_called_with('-created')
+        job_template.jobs.all.assert_called_once_with()
+        job_template.jobs.all.order_by.assert_called_once_with('-created')
         assert len(recent_jobs) == 10
         for x in jobs[:10]:
             assert recent_jobs == [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in jobs[:10]]
@@ -126,17 +126,16 @@ class TestJobSerializerGetRelated(GetRelatedMixin):
     def test_get_related(self, mocker, job, related_resource_name):
         self._test_get_related(JobSerializer, job, 'jobs', related_resource_name)
 
-    def test_job_template_present(self, job):
-        job.job_template.active = True
-        serializer = JobSerializer()
-        related = serializer.get_related(job)
-        assert 'job_template' in related
-
-    def test_job_template_absent(self, job):
-        job.job_template.active = False
+    def test_job_template_absent(self, mocker, job):
+        job.job_template = None
         serializer = JobSerializer()
         related = serializer.get_related(job)
         assert 'job_template' not in related
+
+    def test_job_template_present(self, job):
+        related = self._mock_and_run(JobSerializer, job)
+        assert 'job_template' in related
+        assert related['job_template'] == '/api/v1/%s/%d/' % ('job_templates', job.job_template.pk)
 
 @mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', lambda x,y: {})
 class TestJobOptionsSerializerGetSummaryFields(GetSummaryFieldsMixin):
