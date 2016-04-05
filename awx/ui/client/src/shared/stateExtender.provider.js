@@ -14,7 +14,7 @@ export default function($stateProvider) {
                     onEnter: state.onEnter,
                     onExit: state.onExit,
                     template: state.template,
-                    controllerAs: state.controllerAs
+                    controllerAs: state.controllerAs,
                     views: state.views
                 });
             }
