@@ -1,4 +1,4 @@
-function copyHostsDirectiveController($compile, $state, $scope, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, ParamPass, Store) {
+function CopyHostsCtrl($compile, $state, $scope, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, ParamPass, Store) {
     var vm = this;
     var name;
 
@@ -235,5 +235,5 @@ function copyHostsDirectiveController($compile, $state, $scope, Rest, ProcessErr
 }
 
 export default ['$compile', '$state', '$scope', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
-    'PaginateInit', 'ParamPass', 'Store', copyHostsDirectiveController
+    'PaginateInit', 'ParamPass', 'Store', CopyHostsCtrl
 ];

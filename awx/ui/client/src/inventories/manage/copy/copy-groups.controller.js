@@ -1,4 +1,4 @@
-function copyGroupsDirectiveController($compile, $state, $scope, $location, Rest, ProcessErrors, CreateDialog,
+function CopyGroupsCtrl($compile, $state, $scope, $location, Rest, ProcessErrors, CreateDialog,
     GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, GetRootGroups, ParamPass, Store) {
     var vm = this;
     var name;
@@ -299,5 +299,5 @@ function copyGroupsDirectiveController($compile, $state, $scope, $location, Rest
 };
 
 export default ['$compile', '$state', '$scope', '$location', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
-    'PaginateInit', 'GetRootGroups', 'ParamPass', 'Store', copyGroupsDirectiveController
+    'PaginateInit', 'GetRootGroups', 'ParamPass', 'Store', CopyGroupsCtrl
 ];
