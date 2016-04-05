@@ -24,10 +24,21 @@ class Label(CommonModelNameNotUnique):
     organization = models.ForeignKey(
         'Organization',
         related_name='labels',
+        blank=True,
+        null=True,
+        default=None,
         help_text=_('Organization this label belongs to.'),
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
 
     def get_absolute_url(self):
         return reverse('api:label_detail', args=(self.pk,))
+
+    @staticmethod
+    def get_orphaned_labels():
+        return \
+            Label.objects.filter(
+                organization=None,
+                jobtemplate_labels__isnull=True
+            )
 
