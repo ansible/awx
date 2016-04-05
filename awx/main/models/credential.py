@@ -32,21 +32,22 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     '''
 
     KIND_CHOICES = [
-        ('ssh',    _('Machine')),
-        ('scm',    _('Source Control')),
-        ('aws',    _('Amazon Web Services')),
-        ('rax',    _('Rackspace')),
+        ('ssh', _('Machine')),
+        ('scm', _('Source Control')),
+        ('aws', _('Amazon Web Services')),
+        ('rax', _('Rackspace')),
         ('vmware', _('VMware vCenter')),
-        ('gce',    _('Google Compute Engine')),
-        ('azure',  _('Microsoft Azure')),
+        ('foreman', _('Satellite 6')),
+        ('gce', _('Google Compute Engine')),
+        ('azure', _('Microsoft Azure')),
         ('openstack', _('OpenStack')),
     ]
 
     BECOME_METHOD_CHOICES = [
-        ('',       _('None')),
-        ('sudo',   _('Sudo')),
-        ('su',     _('Su')),
-        ('pbrun',  _('Pbrun')),
+        ('', _('None')),
+        ('sudo', _('Sudo')),
+        ('su', _('Su')),
+        ('pbrun', _('Pbrun')),
         ('pfexec', _('Pfexec')),
         #('runas',  _('Runas')),
     ]

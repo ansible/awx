@@ -1,0 +1,15 @@
+[foreman]
+url = http://localhost:3000/
+user = foreman
+password = secret
+ssl_verify = True
+
+[ansible]
+group_patterns = ["{app}-{tier}-{color}",
+	          "{app}-{color}",
+	          "{app}",
+		  "{tier}"]
+
+[cache]
+path = .
+max_age = 60

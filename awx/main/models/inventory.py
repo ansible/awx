@@ -725,13 +725,14 @@ class InventorySourceOptions(BaseModel):
     '''
 
     SOURCE_CHOICES = [
-        ('',       _('Manual')),
-        ('file',   _('Local File, Directory or Script')),
-        ('rax',    _('Rackspace Cloud Servers')),
-        ('ec2',    _('Amazon EC2')),
-        ('gce',    _('Google Compute Engine')),
-        ('azure',  _('Microsoft Azure')),
+        ('', _('Manual')),
+        ('file', _('Local File, Directory or Script')),
+        ('rax', _('Rackspace Cloud Servers')),
+        ('ec2', _('Amazon EC2')),
+        ('gce', _('Google Compute Engine')),
+        ('azure', _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
+        ('foreman', _('Satellite 6')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
     ]
