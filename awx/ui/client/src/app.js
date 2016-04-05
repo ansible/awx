@@ -197,7 +197,8 @@ var tower = angular.module('Tower', [
     'ncy-angular-breadcrumb',
     'scheduler',
     'ApiModelHelper',
-    'ActivityStreamHelper'
+    'ActivityStreamHelper',
+    'dndLists'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
