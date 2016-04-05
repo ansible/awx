@@ -182,6 +182,8 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         Rest.get()
             .success(function(data) {
                 $scope.canShareCredential = (data.count) ? true : false;
+            }).error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
             });
     }
 
@@ -342,6 +344,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         Rest.get()
             .success(function(data) {
                 $scope.canShareCredential = (data.count) ? true : false;
+            }).error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
             });
     }
 
