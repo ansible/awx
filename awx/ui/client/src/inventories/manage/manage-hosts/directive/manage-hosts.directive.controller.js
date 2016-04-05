@@ -99,7 +99,6 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
                      scope: scope,
                     field_id: 'host_variables',
                  });
-                //scope.$emit('hostVariablesLoaded');
                 scope.parseType = 'yaml';
                 ParseTypeChange({
                     scope: scope,

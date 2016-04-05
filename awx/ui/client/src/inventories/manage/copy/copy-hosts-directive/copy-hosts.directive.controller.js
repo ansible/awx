@@ -142,7 +142,7 @@ function copyHostsDirectiveController($compile, $state, $scope, Rest, ProcessErr
             setWidgets: false
         });
         $scope.refreshHostsOnGroupRefresh = true;
-    }
+    };
 
     var performCopy = function() {
         var list = GroupList,
@@ -229,9 +229,10 @@ function copyHostsDirectiveController($compile, $state, $scope, Rest, ProcessErr
         copy_choice: copy_choice,
         name: name,
         cancel: cancel,
-        allowSave: allowSave
-    })
-};
+        allowSave: allowSave,
+        performCopy: performCopy
+    });
+}
 
 export default ['$compile', '$state', '$scope', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
     'PaginateInit', 'ParamPass', 'Store', copyHostsDirectiveController
