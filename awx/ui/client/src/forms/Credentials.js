@@ -40,47 +40,19 @@ export default
                     addRequired: false,
                     editRequired: false
                 },
-                owner: {
-                    label: "Does this credential belong to a team or user?",
-                    type: 'radio_group',
-                    ngChange: "ownerChange()",
-                    options: [{
-                        label: 'User',
-                        value: 'user',
-                        selected: true
-                    }, {
-                        label: 'Team',
-                        value: 'team'
-                    }],
-                    awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " +
-                        "to the credential. Choosing a team shares the credential with all team members.</p>",
-                    dataTitle: 'Owner',
-                    dataPlacement: 'right',
-                    dataContainer: "body"
-                },
-                user: {
-                    label: 'User that owns this credential',
+                organization: {
+                    addRequired: false,
+                    editRequired: false,
+                    ngShow: 'canShareCredential',
+                    label: 'Organization',
                     type: 'lookup',
-                    sourceModel: 'user',
-                    sourceField: 'username',
-                    ngClick: 'lookUpUser()',
-                    ngShow: "owner == 'user'",
-                    awRequiredWhen: {
-                        variable: "user_required",
-                        init: "false"
-                    }
-                },
-                team: {
-                    label: 'Team that owns this credential',
-                    type: 'lookup',
-                    sourceModel: 'team',
+                    sourceModel: 'organization',
                     sourceField: 'name',
-                    ngClick: 'lookUpTeam()',
-                    ngShow: "owner == 'team'",
-                    awRequiredWhen: {
-                        variable: "team_required",
-                        init: "false"
-                    }
+                    ngClick: 'lookUpOrganization()',
+                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  organization admins and system administrators can assign an organization so that roles can be assigned to users and teams in that organization.</p>",
+                    dataTitle: 'Required ',
+                    dataPlacement: 'bottom',
+                    dataContainer: "body"
                 },
                 kind: {
                     label: 'Type',

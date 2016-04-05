@@ -193,8 +193,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
-         function (Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
+.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
+         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -204,20 +204,14 @@ angular.module('CredentialsHelper', ['Utilities'])
                  for (fld in form.fields) {
                      if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
                          fld !== 'ssh_password') {
-                         if (scope[fld] === null) {
+                         if (fld === "organization" && !scope[fld]) {
+                             data["user"] = $rootScope.current_user.id;
+                         } else if (scope[fld] === null) {
                              data[fld] = "";
                          } else {
                              data[fld] = scope[fld];
                          }
                      }
-                 }
-
-                 if (!Empty(scope.team)) {
-                     data.team = scope.team;
-                     data.user = "";
-                 } else {
-                     data.user = scope.user;
-                     data.team = "";
                  }
 
                  data.kind = scope.kind.value;
@@ -247,65 +241,59 @@ angular.module('CredentialsHelper', ['Utilities'])
                          data.username = scope.subscription_id;
                  }
 
-                 if (Empty(data.team) && Empty(data.user)) {
-                     Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' +
-                           'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');
+                 Wait('start');
+                 if (mode === 'add') {
+                     url = GetBasePath("credentials");
+                     Rest.setUrl(url);
+                     Rest.post(data)
+                     .success(function (data) {
+                         scope.addedItem = data.id;
+
+                         Refresh({
+                             scope: scope,
+                             set: 'credentials',
+                             iterator: 'credential',
+                             url: url
+                         });
+
+                         Wait('stop');
+                         var base = $location.path().replace(/^\//, '').split('/')[0];
+                             if (base === 'credentials') {
+                             ReturnToCaller();
+                         }
+                         else {
+                             ReturnToCaller(1);
+                         }
+                     })
+                     .error(function (data, status) {
+                         Wait('stop');
+                         ProcessErrors(scope, data, status, form, {
+                             hdr: 'Error!',
+                             msg: 'Failed to create new Credential. POST status: ' + status
+                         });
+                     });
                  } else {
-                     Wait('start');
-                     if (mode === 'add') {
-                         url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' :
-                             GetBasePath('users') + data.user + '/credentials/';
-                         Rest.setUrl(url);
-                         Rest.post(data)
-                         .success(function (data) {
-                             scope.addedItem = data.id;
-
-                             Refresh({
-                                 scope: scope,
-                                 set: 'credentials',
-                                 iterator: 'credential',
-                                 url: url
-                             });
-
-                             Wait('stop');
-                             var base = $location.path().replace(/^\//, '').split('/')[0];
-                                 if (base === 'credentials') {
-                                 ReturnToCaller();
-                             }
-                             else {
-                                 ReturnToCaller(1);
-                             }
-                         })
-                         .error(function (data, status) {
-                             Wait('stop');
-                             ProcessErrors(scope, data, status, form, {
-                                 hdr: 'Error!',
-                                 msg: 'Failed to create new Credential. POST status: ' + status
-                             });
+                     url = GetBasePath('credentials') + scope.id + '/';
+                     Rest.setUrl(url);
+                     Rest.put(data)
+                     .success(function () {
+                         Wait('stop');
+                         var base = $location.path().replace(/^\//, '').split('/')[0];
+                             if (base === 'credentials') {
+                             ReturnToCaller();
+                         }
+                         else {
+                             ReturnToCaller(1);
+                         }
+                     })
+                     .error(function (data, status) {
+                         Wait('stop');
+                         ProcessErrors(scope, data, status, form, {
+                             hdr: 'Error!',
+                             msg: 'Failed to update Credential. PUT status: ' + status
                          });
-                     } else {
-                         url = GetBasePath('credentials') + scope.id + '/';
-                         Rest.setUrl(url);
-                         Rest.put(data)
-                         .success(function () {
-                             Wait('stop');
-                             var base = $location.path().replace(/^\//, '').split('/')[0];
-                                 if (base === 'credentials') {
-                                 ReturnToCaller();
-                             }
-                             else {
-                                 ReturnToCaller(1);
-                             }
-                         })
-                         .error(function (data, status) {
-                             Wait('stop');
-                             ProcessErrors(scope, data, status, form, {
-                                 hdr: 'Error!',
-                                 msg: 'Failed to update Credential. PUT status: ' + status
-                             });
-                         });
-                     }
-                 }
+                     });
+                }
              };
          }
 ]);

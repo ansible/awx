@@ -132,7 +132,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
-    LookUpInit, UserList, TeamList, GetBasePath, GetChoices, Empty, KindChange,
+    LookUpInit, OrganizationList, GetBasePath, GetChoices, Empty, KindChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
 
     ClearScope();
@@ -173,22 +173,32 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         multiple: false
     });
 
-    LookUpInit({
-        scope: $scope,
-        form: form,
-        current_item: (!Empty($stateParams.user_id)) ? $stateParams.user_id : null,
-        list: UserList,
-        field: 'user',
-        input_type: 'radio',
-        autopopulateLookup: false
-    });
+    $scope.canShareCredential = false;
 
+    if ($rootScope.current_user.is_superuser) {
+        $scope.canShareCredential = true;
+    } else {
+        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+        Rest.get()
+            .success(function(data) {
+                $scope.canShareCredential = (data.count) ? true : false;
+            }).error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+            });
+    }
+
+
+    var orgUrl = ($rootScope.current_user.is_superuser) ?
+        GetBasePath("organizations") :
+        $rootScope.current_user.url + "admin_of_organizations?";
+
+    // Create LookUpInit for organizations
     LookUpInit({
         scope: $scope,
+        url: orgUrl,
         form: form,
-        current_item: (!Empty($stateParams.team_id)) ? $stateParams.team_id : null,
-        list: TeamList,
-        field: 'team',
+        list: OrganizationList,
+        field: 'organization',
         input_type: 'radio',
         autopopulateLookup: false
     });
@@ -251,11 +261,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         }
     };
 
-    // Handle Owner change
-    $scope.ownerChange = function () {
-        OwnerChange({ scope: $scope });
-    };
-
     $scope.formCancel = function () {
         $state.transitionTo('credentials');
     };
@@ -305,7 +310,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
-    'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList',
+    'SearchInit', 'PaginateInit', 'LookUpInit', 'OrganizationList',
     'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
     'FormSave', '$state', 'CreateSelect2'
 ];
@@ -314,7 +319,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
-    GetBasePath, GetChoices, KindChange, UserList, TeamList, LookUpInit, Empty,
+    GetBasePath, GetChoices, KindChange, OrganizationList, LookUpInit, Empty,
     OwnerChange, FormSave, Wait, $state, CreateSelect2) {
 
     ClearScope();
@@ -329,6 +334,20 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
+
+    $scope.canShareCredential = false;
+
+    if ($rootScope.current_user.is_superuser) {
+        $scope.canShareCredential = true;
+    } else {
+        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+        Rest.get()
+            .success(function(data) {
+                $scope.canShareCredential = (data.count) ? true : false;
+            }).error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+            });
+    }
 
     function setAskCheckboxes() {
         var fld, i;
@@ -359,22 +378,20 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         $scope.removeCredentialLoaded();
     }
     $scope.removeCredentialLoaded = $scope.$on('credentialLoaded', function () {
-        LookUpInit({
-            scope: $scope,
-            form: form,
-            current_item: (!Empty($scope.user_id)) ? $scope.user_id : null,
-            list: UserList,
-            field: 'user',
-            input_type: 'radio'
-        });
+        var orgUrl = ($rootScope.current_user.is_superuser) ?
+            GetBasePath("organizations") :
+            $rootScope.current_user.url + "admin_of_organizations?";
 
+        // create LookUpInit for organizations
         LookUpInit({
             scope: $scope,
+            url: orgUrl,
             form: form,
-            current_item: (!Empty($scope.team_id)) ? $scope.team_id : null,
-            list: TeamList,
+            current_item: $scope.organization,
+            list: OrganizationList,
+            field: 'organization',
             input_type: 'radio',
-            field: 'team'
+            autopopulateLookup: false
         });
 
         setAskCheckboxes();
@@ -630,6 +647,6 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-    'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange',
+    'KindChange', 'OrganizationList', 'LookUpInit', 'Empty', 'OwnerChange',
     'FormSave', 'Wait', '$state', 'CreateSelect2'
 ];
