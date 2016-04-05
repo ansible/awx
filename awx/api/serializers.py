@@ -2121,6 +2121,11 @@ class JobLaunchSerializer(BaseSerializer):
             'credential': {
                 'write_only': True,
             },
+            'limit': {'write_only': True},
+            'job_tags': {'write_only': True},
+            'skip_tags': {'write_only': True},
+            'job_type': {'write_only': True},
+            'inventory': {'write_only': True},
         }
 
     def get_credential_needed_to_start(self, obj):

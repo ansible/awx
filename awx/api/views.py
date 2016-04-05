@@ -2116,59 +2116,9 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             'credential': serializer.instance.credential.pk,
         }
 
-        # -- following code will be moved to JobTemplate model --
-        # Sort the runtime fields allowed and disallowed by job template
-        ignored_fields = {}
-        if 'extra_vars' in request.data:
-            kv['extra_vars'] = {}
-            ignored_fields['extra_vars'] = {}
-            if obj.ask_variables_on_launch:
-                # Accept all extra_vars if the flag is set
-                kv['extra_vars'] = request.data['extra_vars']
-            else:
-                if obj.survey_enabled:
-                    # Accept vars defined in the survey and no others
-                    survey_vars = [question['variable'] for question in obj.survey_spec['spec']]
-                    for key in request.data['extra_vars']:
-                        if key in survey_vars:
-                            kv['extra_vars'][key] = request.data['extra_vars'][key]
-                        else:
-                            ignored_fields['extra_vars'][key] = request.data['extra_vars'][key]
-                else:
-                    # No survey & prompt flag is false - ignore all
-                    ignored_fields['extra_vars'] = request.data['extra_vars']
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(user=self.request.user, **request.data)
 
-        if 'limit' in request.data:
-            if obj.ask_limit_on_launch:
-                kv['limit'] = request.data['limit']
-            else:
-                ignored_fields['limit'] = request.data['limit']
-
-        if 'job_tags' or 'skip_tags' in request.data:
-            if obj.ask_tags_on_launch:
-                if 'job_tags' in request.data:
-                    kv['job_tags'] = request.data['job_tags']
-                if 'skip_tags' in request.data:
-                    kv['skip_tags'] = request.data['skip_tags']
-            else:
-                if 'job_tags' in request.data:
-                    ignored_fields['job_tags'] = request.data['job_tags']
-                if 'skip_tags' in request.data:
-                    ignored_fields['skip_tags'] = request.data['skip_tags']
-
-        if 'job_type' in request.data:
-            if obj.ask_job_type_on_launch:
-                kv['job_type'] = request.data['job_type']
-            else:
-                ignored_fields['job_type'] = request.data['job_type']
-
-        if 'inventory' in request.data:
-            inv_id = request.data['inventory']
-            if obj.ask_inventory_on_launch and Inventory.objects.get(pk=inv_id).accessible_by(self.request.user, {'write': True}):
-                kv['inventory'] = inv_id
-            else:
-                ignored_fields['inventory'] = inv_id
-
+        kv.update(prompted_fields)
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)

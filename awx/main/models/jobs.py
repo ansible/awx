@@ -378,6 +378,65 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
 
+    def _accept_or_ignore_job_kwargs(self, user, **kwargs):
+        # Sort the runtime fields allowed and disallowed by job template
+        ignored_fields = {}
+        prompted_fields = {}
+        if 'extra_vars' in kwargs:
+            prompted_fields['extra_vars'] = {}
+            ignored_fields['extra_vars'] = {}
+            if self.ask_variables_on_launch:
+                # Accept all extra_vars if the flag is set
+                prompted_fields['extra_vars'] = kwargs['extra_vars']
+            else:
+                if self.survey_enabled:
+                    # Accept vars defined in the survey and no others
+                    survey_vars = [question['variable'] for question in self.survey_spec['spec']]
+                    for key in kwargs['extra_vars']:
+                        if key in survey_vars:
+                            prompted_fields['extra_vars'][key] = kwargs['extra_vars'][key]
+                        else:
+                            ignored_fields['extra_vars'][key] = kwargs['extra_vars'][key]
+                else:
+                    # No survey & prompt flag is false - ignore all
+                    ignored_fields['extra_vars'] = kwargs['extra_vars']
+
+        if 'limit' in kwargs:
+            if self.ask_limit_on_launch:
+                prompted_fields['limit'] = kwargs['limit']
+            else:
+                ignored_fields['limit'] = kwargs['limit']
+
+        if 'job_tags' or 'skip_tags' in kwargs:
+            if self.ask_tags_on_launch:
+                if 'job_tags' in kwargs:
+                    prompted_fields['job_tags'] = kwargs['job_tags']
+                if 'skip_tags' in kwargs:
+                    prompted_fields['skip_tags'] = kwargs['skip_tags']
+            else:
+                if 'job_tags' in kwargs:
+                    ignored_fields['job_tags'] = kwargs['job_tags']
+                if 'skip_tags' in kwargs:
+                    ignored_fields['skip_tags'] = kwargs['skip_tags']
+
+        if 'job_type' in kwargs:
+            if self.ask_job_type_on_launch:
+                prompted_fields['job_type'] = kwargs['job_type']
+            else:
+                ignored_fields['job_type'] = kwargs['job_type']
+
+        if 'inventory' in kwargs:
+            inv_id = kwargs['inventory']
+            if self.ask_inventory_on_launch:
+                from awx.main.models.inventory import Inventory
+                if Inventory.objects.get(pk=inv_id).accessible_by(user, {'write': True}):
+                    prompted_fields['inventory'] = inv_id
+                else:
+                    ignored_fields['inventory'] = inv_id
+            else:
+                ignored_fields['inventory'] = inv_id
+        return prompted_fields, ignored_fields
+
     @property
     def cache_timeout_blocked(self):
         if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(tower_settings, 'SCHEDULE_MAX_JOBS', 10):
