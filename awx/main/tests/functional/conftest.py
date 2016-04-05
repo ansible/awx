@@ -151,6 +151,18 @@ def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
 
 @pytest.fixture
+def organization_factory(instance):
+    def factory(name):
+        try:
+            org = Organization.objects.get(name=name)
+        except Organization.DoesNotExist:
+            org = Organization.objects.create(name=name,
+                                              description="description for " + name,
+                                              )
+        return org
+    return factory
+
+@pytest.fixture
 def credential():
     return Credential.objects.create(kind='aws', name='test-cred')
 

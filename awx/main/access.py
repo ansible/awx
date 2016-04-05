@@ -1204,6 +1204,7 @@ class LabelAccess(BaseAccess):
     def can_add(self, data):
         if self.user.is_superuser:
             return True
+
         if not data or '_method' in data:  # So the browseable API will work?
             return True
 
@@ -1214,6 +1215,10 @@ class LabelAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
+
+        if self.can_add(data) is False:
+            return False
+
         return obj.organization and obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_delete(self, obj):
