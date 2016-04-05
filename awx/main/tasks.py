@@ -46,6 +46,7 @@ from django.contrib.auth.models import User
 from awx.lib.metrics import task_timer
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.models.label import Label
 from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
 from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
@@ -108,6 +109,13 @@ def run_administrative_checks(self):
                   "Ansible Tower license will expire soon",
                   tower_admin_emails,
                   fail_silently=True)
+
+@task(bind=True)
+def run_label_cleanup(self):
+    qs = Label.get_orphaned_labels()
+    labels_count = qs.count()
+    qs.delete()
+    return labels_count
 
 @task(bind=True)
 def tower_periodic_scheduler(self):

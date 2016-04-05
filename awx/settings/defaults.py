@@ -345,6 +345,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.run_administrative_checks',
         'schedule': timedelta(days=30)
     },
+    'label_cleanup': {
+        'task': 'awx.main.tasks.run_label_cleanup',
+        'schedule': timedelta(days=7)
+    },
 }
 
 # Social Auth configuration.
