@@ -372,7 +372,7 @@ class BaseTask(Task):
         '''
         Create a temporary files containing the private data.
         Returns a dictionary with keys from build_private_data
-        (i.e. 'credential', 'cloud_credential') and values the file path.
+        (i.e. 'credential', 'cloud_credential', 'network_credential') and values the file path.
         '''
         private_data = self.build_private_data(instance, **kwargs)
         private_data_files = {}
@@ -694,8 +694,9 @@ class RunJob(BaseTask):
         Returns a dict of the form
         dict['credential'] = <credential_decrypted_ssh_key_data>
         dict['cloud_credential'] = <cloud_credential_decrypted_ssh_key_data>
+        dict['network_credential'] = <network_credential_decrypted_ssh_key_data>
         '''
-        job_credentials = ['credential', 'cloud_credential']
+        job_credentials = ['credential', 'cloud_credential', 'network_credential']
         private_data = {}
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
@@ -800,6 +801,16 @@ class RunJob(BaseTask):
             env['VMWARE_HOST'] = cloud_cred.host
         elif cloud_cred and cloud_cred.kind == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+
+        network_cred = job.network_credential
+        if network_cred:
+            env['ANSIBLE_NET_USERNAME'] = network_cred.username
+            env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
+
+            authorize = network_cred.become_method == 'sudo'
+            env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
+            if authorize:
+                env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] = decrypt_field(network_cred, 'become_password')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:

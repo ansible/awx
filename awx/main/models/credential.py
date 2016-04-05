@@ -33,6 +33,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     KIND_CHOICES = [
         ('ssh', _('Machine')),
+        ('net', _('Network')),
         ('scm', _('Source Control')),
         ('aws', _('Amazon Web Services')),
         ('rax', _('Rackspace')),

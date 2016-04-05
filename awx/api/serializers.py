@@ -77,6 +77,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
+    'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
     'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
@@ -1551,7 +1552,7 @@ class JobOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
-                  'credential', 'cloud_credential', 'forks', 'limit',
+                  'credential', 'cloud_credential', 'network_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
                   'skip_tags', 'start_at_task',)
 
@@ -1567,6 +1568,9 @@ class JobOptionsSerializer(BaseSerializer):
         if obj.cloud_credential:
             res['cloud_credential'] = reverse('api:credential_detail',
                                               args=(obj.cloud_credential.pk,))
+        if obj.network_credential:
+            res['network_credential'] = reverse('api:credential_detail',
+                                                args=(obj.network_credential.pk,))
         return res
 
     def _summary_field_labels(self, obj):
@@ -1591,6 +1595,8 @@ class JobOptionsSerializer(BaseSerializer):
             ret['credential'] = None
         if 'cloud_credential' in ret and not obj.cloud_credential:
             ret['cloud_credential'] = None
+        if 'network_credential' in ret and not obj.network_credential:
+            ret['network_credential'] = None
         return ret
 
     def validate(self, attrs):
@@ -1718,6 +1724,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 data.setdefault('credential', job_template.credential.pk)
             if job_template.cloud_credential:
                 data.setdefault('cloud_credential', job_template.cloud_credential.pk)
+            if job_template.network_credential:
+                data.setdefault('network_credential', job_template.network_credential.pk)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
