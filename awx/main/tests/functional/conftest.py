@@ -159,6 +159,10 @@ def inventory(organization):
     return organization.inventories.create(name="test-inv")
 
 @pytest.fixture
+def label(organization):
+    return organization.labels.create(name="test-label", description="test-label-desc")
+
+@pytest.fixture
 def role():
     return Role.objects.create(name='role')
 
@@ -225,9 +229,6 @@ def hosts(group):
             hosts.append(host)
         return hosts
     return rf
-
-
-
 
 @pytest.fixture
 def permissions():
