@@ -38,6 +38,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ('rax', _('Rackspace')),
         ('vmware', _('VMware vCenter')),
         ('foreman', _('Satellite 6')),
+        ('cloudforms', _('CloudForms')),
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure')),
         ('openstack', _('OpenStack')),

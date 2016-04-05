@@ -1239,6 +1239,16 @@ class RunInventoryUpdate(BaseTask):
             cp.set(section, 'path', '/tmp')
             cp.set(section, 'max_age', '0')
 
+        elif inventory_update.source == 'cloudforms':
+            section = 'cloudforms'
+            cp.add_section(section)
+
+            credential = inventory_update.credential
+            if credential:
+                cp.set(section, 'hostname', credential.host)
+                cp.set(section, 'username', credential.username)
+                cp.set(section, 'password', decrypt_field(credential, 'password'))
+
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -1321,6 +1331,8 @@ class RunInventoryUpdate(BaseTask):
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'foreman':
             env['FOREMAN_INI_PATH'] = cloud_credential
+        elif inventory_update.source == 'cloudforms':
+            env['CLOUDFORMS_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass

@@ -733,6 +733,7 @@ class InventorySourceOptions(BaseModel):
         ('azure', _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
         ('foreman', _('Satellite 6')),
+        ('cloudforms', _('CloudForms')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
     ]
