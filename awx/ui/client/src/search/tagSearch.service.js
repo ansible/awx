@@ -93,18 +93,19 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
                                             value: i[0],
                                             label: i[1]
                                         };
-                        });
-
-                    return option;
+                                    });
+                        return option;
+                    });
+                    Wait("stop");
+                    defer.resolve(joinOptions());
                 })
                 .error(function (data, status) {
+                    Wait("stop");
+                    defer.reject("options request failed");
                     ProcessErrors(null, data, status, null, {
                         hdr: 'Error!',
                         msg: 'Getting type options failed'});
                 });
-                Wait("stop");
-                defer.resolve(joinOptions());
-            });
         } else {
             Wait("stop");
             defer.resolve(joinOptions());
