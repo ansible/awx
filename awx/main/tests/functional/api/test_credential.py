@@ -124,6 +124,22 @@ def test_create_org_credential_as_admin(post, organization, org_admin):
     assert response.status_code == 201
 
 @pytest.mark.django_db
+def test_credential_detail(post, get, organization, org_admin):
+    response = post(reverse('api:credential_list'), {
+        'name': 'Some name',
+        'username': 'someusername',
+        'organization': organization.id,
+    }, org_admin)
+    assert response.status_code == 201
+    response = get(reverse('api:credential_detail', args=(response.data['id'],)), org_admin)
+    assert response.status_code == 200
+    summary_fields = response.data['summary_fields']
+    assert 'organization' in summary_fields
+    assert summary_fields['organization']['id'] == organization.id
+    related_fields = response.data['related']
+    assert 'organization' in related_fields
+
+@pytest.mark.django_db
 def test_list_created_org_credentials(post, get, organization, org_admin, org_member):
     response = post(reverse('api:credential_list'), {
         'name': 'Some name',

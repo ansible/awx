@@ -1526,7 +1526,25 @@ class CredentialSerializer(BaseSerializer):
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
+
+        qs = Organization.objects.filter(admin_role__children=obj.owner_role)
+        if qs.count() > 0:
+            res.update(dict(organization=qs[0].get_absolute_url()))
         return res
+
+    def get_summary_fields(self, obj):
+        summary_dict = super(CredentialSerializer, self).get_summary_fields(obj)
+
+        qs = Organization.objects.filter(admin_role__children=obj.owner_role)
+        if qs.count() > 0:
+            org = qs[0]
+            summary_dict['organization'] = {
+                'id': org.id,
+                'name': org.name,
+                'description': org.description,
+            }
+
+        return summary_dict
 
 
 class JobOptionsSerializer(BaseSerializer):
