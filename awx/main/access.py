@@ -255,6 +255,8 @@ class UserAccess(BaseAccess):
         if obj.is_superuser and super_users.count() == 1:
             # cannot delete the last active superuser
             return False
+        if self.user.is_superuser:
+            return True
         return obj.accessible_by(self.user, {'delete': True})
 
 
