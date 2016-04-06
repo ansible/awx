@@ -392,10 +392,9 @@ class BaseTask(Task):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
-                    os.mkfifo(path, 0600)
-                    thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
+                    self.open_fifo_write(path)
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -404,6 +403,14 @@ class BaseTask(Task):
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
                 private_data_files[name] = path
         return private_data_files
+
+    def open_fifo_write(self, path):
+        '''open_fifo_write opens the fifo named pipe in a new thread.
+        This blocks until the the calls to ssh-agent/ssh-add have read the
+        credential information from the pipe.
+        '''
+        os.mkfifo(path, 0600)
+        thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
 
     def build_passwords(self, instance, **kwargs):
         '''
@@ -435,7 +442,7 @@ class BaseTask(Task):
             env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
             env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
             env['PYTHONPATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "lib/python2.7/site-packages/") + ":"
-        if self.should_use_proot:
+        if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
 
@@ -700,7 +707,6 @@ class RunJob(BaseTask):
         private_data = {}
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
-
         for cred_name in job_credentials:
             credential = getattr(job, cred_name, None)
             if credential:
@@ -949,7 +955,12 @@ class RunJob(BaseTask):
         '''
         If using an SSH key, return the path for use by ssh-agent.
         '''
-        return kwargs.get('private_data_files', {}).get('credential', '')
+        private_data_files = kwargs.get('private_data_files', {})
+        if 'credential' in private_data_files:
+            return private_data_files.get('credential')
+        elif 'network_credential' in private_data_files:
+            return private_data_files.get('network_credential')
+        return ''
 
     def should_use_proot(self, instance, **kwargs):
         '''
