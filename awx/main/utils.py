@@ -284,6 +284,22 @@ def update_scm_url(scm_type, url, username=True, password=True,
     return new_url
 
 
+
+def get_allowed_fields(obj, serializer_mapping):
+    from django.contrib.auth.models import User
+
+    if serializer_mapping is not None and obj.__class__ in serializer_mapping:
+        serializer_actual = serializer_mapping[obj.__class__]()
+        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
+    else:
+        allowed_fields = [x.name for x in obj._meta.fields]
+
+    if isinstance(obj, User):
+        field_blacklist = ['last_login']
+        allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
+
+    return allowed_fields
+
 def model_instance_diff(old, new, serializer_mapping=None):
     """
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
@@ -301,11 +317,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
 
     diff = {}
 
-    if serializer_mapping is not None and new.__class__ in serializer_mapping:
-        serializer_actual = serializer_mapping[new.__class__]()
-        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
-    else:
-        allowed_fields = [x.name for x in new._meta.fields]
+    allowed_fields = get_allowed_fields(new, serializer_mapping)
 
     for field in allowed_fields:
         old_value = getattr(old, field, None)
@@ -334,11 +346,9 @@ def model_to_dict(obj, serializer_mapping=None):
     """
     from awx.main.models.credential import Credential
     attr_d = {}
-    if serializer_mapping is not None and obj.__class__ in serializer_mapping:
-        serializer_actual = serializer_mapping[obj.__class__]()
-        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
-    else:
-        allowed_fields = [x.name for x in obj._meta.fields]
+
+    allowed_fields = get_allowed_fields(obj, serializer_mapping)
+
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
