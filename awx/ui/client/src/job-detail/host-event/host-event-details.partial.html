@@ -1,49 +1,49 @@
 <div class="HostEvent-details--left">
-	<div class="HostEvent-field">
-		<div class="HostEvent-title">EVENT</div>
-		<span class="HostEvent-field--content"></span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">HOST</span>
-		<span class="HostEvent-field--content">
-		<a ui-sref="jobDetail.host-events({hostName: event.host_name})">{{event.host_name || "No result found"}}</a></span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">STATUS</span>
-		<span class="HostEvent-field--content">
-			<a class="HostEvents-status">
-				<i class="fa fa-circle"  ng-class="processEventStatus"></i>
-			</a>
-			{{event.status || "No result found"}}
-		</span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">ID</span>
-		<span class="HostEvent-field--content">{{event.id || "No result found"}}</span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">CREATED</span>
-		<span class="HostEvent-field--content">{{event.created || "No result found"}}</span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">PLAY</span>
-		<span class="HostEvent-field--content">{{event.play || "No result found"}}</span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">TASK</span>
-		<span class="HostEvent-field--content">{{event.task || "No result found"}}</span>
-	</div>
-	<div class="HostEvent-field">
-		<span class="HostEvent-field--label">MODULE</span>
-		<span class="HostEvent-field--content">{{event.event_data.res.invocation.module_name || "No result found"}}</span>
-	</div>
+    <div class="HostEvent-field">
+        <div class="HostEvent-title">EVENT</div>
+        <span class="HostEvent-field--content"></span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">HOST</span>
+        <span class="HostEvent-field--content">
+        <a ui-sref="jobDetail.host-events({hostName: event.host_name})">{{event.host_name || "No result found"}}</a></span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">STATUS</span>
+        <span class="HostEvent-field--content">
+            <a class="HostEvents-status">
+                <i class="fa fa-circle"  ng-class="processEventStatus(event).class"></i>
+            </a>
+            {{processEventStatus(event).status || "No result found"}}
+        </span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">ID</span>
+        <span class="HostEvent-field--content">{{event.id || "No result found"}}</span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">CREATED</span>
+        <span class="HostEvent-field--content">{{event.created || "No result found"}}</span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">PLAY</span>
+        <span class="HostEvent-field--content">{{event.play || "No result found"}}</span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">TASK</span>
+        <span class="HostEvent-field--content">{{event.task || "No result found"}}</span>
+    </div>
+    <div class="HostEvent-field">
+        <span class="HostEvent-field--label">MODULE</span>
+        <span class="HostEvent-field--content">{{event.event_data.res.invocation.module_name || "No result found"}}</span>
+    </div>
 </div>
 <div class="HostEvent-details--right" ng-show="event.event_data.res">
-	<div class="HostEvent-title">RESULTS</div>
-	<!-- discard any objects in the ansible response until we decide to flatten them -->
-	<div class="HostEvent-field" ng-repeat="(key, value) in results = event.event_data.res track by $index" ng-if="processResults(value)">
-		<span class="HostEvent-field--label">{{key}}</span>
-		<span class="HostEvent-field--content">{{value}}</span>
-	</div>
+    <div class="HostEvent-title">RESULTS</div>
+    <!-- discard any objects in the ansible response until we decide to flatten them -->
+    <div class="HostEvent-field" ng-repeat="(key, value) in results = event.event_data.res track by $index" ng-if="processResults(value)">
+        <span class="HostEvent-field--label">{{key}}</span>
+        <span class="HostEvent-field--content">{{value}}</span>
+    </div>
 </div>
 

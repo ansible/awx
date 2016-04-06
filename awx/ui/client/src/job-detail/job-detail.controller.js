@@ -16,7 +16,7 @@ export default
         'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
         'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
-        'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
+        'LoadPlays', 'LoadTasks', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
         'EditSchedule', 'ParseTypeChange', 'JobDetailService',
         function(
@@ -25,7 +25,7 @@ export default
             SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph,
             LoadHostSummary, ReloadHostSummaryList, JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
-            PlaybookRun, LoadPlays, LoadTasks, LoadHosts,
+            PlaybookRun, LoadPlays, LoadTasks,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
             fieldLabels, EditSchedule, ParseTypeChange, JobDetailService
         ) {
@@ -376,64 +376,26 @@ export default
                         var params = {
                             parent: task.id,
                             event__startswith: 'runner',
-                            page_size: scope.hostResultsMaxRows 
                         };
                         JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
+                                console.log(data)
                                 var idx, event, status, status_text, item, msg;
-                                if (data.results.length > 0) {
+                                if (data.results.length > 0) {$
                                     lastEventId =  data.results[0].id;
                                 }
                                 scope.next_host_results = data.next;
                                 for (idx=data.results.length - 1; idx >= 0; idx--) {
                                     event = data.results[idx];
-                                    if (event.event === "runner_on_skipped") {
-                                        status = 'skipped';
-                                    }
-                                    else if (event.event === "runner_on_unreachable") {
-                                        status = 'unreachable';
-                                    }
-                                    else {
-                                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                                    }
-                                    switch(status) {
-                                        case "successful":
-                                            status_text = 'OK';
-                                            break;
-                                        case "changed":
-                                            status_text = "Changed";
-                                            break;
-                                        case "failed":
-                                            status_text = "Failed";
-                                            break;
-                                        case "unreachable":
-                                            status_text = "Unreachable";
-                                            break;
-                                        case "skipped":
-                                            status_text = "Skipped";
-                                    }
+                                    event.status = JobDetailService.processEventStatus(event).status;
+                                    msg = JobDetailService.processEventMsg(event);
+                                    item = JobDetailService.processEventItem(event);
 
-                                    if (event.event_data && event.event_data.res) {
-                                        item = event.event_data.res.item;
-                                        if (typeof item === "object") {
-                                            item = JSON.stringify(item);
-                                        }
-                                    }
-
-                                    msg = '';
-                                    if (event.event_data && event.event_data.res) {
-                                        if (typeof event.event_data.res === 'object') {
-                                            msg = event.event_data.res.msg;
-                                        } else {
-                                            msg = event.event_data.res;
-                                        }
-                                    }
-
-                                    if (event.event !== "runner_on_no_hosts") {
+                                    if (event.event !== "runner_on$_no_hosts") {
                                         task.hostResults[event.id] = {
                                             id: event.id,
-                                            status: status,
-                                            status_text: status_text,
+                                            status: event.status,
+                                            status_text: event.status.toUpperCase(),
                                             host_id: event.host,
                                             task_id: event.parent,
                                             name: event.event_data.host,
@@ -673,7 +635,7 @@ export default
                         scope.$emit('LoadTasks', events_url);
                     });
             });
-
+            
 
             if (scope.removeLoadJob) {
                 scope.removeLoadJob();
@@ -1037,6 +999,16 @@ export default
                     scope.searchTasksEnabled = true;
                 }
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+                    // /api/v1/jobs/15/job_tasks/?event_id=762&task__icontains=create&page_size=200&order=id
+                    var params = {
+                        event_id: scope.selectedPlay,
+                        task__icontains: scope.search_task_name,
+                        page_size: scope.tasksMaxRows,
+
+                    };
+                    if (scope.search_task_status === 'failed'){
+                        params.failed = true;
+                    }
                     LoadTasks({
                         scope: scope
                     });
@@ -1058,8 +1030,20 @@ export default
                     scope.searchHostsEnabled = true;
                 }
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadHosts({
-                        scope: scope
+                    scope.hostResultsLoading = true;
+                    var params = {
+                        parent: scope.selectedTask,
+                        event__startswith: 'runner',
+                        page_size: scope.hostResultsMaxRows,
+                        order: 'host_name,counter',
+                        host_name__icontains: scope.search_host_name                    
+                    }
+                    if (scope.search_host_status === 'failed'){
+                        params.failed = true;
+                    }
+                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                        scope.hostResults = JobDetailService.processHostResults(res.results)
+                        scope.hostResultsLoading = false;
                     });
                 }
             };
@@ -1104,8 +1088,20 @@ export default
             scope.filterHostStatus = function() {
                 scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadHosts({
-                        scope: scope
+                    console.log('filterHostStattus', scope)
+                    var params = {
+                        parent: scope.selectedTask,
+                        event__startswith: 'runner',
+                        page_size: scope.hostResultsMaxRows,
+                        order: 'host_name,counter'                    
+                    }
+                    if (scope.search_host_status === 'failed'){
+                        params.failed = true;
+                    }
+                    scope.hostResultsLoading = true;
+                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                        scope.hostResults = JobDetailService.processHostResults(res.results)
+                        scope.hostResultsLoading = false;
                     });
                 }
             };

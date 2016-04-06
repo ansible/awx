@@ -822,7 +822,6 @@ export default
                 url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
                 url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
                 url += '&page_size=' + scope.tasksMaxRows + '&order=id';
-
                 scope.plays.every(function(p, idx) {
                     if (p.id === scope.selectedPlay) {
                         play = scope.plays[idx];
@@ -931,7 +930,7 @@ export default
     }])
 
     // Call when the selected task needs to change
-    .factory('SelectTask', ['LoadHosts', function(LoadHosts) {
+    .factory('SelectTask', ['LoadHosts', 'JobDetailService', function(LoadHosts, JobDetailService) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -946,11 +945,16 @@ export default
                     scope.tasks[idx].taskActiveClass = '';
                 }
             });
-
-            LoadHosts({
-                scope: scope,
-                callback: callback,
-                clear: true
+            // /api/v1/jobs/16/job_events/?parent=832&event__startswith=runner&page_size=200&order=host_name,counte
+            var params = {
+                parent: scope.selectedTask,
+                event__startswith: 'runner',
+                page_size: scope.hostResultsMaxRows,
+                order: 'host_name,counter',  
+            };
+            JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                scope.hostResults = JobDetailService.processHostResults(res.results)
+                scope.hostResultsLoading = false;
             });
         };
     }])
@@ -960,8 +964,7 @@ export default
         return function(params) {
             var scope = params.scope,
                 callback = params.callback,
-                url;
-
+                url;    
             scope.hostResults = [];
 
             if (scope.selectedTask) {
@@ -970,6 +973,7 @@ export default
                 url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
                 url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
                 url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
+                console.log(url)
                 scope.hostResultsLoading = true;
                 Rest.setUrl(url);
                 Rest.get()
@@ -1020,7 +1024,6 @@ export default
                                     msg = event.event_data.res;
                                 }
                             }
-
                             if (event.event !== "runner_on_no_hosts") {
                                 scope.hostResults.push({
                                     id: event.id,
@@ -1037,7 +1040,6 @@ export default
                         });
 
                         scope.hostResultsLoading = false;
-
                         if (callback) {
                             scope.$emit(callback);
                         }
