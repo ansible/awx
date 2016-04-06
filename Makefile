@@ -305,11 +305,7 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	if [ "$(VIRTUAL_ENV)" ]; then \
-	    tower-manage register_instance --primary --hostname=127.0.0.1; \
-	else \
-	    sudo tower-manage register_instance --primary --hostname=127.0.0.1; \
-	fi
+	tower-manage register_instance --primary --hostname=127.0.0.1; \
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -863,7 +859,6 @@ docker-compose-test:
 MACHINE?=default
 docker-clean:
 	rm -f awx/lib/.deps_built
-	rm -rf awx/lib/site-packages
 	eval $$(docker-machine env $(MACHINE))
 	docker stop $$(docker ps -a -q)
 	-docker rm $$(docker ps -f name=tools_tower -a -q)

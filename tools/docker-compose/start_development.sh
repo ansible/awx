@@ -22,14 +22,13 @@ fi
 cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
 
 # Check if we need to build dependencies
-if [ -f "awx/lib/.deps_built" ]; then
-    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
-else
-    make requirements_dev
-    touch awx/lib/.deps_built
-fi
+#if [ -f "awx/lib/.deps_built" ]; then
+#    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
+#else
+make requirements_dev
+#    touch awx/lib/.deps_built
+#fi
 
-rm -rf /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 
 # Tower bootstrapping
