@@ -1485,17 +1485,47 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-
             return { 'role': role_dict, 'permissions': get_role_permissions_on_resource(obj, role)}
 
+        def format_team_role_perm(team_role, all_permissive_role_ids):
+            role = team_role.children.filter(id__in=all_permissive_role_ids)[0]
+
+            role_dict = {
+                'id': role.id,
+                'name': role.name,
+                'description': role.description,
+                'team_id': team_role.object_id,
+                'team_name': team_role.content_object.name
+            }
+            try:
+                role_dict['resource_name'] = role.content_object.name
+                role_dict['resource_type'] = role.content_type.name
+                role_dict['related'] = reverse_gfk(role.content_object)
+            except:
+                pass
+            return { 'role': role_dict, 'permissions': get_role_permissions_on_resource(obj, team_role)}
+
+        team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
         direct_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__id')
         direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
         ret['summary_fields']['direct_access'] = [format_role_perm(r) for r in direct_access_roles]
 
         all_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__ancestors__id')
-        indirect_access_roles = user.roles.filter(id__in=all_permissive_role_ids).exclude(id__in=direct_permissive_role_ids).all()
-        ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles]
+
+        team_roles = Role.objects \
+                         .filter(content_type=team_content_type,
+                                 members=user,
+                                 children__in=all_permissive_role_ids)
+
+        indirect_access_roles = user.roles \
+                                    .filter(id__in=all_permissive_role_ids) \
+                                    .exclude(id__in=direct_permissive_role_ids) \
+                                    .exclude(id__in=team_roles)
+        ret['summary_fields']['indirect_access'] \
+            = [format_role_perm(r) for r in indirect_access_roles] \
+            + [format_team_role_perm(r, all_permissive_role_ids) for r in team_roles]
+
         return ret
 
 
