@@ -89,7 +89,7 @@ function controller($rootScope,
                             leftRange,
                             rightRange)
                 .then(function(responses) {
-                    var data = _.pluck(responses, 'fact');
+                    var data = _.pluck(responses, 'facts');
                     if (_.isEmpty(data[0]) && _.isEmpty(data[1])) {
                         return _.reject({
                                 name: 'NoScanData',
@@ -253,7 +253,6 @@ function controller($rootScope,
                         $scope.factData =  info.factData;
                         $scope.isNestedDisplay = info.isNestedDisplay;
                     }
-
                     return info;
 
                 }).catch(function(error) {

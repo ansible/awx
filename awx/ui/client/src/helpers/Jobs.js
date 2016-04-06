@@ -366,12 +366,8 @@ export default
                 mode: 'edit',
                 id: id,
                 scope: scope,
-<<<<<<< HEAD
-                showSearch: false
-=======
                 showSearch: true,
                 title: false
->>>>>>> tagSearchUI
             });
 
             SearchInit({

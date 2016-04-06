@@ -1,4 +1,5 @@
 /** @define FactDataTable */
+@import "../../shared/branding/colors.default.less";
 
 .FactDataTable {
     &-row, &-headingRow, &-groupHeadingRow {
@@ -6,14 +7,18 @@
     }
 
     &-row {
-      margin-bottom: 0.5em;
+      padding: .5em 0;
       align-items: center;
       transition: background-color 100ms, border-color 100ms;
-      // max-height: 36px;
       border: solid 1px #fff;
+
+      &:nth-child(even) {
+          background-color: @default-no-items-bord;
+      }
+
       &:hover {
-        background-color: #ebebeb;
-        border-color: #adadad;
+        background-color: @default-list-header-bg;
+        border-color: @default-border;
       }
 
       &--flexible {
@@ -23,15 +28,39 @@
 
     }
 
+    &-repeat {
+        &:nth-child(even) {
+            background-color: @default-no-items-bord;
+        }
+    }
+
     &-headingRow {
-      border-bottom: 1px solid #adadad;
-      margin-bottom: 1.5em;
+      background-color: @default-icon-hov;
+      border: none;
+      padding: 8px 12px;
+
+      .FactDataTable-column.FactDataTableHeading:first-child {
+          padding-left: 0;
+      }
+    }
+
+    &-groupHeadingRow {
+        background-color: @default-icon-hov;
+        padding: 1em 12px;
+        color: @default-as-detail-txt;
+        font-size: 14px;
+        text-transform: uppercase;
     }
 
     &-column {
         padding: 8px;
         flex: 1 0 33%;
         align-self: flex-start;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        padding: 8px;
+        word-wrap: break-word;
         &--offsetLeft {
             margin-left: 33%;
         }
@@ -46,6 +75,74 @@
         margin-bottom: 16px;
         &:last-child {
             margin-bottom: inherit;
+        }
+    }
+}
+
+.FactDataError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &-message {
+        font-size: 1.5em;
+        line-height: 1.5;
+        text-align: center;
+        width: 75%;
+        margin-bottom: 2em;
+    }
+
+    &-note {
+        &--full {
+            font-size: 22px;
+        }
+    }
+}
+
+.FactDataGroup {
+    &-headings {
+        &:hover {
+            background-color: @default-bg;
+            border-color: transparent;
+        }
+    }
+    &-header {
+        padding: 0;
+    }
+}
+
+.FactDataTableHeading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    font-size: 14px;
+    color: @default-as-detail-txt;
+    text-transform: uppercase;
+
+    &-host {
+        margin: 0;
+    }
+    &-date {
+        flex-basis: auto;
+    }
+
+    // Override some global styling on h3 tags
+    h3 {
+        margin: 1em initial;
+    }
+}
+
+.FactDatum {
+    &--divergent {
+        //margin-bottom: 0.5rem;
+        background-color: @default-err;
+        border: none;
+        color: #FFFFFF;
+
+        &:hover {
+            background-color: @default-err;
+            border: none;
         }
     }
 }
