@@ -2097,11 +2097,11 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         if 'credential' not in request.data and 'credential_id' in request.data:
             request.data['credential'] = request.data['credential_id']
+        if 'inventory' not in request.data and 'inventory_id' in request.data:
+            request.data['inventory'] = request.data['inventory_id']
 
         passwords = {}
         serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
@@ -2116,12 +2116,22 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             'credential': serializer.instance.credential.pk,
         }
 
-        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(user=self.request.user, **request.data)
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
+
+        if 'inventory' in prompted_fields:
+            new_inventory = Inventory.objects.get(pk=prompted_fields['inventory'])
+            if not request.user.can_access(Inventory, 'read', new_inventory):
+                raise PermissionDenied()
 
         kv.update(prompted_fields)
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
+
+        if not request.user.can_access(Job, 'start', new_job):
+            new_job.delete()
+            raise PermissionDenied()
+
         result = new_job.signal_start(**kv)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)

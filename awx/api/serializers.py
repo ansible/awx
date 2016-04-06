@@ -2109,7 +2109,8 @@ class JobLaunchSerializer(BaseSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
+        fields = ('can_start_without_user_input', 'passwords_needed_to_start',
+                  'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
                   'ask_variables_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
                   'ask_inventory_on_launch', 'ask_limit_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
@@ -2121,11 +2122,6 @@ class JobLaunchSerializer(BaseSerializer):
             'credential': {
                 'write_only': True,
             },
-            'limit': {'write_only': True},
-            'job_tags': {'write_only': True},
-            'skip_tags': {'write_only': True},
-            'job_type': {'write_only': True},
-            'inventory': {'write_only': True},
         }
 
     def get_credential_needed_to_start(self, obj):
@@ -2182,8 +2178,18 @@ class JobLaunchSerializer(BaseSerializer):
             raise serializers.ValidationError(errors)
 
         JT_extra_vars = obj.extra_vars
+        JT_limit = obj.limit
+        JT_job_type = obj.job_type
+        JT_job_tags = obj.job_tags
+        JT_skip_tags = obj.skip_tags
+        JT_inventory = obj.inventory
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = JT_extra_vars
+        obj.limit = JT_limit
+        obj.job_type = JT_job_type
+        obj.skip_tags = JT_skip_tags
+        obj.job_tags = JT_job_tags
+        obj.inventory = JT_inventory
         return attrs
 
 class NotifierSerializer(BaseSerializer):

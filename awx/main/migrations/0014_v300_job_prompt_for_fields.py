@@ -8,7 +8,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0012_v300_create_labels'),
+        ('main', '0013_v300_label_changes'),
     ]
 
     operations = [

@@ -378,10 +378,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
 
-    def _accept_or_ignore_job_kwargs(self, user, **kwargs):
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
         # Sort the runtime fields allowed and disallowed by job template
         ignored_fields = {}
         prompted_fields = {}
+
         if 'extra_vars' in kwargs:
             prompted_fields['extra_vars'] = {}
             ignored_fields['extra_vars'] = {}
@@ -401,40 +402,26 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                     # No survey & prompt flag is false - ignore all
                     ignored_fields['extra_vars'] = kwargs['extra_vars']
 
-        if 'limit' in kwargs:
-            if self.ask_limit_on_launch:
-                prompted_fields['limit'] = kwargs['limit']
-            else:
-                ignored_fields['limit'] = kwargs['limit']
+        # Fields which all follow the same pattern
+        ask_for_field_dict = dict(
+            limit=self.ask_limit_on_launch,
+            job_tags=self.ask_tags_on_launch,
+            skip_tags=self.ask_tags_on_launch,
+            job_type=self.ask_job_type_on_launch,
+            inventory=self.ask_inventory_on_launch
+        )
 
-        if 'job_tags' or 'skip_tags' in kwargs:
-            if self.ask_tags_on_launch:
-                if 'job_tags' in kwargs:
-                    prompted_fields['job_tags'] = kwargs['job_tags']
-                if 'skip_tags' in kwargs:
-                    prompted_fields['skip_tags'] = kwargs['skip_tags']
-            else:
-                if 'job_tags' in kwargs:
-                    ignored_fields['job_tags'] = kwargs['job_tags']
-                if 'skip_tags' in kwargs:
-                    ignored_fields['skip_tags'] = kwargs['skip_tags']
-
-        if 'job_type' in kwargs:
-            if self.ask_job_type_on_launch:
-                prompted_fields['job_type'] = kwargs['job_type']
-            else:
-                ignored_fields['job_type'] = kwargs['job_type']
-
-        if 'inventory' in kwargs:
-            inv_id = kwargs['inventory']
-            if self.ask_inventory_on_launch:
-                from awx.main.models.inventory import Inventory
-                if Inventory.objects.get(pk=inv_id).accessible_by(user, {'write': True}):
-                    prompted_fields['inventory'] = inv_id
+        for field in ask_for_field_dict:
+            if field in kwargs:
+                if ask_for_field_dict[field]:
+                    prompted_fields[field] = kwargs[field]
                 else:
-                    ignored_fields['inventory'] = inv_id
-            else:
-                ignored_fields['inventory'] = inv_id
+                    ignored_fields[field] = kwargs[field]
+
+        if prompted_fields.get('job_type', None) == 'scan' or self.job_type == 'scan':
+            if 'inventory' in prompted_fields:
+                ignored_fields['inventory'] = prompted_fields.pop('inventory')
+
         return prompted_fields, ignored_fields
 
     @property
