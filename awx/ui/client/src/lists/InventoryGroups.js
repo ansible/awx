@@ -73,7 +73,7 @@ export default
             },
             last_update_failed: {
                 label: 'Update failed?',
-                searchType: 'select',
+                searchType: 'boolean',
                 searchSingleValue: true,
                 searchValue: 'failed',
                 searchOnly: true,

@@ -9,6 +9,7 @@ export default ['GetBasePath', function(GetBasePath) {
                     .searchable !== false);
             }).map(function(i) {
                 delete f[i].awToolTip;
+                delete f[i].ngClass;
                 return {[i]: f[i]};
             }).reduce(function (acc, i) {
                 var key = Object.keys(i);

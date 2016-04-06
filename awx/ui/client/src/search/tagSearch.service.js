@@ -1,4 +1,4 @@
-export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
+export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(Rest, $q, GetBasePath, Wait, ProcessErrors) {
     var that = this;
     // parse the field config object to return
     // one of the searchTypes (for the left dropdown)
@@ -18,7 +18,7 @@ export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
         var type, typeOptions;
         if (field.searchType === 'select') {
             type = 'select';
-            typeOptions = [];
+            typeOptions = field.searchOptions || [];
         } else if (field.searchType === 'boolean') {
             type = 'select';
             typeOptions = [{label: "Yes", value: true},
@@ -49,6 +49,7 @@ export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
     // given the fields that are searchable,
     // return searchTypes in the format the view can use
     this.getSearchTypes = function(list, basePath) {
+        Wait("start");
         var defer = $q.defer();
 
         var options = Object
@@ -95,11 +96,17 @@ export default ['Rest', '$q', 'GetBasePath', function(Rest, $q, GetBasePath) {
                         });
 
                     return option;
+                })
+                .error(function (data, status) {
+                    ProcessErrors(null, data, status, null, {
+                        hdr: 'Error!',
+                        msg: 'Getting type options failed'});
                 });
-
+                Wait("stop");
                 defer.resolve(joinOptions());
             });
         } else {
+            Wait("stop");
             defer.resolve(joinOptions());
         }
 

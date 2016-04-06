@@ -3,9 +3,10 @@
         <div class="TagSearch-bar">
             <div class="TagSearch-typeDropdown"
                 ng-click="toggleTypeDropdown()"
-                ng-class="{'is-open': showTypeDropdown}">
-                <span class="TagSearch-typeDropdownName">
-                    {{ currentSearchType.label || "Foo bar"}}
+                ng-class="{'is-open': showTypeDropdown}"
+                ng-cloak>
+                <span class="TagSearch-typeDropdownName" ng-cloak>
+                    {{ currentSearchType.label }}
                 </span>
                 <i class="TagSearch-selectDownIcon fa fa-angle-down"></i>
             </div>
