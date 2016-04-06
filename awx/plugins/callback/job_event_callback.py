@@ -344,7 +344,6 @@ class BaseCallbackModule(object):
                         task=result._task)
 
     @staticmethod
-    @statsd.timer('terminate_ssh_control_masters')
     def terminate_ssh_control_masters():
         # Determine if control persist is being used and if any open sockets
         # exist after running the playbook.
