@@ -255,8 +255,7 @@ class BaseCallbackModule(object):
             event_data['res'] = censor(deepcopy(event_data['res']))
 
         if self.callback_consumer_port:
-            with statsd.timer('zmq_post_event_msg.{0}'.format(event)):
-                self._post_job_event_queue_msg(event, event_data)
+            self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)
 
