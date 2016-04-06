@@ -284,7 +284,7 @@ requirements_jenkins:
 
 requirements: virtualenv requirements_ansible requirements_tower
 
-requirements_dev: virtualenv requirements_ansible requirements_tower_dev
+requirements_dev: requirements requirements_tower_dev
 
 # "Install" ansible-tower package in development mode.
 develop:

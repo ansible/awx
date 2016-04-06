@@ -1,4 +1,3 @@
--r requirements.txt
 django-debug-toolbar==1.4
 unittest2
 pep8
@@ -9,4 +8,3 @@ pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock
-django-split-settings
