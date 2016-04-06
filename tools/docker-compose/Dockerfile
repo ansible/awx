@@ -11,9 +11,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && apt
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" | tee /etc/apt/sources.list.d/postgres-9.4.list
 RUN apt-get update
 RUN apt-get install -y openssh-server ansible mg vim tmux git mercurial subversion python-dev python-psycopg2 make postgresql-client libpq-dev nodejs python-psutil libxml2-dev libxslt-dev lib32z1-dev libsasl2-dev libldap2-dev libffi-dev libzmq-dev proot python-pip libxmlsec1-dev swig redis-server && rm -rf /var/lib/apt/lists/*
-RUN pip install flake8
-RUN pip install pytest pytest-pythonpath pytest-django pytest-cov
-RUN pip install dateutils # for private/license_writer.py
+RUN pip install flake8 pytest pytest-pythonpath pytest-django pytest-cov pytest-mock dateutils django-debug-toolbar==1.4 pyflakes==1.0.0 virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db

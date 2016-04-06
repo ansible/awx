@@ -20,8 +20,8 @@ else:
 # Paths we'll use later
 etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
-sharedir = "/usr/share/awx"
 bindir = "/usr/bin"
+sharedir = "/usr/share/awx"
 docdir = "/usr/share/doc/ansible-tower"
 munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
@@ -136,7 +136,8 @@ setup(
                                     "tools/munin_monitors/mongo_mem",
                                     "tools/munin_monitors/mongo_ops"]),
         ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
-        ("%s" % bindir, ["tools/scripts/ansible-tower-service"]),
+        ("%s" % bindir, ["tools/scripts/ansible-tower-service",
+                         "tools/scripts/tower-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'egg_info': {
@@ -145,6 +146,9 @@ setup(
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',
+        },
+        'build_scripts': {
+            'executable': '/usr/bin/tower-python',
         },
     },
 )

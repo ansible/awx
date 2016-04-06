@@ -15,6 +15,9 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
+VENV_BASE ?= /tower_devel/venv
+SCL_PREFIX ?=
+
 CLIENT_TEST_DIR ?= build_test
 
 # Determine appropriate shasum command
@@ -107,6 +110,7 @@ MOCK_CFG ?=
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
+
 # Provide a fallback value for RPM_DIST
 ifeq ($(RPM_DIST),)
     RPM_DIST = .el6
@@ -116,7 +120,17 @@ RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
 ifeq ($(RPM_ARCH),)
     RPM_ARCH = $(shell uname -m)
 endif
-RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
+
+# Software collections settings if on EL6
+ifeq ($(RPM_DIST),.el6)
+    SCL_PREFIX = python27-
+    SCL_DEFINES = --define 'scl python27'
+else
+    SCL_PREFIX =
+    SCL_DEFINES =
+endif
+
+RPM_NVR = $(SCL_PREFIX)$(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 
 # TAR Bundle build parameters
 DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
@@ -154,7 +168,6 @@ endif
 .DEFAULT_GOAL := build
 
 .PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
-	real-requirements real-requirements_dev real-requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -232,29 +245,46 @@ rebase:
 push:
 	git push origin master
 
-# Install runtime, development and jenkins requirements
-requirements requirements_dev requirements_jenkins: %: real-%
-
-# Install third-party requirements needed for development environment.
-# NOTE:
-#  * --target is only supported on newer versions of pip
-#  * https://github.com/pypa/pip/issues/3056 - the workaround is to override the `install-platlib`
-#  * --user (in conjunction with PYTHONUSERBASE="awx" may be a better option
-#  * --target implies --ignore-installed
-real-requirements:
-	@if [ "$(PYTHON_VERSION)" = "2.6" ]; then \
-	  pip install -r requirements/requirements_python26.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
-	else \
-	  pip install -r requirements/requirements.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"; \
+virtualenv:
+	if [ "$(VENV_BASE)" ]; then \
+		if [ ! -d "$(VENV_BASE)" ]; then \
+			mkdir $(VENV_BASE); \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/tower" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/tower; \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/ansible; \
+		fi; \
 	fi
 
-real-requirements_dev:
-	pip install -r requirements/requirements_dev.txt --target awx/lib/site-packages/ --install-option="--install-platlib=\$$base/lib/python"
+requirements_ansible:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/ansible/bin/activate; \
+	fi && \
+	pip install -r requirements/requirements_ansible.txt
+
+# Install third-party requirements needed for Tower's environment.
+requirements_tower:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi && \
+	pip install -r requirements/requirements.txt; \
+
+requirements_tower_dev:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi && \
+	pip install -r requirements/requirements_dev.txt
 
 # Install third-party requirements needed for running unittests in jenkins
-real-requirements_jenkins:
+requirements_jenkins:
 	pip install -r requirements/requirements_jenkins.txt
 	$(NPM_BIN) install csslint jshint
+
+requirements: virtualenv requirements_ansible requirements_tower
+
+requirements_dev: virtualenv requirements_ansible requirements_tower_dev
 
 # "Install" ansible-tower package in development mode.
 develop:
@@ -272,7 +302,10 @@ version_file:
 
 # Do any one-time init tasks.
 init:
-	@if [ "$(VIRTUAL_ENV)" ]; then \
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	if [ "$(VIRTUAL_ENV)" ]; then \
 	    tower-manage register_instance --primary --hostname=127.0.0.1; \
 	else \
 	    sudo tower-manage register_instance --primary --hostname=127.0.0.1; \
@@ -287,6 +320,9 @@ adduser:
 
 # Create database tables and apply any new migrations.
 migrate:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py migrate --noinput --fake-initial
 
 # Run after making changes to the models to create a new migration.
@@ -319,27 +355,48 @@ servercc: server_noattach
 # Alternate approach to tmux to run all development tasks specified in
 # Procfile.  https://youtu.be/OPMgaibszjk
 honcho:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	honcho start
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py runserver
 
 # Run to start the background celery worker for development.
 celeryd:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair
 
 # Run to start the zeromq callback receiver
 receiver:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_callback_receiver
 
 taskmanager:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_task_system
 
 socketservice:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_socketio_service
 
 factcacher:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) manage.py run_fact_cache_receiver
 
 reports:
@@ -647,7 +704,7 @@ rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
 
 mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
@@ -657,7 +714,7 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	@echo "#############################################"
@@ -789,9 +846,11 @@ packaging/packer/ansible-tower-$(VERSION)-vmx/ansible-tower-$(VERSION).vmx: pack
 # TODO - figure out how to build the front-end and python requirements with
 # 'build'
 build:
+	export SCL_PREFIX
 	$(PYTHON) setup.py build
 
 install:
+	export SCL_PREFIX HTTPD_SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
 # Docker Compose Development environment

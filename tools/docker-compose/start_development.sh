@@ -29,6 +29,9 @@ else
     touch awx/lib/.deps_built
 fi
 
+rm -rf /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+
 # Tower bootstrapping
 make version_file
 make migrate

@@ -12,9 +12,9 @@ cffi==1.5.0
 cliff==1.15.0
 cmd2==0.6.8
 cryptography==0.9.3
-d2to1==0.2.11
+d2to1==0.2.11   # TODO: Still needed?
 defusedxml==0.4.1
-Django==1.8.8
+Django==1.8.10
 debtcollector==1.2.0
 decorator==4.0.6
 django-auth-ldap==1.2.6
@@ -31,15 +31,12 @@ django-statsd-mozilla==0.3.16
 django-taggit==0.17.6
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
-#functools32==3.2.3-2
 gevent==1.1rc3
 gevent-websocket==0.9.3
 git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=django-jsonfield
 git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
 git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@5dfa1df79f81765d36c0de31dc1c2f390e42d428#egg=django-rest-framework-mongoengine
 git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=gevent-socketio
-git+https://github.com/chrismeyersfsu/python-ipy.git@fix-127_localhost#egg=IPy
-git+https://github.com/chrismeyersfsu/sitecustomize.git#egg=sitecustomize
 greenlet==0.4.9
 dogpile.cache==0.5.7
 enum34==1.1.2
@@ -73,7 +70,7 @@ os-client-config==1.14.0
 os-diskconfig-python-novaclient-ext==0.1.3
 os-networksv2-python-novaclient-ext==0.25
 os-virtual-interfacesv2-python-novaclient-ext==0.19
-pbr==0.11.1
+pbr==1.8.1
 oslo.config==3.3.0
 oslo.i18n==3.2.0
 oslo.serialization==2.2.0
@@ -82,7 +79,7 @@ pexpect==3.1
 prettytable==0.7.2
 psphere==0.5.2
 psutil==3.1.1
-psycopg2
+psycopg2==2.6.1
 pyasn1==0.1.9
 pycrypto==2.6.1
 pycparser==2.14
