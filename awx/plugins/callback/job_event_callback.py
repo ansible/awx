@@ -50,28 +50,25 @@ import psutil
 
 # Only use statsd if there's a statsd host in the environment
 # otherwise just do a noop.
-if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
-    from statsd import StatsClient
-    statsd = StatsClient(host=os.environ['GRAPHITE_PORT_8125_UDP_ADDR'],
-                         port=8125,
-                         prefix='tower.job.event_callback',
-                         maxudpsize=512)
-else:
-    from statsd import StatsClient
-
-    class NoStatsClient(StatsClient):
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def _prepare(self, stat, value, rate):
-            pass
-
-        def _send_stat(self, stat, value, rate):
-            pass
-
-        def _send(self, *args, **kwargs):
-            pass
-    statsd = NoStatsClient()
+# NOTE: I've disabled this for the time being until we sort through the venv dependency around this
+# if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
+#     from statsd import StatsClient
+#     statsd = StatsClient(host=os.environ['GRAPHITE_PORT_8125_UDP_ADDR'],
+#                          port=8125,
+#                          prefix='tower.job.event_callback',
+#                          maxudpsize=512)
+# else:
+#     from statsd import StatsClient
+#     class NoStatsClient(StatsClient):
+#         def __init__(self, *args, **kwargs):
+#             pass
+#         def _prepare(self, stat, value, rate):
+#             pass
+#         def _send_stat(self, stat, value, rate):
+#             pass
+#         def _send(self, *args, **kwargs):
+#             pass
+#     statsd = NoStatsClient()
 
 CENSOR_FIELD_WHITELIST=[
     'msg',
