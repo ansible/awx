@@ -678,7 +678,10 @@ class JobTemplateAccess(BaseAccess):
     model = JobTemplate
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, {'read':True})
+        if self.user.is_superuser:
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.accessible_objects(self.user, {'read':True})
         return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
                                  'credential', 'cloud_credential', 'next_schedule').all()
 
