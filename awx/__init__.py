@@ -4,7 +4,6 @@
 import os
 import sys
 import warnings
-import site
 
 __version__ = '3.0.0'
 
