@@ -2119,9 +2119,12 @@ class JobLaunchSerializer(BaseSerializer):
                             'ask_tags_on_launch', 'ask_job_type_on_launch',
                             'ask_inventory_on_launch')
         extra_kwargs = {
-            'credential': {
-                'write_only': True,
-            },
+            'credential': {'write_only': True,},
+            'limit': {'write_only': True,},
+            'job_tags': {'write_only': True,},
+            'skip_tags': {'write_only': True,},
+            'job_type': {'write_only': True,},
+            'inventory': {'write_only': True,}
         }
 
     def get_credential_needed_to_start(self, obj):

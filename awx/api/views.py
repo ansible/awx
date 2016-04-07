@@ -2092,7 +2092,19 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
                 data['credential'] = None
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
-        data['extra_vars'] = extra_vars
+            ask_for_field_dict = dict(
+                extra_vars=obj.ask_variables_on_launch,
+                limit=obj.ask_limit_on_launch,
+                job_tags=obj.ask_tags_on_launch,
+                skip_tags=obj.ask_tags_on_launch,
+                job_type=obj.ask_job_type_on_launch,
+                inventory=obj.ask_inventory_on_launch
+            )
+            for field in ask_for_field_dict:
+                if not ask_for_field_dict[field]:
+                    data.pop(field, None)
+                elif field == 'extra_vars':
+                    data[field] = extra_vars
         return data
 
     def post(self, request, *args, **kwargs):
