@@ -1,10 +1,9 @@
-
-export default function($stateProvider){
-    this.$get = function(){
+export default function($stateProvider) {
+    this.$get = function() {
         return {
             addState: function(state) {
                 var route = state.route || state.url;
-                $stateProvider.state(state.name , {
+                $stateProvider.state(state.name, {
                     url: route,
                     controller: state.controller,
                     templateUrl: state.templateUrl,
@@ -14,6 +13,8 @@ export default function($stateProvider){
                     ncyBreadcrumb: state.ncyBreadcrumb,
                     onEnter: state.onEnter,
                     onExit: state.onExit,
+                    template: state.template,
+                    controllerAs: state.controllerAs,
                     views: state.views
                 });
             }
