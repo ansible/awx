@@ -59,7 +59,17 @@ def migrate_users(apps, schema_editor):
             logger.info(smart_text(u"migrating to new role for user: {}".format(user.username)))
 
         if user.is_superuser:
-            Role.singleton('System Administrator').members.add(user)
+            if Role.objects.filter(singleton_name='System Administrator').exists():
+                sa_role = Role.objects.get(singleton_name='System Administrator')
+            else:
+                sa_role = Role.objects.create(
+                    created=now(),
+                    modified=now(),
+                    singleton_name='System Administrator',
+                    name='System Administrator'
+                )
+
+            sa_role.members.add(user)
             logger.warning(smart_text(u"added superuser: {}".format(user.username)))
 
 @log_migration
