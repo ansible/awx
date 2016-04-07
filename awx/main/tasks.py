@@ -1223,6 +1223,38 @@ class RunInventoryUpdate(BaseTask):
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
+        elif inventory_update.source == 'foreman':
+            section = 'foreman'
+            cp.add_section(section)
+
+            foreman_opts = dict(inventory_update.source_vars_dict.items())
+            foreman_opts.setdefault('ssl_verify', 'False')
+            for k, v in foreman_opts.items():
+                cp.set(section, k, unicode(v))
+
+            credential = inventory_update.credential
+            if credential:
+                cp.set(section, 'url', credential.host)
+                cp.set(section, 'user', credential.username)
+                cp.set(section, 'password', decrypt_field(credential, 'password'))
+
+            section = 'ansible'
+            cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
+
+            section = 'cache'
+            cp.set(section, 'path', '/tmp')
+            cp.set(section, 'max_age', '0')
+
+        elif inventory_update.source == 'cloudforms':
+            section = 'cloudforms'
+            cp.add_section(section)
+
+            credential = inventory_update.credential
+            if credential:
+                cp.set(section, 'hostname', credential.host)
+                cp.set(section, 'username', credential.username)
+                cp.set(section, 'password', decrypt_field(credential, 'password'))
+
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -1305,6 +1337,10 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_ZONE'] = inventory_update.source_regions
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
+        elif inventory_update.source == 'foreman':
+            env['FOREMAN_INI_PATH'] = cloud_credential
+        elif inventory_update.source == 'cloudforms':
+            env['CLOUDFORMS_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
