@@ -1053,7 +1053,7 @@ class UserTeamsList(ListAPIView):
     serializer_class = TeamSerializer
 
     def get_queryset(self):
-        u = User.objects.get(pk=self.kwargs['pk'])
+        u = get_object_or_404(User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
         return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
@@ -1229,7 +1229,7 @@ class UserCredentialsList(CredentialList):
     serializer_class = CredentialSerializer
 
     def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
+        user = get_object_or_404(User,pk=self.kwargs['pk'])
         if not self.request.user.can_access(User, 'read', user):
             raise PermissionDenied()
 
@@ -1249,7 +1249,7 @@ class TeamCredentialsList(CredentialList):
     serializer_class = CredentialSerializer
 
     def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs['pk'])
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
         if not self.request.user.can_access(Team, 'read', team):
             raise PermissionDenied()
 
@@ -3496,7 +3496,7 @@ class RoleTeamsList(ListAPIView):
 
     def get_queryset(self):
         # TODO: Check
-        role = Role.objects.get(pk=self.kwargs['pk'])
+        role = get_object_or_404(Role, pk=self.kwargs['pk'])
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
