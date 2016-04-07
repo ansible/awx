@@ -279,12 +279,17 @@ requirements_tower_dev:
 
 # Install third-party requirements needed for running unittests in jenkins
 requirements_jenkins:
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi && \
 	pip install -r requirements/requirements_jenkins.txt
 	$(NPM_BIN) install csslint jshint
 
 requirements: virtualenv requirements_ansible requirements_tower
 
 requirements_dev: requirements requirements_tower_dev
+
+requirements_test: requirements requirements_jenkins
 
 # "Install" ansible-tower package in development mode.
 develop:
