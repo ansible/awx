@@ -2,11 +2,12 @@ import logging
 
 from django.utils.encoding import smart_text
 from django.db.models import Q
+from django.utils.timezone import now
 
 from collections import defaultdict
 from awx.main.utils import getattrd
-import _old_access as old_access
 
+import _old_access as old_access
 logger = logging.getLogger(__name__)
 
 def log_migration(wrapped):
@@ -39,14 +40,19 @@ def migrate_users(apps, schema_editor):
             logger.info(smart_text(u"found existing role for user: {}".format(user.username)))
         except Role.DoesNotExist:
             role = Role.objects.create(
+                created=now(),
+                modified=now(),
                 singleton_name = smart_text(u'{}-admin_role'.format(user.username)),
                 content_type = user_content_type,
                 object_id = user.id
             )
             role.members.add(user)
             RolePermission.objects.create(
+                created=now(),
+                modified=now(),
                 role = role,
-                resource = user,
+                content_type = user_content_type,
+                object_id = user.id,
                 create=1, read=1, write=1, delete=1, update=1,
                 execute=1, scm_update=1, use=1,
             )
