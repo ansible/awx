@@ -31,15 +31,17 @@ def migrate_users(apps, schema_editor):
     Role = apps.get_model('main', "Role")
     RolePermission = apps.get_model('main', "RolePermission")
     ContentType = apps.get_model('contenttypes', "ContentType")
+    user_content_type = ContentType.objects.get_for_model(User)
 
     for user in User.objects.iterator():
         try:
-            Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=user.id)
+            Role.objects.get(content_type=user_content_type, object_id=user.id)
             logger.info(smart_text(u"found existing role for user: {}".format(user.username)))
         except Role.DoesNotExist:
             role = Role.objects.create(
                 singleton_name = smart_text(u'{}-admin_role'.format(user.username)),
-                content_object = user,
+                content_type = user_content_type,
+                object_id = user.id
             )
             role.members.add(user)
             RolePermission.objects.create(
