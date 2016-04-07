@@ -1092,7 +1092,8 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @property
     def notifiers(self):
-        base_notifiers = Notifier.objects.filter(active=True)
+        # TODO: Go through RBAC instead of calling all(). Need to account for orphaned Notifiers
+        base_notifiers = Notifier.objects.all()
         error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self]))
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self]))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self]))
