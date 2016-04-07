@@ -1264,7 +1264,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         return True
 
 
-class CustomInventoryScript(CommonModelNameNotUnique):
+class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
 
     class Meta:
         app_label = 'main'
@@ -1283,6 +1283,27 @@ class CustomInventoryScript(CommonModelNameNotUnique):
         blank=False,
         null=True,
         on_delete=models.SET_NULL,
+    )
+
+    admin_role = ImplicitRoleField(
+        role_name='CustomInventory Administrator',
+        role_description='May manage this inventory',
+        parent_role='organization.admin_role',
+        permissions = {'all': True}
+    )
+
+    member_role = ImplicitRoleField(
+        role_name='CustomInventory Member',
+        role_description='May view but not modify this inventory',
+        parent_role='organization.member_role',
+        permissions = {'read': True}
+    )
+
+    auditor_role = ImplicitRoleField(
+        role_name='CustomInventory Auditor',
+        role_description='May view but not modify this inventory',
+        parent_role='organization.auditor_role',
+        permissions = {'read': True}
     )
 
     def get_absolute_url(self):

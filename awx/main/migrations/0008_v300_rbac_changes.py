@@ -142,6 +142,21 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
         ),
         migrations.AddField(
+            model_name='custominventoryscript',
+            name='admin_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
+            model_name='custominventoryscript',
+            name='auditor_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
+            model_name='custominventoryscript',
+            name='member_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+        ),
+        migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),

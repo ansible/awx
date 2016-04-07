@@ -1,9 +1,24 @@
 import pytest
 
 from awx.main.migrations import _rbac as rbac
-from awx.main.models import Permission, Host
+from awx.main.models import (
+    Permission,
+    Host,
+    CustomInventoryScript,
+)
 from awx.main.access import InventoryAccess
 from django.apps import apps
+
+@pytest.mark.django_db
+def test_custom_inv_script_access(organization, user):
+    u = user('user', False)
+
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test')
+    custom_inv.organization = organization
+    assert not custom_inv.accessible_by(u, {'read':True})
+
+    organization.member_role.members.add(u)
+    assert custom_inv.accessible_by(u, {'read':True})
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
