@@ -282,7 +282,7 @@ requirements_jenkins:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi && \
-	pip install -r requirements/requirements_jenkins.txt
+	pip install -Ir requirements/requirements_jenkins.txt
 	$(NPM_BIN) install csslint jshint
 
 requirements: virtualenv requirements_ansible requirements_tower
