@@ -35,19 +35,14 @@ var hostEventModal = {
 	    $('.modal-backdrop').remove();
 	    $('body').removeClass('modal-open');
 	}
- }
+ };
 
  var hostEventDetails = {
  	name: 'jobDetail.host-event.details',
  	url: '/details',
  	controller: 'HostEventController',
  	templateUrl: templateUrl('job-detail/host-event/host-event-details'),
- 	resolve: {
- 		features: ['FeaturesService', function(FeaturesService){
- 			return FeaturesService.get();
- 		}]
- 	}
- }
+ };
 
  var hostEventJson = {
   	name: 'jobDetail.host-event.json',
@@ -60,27 +55,12 @@ var hostEventModal = {
  		}]
  	}
  };
- var hostEventTiming = {
-   	name: 'jobDetail.host-event.timing',
- 	url: '/timing',
- 	controller: 'HostEventController',
- 	templateUrl: templateUrl('job-detail/host-event/host-event-timing'),
- 	resolve: {
- 		features: ['FeaturesService', function(FeaturesService){
- 			return FeaturesService.get();
- 		}]
- 	}
- };
+
  var hostEventStdout = {
  	  	name: 'jobDetail.host-event.stdout',
  	url: '/stdout',
  	controller: 'HostEventController',
- 	templateUrl: templateUrl('job-detail/host-event/host-event-stdout'),
- 	resolve: {
- 		features: ['FeaturesService', function(FeaturesService){
- 			return FeaturesService.get();
- 		}]
- 	}
+ 	templateUrl: templateUrl('job-detail/host-event/host-event-stdout')
  };
 
- export {hostEventDetails, hostEventJson, hostEventTiming, hostEventStdout, hostEventModal}
+ export {hostEventDetails, hostEventJson, hostEventStdout, hostEventModal}

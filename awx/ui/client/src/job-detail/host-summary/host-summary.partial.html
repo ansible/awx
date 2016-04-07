@@ -1,0 +1,66 @@
+
+                        <div id="hosts-summary-section" class="section">
+
+                            <div class="JobDetail-searchHeaderRow">
+                                <div class="JobDetail-searchContainer form-group">
+                                    <div class="search-name">
+                                        <input type="text" class="JobDetail-searchInput form-control List-searchInput" id="search_host_summary_name" ng-model="search_host_summary_name" placeholder="Host Name" ng-keypress="searchHostSummaryKeyPress($event)" >
+                                            <a class="List-searchInputIcon search-icon" ng-show="searchHostSummaryEnabled" ng-click="searchHostSummary()"><i class="fa fa-search"></i></a>
+                                            <a class="List-searchInputIcon search-icon" ng-show="!searchHostSummaryEnabled" ng-click="search_host_summary_name=''; searchHostSummary()"><i class="fa fa-times"></i></a>
+                                    </div>
+                                </div>
+                                <div class="JobDetail-tableToggleContainer form-group">
+                                    <div class="btn-group" aw-toggle-button data-after-toggle="filterHostSummaryStatus">
+                                        <button class="JobDetail-tableToggle btn btn-xs btn-primary active">All</button>
+                                        <button class="JobDetail-tableToggle btn btn-xs btn-default">Failed</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-header">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th class="List-tableHeader col-lg-6 col-md-6 col-sm-6 col-xs-6">Hosts</th>
+                                            <th class="List-tableHeader JobDetail-tableHeader col-lg-6 col-md-5 col-sm-5 col-xs-5">Completed Tasks</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
+                                <table class="table">
+                                    <tbody>
+                                        <tr class="List-tableRow" ng-repeat="host in summaryList = (hosts) track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
+                                            <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name})" aw-tool-tip="View  events" data-placement="top">{{ host.name }}</a>
+                                            </td>
+                                            <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'changed'})"  aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'unreachable'})"  aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
+                                                <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="summaryList.length === 0 && waiting">
+                                            <td colspan="5" class="col-lg-12 loading-info">Waiting...</td>
+                                        </tr>
+                                        <tr ng-show="summaryList.length === 0 && hostSummariesLoading && !waiting">
+                                            <td colspan="5" class="col-lg-12 loading-info">Loading...</td>
+                                        </tr>
+                                        <tr ng-show="summaryList.length === 0 && !hostSummariesLoading && !waiting">
+                                            <td colspan="2" class="col-lg-12 loading-info">No matching hosts</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="scroll-spinner" id="hostSummariesMoreRows">
+                                <i class="fa fa-cog fa-spin"></i>
+                            </div>
+
+                        </div><!-- section -->
+
+                        <div id="graph-section" class="JobDetail-graphSection">
+                            <svg width="100%" height="100%"></svg>
+                        </div>

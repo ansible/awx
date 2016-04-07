@@ -63,52 +63,47 @@ export default
         // the stack for which status to display is
         // unreachable > failed > changed > ok
         // uses the API's runner events and convenience properties .failed .changed to determine status. 
-        // see: job_event_callback.py
+        // see: job_event_callback.py for more filters to support
         processEventStatus: function(event){
-                if (event.event == 'runner_on_unreachable'){
-                    return {
-                        class: 'HostEvents-status--unreachable',
-                        status: 'unreachable'
-                    }
+            if (event.event == 'runner_on_unreachable'){
+                return {
+                    class: 'HostEvents-status--unreachable',
+                    status: 'unreachable'
                 }
-                // equiv to 'runner_on_error' && 'runner on failed'
-                if (event.failed){
-                    return {
-                        class: 'HostEvents-status--failed',
-                        status: 'failed'
-                    }
+            }
+            // equiv to 'runner_on_error' && 'runner on failed'
+            if (event.failed){
+                return {
+                    class: 'HostEvents-status--failed',
+                    status: 'failed'
                 }
-                // catch the changed case before ok, because both can be true
-                if (event.changed){
-                    return {
-                        class: 'HostEvents-status--changed',
-                        status: 'changed'
-                    }
+            }
+            // catch the changed case before ok, because both can be true
+            if (event.changed){
+                return {
+                    class: 'HostEvents-status--changed',
+                    status: 'changed'
                 }
-                if (event.event == 'runner_on_ok'){
-                    return {
-                        class: 'HostEvents-status--ok',
-                        status: 'ok'
-                    }
+            }
+            if (event.event == 'runner_on_ok' || event.event == 'runner_on_async_ok'){
+                return {
+                    class: 'HostEvents-status--ok',
+                    status: 'ok'
                 }
-                if (event.event == 'runner_on_skipped'){
-                    return {
-                        class: 'HostEvents-status--skipped',
-                        status: 'skipped'
-                    }
+            }
+            if (event.event == 'runner_on_skipped'){
+                return {
+                    class: 'HostEvents-status--skipped',
+                    status: 'skipped'
                 }
-                else{
-                    // study a case where none of these apply
-                }
+            }
         },
-
-        // Consumes a response from this.getRelatedJobEvents
+        // Consumes a response from this.getRelatedJobEvents(id, params)
         // returns an array for view logic to iterate over to build host result rows
-        processHostResults: function(data){
+        processHostEvents: function(data){
             var self = this;
             var results = [];
-            data.forEach(function(element, index, array){
-                var event = element;
+            data.forEach(function(event){
                 if (event.event !== 'runner_on_no_hosts'){
                     var status = self.processEventStatus(event);
                     var msg = self.processEventMsg(event);
@@ -116,7 +111,7 @@ export default
                     results.push({
                         id: event.id,
                         status: status.status,
-                        status_text: status.status.charAt(0).toUpperCase() + status.status.slice(1),
+                        status_text: _.head(status.status).toUpperCase() + _.tail(status.status),
                         host_id: event.host,
                         task_id: event.parent,
                         name: event.event_data.host,
@@ -128,7 +123,6 @@ export default
             });
             return results;
         },
-
         // GET events related to a job run
         // e.g. 
         // ?event=playbook_on_stats

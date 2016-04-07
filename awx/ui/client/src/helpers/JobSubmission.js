@@ -804,6 +804,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) ||
                 (base === 'home')){
                 $location.path('/jobs/' + job);
+                // use $state.go with reload: true option to re-instantiate sockets in
               }
 
             });

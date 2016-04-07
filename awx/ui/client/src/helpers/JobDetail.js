@@ -930,7 +930,7 @@ export default
     }])
 
     // Call when the selected task needs to change
-    .factory('SelectTask', ['LoadHosts', 'JobDetailService', function(LoadHosts, JobDetailService) {
+    .factory('SelectTask', ['JobDetailService', function(JobDetailService) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -953,108 +953,9 @@ export default
                 order: 'host_name,counter',  
             };
             JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                scope.hostResults = JobDetailService.processHostResults(res.results)
+                scope.hostResults = JobDetailService.processHostEvents(res.results)
                 scope.hostResultsLoading = false;
             });
-        };
-    }])
-
-    // Refresh the list of hosts
-    .factory('LoadHosts', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
-        return function(params) {
-            var scope = params.scope,
-                callback = params.callback,
-                url;    
-            scope.hostResults = [];
-
-            if (scope.selectedTask) {
-                // If we have a selected task, then get the list of hosts
-                url = scope.job.related.job_events + '?parent=' + scope.selectedTask + '&';
-                url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
-                url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
-                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
-                console.log(url)
-                scope.hostResultsLoading = true;
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        scope.next_host_results = data.next;
-                        scope.hostResults = [];
-                        data.results.forEach(function(event) {
-                            var status, status_text, item, msg;
-                            if (event.event === "runner_on_skipped") {
-                                status = 'skipped';
-                            }
-                            else if (event.event === "runner_on_unreachable") {
-                                status = 'unreachable';
-                            }
-                            else {
-                                status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                            }
-                            switch(status) {
-                                case "successful":
-                                    status_text = 'OK';
-                                    break;
-                                case "changed":
-                                    status_text = "Changed";
-                                    break;
-                                case "failed":
-                                    status_text = "Failed";
-                                    break;
-                                case "unreachable":
-                                    status_text = "Unreachable";
-                                    break;
-                                case "skipped":
-                                    status_text = "Skipped";
-                            }
-
-                            if (event.event_data && event.event_data.res) {
-                                item = event.event_data.res.item;
-                                if (typeof item === "object") {
-                                    item = JSON.stringify(item);
-                                    item = item.replace(/\"/g,'').replace(/:/g,': ').replace(/,/g,', ');
-                                }
-                            }
-
-                            msg = '';
-                            if (event.event_data && event.event_data.res) {
-                                if (typeof event.event_data.res === 'object') {
-                                    msg = event.event_data.res.msg;
-                                } else {
-                                    msg = event.event_data.res;
-                                }
-                            }
-                            if (event.event !== "runner_on_no_hosts") {
-                                scope.hostResults.push({
-                                    id: event.id,
-                                    status: status,
-                                    status_text: status_text,
-                                    host_id: event.host,
-                                    task_id: event.parent,
-                                    name: event.event_data.host,
-                                    created: event.created,
-                                    msg: msg,
-                                    item: item
-                                });
-                            }
-                        });
-
-                        scope.hostResultsLoading = false;
-                        if (callback) {
-                            scope.$emit(callback);
-                        }
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-            else {
-                if (callback) {
-                    scope.$emit(callback);
-                }
-                //$('#hosts-table-detail').mCustomScrollbar("update");
-            }
         };
     }])
 
@@ -1069,7 +970,6 @@ export default
             url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&': '';
             url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
             url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
-
             scope.hosts = [];
             scope.hostSummariesLoading = true;
 
@@ -1098,7 +998,6 @@ export default
                     });
 
                     scope.hostSummariesLoading = false;
-
                     if (callback) {
                         scope.$emit(callback);
                     }
@@ -1564,7 +1463,6 @@ export default
         function(DrawPlays, DrawTasks, DrawHostResults, DrawHostSummaries, DrawGraph) {
         return function(params) {
             var scope = params.scope;
-
             if (!scope.pauseLiveEvents) {
                 DrawPlays({ scope: scope });
                 DrawTasks({ scope: scope });
