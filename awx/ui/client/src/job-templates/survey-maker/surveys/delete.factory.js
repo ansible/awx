@@ -4,7 +4,6 @@
  * DeleteSurvey({
  *     scope:       $scope containing list of survey form fields
  *     id:          id of job template that survey is attached to
- *     callback:    $scope.$emit label to call when delete is completed
  * })
  *
  */
@@ -14,7 +13,6 @@ export default
 
             var scope = params.scope,
                 id = params.id,
-                // callback = params.callback,
                 url;
 
 
@@ -25,11 +23,9 @@ export default
                 scope.survey_name = "";
                 scope.survey_description = "";
                 scope.survey_questions = [];
+                scope.closeSurvey('survey-modal-dialog');
                 Wait('stop');
                 scope.survey_exists = false;
-                $('#job_templates_delete_survey_btn').hide();
-                $('#job_templates_edit_survey_btn').hide();
-                $('#job_templates_create_survey_btn').show();
             });
 
 

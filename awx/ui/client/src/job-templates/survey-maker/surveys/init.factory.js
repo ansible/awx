@@ -1,6 +1,6 @@
 export default
-        function Init($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, $sce) {
+        function Init(DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
+            GetBasePath, Rest, ProcessErrors, $compile, EditQuestion, CreateSelect2) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -20,230 +20,183 @@ export default
                 {name: 'Float', type: 'float'}
             ];
 
-            scope.serialize = function(expression){
-                return $sce.getTrustedHtml(expression);
-            };
+            /* SURVEY RELATED FUNCTIONS */
 
-            scope.deleteSurvey = function() {
-                DeleteSurvey({
-                    scope: scope,
-                    id: id,
-                    // callback: 'SchedulesRefresh'
-                });
-            };
-
-            scope.editSurvey = function() {
-                if(scope.mode==='add'){
-                    for(i=0; i<scope.survey_questions.length; i++){
-                        questions.push(scope.survey_questions[i]);
-                    }
-                }
-                EditSurvey({
-                    scope: scope,
-                    id: id,
-                    // callback: 'SchedulesRefresh'
-                });
-            };
-
+            // Called when a job template does not have a saved survey.  This simply sets some
+            // default variables and fills the add question form via form generator.
             scope.addSurvey = function() {
                 AddSurvey({
                     scope: scope
                 });
             };
 
-            scope.cancelSurvey = function(me){
-                if(scope.mode === 'add'){
-                    questions = [];
+            // Called when a job template (new or existing) already has a "saved" survey
+            // In the case where a job template has not yet been created but a survey has
+            // been the data is just pulled out of the scope rather than from the server.
+            // (this is dictated by scope.mode)
+            scope.editSurvey = function() {
+                // Goes out and fetches the existing survey and populates the preview
+                EditSurvey({
+                    scope: scope,
+                    id: id
+                });
+            };
+
+            // This gets called after a user confirms survey deletion
+            scope.deleteSurvey = function() {
+                    // Hide the delete overlay
+                    scope.hideDeleteOverlay();
+                    // Show the loading spinner
+                    Wait('start');
+                    // Call the delete survey factory which handles making the rest call
+                    // and closing the modal after success
+                    DeleteSurvey({
+                        scope: scope,
+                        id: id
+                    });
+            };
+
+            // Called when the user hits cancel/close on the survey modal.  This function
+            // goes out and cleans up the survey_questions on scope before destroying
+            // the modal.
+            scope.closeSurvey = function(id) {
+                if(scope.mode === 'add') {
+                    // Clear out any "unsaved" survey questions
+                    for (var i = scope.survey_questions.length - 1; i >= 0; i--) {
+                        if (scope.survey_questions[i].new_question) {
+                            scope.survey_questions.splice(i, 1);
+                        }
+                    }
                 }
                 else {
+                    // Clear out the whole array, this data gets pulled in each time the modal is opened
                     scope.survey_questions = [];
                 }
-                $(me).dialog('close');
+                $('#' + id).dialog('destroy');
+            }
+
+            // Gets called when a user actually hits the save button.  Functionality differs
+            // based on the mode.  scope.mode="add" cleans up scope.survey_questions and
+            // destroys the modal, holding the survey questions in memory.  scope.mode="edit"
+            // actually fires off the necessary server call(s) to add/update a survey.
+            scope.saveSurvey = function() {
+                Wait('start');
+                if(scope.mode ==="add"){
+                    // Loop across the survey questions and remove any new_question flags
+                    angular.forEach(scope.survey_questions, function(question, key) {
+                        delete question['new_question'];
+                    });
+
+                    $('#survey-modal-dialog').dialog('destroy');
+                    scope.survey_name = "";
+                    scope.survey_description = "";
+                    scope.$emit('SurveySaved');
+                }
+                else {
+
+                    scope.survey_name = "";
+                    scope.survey_description = "";
+
+                    var updateSurveyQuestions = function() {
+                        Rest.setUrl(GetBasePath('job_templates') + id + '/survey_spec/');
+                        return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
+                        .success(function (data) {
+
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to add new survey. POST returned status: ' + status });
+                        });
+                    }
+
+                    var updateSurveyEnabled = function() {
+                        Rest.setUrl(GetBasePath('job_templates') + id+ '/');
+                        return Rest.patch({"survey_enabled": scope.survey_enabled})
+                        .success(function (data) {
+
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to retrieve save survey_enabled: ' + $routeParams.template_id + '. GET status: ' + status
+                            });
+                        });
+                    }
+
+                    updateSurveyQuestions()
+                    .then(function() {
+                        return updateSurveyEnabled();
+                    })
+                    .then(function() {
+                        scope.closeSurvey('survey-modal-dialog');
+                        scope.$emit('SurveySaved');
+                    })
+
+                }
             };
 
-            scope.addQuestion = function(){
+            // Gets called when the user clicks the on/off toggle beside the survey modal title.
+            scope.toggleSurveyEnabled = function() {
+                scope.survey_enabled = !scope.survey_enabled;
+            };
+
+            /* END SURVEY RELATED FUNCTIONS */
+
+            /* QUESTION RELATED FUNCTIONS */
+
+            // This injects the Add Question form into survey_maker_question_form
+            scope.generateAddQuestionForm = function(){
+                // This tmpMode logic is necessary because form generator seems to set scope.mode to match the mode that you pass it.
+                // So if a user is editing a job template (scope.mode='edit') but the JT doesn't have a survey then when we open the
+                // modal we need to make sure that scope.mode is still 'edit' after the Add Question form is injected.
+                // To avoid having to do this we'd need to track the job template mode in a variable other than scope.mode.
                 var tmpMode = scope.mode;
-                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope: scope, related: false});
+                GenerateForm.inject(form, { id:'survey_maker_question_form', mode: 'add' , scope: scope, related: false});
                 scope.mode = tmpMode;
-                scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
-                scope.text_min = null;
-                scope.text_max = null;
-                scope.int_min = null;
-                scope.int_max = null;
-                scope.float_min = null;
-                scope.float_max = null;
-                scope.duplicate = false;
-                scope.invalidChoice = false;
-                scope.minTextError = false;
-                scope.maxTextError = false;
+                scope.clearQuestion();
             };
 
-            scope.addNewQuestion = function(){
-                // $('#add_question_btn').on("click" , function(){
-                scope.addQuestion();
-                $('#survey_question_question_name').focus();
-                $('#add_question_btn').attr('disabled', 'disabled');
-                $('#add_question_btn').hide();
-                $('#survey-save-button').attr('disabled' , 'disabled');
-            // });
-            };
+            // This gets called when a users clicks the pencil icon beside a question preview in order to edit it.
             scope.editQuestion = function(index){
                 scope.duplicate = false;
+                // The edit question factory injects the edit form and fills the form with the question data from memory.
                 EditQuestion({
                     index: index,
                     scope: scope,
-                    question: (scope.mode==='add') ? questions[index] : scope.survey_questions[index]
+                    question: scope.survey_questions[index]
                 });
             };
 
+            // Gets called when a user clicks the delete icon on a question in the survey preview
+            scope.showDeleteQuestion = function(deleteIndex) {
+                // Keep track of the question to be deleted on scope
+                scope.questionToBeDeleted = deleteIndex;
+                // Show the delete overlay with mode='question'
+                scope.showDeleteOverlay('question');
+            }
+
+            // Called after a user confirms question deletion (hitting the DELETE button on the delete question overlay).
             scope.deleteQuestion = function(index){
-                element = $('.question_final:eq('+index+')');
-                element.remove();
-                if(scope.mode === 'add'){
-                    questions.splice(index, 1);
-                    scope.reorder();
-                    if(questions.length<1){
-                        $('#survey-save-button').attr('disabled', 'disabled');
+                // Move the edit question index down by one if this question came before the
+                // one being edited in the array.  This makes sure that our pointer to the question
+                // currently being edited gets updated independently from a deleted question.
+                if(GenerateForm.mode === 'edit' && !isNaN(scope.editQuestionIndex)){
+                    if(scope.editQuestionIndex == index) {
+                        // The user is deleting the question being edited - need to roll back to Add Question mode
+                        scope.editQuestionIndex = null;
+                        scope.generateAddQuestionForm();
+                    }
+                    else if(scope.editQuestionIndex > index) {
+                        scope.editQuestionIndex--;
                     }
                 }
-                else {
-                    scope.survey_questions.splice(index, 1);
-                    scope.reorder();
-                    if(scope.survey_questions.length<1){
-                        $('#survey-save-button').attr('disabled', 'disabled');
-                    }
-                }
+                // Remove the question from the array
+                scope.survey_questions.splice(index, 1);
+                // Hide the delete overlay
+                scope.hideDeleteOverlay();
             };
 
-            scope.cancelQuestion = function(event){
-                var elementID, key;
-                if(event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id==="new_question"){
-                    $('#new_question .aw-form-well').remove();
-                    $('#add_question_btn').show();
-                    $('#add_question_btn').removeAttr('disabled');
-                    if(scope.mode === 'add' && questions.length>0){
-                        $('#survey-save-button').removeAttr('disabled');
-                    }
-                    if(scope.mode === 'edit' && scope.survey_questions.length>0 && scope.can_edit===true){
-                        $('#survey-save-button').removeAttr('disabled');
-                    }
-
-                } else {
-                    elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
-                    key = elementID.split('_')[1];
-                    $('#'+elementID).empty();
-                    if(scope.mode === 'add'){
-                        if(questions.length>0){
-                            $('#survey-save-button').removeAttr('disabled');
-                        }
-                        scope.finalizeQuestion(questions[key], Number(key));
-                    }
-                    else if(scope.mode=== 'edit' ){
-                        if(scope.survey_questions.length>0 && scope.can_edit === true){
-                            $('#survey-save-button').removeAttr('disabled');
-                        }
-                        scope.finalizeQuestion(scope.survey_questions[key] , Number(key));
-                    }
-                }
-            };
-
-            scope.questionUp = function(index){
-                var animating = false,
-                    clickedDiv = $('#question_'+index),
-                    prevDiv = clickedDiv.prev(),
-                    distance = clickedDiv.outerHeight();
-
-                if (animating) {
-                    return;
-                }
-
-                if (prevDiv.length) {
-                    animating = true;
-                    $.when(clickedDiv.animate({
-                        top: -distance
-                    }, 600),
-                    prevDiv.animate({
-                        top: distance
-                    }, 600)).done(function () {
-                        prevDiv.css('top', '0px');
-                        clickedDiv.css('top', '0px');
-                        clickedDiv.insertBefore(prevDiv);
-                        animating = false;
-                        if ( scope.mode === 'add'){
-                            i = questions[index];
-                            questions[index] = questions[index-1];
-                            questions[index-1] = i;
-                        } else {
-                            i = scope.survey_questions[index];
-                            scope.survey_questions[index] = scope.survey_questions[index-1];
-                            scope.survey_questions[index-1] = i;
-                        }
-                        scope.reorder();
-                    });
-                }
-            };
-
-            scope.questionDown = function(index){
-                var clickedDiv = $('#question_'+index),
-                    nextDiv = clickedDiv.next(),
-                    distance = clickedDiv.outerHeight(),
-                    animating = false;
-
-                if (animating) {
-                    return;
-                }
-
-                if (nextDiv.length) {
-                    animating = true;
-                    $.when(clickedDiv.animate({
-                        top: distance
-                    }, 600),
-                    nextDiv.animate({
-                        top: -distance
-                    }, 600)).done(function () {
-                        nextDiv.css('top', '0px');
-                        clickedDiv.css('top', '0px');
-                        nextDiv.insertBefore(clickedDiv);
-                        animating = false;
-                        if(scope.mode === 'add'){
-                            i = questions[index];
-                            questions[index] = questions[Number(index)+1];
-                            questions[Number(index)+1] = i;
-                        } else {
-                            i = scope.survey_questions[index];
-                            scope.survey_questions[index] = scope.survey_questions[Number(index)+1];
-                            scope.survey_questions[Number(index)+1] = i;
-                        }
-                        scope.reorder();
-                    });
-                }
-            };
-
-            scope.reorder = function(){
-                if(scope.mode==='add'){
-                    for(i=0; i<questions.length; i++){
-                        questions[i].index=i;
-                        $('.question_final:eq('+i+')').attr('id', 'question_'+i);
-                    }
-                }
-                else {
-                    for(i=0; i<scope.survey_questions.length; i++){
-                        scope.survey_questions[i].index=i;
-                        $('.question_final:eq('+i+')').attr('id', 'question_'+i);
-                    }
-                }
-            };
-
-            scope.finalizeQuestion= function(data, index){
-                FinalizeQuestion({
-                    scope: scope,
-                    question: data,
-                    id: id,
-                    index: index
-                });
-            };
-
-            scope.typeChange = function() {
+            function clearTypeSpecificFields() {
                 scope.minTextError = false;
                 scope.maxTextError = false;
                 scope.default = "";
@@ -263,6 +216,34 @@ export default
                 scope.int_max = "";
                 scope.float_min = "";
                 scope.float_max = "";
+            }
+
+            // Sets all of our scope variables used for adding/editing a question back to a clean state
+            scope.clearQuestion = function(){
+                clearTypeSpecificFields();
+                scope.editQuestionIndex = null;
+                scope.question_name = null;
+                scope.question_description = null;
+                scope.variable = null;
+                scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
+                scope.duplicate = false;
+                scope.invalidChoice = false;
+                scope.type = "";
+
+                // Make sure that the select2 dropdown for question type is clean
+                CreateSelect2({
+                    element:'#survey_question_type',
+                    multiple: false
+                });
+
+                // Set the whole form to pristine
+                scope.survey_question_form.$setPristine();
+            }
+
+            // Gets called when the "type" dropdown value changes.  In that case, we want to clear out
+            // all the "type" specific fields/errors and start fresh.
+            scope.typeChange = function() {
+                clearTypeSpecificFields();
                 scope.survey_question_form.default.$setPristine();
                 scope.survey_question_form.default_multiselect.$setPristine();
                 scope.survey_question_form.default_float.$setPristine();
@@ -274,6 +255,9 @@ export default
                 scope.survey_question_form.int_max.$setPristine();
             };
 
+            // Function that gets called when a user hits ADD/UPDATE on the survey question form.  This
+            // function handles some validation as well as eventually adding the question to the
+            // scope.survey_questions array.
             scope.submitQuestion = function(event){
                 var data = {},
                 fld, i,
@@ -340,36 +324,18 @@ export default
 
                 // validate that there aren't any questions using this var name.
                 if(GenerateForm.mode === 'add'){
-                    if(scope.mode === 'add'){
-                        for(fld in questions){
-                            if(questions[fld].variable === scope.variable){
-                                scope.duplicate = true;
-                            }
-                        }
-                    }
-                    else if (scope.mode === 'edit'){
-                        for(fld in scope.survey_questions){
-                            if(scope.survey_questions[fld].variable === scope.variable){
-                                scope.duplicate = true;
-                            }
+                    for(fld in scope.survey_questions){
+                        if(scope.survey_questions[fld].variable === scope.variable){
+                            scope.duplicate = true;
                         }
                     }
                 }
                 if(GenerateForm.mode === 'edit'){
-                    elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
-                    key = elementID.split('_')[1];
-                    if(scope.mode==='add'){
-                        for(fld in questions){
-                            if(questions[fld].variable === scope.variable && fld!==key){
-                                scope.duplicate = true;
-                            }
-                        }
-                    }
-                    else if(scope.mode === 'edit'){
-                        for(fld in scope.survey_questions){
-                            if(scope.survey_questions[fld].variable === scope.variable && fld!==key){
-                                scope.duplicate = true;
-                            }
+                    // Loop across the survey questions and see if a different question already has
+                    // the same variable name
+                    for(var i=0; i<scope.survey_questions.length; i++){
+                        if(scope.survey_questions[i].variable === scope.variable && i!==scope.editQuestionIndex){
+                            scope.duplicate = true;
                         }
                     }
 
@@ -440,38 +406,22 @@ export default
                     }
 
                     Wait('stop');
-                    if(scope.mode === 'add' || scope.mode==="edit" && scope.can_edit === true){
-                        $('#survey-save-button').removeAttr('disabled');
-                    }
 
                     if(GenerateForm.mode === 'add'){
-                        if(scope.mode === 'add'){
-                            questions.push(data);
-                            $('#new_question .aw-form-well').remove();
-                            $('#add_question_btn').show();
-                            scope.finalizeQuestion(data , questions.length-1);
-                        }
-                        else if (scope.mode === 'edit'){
-                            scope.survey_questions.push(data);
-                            $('#new_question .aw-form-well').remove();
-                            $('#add_question_btn').show();
-                            scope.finalizeQuestion(data , scope.survey_questions.length-1);
-                        }
+                        // Flag this question as new
+                        data.new_question = true;
 
+                        scope.survey_questions.push(data);
+                        $('#new_question .aw-form-well').remove();
+                        $('#add_question_btn').show();
                     }
                     if(GenerateForm.mode === 'edit'){
-                        elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
-                        key = elementID.split('_')[1];
-                        if(scope.mode==='add'){
-                            questions[key] = data;
-                        }
-                        else if(scope.mode === 'edit'){
-                            scope.survey_questions[key] = data;
-                        }
-                        $('#'+elementID).empty();
-                        scope.finalizeQuestion(data , Number(key));
+                        // Overwrite the survey question with the new data
+                        scope.survey_questions[scope.editQuestionIndex] = data;
                     }
 
+                    // Throw the user back to the "add question" form
+                    scope.generateAddQuestionForm();
 
 
                 } catch (err) {
@@ -479,71 +429,109 @@ export default
                     Alert("Error", "Error parsing extra variables. Parser returned: " + err);
                 }
             };
-            scope.resetForm = function(){
-                html = '<div class="row">'+
-                        '<div class="col-sm-12">'+
-                        '<label for="survey"><span class="label-text prepend-asterisk"> Questions</span></label>'+
-                        '<div id="survey_maker_question_area"></div>'+
-                        '<div id="finalized_questions"></div>'+
-                        '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  New Question</button>'+
-                        '<div id="new_question"></div>'+
-                    '</div>'+
-                '</div>';
-                $('#survey-modal-dialog').html(html);
-                element = angular.element(document.getElementById('add_question_btn'));
-                $compile(element)(scope);
-            };
 
-            scope.saveSurvey = function() {
-                Wait('start');
-                if(scope.mode ==="add"){
-                    $('#survey-modal-dialog').dialog('close');
-                    if(questions.length>0){
-                        scope.survey_questions = questions;
+            // This function is bound to the dnd-drop directive.  When a question is dragged and
+            // dropped, this is the function that gets called.
+            scope.surveyQuestionDropped = function(dropIndex, question) {
+
+                // Handle moving the question to its new slot in scope.survey_questions
+                for(var i=0; i<scope.survey_questions.length; i++) {
+
+                    if(angular.equals(scope.survey_questions[i], question)) {
+
+                        // Check to make sure that the survey question was actually moved
+                        if(i !== dropIndex) {
+                            // Since the suvey question being "moved" is still technically in the array
+                            // we need to adjust the drop index when moving a question down in the array
+                            // See: https://github.com/marceljuenemann/angular-drag-and-drop-lists/issues/54#issuecomment-125487293
+                            if(i < dropIndex) {
+                                dropIndex--;
+                            }
+                            // Remove this survey question from its original position
+                            scope.survey_questions.splice(i, 1);
+
+                            // Add this survey question to its new position
+                            scope.survey_questions.splice(dropIndex, 0, question);
+
+                            // Update the editQuestionIndex if applicable
+                            if(typeof scope.editQuestionIndex === "number") {
+                                // A question is being edited - lets see if we need to adjust the index
+                                if(scope.editQuestionIndex === i) {
+                                    // The edited question was moved
+                                    scope.editQuestionIndex = dropIndex;
+                                }
+                                else if(scope.editQuestionIndex < i && dropIndex <= scope.editQuestionIndex) {
+                                    // An element that was behind the edit question is now ahead of it
+                                    scope.editQuestionIndex++;
+                                }
+                                else if(scope.editQuestionIndex > i && dropIndex >= scope.editQuestionIndex) {
+                                    // An element that was ahead of the edit question is now behind it
+                                    scope.editQuestionIndex--;
+                                }
+                            }
+                        }
+
+                        // Break out of the for loop
+                        break;
                     }
-                    scope.survey_name = "";
-                    scope.survey_description = "";
-                    questions = [] ;
-                    scope.$emit('SurveySaved');
-                }
-                else{
-                    scope.survey_name = "";
-                    scope.survey_description = "";
-                    url = GetBasePath('job_templates') + id + '/survey_spec/';
-                    Rest.setUrl(url);
-                    Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                        .success(function () {
-                            // Wait('stop');
-                            $('#survey-modal-dialog').dialog('close');
-                            scope.$emit('SurveySaved');
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Failed to add new survey. POST returned status: ' + status });
-                        });
-                }
-            };
 
-            //for toggling the input on password inputs
+                };
+
+                // return true here signals that the drop is allowed, but that we've already taken care of inserting the element
+                return true;
+            }
+
+            // Gets called when a user is creating/editing a question that has a password
+            // field.  The password field in the form has a SHOW/HIDE button that calls this.
             scope.toggleInput = function(id) {
+                // Note that the id string passed into this function will have a "#" prepended
                 var buttonId = id + "_show_input_button",
                     inputId = id,
                     buttonInnerHTML = $(buttonId).html();
-                if (buttonInnerHTML.indexOf("Show") > -1) {
-                    $(buttonId).html("Hide");
+                if (buttonInnerHTML.indexOf("SHOW") > -1) {
+                    $(buttonId).html("HIDE");
                     $(inputId).attr("type", "text");
                 } else {
-                    $(buttonId).html("Show");
+                    $(buttonId).html("SHOW");
                     $(inputId).attr("type", "password");
                 }
             };
+
+            /* END QUESTION RELATED FUNCTIONS */
+
+            /* DELETE OVERLAY RELATED FUNCTIONS */
+
+            // This handles setting the delete mode and flipping the boolean used to show the delete overlay
+            scope.showDeleteOverlay = function(mode) {
+                // Set the delete mode (question or survey) so that the overlay knows
+                // how to phrase the prompt
+                scope.deleteMode = mode;
+                // Flip the deleteOverlayVisible flag so that the overlay becomes visible via ng-show
+                scope.deleteOverlayVisible = true;
+            }
+
+            // Called by the cancel/close buttons on the delete overlay.  Also called after deletion has been confirmed.
+            scope.hideDeleteOverlay = function() {
+                // Clear out the delete mode for next time
+                scope.deleteMode = null;
+                // Clear out the index variable for next time
+                scope.questionToBeDeleted = null;
+                // Hide the delete overlay
+                scope.deleteOverlayVisible = false;
+            }
+
+            /* END DELETE OVERLAY RELATED FUNCTIONS */
+
+            // Watcher that updates the survey enabled/disabled tooltip based on scope.survey_enabled
+            scope.$watch('survey_enabled', function(newVal, oldVal) {
+                scope.surveyEnabledTooltip = (newVal) ? "Disable survey" : "Enable survey";
+            })
 
         };
     }
 
 Init.$inject =
-    [   '$location',
-        'deleteSurvey',
+    [   'deleteSurvey',
         'editSurvey',
         'addSurvey',
         'GenerateForm',
@@ -554,7 +542,6 @@ Init.$inject =
         'Rest',
         'ProcessErrors',
         '$compile',
-        'finalizeQuestion',
         'editQuestion',
-        '$sce'
+        'CreateSelect2'
     ];

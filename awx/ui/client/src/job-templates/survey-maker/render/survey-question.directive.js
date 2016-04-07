@@ -23,31 +23,104 @@ function findQuestionByIndex(questions, index) {
     });
 }
 
-function link(scope, element, attrs) {
+function link($sce, $filter, Empty, scope, element, attrs) {
+
+    function serialize(expression) {
+        return $sce.getTrustedHtml(expression);
+    }
+
+    function sanitizeDefault() {
+
+        var defaultValue = "";
+
+        if(scope.question.type === 'text'|| scope.question.type === "password" ){
+            defaultValue = (scope.question.default) ? scope.question.default : "";
+            defaultValue = $filter('sanitize')(defaultValue);
+            defaultValue = serialize(defaultValue);
+        }
+
+        if(scope.question.type === "textarea"){
+            defaultValue = (scope.question.default) ? scope.question.default : (scope.question.default_textarea) ? scope.question.default_textarea:  "" ;
+            defaultValue =  $filter('sanitize')(defaultValue);
+            defaultValue = serialize(defaultValue);
+        }
+
+        if(scope.question.type === 'multiplechoice' || scope.question.type === "multiselect"){
+
+            scope.question.default = scope.question.default_multiselect || scope.question.default;
+
+            if (scope.question.default) {
+                if (scope.question.type === 'multiselect' && typeof scope.question.default.split === 'function') {
+                    defaultValue = scope.question.default.split('\n');
+                } else if (scope.question.type !== 'multiselect') {
+                    defaultValue = scope.question.default;
+                }
+            } else {
+                defaultValue = '';
+            }
+        }
+
+        if(scope.question.type === 'integer'){
+            var min = (!Empty(scope.question.min)) ? scope.question.min : "";
+            var max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
+            defaultValue = (!Empty(scope.question.default)) ? scope.question.default : (!Empty(scope.question.default_int)) ? scope.question.default_int : "" ;
+
+        }
+        if(scope.question.type === "float"){
+            var min = (!Empty(scope.question.min)) ? scope.question.min : "";
+            var max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
+            defaultValue = (!Empty(scope.question.default)) ? scope.question.default : (!Empty(scope.question.default_float)) ? scope.question.default_float : "" ;
+
+        }
+
+        scope.defaultValue = defaultValue;
+
+    }
+
+    //for toggling the input on password inputs
+    scope.toggleInput = function(id) {
+        var buttonId = id + "_show_input_button",
+            inputId = id,
+            buttonInnerHTML = $(buttonId).html();
+        if (buttonInnerHTML.indexOf("SHOW") > -1) {
+            $(buttonId).html("HIDE");
+            $(inputId).attr("type", "text");
+        } else {
+            $(buttonId).html("SHOW");
+            $(inputId).attr("type", "password");
+        }
+    };
 
     if (!scope.question) {
         scope.question = findQuestionByIndex(scope.surveyQuestions, Number(attrs.index));
     }
 
+    // Split out choices to be consumed by the multiple-choice directive
     if (!_.isUndefined(scope.question.choices)) {
         scope.choices = scope.question.choices.split('\n');
     }
+
+    sanitizeDefault();
+
 }
 
 export default
-    function() {
-        var directive =
-            {   restrict: 'E',
-                scope:
-                    {   question: '=',
-                        selectedValue: '=ngModel',
-                        surveyQuestions: '=',
-                        isRequired: '@ngRequired',
-                        isDisabled: '@ngDisabled'
-                    },
-                templateUrl: templateUrl('job-templates/survey-maker/render/survey-question'),
-                link: link
-            };
+    [
+        '$sce', '$filter', 'Empty',
+        function($sce, $filter, Empty) {
+            var directive =
+                {   restrict: 'E',
+                    scope:
+                        {   question: '=',
+                            surveyQuestions: '=',
+                            isRequired: '@ngRequired',
+                            isDisabled: '@ngDisabled',
+                            preview: '='
+                        },
+                    templateUrl: templateUrl('job-templates/survey-maker/render/survey-question'),
+                    link: _.partial(link, $sce, $filter, Empty)
+                };
 
-        return directive;
-    }
+            return directive;
+        }
+    ];

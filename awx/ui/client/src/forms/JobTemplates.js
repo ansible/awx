@@ -276,8 +276,8 @@ export default
                     type: 'custom',
                     column: 2,
                     ngHide: "job_type.value === 'scan'" ,
-                    control: '<button type="button" class="btn btn-sm Form-buttonDefault" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
-                            '<button type="button" class="btn btn-sm Form-buttonDefault" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
+                    control: '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
+                            '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
                 }
             },
 

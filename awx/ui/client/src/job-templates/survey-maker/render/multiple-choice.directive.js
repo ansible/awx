@@ -1,43 +1,31 @@
 /* jshint unused: vars */
 import {templateUrl} from '../../../shared/template-url/template-url.factory';
 
-function link($timeout, scope, element, attrs, ngModel) {
-    attrs.width = attrs.width || '100%';
+function link($timeout, CreateSelect2, scope, element, attrs, ngModel) {
 
     $timeout(function() {
 
-        $.fn.select2.amd.require(
-            [   'select2/utils',
-                'select2/dropdown',
-                'select2/dropdown/search',
-                'select2/dropdown/attachContainer',
-                'select2/dropdown/closeOnSelect',
-                'select2/dropdown/minimumResultsForSearch'
-            ],
-            function(Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch) {
-
-                var CustomAdapter =
-                    _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch],
-                             function(Adapter, Decorator) {
-                                 return Utils.Decorate(Adapter, Decorator);
-                             }, Dropdown);
-
-                element.find('select').select2(
-                    {   multiple: scope.isMultipleSelect(),
-                        minimumResultsForSearch: Infinity,
-                        theme: 'bootstrap',
-                        width: attrs.width,
-                        dropdownAdapter: CustomAdapter
-                    });
-            });
+        // select2-ify the dropdown.  If the preview flag is passed here
+        // and it's true then we don't want to use a custom dropdown adapter.
+        // The reason for this is that the custom dropdown adapter breaks
+        // the draggability of this element.  We're able to get away with this
+        // in preview mode (survey create/edit) because the element is disabled
+        // and we don't actually need the dropdown portion.  Note that the custom
+        // dropdown adapter is used to get the dropdown contents to show up in
+        // a modal.
+        CreateSelect2({
+             element: element.find('select'),
+             multiple: scope.isMultipleSelect(),
+             customDropdownAdapter: scope.preview ? false : true
+        });
 
     });
 
 }
 
 export default
-    [   '$timeout',
-        function($timeout) {
+    [   '$timeout', 'CreateSelect2',
+        function($timeout, CreateSelect2) {
             var directive =
                 {   restrict: 'E',
                     require: 'ngModel',
@@ -47,10 +35,11 @@ export default
                         question: '=',
                         isRequired: '=ngRequired',
                         selectedValue: '=ngModel',
-                        isDisabled: '=ngDisabled'
+                        isDisabled: '=ngDisabled',
+                        preview: '='
                     },
                     templateUrl: templateUrl('job-templates/survey-maker/render/multiple-choice'),
-                    link: _.partial(link, $timeout)
+                    link: _.partial(link, $timeout, CreateSelect2)
                 };
             return directive;
         }

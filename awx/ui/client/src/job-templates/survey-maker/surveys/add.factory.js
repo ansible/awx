@@ -3,17 +3,19 @@ export default
         return function(params) {
             var scope = params.scope;
 
+            // This variable controls the survey on/off toggle beside the create survey
+            // modal title.  We want this toggle to be on by default
+            scope.survey_enabled = true;
+
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
             }
             scope.removeDialogReady = scope.$on('DialogReady', function() {
                 $('#survey-modal-dialog').dialog('open');
-                scope.addQuestion();
+                scope.generateAddQuestionForm();
             });
             Wait('start');
-            $('#form-container').empty();
-            scope.resetForm();
-            ShowSurveyModal({ title: "Add Survey", scope: scope, callback: 'DialogReady' });
+            ShowSurveyModal({ scope: scope, callback: 'DialogReady' });
         };
     }
 
