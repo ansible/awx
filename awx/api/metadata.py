@@ -183,4 +183,8 @@ class RoleMetadata(Metadata):
         metadata = super(RoleMetadata, self).determine_metadata(request, view)
         if 'actions' in metadata:
             metadata['actions'].pop('POST')
+            metadata['actions']['POST'] = {
+                "id": {"type": "integer", "label": "ID", "help_text": "Database ID for this role."},
+                "disassociate": {"type": "integer", "label": "Disassociate", "help_text": "Provide to remove this role."},
+            }
         return metadata
