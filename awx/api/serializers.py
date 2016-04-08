@@ -2140,7 +2140,12 @@ class JobLaunchSerializer(BaseSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
-        credential = attrs.get('credential', obj and obj.credential or None)
+        if obj and obj.credential is not None:
+            # force job template to override runtime credential, if present
+            credential = obj.credential
+            attrs.pop('credential', None)
+        else:
+            credential = attrs.get('credential', None)
         if not credential:
             errors['credential'] = 'Credential not provided'
 
@@ -2174,7 +2179,7 @@ class JobLaunchSerializer(BaseSerializer):
 
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
             errors['project'] = 'Job Template Project is missing or undefined'
-        if obj.inventory is None:
+        if (obj.inventory is None) and not attrs.get('inventory', None):
             errors['inventory'] = 'Job Template Inventory is missing or undefined'
 
         if errors:
