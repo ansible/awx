@@ -2092,23 +2092,26 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
                 data['credential'] = None
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
-            ask_for_field_dict = dict(
-                extra_vars=obj.ask_variables_on_launch,
-                limit=obj.ask_limit_on_launch,
-                job_tags=obj.ask_tags_on_launch,
-                skip_tags=obj.ask_tags_on_launch,
-                job_type=obj.ask_job_type_on_launch,
-                inventory=obj.ask_inventory_on_launch
-            )
-            for field in ask_for_field_dict:
-                if not ask_for_field_dict[field]:
+            ask_for_vars_dict = obj._ask_for_vars_dict()
+            for field in ask_for_vars_dict:
+                if not ask_for_vars_dict[field]:
                     data.pop(field, None)
                 elif field == 'extra_vars':
                     data[field] = extra_vars
+                elif field == 'inventory':
+                    inv_obj = getattr(obj, field)
+                    if inv_obj in ('', None):
+                        data[field] = None
+                    else:
+                        data[field] = inv_obj.id
+                else:
+                    data[field] = getattr(obj, field)
         return data
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if not request.user.can_access(self.model, 'start', obj):
+            raise PermissionDenied()
 
         if 'credential' not in request.data and 'credential_id' in request.data:
             request.data['credential'] = request.data['credential_id']
@@ -2139,22 +2142,16 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
-
-        if not request.user.can_access(Job, 'start', new_job):
-            new_job.delete()
-            raise PermissionDenied()
-
         result = new_job.signal_start(**kv)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             new_job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = dict(job=new_job.id)
-            serializer = JobSerializer(new_job)
-            data['job_data'] = serializer.data
+            data = JobSerializer(new_job).data
+            data['job'] = new_job.id
             data['ignored_fields'] = ignored_fields
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            return Response(data, status=status.HTTP_201_CREATED)
 
 class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 

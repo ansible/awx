@@ -766,7 +766,7 @@ class JobTemplateAccess(BaseAccess):
             self.check_license()
             if obj.job_type == PERM_INVENTORY_SCAN:
                 self.check_license(feature='system_tracking')
-            if obj.survey_enabled:
+            if getattr(obj, 'survey_enabled', None):
                 self.check_license(feature='surveys')
 
         # Super users can start any job

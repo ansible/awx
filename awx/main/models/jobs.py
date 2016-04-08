@@ -378,32 +378,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
 
-    def _accept_or_ignore_job_kwargs(self, **kwargs):
-        # Sort the runtime fields allowed and disallowed by job template
-        ignored_fields = {}
-        prompted_fields = {}
-
-        if 'extra_vars' in kwargs:
-            prompted_fields['extra_vars'] = {}
-            ignored_fields['extra_vars'] = {}
-            if self.ask_variables_on_launch:
-                # Accept all extra_vars if the flag is set
-                prompted_fields['extra_vars'] = kwargs['extra_vars']
-            else:
-                if self.survey_enabled:
-                    # Accept vars defined in the survey and no others
-                    survey_vars = [question['variable'] for question in self.survey_spec['spec']]
-                    for key in kwargs['extra_vars']:
-                        if key in survey_vars:
-                            prompted_fields['extra_vars'][key] = kwargs['extra_vars'][key]
-                        else:
-                            ignored_fields['extra_vars'][key] = kwargs['extra_vars'][key]
-                else:
-                    # No survey & prompt flag is false - ignore all
-                    ignored_fields['extra_vars'] = kwargs['extra_vars']
-
-        # Fields which all follow the same pattern
-        ask_for_field_dict = dict(
+    def _ask_for_vars_dict(self):
+        return dict(
+            extra_vars=self.ask_variables_on_launch,
             limit=self.ask_limit_on_launch,
             job_tags=self.ask_tags_on_launch,
             skip_tags=self.ask_tags_on_launch,
@@ -411,13 +388,33 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             inventory=self.ask_inventory_on_launch
         )
 
-        for field in ask_for_field_dict:
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
+        # Sort the runtime fields allowed and disallowed by job template
+        ignored_fields = {}
+        prompted_fields = {}
+
+        ask_for_vars_dict = self._ask_for_vars_dict()
+
+        for field in ask_for_vars_dict:
             if field in kwargs:
-                if ask_for_field_dict[field]:
+                if field == 'extra_vars':
+                    prompted_fields[field] = {}
+                    ignored_fields[field] = {}
+                if ask_for_vars_dict[field]:
                     prompted_fields[field] = kwargs[field]
                 else:
-                    ignored_fields[field] = kwargs[field]
+                    if field == 'extra_vars' and self.survey_enabled:
+                        # Accept vars defined in the survey and no others
+                        survey_vars = [question['variable'] for question in self.survey_spec['spec']]
+                        for key in kwargs[field]:
+                            if key in survey_vars:
+                                prompted_fields[field][key] = kwargs[field][key]
+                            else:
+                                ignored_fields[field][key] = kwargs[field][key]
+                    else:
+                        ignored_fields[field] = kwargs[field]
 
+        # Special case to ignore inventory if it is a scan job
         if prompted_fields.get('job_type', None) == 'scan' or self.job_type == 'scan':
             if 'inventory' in prompted_fields:
                 ignored_fields['inventory'] = prompted_fields.pop('inventory')
