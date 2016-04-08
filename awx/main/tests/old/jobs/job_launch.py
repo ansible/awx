@@ -68,7 +68,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def test_credential_implicit(self):
         # Implicit, attached credentials
         with self.current_user(self.user_sue):
-            response = self.post(self.launch_url, {}, expect=202)
+            response = self.post(self.launch_url, {}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
 
@@ -76,7 +76,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # Sending extra_vars as a JSON string, implicit credentials
         with self.current_user(self.user_sue):
             data = dict(extra_vars = '{\"a\":3}')
-            response = self.post(self.launch_url, data, expect=202)
+            response = self.post(self.launch_url, data, expect=201)
             j = Job.objects.get(pk=response['job'])
             ev_dict = yaml.load(j.extra_vars)
             self.assertIn('a', ev_dict)
@@ -87,7 +87,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # Sending extra_vars as a JSON string, implicit credentials
         with self.current_user(self.user_sue):
             data = dict(extra_vars = 'a: 3')
-            response = self.post(self.launch_url, data, expect=202)
+            response = self.post(self.launch_url, data, expect=201)
             j = Job.objects.get(pk=response['job'])
             ev_dict = yaml.load(j.extra_vars)
             self.assertIn('a', ev_dict)
@@ -98,7 +98,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # Explicit, credential
         with self.current_user(self.user_sue):
             self.cred_sue.delete()
-            response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=202)
+            response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
             self.assertEqual(j.credential.pk, self.cred_doug.pk)
@@ -107,26 +107,26 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # Explicit, credential
         with self.current_user(self.user_sue):
             self.cred_sue.delete()
-            response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=202)
+            response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
             self.assertEqual(j.credential.pk, self.cred_doug.pk)
 
-    def test_credential_override(self):
+    def test_credential_override_reject(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
-            response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=202)
+            response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
-            self.assertEqual(j.credential.pk, self.cred_doug.pk)
+            self.assertEqual(j.credential.pk, self.cred_sue.pk)
 
-    def test_credential_override_via_credential_id(self):
+    def test_credential_override_via_credential_id_reject(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
-            response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=202)
+            response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
-            self.assertEqual(j.credential.pk, self.cred_doug.pk)
+            self.assertEqual(j.credential.pk, self.cred_sue.pk)
 
     def test_bad_credential_launch_fail(self):
         # Can't launch a job template without a credential defined (or if we
@@ -212,7 +212,7 @@ class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTe
 
     def test_explicit_cred_with_ask_password(self):
         with self.current_user(self.user_sue):
-            response = self.post(self.launch_url, {'ssh_password': 'whatever'}, expect=202)
+            response = self.post(self.launch_url, {'ssh_password': 'whatever'}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
 

@@ -49,7 +49,7 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, us
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     runtime_data, user('admin', True))
 
-    assert response.status_code == 202
+    assert response.status_code == 201
     job_id = response.data['job']
     job_obj = Job.objects.get(pk=job_id)
 
@@ -80,7 +80,7 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     runtime_data, user('admin', True))
 
-    assert response.status_code == 202
+    assert response.status_code == 201
     job_id = response.data['job']
     job_obj = Job.objects.get(pk=job_id)
 
@@ -150,7 +150,7 @@ def test_job_launch_fails_without_inventory_access(deploy_jobtemplate, machine_c
     response = post(reverse('api:job_template_launch',
                     args=[deploy_jobtemplate.pk]), {}, common_user)
 
-    assert response.status_code == 202
+    assert response.status_code == 201
 
     # Assure that giving an inventory without access to the inventory blocks the launch
     new_inv = deploy_jobtemplate.project.organization.inventories.create(name="user-can-not-use")
@@ -170,7 +170,7 @@ def test_job_relaunch_prompted_vars(runtime_data, job_template_prompts, post, us
     first_response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                           runtime_data, admin_user)
 
-    assert first_response.status_code == 202
+    assert first_response.status_code == 201
     original_job = Job.objects.get(pk=first_response.data['job'])
 
     # Launch a second job as a relaunch of the first
@@ -179,7 +179,7 @@ def test_job_relaunch_prompted_vars(runtime_data, job_template_prompts, post, us
     relaunched_job = Job.objects.get(pk=second_response.data['job'])
 
     # Check that job data matches the original runtime variables
-    assert first_response.status_code == 202
+    assert first_response.status_code == 201
     assert 'job_launch_var' in yaml.load(relaunched_job.extra_vars)
     assert relaunched_job.limit == runtime_data['limit']
     assert relaunched_job.job_type == runtime_data['job_type']
@@ -189,6 +189,7 @@ def test_job_relaunch_prompted_vars(runtime_data, job_template_prompts, post, us
 @pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
+    deploy_jobtemplate.credential = None
     deploy_jobtemplate.save()
 
     kv = dict(extra_vars={"job_launch_var": 4}, credential=machine_credential.id)
@@ -205,6 +206,7 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     assert result
     assert 'job_template_var' in final_job_extra_vars
     assert 'job_launch_var' in final_job_extra_vars
+    assert job_obj.credential.id == machine_credential.id
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
