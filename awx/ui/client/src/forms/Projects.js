@@ -246,6 +246,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
 
         related: {
             permissions: {
+                basePath: 'projects/:id/access_list/',
                 type: 'collection',
                 title: 'Permissions',
                 iterator: 'permission',

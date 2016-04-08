@@ -79,6 +79,7 @@ export default
 
             related: {
                 scan_job_templates: {
+                    basePath: 'inventories/:id/scan_job_templates',
                     type: 'collection',
                     title: 'Scan Job Templates',
                     iterator: 'scan_job_template',

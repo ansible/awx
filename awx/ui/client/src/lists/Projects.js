@@ -30,6 +30,7 @@ export default
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "List-staticColumn--smallStatus",
                 nosort: true,
+                searchLabel: 'Status',
                 searchType: 'select',
                 searchOptions: [],  //set in the controller
                 excludeModal: true

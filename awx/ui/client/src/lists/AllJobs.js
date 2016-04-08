@@ -10,15 +10,15 @@ export default
     .value( 'AllJobsList', {
 
         name: 'all_jobs',
+        basePath: 'unified_jobs',
         iterator: 'all_job',
         editTitle: 'All Jobs',
         index: false,
         hover: true,
         well: false,
-
         fields: {
             status: {
-                label: '',
+                label: 'Status',
                 columnClass: 'List-staticColumn--smallStatus',
                 awToolTip: "{{ all_job.status_tip }}",
                 awTipPlacement: "right",
