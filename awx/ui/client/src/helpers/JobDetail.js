@@ -40,9 +40,9 @@ export default
     angular.module('JobDetailHelper', ['Utilities', 'RestServices', 'ModalDialog'])
 
     .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
-        'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
+        'GetElapsed', 'UpdateTaskStatus', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
     function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
-        UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask, AddNewPlay) {
+        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay) {
         return function(params) {
 
             var scope = params.scope,
@@ -185,7 +185,7 @@ export default
         };
     }])
 
-    .factory('GetElapsed', [ function() {
+    .factory('GetElapsed', ['moment', function(moment) {
         return function(params) {
             var start = params.start,
                 end = params.end,
@@ -299,7 +299,7 @@ export default
         };
     }])
 
-    .factory('AddNewTask', ['DrawGraph', 'UpdatePlayStatus', 'SetActivePlay', 'SetActiveTask', function(DrawGraph, UpdatePlayStatus, SetActivePlay, SetActiveTask) {
+    .factory('AddNewTask', ['UpdatePlayStatus', 'SetActivePlay', 'SetActiveTask', function(UpdatePlayStatus, SetActivePlay, SetActiveTask) {
         return function(params) {
             var scope = params.scope,
                 event = params.event,
@@ -351,7 +351,7 @@ export default
         };
     }])
 
-    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', function(GetElapsed, Empty, JobIsFinished) {
+    .factory('UpdateJobStatus', ['moment', 'GetElapsed', 'Empty', 'JobIsFinished', function(moment, GetElapsed, Empty, JobIsFinished) {
         return function(params) {
             var scope = params.scope,
                 failed = params.failed,
@@ -363,17 +363,17 @@ export default
                 scope.job_status.status = 'failed';
             }
             if (JobIsFinished(scope) && !Empty(modified)) {
-                scope.job_status.finished = modified;
+                scope.job_status.finished = moment(modified).format('l');
             }
             if (!Empty(started) && Empty(scope.job_status.started)) {
-                scope.job_status.started = started;
+                scope.job_status.started = moment(started).format('l');
             }
             if (!Empty(scope.job_status.finished) && !Empty(scope.job_status.started)) {
                 scope.job_status.elapsed = GetElapsed({
-                    start: scope.job_status.started,
-                    end: scope.job_status.finished
+                    start: started,
+                    end: finished
                 });
-            }
+            }            
         };
     }])
 
@@ -959,127 +959,39 @@ export default
         };
     }])
 
-    // Refresh the list of hosts in the hosts summary section
-    .factory('ReloadHostSummaryList', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
-        return function(params) {
-            var scope = params.scope,
-                callback = params.callback,
-                url;
-
-            url = scope.job.related.job_host_summaries + '?';
-            url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&': '';
-            url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
-            url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
-            scope.hosts = [];
-            scope.hostSummariesLoading = true;
-
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    scope.next_host_summaries = data.next;
-                    scope.hosts = [];
-                    data.results.forEach(function(event) {
-                        var name;
-                        if (event.host_name) {
-                            name = event.host_name;
-                        }
-                        else {
-                            name = "<deleted host>";
-                        }
-                        scope.hosts.push({
-                            id: name,
-                            name: event.host_name,
-                            ok: event.ok,
-                            changed: event.changed,
-                            unreachable: event.dark,
-                            failed: event.failures,
-                            status: (event.failed) ? 'failed' : 'successful'
-                        });
-                    });
-
-                    scope.hostSummariesLoading = false;
-                    if (callback) {
-                        scope.$emit(callback);
-                    }
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        };
-    }])
-
-    .factory('LoadHostSummary', [ function() {
-        return function(params) {
-            var scope = params.scope,
-                data = params.data,
-                host;
-            scope.host_summary.ok = 0;
-            for (host in data.ok) {
-                if (!data.changed[host] && !data.dark[host] && !data.failures[host]) {
-                    scope.host_summary.ok += 1;
-                }
-            }
-            scope.host_summary.changed = 0;
-            for (host in data.changed) {
-                if (!data.dark[host] && !data.failures[host]) {
-                    scope.host_summary.changed += 1;
-                }
-            }
-            scope.host_summary.unreachable = 0;
-            for (host in data.dark) {
-                scope.host_summary.unreachable += 1;
-            }
-            scope.host_summary.failed = 0;
-            for (host in data.failures) {
-                scope.host_summary.failed += 1;
-            }
-            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
-                scope.host_summary.unreachable + scope.host_summary.failed;
-        };
-    }])
-
-
     .factory('DrawGraph', ['DonutChart', function(DonutChart) {
         return function(params) {
-            var scope = params.scope,
+            var count = params.count,
                 graph_data = [];
-
             // Ready the data
-            if (scope.host_summary.ok) {
+            if (count.ok.length > 0) {
                 graph_data.push({
                     label: 'OK',
-                    value: scope.host_summary.ok,
+                    value: count.ok.length,
                     color: '#60D66F'
                 });
             }
-            if (scope.host_summary.changed) {
+            if (count.changed.length > 0) {
                 graph_data.push({
                     label: 'CHANGED',
-                    value: scope.host_summary.changed,
+                    value: count.changed.length,
                     color: '#FF9900'
                 });
             }
-            if (scope.host_summary.unreachable) {
+            if (count.unreachable.length > 0) {
                 graph_data.push({
                     label: 'UNREACHABLE',
-                    value: scope.host_summary.unreachable,
+                    value: count.unreachable.length,
                     color: '#FF0000'
                 });
             }
-            if (scope.host_summary.failed) {
+            if (count.failed.length > 0) {
                 graph_data.push({
                     label: 'FAILED',
-                    value: scope.host_summary.failed,
+                    value: count.failed.length,
                     color: '#ff5850'
                 });
             }
-            scope.graph_data = graph_data;
-            var total_count = 0, gd_obj;
-            for (gd_obj in graph_data) {
-                total_count += graph_data[gd_obj].value;
-            }
-            scope.total_count_for_graph = total_count;
             DonutChart({
                 data: graph_data
             });
@@ -1121,44 +1033,42 @@ export default
                     "font-family": 'Open Sans',
                     "font-style": "normal",
                     "font-weight":400,
-                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)",
+                    "width": 500,
+                    "height": 300,
                 });
 
             d3.select(element.find(".nv-label text")[0])
-                .attr("class", "DashboardGraphs-hostStatusLabel--successful")
+                .attr("class", "HostSummary-graph--successful")
                 .style({
                     "font-family": 'Open Sans',
-                    "text-anchor": "start",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
                     "fill" : colors[0],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[1])
-                .attr("class", "DashboardGraphs-hostStatusLabel--failed")
+                .attr("class", "HostSummary-graph--changed")
                 .style({
                     "font-family": 'Open Sans',
-                    "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
                     "fill" : colors[1],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[2])
-                .attr("class", "DashboardGraphs-hostStatusLabel--successful")
+                .attr("class", "HostSummary-graph--failed")
                 .style({
                     "font-family": 'Open Sans',
-                    "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
                     "fill" : colors[2],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
             d3.select(element.find(".nv-label text")[3])
-                .attr("class", "DashboardGraphs-hostStatusLabel--failed")
+                .attr("class", "HostSummary-graph--unreachable")
                 .style({
                     "font-family": 'Open Sans',
-                    "text-anchor" : "end !imporant",
                     "font-size": "16px",
                     "text-transform" : "uppercase",
                     "fill" : colors[3],
@@ -1399,68 +1309,8 @@ export default
         };
     }])
 
-    .factory('DrawHostSummaries', [ function() {
-        return function(params) {
-            var scope = params.scope,
-                result = [],
-                filteredListA = [],
-                filteredListB = [],
-                idx = 0,
-                hostSummaries,
-                key,
-                keys = Object.keys(scope.jobData.hostSummaries);
-            if (keys.length > 0) {
-                hostSummaries = JSON.parse(JSON.stringify(scope.jobData.hostSummaries));
-                if (scope.search_host_summary_name) {
-                    for (key in hostSummaries) {
-                        if (hostSummaries[key].name.indexOf(scope.search_host_summary_name) > 0) {
-                            filteredListA[key] = hostSummaries[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListA = hostSummaries;
-                }
-
-                if (scope.search_host_summary_status === 'failed') {
-                    for (key in filteredListA) {
-                        if (filteredListA[key].status === 'failed' || filteredListA[key].status === 'unreachable') {
-                            filteredListB[key] = filteredListA[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListB = filteredListA;
-                }
-
-                keys = Object.keys(filteredListB);
-
-                keys.sort(function(a,b) {
-                    if (filteredListB[a].name > filteredListB[b].name) {
-                        return 1;
-                    }
-                    if (filteredListB[a].name < filteredListB[b].name) {
-                        return -1;
-                    }
-                    // a must be equal to b
-                    return 0;
-                });
-
-                while (idx < keys.length && result.length < scope.hostSummariesMaxRows) {
-                    result.push(filteredListB[keys[idx]]);
-                    idx++;
-                }
-            }
-            setTimeout( function() {
-                scope.$apply( function() {
-                    scope.hosts = result;
-                });
-            });
-        };
-    }])
-
-    .factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawHostSummaries', 'DrawGraph',
-        function(DrawPlays, DrawTasks, DrawHostResults, DrawHostSummaries, DrawGraph) {
+    .factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults',
+        function(DrawPlays, DrawTasks, DrawHostResults) {
         return function(params) {
             var scope = params.scope;
             if (!scope.pauseLiveEvents) {
@@ -1469,17 +1319,10 @@ export default
                 DrawHostResults({ scope: scope });
             }
 
-            DrawHostSummaries({ scope: scope });
-
             setTimeout(function() {
                 scope.playsLoading = false;
                 scope.tasksLoading = false;
                 scope.hostResultsLoading = false;
-                scope.LoadHostSummaries = false;
             },100);
-
-            if (scope.host_summary.total > 0) {
-                DrawGraph({ scope: scope, resize: true });
-            }
         };
     }]);

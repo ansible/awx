@@ -5,49 +5,114 @@
  *************************************************/
 
  export default
- 	['$scope', '$rootScope', '$stateParams', 'JobDetailService', 'jobSocket', function($scope, $rootScope, $stateParams, JobDetailService, jobSocket){
+    ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'jobSocket', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, jobSocket, DrawGraph){
 
- 		// the job_events socket should be substituted for a job_host_summary socket post 3.0 
         var page_size = 200;
-        var socketListener = function(){
-        	console.log(jobSocket)
-        	jobSocket.on('summary_complete', function(data) {
-        		JobDetailService.getJob($stateParams.id).success(function(res){
-        			console.log('job at summary_complete.', res)
-        		});
-        	});
-        	jobSocket.on('status_changed', function(data) {
-        		JobDetailService.getJob($stateParams.id).success(function(res){
-        			console.log('job at data.stats.', data.status, res)
-        		});
-        		JobDetailService.getJobHostSummaries($stateParams.id, {}).success(function(res){
-        			console.log('jobhostSummaries at summary_complete.', data.status, res)
-        		});
-        	});
-        }
- 		$scope.loading = $scope.hosts.length > 0 ? false : true;
- 		$scope.done = true;
- 		$scope.events = [];
- 		$scope.$watchCollection('events', function(c){
-	 		var filtered = $scope.events.filter(function(event){
-	 			return ((event.failed || event.changed ||
-	 				'runner_on_ok' || 'runner_on_async_ok' ||
-	 				'runner_on_unreachable' || 'runner_on_skipped')
-	 				&& event.host_name != '');
-	 		});
-	 		var grouped = _.groupBy(filtered, 'host_name');
-	 		//$scope.hosts =              		
- 		});
 
+        $scope.loading = $scope.hosts.length > 0 ? false : true;
+        $scope.filter = 'all';
+        $scope.search = null;
 
- 		$scope.search = function(host_name){};
- 		$scope.filter = function(filter){};
-
-    	var init = function(){
-    		socketListener();
-        	JobDetailService.getJobHostSummaries($stateParams.id, {}).success(function(res){
-        			console.log('jobhostSummaries at init.', res)
-        		});    		
+        var buildTooltips = function(hosts){
+            var count = {
+                ok : _.filter(hosts, function(o){
+                    return o.changed === 0 && o.ok > 0;
+                }),
+                skipped : _.filter(hosts, function(o){
+                    return o.skipped > 0;
+                }),
+                unreachable : _.filter(hosts, function(o){
+                    return o.dark > 0;
+                }),
+                failed : _.filter(hosts, function(o){
+                    return o.failed === true;
+                }),
+                changed : _.filter(hosts, function(o){
+                    return o.changed > 0;
+                })       
+            };
+            var tooltips = {
+                0: 'No host events were ',
+                1: ' host event was ',
+                2: ' host events were '
+            };
+            return {count, tooltips}
         };
-    	init();
- 	}];
+        var socketListener = function(){
+            // emitted by the API in the same function used to persist host summary data
+            // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py 
+            jobSocket.on('summary_complete', function(data) {
+                // discard socket msgs we don't care about in this context
+                if ($stateParams.id === data['unified_job_id']){
+                    JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
+                    .success(function(res){
+                        init()
+                    });
+                }
+            });
+            // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py 
+            jobSocket.on('status_changed', function(data) {
+                if ($stateParams.id === data['unified_job_id']){
+                    $scope.status = data['status'];
+                }
+            });
+        };
+
+        $scope.search = function(){
+            Wait('start')
+            JobDetailService.getJobHostSummaries($stateParams.id, {
+                page_size: page_size,
+                host_name__icontains: $scope.searchTerm,
+            }).success(function(res){
+                $scope.hosts = res.results;
+                $scope.next = res.next;
+                Wait('stop')
+            })
+        };
+        $scope.setFilter = function(filter){
+            $scope.filter = filter;
+            var getAll = function(){
+                Wait('start');
+                JobDetailService.getJobHostSummaries($stateParams.id, {
+                    page_size: page_size
+                }).success(function(res){
+                    Wait('stop')           
+                    $scope.hosts = res.results;
+                    $scope.next = res.next;
+                });
+            };
+            var getFailed = function(){
+                Wait('start');
+                JobDetailService.getJobHostSummaries($stateParams.id, {
+                    page_size: page_size,
+                    failed: true
+                }).success(function(res){
+                    Wait('stop')
+                    $scope.hosts = res.results;
+                    $scope.next = res.next;
+                });                
+            }
+            var get = filter == 'all' ? getAll() : getFailed()
+        };
+
+        $scope.$watchCollection('hosts', function(curr, prev){
+            $scope.tooltips = buildTooltips(curr);
+            DrawGraph({count: $scope.tooltips.count, resize:true});
+        });
+
+        var init = function(){
+            Wait('start');
+            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
+            .success(function(res){
+                $scope.hosts = res.results;
+                $scope.next = res.next;
+                Wait('stop');
+            });
+            JobDetailService.getJob($stateParams.id)
+            .success(function(res){
+                $scope.status = status;
+            });
+        };
+        socketListener();
+        init();
+    }];

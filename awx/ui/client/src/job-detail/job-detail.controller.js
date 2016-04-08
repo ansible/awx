@@ -13,8 +13,7 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile',
         '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
-        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
-        'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
+        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
         'LoadPlays', 'LoadTasks', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
@@ -22,8 +21,8 @@ export default
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
             $log, ClearScope, GetBasePath, Wait, ProcessErrors,
-            SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph,
-            LoadHostSummary, ReloadHostSummaryList, JobIsFinished,
+            SelectPlay, SelectTask, Socket, GetElapsed,
+            JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
             PlaybookRun, LoadPlays, LoadTasks,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
@@ -192,7 +191,6 @@ export default
             scope.searchPlaysEnabled = true;
             scope.searchTasksEnabled = true;
             scope.searchHostsEnabled = true;
-            scope.searchHostSummaryEnabled = true;
             scope.search_play_status = 'all';
             scope.search_task_status = 'all';
             scope.search_host_status = 'all';
@@ -291,10 +289,6 @@ export default
                     };
                     JobDetailService.getRelatedJobEvents(scope.job.id, params)
                         .success(function(data) {
-                                LoadHostSummary({
-                                    scope: scope,
-                                    data: data.results[0].event_data
-                                });
                             UpdateDOM({ scope: scope });
                         })
                         .error(function(data, status) {
@@ -623,7 +617,6 @@ export default
                 scope.playsLoading = true;
                 scope.tasksLoading = true;
                 scope.hostResultsLoading = true;
-                scope.LoadHostSummaries = true;
 
                 // Load the job record
                 JobDetailService.getJob(job_id)
@@ -749,10 +742,6 @@ export default
                     // First time. User just loaded page.
                     scope.$emit('LoadJob');
                 }
-                else {
-                    // Check if the graph needs to redraw
-                    setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
-                }
             });
 
             scope.adjustSize = function() {
@@ -800,7 +789,6 @@ export default
                 // Summary table height adjusting.
                 height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .JobDetail-searchHeaderRow').outerHeight() -
                     $('#hosts-summary-section .table-header').outerHeight() - 20;
-                // $('#hosts-summary-table').height(height);
                 //$('#hosts-summary-table').mCustomScrollbar("update");
                 scope.$emit('RefreshCompleted');
             };
@@ -850,57 +838,22 @@ export default
                 }
             };
 
-            scope.toggleSummary = function(hide) {
-                var docw, doch, height = $('#job-detail-container').height(), slide_width;
-                if (!hide) {
-                    docw = $(window).width();
-                    doch = $(window).height();
-                    slide_width = (docw < 840) ? '100%' : '80%';
-                    $('#summary-button').hide();
-                    $('.overlay').css({
-                        width: $(document).width(),
-                        height: $(document).height()
-                    }).show();
-
-                    // Adjust the summary table height
-                    $('#job-summary-container .job_well').height(height - 18).css({
-                        'box-shadow': '-3px 3px 5px 0 #ccc'
-                    });
-                    height = Math.floor($('#job-detail-container').height() * 0.5) -
-                        $('#hosts-summary-section .header').outerHeight() -
-                        $('#hosts-summary-section .table-header').outerHeight() -
-                        $('#hide-summary-button').outerHeight() -
-                        $('#summary-search-section').outerHeight() -
-                        $('#hosts-summary-section .header').outerHeight() -
-                        $('#hosts-summary-section .legend').outerHeight();
-                    $('#hosts-summary-table').height(height - 50);
-                    //$('#hosts-summary-table').mCustomScrollbar("update");
-
-                    $('#hide-summary-button').show();
-
-                    $('#job-summary-container').css({
-                        top: 0,
-                        right: 0,
-                        width: slide_width,
-                        'z-index': 1090,
-                        'padding-right': '15px',
-                        'padding-left': '15px'
-                    }).show('slide', {'direction': 'right'});
-
-                    setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
-                }
-                else {
-                    $('.overlay').hide();
-                    $('#summary-button').show();
-                    $('#job-summary-container').hide('slide', {'direction': 'right'});
-                }
-            };
-
             scope.objectIsEmpty = function(obj) {
                 if (angular.isObject(obj)) {
                     return (Object.keys(obj).length > 0) ? false : true;
                 }
                 return true;
+            };
+
+            scope.toggleLessEvents = function() {
+                if (!scope.lessEvents) {
+                    $('#events-summary').slideUp(200);
+                    scope.lessEvents = true;
+                }
+                else {
+                    $('#events-summary').slideDown(200);
+                    scope.lessEvents = false;
+                }
             };
 
             scope.toggleLessStatus = function() {
@@ -922,18 +875,6 @@ export default
                 else {
                     $('#job-detail-details').slideDown(200);
                     scope.lessDetail = false;
-                }
-            };
-
-            scope.toggleLessEvents = function() {
-                if (!scope.lessEvents) {
-                    $('#events-summary').slideUp(200);
-                    scope.lessEvents = true;
-                }
-                else {
-                    $('#events-summary').slideDown(200);
-                    scope.lessEvents = false;
-                    DrawGraph({scope:scope});
                 }
             };
 
@@ -1017,86 +958,6 @@ export default
                 }
             };
 
-            scope.searchHostsKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHosts();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchHostSummary = function() {
-                if (scope.search_host_summary_name) {
-                    scope.searchHostSummaryEnabled = false;
-                }
-                else {
-                    scope.searchHostSummaryEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    ReloadHostSummaryList({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchHostSummaryKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHostSummary();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.filterTaskStatus = function() {
-                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterHostStatus = function() {
-                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    var params = {
-                        parent: scope.selectedTask,
-                        event__startswith: 'runner',
-                        page_size: scope.hostResultsMaxRows,
-                        order: 'host_name,counter'                    
-                    }
-                    if (scope.search_host_status === 'failed'){
-                        params.failed = true;
-                    }
-                    scope.hostResultsLoading = true;
-                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                        scope.hostResults = JobDetailService.processHostEvents(res.results)
-                        scope.hostResultsLoading = false;
-                    });
-                }
-            };
-
-            scope.filterHostSummaryStatus = function() {
-                scope.search_host_summary_status = (scope.search_host_summary_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    // /api/v1/jobs/11/job_host_summaries/?failed=true&&page_size=200&order=host_name
-                    var params = {
-                        page_size: scope.hostSummariesMaxRows,
-                        order: 'host_name'
-                    }
-                    if (scope.search_host_summary_status === 'failed'){
-                        params.failed = true;
-                    }
-                    /*
-                    JobDetailService.getJobHostSummaries(scope.job.id, params).success(function(res){
-                        scope.next_host_summaries = res.next;
-                        scope.hosts = res.results;
-                        console.log(res.results)
-                    });
-                    */
-                    ReloadHostSummaryList({
-                        scope: scope
-                    });
-                }
-            };
 
             if (scope.removeDeleteFinished) {
                 scope.removeDeleteFinished();
