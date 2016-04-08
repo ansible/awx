@@ -116,7 +116,6 @@ export default function() {
                     variable: "password_required" ,
                     init: "false"
                 },
-                // ngRequired:"notification_type.value == 'email' || notification_type.value == 'irc'",
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
                 subForm: 'typeSubForm'
             },
@@ -164,7 +163,6 @@ export default function() {
                     variable: "token_required",
                     init: "false"
                 },
-                // ngRequired:"notification_type.value == 'slack' || notification_type.value == 'pagerduty' || notification_type.value == 'hipchat'",
                 ngShow: "notification_type.value == 'slack' || notification_type.value == 'pagerduty' || notification_type.value == 'hipchat'",
                 subForm: 'typeSubForm'
             },

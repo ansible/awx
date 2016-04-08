@@ -39,7 +39,6 @@ export default
                     for (i = 0; i < $scope.notification_type_options.length; i++) {
                         if ($scope.notification_type_options[i].value === '') {
                             $scope.notification_type_options[i].value="manual";
-                            // $scope.scm_type = $scope.scm_type_options[i];
                             break;
                         }
                     }
@@ -79,14 +78,6 @@ export default
                                     break;
                                 }
                             }
-
-                            // if ($scope.notification_type.value !== 'manual') {
-                            //     $scope.pathRequired = false;
-                            //     $scope.scmRequired = true;
-                            // } else {
-                            //     $scope.pathRequired = true;
-                            //     $scope.scmRequired = false;
-                            // }
 
                             master.notification_type = $scope.notification_type;
                             CreateSelect2({
@@ -135,7 +126,6 @@ export default
 
             $scope.formSave = function(){
                 var params,
-                    // config,
                     v = $scope.notification_type.value;
 
                 generator.clearApiErrors();

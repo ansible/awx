@@ -1227,9 +1227,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         } else {
                             html += "<span class=\"Form-inputLabel\">" + field.label + "</span>";
                         }
-                        // html += '<span class=\"Form-inputLabel\">' + field.label + "</span>";
-
-                        // html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
 
                         html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";

@@ -102,7 +102,7 @@ export default
                 $compile(elem)(scope);
                 elem.on('shown.bs.popover', function() {
                     $('.popover').each(function() {
-                        // $compile($(this))(scope);  //make nested directives work!
+                        $compile($(this))(scope);  //make nested directives work!
                     });
                     $('.popover-content, .popover-title').click(function() {
                         elem.popover('hide');
@@ -135,8 +135,7 @@ export default
 
                         recent_notifications.forEach(function(row) {
                             html += "<tr>\n";
-                            html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                                ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>\n";
+                            html += "<td><i class=\"fa icon-job-" + row.status + "\"></i></td>\n";
                             html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
                             html += "</tr>\n";
                         });
@@ -149,9 +148,6 @@ export default
                     attachElem(event, html, title);
                 }
             };
-
-
-
 
             scope.testNotification = function(){
                 var name = this.notifier.name;
@@ -182,7 +178,6 @@ export default
             };
 
             scope.deleteNotification =  function(id, name){
-
                 var action = function () {
                     $('#prompt-modal').modal('hide');
                     Wait('start');
@@ -197,7 +192,6 @@ export default
                                 msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                         });
                 };
-
                 var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + name + '</div>';
                 Prompt({
                     hdr: 'Delete',
@@ -206,7 +200,5 @@ export default
                     actionText: 'DELETE'
                 });
             };
-
-
         }
     ];

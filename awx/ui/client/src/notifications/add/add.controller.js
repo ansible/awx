@@ -36,7 +36,6 @@ export default
                 for (i = 0; i < $scope.notification_type_options.length; i++) {
                     if ($scope.notification_type_options[i].value === '') {
                         $scope.notification_type_options[i].value="manual";
-                        // $scope.scm_type = $scope.scm_type_options[i];
                         break;
                     }
                 }
@@ -79,7 +78,6 @@ export default
             // Save
             $scope.formSave = function () {
                 var params,
-                    // config,
                     v = $scope.notification_type.value;
 
                 generator.clearApiErrors();

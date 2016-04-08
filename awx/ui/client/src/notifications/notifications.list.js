@@ -4,8 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-
-
 export default function(){
     return {
         name:  'notifications' ,
@@ -24,13 +22,12 @@ export default function(){
             notification_type: {
                 label: 'Type',
                 searchType: 'select',
-                searchOptions: [], // will be set by Options call to projects resource
+                searchOptions: [],
                 excludeModal: true,
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             notifiers_success: {
                 label: 'Successful',
-                // columnClass: 'List-staticColumn--toggle',
                 flag: 'notifiers_success',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notifiers_success\")",
