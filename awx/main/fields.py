@@ -97,6 +97,14 @@ class ImplicitRoleField(models.ForeignKey):
         kwargs.setdefault('null', 'True')
         super(ImplicitRoleField, self).__init__(*args, **kwargs)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(ImplicitRoleField, self).deconstruct()
+        kwargs['role_name'] = self.role_name
+        kwargs['role_description'] = self.role_description
+        kwargs['permissions'] = self.permissions
+        kwargs['parent_role'] = self.parent_role
+        return name, path, args, kwargs
+
     def contribute_to_class(self, cls, name):
         super(ImplicitRoleField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, ImplicitRoleDescriptor(self))
