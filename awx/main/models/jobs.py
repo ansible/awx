@@ -53,7 +53,9 @@ class JobOptions(BaseModel):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
+        blank=True,
         null=True,
+        default=None,
         on_delete=models.SET_NULL,
     )
     project = models.ForeignKey(

@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.db.models.deletion
 from django.conf import settings
 
 
@@ -31,5 +32,15 @@ class Migration(migrations.Migration):
             model_name='jobtemplate',
             name='ask_tags_on_launch',
             field=models.BooleanField(default=False),
+        ),
+        migrations.AlterField(
+            model_name='job',
+            name='inventory',
+            field=models.ForeignKey(related_name='jobs', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True),
+        ),
+        migrations.AlterField(
+            model_name='jobtemplate',
+            name='inventory',
+            field=models.ForeignKey(related_name='jobtemplates', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True),
         ),
     ]
