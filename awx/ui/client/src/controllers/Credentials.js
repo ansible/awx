@@ -329,7 +329,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         form = CredentialForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $stateParams.credential_id;
+        id = $stateParams.credential_id,
+        relatedSets = {};
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
@@ -378,6 +379,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         $scope.removeCredentialLoaded();
     }
     $scope.removeCredentialLoaded = $scope.$on('credentialLoaded', function () {
+        var set;
+        for (set in relatedSets) {
+            $scope.search(relatedSets[set].iterator);
+        }
         var orgUrl = ($rootScope.current_user.is_superuser) ?
             GetBasePath("organizations") :
             $rootScope.current_user.url + "admin_of_organizations?";
@@ -421,6 +426,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         Rest.setUrl(defaultUrl + ':id/');
         Rest.get({ params: { id: id } })
             .success(function (data) {
+                if (data && data.summary_fields &&
+                    data.summary_fields.organization &&
+                    data.summary_fields.organization.id) {
+                    $scope.needsRoleList = true;
+                } else {
+                    $scope.needsRoleList = false;
+                }
 
                 $scope.credential_name = data.name;
 
@@ -439,6 +451,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                             $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                     }
                 }
+                relatedSets = form.relatedSets(data.related);
 
                 if (!Empty($scope.user)) {
                     $scope.owner = 'user';
@@ -509,6 +522,17 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                     $scope.subscription_id = data.username;
 
                 }
+                $scope.credential_obj = data;
+
+                RelatedSearchInit({
+                    scope: $scope,
+                    form: form,
+                    relatedSets: relatedSets
+                });
+                RelatedPaginateInit({
+                    scope: $scope,
+                    relatedSets: relatedSets
+                });
 
                 $scope.$emit('credentialLoaded');
             })

@@ -33,6 +33,8 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             url: defaultUrl,
         });
 
+        $scope.list = list;
+
         $scope.search(list.iterator);
 
         $scope.PaginateWidget = PaginateWidget({

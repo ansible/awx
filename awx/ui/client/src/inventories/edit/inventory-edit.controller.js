@@ -103,6 +103,9 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
                 field: 'organization',
                 input_type: 'radio'
             });
+
+            $scope.inventory_obj = data;
+
             $scope.$emit('inventoryLoaded');
         })
         .error(function (data, status) {

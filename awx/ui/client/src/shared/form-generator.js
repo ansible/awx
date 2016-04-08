@@ -205,7 +205,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     this.scope.mode = options.mode;
                 }
 
-                if(options.mode === 'edit' && this.form.tabs){
+                if(options.mode === 'edit' && this.form.related &&
+                    !_.isEmpty(this.form.related)){
                     var tabs = [this.form.name], that = this;
                     tabs.push(Object.keys(this.form.related));
                     tabs = _.flatten(tabs);

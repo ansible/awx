@@ -66,9 +66,12 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                         };
                     }
                 }
+                angular.extend(relatedSets, form
+                    .relatedSets(data.related));
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
                 RelatedSearchInit({ scope: $scope, form: form, relatedSets: relatedSets });
                 RelatedPaginateInit({ scope: $scope, relatedSets: relatedSets });
+                $scope.organization_obj = data;
                 $scope.$emit('organizationLoaded');
             })
             .error(function (data, status) {
