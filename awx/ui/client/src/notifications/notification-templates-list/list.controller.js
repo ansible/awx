@@ -155,7 +155,8 @@ export default
                 Rest.post({})
                 .then(function () {
                     ngToast.success({
-                        content: `Test Notification Success: <b>${name}</b> `
+                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> Test Notification Success: <b>${name}</b> `,
+                        className: 'Toast-success'
                      });
 
                 })
