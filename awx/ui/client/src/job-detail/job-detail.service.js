@@ -145,6 +145,19 @@ export default
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });         
         },
+        getJobEventChildren: function(id){
+            var url = GetBasePath('job_events');
+            url = url + id + '/children/';
+            Rest.setUrl(url);
+            return Rest.get()
+                .success(function(data){
+                    return data
+                })
+                .error(function(data, status) {
+                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });            
+        },
         // GET job host summaries related to a job run
         // e.g. ?page_size=200&order=host_name
         getJobHostSummaries: function(id, params){

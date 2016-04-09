@@ -10,6 +10,7 @@
     function($stateParams, $scope, $state, Wait, JobDetailService, moment, event){
 
         $scope.processEventStatus = JobDetailService.processEventStatus;
+        $scope.hostResults = [];
         // Avoid rendering objects in the details fieldset
         // ng-if="processResults(value)" via host-event-details.partial.html
         $scope.processResults = function(value){
@@ -18,8 +19,8 @@
         };
 
         var codeMirror = function(el, json){
-            var el = $(el)[0];
-            var editor = CodeMirror.fromTextArea(el, {
+            var container = $(el)[0];
+            var editor = CodeMirror.fromTextArea(container, {
                 lineNumbers: true,
                 mode: {name: "javascript", json: true}
              });
@@ -54,17 +55,17 @@
         };
 
         var init = function(){
-            console.log(event)
             $scope.event = event.data.results[0];
             $scope.event.created = moment($scope.event.created).format();
-            $scope.hostResults = $stateParams.hostResults;
+            JobDetailService.getJobEventChildren($stateParams.taskId).success(function(res){
+                $scope.hostResults = res.results;
+            });
             $scope.json = JobDetailService.processJson($scope.event);
             if ($state.current.name == 'jobDetail.host-event.json'){
                 codeMirror('#HostEvent-json', $scope.json);
             }
             try {
                 $scope.stdout = JobDetailService.processJson($scope.event.event_data.res)
-                console.log($scope.stdout)
                 if ($state.current.name == 'jobDetail.host-event.stdout'){
                 codeMirror('#HostEvent-stdout', $scope.stdout);
                 }
@@ -72,9 +73,6 @@
             catch(err){
                 $scope.sdout = null;
             }
-            console.log($scope)
-
-            
             $('#HostEvent').modal('show');
         };
         init();

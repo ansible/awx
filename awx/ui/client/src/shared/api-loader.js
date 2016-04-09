@@ -35,6 +35,8 @@ angular.module('ApiLoader', ['Utilities'])
                         .success(function (data) {
                             data.base = base;
                             $rootScope.defaultUrls = data;
+                            // tiny hack to side-step api/v1/job_events not being a visible endpoint @ GET api/v1/
+                            $rootScope.defaultUrls['job_events'] = '/api/v1/job_events/';
                             Store('api', data);
                         })
                         .error(function (data, status) {

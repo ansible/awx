@@ -75,7 +75,7 @@ export default
                 scope.viewJobDetails = function(job) {
 
                     var goToJobDetails = function(state) {
-                        $state.go(state, {id: job.id});
+                        $state.go(state, {id: job.id}, {reload:true});
                     }
 
                     switch(job.type) {

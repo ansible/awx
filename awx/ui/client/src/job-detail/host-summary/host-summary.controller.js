@@ -14,9 +14,10 @@
         $scope.search = null;
 
         var buildTooltips = function(hosts){
+            //  status waterfall: unreachable > failed > changed > ok > skipped
             var count = {
                 ok : _.filter(hosts, function(o){
-                    return o.changed === 0 && o.ok > 0;
+                    return o.failures === 0 && o.changed === 0 && o.ok > 0;
                 }),
                 skipped : _.filter(hosts, function(o){
                     return o.skipped > 0;
@@ -43,16 +44,13 @@
             // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py 
             jobSocket.on('summary_complete', function(data) {
                 // discard socket msgs we don't care about in this context
-                if ($stateParams.id === data['unified_job_id']){
-                    JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
-                    .success(function(res){
-                        init()
-                    });
+                if ($stateParams.id == data['unified_job_id']){
+                    init()
                 }
             });
             // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py 
             jobSocket.on('status_changed', function(data) {
-                if ($stateParams.id === data['unified_job_id']){
+                if ($stateParams.id == data['unified_job_id']){
                     $scope.status = data['status'];
                 }
             });

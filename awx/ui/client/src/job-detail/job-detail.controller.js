@@ -272,7 +272,7 @@ export default
             $rootScope.removeJobSummaryComplete = $rootScope.$on('JobSummaryComplete', function() {
                 // the job host summary should now be available from the API
                 $log.debug('Trigging reload of job_host_summaries');
-                scope.$emit('LoadHostSummaries');
+                scope.$emit('InitialLoadComplete');
             });
 
             if (scope.removeInitialLoadComplete) {
@@ -315,42 +315,6 @@ export default
             if (scope.removeLoadHostSummaries) {
                 scope.removeLoadHostSummaries();
             }
-            scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
-                if(scope.job){
-                    var params = {
-                        page_size: scope.hostSummariesMaxRows,
-                        order: 'host_name'
-                    };
-                    JobDetailService.getJobHostSummaries(scope.job.id, params)
-                        .success(function(data) {
-                            scope.next_host_summaries = data.next;
-                            if (data.results.length > 0) {
-                                // only dump what's in memory when job_host_summaries is available.
-                                scope.jobData.hostSummaries = {};
-                            }
-                            data.results.forEach(function(event) {
-                                var name;
-                                if (event.host_name) {
-                                    name = event.host_name;
-                                }
-                                else {
-                                    name = "<deleted host>";
-                                }
-                                scope.jobData.hostSummaries[event.host] = {
-                                    id: event.host,
-                                    name: name,
-                                    ok: event.ok,
-                                    changed: event.changed,
-                                    unreachable: event.dark,
-                                    failed: event.failures,
-                                    status: (event.failed) ? 'failed' : 'successful'
-                                };
-                            });
-                            scope.$emit('InitialLoadComplete');
-                        });
-                }
-
-            });
 
             if (scope.removeLoadHosts) {
                 scope.removeLoadHosts();
@@ -376,13 +340,13 @@ export default
                                 }
                                 scope.next_host_results = data.next;
                                 task.hostResults = JobDetailService.processHostEvents(data.results);
-                                scope.$emit('LoadHostSummaries');
+                                scope.$emit('InitialLoadComplete');
                             });
                     } else {
-                        scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                     }
                 } else {
-                    scope.$emit('LoadHostSummaries');
+                scope.$emit('InitialLoadComplete');
                 }
             });
 
@@ -491,10 +455,10 @@ export default
                                     msg: 'Call to ' + url + '. GET returned: ' + status });
                             });
                     } else {
-                        scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                     }
                 } else {
-                    scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                 }
             });
 
