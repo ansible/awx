@@ -251,6 +251,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels',]
 
+    def clean(self):
+        if self.job_type == 'scan' and (self.inventory is None or self.ask_inventory_on_launch):
+            raise ValidationError('Scan jobs must be assigned a fixed inventory')
+        if (not self.ask_inventory_on_launch) and self.inventory is None:
+            raise ValidationError('Job Template must either have an inventory or allow prompting for inventory')
+        return super(JobTemplate, self).clean()
+
     def create_job(self, **kwargs):
         '''
         Create a new job based on this template.
@@ -265,9 +272,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start)
-                    and not len(self.variables_needed_to_start)
-                    and self.inventory)
+        return bool(self.credential and not len(self.passwords_needed_to_start) and
+                    not len(self.variables_needed_to_start) and
+                    self.inventory)
 
     @property
     def variables_needed_to_start(self):
