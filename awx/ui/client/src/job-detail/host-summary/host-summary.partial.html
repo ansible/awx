@@ -1,6 +1,6 @@
 
 <div id="hosts-summary-section" class="section">
-    <div class="JobDetail-searchHeaderRow">
+    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0">
         <div class="JobDetail-searchContainer form-group">
             <div class="search-name">
                 <form ng-submit="search()">
@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="table-header">
+    <div class="table-header" ng-hide="hosts.length == 0">
         <table class="table table-condensed">
             <thead>
                 <tr>
@@ -32,7 +32,7 @@
         </table>
     </div>
 
-    <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
+    <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="getNextPage" scroll-threshold="10" time-threshold="500">
         <table class="table">
             <tbody>
                 <tr class="List-tableRow" ng-repeat="host in hosts track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
@@ -40,21 +40,21 @@
                         <a ui-sref="jobDetail.host-events({hostName: host.host_name})" aw-tool-tip="View  events" data-placement="top">{{ host.host_name }}</a>
                     </td>
                     <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ host.okTip }}" data-tip-watch="host.okTip" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{ host.changedTip }}" data-tip-watch="host.changedTip" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{ host.skippedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{ host.unreachableTip }}" data-tip-watch="host.unreachableTip" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ host.failedTip }}" data-tip-watch="host.failedTip" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ tooltips.text.ok }}" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok - host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{ tooltips.text.changed }}" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{ tooltips.text.skipped }}" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{ tooltips.text.unreachable}}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ tooltips.text.failures}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
                     </td>
                 </tr>
                 <tr ng-show="hosts.length === 0 && status === 'pending'">
-                    <td colspan="5" class="col-lg-12 loading-info">Waiting...</td>
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Waiting...</td>
                 </tr>
                 <tr ng-show="hosts.length === 0 && status === 'running' ">
-                    <td colspan="5" class="col-lg-12 loading-info">Loading...</td>
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Loading...</td>
                 </tr>
                 <tr ng-show="status === 'failed' ||  status === 'successful' && hosts.length === 0 ">
-                    <td colspan="2" class="col-lg-12 loading-info">No matching hosts</td>
+                    <td colspan="2" class="col-lg-12 HostSummary-loading">No matching hosts</td>
                 </tr>
             </tbody>
         </table>

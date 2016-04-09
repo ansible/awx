@@ -230,6 +230,7 @@ export default
         // expects 'next' param returned by the API e.g.
         // "/api/v1/jobs/51/job_plays/?order_by=id&page=2&page_size=1"
         getNextPage: function(url){
+            Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
                     return data

@@ -488,15 +488,6 @@ export default
                 counter = params.counter,
                 h, host;
 
-            /*
-            scope.host_summary.ok += (status === 'successful') ? 1 : 0;
-            scope.host_summary.changed += (status === 'changed') ? 1 : 0;
-            scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
-            scope.host_summary.failed += (status === 'failed') ? 1 : 0;
-            scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                scope.host_summary.failed;
-            */
-
             if (scope.jobData.hostSummaries[host_id] !== undefined) {
                 scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
                 scope.jobData.hostSummaries[host_id].changed += (status === 'changed') ? 1 : 0;
@@ -517,29 +508,6 @@ export default
                     status: (status === 'failed' || status === 'unreachable') ? 'failed' : 'successful'
                 };
             }
-
-            scope.host_summary.ok = 0;
-            scope.host_summary.changed = 0;
-            scope.host_summary.unreachable = 0;
-            scope.host_summary.failed = 0;
-            for (h in scope.jobData.hostSummaries) {
-                host = scope.jobData.hostSummaries[h];
-                if (host.ok > 0 && host.failed === 0 && host.unreachable === 0 && host.changed === 0) {
-                    scope.host_summary.ok++;
-                }
-                if (host.changed > 0 && host.failed === 0 && host.unreachable === 0) {
-                    scope.host_summary.changed++;
-                }
-                if (host.failed > 0) {
-                    scope.host_summary.failed++;
-                }
-                if (host.unreachable > 0) {
-                    scope.host_summary.unreachable++;
-                }
-            }
-            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                scope.host_summary.failed;
-
             UpdateTaskStatus({
                 scope: scope,
                 task_id: task_id,
@@ -985,10 +953,10 @@ export default
                     color: '#FF0000'
                 });
             }
-            if (count.failed.length > 0) {
+            if (count.failures.length > 0) {
                 graph_data.push({
                     label: 'FAILED',
-                    value: count.failed.length,
+                    value: count.failures.length,
                     color: '#ff5850'
                 });
             }
@@ -1085,7 +1053,8 @@ export default
                 idx = 0,
                 result = [],
                 newKeys = [],
-                plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
+                //plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
+                plays = scope.jobData.plays,
                 filteredListX = [],
                 filteredListA = [],
                 filteredListB = [],
@@ -1174,7 +1143,8 @@ export default
 
             if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
 
-                tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
+                //tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
+                tasks = scope.jobData.plays[scope.activePlay].tasks;
 
                 // Only draw tasks that are in the 'active' list
                 for (key in tasks) {
@@ -1248,7 +1218,8 @@ export default
             if (scope.activePlay && scope.activeTask && scope.jobData.plays[scope.activePlay] &&
                 scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
 
-                hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
+                //hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
+                hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults;
 
                 if (scope.search_host_name) {
                     for (key in hostResults) {

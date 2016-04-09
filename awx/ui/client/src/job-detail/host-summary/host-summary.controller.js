@@ -15,7 +15,8 @@
 
         var buildTooltips = function(hosts){
             //  status waterfall: unreachable > failed > changed > ok > skipped
-            var count = {
+            var count, grammar, text = {};
+            count = {
                 ok : _.filter(hosts, function(o){
                     return o.failures === 0 && o.changed === 0 && o.ok > 0;
                 }),
@@ -25,19 +26,30 @@
                 unreachable : _.filter(hosts, function(o){
                     return o.dark > 0;
                 }),
-                failed : _.filter(hosts, function(o){
+                failures : _.filter(hosts, function(o){
                     return o.failed === true;
                 }),
                 changed : _.filter(hosts, function(o){
                     return o.changed > 0;
                 })       
             };
-            var tooltips = {
-                0: 'No host events were ',
-                1: ' host event was ',
-                2: ' host events were '
+            var grammar = function(n, status){
+                var dict = {
+                    0: 'No host events were ',
+                    1: ' host event was ',
+                    2: ' host events were '
+                };
+                if (n >= 2){
+                    return n + dict[2] + status;
+                }
+                else{
+                    return n !== 0 ? n + dict[n] + status : dict[n] + status;
+                }
             };
-            return {count, tooltips}
+            _.forIn(count, function(value, key){
+                text[key] = grammar(value.length, key);
+            });
+            return {count, text}
         };
         var socketListener = function(){
             // emitted by the API in the same function used to persist host summary data
@@ -56,6 +68,17 @@
             });
         };
 
+        $scope.getNextPage = function(){
+            if ($scope.next){
+                JobDetailService.getNextPage($scope.next).success(function(res){
+                    res.results.forEach(function(key, index){
+                        $scope.hosts.push(res.results[index]);  
+                    })
+                    $scope.hosts.push(res.results);
+                    $scope.next = res.next;
+                });
+            }
+        };
         $scope.search = function(){
             Wait('start')
             JobDetailService.getJobHostSummaries($stateParams.id, {

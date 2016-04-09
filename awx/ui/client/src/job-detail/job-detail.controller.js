@@ -81,38 +81,6 @@ export default
                 }
             });
             scope.hosts = [];
-            scope.$watch('hosts', function(hosts) {
-                for (var host in hosts) {
-                    if (hosts[host].ok) {
-                        hosts[host].okTip = hosts[host].ok;
-                        hosts[host].okTip += (hosts[host].ok === 1) ? " host event was" : " host events were";
-                        hosts[host].okTip += " ok.";
-                    } else {
-                        hosts[host].okTip = "No host events were ok.";
-                    }
-                    if (hosts[host].changed) {
-                        hosts[host].changedTip = hosts[host].changed;
-                        hosts[host].changedTip += (hosts[host].changed === 1) ? " host event" : " host events";
-                        hosts[host].changedTip += " changed.";
-                    } else {
-                        hosts[host].changedTip = "No host events changed.";
-                    }
-                    if (hosts[host].failed) {
-                        hosts[host].failedTip = hosts[host].failed;
-                        hosts[host].failedTip += (hosts[host].failed === 1) ? " host event" : " host events";
-                        hosts[host].failedTip += " failed.";
-                    } else {
-                        hosts[host].failedTip = "No host events failed.";
-                    }
-                    if (hosts[host].unreachable) {
-                        hosts[host].unreachableTip = hosts[host].unreachable;
-                        hosts[host].unreachableTip += (hosts[host].unreachable === 1) ? " host event was" : " hosts events were";
-                        hosts[host].unreachableTip += " unreachable";
-                    } else {
-                        hosts[host].unreachableTip = "No host events were unreachable.";
-                    }
-                }
-            });
             scope.tasks = [];
             scope.$watch('tasks', function(tasks) {
                 for (var task in tasks) {
@@ -168,7 +136,6 @@ export default
             scope.hostResults = [];
 
             scope.hostResultsMaxRows = 200;
-            scope.hostSummariesMaxRows = 200;
             scope.tasksMaxRows = 200;
             scope.playsMaxRows = 200;
 
@@ -176,7 +143,6 @@ export default
             scope.playsLoading = true;
             scope.tasksLoading = true;
             scope.hostResultsLoading = true;
-            scope.hostSummariesLoading = true;
 
             // Turn on the 'Waiting...' message until events begin arriving
             scope.waiting = true;
@@ -194,20 +160,12 @@ export default
             scope.search_play_status = 'all';
             scope.search_task_status = 'all';
             scope.search_host_status = 'all';
-            scope.search_host_summary_status = 'all';
 
             scope.haltEventQueue = false;
             scope.processing = false;
             scope.lessStatus = false;
             scope.lessDetail = false;
             scope.lessEvents = true;
-
-            scope.host_summary = {};
-            scope.host_summary.ok = 0;
-            scope.host_summary.changed = 0;
-            scope.host_summary.unreachable = 0;
-            scope.host_summary.failed = 0;
-            scope.host_summary.total = 0;
 
             scope.jobData = {};
             scope.jobData.hostSummaries = {};
@@ -228,7 +186,6 @@ export default
                 url: GetBasePath('unified_jobs'),
                 field: 'status',
                 variable: 'status_choices',
-                // callback: 'choicesReady'
             });
 
             scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
@@ -237,11 +194,13 @@ export default
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
             function openSocket() {
                 $rootScope.event_socket.on("job_events-" + job_id, function(data) {
+                    console.log(data)
                     if (api_complete && data.id > lastEventId) {
                         scope.waiting = false;
                         data.event = data.event_name;
                         DigestEvent({ scope: scope, event: data });
                     }
+                    UpdateDOM({ scope: scope });
                 });
             }
             openSocket();
@@ -256,9 +215,6 @@ export default
                     if (data.status === 'failed' || data.status === 'canceled' ||
                             data.status === 'error' || data.status === 'successful' || data.status === 'running') {
                         $scope.liveEventProcessing = false;
-                        if ($rootScope.jobDetailInterval) {
-                            window.clearInterval($rootScope.jobDetailInterval);
-                        }
                         if (!scope.pauseLiveEvents) {
                             $scope.$emit('LoadJob'); //this is what is used for the refresh
                         }
@@ -295,26 +251,14 @@ export default
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Call to ' + url + '. GET returned: ' + status });
                         });
-                    if ($rootScope.jobDetailInterval) {
-                        window.clearInterval($rootScope.jobDetailInterval);
-                    }
                     $log.debug('Job completed!');
                     $log.debug(scope.jobData);
                 }
                 else {
                     api_complete = true;  //trigger events to start processing
-                    if ($rootScope.jobDetailInterval) {
-                        window.clearInterval($rootScope.jobDetailInterval);
-                    }
-                    $rootScope.jobDetailInterval = setInterval(function() {
-                        UpdateDOM({ scope: scope });
-                    }, 2000);
+                    UpdateDOM({ scope: scope})
                 }
             });
-
-            if (scope.removeLoadHostSummaries) {
-                scope.removeLoadHostSummaries();
-            }
 
             if (scope.removeLoadHosts) {
                 scope.removeLoadHosts();
@@ -466,12 +410,6 @@ export default
                 scope.removeLoadPlays();
             }
             scope.removeLoadPlays = scope.$on('LoadPlays', function(e, events_url) {
-
-                scope.host_summary.ok = 0;
-                scope.host_summary.changed = 0;
-                scope.host_summary.unreachable = 0;
-                scope.host_summary.failed = 0;
-                scope.host_summary.total = 0;
                 scope.jobData.plays = {};
                 var params = {
                     order_by: 'id'
@@ -555,13 +493,6 @@ export default
                                 scope.jobData.plays[event.id].status_text = 'No matching hosts';
                                 scope.jobData.plays[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
                             }
-
-                            scope.host_summary.ok += ok;
-                            scope.host_summary.changed += changed;
-                            scope.host_summary.unreachable += (event.unreachable_count) ? event.unreachable_count : 0;
-                            scope.host_summary.failed += failed;
-                            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                                scope.host_summary.failed;
                         });
                         if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
                             scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
@@ -664,7 +595,6 @@ export default
                             scope.playsLoading = false;
                             scope.tasksLoading = false;
                             scope.hostResultsLoading = false;
-                            scope.hostSummariesLoading = false;
                         }
                         else {
                             scope.job_status.finished = null;
@@ -1154,41 +1084,6 @@ export default
                             $('#hostResultsMoreRows').fadeOut(400);
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Call to ' + scope.next_host_results + '. GET returned: ' + status });
-                        });
-                }
-            };
-
-            scope.hostSummariesScrollDown = function() {
-                // check for more hosts when user scrolls to bottom of host summaries list...
-                if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_summaries) {
-                    scope.hostSummariesLoading = true;
-                    JobDetailService.getNextPage(scope.next_host_summaries)
-                        .success(function(data) {
-                            scope.next_host_summaries = data.next;
-                            data.results.forEach(function(row) {
-                                var name;
-                                if (row.host_name) {
-                                    name = row.host_name;
-                                }
-                                else {
-                                    name = "<deleted host>";
-                                }
-                                scope.hosts.push({
-                                    id: row.id,
-                                    name: name,
-                                    ok: row.ok,
-                                    changed: row.changed,
-                                    unreachable: row.dark,
-                                    failed: row.failures
-                                });
-                            });
-                            $('#hostSummariesMoreRows').fadeOut();
-                            scope.hostSummariesLoading = false;
-                        })
-                        .error(function(data, status) {
-                            $('#hostSummariesMoreRows').fadeOut();
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + scope.next_host_summaries + '. GET returned: ' + status });
                         });
                 }
             };

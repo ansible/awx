@@ -6,8 +6,8 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'moment', 'event',
-    function($stateParams, $scope, $state, Wait, JobDetailService, moment, event){
+    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'event',
+    function($stateParams, $scope, $state, Wait, JobDetailService, event){
 
         $scope.processEventStatus = JobDetailService.processEventStatus;
         $scope.hostResults = [];
@@ -24,7 +24,8 @@
                 lineNumbers: true,
                 mode: {name: "javascript", json: true}
              });
-             editor.getDoc().setValue(JSON.stringify(json, null, 4));        
+            editor.setSize("100%", 300)
+            editor.getDoc().setValue(JSON.stringify(json, null, 4));        
         };
 
         $scope.getActiveHostIndex = function(){
@@ -55,8 +56,7 @@
         };
 
         var init = function(){
-            $scope.event = event.data.results[0];
-            $scope.event.created = moment($scope.event.created).format();
+            $scope.event = event;
             JobDetailService.getJobEventChildren($stateParams.taskId).success(function(res){
                 $scope.hostResults = res.results;
             });

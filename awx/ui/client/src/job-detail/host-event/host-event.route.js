@@ -15,10 +15,13 @@ var hostEventModal = {
  		features: ['FeaturesService', function(FeaturesService){
  			return FeaturesService.get();
  		}],
-        event: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
-             return JobDetailService.getRelatedJobEvents($stateParams.id, {
+        event: ['JobDetailService','$stateParams', 'moment', function(JobDetailService, $stateParams, moment) {
+            return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				id: $stateParams.eventId,
- 			}).success(function(res){ return res;})
+ 			}).then(function(res){ 
+ 				res.data.results[0].created = moment(res.data.results[0].created).format('MMMM Do YYYY, h:mm:ss a');
+ 				return res.data.results[0];
+ 			});
          }]
  	},
  	onExit: function($state){
