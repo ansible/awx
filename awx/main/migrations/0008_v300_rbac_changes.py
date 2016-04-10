@@ -7,7 +7,6 @@ from django.conf import settings
 import taggit.managers
 import awx.main.fields
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -37,6 +36,11 @@ class Migration(migrations.Migration):
             'Team',
             'projects',
             'deprecated_projects',
+        ),
+        migrations.AlterField(
+            model_name='team',
+            name='deprecated_projects',
+            field=models.ManyToManyField(related_name='deprecated_teams', to='main.Project', blank=True),
         ),
 
         migrations.CreateModel(
@@ -86,141 +90,144 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'permissions',
             },
         ),
-        migrations.AddField(
-            model_name='credential',
-            name='owner_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
+
         migrations.AddField(
             model_name='credential',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Auditor of the credential', parent_role=[b'singleton:System Auditor'], to='main.Role', role_name=b'Credential Auditor', null=b'True', permissions={b'read': True}),
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='owner_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Owner of the credential', parent_role=[b'singleton:System Administrator'], to='main.Role', role_name=b'Credential Owner', null=b'True', permissions={b'all': True}),
         ),
         migrations.AddField(
             model_name='credential',
             name='usage_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this credential, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Credential User', null=b'True', permissions={b'use': True}),
+        ),
+        migrations.AddField(
+            model_name='custominventoryscript',
+            name='admin_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May manage this inventory', parent_role=b'organization.admin_role', to='main.Role', role_name=b'CustomInventory Administrator', null=b'True', permissions={b'all': True}),
+        ),
+        migrations.AddField(
+            model_name='custominventoryscript',
+            name='auditor_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May view but not modify this inventory', parent_role=b'organization.auditor_role', to='main.Role', role_name=b'CustomInventory Auditor', null=b'True', permissions={b'read': True}),
+        ),
+        migrations.AddField(
+            model_name='custominventoryscript',
+            name='member_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May view but not modify this inventory', parent_role=b'organization.member_role', to='main.Role', role_name=b'CustomInventory Member', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='group',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.admin_role', b'parents.admin_role'], to='main.Role', role_name=b'Inventory Group Administrator', null=b'True', permissions={b'all': True}),
         ),
         migrations.AddField(
             model_name='group',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.auditor_role', b'parents.auditor_role'], to='main.Role', role_name=b'Inventory Group Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='group',
             name='executor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.executor_role', b'parents.executor_role'], to='main.Role', role_name=b'Inventory Group Executor', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(
             model_name='group',
             name='updater_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.updater_role', b'parents.updater_role'], to='main.Role', role_name=b'Inventory Group Updater', null=b'True', permissions={b'read': True, b'write': True, b'create': True, b'use': True}),
         ),
         migrations.AddField(
             model_name='inventory',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May manage this inventory', parent_role=b'organization.admin_role', to='main.Role', role_name=b'Inventory Administrator', null=b'True', permissions={b'all': True}),
         ),
         migrations.AddField(
             model_name='inventory',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May view but not modify this inventory', parent_role=b'organization.auditor_role', to='main.Role', role_name=b'Inventory Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='inventory',
             name='executor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May execute jobs against this inventory', parent_role=None, to='main.Role', role_name=b'Inventory Executor', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(
             model_name='inventory',
             name='updater_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='custominventoryscript',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='custominventoryscript',
-            name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='custominventoryscript',
-            name='member_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May update the inventory', parent_role=None, to='main.Role', role_name=b'Inventory Updater', null=b'True', permissions={b'read': True, b'update': True}),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Full access to all settings', parent_role=b'project.admin_role', to='main.Role', role_name=b'Job Template Administrator', null=b'True', permissions={b'all': True}),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Read-only access to all settings', parent_role=b'project.auditor_role', to='main.Role', role_name=b'Job Template Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='executor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May run the job template', parent_role=None, to='main.Role', role_name=b'Job Template Runner', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(
             model_name='organization',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May manage all aspects of this organization', parent_role=b'singleton:System Administrator', to='main.Role', role_name=b'Organization Administrator', null=b'True', permissions={b'write': True, b'use': True, b'scm_update': True, b'execute': True, b'read': True, b'create': True, b'update': True, b'delete': True}),
         ),
         migrations.AddField(
             model_name='organization',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May read all settings associated with this organization', parent_role=b'singleton:System Auditor', to='main.Role', role_name=b'Organization Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='organization',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'A member of this organization', parent_role=b'admin_role', to='main.Role', role_name=b'Organization Member', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='project',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May manage this project', parent_role=[b'organization.admin_role', b'singleton:System Administrator'], to='main.Role', role_name=b'Project Administrator', null=b'True', permissions={b'all': True}),
         ),
         migrations.AddField(
             model_name='project',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May read all settings associated with this project', parent_role=[b'organization.auditor_role', b'singleton:System Auditor'], to='main.Role', role_name=b'Project Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='project',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Implies membership within this project', parent_role=None, to='main.Role', role_name=b'Project Member', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='project',
             name='scm_update_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May update this project from the source control management system', parent_role=b'admin_role', to='main.Role', role_name=b'Project Updater', null=b'True', permissions={b'scm_update': True}),
         ),
         migrations.AddField(
             model_name='team',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May manage this team', parent_role=b'organization.admin_role', to='main.Role', role_name=b'Team Administrator', null=b'True', permissions={b'write': True, b'use': True, b'scm_update': True, b'execute': True, b'read': True, b'create': True, b'update': True, b'delete': True}),
         ),
         migrations.AddField(
             model_name='team',
             name='auditor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May read all settings associated with this team', parent_role=b'organization.auditor_role', to='main.Role', role_name=b'Team Auditor', null=b'True', permissions={b'read': True}),
         ),
         migrations.AddField(
             model_name='team',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'A member of this team', parent_role=b'admin_role', to='main.Role', role_name=b'Team Member', null=b'True', permissions={b'read': True}),
         ),
+
+
         migrations.AlterIndexTogether(
             name='rolepermission',
             index_together=set([('content_type', 'object_id')]),
