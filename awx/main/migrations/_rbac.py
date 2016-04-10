@@ -135,7 +135,7 @@ def _discover_credentials(instances, cred, orgfunc):
         orgs[orgfunc(inst)].append(inst)
 
     if len(orgs) == 1:
-        _update_credential_parents(instances[0].inventory.organization, cred)
+        _update_credential_parents(orgfunc(instances[0]), cred)
     else:
         for pos, org in enumerate(orgs):
             if pos == 0:
