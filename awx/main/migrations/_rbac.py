@@ -39,6 +39,7 @@ def migrate_users(apps, schema_editor):
     user_content_type = ContentType.objects.get_for_model(User)
 
     for user in User.objects.iterator():
+        user.save()
         try:
             Role.objects.get(content_type=user_content_type, object_id=user.id)
             logger.info(smart_text(u"found existing role for user: {}".format(user.username)))
@@ -80,6 +81,7 @@ def migrate_users(apps, schema_editor):
 def migrate_organization(apps, schema_editor):
     Organization = apps.get_model('main', "Organization")
     for org in Organization.objects.iterator():
+        org.save() # force creates missing roles
         for admin in org.deprecated_admins.all():
             org.admin_role.members.add(admin)
             logger.info(smart_text(u"added admin: {}, {}".format(org.name, admin.username)))
@@ -91,6 +93,7 @@ def migrate_organization(apps, schema_editor):
 def migrate_team(apps, schema_editor):
     Team = apps.get_model('main', 'Team')
     for t in Team.objects.iterator():
+        t.save()
         for user in t.deprecated_users.all():
             t.member_role.members.add(user)
             logger.info(smart_text(u"team: {}, added user: {}".format(t.name, user.username)))
@@ -160,6 +163,7 @@ def migrate_credential(apps, schema_editor):
     InventorySource = apps.get_model('main', 'InventorySource')
 
     for cred in Credential.objects.iterator():
+        cred.save()
         results = (JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all() or
                    InventorySource.objects.filter(credential=cred).all())
         if results:
@@ -213,6 +217,7 @@ def migrate_inventory(apps, schema_editor):
             return None
 
     for inventory in Inventory.objects.iterator():
+        inventory.save()
         for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
@@ -260,6 +265,7 @@ def migrate_projects(apps, schema_editor):
 
     # Migrate projects to single organizations, duplicating as necessary
     for project in Project.objects.iterator():
+        project.save()
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
@@ -371,6 +377,7 @@ def migrate_job_templates(apps, schema_editor):
     Permission = apps.get_model('main', 'Permission')
 
     for jt in JobTemplate.objects.iterator():
+        jt.save()
         permission = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,
