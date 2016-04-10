@@ -17,10 +17,11 @@ from django.db.models.fields.related import (
     ReverseManyRelatedObjectsDescriptor,
 )
 from django.utils.encoding import smart_text
+from django.utils.timezone import now
 
 # AWX
-from awx.main.models.rbac import RolePermission, Role, batch_role_ancestor_rebuilding
-
+from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
+from awx.main.utils import get_current_apps
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField']
 
@@ -65,8 +66,12 @@ def resolve_role_field(obj, field):
     else:
         return []
 
+    if obj is None:
+        return []
+
     if len(field_components) == 1:
-        if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role:
+        Role_ = get_current_apps().get_model('main', 'Role')
+        if type(obj) is not ImplicitRoleDescriptor and type(obj) is not Role_:
             raise Exception(smart_text('{} refers to a {}, not an ImplicitRoleField or Role'.format(field, type(obj))))
         ret.append(obj)
     else:
@@ -174,7 +179,10 @@ class ImplicitRoleField(models.ForeignKey):
         role = getattr(instance, self.name, None)
         if role:
             return role
-        role = Role.objects.create(
+        Role_ = get_current_apps().get_model('main', 'Role')
+        role = Role_.objects.create(
+            created=now(),
+            modified=now(),
             name=self.role_name,
             description=self.role_description
         )
@@ -186,9 +194,16 @@ class ImplicitRoleField(models.ForeignKey):
         role.save()
 
         if self.permissions is not None:
-            permissions = RolePermission(
+            RolePermission_ = get_current_apps().get_model('main', 'RolePermission')
+            ContentType = get_current_apps().get_model('contenttypes', "ContentType")
+            instance_content_type = ContentType.objects.get_for_model(instance)
+
+            permissions = RolePermission_(
+                created=now(),
+                modified=now(),
                 role=role,
-                resource=instance,
+                content_type=instance_content_type,
+                object_id=instance.id,
                 auto_generated=True
             )
 
@@ -253,7 +268,20 @@ class ImplicitRoleField(models.ForeignKey):
         parent_roles = set()
         for path in paths:
             if path.startswith("singleton:"):
-                parents = [Role.singleton(path[10:])]
+                singleton_name = path[10:]
+                Role_ = get_current_apps().get_model('main', 'Role')
+                qs = Role_.objects.filter(singleton_name=singleton_name)
+                if qs.count() >= 1:
+                    role = qs[0]
+                else:
+                    role = Role_.objects.create(
+                               created=now(),
+                               modified=now(),
+                               singleton_name=singleton_name,
+                               name=singleton_name,
+                               description=singleton_name
+                           )
+                parents = [role]
             else:
                 parents = resolve_role_field(instance, path)
             for parent in parents:

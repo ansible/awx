@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from collections import defaultdict
-from awx.main.utils import getattrd
+from awx.main.utils import getattrd, set_current_apps
 
 import _old_access as old_access
 logger = logging.getLogger(__name__)
@@ -25,6 +25,10 @@ def log_migration(wrapped):
         logger.addHandler(handler)
         return wrapped(*args, **kwargs)
     return wrapper
+
+@log_migration
+def init_rbac_migration(apps, schema_editor):
+    set_current_apps(apps)
 
 @log_migration
 def migrate_users(apps, schema_editor):
