@@ -2,7 +2,7 @@
     <input type="text" ng-model="defaultValue" class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>
 </div>
 <div ng-if="question.type === 'textarea'" class="input_area">
-    <textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>{{defaultValue}}</textarea>
+    <textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" ng-bind-html="defaultValue" readonly></textarea>
 </div>
 <div ng-if="question.type === 'multiplechoice' || question.type === 'multiselect'" class="SurveyMaker-previewInput">
     <multiple-choice
