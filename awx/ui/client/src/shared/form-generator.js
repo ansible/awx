@@ -1408,7 +1408,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
 
 
-                if (this.form.tabs) {
+                if (!_.isEmpty(this.form.related)) {
                     var collection;
                     html += "<div class=\"Form-tabHolder\">";
 
@@ -1442,7 +1442,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>";//tabHolder
                 }
 
-                if(this.form.tabs && this.mode === "edit"){
+                if(!_.isEmpty(this.form.related) && this.mode === "edit"){
                     html += "<div class=\"Form-tabSection\" "+
                             "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">";
                 }
@@ -1554,7 +1554,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
-                        if (options.mode === 'edit' && this.form.tabs) {
+                        if (options.mode === 'edit' && !_.isEmpty(this.form.related)) {
                             html += "ng-show=\"" + this.form.name + "Selected\"; "
                         }
                         html += ">\n";
@@ -1622,7 +1622,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "</div>\n";
                         }
 
-                        if(this.form.tabs && this.mode === "edit"){
+                        if(!_.isEmpty(this.form.related) && this.mode === "edit"){
                             var collection1;
                             html += "</div>\n"; // end of form's Form-tabSection
 
@@ -1631,12 +1631,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                                 html += "<div class=\"Form-tabSection\" "+
                                     "ng-class=\"{'is-selected': " + itm + "Selected }\">";
-                                if (collection1.generateList) {
-                                    html += GenerateList.buildHTML(collection1, { mode: 'edit' });
-                                }
-                                else {
-                                    html += this.GenerateCollection({ form: this.form, related: itm }, options);
-                                }
+                                html += this.GenerateCollection({ form: this.form, related: itm }, options);
                                 html += "</div>\n";
                             }
                         }
@@ -1694,8 +1689,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>\n";
                 }
                 var rootID = $location.$$path.split("/")[2];
-                var endpoint = "/api/v1/" + collection.basePath
-                    .replace(":id", rootID);
+                var endpoint = (collection.basePath) ? "/api/v1/" +
+                    collection.basePath
+                        .replace(":id", rootID) : "";
                 var tagSearch = getSearchHtml
                     .inject(getSearchHtml.getList(collection),
                         endpoint, itm, collection.iterator);

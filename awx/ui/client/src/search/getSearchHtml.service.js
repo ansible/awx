@@ -10,6 +10,7 @@ export default ['GetBasePath', function(GetBasePath) {
             }).map(function(i) {
                 delete f[i].awToolTip;
                 delete f[i].ngClass;
+                delete f[i].ngClick;
                 return {[i]: f[i]};
             }).reduce(function (acc, i) {
                 var key = Object.keys(i);

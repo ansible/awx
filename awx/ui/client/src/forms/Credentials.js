@@ -366,6 +366,7 @@ export default
 
             related: {
                 permissions: {
+                    basePath: 'credentials/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',
                     iterator: 'permission',

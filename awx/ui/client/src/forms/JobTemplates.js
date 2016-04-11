@@ -292,85 +292,11 @@ export default
             },
 
             related: {
-                schedules: {
-                    type: 'collection',
-                    title: 'Schedules',
-                    iterator: 'schedule',
-                    index: false,
-                    open: false,
-
-                    actions: {
-                        refresh: {
-                            mode: 'all',
-                            awToolTip: "Refresh the page",
-                            ngClick: "refreshSchedules()",
-                            actionClass: 'btn List-buttonDefault',
-                            buttonContent: 'REFRESH',
-                            ngHide: 'scheduleLoading == false && schedule_active_search == false && schedule_total_rows < 1'
-                        },
-                        add: {
-                            mode: 'all',
-                            ngClick: 'addSchedule()',
-                            awToolTip: 'Add a new schedule',
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
-                        }
-                    },
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name',
-                            ngClick: "editSchedule(schedule.id)",
-                            columnClass: "col-md-3 col-sm-3 col-xs-3"
-                        },
-                        dtstart: {
-                            label: 'First Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 hidden-xs"
-                        },
-                        next_run: {
-                            label: 'Next Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 col-xs-3"
-                        },
-                        dtend: {
-                            label: 'Final Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 hidden-xs"
-                        }
-                    },
-                    fieldActions: {
-                        "play": {
-                            mode: "all",
-                            ngClick: "toggleSchedule($event, schedule.id)",
-                            awToolTip: "{{ schedule.play_tip }}",
-                            dataTipWatch: "schedule.play_tip",
-                            iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
-                            dataPlacement: "top"
-                        },
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "editSchedule(schedule.id)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit schedule',
-                            dataPlacement: 'top'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "deleteSchedule(schedule.id)",
-                            icon: 'icon-trash',
-                            awToolTip: 'Delete schedule',
-                            dataPlacement: 'top'
-                        }
-                    }
-                },
                 "completed_jobs": {
                     include: "CompletedJobsList"
                 },
                 permissions: {
+                    basePath: 'job_templates/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',
                     iterator: 'permission',
@@ -409,10 +335,6 @@ export default
                     completed_jobs: {
                         iterator: 'completed_job',
                         url: urls.jobs + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
-                    },
-                    schedules: {
-                        iterator: 'schedule',
-                        url: urls.schedules
                     },
                     permissions: {
                         iterator: 'permission',

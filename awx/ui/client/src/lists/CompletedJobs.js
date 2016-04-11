@@ -12,6 +12,7 @@ export default
     .value( 'CompletedJobsList', {
 
         name: 'completed_jobs',
+        basePath: 'job_templates/:id/jobs/?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
         iterator: 'completed_job',
         editTitle: 'Completed Jobs',
         index: false,
@@ -21,6 +22,7 @@ export default
         fields: {
             status: {
                 label: '',
+                searchLabel: 'Status',
                 columnClass: 'List-staticColumn--smallStatus',
                 awToolTip: "{{ completed_job.status_tip }}",
                 awTipPlacement: "right",
