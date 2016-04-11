@@ -389,20 +389,6 @@ def test_role_children(get, team, admin, role):
 
 
 
-
-#
-# /resource/<id>/access_list
-#
-
-@pytest.mark.django_db
-def test_resource_access_list(get, team, admin, role):
-    team.member_role.members.add(admin)
-    url = reverse('api:team_access_list', args=(team.id,))
-    res = get(url, admin)
-    assert res.status_code == 200
-
-
-
 #
 # Generics
 #
