@@ -394,7 +394,7 @@ class BaseTask(Task):
                 # will be read then closed, instead of leaving the SSH key on disk.
                 if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
-                    self.open_fifo_write(path)
+                    self.open_fifo_write(path, data)
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -404,7 +404,7 @@ class BaseTask(Task):
                 private_data_files[name] = path
         return private_data_files
 
-    def open_fifo_write(self, path):
+    def open_fifo_write(self, path, data):
         '''open_fifo_write opens the fifo named pipe in a new thread.
         This blocks until the the calls to ssh-agent/ssh-add have read the
         credential information from the pipe.
