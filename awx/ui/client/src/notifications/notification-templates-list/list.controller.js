@@ -156,7 +156,6 @@ export default
                 .then(function () {
                     ngToast.success({
                         content: `<i class="fa fa-check-circle Toast-successIcon"></i> Test Notification Success: <b>${name}</b> `,
-                        className: 'Toast-success'
                      });
 
                 })
