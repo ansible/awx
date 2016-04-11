@@ -519,8 +519,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                     $scope.project = data.project;
                     break;
                 case 'azure':
-                    $scope.subscription_id = data.username;
-
+                    $scope.subscription = data.username;
+                    break;
                 }
                 $scope.credential_obj = data;
 

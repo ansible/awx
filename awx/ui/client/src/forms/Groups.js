@@ -91,7 +91,7 @@ export default
                     type: 'select',
                     ngOptions: 'source.label for source in source_region_choices track by source.value',
                     multiSelect: true,
-                    ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure')",
+                    ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure' || source.value == 'azure_rm')",
                     addRequired: false,
                     editRequired: false,
                     dataTitle: 'Source Regions',
