@@ -85,6 +85,14 @@ class JobOptions(BaseModel):
         default=None,
         on_delete=models.SET_NULL,
     )
+    network_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_as_network_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    ),
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -138,6 +146,14 @@ class JobOptions(BaseModel):
         if cred and cred.kind != 'ssh':
             raise ValidationError(
                 'You must provide a machine / SSH credential.',
+            )
+        return cred
+
+    def clean_network_credential(self):
+        cred = self.network_credential
+        if cred and cred.kind != 'net':
+            raise ValidationError(
+                'You must provide a network credential.',
             )
         return cred
 
@@ -212,7 +228,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'cloud_credential', 'forks', 'schedule',
+                'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels',]
