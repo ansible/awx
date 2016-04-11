@@ -369,6 +369,38 @@ export default
                 },
                 "completed_jobs": {
                     include: "CompletedJobsList"
+                },
+                permissions: {
+                    type: 'collection',
+                    title: 'Permissions',
+                    iterator: 'permission',
+                    index: false,
+                    open: false,
+                    searchType: 'select',
+                    actions: {
+                        add: {
+                            ngClick: "addPermission",
+                            label: 'Add',
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
+                        }
+                    },
+
+                    fields: {
+                        username: {
+                            key: true,
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                        },
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
+                        }
+                    }
                 }
             },
 
@@ -381,6 +413,10 @@ export default
                     schedules: {
                         iterator: 'schedule',
                         url: urls.schedules
+                    },
+                    permissions: {
+                        iterator: 'permission',
+                        url: urls.access_list
                     }
                 };
             }
