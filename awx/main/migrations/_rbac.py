@@ -274,13 +274,14 @@ def migrate_projects(apps, schema_editor):
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
-        if len(project_orgs) > 1:
+        if len(project_orgs) >= 1:
             first_org = None
             for org in project_orgs:
                 if first_org is None:
                     # For the first org, re-use our existing Project object, so don't do the below duplication effort
                     first_org = org
-                    project.name = smart_text(u'{} - {}'.format(first_org.name, original_project_name))
+                    if len(project_orgs) > 1:
+                        project.name = smart_text(u'{} - {}'.format(first_org.name, original_project_name))
                     project.organization = first_org
                     project.save()
                 else:
