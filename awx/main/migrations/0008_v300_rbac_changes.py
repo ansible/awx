@@ -37,6 +37,11 @@ class Migration(migrations.Migration):
             'projects',
             'deprecated_projects',
         ),
+        migrations.AddField(
+            model_name='project',
+            name='organization',
+            field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
+        ),
         migrations.AlterField(
             model_name='team',
             name='deprecated_projects',
@@ -241,11 +246,6 @@ class Migration(migrations.Migration):
             model_name='organization',
             name='deprecated_projects',
             field=models.ManyToManyField(related_name='deprecated_organizations', to='main.Project', blank=True),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='organization',
-            field=models.ForeignKey(related_name='projects', to='main.Organization', blank=True, null=True),
         ),
         migrations.RenameField(
             'Credential',
