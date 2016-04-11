@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
     'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', 'getSearchHtml', '$state',
+    'Store', 'ActionButton', 'getSearchHtml',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget,
         PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml, $state) {
+        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -1041,7 +1041,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-textArea";
-                        html += (field['elementClass']) ? " " + field['elementClass'] : "";
+                        html += (field.class) ? " " + field.class : "";
+                        html += (field.elementClass) ? " " + field.elementClass : "";
                         html += "\" ";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += buildId(field, fld, this.form);
@@ -1487,8 +1488,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     html += "</div>\n";
                 } else {
-                    var inSubForm = false;
-                    var currentSubForm = undefined;
+                    var currentSubForm;
                     var hasSubFormField;
                     // original, single-column form
                     section = '';
@@ -1560,7 +1560,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
                         if (options.mode === 'edit' && !_.isEmpty(this.form.related)) {
-                            html += "ng-show=\"" + this.form.name + "Selected\"; "
+                            html += "ng-show=\"" + this.form.name + "Selected\"; ";
                         }
                         html += ">\n";
 
@@ -1685,7 +1685,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     form = params.form,
                     itm = params.related,
                     collection = form.related[itm],
-                    act, action, fld, cnt, base, fAction;
+                    act, fld, cnt, base, fAction;
 
                 if (collection.instructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
@@ -1747,7 +1747,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
 
                     if (!collection.fields[fld].noSort) {
-                        html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">"
+                        html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
                     } else {
                         html += ">";
                     }
@@ -1768,7 +1768,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         } else {
                             html += "fa fa-sort";
                         }
-                        html += "\"></i>"
+                        html += "\"></i>";
                     }
 
                     html += "</a></th>\n";

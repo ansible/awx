@@ -160,7 +160,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
         list = HomeGroupList,
         defaultUrl = GetBasePath('groups'),
         scope = $scope,
-        modal_scope = $scope.$new(),
         opt, PreviousSearchParams;
 
     generator.inject(list, { mode: 'edit', scope: scope });

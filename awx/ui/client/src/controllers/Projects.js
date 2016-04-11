@@ -17,8 +17,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
     Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
-    console.log("foo");
-
     ClearScope();
 
     Wait('start');

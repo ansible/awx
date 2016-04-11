@@ -297,7 +297,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     //
                     var html = '',
                         list = this.list,
-                        base, size, action, fld, cnt, field_action, fAction, itm;
+                        base, action, fld, cnt, field_action, fAction, itm;
 
                         if (options.mode !== 'lookup') {
                           if(options.title !== false){

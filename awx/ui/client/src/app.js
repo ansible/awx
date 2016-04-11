@@ -5,12 +5,13 @@
  *************************************************/
 
 var urlPrefix;
+var $basePath;
 
 if ($basePath) {
     urlPrefix = $basePath;
 } else {
     // required to make tests work
-    var $basePath = '/static/';
+    $basePath = '/static/';
     urlPrefix = $basePath;
 }
 
@@ -710,7 +711,7 @@ var tower = angular.module('Tower', [
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
-            }
+            };
 
             $rootScope.deletePermission = function (user, role, userName,
                 roleName, resourceName) {
@@ -774,16 +775,17 @@ var tower = angular.module('Tower', [
                 $rootScope.removeConfigReady();
             }
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+                var list, id;
                 // initially set row edit indicator for crud pages
                 if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
-                    var list = $location.$$path.split("/")[3];
-                    var id = $location.$$path.split("/")[4];
+                    list = $location.$$path.split("/")[3];
+                    id = $location.$$path.split("/")[4];
                     $rootScope.listBeingEdited = list;
                     $rootScope.rowBeingEdited = id;
                     $rootScope.initialIndicatorLoad = true;
                 } else if ($location.$$path.split("/")[2]) {
-                    var list = $location.$$path.split("/")[1];
-                    var id = $location.$$path.split("/")[2];
+                    list = $location.$$path.split("/")[1];
+                    id = $location.$$path.split("/")[2];
                     $rootScope.listBeingEdited = list;
                     $rootScope.rowBeingEdited = id;
                 }
@@ -917,13 +919,14 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
                     // catch license expiration notifications immediately after user logs in, redirect
-                    if (fromState.name == 'signIn'){
+                    if (fromState.name === 'signIn'){
                         CheckLicense.notify();
                     }
+                    var list, id;
                     // broadcast event change if editing crud object
                     if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
-                        var list = $location.$$path.split("/")[3];
-                        var id = $location.$$path.split("/")[4];
+                        list = $location.$$path.split("/")[3];
+                        id = $location.$$path.split("/")[4];
 
                         if (!$rootScope.initialIndicatorLoad) {
                             delete $rootScope.listBeingEdited;
@@ -934,8 +937,8 @@ var tower = angular.module('Tower', [
 
                         $rootScope.$broadcast("EditIndicatorChange", list, id);
                     } else if ($location.$$path.split("/")[2]) {
-                        var list = $location.$$path.split("/")[1];
-                        var id = $location.$$path.split("/")[2];
+                        list = $location.$$path.split("/")[1];
+                        id = $location.$$path.split("/")[2];
 
                         delete $rootScope.listBeingEdited;
                         delete $rootScope.rowBeingEdited;
