@@ -160,7 +160,11 @@ def migrate_credential(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
     JobTemplate = apps.get_model('main', 'JobTemplate')
     Project = apps.get_model('main', 'Project')
+    Role = apps.get_model('main', 'Role')
+    User = apps.get_model('auth', 'User')
     InventorySource = apps.get_model('main', 'InventorySource')
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    user_content_type = ContentType.objects.get_for_model(User)
 
     for cred in Credential.objects.iterator():
         cred.save()
@@ -190,7 +194,8 @@ def migrate_credential(apps, schema_editor):
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host)))
         elif cred.deprecated_user is not None:
-            cred.deprecated_user.admin_role.children.add(cred.owner_role)
+            user_admin_role = Role.objects.get(content_type=user_content_type, object_id=cred.deprecated_user.id)
+            user_admin_role.children.add(cred.owner_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host, )))
