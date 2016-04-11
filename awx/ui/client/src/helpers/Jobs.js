@@ -366,7 +366,6 @@ export default
                 mode: 'edit',
                 id: id,
                 scope: scope,
-                showSearch: true,
                 title: false
             });
 
