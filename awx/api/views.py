@@ -2086,10 +2086,6 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if obj:
             for p in obj.passwords_needed_to_start:
                 data[p] = u''
-            if obj.credential:
-                data.pop('credential', None)
-            else:
-                data['credential'] = None
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
             ask_for_vars_dict = obj._ask_for_vars_dict()
@@ -2098,12 +2094,8 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
                     data.pop(field, None)
                 elif field == 'extra_vars':
                     data[field] = extra_vars
-                elif field == 'inventory':
-                    inv_obj = getattr(obj, field)
-                    if inv_obj in ('', None):
-                        data[field] = None
-                    else:
-                        data[field] = inv_obj.id
+                elif field == 'inventory' or field == 'credential':
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
                 else:
                     data[field] = getattr(obj, field)
         return data
@@ -2123,22 +2115,19 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # At this point, a credential is gauranteed to exist at serializer.instance.credential
-        if not request.user.can_access(Credential, 'read', serializer.instance.credential):
-            raise PermissionDenied()
-
-        kv = {
-            'credential': serializer.instance.credential.pk,
-        }
-
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
-        if 'inventory' in prompted_fields:
+        if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
+            new_credential = Credential.objects.get(pk=prompted_fields['credential'])
+            if not request.user.can_access(Credential, 'read', new_credential):
+                raise PermissionDenied()
+
+        if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
             new_inventory = Inventory.objects.get(pk=prompted_fields['inventory'])
             if not request.user.can_access(Inventory, 'read', new_inventory):
                 raise PermissionDenied()
 
-        kv.update(prompted_fields)
+        kv = prompted_fields
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
@@ -2435,7 +2424,7 @@ class JobTemplateCallback(GenericAPIView):
 
         # Return the location of the new job.
         headers = {'Location': job.get_absolute_url()}
-        return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+        return Response(status=status.HTTP_201_CREATED, headers=headers)
 
 
 class JobTemplateJobsList(SubListCreateAPIView):
@@ -2483,7 +2472,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         new_job = obj.create_unified_job(**request.data)
         new_job.signal_start(**request.data)
         data = dict(system_job=new_job.id)
-        return Response(data, status=status.HTTP_202_ACCEPTED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 

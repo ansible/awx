@@ -37,6 +37,7 @@ def job_template_prompts(project, inventory, machine_credential):
             ask_job_type_on_launch=on_off,
             ask_inventory_on_launch=on_off,
             ask_limit_on_launch=on_off,
+            ask_credential_on_launch=on_off,
         )
     return rf
 
@@ -59,12 +60,14 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, us
     assert job_obj.job_type == job_template_saved.job_type
     assert job_obj.inventory.pk == job_template_saved.inventory.pk
     assert job_obj.job_tags == job_template_saved.job_tags
+    assert job_obj.credential.pk == job_template_saved.credential.pk
 
     # Check that response tells us what things were ignored
     assert 'job_launch_var' in response.data['ignored_fields']['extra_vars']
     assert 'job_type' in response.data['ignored_fields']
     assert 'limit' in response.data['ignored_fields']
     assert 'inventory' in response.data['ignored_fields']
+    assert 'credential' in response.data['ignored_fields']
     assert 'job_tags' in response.data['ignored_fields']
     assert 'skip_tags' in response.data['ignored_fields']
 
@@ -89,6 +92,7 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     assert job_obj.limit == runtime_data['limit']
     assert job_obj.job_type == runtime_data['job_type']
     assert job_obj.inventory.pk == runtime_data['inventory']
+    assert job_obj.credential.pk == runtime_data['credential']
     assert job_obj.job_tags == runtime_data['job_tags']
 
 @pytest.mark.django_db
@@ -99,11 +103,12 @@ def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, po
     response = post(
         reverse('api:job_template_launch', args=[job_template.pk]),
         dict(job_type='foobicate',  # foobicate is not a valid job type
-             inventory=87865), user('admin', True))
+             inventory=87865, credential=48474), user('admin', True))
 
     assert response.status_code == 400
     assert response.data['job_type'] == [u'"foobicate" is not a valid choice.']
     assert response.data['inventory'] == [u'Invalid pk "87865" - object does not exist.']
+    assert response.data['credential'] == [u'Invalid pk "48474" - object does not exist.']
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -189,7 +194,7 @@ def test_job_relaunch_prompted_vars(runtime_data, job_template_prompts, post, us
 @pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
-    deploy_jobtemplate.credential = None
+    deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.save()
 
     kv = dict(extra_vars={"job_launch_var": 4}, credential=machine_credential.id)

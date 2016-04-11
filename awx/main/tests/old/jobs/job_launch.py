@@ -28,6 +28,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             credential   = self.cred_sue.pk,
             playbook     = self.proj_dev.playbooks[0],
             ask_variables_on_launch = True,
+            ask_credential_on_launch = True,
         )
         self.data_no_cred = dict(
             name         = 'launched job template no credential',
@@ -35,6 +36,8 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             inventory    = self.inv_eng.pk,
             project      = self.proj_dev.pk,
             playbook     = self.proj_dev.playbooks[0],
+            ask_credential_on_launch = True,
+            ask_variables_on_launch = True,
         )
         self.data_cred_ask = dict(self.data)
         self.data_cred_ask['name'] = 'launched job templated with ask passwords'
@@ -112,21 +115,21 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.assertEqual(j.status, 'new')
             self.assertEqual(j.credential.pk, self.cred_doug.pk)
 
-    def test_credential_override_reject(self):
+    def test_credential_override(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
             response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
-            self.assertEqual(j.credential.pk, self.cred_sue.pk)
+            self.assertEqual(j.credential.pk, self.cred_doug.pk)
 
-    def test_credential_override_via_credential_id_reject(self):
+    def test_credential_override_via_credential_id(self):
         # Explicit, credential
         with self.current_user(self.user_sue):
             response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
-            self.assertEqual(j.credential.pk, self.cred_sue.pk)
+            self.assertEqual(j.credential.pk, self.cred_doug.pk)
 
     def test_bad_credential_launch_fail(self):
         # Can't launch a job template without a credential defined (or if we
@@ -192,6 +195,7 @@ class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTe
             project      = self.proj_dev.pk,
             credential   = self.cred_sue_ask.pk,
             playbook     = self.proj_dev.playbooks[0],
+            ask_credential_on_launch = True,
         )
 
         with self.current_user(self.user_sue):

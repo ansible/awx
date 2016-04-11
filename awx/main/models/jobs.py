@@ -212,6 +212,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         blank=True,
         default=False,
     )
+    ask_credential_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
 
     survey_enabled = models.BooleanField(
         default=False,
@@ -256,6 +260,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             raise ValidationError('Scan jobs must be assigned a fixed inventory')
         if (not self.ask_inventory_on_launch) and self.inventory is None:
             raise ValidationError('Job Template must either have an inventory or allow prompting for inventory')
+        if (not self.ask_credential_on_launch) and self.credential is None:
+            raise ValidationError('Job Template must either have a credential or allow prompting for credential')
         return super(JobTemplate, self).clean()
 
     def create_job(self, **kwargs):
@@ -396,7 +402,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             job_tags=self.ask_tags_on_launch,
             skip_tags=self.ask_tags_on_launch,
             job_type=self.ask_job_type_on_launch,
-            inventory=self.ask_inventory_on_launch
+            inventory=self.ask_inventory_on_launch,
+            credential=self.ask_credential_on_launch
         )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):

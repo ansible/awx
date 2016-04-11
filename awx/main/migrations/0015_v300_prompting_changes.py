@@ -9,7 +9,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0013_v300_label_changes'),
+        ('main', '0014_v300_invsource_cred'),
     ]
 
     operations = [
@@ -21,6 +21,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='ask_inventory_on_launch',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='ask_credential_on_launch',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(

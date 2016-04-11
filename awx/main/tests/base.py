@@ -352,6 +352,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             'host_config_key': settings.SYSTEM_UUID,
             'created_by': created_by,
             'playbook': playbook,
+            'ask_credential_on_launch': True,
         }
         opts.update(kwargs)
         return JobTemplate.objects.create(**opts)

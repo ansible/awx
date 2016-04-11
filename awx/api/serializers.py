@@ -1675,7 +1675,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
                   'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
-                  'survey_enabled', 'become_enabled')
+                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -2104,6 +2104,7 @@ class JobLaunchSerializer(BaseSerializer):
     can_start_without_user_input = serializers.BooleanField(read_only=True)
     variables_needed_to_start = serializers.ReadOnlyField()
     credential_needed_to_start = serializers.SerializerMethodField()
+    inventory_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
 
@@ -2111,13 +2112,13 @@ class JobLaunchSerializer(BaseSerializer):
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
-                  'ask_variables_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
-                  'ask_inventory_on_launch', 'ask_limit_on_launch',
+                  'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
+                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_limit_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
-                  'credential', 'credential_needed_to_start',)
+                  'credential_needed_to_start', 'inventory_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
                             'ask_tags_on_launch', 'ask_job_type_on_launch',
-                            'ask_inventory_on_launch')
+                            'ask_inventory_on_launch', 'ask_credential_on_launch')
         extra_kwargs = {
             'credential': {'write_only': True,},
             'limit': {'write_only': True,},
@@ -2130,6 +2131,9 @@ class JobLaunchSerializer(BaseSerializer):
     def get_credential_needed_to_start(self, obj):
         return not (obj and obj.credential)
 
+    def get_inventory_needed_to_start(self, obj):
+        return not (obj and obj.inventory)
+
     def get_survey_enabled(self, obj):
         if obj:
             return obj.survey_enabled and 'spec' in obj.survey_spec
@@ -2140,10 +2144,8 @@ class JobLaunchSerializer(BaseSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
-        if obj and obj.credential is not None:
-            # force job template to override runtime credential, if present
+        if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
             credential = obj.credential
-            attrs.pop('credential', None)
         else:
             credential = attrs.get('credential', None)
         if not credential:
@@ -2191,6 +2193,7 @@ class JobLaunchSerializer(BaseSerializer):
         JT_job_tags = obj.job_tags
         JT_skip_tags = obj.skip_tags
         JT_inventory = obj.inventory
+        JT_credential = obj.credential
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = JT_extra_vars
         obj.limit = JT_limit
@@ -2198,6 +2201,7 @@ class JobLaunchSerializer(BaseSerializer):
         obj.skip_tags = JT_skip_tags
         obj.job_tags = JT_job_tags
         obj.inventory = JT_inventory
+        obj.credential = JT_credential
         return attrs
 
 class NotifierSerializer(BaseSerializer):
