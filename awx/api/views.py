@@ -72,7 +72,7 @@ from awx.api.metadata import RoleMetadata
 from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
 
-logger = logging.getLogger('awx.api.generics')
+logger = logging.getLogger('awx.api.views')
 
 def api_exception_handler(exc, context):
     '''
