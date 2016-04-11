@@ -1204,7 +1204,7 @@ class LabelAccess(BaseAccess):
     def can_read(self, obj):
         if self.user.is_superuser:
             return True
-        return obj.organization and obj.organization.accessible_by(self.user, {'read': True})
+        return obj.organization.accessible_by(self.user, {'read': True})
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -1224,7 +1224,7 @@ class LabelAccess(BaseAccess):
         if self.can_add(data) is False:
             return False
 
-        return obj.organization and obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
+        return obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
