@@ -8,5 +8,5 @@ Make a GET request to this resource to retrieve a list of roles associated with 
 
 Make a POST request to this resource to add or remove a role from this team. The following fields may be modified:
 
-   * `id`: Required. The Role ID to add to the team. 
-   * `disassociate`: Optional. Provide if you want to remove the role.
+   * `id`: The Role ID to add to the team. (int, required)
+   * `disassociate`: Provide if you want to remove the role. (any value, optional)
