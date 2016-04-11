@@ -41,6 +41,7 @@ oslo.serialization==2.2.0
 oslo.utils==3.4.0
 prettytable==0.7.2
 psphere==0.5.2
+psutil==3.1.1
 pyasn1==0.1.9
 pycrypto==2.6.1
 pycparser==2.14
