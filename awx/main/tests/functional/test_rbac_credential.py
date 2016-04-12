@@ -82,7 +82,6 @@ def test_credential_access_admin(user, team, credential):
     # that I am an admin for
     credential.owner_role.parents.add(team.admin_role)
     credential.save()
-    credential.owner_role.rebuild_role_ancestor_list()
 
     cred = Credential.objects.create(kind='aws', name='test-cred')
     cred.deprecated_team = team
