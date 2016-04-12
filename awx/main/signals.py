@@ -123,10 +123,14 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
 
 def create_user_role(instance, **kwargs):
     try:
-        instance.admin_role
+        Role.objects.get(
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            name = 'Owner'
+        )
     except Role.DoesNotExist:
         role = Role.objects.create(
-            singleton_name = '%s-admin_role' % instance.username,
+            name = 'Owner',
             content_object = instance,
         )
         role.members.add(instance)
