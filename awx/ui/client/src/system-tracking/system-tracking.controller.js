@@ -89,7 +89,15 @@ function controller($rootScope,
                             leftRange,
                             rightRange)
                 .then(function(responses) {
-                    var data = _.pluck(responses, 'facts');
+                    var data = [];
+                    _.each(responses, function(response) {
+                        if(response.fact) {
+                            data.push(response.fact);
+                        } else if (response.facts) {
+                            data.push(response.facts);
+                        }
+                    });
+
                     if (_.isEmpty(data[0]) && _.isEmpty(data[1])) {
                         return _.reject({
                                 name: 'NoScanData',
