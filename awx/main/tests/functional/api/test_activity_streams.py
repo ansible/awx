@@ -20,7 +20,7 @@ def test_get_activity_stream_list(monkeypatch, organization, get, user):
 @pytest.mark.django_db
 def test_basic_fields(monkeypatch, organization, get, user):
     u = user('admin', True)
-    activity_stream = ActivityStream.objects.latest('pk')
+    activity_stream = ActivityStream.objects.filter(organization=organization).latest('pk')
     activity_stream.actor = u
     activity_stream.save()
 
