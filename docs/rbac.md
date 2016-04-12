@@ -5,12 +5,11 @@ The intended audience of this document is the Ansible Tower developer.
 
 ## Overview
 
-### Role Based Access Control System Basics
+### RBAC - System Basics
 
-With Role Based Access Control Systems there are four main concepts to be
-familiar with, Roles, Resources, Users, and Permissions. Users can be members
-of a role, which gives them access to any permissions bestowed upon that Role.
-In order to access a Resource, a Permission must be granted to a Role enabling
+There are four main concepts to be familiar with, Roles, Resources, Users, and Permissions.
+Users can be members of a role, which gives them access to any permissions bestowed upon
+that Role. In order to access a Resource, a Permission must be granted to a Role enabling
 all members of that Role to access the Resource.
 
 For example, if I have an organization named "MyCompany" and I want to allow
@@ -72,17 +71,25 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 `Role` defines a single role within the RBAC implementation. It encapsulates the `ancestors`, `parents`, and `members` for a role. This model is intentionally kept dumb and it has no explicit knowledge of a `Resource`. The `Role` model (get it?), defines some methods that aid in the granting and creation of roles.
 
-##### `grant(self, resource, permissions)`
+##### `visible_roles(cls, user)`
 
-The `grant` instance method takes a resource and a set of permissions (see below) and creates an entry in the `RolePermission` table (described below). The result of this being that any member of this role will now have those permissions to the resource. The `grant` method considers a resource to be anything that is explicitly of type `Resource` or any model that has a `resource` field of type `Resource`.
+`visible_roles` is a class method that will lookup all of the `Role` instances a user can "see". This includes any roles the user is a direct decendent of as well as any ancestor roles.
 
-##### `singleton(name)`
+##### `singleton(cls, name)`
 
-The `singleton` static method is a helper method on the `Role` model that helps in the creation of singleton roles. It will return the role by name if it already exists or create and return the new role in the case it does not.
+The `singleton` class method is a helper method on the `Role` model that helps in the creation of singleton roles. It will return the role by name if it already exists or create and return the new role in the case it does not.
+
+##### `get_absolute_url(self)`
+
+`get_absolute_url` returns the consumable URL endpoint for the `Role`.
 
 ##### `rebuild_role_ancestor_list(self)`
 
 `rebuild_role_ancestor_list` will rebuild the current role ancestory that is stored in the `ancestors` field of a `Role`. This is called for you by `save` and different Django signals.
+
+##### `is_ancestor_of(self, role)`
+
+`is_ancestor_of` returns if the given `role` is an ancestor of the current `Role` instance.
 
 #### `Resource`
 
