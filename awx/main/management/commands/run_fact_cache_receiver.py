@@ -9,7 +9,7 @@ from datetime import datetime
 # Django
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
-#from django.core.exceptions import Does
+from django.utils import timezone
 
 # AWX
 from awx.main.models.fact import Fact
@@ -64,7 +64,7 @@ class FactCacheReceiver(object):
             return None
 
         (module_name, facts) = self.process_facts(facts_data)
-        self.timestamp = datetime.fromtimestamp(date_key, None)
+        self.timestamp = datetime.fromtimestamp(date_key, timezone.utc)
 
         # Update existing Fact entry
         try:
