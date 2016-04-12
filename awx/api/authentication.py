@@ -3,9 +3,11 @@
 
 # Python
 import urllib
+import logging
 
 # Django
 from django.utils.timezone import now as tz_now
+from django.utils.encoding import smart_text
 
 # Django REST Framework
 from rest_framework import authentication
@@ -15,6 +17,8 @@ from rest_framework import HTTP_HEADER_ENCODING
 # AWX
 from awx.main.models import UnifiedJob, AuthToken
 from awx.main.conf import tower_settings
+
+logger = logging.getLogger('awx.api.authentication')
 
 class TokenAuthentication(authentication.TokenAuthentication):
     '''
@@ -93,7 +97,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
             if not token.in_valid_tokens(now=now):
                 token.invalidate(reason='limit_reached')
                 raise exceptions.AuthenticationFailed(AuthToken.reason_long('limit_reached'))
-        
+
         # If the user is inactive, then return an error.
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted')
@@ -114,6 +118,16 @@ class TokenGetAuthentication(TokenAuthentication):
             if token:
                 request.META['HTTP_X_AUTH_TOKEN'] = 'Token %s' % token
         return super(TokenGetAuthentication, self).authenticate(request)
+
+
+class LoggedBasicAuthentication(authentication.BasicAuthentication):
+
+    def authenticate(self, request):
+        ret = super(LoggedBasicAuthentication, self).authenticate(request)
+        if ret:
+            username = ret[0].username if ret[0] else '<none>'
+            logger.debug(smart_text(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
+        return ret
 
 
 class TaskAuthentication(authentication.BaseAuthentication):

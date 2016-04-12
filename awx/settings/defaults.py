@@ -202,7 +202,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'awx.api.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'awx.api.authentication.LoggedBasicAuthentication',
         #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (

@@ -11,6 +11,7 @@ import time
 import socket
 import sys
 import errno
+import logging
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -22,7 +23,7 @@ from django.core.exceptions import FieldError
 from django.db.models import Q, Count
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import force_text
+from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
@@ -70,6 +71,8 @@ from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
+
+logger = logging.getLogger('awx.api.views')
 
 def api_exception_handler(exc, context):
     '''
@@ -528,9 +531,13 @@ class AuthTokenView(APIView):
                                                  expires__gt=now(),
                                                  reason='')[0]
                 token.refresh()
+                if 'username' in request.data:
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
+                if 'username' in request.data:
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
                 # Get user un-expired tokens that are not invalidated that are
                 # over the configured limit.
                 # Mark them as invalid and inform the user
@@ -549,6 +556,8 @@ class AuthTokenView(APIView):
                 'Auth-Token-Timeout': int(tower_settings.AUTH_TOKEN_EXPIRATION)
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
+        if 'username' in request.data:
+            logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationList(ListCreateAPIView):
