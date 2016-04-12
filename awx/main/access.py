@@ -312,7 +312,14 @@ class InventoryAccess(BaseAccess):
         return qs.select_related('created_by', 'modified_by', 'organization').all()
 
     def can_read(self, obj):
+        if self.user.is_superuser:
+            return True
         return obj.accessible_by(self.user, {'read': True})
+
+    def can_use(self, obj):
+        if self.user.is_superuser:
+            return True
+        return obj.accessible_by(self.user, {'use': True})
 
     def can_add(self, data):
         # If no data is specified, just checking for generic add permission?
@@ -551,6 +558,11 @@ class CredentialAccess(BaseAccess):
         # Access enforced in our view where we have context enough to make a decision
         return True
 
+    def can_use(self, obj):
+        if self.user.is_superuser:
+            return True
+        return obj.accessible_by(self.user, {'use': True})
+
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
@@ -770,6 +782,11 @@ class JobTemplateAccess(BaseAccess):
                 return False
         if obj.project is None:
             return False
+
+        # Given explicit execute access to this JobTemplate
+        if obj.accessible_by(self.user, {'execute':True}):
+            return True
+
         # If the user has admin access to the project they can start a job
         if obj.project.accessible_by(self.user, ALL_PERMISSIONS):
             return True
