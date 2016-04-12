@@ -31,6 +31,7 @@ django-statsd-mozilla==0.3.16
 django-taggit==0.17.6
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
+funcsigs==0.4
 gevent==1.1rc3
 gevent-websocket==0.9.3
 git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=django-jsonfield
