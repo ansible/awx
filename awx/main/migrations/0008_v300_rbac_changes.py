@@ -64,6 +64,7 @@ class Migration(migrations.Migration):
                 ('members', models.ManyToManyField(related_name='roles', to=settings.AUTH_USER_MODEL)),
                 ('modified_by', models.ForeignKey(related_name="{u'class': 'role', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('parents', models.ManyToManyField(related_name='children', to='main.Role')),
+                ('implicit_parents', models.ManyToManyField(related_name='implicit_children', to='main.Role')),
                 ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
             ],
             options={
