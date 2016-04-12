@@ -168,6 +168,11 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May update the inventory', parent_role=None, to='main.Role', role_name=b'Inventory Updater', null=b'True', permissions={b'read': True, b'update': True}),
         ),
         migrations.AddField(
+            model_name='inventory',
+            name='usage_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this inventory, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Inventory User', null=b'True', permissions={b'use': True}),
+        ),
+        migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Full access to all settings', parent_role=b'project.admin_role', to='main.Role', role_name=b'Job Template Administrator', null=b'True', permissions={b'all': True}),

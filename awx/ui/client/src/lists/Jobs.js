@@ -29,7 +29,8 @@ export default
                 awTipPlacement: "top",
             },
             status: {
-                label: 'Status',
+                label: '',
+                searchLabel: 'Status',
                 columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ job.status_tip }}",
                 awTipPlacement: "top",
