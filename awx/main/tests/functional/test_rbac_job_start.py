@@ -14,10 +14,10 @@ def test_admin_executing_permissions(deploy_jobtemplate, inventory, machine_cred
 
     admin_user = user('admin-user', True)
 
-    assert admin_user.can_access(Inventory, 'read', inventory)
-    assert admin_user.can_access(Inventory, 'execute', inventory)  # for ad_hoc
+    assert admin_user.can_access(Inventory, 'use', inventory)
+    assert admin_user.can_access(Inventory, 'run_ad_hoc_commands', inventory)  # for ad_hoc
     assert admin_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
-    assert admin_user.can_access(Credential, 'read', machine_credential)
+    assert admin_user.can_access(Credential, 'use', machine_credential)
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
@@ -35,13 +35,13 @@ def test_credential_use_access(machine_credential, user):
     common_user = user('test-user', False)
     machine_credential.usage_role.members.add(common_user)
 
-    assert common_user.can_access(Credential, 'read', machine_credential)
+    assert common_user.can_access(Credential, 'use', machine_credential)
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
 def test_inventory_use_access(inventory, user):
 
     common_user = user('test-user', False)
-    inventory.executor_role.members.add(common_user)
+    inventory.usage_role.members.add(common_user)
 
-    assert common_user.can_access(Inventory, 'start', inventory)
+    assert common_user.can_access(Inventory, 'use', inventory)
