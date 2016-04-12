@@ -166,7 +166,7 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
                 Wait('stop');
                 $rootScope.flashMessage = "New team successfully created!";
                 $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
-                $location.path('/teams/' + data.id);
+                $state.go('teams.edit', {team_id: data.id}, {reload: true});
             })
             .error(function (data, status) {
                 Wait('stop');
@@ -188,11 +188,10 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 ];
 
 
-export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
-    $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
-    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope,
-    LookUpInit, Prompt, GetBasePath, CheckAccess, OrganizationList, Wait,
-    fieldChoices, fieldLabels, permissionsSearchSelect, $state) {
+export function TeamsEdit($scope, $rootScope, $location, 
+    $stateParams, TeamForm, GenerateForm, Rest, ProcessErrors,
+    RelatedSearchInit, RelatedPaginateInit, ClearScope,
+    LookUpInit, GetBasePath, OrganizationList, Wait, $state) {
 
     ClearScope();
 
@@ -204,238 +203,109 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log,
         id = $stateParams.team_id,
         relatedSets = {};
 
-    $scope.permission_label = {};
-    $scope.permission_search_select = [];
-
-    $scope.$emit("RefreshTeamsList");
-
-    // return a promise from the options request with the permission type choices (including adhoc) as a param
-    // var permissionsChoice = fieldChoices({
-    //     scope: $scope,
-    //     url: 'api/v1/' + base + '/' + id + '/permissions/',
-    //     field: 'permission_type'
-    // });
-
-    // // manipulate the choices from the options request to be set on
-    // // scope and be usable by the list form
-    // permissionsChoice.then(function (choices) {
-    //     choices =
-    //         fieldLabels({
-    //             choices: choices
-    //         });
-    //     _.map(choices, function(n, key) {
-    //         $scope.permission_label[key] = n;
-    //     });
-    // });
-
-    // manipulate the choices from the options request to be usable
-    // by the search option for permission_type, you can't inject the
-    // list until this is done!
-    // permissionsChoice.then(function (choices) {
-    //     form.related.permissions.fields.permission_type.searchOptions =
-    //         permissionsSearchSelect({
-    //             choices: choices
-    //         });
-        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-        generator.reset();
-        $scope.$emit('loadTeam');
-    // });
-
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    generator.reset();
-    $scope.$emit('loadTeam');
-
     $scope.team_id = id;
 
-    $scope.PermissionAddAllowed = false;
 
-    // Retrieve each related set and any lookups
-    if ($scope.loadTeamRemove) {
-        $scope.loadTeamRemove();
-    }
-    $scope.loadTeamRemove = $scope.$on('loadTeam', function () {
-        // Retrieve detail record and prepopulate the form
-        Wait('start');
-        Rest.setUrl(defaultUrl + ':id/');
-        Rest.get({
-            params: {
-                id: id
-            }
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+    generator.reset()
+
+    var setScopeFields = function(data){
+        _(data)
+        .pick(function(value, key){
+            return form.fields.hasOwnProperty(key) === true;
         })
-            .success(function (data) {
-                var fld, related, set;
-                $scope.team_name = data.name;
-                for (fld in form.fields) {
-                    if (data[fld]) {
-                        $scope[fld] = data[fld];
-                        master[fld] = $scope[fld];
-                    }
-                }
-                related = data.related;
-                for (set in form.related) {
-                    if (related[set]) {
-                        relatedSets[set] = {
-                            url: related[set],
-                            iterator: form.related[set].iterator
-                        };
-                    }
-                }
-                // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-                RelatedSearchInit({
-                    scope: $scope,
-                    form: form,
-                    relatedSets: relatedSets
-                });
-                RelatedPaginateInit({
-                    scope: $scope,
-                    relatedSets: relatedSets
-                });
-
-                LookUpInit({
-                    scope: $scope,
-                    form: form,
-                    current_item: data.organization,
-                    list: OrganizationList,
-                    field: 'organization',
-                    input_type: 'radio'
-                });
-
-                $scope.organization_url = data.related.organization;
-                $scope.organization_name = data.summary_fields.organization.name;
-                master.organization_name = data.summary_fields.organization.name;
-
-                // get related object values and populate
-                for (var relatedValues in relatedSets) {
-                    $scope.search(relatedSets[relatedValues].iterator);
-                }
-                CheckAccess({ scope: $scope }); //Does the user have access to add/edit Permissions?
-                Wait('stop');
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $stateParams.team_id +
-                    '. GET status: ' + status });
-                Wait('stop');
-            });
-    });
-
-    $scope.getPermissionText = function () {
-        if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
-            return $scope.permission_label[this.permission.permission_type] +
-            " and " + $scope.permission_label.adhoc;
-        } else {
-            return $scope.permission_label[this.permission.permission_type];
-        }
+        .forEach(function(value, key){
+            $scope[key] = value;
+        })
+        .value();
+        return
+    };
+    var setScopeRelated = function(data, related){
+        _(related)
+        .pick(function(value, key){
+            return data.related.hasOwnProperty(key) === true;
+        })
+        .forEach(function(value, key){
+            relatedSets[key] = {
+                url: data.related[key],
+                iterator: value.iterator
+            };
+        })
+        .value();
     };
 
-    // Save changes to the parent
-    $scope.formSave = function () {
-        var data = {}, fld;
-        generator.clearApiErrors();
-        Wait('start');
-        $rootScope.flashMessage = null;
-        Rest.setUrl(defaultUrl + $stateParams.team_id + '/');
-        for (fld in form.fields) {
-            data[fld] = $scope[fld];
-        }
-        Rest.put(data)
-            .success(function () {
-                Wait('stop');
-                var base = $location.path().replace(/^\//, '').split('/')[0];
-                $scope.team_name = $scope.name;
-                if (base === 'teams') {
-                    ReturnToCaller();
-                }
-                else {
-                    ReturnToCaller(1);
-                }
-            })
-            .error(function (data, status) {
-                Wait('stop');
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to update team: ' + $stateParams.team_id + '. PUT status: ' + status });
-            });
-    };
-
-    $scope.formCancel = function () {
-        $state.transitionTo('teams');
-    };
-
-    // Related set: Add button
-    $scope.add = function (set) {
-        $rootScope.flashMessage = null;
-        if (set === 'permissions') {
-            if ($scope.PermissionAddAllowed) {
-                $location.path('/' + base + '/' + $stateParams.team_id + '/' + set + '/add');
-            } else {
-                Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+    // prepares a data payload for a PUT request to the API
+    var processNewData = function(fields){
+        var data = {};
+        _.forEach(fields, function(value, key){
+            if ($scope[key] !== '' && $scope[key]  !== null && $scope[key] !== undefined){
+             data[key] = $scope[key];
             }
-        } else {
-            $location.path('/' + base + '/' + $stateParams.team_id + '/' + set);
-        }
-    };
-
-    // Related set: Edit button
-    $scope.edit = function (set, id) {
-        $rootScope.flashMessage = null;
-        if (set === 'permissions') {
-            $location.path('/' + base + '/' + $stateParams.team_id + '/' + set + '/' + id);
-        } else {
-            $location.path('/' + set + '/' + id);
-        }
-    };
-
-    // Related set: Delete button
-    $scope['delete'] = function (set, itm_id, name, title) {
-        $rootScope.flashMessage = null;
-
-        var action = function () {
-            var url;
-            if (set === 'permissions') {
-                if ($scope.PermissionAddAllowed) {
-                    url = GetBasePath('base') + 'permissions/' + itm_id + '/';
-                    Rest.setUrl(url);
-                    Rest.destroy()
-                        .success(function () {
-                            $('#prompt-modal').modal('hide');
-                            $scope.search(form.related[set].iterator);
-                        })
-                        .error(function (data, status) {
-                            $('#prompt-modal').modal('hide');
-                            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                                ' failed. DELETE returned status: ' + status });
-                        });
-                } else {
-                    Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-                }
-            } else {
-                url = defaultUrl + $stateParams.team_id + '/' + set + '/';
-                Rest.setUrl(url);
-                Rest.post({ id: itm_id, disassociate: 1 })
-                    .success(function () {
-                        $('#prompt-modal').modal('hide');
-                        $scope.search(form.related[set].iterator);
-                    })
-                    .error(function (data, status) {
-                        $('#prompt-modal').modal('hide');
-                        ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                            ' failed. POST returned status: ' + status });
-                    });
-            }
-        };
-
-        Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.name + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
-            action: action,
-            actionText: 'DELETE'
         });
+        return data
     };
+
+    var init = function(){
+        var url = defaultUrl + id;
+        Rest.setUrl(url);
+        Wait('start');
+        Rest.get(url).success(function(data){
+            setScopeFields(data);
+            setScopeRelated(data, form.related)
+            $scope.organization_name = data.summary_fields.organization.name;
+
+            RelatedSearchInit({
+                scope: $scope,
+                form: form,
+                relatedSets: relatedSets
+            });
+
+            RelatedPaginateInit({
+                scope: $scope,
+                relatedSets: relatedSets
+            });
+
+            LookUpInit({
+                url: GetBasePath('organizations'),
+                scope: $scope,
+                form: form,
+                current_item: $scope.organization,
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio'
+            });
+        });
+    }
+
+    $scope.formCancel = function(){
+        $state.go('teams', null, {reload: true});
+    }
+
+    $scope.formSave = function(){
+        generator.clearApiErrors();
+        generator.checkAutoFill();
+        $rootScope.flashMessage = null;
+        if ($scope[form.name + '_form'].$valid){
+            Rest.setUrl(defaultUrl + id + '/');
+            var data = processNewData(form.fields);
+            Rest.put(data).success(function(res){
+                $state.go('teams', null, {reload: true});
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
+                $stateParams.id + '. GET status: ' + status });
+            });   
+        }
+    };
+
+    init();
+
+    /* Related Set implementation TDB */
 }
 
-TeamsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
-    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 'Alert',
+TeamsEdit.$inject = ['$scope', '$rootScope',  '$location',
+    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt', 'GetBasePath',
-    'CheckAccess', 'OrganizationList', 'Wait', 'fieldChoices',
-    'fieldLabels', 'permissionsSearchSelect', '$state'
+     'ClearScope', 'LookUpInit', 'GetBasePath',
+     'OrganizationList', 'Wait', '$state'
 ];
