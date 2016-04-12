@@ -126,7 +126,7 @@ def create_user_role(instance, **kwargs):
         instance.admin_role
     except Role.DoesNotExist:
         role = Role.objects.create(
-            singleton_name = '%s-admin_role' % instance.username,
+            name = '%s-admin_role' % instance.username,
             content_object = instance,
         )
         role.members.add(instance)
