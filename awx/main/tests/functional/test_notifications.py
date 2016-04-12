@@ -7,13 +7,6 @@ from awx.main.models.jobs import JobTemplate
 
 from django.core.urlresolvers import reverse
 
-@pytest.fixture
-def notifier():
-    return Notifier.objects.create(name="test-notification",
-                                   notification_type="webhook",
-                                   notification_configuration=dict(url="http://localhost",
-                                                                   headers={"Test": "Header"}))
-
 @pytest.mark.django_db
 def test_get_notifier_list(get, user, notifier):
     url = reverse('api:notifier_list')

@@ -36,6 +36,7 @@ from awx.main.models.organization import (
 )
 
 from awx.main.models.rbac import Role
+from awx.main.models.notifications import Notifier
 
 '''
 Disable all django model signals.
@@ -175,6 +176,14 @@ def label(organization):
     return organization.labels.create(name="test-label", description="test-label-desc")
 
 @pytest.fixture
+def notifier(organization):
+    return Notifier.objects.create(name='test-notifier',
+                                   organization=organization,
+                                   notification_type="webhook",
+                                   notification_configuration=dict(url="http://localhost",
+                                                                   headers={"Test": "Header"}))
+
+@pytest.fixture
 def role():
     return Role.objects.create(name='role')
 
@@ -255,6 +264,20 @@ def permissions():
                  'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
 
+@pytest.fixture
+def notifier_factory(organization):
+    def n(name="test-notifier"):
+        try:
+            notifier = Notifier.objects.get(name=name)
+        except Notifier.DoesNotExist:
+            notifier = Notifier(name=name,
+                                organization=organization,
+                                notification_type="webhook",
+                                notification_configuration=dict(url="http://localhost",
+                                                                headers={"Test": "Header"}))
+            notifier.save()
+        return notifier
+    return n
 
 @pytest.fixture
 def post():

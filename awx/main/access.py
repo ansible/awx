@@ -1194,7 +1194,44 @@ class NotifierAccess(BaseAccess):
     model = Notifier
 
     def get_queryset(self):
-        return self.model.objects.distinct().all()
+        qs = self.model.objects.all()
+        if self.user.is_superuser:
+            return qs
+        return self.model.objects.filter(organization__in=Organization.accessible_objects(self.user, ALL_PERMISSIONS).all())
+
+    def can_read(self, obj):
+        if self.user.is_superuser:
+            return True
+        if obj.organization is not None:
+            return obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
+        return False
+
+    def can_add(self, data):
+        if self.user.is_superuser:
+            return True
+        if not data:
+            return Organization.accessible_objects(self.user, ALL_PERMISSIONS).exists()
+        org_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=org_pk)
+        return org.accessible_by(self.user, ALL_PERMISSIONS)
+
+    def can_change(self, obj, data):
+        if self.user.is_superuser:
+            return True
+        org_pk = get_pk_from_dict(data, 'organization')
+        if obj and org_pk and obj.organization.pk != org_pk:
+            org = get_object_or_400(Organization, pk=org_pk)
+            if not org.accessible_by(self.user, ALL_PERMISSIONS):
+                return False
+        if obj.organization is not None:
+            return obj.organization.accessible_by(self.user, ALL_PERMISSIONS)
+        return False
+
+    def can_admin(self, obj, data):
+        return self.can_change(obj, data)
+
+    def can_delete(self, obj):
+        return self.can_change(obj, None)
 
 class NotificationAccess(BaseAccess):
     '''
@@ -1203,7 +1240,16 @@ class NotificationAccess(BaseAccess):
     model = Notification
 
     def get_queryset(self):
-        return self.model.objects.distinct().all()
+        qs = self.model.objects.all()
+        if self.user.is_superuser:
+            return qs
+        return self.model.objects.filter(notifier__organization__in=Organization.accessible_objects(self.user, ALL_PERMISSIONS))
+
+    def can_read(self, obj):
+        return self.user.can_access(Notifier, 'read', obj.notifier)
+
+    def can_delete(self, obj):
+        return self.user.can_access(Notifier, 'delete', obj.notifier)
 
 class LabelAccess(BaseAccess):
     '''
