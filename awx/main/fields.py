@@ -20,7 +20,7 @@ from django.utils.encoding import smart_text
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
+from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import get_current_apps
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField']
@@ -274,13 +274,11 @@ class ImplicitRoleField(models.ForeignKey):
                 if qs.count() >= 1:
                     role = qs[0]
                 else:
-                    role = Role_.objects.create(
-                               created=now(),
-                               modified=now(),
-                               singleton_name=singleton_name,
-                               name=singleton_name,
-                               description=singleton_name
-                           )
+                    role = Role_.objects.create(created=now(),
+                                                modified=now(),
+                                                singleton_name=singleton_name,
+                                                name=singleton_name,
+                                                description=singleton_name)
                 parents = [role]
             else:
                 parents = resolve_role_field(instance, path)
