@@ -43,9 +43,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                addRequired: true,
-                editRequired: false,
-                excludeMode: 'edit',
                 ngClick: 'lookUpOrganization()',
                 awRequiredWhen: {
                     variable: "organizationrequired",
@@ -150,17 +147,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 addRequired: false,
                 editRequired: false,
                 subForm: 'sourceSubForm'
-            },
-            organization: {
-                label: 'Organization',
-                type: 'lookup',
-                sourceModel: 'organization',
-                sourceField: 'name',
-                ngClick: 'lookUpOrganization()',
-                awRequiredWhen: {
-                    variable: "organizationrequired",
-                    init: "true"
-                }
             },
             credential: {
                 label: 'SCM Credential',
@@ -277,6 +263,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
                     }
                 }
+            },
+            "notifications": {
+                include: "NotificationsList"
             }
         },
 
@@ -285,18 +274,22 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 permissions: {
                     iterator: 'permission',
                     url: urls.access_list
+                },
+                notifications: {
+                    iterator: 'notification',
+                    url: '/api/v1/notifiers/'
                 }
             };
         }
 
     })
 
-    .factory('ProjectsForm', ['ProjectsFormObject', 'SchedulesList', function(ProjectsFormObject, ScheduleList) {
+    .factory('ProjectsForm', ['ProjectsFormObject', 'NotificationsList', function(ProjectsFormObject, NotificationsList) {
         return function() {
             var itm;
             for (itm in ProjectsFormObject.related) {
-                if (ProjectsFormObject.related[itm].include === "SchedulesList") {
-                    ProjectsFormObject.related[itm] = ScheduleList;
+                if (ProjectsFormObject.related[itm].include === "NotificationsList") {
+                    ProjectsFormObject.related[itm] = NotificationsList;
                     ProjectsFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                 }
             }

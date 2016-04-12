@@ -12,7 +12,7 @@
 
 export default
     angular.module('OrganizationFormDefinition', [])
-        .value('OrganizationForm', {
+        .value('OrganizationFormObject', {
 
             addTitle: 'New Organization', //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
@@ -171,6 +171,10 @@ export default
                             class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
                         }
                     }
+                },
+                "notifications": {
+                    include: "NotificationsList"
+
                 }
 
             },
@@ -179,8 +183,25 @@ export default
                     permissions: {
                         iterator: 'permission',
                         url: urls.access_list
+                    },
+                    notifications: {
+                        iterator: 'notification',
+                        url: '/api/v1/notifiers/'
                     }
                 };
             }
+        })
 
-        }); //OrganizationForm
+        .factory('OrganizationForm', ['OrganizationFormObject', 'NotificationsList',
+            function(OrganizationFormObject, NotificationsList) {
+            return function() {
+                var itm;
+                for (itm in OrganizationFormObject.related) {
+                    if (OrganizationFormObject.related[itm].include === "NotificationsList") {
+                        OrganizationFormObject.related[itm] = NotificationsList;
+                        OrganizationFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+                    }
+                }
+                return OrganizationFormObject;
+            };
+        }]);

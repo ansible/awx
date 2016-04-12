@@ -517,7 +517,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
     GetChoices, Empty, DebugForm, Wait, SchedulesControllerInit,
     SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2,
-    OrganizationList) {
+    OrganizationList, NotificationsListInit, ToggleNotification) {
 
     ClearScope('htmlTemplate');
 
@@ -604,6 +604,12 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
         $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         Wait('stop');
+
+        NotificationsListInit({
+            scope: $scope,
+            url: GetBasePath('projects'),
+            id: $scope.project_obj.id
+        });
     });
 
     if ($scope.removeChoicesReady) {
@@ -709,6 +715,24 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         variable: 'scm_type_options',
         callback: 'choicesReady'
     });
+
+    $scope.toggleNotification = function(event, id, column) {
+        var notifier = this.notification;
+        try {
+            $(event.target).tooltip('hide');
+        }
+        catch(e) {
+            // ignore
+        }
+        ToggleNotification({
+            scope: $scope,
+            url: $scope.project_url,
+            id: $scope.project_obj.id,
+            notifier: notifier,
+            column: column,
+            callback: 'NotificationRefresh'
+        });
+    };
 
     // Save changes to the parent
     $scope.formSave = function () {
@@ -820,5 +844,6 @@ ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     'ClearScope', 'GetBasePath', 'ReturnToCaller', 'GetProjectPath',
     'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'SchedulesControllerInit', 'SchedulesListInit',
-    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2', 'OrganizationList'
+    'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2',
+    'OrganizationList', 'NotificationsListInit', 'ToggleNotification'
 ];

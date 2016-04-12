@@ -1,0 +1,60 @@
+/*!
+ * ngToast v2.0.0 (http://tameraydin.github.io/ngToast)
+ * Copyright 2016 Tamer Aydin (http://tamerayd.in)
+ * Licensed under MIT (http://tameraydin.mit-license.org/)
+ */
+
+.ng-toast {
+  position: fixed;
+  z-index: 1080;
+  width: 100%;
+  height: 0;
+  margin-top: 20px;
+  text-align: center; }
+  .ng-toast.ng-toast--top {
+    top: 0;
+    bottom: auto; }
+    .ng-toast.ng-toast--top .ng-toast__list {
+      top: 0;
+      bottom: auto; }
+    .ng-toast.ng-toast--top.ng-toast--center .ng-toast__list {
+      position: static; }
+  .ng-toast.ng-toast--bottom {
+    top: auto;
+    bottom: 0; }
+    .ng-toast.ng-toast--bottom .ng-toast__list {
+      top: auto;
+      bottom: 0; }
+    .ng-toast.ng-toast--bottom.ng-toast--center .ng-toast__list {
+      pointer-events: none; }
+    .ng-toast.ng-toast--bottom.ng-toast--center .ng-toast__message .alert {
+      pointer-events: auto; }
+  .ng-toast.ng-toast--right .ng-toast__list {
+    left: auto;
+    right: 0;
+    margin-right: 20px; }
+  .ng-toast.ng-toast--right .ng-toast__message {
+    text-align: right; }
+  .ng-toast.ng-toast--left .ng-toast__list {
+    right: auto;
+    left: 0;
+    margin-left: 20px; }
+  .ng-toast.ng-toast--left .ng-toast__message {
+    text-align: left; }
+  .ng-toast .ng-toast__list {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none; }
+  .ng-toast .ng-toast__message {
+    display: block;
+    width: 100%;
+    text-align: center; }
+    .ng-toast .ng-toast__message .alert {
+      display: inline-block; }
+  .ng-toast .ng-toast__message__count {
+    display: inline-block;
+    margin: 0 15px 0 5px; }

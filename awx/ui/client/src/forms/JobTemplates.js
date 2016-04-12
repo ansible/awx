@@ -11,7 +11,7 @@
 */
 
 export default
-    angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'CompletedJobsDefinition'])
+    angular.module('JobTemplateFormDefinition', [ 'CompletedJobsDefinition'])
 
         .value ('JobTemplateFormObject', {
 
@@ -327,6 +327,10 @@ export default
                             class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
                         }
                     }
+                },
+                "notifications": {
+                    include: "NotificationsList"
+
                 }
             },
 
@@ -339,19 +343,23 @@ export default
                     permissions: {
                         iterator: 'permission',
                         url: urls.access_list
+                    },
+                    notifications: {
+                        iterator: 'notification',
+                        url: '/api/v1/notifiers/'
                     }
                 };
             }
         })
 
-        .factory('JobTemplateForm', ['JobTemplateFormObject', 'SchedulesList', 'CompletedJobsList',
-        function(JobTemplateFormObject, SchedulesList, CompletedJobsList) {
+        .factory('JobTemplateForm', ['JobTemplateFormObject', 'NotificationsList', 'CompletedJobsList',
+        function(JobTemplateFormObject, NotificationsList, CompletedJobsList) {
             return function() {
                 var itm;
 
                 for (itm in JobTemplateFormObject.related) {
-                    if (JobTemplateFormObject.related[itm].include === "SchedulesList") {
-                        JobTemplateFormObject.related[itm] = SchedulesList;
+                    if (JobTemplateFormObject.related[itm].include === "NotificationsList") {
+                        JobTemplateFormObject.related[itm] = NotificationsList;
                         JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                     }
                     if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {

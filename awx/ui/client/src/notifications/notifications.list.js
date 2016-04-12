@@ -4,12 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-
-
 export default function(){
     return {
         name:  'notifications' ,
-        listTitle: 'Notifications',
+        title: 'Notifications',
         iterator: 'notification',
         index: false,
         hover: false,
@@ -19,45 +17,39 @@ export default function(){
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-8'
+                linkTo: '/#/notifications/{{notifier.id}}'
             },
-            description: {
-                label: 'Description',
+            notification_type: {
+                label: 'Type',
+                searchType: 'select',
+                searchOptions: [],
                 excludeModal: true,
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
-            }
-        },
-
-        actions: {
-            add: {
-                mode: 'all', // One of: edit, select, all
-                ngClick: 'addNotification()',
-                awToolTip: 'Create a new custom inventory',
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
-            }
-        },
-
-        fieldActions: {
-
-            columnClass: 'col-md-2 col-sm-3 col-xs-3',
-
-            edit: {
-                ngClick: "editNotification(inventory_script.id)",
-                icon: 'fa-edit',
-                label: 'Edit',
-                "class": 'btn-sm',
-                awToolTip: 'Edit credential',
-                dataPlacement: 'top'
             },
-            "delete": {
-                ngClick: "deleteNotification(notification.id, notification.name)",
-                icon: 'fa-trash',
-                label: 'Delete',
-                "class": 'btn-sm',
-                awToolTip: 'Delete credential',
-                dataPlacement: 'top'
+            notifiers_success: {
+                label: 'Successful',
+                flag: 'notifiers_success',
+                type: "toggle",
+                ngClick: "toggleNotification($event, notification.id, \"notifiers_success\")",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                dataPlacement: "right",
+                searchable: false,
+                nosort: true,
+            },
+            notifiers_error: {
+                label: 'Failed',
+                columnClass: 'NotifierList-lastColumn',
+                flag: 'notifiers_error',
+                type: "toggle",
+                ngClick: "toggleNotification($event, notification.id, \"notifiers_error\")",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                dataPlacement: "right",
+                searchable: false,
+                nosort: true,
             }
         }
+
     };
 }
