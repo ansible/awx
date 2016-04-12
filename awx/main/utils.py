@@ -20,6 +20,7 @@ import tempfile
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
+from django.apps import apps
 
 # PyCrypto
 from Crypto.Cipher import AES
@@ -30,7 +31,8 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided']
+           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
+           'get_current_apps', 'set_current_apps']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -556,3 +558,11 @@ def getattrd(obj, name, default=NoDefaultProvided):
             return default
         raise
 
+current_apps = apps
+def set_current_apps(apps):
+    global current_apps
+    current_apps = apps
+
+def get_current_apps():
+    global current_apps
+    return current_apps

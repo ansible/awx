@@ -2,11 +2,12 @@ import logging
 
 from django.utils.encoding import smart_text
 from django.db.models import Q
+from django.utils.timezone import now
 
 from collections import defaultdict
-from awx.main.utils import getattrd
-import _old_access as old_access
+from awx.main.utils import getattrd, set_current_apps
 
+import _old_access as old_access
 logger = logging.getLogger(__name__)
 
 def log_migration(wrapped):
@@ -26,38 +27,61 @@ def log_migration(wrapped):
     return wrapper
 
 @log_migration
+def init_rbac_migration(apps, schema_editor):
+    set_current_apps(apps)
+
+@log_migration
 def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
     RolePermission = apps.get_model('main', "RolePermission")
     ContentType = apps.get_model('contenttypes', "ContentType")
+    user_content_type = ContentType.objects.get_for_model(User)
 
     for user in User.objects.iterator():
+        user.save()
         try:
-            Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=user.id)
+            Role.objects.get(content_type=user_content_type, object_id=user.id)
             logger.info(smart_text(u"found existing role for user: {}".format(user.username)))
         except Role.DoesNotExist:
             role = Role.objects.create(
+                created=now(),
+                modified=now(),
                 singleton_name = smart_text(u'{}-admin_role'.format(user.username)),
-                content_object = user,
+                content_type = user_content_type,
+                object_id = user.id
             )
             role.members.add(user)
             RolePermission.objects.create(
+                created=now(),
+                modified=now(),
                 role = role,
-                resource = user,
+                content_type = user_content_type,
+                object_id = user.id,
                 create=1, read=1, write=1, delete=1, update=1,
                 execute=1, scm_update=1, use=1,
             )
             logger.info(smart_text(u"migrating to new role for user: {}".format(user.username)))
 
         if user.is_superuser:
-            Role.singleton('System Administrator').members.add(user)
+            if Role.objects.filter(singleton_name='System Administrator').exists():
+                sa_role = Role.objects.get(singleton_name='System Administrator')
+            else:
+                sa_role = Role.objects.create(
+                    created=now(),
+                    modified=now(),
+                    singleton_name='System Administrator',
+                    name='System Administrator'
+                )
+
+            sa_role.members.add(user)
             logger.warning(smart_text(u"added superuser: {}".format(user.username)))
 
 @log_migration
 def migrate_organization(apps, schema_editor):
     Organization = apps.get_model('main', "Organization")
     for org in Organization.objects.iterator():
+        org.save() # force creates missing roles
         for admin in org.deprecated_admins.all():
             org.admin_role.members.add(admin)
             logger.info(smart_text(u"added admin: {}, {}".format(org.name, admin.username)))
@@ -69,6 +93,7 @@ def migrate_organization(apps, schema_editor):
 def migrate_team(apps, schema_editor):
     Team = apps.get_model('main', 'Team')
     for t in Team.objects.iterator():
+        t.save()
         for user in t.deprecated_users.all():
             t.member_role.members.add(user)
             logger.info(smart_text(u"team: {}, added user: {}".format(t.name, user.username)))
@@ -110,7 +135,7 @@ def _discover_credentials(instances, cred, orgfunc):
         orgs[orgfunc(inst)].append(inst)
 
     if len(orgs) == 1:
-        _update_credential_parents(instances[0].inventory.organization, cred)
+        _update_credential_parents(orgfunc(instances[0]), cred)
     else:
         for pos, org in enumerate(orgs):
             if pos == 0:
@@ -135,9 +160,14 @@ def migrate_credential(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
     JobTemplate = apps.get_model('main', 'JobTemplate')
     Project = apps.get_model('main', 'Project')
+    Role = apps.get_model('main', 'Role')
+    User = apps.get_model('auth', 'User')
     InventorySource = apps.get_model('main', 'InventorySource')
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    user_content_type = ContentType.objects.get_for_model(User)
 
     for cred in Credential.objects.iterator():
+        cred.save()
         results = (JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all() or
                    InventorySource.objects.filter(credential=cred).all())
         if results:
@@ -164,7 +194,8 @@ def migrate_credential(apps, schema_editor):
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host)))
         elif cred.deprecated_user is not None:
-            cred.deprecated_user.admin_role.children.add(cred.owner_role)
+            user_admin_role = Role.objects.get(content_type=user_content_type, object_id=cred.deprecated_user.id)
+            user_admin_role.children.add(cred.owner_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host, )))
@@ -191,6 +222,7 @@ def migrate_inventory(apps, schema_editor):
             return None
 
     for inventory in Inventory.objects.iterator():
+        inventory.save()
         for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
@@ -238,16 +270,18 @@ def migrate_projects(apps, schema_editor):
 
     # Migrate projects to single organizations, duplicating as necessary
     for project in Project.objects.iterator():
+        project.save()
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
-        if len(project_orgs) > 1:
+        if len(project_orgs) >= 1:
             first_org = None
             for org in project_orgs:
                 if first_org is None:
                     # For the first org, re-use our existing Project object, so don't do the below duplication effort
                     first_org = org
-                    project.name = smart_text(u'{} - {}'.format(first_org.name, original_project_name))
+                    if len(project_orgs) > 1:
+                        project.name = smart_text(u'{} - {}'.format(first_org.name, original_project_name))
                     project.organization = first_org
                     project.save()
                 else:
@@ -349,6 +383,7 @@ def migrate_job_templates(apps, schema_editor):
     Permission = apps.get_model('main', 'Permission')
 
     for jt in JobTemplate.objects.iterator():
+        jt.save()
         permission = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,

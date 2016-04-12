@@ -92,6 +92,46 @@ def test_project_migration():
     assert o3.projects.all()[0].jobtemplates.count() == 0
 
 @pytest.mark.django_db
+def test_single_org_project_migration(organization):
+    project = Project.objects.create(name='my project',
+                                     description="description",
+                                     organization=None)
+    organization.deprecated_projects.add(project)
+    assert project.organization is None
+    rbac.migrate_projects(apps, None)
+    project = Project.objects.get(id=project.id)
+    assert project.organization.id == organization.id
+
+@pytest.mark.django_db
+def test_no_org_project_migration(organization):
+    project = Project.objects.create(name='my project',
+                                     description="description",
+                                     organization=None)
+    assert project.organization is None
+    rbac.migrate_projects(apps, None)
+    assert project.organization is None
+
+@pytest.mark.django_db
+def test_multi_org_project_migration():
+    org1 = Organization.objects.create(name="org1", description="org1 desc")
+    org2 = Organization.objects.create(name="org2", description="org2 desc")
+    project = Project.objects.create(name='my project',
+                                     description="description",
+                                     organization=None)
+
+    assert Project.objects.all().count() == 1
+    assert Project.objects.filter(organization=org1).count() == 0
+    assert Project.objects.filter(organization=org2).count() == 0
+
+    project.deprecated_organizations.add(org1)
+    project.deprecated_organizations.add(org2)
+    assert project.organization is None
+    rbac.migrate_projects(apps, None)
+    assert Project.objects.filter(organization=org1).count() == 1
+    assert Project.objects.filter(organization=org2).count() == 1
+
+
+@pytest.mark.django_db
 def test_project_user_project(user_project, project, user):
     u = user('owner')
 
