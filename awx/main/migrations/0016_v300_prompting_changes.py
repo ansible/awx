@@ -9,7 +9,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0014_v300_invsource_cred'),
+        ('main', '0015_v300_label_changes'),
     ]
 
     operations = [

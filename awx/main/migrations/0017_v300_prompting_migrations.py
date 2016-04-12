@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0015_v300_prompting_changes'),
+        ('main', '0016_v300_prompting_changes'),
     ]
 
     operations = [
