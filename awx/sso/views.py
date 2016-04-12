@@ -27,7 +27,6 @@ class BaseRedirectView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         last_path = self.request.COOKIES.get('lastPath', '')
         last_path = urllib.quote(urllib.unquote(last_path).strip('"'))
-        logger.warning(smart_text(u"Redirecting invalid SSO login attempt".format(last_path)))
         url = reverse('ui:index')
         if last_path:
             return '%s#%s' % (url, last_path)
