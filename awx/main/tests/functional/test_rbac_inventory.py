@@ -15,6 +15,7 @@ def test_custom_inv_script_access(organization, user):
 
     custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test')
     custom_inv.organization = organization
+    custom_inv.save()
     assert not custom_inv.accessible_by(u, {'read':True})
 
     organization.member_role.members.add(u)

@@ -24,11 +24,8 @@ class Label(CommonModelNameNotUnique):
     organization = models.ForeignKey(
         'Organization',
         related_name='labels',
-        blank=True,
-        null=True,
-        default=None,
         help_text=_('Organization this label belongs to.'),
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     def get_absolute_url(self):
