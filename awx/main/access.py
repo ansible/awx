@@ -773,10 +773,6 @@ class JobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        # Must have an inventory if you are not a superuser.
-        if obj.inventory is None:
-            return False
-
         if obj.job_type == PERM_INVENTORY_SCAN:
             # Scan job with default project, must have JT execute or be org admin
             if obj.project is None and obj.inventory:
@@ -859,14 +855,18 @@ class JobAccess(BaseAccess):
         # A super user can relaunch a job
         if self.user.is_superuser:
             return True
+
         # If a user can launch the job template then they can relaunch a job from that
         # job template
-        has_perm = False
-        if obj.job_template is not None and obj.job_template.accessible_by(self.user, {'execute':True}):
-            has_perm = True
-        dep_access_inventory = obj.inventory.accessible_by(self.user, {'use':True})
-        dep_access_project = obj.project is None or obj.project.accessible_by(self.user, {'read':True})
-        return self.can_read(obj) and dep_access_inventory and dep_access_project and has_perm
+        if obj.job_template is not None:
+            return obj.job_template.accessible_by(self.user, {'execute': True})
+
+        inventory_access = obj.inventory.accessible_by(self.user, {'use':True})
+
+        org_access = obj.inventory.organization.accessible_by(self.user, ALL_PERMISSIONS)
+        project_access = obj.project is None or obj.project.accessible_by(self.user, ALL_PERMISSIONS)
+
+        return inventory_access and (org_access or project_access)
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
