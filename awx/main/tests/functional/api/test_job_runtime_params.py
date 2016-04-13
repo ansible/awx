@@ -41,6 +41,22 @@ def job_template_prompts(project, inventory, machine_credential):
         )
     return rf
 
+@pytest.fixture
+def job_template_prompts_null(project):
+    return JobTemplate.objects.create(
+        job_type='run',
+        project=project,
+        inventory=None,
+        credential=None,
+        name='deploy-job-template',
+        ask_variables_on_launch=True,
+        ask_tags_on_launch=True,
+        ask_job_type_on_launch=True,
+        ask_inventory_on_launch=True,
+        ask_limit_on_launch=True,
+        ask_credential_on_launch=True,
+    )
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, user):
@@ -81,7 +97,38 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     job_template.inventory.save()
 
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    runtime_data, user('admin', True))
+                    runtime_data, admin_user)
+
+    assert response.status_code == 201
+    job_id = response.data['job']
+    job_obj = Job.objects.get(pk=job_id)
+
+    # Check that job data matches the given runtime variables
+    assert 'job_launch_var' in yaml.load(job_obj.extra_vars)
+    assert job_obj.limit == runtime_data['limit']
+    assert job_obj.job_type == runtime_data['job_type']
+    assert job_obj.inventory.pk == runtime_data['inventory']
+    assert job_obj.credential.pk == runtime_data['credential']
+    assert job_obj.job_tags == runtime_data['job_tags']
+
+@pytest.mark.django_db
+@pytest.mark.skip(reason="JT can_start without inventory needs to be fixed before passing")
+@pytest.mark.job_runtime_vars
+def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, post, user):
+    job_template = job_template_prompts_null
+    common_user = user('admin', False)
+
+    job_template.executor_role.members.add(common_user)
+    job_template.save()
+    job_template.project.member_role.members.add(common_user)
+    job_template.project.save()
+
+    credential = Credential.objects.get(pk=runtime_data['credential'])
+    credential.usage_role.members.add(common_user)
+    credential.save()
+
+    response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+                    runtime_data, common_user)
 
     assert response.status_code == 201
     job_id = response.data['job']
@@ -140,15 +187,13 @@ def test_job_launch_fails_without_inventory_access(deploy_jobtemplate, machine_c
     deploy_jobtemplate.ask_inventory_on_launch = True
     deploy_jobtemplate.credential = machine_credential
     common_user = user('test-user', False)
-    # TODO: Change admin_role to executor_role once issue #1422 is resolved
-    deploy_jobtemplate.admin_role.members.add(common_user)
+    deploy_jobtemplate.executor_role.members.add(common_user)
     deploy_jobtemplate.save()
-    deploy_jobtemplate.inventory.executor_role.members.add(common_user)
+    deploy_jobtemplate.inventory.usage_role.members.add(common_user)
     deploy_jobtemplate.inventory.save()
     deploy_jobtemplate.project.member_role.members.add(common_user)
     deploy_jobtemplate.project.save()
-    # TODO: change owner_role to usage_role after fix
-    deploy_jobtemplate.credential.owner_role.members.add(common_user)
+    deploy_jobtemplate.credential.usage_role.members.add(common_user)
     deploy_jobtemplate.credential.save()
 
     # Assure that the base job template can be launched to begin with
@@ -215,38 +260,40 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_unprompted_vars_with_survey(job_template_prompts, post, user):
-    job_template = job_template_prompts(False)
-    job_template.survey_enabled = True
-    job_template.survey_spec = {
-        "spec": [
-            {
-                "index": 0,
-                "question_name": "survey_var",
-                "min": 0,
-                "default": "",
-                "max": 100,
-                "question_description": "A survey question",
-                "required": True,
-                "variable": "survey_var",
-                "choices": "",
-                "type": "integer"
-            }
-        ],
-        "description": "",
-        "name": ""
-    }
-    job_template.save()
+def test_job_launch_unprompted_vars_with_survey(mocker, job_template_prompts, post, user):
+    with mocker.patch('awx.main.access.BaseAccess.check_license', return_value=False):
+        job_template = job_template_prompts(False)
+        job_template.survey_enabled = True
+        job_template.survey_spec = {
+            "spec": [
+                {
+                    "index": 0,
+                    "question_name": "survey_var",
+                    "min": 0,
+                    "default": "",
+                    "max": 100,
+                    "question_description": "A survey question",
+                    "required": True,
+                    "variable": "survey_var",
+                    "choices": "",
+                    "type": "integer"
+                }
+            ],
+            "description": "",
+            "name": ""
+        }
+        job_template.save()
 
-    response = post(
-        reverse('api:job_template_launch', args=[job_template.pk]),
-        dict(extra_vars={"job_launch_var": 3, "survey_var": 4}), 
-        user('admin', True))
+        response = post(
+            reverse('api:job_template_launch', args=[job_template.pk]),
+            dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
+            user('admin', True))
+        assert response.status_code == 201
 
-    job_id = response.data['job']
-    job_obj = Job.objects.get(pk=job_id)
+        job_id = response.data['job']
+        job_obj = Job.objects.get(pk=job_id)
 
-    # Check that the survey variable is accepted and the job variable isn't
-    job_extra_vars = yaml.load(job_obj.extra_vars)
-    assert 'job_launch_var' not in job_extra_vars
-    assert 'survey_var' in job_extra_vars
+        # Check that the survey variable is accepted and the job variable isn't
+        job_extra_vars = yaml.load(job_obj.extra_vars)
+        assert 'job_launch_var' not in job_extra_vars
+        assert 'survey_var' in job_extra_vars
