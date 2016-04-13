@@ -1,5 +1,5 @@
 export default
-    function EditQuestion(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm) {
+    function EditQuestion(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm, CreateSelect2) {
         return function(params) {
 
             var scope = params.scope,
@@ -7,16 +7,12 @@ export default
                 element,
                 tmpVar,
                 i,
-                question = params.question, //scope.survey_questions[index],
+                question = params.question,
                 form = SurveyQuestionForm;
 
-            $('#survey-save-button').attr('disabled', 'disabled');
-            angular.element('#survey_question_question_cancel_btn').trigger('click');
-            $('#add_question_btn').hide();
-            // $('#new_question .aw-form-well').remove();
-            element = $('.question_final:eq('+index+')');
-            element.css('opacity', 1.0);
-            element.empty();
+            // Update the index so that we know which question is being edited.
+            scope.editQuestionIndex = index;
+            
             scope.text_min = null;
             scope.text_max = null;
             scope.int_min = null;
@@ -70,6 +66,16 @@ export default
                 else if ( question.type === 'multiselect'){
                     scope.default_multiselect = question.default;
                 }
+
+                // After we populate the form with data, need to call CreateSelect2 again
+                // to get the dropdown to show the selected item.
+                CreateSelect2({
+                    element:'#survey_question_type',
+                    multiple: false
+                });
+
+                // Set the form to dirty.  This lets the cancel button know that it should become enabled.
+                scope.survey_question_form.$setDirty();
             });
 
             if (scope.removeGenerateForm) {
@@ -77,7 +83,7 @@ export default
             }
             scope.removeGenerateForm = scope.$on('GenerateForm', function() {
                 tmpVar = scope.mode;
-                GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope });
+                GenerateForm.inject(form, { id: 'survey_maker_question_form', mode: 'edit', related: false, scope:scope });
                 scope.mode = tmpVar;
                 scope.$emit('FillQuestionForm');
             });
@@ -95,5 +101,6 @@ EditQuestion.$inject =
         'ProcessErrors',
         '$compile',
         'GenerateForm',
-        'questionDefinitionForm'
+        'questionDefinitionForm',
+        'CreateSelect2'
     ];

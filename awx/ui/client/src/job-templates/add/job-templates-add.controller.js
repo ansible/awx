@@ -337,16 +337,20 @@
                             if (form.fields[fld].type === 'select' && fld !== 'playbook') {
                                 data[fld] = $scope[fld].value;
                             } else {
-                                if (fld !== 'variables') {
+                                if (fld !== 'variables' && fld !== 'survey') {
                                     data[fld] = $scope[fld];
                                 }
                             }
                         }
                         data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
                         if(data.job_type === 'scan' && $scope.default_scan === true){
-                          data.project = "";
-                          data.playbook = "";
+                            data.project = "";
+                            data.playbook = "";
                         }
+                        // We only want to set the survey_enabled flag to true for this job template if a survey exists
+                        // and it's been enabled.  By default, survey_enabled is explicitly set to true but if no survey
+                        // is created then we don't want it enabled.
+                        data.survey_enabled = ($scope.survey_enabled && $scope.survey_exists) ? $scope.survey_enabled : false;
                         Rest.setUrl(defaultUrl);
                         Rest.post(data)
                             .success(function(data) {
@@ -361,7 +365,7 @@
                                     url: $scope.current_url
                                 });
 
-                                if(data.survey_enabled===true){
+                                if($scope.survey_questions && $scope.survey_questions.length > 0){
                                     //once the job template information is saved we submit the survey info to the correct endpoint
                                     var url = data.url+ 'survey_spec/';
                                     Rest.setUrl(url);
@@ -413,19 +417,12 @@
                 if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
                     $scope.survey_enabled = false;
                 }
+                // Can't have a survey enabled without a survey
                 if($scope.survey_enabled === true && $scope.survey_exists!==true){
-                    // $scope.$emit("PromptForSurvey");
-
-                    // The original design for this was a pop up that would prompt the user if they wanted to create a
-                    // survey, because they had enabled one but not created it yet. We switched this for now so that
-                    // an error message would be displayed by the survey buttons that tells the user to add a survey or disabled
-                    // surveys.
-                    $scope.invalid_survey = true;
-                    return;
-                } else {
-                    $scope.$emit("GatherFormFields");
+                    $scope.survey_enabled = false;
                 }
 
+                $scope.$emit("GatherFormFields");
 
             };
 

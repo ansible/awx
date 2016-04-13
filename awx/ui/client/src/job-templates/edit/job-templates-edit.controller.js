@@ -332,27 +332,6 @@ export default
 
             Wait('start');
 
-            if ($scope.removeEnableSurvey) {
-                $scope.removeEnableSurvey();
-            }
-            $scope.removeEnableSurvey = $scope.$on('EnableSurvey', function(fld) {
-
-                $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
-                Rest.setUrl(defaultUrl + id+ '/survey_spec/');
-                Rest.get()
-                    .success(function (data) {
-                        if(data && data.name){
-                            $scope.survey_exists = true;
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to retrieve job template: ' + $stateParams.template_id + '. GET status: ' + status
-                        });
-                    });
-            });
-
             if ($scope.removeSurveySaved) {
                 $scope.rmoveSurveySaved();
             }

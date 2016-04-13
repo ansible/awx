@@ -615,7 +615,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             var element = params.element,
             options = params.opts,
             multiple = (params.multiple!==undefined) ? params.multiple : true,
-            placeholder = params.placeholder;
+            placeholder = params.placeholder,
+            customDropdownAdapter = (params.customDropdownAdapter!==undefined) ? params.customDropdownAdapter : true;
 
             $.fn.select2.amd.require([
                 'select2/utils',
@@ -632,14 +633,22 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                                return Utils.Decorate(Adapter, Decorator);
                            }, Dropdown);
 
-                $(element).select2({
+                var config = {
                     placeholder: placeholder,
                     multiple: multiple,
                     containerCssClass: 'Form-dropDown',
                     width: '100%',
                     minimumResultsForSearch: Infinity,
-                    dropdownAdapter: CustomAdapter
-                });
+                }
+
+                // multiple-choice directive calls select2 but needs to do so without this custom adapter
+                // to allow the element to be draggable on survey preview.
+                if(customDropdownAdapter) {
+                    config.dropdownAdapter = CustomAdapter;
+                }
+
+                $(element).select2(config);
+
                 if(options){
                     for (var d = 0; d < $(element + " option").length; d++) {
                         var item = $(element + " option")[d];

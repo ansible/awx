@@ -262,7 +262,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 $('.form-control[required], input[type="radio"][required]').each(function () {
                     var label, span;
                     if (Empty($(this).attr('aw-required-when'))) {
-                        label = $(this).parent().parent().find('label').first();
+                        label = $(this).closest('.form-group').find('label').first();
                         if ($(this).attr('type') === 'radio') {
                             label = $(this).parent().parent().parent().find('label').first();
                         }
@@ -569,7 +569,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
                 html += "<input type=\"text\" name=\"" + fld + "\" ";
                 html += "ng-model=\"" + fld + "\" ";
-                html += (field['class']) ? Attr(field, "class") : "";
                 html += " readonly />\n";
                 return html;
             },
@@ -675,7 +674,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "id=\"" + form.name + "_" + fld + "_chbox\" ";
                     html += (idx !== undefined) ? "_" + idx : "";
                     html += "class=\"";
-                    html += (field['class']) ? field['class'] + " " : "";
                     html += "\"";
                     html += (field.trueValue !== undefined) ? Attr(field, 'trueValue') : "";
                     html += (field.falseValue !== undefined) ? Attr(field, 'falseValue') : "";
@@ -738,7 +736,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "\">\n";
                     html += "<div class=\"alert";
                     html += (field.closeable === undefined || field.closeable === true) ? " alert-dismissable" : "";
-                    html += (field['class']) ? " " + field['class'] : "";
                     html += "\" ";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += ">\n";
@@ -784,7 +781,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildId(field, fld, this.form);
                             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
                             html += "class=\"form-control Form-textInput ";
-                            html += (field['class']) ? " " + this.attr(field, 'class') : "";
                             html += "\" ";
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                             html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
@@ -916,7 +912,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
                             html += "class='form-control Form-textInput";
-                            html += (field['class']) ? " " + this.attr(field, 'class') : "";
                             html += "' ";
                             html += (field.chkPass) ? "chk-pass " : "";
 
@@ -1045,7 +1040,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-textArea";
-                        html += (field['class']) ? " " + field['class'] : "";
                         html += (field['elementClass']) ? " " + field['elementClass'] : "";
                         html += "\" ";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
@@ -1084,7 +1078,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-dropDown";
-                        html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
                         html += (field.ngOptions) ? this.attr(field, 'ngOptions') : "" ;
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
@@ -1139,7 +1132,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (!field.slider && !field.spinner) {
                             html += "form-control";
                         }
-                        html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
                         html += (field.slider) ? "aw-slider=\"" + fld + "\" " : "";
                         html += (field.spinner) ? "aw-spinner=\"" + fld + "\" " : "";
@@ -1392,14 +1384,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 // title and exit button
                 html +=  "<div class=\"Form-header\">";
-                html += "<div class=\"Form-title\">";
+                html += "<div class=\"Form-title ";
+                html += (this.form.titleClass) ? this.form.titleClass : "";
+                html += "\">";
                 html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                 if(this.form.name === "user"){
                     html+= "<span class=\"Form-title--is_superuser\" "+
                         "ng-if=is_superuser>Admin</span>";
                 }
                 html += "</div>\n";
-                if(options.cancelButton !== undefined && options.cancelButton === false) {
+                if(this.form.cancelButton !== undefined && this.form.cancelButton === false) {
                     html += "<div class=\"Form-exitHolder\">";
                     html += "</div>";
                 } else {
@@ -1408,9 +1402,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<i class=\"fa fa-times-circle\"></i>";
                     html += "</button></div>\n";
                 }
-                    html += "</div>\n"; //end of Form-header
-
-
+                html += "</div>\n"; //end of Form-header
 
                 if (!_.isEmpty(this.form.related)) {
                     var collection;

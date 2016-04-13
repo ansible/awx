@@ -79,7 +79,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   scope.job_template_obj = data;
                                   var fld, i;
                                   for (fld in form.fields) {
-                                      if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
+                                      if (fld !== 'variables' && fld !== 'survey' && data[fld] !== null && data[fld] !== undefined) {
                                           if (form.fields[fld].type === 'select') {
                                               if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
                                                   for (i = 0; i < scope[fld + '_options'].length; i++) {
@@ -92,10 +92,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                               }
                                           } else {
                                               scope[fld] = data[fld];
-                                              if(fld ==='survey_enabled'){
-                                                  if(!Empty(data.summary_fields.survey)) {
-                                                      scope.survey_exists = true;
-                                                  }
+                                              if(!Empty(data.summary_fields.survey)) {
+                                                  scope.survey_exists = true;
                                               }
                                           }
                                           master[fld] = scope[fld];
@@ -114,6 +112,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   }
                                   Wait('stop');
                                   scope.url = data.url;
+
+                                  scope.survey_enabled = data.survey_enabled;
 
                                   scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
                                   master.ask_variables_on_launch = scope.ask_variables_on_launch;

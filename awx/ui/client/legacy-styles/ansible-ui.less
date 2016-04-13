@@ -2058,12 +2058,26 @@ tr td button i {
     margin-top: 10px;
 }
 
-.select2-container--disabled,.select2-container--disabled  .select2-selection--single{
+/* Overwrite select2 base styles for single/multiple selects so that match up with other form elements.  Also overwrite disabled styles. */
+.select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
     cursor: not-allowed !important;
 }
 
 .select2-container--disabled {
     opacity: .35;
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: @field-secondary-bg;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+.select2-container--default .select2-selection--multiple {
+    background-color: @field-secondary-bg;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    cursor: text;
 }
 
 body.is-modalOpen {
