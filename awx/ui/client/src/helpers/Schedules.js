@@ -20,14 +20,12 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('ShowSchedulerModal', ['$rootScope', 'Wait', 'CreateDialog', function($rootScope, Wait, CreateDialog) {
+        .factory('ShowSchedulerModal', ['$rootScope', function($rootScope) {
             return function(params) {
                 // Set modal dimensions based on viewport width
 
                 var buttons,
-                    scope = params.scope,
-                    callback = params.callback,
-                    title = params.title;
+                    scope = params.scope;
 
                 buttons = [{
                     "label": "Cancel",
@@ -221,12 +219,12 @@ export default
                 if (!Empty($stateParams.template_id)) {
                     url += $stateParams.template_id + '/schedules/';
                 }
-                else if (!Empty($stateParams.id) && base != 'system_job_templates') {
+                else if (!Empty($stateParams.id) && base !== 'system_job_templates') {
                     url += $stateParams.id + '/schedules/';
                 }
-                else if (base == 'system_job_templates') {
+                else if (base === 'system_job_templates') {
                     url += $stateParams.id + '/schedules/';
-                    if($stateParams.id  == 4){
+                    if($stateParams.id  === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -532,9 +530,8 @@ export default
 
 
         .factory('SchedulesControllerInit', ['$state', '$location', 'ToggleSchedule',
-        'DeleteSchedule', 'EditSchedule', 'AddSchedule',
-            function($state, $location, ToggleSchedule, DeleteSchedule, EditSchedule,
-                AddSchedule) {
+        'DeleteSchedule',
+            function($state, $location, ToggleSchedule, DeleteSchedule) {
             return function(params) {
                 var scope = params.scope,
                     parent_scope = params.parent_scope,

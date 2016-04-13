@@ -22,8 +22,8 @@ export default
      *  Initialize calling scope with all the bits required to support a jobs list
      *
      */
-    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob', '$window',
-        function($state, Find, DeleteJob, RelaunchJob, $window) {
+    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob',
+        function($state, Find, DeleteJob, RelaunchJob) {
             return function(params) {
                 var scope = params.scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator;
@@ -76,7 +76,7 @@ export default
 
                     var goToJobDetails = function(state) {
                         $state.go(state, {id: job.id}, {reload:true});
-                    }
+                    };
 
                     switch(job.type) {
                         case 'job':
@@ -348,8 +348,8 @@ export default
      *  Called from JobsList controller to load each section or list on the page
      *
      */
-    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
-        function($stateParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
+    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate',
+        function($stateParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
@@ -359,8 +359,7 @@ export default
                 pageSize = params.pageSize || 5,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 search_params = params.searchParams,
-                spinner = (params.spinner === undefined) ? true : params.spinner,
-                e, html, key;
+                spinner = (params.spinner === undefined) ? true : params.spinner, key;
 
             GenerateList.inject(list, {
                 mode: 'edit',

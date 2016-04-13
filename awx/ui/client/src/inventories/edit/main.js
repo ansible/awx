@@ -5,7 +5,6 @@
  *************************************************/
 
 import route from './inventory-edit.route';
-import controller from './inventory-edit.controller';
 
 export default
     angular.module('inventoryEdit', [])
