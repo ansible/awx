@@ -42,18 +42,6 @@ export default
                     editRequired: true,
                     autocomplete: false
                 },
-                organization: {
-                    label: 'Organization',
-                    type: 'lookup',
-                    sourceModel: 'organization',
-                    sourceField: 'name',
-                    ngClick: 'lookUpOrganization()',
-                    excludeMode: 'edit',
-                    awRequiredWhen: {
-                        variable: "orgrequired",
-                        init: true
-                    }
-                },
                 username: {
                     label: 'Username',
                     type: 'text',
@@ -62,6 +50,20 @@ export default
                         init: true
                     },
                     autocomplete: false
+                },
+                organization: {
+                    label: 'Organization',
+                    type: 'lookup',
+                    sourceModel: 'organization',
+                    sourceField: 'name',
+                    addRequired: true,
+                    editRequired: false,
+                    excludeMode: 'edit',
+                    ngClick: 'lookUpOrganization()',
+                    awRequiredWhen: {
+                        variable: "orgrequired",
+                        init: true
+                    }
                 },
                 password: {
                     label: 'Password',
@@ -86,12 +88,13 @@ export default
                     autocomplete: false
                 },
                 is_superuser: {
-                    label: 'Superuser (User has full system administration privileges.)',
+                    label: 'Superuser <span style="text-transform:none;">(User has full system administration privileges)</span>',
                     type: 'checkbox',
                     trueValue: 'true',
                     falseValue: 'false',
                     "default": 'false',
-                    ngShow: "current_user['is_superuser'] == true"
+                    ngShow: "current_user['is_superuser'] == true",
+                    ngModel: 'is_superuser'
                 },
                 ldap_user: {
                     label: 'Created by LDAP',
@@ -112,6 +115,26 @@ export default
             },
 
             related: {
+                /*
+                permissions: {
+                    basePath: 'teams/:id/access_list/',
+                    type: 'collection',
+                    title: 'Permissions',
+                    iterator: 'permission',
+                    index: false,
+                    open: false,
+                    searchType: 'select',
+                    actions: {
+                        add: {
+                            ngClick: "addPermission",
+                            label: 'Add',
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
+                        }
+                    }
+                },
+                */
 
                 credentials: {
                     type: 'collection',
@@ -157,92 +180,6 @@ export default
                         }
                     }
                 },
-
-                // permissions: {
-                //     type: 'collection',
-                //     title: 'Permissions',
-                //     iterator: 'permission',
-                //     open: false,
-                //     index: false,
-                //
-                //     actions: {
-                //         add: {
-                //             ngClick: "add('permissions')",
-                //             label: 'Add',
-                //             awToolTip: 'Add a permission for this user',
-                //             ngShow: 'PermissionAddAllowed',
-                //             actionClass: 'btn List-buttonSubmit',
-                //             buttonContent: '&#43; ADD'
-                //         }
-                //     },
-                //
-                //     fields: {
-                //         name: {
-                //             key: true,
-                //             label: 'Name',
-                //             ngClick: "edit('permissions', permission.id, permission.name)"
-                //         },
-                //         inventory: {
-                //             label: 'Inventory',
-                //             sourceModel: 'inventory',
-                //             sourceField: 'name',
-                //             ngBind: 'permission.summary_fields.inventory.name'
-                //         },
-                //         project: {
-                //             label: 'Project',
-                //             sourceModel: 'project',
-                //             sourceField: 'name',
-                //             ngBind: 'permission.summary_fields.project.name'
-                //         },
-                //         permission_type: {
-                //             label: 'Permission',
-                //             ngBind: 'getPermissionText()',
-                //             searchType: 'select'
-                //         }
-                //     },
-                //
-                //     fieldActions: {
-                //         edit: {
-                //             label: 'Edit',
-                //             ngClick: "edit('permissions', permission.id, permission.name)",
-                //             icon: 'icon-edit',
-                //             awToolTip: 'Edit the permission',
-                //             'class': 'btn btn-default'
-                //         },
-                //
-                //         "delete": {
-                //             label: 'Delete',
-                //             ngClick: "delete('permissions', permission.id, permission.name, 'permission')",
-                //             icon: 'icon-trash',
-                //             "class": 'btn-danger',
-                //             awToolTip: 'Delete the permission',
-                //             ngShow: 'PermissionAddAllowed'
-                //         }
-                //     }
-                //
-                // },
-
-                admin_of_organizations: { // Assumes a plural name (e.g. things)
-                    type: 'collection',
-                    title: 'Admin of Organizations',
-                    iterator: 'adminof', // Singular form of name (e.g.  thing)
-                    open: false, // Open accordion on load?
-                    index: false,
-                    base: '/organizations',
-
-                    actions: {},
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    }
-                },
-
                 organizations: {
                     type: 'collection',
                     title: 'Organizations',
