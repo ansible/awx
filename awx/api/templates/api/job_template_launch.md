@@ -13,16 +13,16 @@ The response will include the following fields:
 * `ask_limit_on_launch`: Flag indicating whether the job_template is
   configured to prompt for limit upon launch (boolean, read-only)
 * `ask_inventory_on_launch`: Flag indicating whether the job_template is
-  configured to prompt for limit upon launch (boolean, read-only)
+  configured to prompt for inventory upon launch (boolean, read-only)
 * `ask_credential_on_launch`: Flag indicating whether the job_template is
-  configured to prompt for limit upon launch (boolean, read-only)
+  configured to prompt for credential upon launch (boolean, read-only)
 * `can_start_without_user_input`: Flag indicating if the job_template can be
   launched without user-input (boolean, read-only)
 * `passwords_needed_to_start`: Password names required to launch the
   job_template (array, read-only)
 * `variables_needed_to_start`: Required variable names required to launch the
   job_template (array, read-only)
-* `survey_enabled`: Flag indicating if whether the job_template has an enabled
+* `survey_enabled`: Flag indicating whether the job_template has an enabled
   survey (boolean, read-only)
 * `credential_needed_to_start`: Flag indicating the presence of a credential
   associated with the job template.  If not then one should be supplied when
