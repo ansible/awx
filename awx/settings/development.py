@@ -10,6 +10,8 @@ import traceback
 # Django Split Settings
 from split_settings.tools import optional, include
 
+from awx.main.utils import get_ansible_version
+
 # Load default settings.
 from defaults import *  # NOQA
 
@@ -32,6 +34,8 @@ CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
 AWX_PROOT_ENABLED = True
 
 PENDO_TRACKING_STATE = "off"
+
+ANSIBLE_VERSION = get_ansible_version()
 
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
