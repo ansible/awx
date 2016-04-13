@@ -194,7 +194,6 @@ export default
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
             function openSocket() {
                 $rootScope.event_socket.on("job_events-" + job_id, function(data) {
-                    console.log(data)
                     if (api_complete && data.id > lastEventId) {
                         scope.waiting = false;
                         data.event = data.event_name;
@@ -278,8 +277,8 @@ export default
                         };
                         JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
-                                var idx, event, status, status_text, item, msg;
-                                if (data.results.length > 0) {$
+                                var event, status, status_text, item, msg;
+                                if (data.results.length > 0) {
                                     lastEventId =  data.results[0].id;
                                 }
                                 scope.next_host_results = data.next;
@@ -680,10 +679,6 @@ export default
                     $('#tasks-table-detail').height(120 + (height * 0.20));
                     $('#hosts-table-detail').height(150 + (height * 0.70));
                 }
-                // Summary table height adjusting.
-                height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .JobDetail-searchHeaderRow').outerHeight() -
-                    $('#hosts-summary-section .table-header').outerHeight() - 20;
-                //$('#hosts-summary-table').mCustomScrollbar("update");
                 scope.$emit('RefreshCompleted');
             };
 

@@ -42,7 +42,7 @@ export default
     .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
         'GetElapsed', 'UpdateTaskStatus', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
     function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
-        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay) {
+        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay, longDateFilter) {
         return function(params) {
 
             var scope = params.scope,
@@ -185,7 +185,7 @@ export default
         };
     }])
 
-    .factory('GetElapsed', ['moment', function(moment) {
+    .factory('GetElapsed', [function() {
         return function(params) {
             var start = params.start,
                 end = params.end,
@@ -351,7 +351,7 @@ export default
         };
     }])
 
-    .factory('UpdateJobStatus', ['moment', 'GetElapsed', 'Empty', 'JobIsFinished', function(moment, GetElapsed, Empty, JobIsFinished) {
+    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', function(GetElapsed, Empty, JobIsFinished) {
         return function(params) {
             var scope = params.scope,
                 failed = params.failed,
@@ -363,10 +363,10 @@ export default
                 scope.job_status.status = 'failed';
             }
             if (JobIsFinished(scope) && !Empty(modified)) {
-                scope.job_status.finished = moment(modified).format('l');
+                scope.job_status.finished = longDateFilter(modified)
             }
             if (!Empty(started) && Empty(scope.job_status.started)) {
-                scope.job_status.started = moment(started).format('l');
+                scope.job_status.started = longDateFilter(modified)
             }
             if (!Empty(scope.job_status.finished) && !Empty(scope.job_status.started)) {
                 scope.job_status.elapsed = GetElapsed({
@@ -913,7 +913,6 @@ export default
                     scope.tasks[idx].taskActiveClass = '';
                 }
             });
-            // /api/v1/jobs/16/job_events/?parent=832&event__startswith=runner&page_size=200&order=host_name,counte
             var params = {
                 parent: scope.selectedTask,
                 event__startswith: 'runner',

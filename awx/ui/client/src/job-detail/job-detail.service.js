@@ -27,7 +27,7 @@ export default
             // remove ignored properties
             Object.keys(result).forEach(function(key, index){
                 if (ignored.indexOf(key) > -1) {
-                    delete result[key]
+                    delete result[key];
                 }
             });
 
@@ -36,7 +36,7 @@ export default
                 result.event_data = {};
                 Object.keys(data.event_data.res).forEach(function(key, index){
                     if (ignored.indexOf(key) > -1) {
-                        return
+                        return;
                     }
                     else{
                         result.event_data[key] = data.event_data.res[key];
@@ -45,7 +45,7 @@ export default
             }
             catch(err){result.event_data = undefined;}
 
-            return result
+            return result;
         },
         // Return Ansible's passed-through response msg on a job_event
         processEventMsg: function(event){
@@ -55,7 +55,7 @@ export default
         processEventItem: function(event){
             try{
                 var item = event.event_data.res.item;
-                return typeof item === 'object' ? JSON.stringify(item) : item
+                return typeof item === 'object' ? JSON.stringify(item) : item;
             }
             catch(err){return;}
         },
@@ -65,11 +65,11 @@ export default
         // uses the API's runner events and convenience properties .failed .changed to determine status. 
         // see: job_event_callback.py for more filters to support
         processEventStatus: function(event){
-            if (event.event == 'runner_on_unreachable'){
+            if (event.event === 'runner_on_unreachable'){
                 return {
                     class: 'HostEvents-status--unreachable',
                     status: 'unreachable'
-                }
+                };
             }
             // equiv to 'runner_on_error' && 'runner on failed'
             if (event.failed){
@@ -83,19 +83,19 @@ export default
                 return {
                     class: 'HostEvents-status--changed',
                     status: 'changed'
-                }
+                };
             }
-            if (event.event == 'runner_on_ok' || event.event == 'runner_on_async_ok'){
+            if (event.event === 'runner_on_ok' || event.event === 'runner_on_async_ok'){
                 return {
                     class: 'HostEvents-status--ok',
                     status: 'ok'
-                }
+                };
             }
-            if (event.event == 'runner_on_skipped'){
+            if (event.event === 'runner_on_skipped'){
                 return {
                     class: 'HostEvents-status--skipped',
                     status: 'skipped'
-                }
+                };
             }
         },
         // Consumes a response from this.getRelatedJobEvents(id, params)
@@ -138,7 +138,7 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -162,7 +162,7 @@ export default
         // e.g. ?page_size=200&order=host_name
         getJobHostSummaries: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_host_summaries/?'
+            url = url + id + '/job_host_summaries/?';
             Object.keys(params).forEach(function(key, index) {
                 // the API is tolerant of extra ampersands
                 url = url + '&' + key + '=' + params[key];
@@ -170,7 +170,7 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -189,7 +189,7 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -206,7 +206,7 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -219,7 +219,7 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -233,13 +233,12 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 }); 
         }
-        }
-    }
-    ];
+        };
+    }];
