@@ -261,28 +261,38 @@ virtualenv:
 requirements_ansible:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-	fi && \
-	pip install -r requirements/requirements_ansible.txt
+		$(VENV_BASE)/ansible/bin/pip install -U pip==8.1.1; \
+		$(VENV_BASE)/ansible/bin/pip install -r requirements/requirements_ansible.txt ;\
+	else \
+		pip install -U pip==8.1.1; \
+		pip install -r requirements/requirements_ansible.txt ; \
+	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-	fi && \
-	pip install -r requirements/requirements.txt; \
+		$(VENV_BASE)/tower/bin/pip install -U pip==8.1.1; \
+		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements.txt ;\
+	else \
+		pip install -U pip==8.1.1; \
+		pip install -r requirements/requirements.txt ; \
+	fi
 
 requirements_tower_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-	fi && \
-	pip install -r requirements/requirements_dev.txt
+		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
+	fi
 
 # Install third-party requirements needed for running unittests in jenkins
 requirements_jenkins:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
+		$(VENV_BASE)/tower/bin/pip install -Ir requirements/requirements_jenkins.txt; \
+	else \
+		pip install -Ir requirements/requirements_jenkins..txt; \
 	fi && \
-	pip install -Ir requirements/requirements_jenkins.txt
 	$(NPM_BIN) install csslint jshint
 
 requirements: virtualenv requirements_ansible requirements_tower
@@ -317,18 +327,18 @@ refresh: clean requirements_dev version_file develop migrate
 
 # Create Django superuser.
 adduser:
-	$(PYTHON) manage.py createsuperuser
+	tower-manage createsuperuser
 
 # Create database tables and apply any new migrations.
 migrate:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py migrate --noinput --fake-initial
+	tower-manage migrate --noinput --fake-initial
 
 # Run after making changes to the models to create a new migration.
 dbchange:
-	$(PYTHON) manage.py makemigrations
+	tower-manage makemigrations
 
 # access database shell, asks for password
 dbshell:
