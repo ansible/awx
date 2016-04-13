@@ -275,46 +275,6 @@ class OrganizationsTest(BaseTest):
         cant_org = dict(name='silly user org', description='4815162342')
         self.post(self.collection(), cant_org, expect=402, auth=self.get_super_credentials())
 
-    def test_post_item_subobjects_projects(self):
-
-        # first get all the orgs
-        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
-
-        # find projects attached to the first org
-        projects0_url = orgs['results'][0]['related']['projects']
-        projects1_url = orgs['results'][1]['related']['projects']
-
-        # get all the projects on the first org
-        projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
-        a_project = projects0['results'][-1]
-
-        # attempt to add the project to the 7th org and see what happens
-        #self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
-        self.post(projects1_url, a_project, expect=400, auth=self.get_super_credentials())
-        projects1 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 3)
-
-        # make sure adding a project that does not exist, or a missing pk field, results in a 400
-        self.post(projects1_url, dict(id=99999), expect=400, auth=self.get_super_credentials())
-        self.post(projects1_url, dict(asdf=1234), expect=400, auth=self.get_super_credentials())
-
-        # test that by posting a pk + disassociate: True we can remove a relationship
-        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 5)
-        a_project['disassociate'] = True
-        self.post(projects1_url, a_project, expect=400, auth=self.get_super_credentials())
-        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 5)
-
-        a_project = projects1['results'][-1]
-        a_project['disassociate'] = 1
-        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.post(projects1_url, a_project, expect=400, auth=self.get_normal_credentials())
-        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 5)
-
-
-
     def test_post_item_subobjects_users(self):
 
         url = reverse('api:organization_users_list', args=(self.organizations[1].pk,))
