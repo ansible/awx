@@ -420,80 +420,50 @@ export default
 
             // Save changes to the parent
             $scope.formSave = function () {
+                var fld, data = {};
                 $scope.invalid_survey = false;
-                if ($scope.removeGatherFormFields) {
-                    $scope.removeGatherFormFields();
-                }
-                $scope.removeGatherFormFields = $scope.$on('GatherFormFields', function(e, data) {
-                    generator.clearApiErrors();
-                    Wait('start');
-                    data = {};
-                    var fld;
-                    try {
-                        // Make sure we have valid variable data
-                        data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-                        if(data.extra_vars === undefined ){
-                            throw 'undefined variables';
-                        }
-                        for (fld in form.fields) {
-                            if (form.fields[fld].type === 'select' && fld !== 'playbook') {
-                                data[fld] = $scope[fld].value;
-                            } else {
-                                if (fld !== 'variables' && fld !== 'callback_url') {
-                                    data[fld] = $scope[fld];
-                                }
-                            }
-                        }
-                        Rest.setUrl(defaultUrl + id + '/');
-                        Rest.put(data)
-                            .success(function (data) {
-                                $scope.$emit('templateSaveSuccess', data);
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                    msg: 'Failed to update job template. PUT returned status: ' + status });
-                            });
-
-                    } catch (err) {
-                        Wait('stop');
-                        Alert("Error", "Error parsing extra variables. Parser returned: " + err);
-                    }
-                });
-
-
-                if ($scope.removePromptForSurvey) {
-                    $scope.removePromptForSurvey();
-                }
-                $scope.removePromptForSurvey = $scope.$on('PromptForSurvey', function() {
-                    var action = function () {
-                            // $scope.$emit("GatherFormFields");
-                            Wait('start');
-                            $('#prompt-modal').modal('hide');
-                            $scope.addSurvey();
-
-                        };
-                    Prompt({
-                        hdr: 'Incomplete Survey',
-                        body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
-                        action: action
-                    });
-                });
 
                 // users can't save a survey with a scan job
                 if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
                     $scope.survey_enabled = false;
                 }
+                // Can't have a survey enabled without a survey
                 if($scope.survey_enabled === true && $scope.survey_exists!==true){
-                    // $scope.$emit("PromptForSurvey");
+                    $scope.survey_enabled = false;
+                }
 
-                    // The original design for this was a pop up that would prompt the user if they wanted to create a
-                    // survey, because they had enabled one but not created it yet. We switched this for now so that
-                    // an error message would be displayed by the survey buttons that tells the user to add a survey or disabled
-                    // surveys.
-                    $scope.invalid_survey = true;
-                    return;
-                } else {
-                    $scope.$emit("GatherFormFields");
+                generator.clearApiErrors();
+
+                Wait('start');
+
+                try {
+                    // Make sure we have valid variable data
+                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
+                    if(data.extra_vars === undefined ){
+                        throw 'undefined variables';
+                    }
+                    for (fld in form.fields) {
+                        if (form.fields[fld].type === 'select' && fld !== 'playbook') {
+                            data[fld] = $scope[fld].value;
+                        } else {
+                            if (fld !== 'variables' && fld !== 'callback_url') {
+                                data[fld] = $scope[fld];
+                            }
+                        }
+                    }
+                    Rest.setUrl(defaultUrl + id + '/');
+                    Rest.put(data)
+                        .success(function (data) {
+                            $scope.$emit('templateSaveSuccess', data);
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to update job template. PUT returned status: ' + status });
+                        });
+
+                } catch (err) {
+                    Wait('stop');
+                    Alert("Error", "Error parsing extra variables. Parser returned: " + err);
                 }
 
             };
