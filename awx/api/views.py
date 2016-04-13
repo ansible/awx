@@ -2137,9 +2137,10 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             new_job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = JobSerializer(new_job).data
-            data['job'] = new_job.id
+            data = OrderedDict()
             data['ignored_fields'] = ignored_fields
+            data.update(JobSerializer(new_job).to_representation(new_job))
+            data['job'] = new_job.id
             return Response(data, status=status.HTTP_201_CREATED)
 
 class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
