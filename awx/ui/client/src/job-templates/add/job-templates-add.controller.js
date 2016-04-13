@@ -323,95 +323,8 @@
 
             // Save
             $scope.formSave = function () {
+                var fld, data = {};
                 $scope.invalid_survey = false;
-                if ($scope.removeGatherFormFields) {
-                    $scope.removeGatherFormFields();
-                }
-                $scope.removeGatherFormFields = $scope.$on('GatherFormFields', function(e, data) {
-                    generator.clearApiErrors();
-                    Wait('start');
-                    data = {};
-                    var fld;
-                    try {
-                        for (fld in form.fields) {
-                            if (form.fields[fld].type === 'select' && fld !== 'playbook') {
-                                data[fld] = $scope[fld].value;
-                            } else {
-                                if (fld !== 'variables' && fld !== 'survey') {
-                                    data[fld] = $scope[fld];
-                                }
-                            }
-                        }
-                        data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-                        if(data.job_type === 'scan' && $scope.default_scan === true){
-                            data.project = "";
-                            data.playbook = "";
-                        }
-                        // We only want to set the survey_enabled flag to true for this job template if a survey exists
-                        // and it's been enabled.  By default, survey_enabled is explicitly set to true but if no survey
-                        // is created then we don't want it enabled.
-                        data.survey_enabled = ($scope.survey_enabled && $scope.survey_exists) ? $scope.survey_enabled : false;
-                        Rest.setUrl(defaultUrl);
-                        Rest.post(data)
-                            .success(function(data) {
-                                $scope.$emit('templateSaveSuccess', data);
-
-                                $scope.addedItem = data.id;
-
-                                Refresh({
-                                    scope: $scope,
-                                    set: 'job_templates',
-                                    iterator: 'job_template',
-                                    url: $scope.current_url
-                                });
-
-                                if($scope.survey_questions && $scope.survey_questions.length > 0){
-                                    //once the job template information is saved we submit the survey info to the correct endpoint
-                                    var url = data.url+ 'survey_spec/';
-                                    Rest.setUrl(url);
-                                    Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec: $scope.survey_questions })
-                                        .success(function () {
-                                            Wait('stop');
-
-                                        })
-                                        .error(function (data, status) {
-                                            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                                msg: 'Failed to add new survey. Post returned status: ' + status });
-                                        });
-                                }
-
-
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                    msg: 'Failed to add new job template. POST returned status: ' + status
-                                });
-                            });
-
-                    } catch (err) {
-                        Wait('stop');
-                        Alert("Error", "Error parsing extra variables. Parser returned: " + err);
-                    }
-                });
-
-
-                if ($scope.removePromptForSurvey) {
-                    $scope.removePromptForSurvey();
-                }
-                $scope.removePromptForSurvey = $scope.$on('PromptForSurvey', function() {
-                    var action = function () {
-                            // $scope.$emit("GatherFormFields");
-                            Wait('start');
-                            $('#prompt-modal').modal('hide');
-                            $scope.addSurvey();
-
-                        };
-                    Prompt({
-                        hdr: 'Incomplete Survey',
-                        body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
-                        action: action
-                    });
-                });
 
                 // users can't save a survey with a scan job
                 if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
@@ -422,7 +335,70 @@
                     $scope.survey_enabled = false;
                 }
 
-                $scope.$emit("GatherFormFields");
+                generator.clearApiErrors();
+
+                Wait('start');
+
+                try {
+                    for (fld in form.fields) {
+                        if (form.fields[fld].type === 'select' && fld !== 'playbook') {
+                            data[fld] = $scope[fld].value;
+                        } else {
+                            if (fld !== 'variables' && fld !== 'survey') {
+                                data[fld] = $scope[fld];
+                            }
+                        }
+                    }
+                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
+                    if(data.job_type === 'scan' && $scope.default_scan === true){
+                        data.project = "";
+                        data.playbook = "";
+                    }
+                    // We only want to set the survey_enabled flag to true for this job template if a survey exists
+                    // and it's been enabled.  By default, survey_enabled is explicitly set to true but if no survey
+                    // is created then we don't want it enabled.
+                    data.survey_enabled = ($scope.survey_enabled && $scope.survey_exists) ? $scope.survey_enabled : false;
+                    Rest.setUrl(defaultUrl);
+                    Rest.post(data)
+                        .success(function(data) {
+                            $scope.$emit('templateSaveSuccess', data);
+
+                            $scope.addedItem = data.id;
+
+                            Refresh({
+                                scope: $scope,
+                                set: 'job_templates',
+                                iterator: 'job_template',
+                                url: $scope.current_url
+                            });
+
+                            if($scope.survey_questions && $scope.survey_questions.length > 0){
+                                //once the job template information is saved we submit the survey info to the correct endpoint
+                                var url = data.url+ 'survey_spec/';
+                                Rest.setUrl(url);
+                                Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec: $scope.survey_questions })
+                                    .success(function () {
+                                        Wait('stop');
+
+                                    })
+                                    .error(function (data, status) {
+                                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                            msg: 'Failed to add new survey. Post returned status: ' + status });
+                                    });
+                            }
+
+
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to add new job template. POST returned status: ' + status
+                            });
+                        });
+
+                } catch (err) {
+                    Wait('stop');
+                    Alert("Error", "Error parsing extra variables. Parser returned: " + err);
+                }
 
             };
 
