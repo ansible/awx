@@ -32,7 +32,6 @@
 import sys
 import os
 import time
-import datetime
 from copy import deepcopy
 from ansible import constants as C
 try:
@@ -55,7 +54,7 @@ class CacheModule(BaseCacheModule):
 
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
-        self.date_key = time.mktime(datetime.datetime.utcnow().timetuple())
+        self.date_key = time.time()
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)

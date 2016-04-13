@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 
 # Django
+from django.utils import timezone
 
 # AWX
 from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver
@@ -18,7 +19,7 @@ def check_process_fact_message_module(fact_returned, data, module_name):
     date_key = data['date_key']
 
     # Ensure 1, and only 1, fact created
-    timestamp = datetime.fromtimestamp(date_key, None)
+    timestamp = datetime.fromtimestamp(date_key, timezone.utc)
     assert 1 == Fact.objects.all().count()
 
     host_obj = Host.objects.get(name=data['host'], inventory__id=data['inventory_id'])
