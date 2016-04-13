@@ -1,18 +1,18 @@
-/** @define RoleList */
+/** @define LabelList */
 @import "../shared/branding/colors.default.less";
 
-.RoleList {
+.LabelList {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
 }
 
-.RoleList-tagContainer {
+.LabelList-tagContainer {
     display: flex;
     max-width: 100%;
 }
 
-.RoleList-tag {
+.LabelList-tag {
     border-radius: 5px;
     padding: 2px 10px;
     margin: 4px 0px;
@@ -28,7 +28,7 @@
     overflow: hidden;
 }
 
-.RoleList-tag--deletable {
+.LabelList-tag--deletable {
     margin-right: 0px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
@@ -36,7 +36,7 @@
     max-wdith: ~"calc(100% - 23px)";
 }
 
-.RoleList-deleteContainer {
+.LabelList-deleteContainer {
     border: 1px solid @default-second-border;
     border-left-color: @default-bg;
     background-color: @default-bg;
@@ -50,25 +50,25 @@
     cursor: pointer;
 }
 
-.RoleList-tagDelete {
+.LabelList-tagDelete {
     font-size: 13px;
     color: @default-icon;
 }
 
-.RoleList-name {
+.LabelList-name {
     flex: initial;
     max-width: 100%;
 }
 
-.RoleList-tag--deletable > .RoleList-name {
+.LabelList-tag--deletable > .LabelList-name {
     max-width: ~"calc(100% - 23px)";
 }
 
-.RoleList-deleteContainer:hover, {
+.LabelList-deleteContainer:hover, {
     border-color: @default-err;
     background-color: @default-err;
 }
 
-.RoleList-deleteContainer:hover > .RoleList-tagDelete {
+.LabelList-deleteContainer:hover > .LabelList-tagDelete {
     color: @default-bg;
 }

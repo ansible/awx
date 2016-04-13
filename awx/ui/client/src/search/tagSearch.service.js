@@ -3,9 +3,13 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
     // parse the field config object to return
     // one of the searchTypes (for the left dropdown)
     this.buildType = function (field, key, id) {
+        var obj = {};
         // build the value (key)
         var value;
-        if (typeof(field.key) === String) {
+        if (field.sourceModel && field.sourceField) {
+            value = field.sourceModel + '__' + field.sourceField;
+            obj.related = true;
+        } else if (typeof(field.key) === String) {
             value = field.key;
         } else {
             value = key;
@@ -27,23 +31,19 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
             type = 'text';
         }
 
+        obj.id = id;
+        obj.value = value;
+        obj.label = label;
+        obj.type = type;
+
+
+
         // return the built option
         if (type === 'select') {
-            return {
-                id: id,
-                value: value,
-                label: label,
-                type: type,
-                typeOptions: typeOptions
-            };
-        } else {
-            return {
-                id: id,
-                value: value,
-                label: label,
-                type: type
-            };
+            obj.typeOptions = typeOptions;
         }
+
+        return obj;
     };
 
     // given the fields that are searchable,
@@ -116,6 +116,45 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
 
     // returns the url with filter params
     this.updateFilteredUrl = function(basePath, tags, pageSize) {
+        // remove the chain directive from all the urls that might have
+        // been added previously
+        tags = (tags || []).map(function(val) {
+            if (val.url.indexOf("chain__") !== -1) {
+                val.url = val.url.substring(("chain__").length);
+            }
+            return val;
+        });
+
+        // separate those tags with the related: true attribute
+        var separateRelated = _.partition(tags, function(i) {
+            return i.related;
+        });
+
+        var relatedTags = separateRelated[0];
+        var nonRelatedTags = separateRelated[1];
+
+        if (relatedTags.length > 1) {
+            // separate query params that need the change directive
+            // but have different keys
+            var chainGroups = _.groupBy(relatedTags, function(i) {
+                return i.value;
+            });
+
+            // iterate over those groups and add the "chain__" to the
+            // beginning of all but the first of each url
+            relatedTags = _.flatten(_.map(chainGroups, function(group) {
+                return group.map(function(val, i) {
+                    if (i !== 0) {
+                        val.url = "chain__" + val.url;
+                    }
+                    return val;
+                });
+            }));
+
+            // combine the related and non related tags after chainifying
+            tags = relatedTags.concat(nonRelatedTags);
+        }
+
         return basePath + "?" +
             (tags || []).map(function (t) {
                 return t.url;

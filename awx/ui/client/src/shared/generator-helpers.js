@@ -448,12 +448,29 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 options = params.options,
                 base = params.base,
                 field = list.fields[fld],
-                html = '';
+                html = '',
+                classList;
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
             } else if (field.type === 'role') {
-                html += "<td class=\"List-tableCell\"><role-list class=\"RoleList\"></role-list></td>";
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <role-list class=\"RoleList\">
+    </role-list>
+</td>
+                `;
+            } else if (field.type === 'labels') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                    html += `
+<td ${classList}>
+    <labels-list class=\"LabelList\">
+    </labels-list>
+</td>
+                    `;
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {

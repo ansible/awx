@@ -21,7 +21,7 @@ export default
         'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
         'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
         'PlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification', 'NotificationsListInit',
+        'ToggleNotification', 'NotificationsListInit', '$q',
         function(
             $filter, $scope, $rootScope, $compile,
             $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -31,7 +31,7 @@ export default
             Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
             JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
             SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, NotificationsListInit
+            CreateSelect2, ToggleNotification, NotificationsListInit, $q
         ) {
 
             ClearScope();
@@ -232,11 +232,6 @@ export default
                     multiple: false
                 });
 
-                CreateSelect2({
-                    element:'#job_templates_verbosity',
-                    multiple: false
-                });
-
                 for (var set in relatedSets) {
                     $scope.search(relatedSets[set].iterator);
                 }
@@ -353,7 +348,7 @@ export default
             }
             $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
                 choicesCount++;
-                if (choicesCount === 4) {
+                if (choicesCount === 5) {
                     $scope.$emit('LoadJobs');
                 }
             });
@@ -392,6 +387,41 @@ export default
                 callback: 'choicesReady'
             });
 
+            Rest.setUrl('api/v1/labels');
+            Wait("start");
+            Rest.get()
+                .success(function (data) {
+                    $scope.labelOptions = data.results
+                        .map((i) => ({label: i.name, value: i.id}));
+                    $scope.$emit("choicesReady");
+                    Rest.setUrl(defaultUrl + $state.params.template_id +
+                         "/labels");
+                    Rest.get()
+                        .success(function(data) {
+                            var opts = data.results
+                                .map(i => ({id: i.id + "",
+                                    test: i.name}));
+                            CreateSelect2({
+                                element:'#job_templates_labels',
+                                multiple: true,
+                                addNew: true,
+                                opts: opts
+                            });
+                            Wait("stop");
+                        });
+                    CreateSelect2({
+                        element:'#job_templates_verbosity',
+                        multiple: false
+                    });
+                })
+                .error(function (data, status) {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get labels. GET returned ' +
+                            'status: ' + status
+                    });
+                });
+
             function saveCompleted() {
                 $state.go('jobTemplates', null, {reload: true});
             }
@@ -401,34 +431,105 @@ export default
             }
             $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
                 Wait('stop');
-                if ($scope.allow_callbacks && ($scope.host_config_key !== master.host_config_key || $scope.callback_url !== master.callback_url)) {
-                    if (data.related && data.related.callback) {
-                        Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
-                            '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
-                            '<p>The host configuration key is: <strong>' + $filter('sanitize')(data.host_config_key) + '</strong></p>', 'alert-info', saveCompleted, null, null, null, true);
-                    }
-                    else {
-                        saveCompleted();
-                    }
+                if (data.related &&
+                    data.related.callback) {
+                    Alert('Callback URL',
+`
+<p>Host callbacks are enabled for this template. The callback URL is:</p>
+<p style=\"padding: 10px 0;\">
+    <strong>
+        ${$scope.callback_server_path}
+        ${data.related.callback}
+    </string>
+</p>
+<p>The host configuration key is:
+    <strong>
+        ${$filter('sanitize')(data.host_config_key)}
+    </string>
+</p>
+`,
+                        'alert-info', saveCompleted, null, null,
+                        null, true);
                 }
-                else {
-                    saveCompleted();
-                }
+                var orgDefer = $q.defer();
+                var associationDefer = $q.defer();
+
+                Rest.setUrl(data.related.labels);
+
+                var currentLabels = Rest.get()
+                    .then(function(data) {
+                        return data.data.results
+                            .map(val => val.id);
+                    });
+
+                currentLabels.then(function (current) {
+                    var labelsToAdd = $scope.labels
+                        .map(val => val.value);
+                    var labelsToDisassociate = current
+                        .filter(val => labelsToAdd
+                            .indexOf(val) === -1)
+                        .map(val => ({id: val, disassociate: true}));
+                    var labelsToAssociate = labelsToAdd
+                        .filter(val => current
+                            .indexOf(val) === -1)
+                        .map(val => ({id: val, associate: true}));
+                    var pass = labelsToDisassociate
+                        .concat(labelsToAssociate);
+                    associationDefer.resolve(pass);
+                });
+
+                Rest.setUrl(GetBasePath("organizations"));
+                Rest.get()
+                    .success(function(data) {
+                        orgDefer.resolve(data.results[0].id);
+                    });
+
+                orgDefer.promise.then(function(orgId) {
+                    var toPost = [];
+                    $scope.newLabels = $scope.newLabels
+                        .map(function(i, val) {
+                            val.organization = orgId;
+                            return val;
+                        });
+
+                    $scope.newLabels.each(function(i, val) {
+                        toPost.push(val);
+                    });
+
+                    associationDefer.promise.then(function(arr) {
+                        toPost = toPost
+                            .concat(arr);
+
+                        Rest.setUrl(data.related.labels);
+
+                        var defers = [];
+                        for (var i = 0; i < toPost.length; i++) {
+                            defers.push(Rest.post(toPost[i]));
+                        }
+                        $q.all(defers)
+                            .then(function() {
+                                saveCompleted();
+                            });
+                    });
+                });
             });
 
 
 
             // Save changes to the parent
+            // Save
             $scope.formSave = function () {
                 var fld, data = {};
                 $scope.invalid_survey = false;
 
                 // users can't save a survey with a scan job
-                if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
+                if($scope.job_type.value === "scan" &&
+                    $scope.survey_enabled === true){
                     $scope.survey_enabled = false;
                 }
                 // Can't have a survey enabled without a survey
-                if($scope.survey_enabled === true && $scope.survey_exists!==true){
+                if($scope.survey_enabled === true &&
+                    $scope.survey_exists!==true){
                     $scope.survey_enabled = false;
                 }
 
@@ -437,21 +538,38 @@ export default
                 Wait('start');
 
                 try {
-                    // Make sure we have valid variable data
-                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-                    if(data.extra_vars === undefined ){
-                        throw 'undefined variables';
-                    }
                     for (fld in form.fields) {
-                        if (form.fields[fld].type === 'select' && fld !== 'playbook') {
+                        if (form.fields[fld].type === 'select' &&
+                            fld !== 'playbook') {
                             data[fld] = $scope[fld].value;
                         } else {
-                            if (fld !== 'variables' && fld !== 'callback_url') {
+                            if (fld !== 'variables' &&
+                                fld !== 'survey') {
                                 data[fld] = $scope[fld];
                             }
                         }
                     }
-                    Rest.setUrl(defaultUrl + id + '/');
+                    data.extra_vars = ToJSON($scope.parseType,
+                        $scope.variables, true);
+                    if(data.job_type === 'scan' &&
+                        $scope.default_scan === true){
+                        data.project = "";
+                        data.playbook = "";
+                    }
+                    // We only want to set the survey_enabled flag to
+                    // true for this job template if a survey exists
+                    // and it's been enabled.  By default,
+                    // survey_enabled is explicitly set to true but
+                    // if no survey is created then we don't want
+                    // it enabled.
+                    data.survey_enabled = ($scope.survey_enabled &&
+                        $scope.survey_exists) ? $scope.survey_enabled : false;
+
+                    $scope.newLabels = $("#job_templates_labels > option")
+                        .filter("[data-select2-tag=true]")
+                        .map((i, val) => ({name: $(val).text()}));
+
+                    Rest.setUrl(defaultUrl + $state.params.template_id);
                     Rest.put(data)
                         .success(function (data) {
                             $scope.$emit('templateSaveSuccess', data);
@@ -460,12 +578,11 @@ export default
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to update job template. PUT returned status: ' + status });
                         });
-
                 } catch (err) {
                     Wait('stop');
-                    Alert("Error", "Error parsing extra variables. Parser returned: " + err);
+                    Alert("Error", "Error parsing extra variables. " +
+                        "Parser returned: " + err);
                 }
-
             };
 
             $scope.formCancel = function () {
@@ -474,7 +591,7 @@ export default
                     var defaultUrl = GetBasePath('job_templates') + $state.params.template_id;
                     Rest.setUrl(defaultUrl);
                     Rest.destroy()
-                        .success(function(res){
+                        .success(function(){
                             $state.go('jobTemplates', null, {reload: true, notify:true});
                         })
                         .error(function(res, status){

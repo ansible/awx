@@ -189,6 +189,18 @@ export default
                     dataPlacement: "right",
                     dataContainer: "body"
                 },
+                labels: {
+                    label: 'Labels',
+                    type: 'select',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    addRequired: false,
+                    editRequired: false,
+                    dataTitle: 'Labels',
+                    dataPlacement: 'right',
+                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    dataContainer: 'body'
+                },
                 variables: {
                     label: 'Extra Variables',
                     type: 'textarea',

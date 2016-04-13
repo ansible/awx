@@ -11,9 +11,10 @@ import jobTemplatesList from './list/main';
 import jobTemplatesAdd from './add/main';
 import jobTemplatesEdit from './edit/main';
 import jobTemplatesCopy from './copy/main';
+import labels from './labels/main';
 
 export default
-    angular.module('jobTemplates', 
-    	[surveyMaker.name, jobTemplatesList.name, jobTemplatesAdd.name, 
-    	jobTemplatesEdit.name, jobTemplatesCopy.name])
+    angular.module('jobTemplates',
+    	[surveyMaker.name, jobTemplatesList.name, jobTemplatesAdd.name,
+    	jobTemplatesEdit.name, jobTemplatesCopy.name, labels.name])
         .service('deleteJobTemplate', deleteJobTemplate);
