@@ -772,26 +772,14 @@ class JobTemplateAccess(BaseAccess):
         # Super users can start any job
         if self.user.is_superuser:
             return True
-        # Check to make sure both the inventory and project exist
-        if obj.inventory is None:
-            return False
+
         if obj.job_type == PERM_INVENTORY_SCAN:
-            if obj.project is None and obj.inventory.organization.accessible_by(self.user, {'read':True, 'update':True, 'write':True}):
-                return True
-            if not obj.inventory.organization.accessible_by(self.user, {'read':True, 'update':True, 'write':True}):
-                return False
-        if obj.project is None:
-            return False
+            # Scan job with default project, must have JT execute or be org admin
+            if obj.project is None and obj.inventory:
+                return (obj.accessible_by(self.user, {'execute': True}) or
+                        obj.inventory.organization.accessible_by(self.user, ALL_PERMISSIONS))
 
-        # Given explicit execute access to this JobTemplate
-        if obj.accessible_by(self.user, {'execute':True}):
-            return True
-
-        # If the user has admin access to the project they can start a job
-        if obj.project.accessible_by(self.user, ALL_PERMISSIONS):
-            return True
-
-        return obj.inventory.accessible_by(self.user, {'read':True}) and obj.project.accessible_by(self.user, {'read':True})
+        return obj.accessible_by(self.user, {'execute':True})
 
     def can_change(self, obj, data):
         data_for_change = data
@@ -867,14 +855,18 @@ class JobAccess(BaseAccess):
         # A super user can relaunch a job
         if self.user.is_superuser:
             return True
+
         # If a user can launch the job template then they can relaunch a job from that
         # job template
-        has_perm = False
-        if obj.job_template is not None and obj.job_template.accessible_by(self.user, {'execute':True}):
-            has_perm = True
-        dep_access_inventory = obj.inventory.accessible_by(self.user, {'read':True})
-        dep_access_project = obj.project is None or obj.project.accessible_by(self.user, {'read':True})
-        return self.can_read(obj) and dep_access_inventory and dep_access_project and has_perm
+        if obj.job_template is not None:
+            return obj.job_template.accessible_by(self.user, {'execute': True})
+
+        inventory_access = obj.inventory.accessible_by(self.user, {'use':True})
+
+        org_access = obj.inventory.organization.accessible_by(self.user, ALL_PERMISSIONS)
+        project_access = obj.project is None or obj.project.accessible_by(self.user, ALL_PERMISSIONS)
+
+        return inventory_access and (org_access or project_access)
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
@@ -895,7 +887,7 @@ class SystemJobAccess(BaseAccess):
     '''
     model = SystemJob
 
-class AdHocCommandAccess(BaseAccess): 
+class AdHocCommandAccess(BaseAccess):
     '''
     I can only see/run ad hoc commands when:
     - I am a superuser.
