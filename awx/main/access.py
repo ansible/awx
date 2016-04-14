@@ -18,7 +18,6 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.models.mixins import ResourceMixin
-from awx.main.models.rbac import ALL_PERMISSIONS
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
 from awx.main.conf import tower_settings

@@ -2,7 +2,6 @@ import pytest
 
 from awx.main.models import (
     Role,
-    RolePermission,
     Organization,
     Project,
 )
@@ -14,23 +13,21 @@ def test_auto_inheritance_by_children(organization, alice):
     B = Role.objects.create(name='B')
     A.members.add(alice)
 
-
-
-    assert organization.accessible_by(alice, {'read': True}) is False
-    assert Organization.accessible_objects(alice, {'read': True}).count() == 0
+    assert alice not in organization.admin_role
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 0
     A.children.add(B)
-    assert organization.accessible_by(alice, {'read': True}) is False
-    assert Organization.accessible_objects(alice, {'read': True}).count() == 0
+    assert alice not in organization.admin_role
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 0
     A.children.add(organization.admin_role)
-    assert organization.accessible_by(alice, {'read': True}) is True
-    assert Organization.accessible_objects(alice, {'read': True}).count() == 1
+    assert alice in organization.admin_role
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 1
     A.children.remove(organization.admin_role)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.admin_role
     B.children.add(organization.admin_role)
-    assert organization.accessible_by(alice, {'read': True}) is True
+    assert alice in organization.admin_role
     B.children.remove(organization.admin_role)
-    assert organization.accessible_by(alice, {'read': True}) is False
-    assert Organization.accessible_objects(alice, {'read': True}).count() == 0
+    assert alice not in organization.admin_role
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 0
 
     # We've had the case where our pre/post save init handlers in our field descriptors
     # end up creating a ton of role objects because of various not-so-obvious issues
@@ -55,19 +52,6 @@ def test_auto_inheritance_by_parents(organization, alice):
     organization.admin_role.parents.remove(B)
     assert organization.accessible_by(alice, {'read': True}) is False
 
-
-@pytest.mark.django_db
-def test_permission_union(organization, alice):
-    A = Role.objects.create(name='A')
-    A.members.add(alice)
-    B = Role.objects.create(name='B')
-    B.members.add(alice)
-
-    assert organization.accessible_by(alice, {'read': True, 'write': True}) is False
-    RolePermission.objects.create(role=A, resource=organization, read=True)
-    assert organization.accessible_by(alice, {'read': True, 'write': True}) is False
-    RolePermission.objects.create(role=A, resource=organization, write=True)
-    assert organization.accessible_by(alice, {'read': True, 'write': True}) is True
 
 
 @pytest.mark.django_db

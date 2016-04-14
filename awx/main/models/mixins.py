@@ -7,8 +7,6 @@ from django.contrib.auth.models import User # noqa
 
 # AWX
 from awx.main.models.rbac import (
-    get_user_permissions_on_resource,
-    get_role_permissions_on_resource,
     Role,
 )
 
@@ -20,10 +18,8 @@ class ResourceMixin(models.Model):
     class Meta:
         abstract = True
 
-    role_permissions = GenericRelation('main.RolePermission')
-
     @classmethod
-    def accessible_objects(cls, accessor, permissions):
+    def accessible_objects(cls, accessor, role_name):
         '''
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:

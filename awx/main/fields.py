@@ -93,10 +93,9 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitRoleField(models.ForeignKey):
     """Implicitly creates a role entry for a resource"""
 
-    def __init__(self, role_name=None, role_description=None, permissions=None, parent_role=None, *args, **kwargs):
+    def __init__(self, role_name=None, role_description=None, parent_role=None, *args, **kwargs):
         self.role_name = role_name
         self.role_description = role_description if role_description else ""
-        self.permissions = permissions
         self.parent_role = parent_role
 
         kwargs.setdefault('to', 'Role')
@@ -108,7 +107,6 @@ class ImplicitRoleField(models.ForeignKey):
         name, path, args, kwargs = super(ImplicitRoleField, self).deconstruct()
         kwargs['role_name'] = self.role_name
         kwargs['role_description'] = self.role_description
-        kwargs['permissions'] = self.permissions
         kwargs['parent_role'] = self.parent_role
         return name, path, args, kwargs
 
@@ -190,39 +188,10 @@ class ImplicitRoleField(models.ForeignKey):
         )
         setattr(instance, self.name, role)
 
-    def _patch_role_content_object_and_grant_permissions(self, instance):
+    def _patch_role_content_object(self, instance):
         role = getattr(instance, self.name)
         role.content_object = instance
         role.save()
-
-        if self.permissions is not None:
-            RolePermission_ = get_current_apps().get_model('main', 'RolePermission')
-            ContentType = get_current_apps().get_model('contenttypes', "ContentType")
-            instance_content_type = ContentType.objects.get_for_model(instance)
-
-            permissions = RolePermission_(
-                created=now(),
-                modified=now(),
-                role=role,
-                content_type=instance_content_type,
-                object_id=instance.id,
-                auto_generated=True
-            )
-
-            if 'all' in self.permissions and self.permissions['all']:
-                del self.permissions['all']
-                self.permissions['create']     = True
-                self.permissions['read']       = True
-                self.permissions['write']      = True
-                self.permissions['update']     = True
-                self.permissions['delete']     = True
-                self.permissions['scm_update'] = True
-                self.permissions['use']        = True
-                self.permissions['execute']    = True
-
-            for k,v in self.permissions.items():
-                setattr(permissions, k, v)
-            permissions.save()
 
     def _pre_save(self, instance, *args, **kwargs):
         for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
@@ -231,7 +200,7 @@ class ImplicitRoleField(models.ForeignKey):
     def _post_save(self, instance, created, *args, **kwargs):
         if created:
             for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                implicit_role_field._patch_role_content_object_and_grant_permissions(instance)
+                implicit_role_field._patch_role_content_object(instance)
 
         with batch_role_ancestor_rebuilding():
             for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):

@@ -19,7 +19,6 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import * # noqa
 from awx.main.models.rbac import (
-    ALL_PERMISSIONS,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
@@ -57,19 +56,16 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         role_name='Organization Administrator',
         role_description='May manage all aspects of this organization',
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-        permissions = ALL_PERMISSIONS,
     )
     auditor_role = ImplicitRoleField(
         role_name='Organization Auditor',
         role_description='May read all settings associated with this organization',
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
-        permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Organization Member',
         role_description='A member of this organization',
         parent_role='admin_role',
-        permissions = {'read': True}
     )
 
 
@@ -112,19 +108,16 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         role_name='Team Administrator',
         role_description='May manage this team',
         parent_role='organization.admin_role',
-        permissions = ALL_PERMISSIONS,
     )
     auditor_role = ImplicitRoleField(
         role_name='Team Auditor',
         role_description='May read all settings associated with this team',
         parent_role='organization.auditor_role',
-        permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Team Member',
         role_description='A member of this team',
         parent_role='admin_role',
-        permissions = {'read':True},
     )
 
     def get_absolute_url(self):

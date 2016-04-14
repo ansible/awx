@@ -227,7 +227,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             'organization.admin_role',
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Project Auditor',
@@ -236,18 +235,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             'organization.auditor_role',
             'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         ],
-        permissions = {'read': True}
     )
     member_role = ImplicitRoleField(
         role_name='Project Member',
         role_description='Implies membership within this project',
-        permissions = {'read': True}
     )
     scm_update_role = ImplicitRoleField(
         role_name='Project Updater',
         role_description='May update this project from the source control management system',
         parent_role='admin_role',
-        permissions = {'scm_update': True}
     )
 
     @classmethod

@@ -100,28 +100,23 @@ class Inventory(CommonModel, ResourceMixin):
         role_name='Inventory Administrator',
         role_description='May manage this inventory',
         parent_role='organization.admin_role',
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Auditor',
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
-        permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
-        permissions = {'read': True, 'update': True}
     )
     usage_role = ImplicitRoleField(
         role_name='Inventory User',
         role_description='May use this inventory, but not read sensitive portions or modify it',
-        permissions = {'use': True}
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
-        permissions = {'read': True, 'execute': True}
     )
 
     def get_absolute_url(self):
@@ -525,22 +520,18 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Inventory Group Administrator',
         parent_role=['inventory.admin_role', 'parents.admin_role'],
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
-        permissions = {'read': True}
     )
     updater_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
         parent_role=['inventory.updater_role', 'parents.updater_role'],
-        permissions = {'read': True, 'write': True, 'create': True, 'use': True},
     )
     executor_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
         parent_role=['inventory.executor_role', 'parents.executor_role'],
-        permissions = {'read':True, 'execute':True},
     )
 
     def __unicode__(self):
@@ -1296,21 +1287,18 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         role_name='CustomInventory Administrator',
         role_description='May manage this inventory',
         parent_role='organization.admin_role',
-        permissions = {'all': True}
     )
 
     member_role = ImplicitRoleField(
         role_name='CustomInventory Member',
         role_description='May view but not modify this inventory',
         parent_role='organization.member_role',
-        permissions = {'read': True}
     )
 
     auditor_role = ImplicitRoleField(
         role_name='CustomInventory Auditor',
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
-        permissions = {'read': True}
     )
 
     def get_absolute_url(self):
