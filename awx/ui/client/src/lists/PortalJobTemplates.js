@@ -11,15 +11,13 @@ export default
 
         name: 'job_templates',
         iterator: 'job_template',
-        // selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
         listTitle: 'Job Templates',
-        // selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
-        //     "button to create a new job template.",
         index: false,
         hover: true,
         well: true,
-
+        searchSize: 'col-lg-8 col-md-8 col-sm-12 col-xs-12',
+        
         fields: {
             name: {
                 key: true,

@@ -2,7 +2,8 @@ export default ['$scope', 'Refresh', 'tagSearchService',
     function($scope, Refresh, tagSearchService) {
         // JSONify passed field elements that can be searched
         $scope.list = JSON.parse($scope.list);
-
+        // Access config lines from list spec
+        $scope.listConfig = $scope.$parent.list;
         // Grab options for the left-dropdown of the searchbar
         tagSearchService.getSearchTypes($scope.list, $scope.endpoint)
             .then(function(searchTypes) {
