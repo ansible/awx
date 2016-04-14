@@ -52,7 +52,7 @@ export default
                 filter: "longDate",
                 searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-xs"
-            }
+            },
         },
 
         actions: {

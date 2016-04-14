@@ -173,8 +173,8 @@ export default
                     }
                     $state.go("^");
                 });
-
                 scope.saveSchedule = function() {
+                    schedule.extra_data = scope.serializedExtraVars;
                     SchedulePost({
                         scope: scope,
                         url: url,
@@ -192,6 +192,7 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        scope.serializedExtraVars = schedule.extra_data;
                         if(schedule.extra_data.hasOwnProperty('granularity')){
                             scope.isFactCleanup = true;
                         }
@@ -312,7 +313,6 @@ export default
                     schedule = (params.schedule) ? params.schedule : {},
                     callback = params.callback,
                     newSchedule, rrule, extra_vars;
-
                 if (scheduler.isValid()) {
                     Wait('start');
                     newSchedule = scheduler.getValue();
@@ -326,14 +326,16 @@ export default
                             "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
                             "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
                         };
+                        schedule.extra_data = JSON.stringify(extra_vars);
                     } else if (scope.cleanupJob) {
                         extra_vars = {
                             "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
                         };
+                        schedule.extra_data = JSON.stringify(extra_vars);
                     }
-                    schedule.extra_data = JSON.stringify(extra_vars);
-
-
+                    else if (scope.serializedExtraVars){
+                        schedule.extra_data = scope.serializedExtraVars;
+                    }
                     Rest.setUrl(url);
                     if (mode === 'add') {
                         Rest.post(schedule)
