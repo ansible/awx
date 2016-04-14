@@ -1,0 +1,71 @@
+
+<div id="hosts-summary-section" class="section">
+    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0">
+        <div class="JobDetail-searchContainer form-group">
+            <div class="search-name">
+                <form ng-submit="search()">
+                <input type="text" class="JobDetail-searchInput form-control List-searchInput" id="search_host_summary_name" ng-model="searchTerm" placeholder="Host Name" />
+                    <a class="List-searchInputIcon search-icon" ng-click="search()"><i class="fa fa-search"></i></a>
+
+                </form>
+            </div>
+        </div>
+        <div class="JobDetail-tableToggleContainer form-group">
+            <div class="btn-group" >
+                <button 
+                ng-click="setFilter('all')"
+                class="JobDetail-tableToggle btn btn-xs" ng-class="{'btn-default': filter == 'failed', 'btn-primary': filter == 'all'}">All</button>
+                <button ng-click="setFilter('failed')"
+                ng-class="{'btn-default': filter == 'all', 'btn-primary': filter == 'failed'}" class="JobDetail-tableToggle btn btn-xs">Failed</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-header" ng-hide="hosts.length == 0">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="List-tableHeader col-lg-6 col-md-6 col-sm-6 col-xs-6">Hosts</th>
+                    <th class="List-tableHeader JobDetail-tableHeader col-lg-6 col-md-5 col-sm-5 col-xs-5">Completed Tasks</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="getNextPage" scroll-threshold="10" time-threshold="500">
+        <table class="table">
+            <tbody>
+                <tr class="List-tableRow" ng-repeat="host in hosts track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
+                    <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name})" aw-tool-tip="View  events" data-placement="top">{{ host.host_name }}</a>
+                    </td>
+                    <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ tooltips.text.ok }}" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok - host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{ tooltips.text.changed }}" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{ tooltips.text.skipped }}" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{ tooltips.text.unreachable}}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ tooltips.text.failures}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
+                    </td>
+                </tr>
+                <tr ng-show="hosts.length === 0 && status === 'pending'">
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Waiting...</td>
+                </tr>
+                <tr ng-show="hosts.length === 0 && status === 'running' ">
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Loading...</td>
+                </tr>
+                <tr ng-show="status === 'failed' ||  status === 'successful' && hosts.length === 0 ">
+                    <td colspan="2" class="col-lg-12 HostSummary-loading">No matching hosts</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="scroll-spinner" id="hostSummariesMoreRows">
+        <i class="fa fa-cog fa-spin"></i>
+    </div>
+
+</div><!-- section -->
+
+<div id="graph-section" class="JobDetail-graphSection">
+    <svg></svg>
+</div>

@@ -2,28 +2,26 @@
 
 @import '../shared/branding/colors.less';
 @import '../shared/branding/colors.default.less';
+@import '../shared/layouts/one-plus-one.less';
+
+@breakpoint-md: 1200px;
+@breakpoint-sm: 420px;
 
 .JobDetail{
-    display: flex;
-    flex-direction: row;
+   .OnePlusOne-container(100%, @breakpoint-md); 
 }
 
 .JobDetail-leftSide{
-    flex: 1 0 auto;
-    width: 50%;
-    padding-right: 20px;
+    .OnePlusOne-panel--left(100%, @breakpoint-md);
 }
 
 .JobDetail-rightSide{
-    flex: 1 0 auto;
-    width: 50%;
+    .OnePlusOne-panel--right(100%, @breakpoint-md);
 }
-
 .JobDetail-panelHeader{
     display: flex;
     height: 30px;
 }
-
 .JobDetail-expandContainer{
     flex: 1;
     margin: 0px;
@@ -62,11 +60,17 @@
     flex-wrap: wrap;
     flex-direction: row;
     padding-top: 25px;
+    @media screen and(max-width: @breakpoint-sm){
+        flex-direction: column;
+    }
 }
 
 .JobDetail-resultRow{
     width: 50%;
     display: flex;
+    @media screen and(max-width: @breakpoint-sm){
+        width: 100%;
+    }
 }
 
 .JobDetail-resultRowLabel{
@@ -78,6 +82,9 @@
     font-size: 14px;
     font-weight: normal!important;
     flex: 1 0 auto;
+    @media screen and(max-width: @breakpoint-md){
+        flex: 2.5 0 auto;
+    }
 }
 
 .JobDetail-resultRow--variables{
@@ -109,10 +116,16 @@
     flex-direction: row;
     height: 50px;
     margin-top: 25px;
+    @media screen and(max-width: @breakpoint-sm){
+        height: auto;
+    }
 }
 
 .JobDetail-searchContainer{
-    flex: 1 0 auto;
+    flex: 2 0 auto;
+    @media screen and(max-width: @breakpoint-sm){
+        margin-bottom: 0px;
+    }
 }
 
 .JobDetail-tableToggleContainer{

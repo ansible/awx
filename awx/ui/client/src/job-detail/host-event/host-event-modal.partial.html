@@ -1,4 +1,4 @@
-<div id="HostEvent" class="HostEvent modal fade" role="dialog">
+<div id="HostEvent" class="HostEvent modal" role="dialog">
 	<div class="modal-dialog">
 		<div class="modal-content">
 		<!-- modal body -->
@@ -14,8 +14,7 @@
 				<!-- view navigation buttons -->
 				<button ui-sref="jobDetail.host-event.details" type="button" class="btn btn-sm btn-default" >Details</button>
 				<button ui-sref="jobDetail.host-event.json" type="button" class="btn btn-sm btn-default ">JSON</button>
-				<button ng-show="event.stdout" ui-sref="jobDetail.host-event.stdout" type="button" class="btn btn-sm btn-default ">Standard Out</button>
-				<button ng-show="event.timing" ui-sref="jobDetail.host-event.timing" type="button" class="btn btn-sm btn-default ">Timing</button>
+				<button ng-show="stdout" ui-sref="jobDetail.host-event.stdout" type="button" class="btn btn-sm btn-default ">Standard Out</button>
 
 			</div>
 			<div class="HostEvent-body">

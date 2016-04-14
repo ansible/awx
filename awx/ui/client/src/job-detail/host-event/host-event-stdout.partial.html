@@ -1,13 +1,2 @@
-<div class="EventHost-stdoutPanel Panel">
-    <div class="StandardOut-panelHeader">
-        <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
-        <div class="StandardOut-panelHeaderActions">
-            <a href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
-                <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
-                    <i class="fa fa-download"></i>
-                </button>
-            </a>
-        </div>
-    </div>
-    <standard-out-log stdout-endpoint="event._stdout"></standard-out-log>
-</div>
+<textarea id="HostEvent-stdout" class="HostEvent-stdout">
+</textarea>

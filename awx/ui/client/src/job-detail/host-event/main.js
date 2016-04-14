@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
- import {hostEventModal, hostEventDetails, hostEventTiming,
+ import {hostEventModal, hostEventDetails,
   hostEventJson, hostEventStdout} from './host-event.route';
  import controller from './host-event.controller';
 
@@ -15,7 +15,6 @@
  		.run(['$stateExtender', function($stateExtender){
  			$stateExtender.addState(hostEventModal);
  			$stateExtender.addState(hostEventDetails);
- 			$stateExtender.addState(hostEventTiming);
  			$stateExtender.addState(hostEventJson);
  			$stateExtender.addState(hostEventStdout);
  		}]);

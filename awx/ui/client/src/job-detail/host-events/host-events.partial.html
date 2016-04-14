@@ -36,9 +36,9 @@
 						<td class=HostEvents-table--cell>
 							<!-- status circles -->
 							<a class="HostEvents-status">
-								<i class="fa fa-circle"  ng-class="processEventStatus(event)"></i>
+								<i class="fa fa-circle"  ng-class="processEventStatus(event).class"></i>
 							</a>
-							{{event.status}}
+							{{processEventStatus(event).status}}
 						</td>
 						<td class=HostEvents-table--cell>{{event.play}}</td>
 						<td class=HostEvents-table--cell>{{event.task}}</td>

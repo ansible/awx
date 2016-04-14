@@ -49,6 +49,7 @@
 	width: 80px;
 	margin-right: 20px;
 	font-size: 12px;
+	word-wrap: break-word;
 }
 .HostEvent-field{
 	.OnePlusTwo-left--detailsRow;
@@ -58,12 +59,17 @@
 }
 .HostEvent-details--left, .HostEvent-details--right{
 	vertical-align:top;
-	width:270px;
+	width:265px;
 	display: inline-block;
-
+}
+.HostEvent-details--left{
+	margin-right: 10px;
 }
 .HostEvent-details--right{
 	.HostEvent-field--label{
-		width: 170px;
+		width: auto;
+	}
+	.HostEvent-field--content{
+		text-align: right;
 	}
 }
