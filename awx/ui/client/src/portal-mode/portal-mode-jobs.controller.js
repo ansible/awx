@@ -53,7 +53,6 @@ export function PortalModeJobsController($scope, $state, $rootScope, GetBasePath
 	};
 
 	init();
-	console.log($scope)
 }
 
 PortalModeJobsController.$inject = ['$scope', '$state', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobsList', 'SearchInit',
