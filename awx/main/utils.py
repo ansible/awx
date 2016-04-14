@@ -97,9 +97,6 @@ def get_ansible_version():
     '''
     Return Ansible version installed.
     '''
-    from django.conf import settings
-    if hasattr(settings, 'ANSIBLE_VERSION'):
-        return settings.ANSIBLE_VERSION
     try:
         proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
