@@ -1,4 +1,4 @@
-export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2) {
+export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange) {
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
@@ -41,12 +41,48 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
     });
 
     $scope.isEdit = true;
-
     $scope.hideForm = true;
+    $scope.parseType = 'yaml';
 
     $scope.formCancel = function() {
         $state.go("^");
     }
+
+    $scope.$on('ScheduleFound', function(){
+        if ($scope.parseType === 'yaml'){
+            try{
+                $scope.extraVars = '---\n' + jsyaml.safeDump($scope.serializedExtraVars);
+            }
+            catch(err){ return; }
+        }
+        else if ($scope.parseType === 'json'){
+            try{
+                $scope.extraVars = JSON.stringify($scope.serializedExtraVars, null, ' ');
+            }
+            catch(err){ return; }
+        }
+        ParseTypeChange({ 
+            scope: $scope, 
+            variable: 'extraVars', 
+            parse_variable: 'parseType',
+            field_id: 'SchedulerForm-extraVars' 
+        });
+    });
+    
+    $scope.$watch('extraVars', function(){
+        if ($scope.parseType === 'yaml'){
+            try{
+                $scope.serializedExtraVars = jsyaml.safeLoad($scope.extraVars);
+            }
+            catch(err){ return; }
+        }
+        else if ($scope.parseType === 'json'){
+            try{
+                $scope.serializedExtraVars = JSON.parse($scope.extraVars);
+            }
+            catch(err){ return; }
+        }
+    });
 
     EditSchedule({
         scope: $scope,

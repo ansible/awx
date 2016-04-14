@@ -632,8 +632,33 @@
                             {{ occurrence.local }}
                         </li>
                     </ul>
-                </div>
 
+                </div>
+                <div class="form-group Form-formGroup Form-textAreaLabel">
+                    <label for="Scheduler-extraVars">
+                        <span class="Form-inputLabel">
+                            Extra Variables
+                        </span>
+                        <!-- tooltip -->
+                        <a aw-pop-over="<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br />
+                        <blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>
+                        YAML:<br />
+                        <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>"
+                        data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+                            <i class="fa fa-question-circle"></i>
+                        </a> 
+
+                        <div class="parse-selection">
+                            <input type="radio" ng-model="parseType" ng-change="parseTypeChange()" value="yaml"><span class="parse-label">YAML</span>
+                            <input type="radio"  ng-model="parseType" ng-change="parseTypeChange()" value="json"> <span class="parse-label">JSON</span>
+                        </div>
+
+                    </label>
+                <div>
+                <textarea rows="6" ng-model="extraVars" name="Scheduler-extraVars" class="form-control" id="SchedulerForm-extraVars"></textarea>
+                </div>
+                </div>
+                </div>
                 <div class="buttons Form-buttons">
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
