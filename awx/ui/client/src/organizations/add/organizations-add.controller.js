@@ -16,7 +16,7 @@ export default ['$scope', '$rootScope', '$compile', '$location',
 
         // Inject dynamic view
         var generator = GenerateForm,
-            form = OrganizationForm,
+            form = OrganizationForm(),
             base = $location.path().replace(/^\//, '').split('/')[0];
 
         generator.inject(form, {
