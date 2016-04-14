@@ -1,4 +1,3 @@
-import pytest
 import subprocess
 
 from awx.main.utils import get_ansible_version
