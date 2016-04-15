@@ -2082,18 +2082,19 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     def update_raw_data(self, data):
         obj = self.get_object()
-        extra_vars = data.get('extra_vars') or {}
+        extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for p in obj.passwords_needed_to_start:
                 data[p] = u''
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
+            if extra_vars:
+                data['extra_vars'] = extra_vars
             ask_for_vars_dict = obj._ask_for_vars_dict()
+            ask_for_vars_dict.pop('extra_vars')
             for field in ask_for_vars_dict:
                 if not ask_for_vars_dict[field]:
                     data.pop(field, None)
-                elif field == 'extra_vars':
-                    data[field] = extra_vars
                 elif field == 'inventory' or field == 'credential':
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
                 else:
