@@ -22,7 +22,7 @@ def test_credential_migration_user(credential, user, permissions):
 def test_credential_use_role(credential, user, permissions):
     u = user('user', False)
     credential.use_role.members.add(u)
-    assert u in credential.owner_role
+    assert u in credential.use_role
 
 @pytest.mark.django_db
 def test_credential_migration_team_member(credential, team, user, permissions):
