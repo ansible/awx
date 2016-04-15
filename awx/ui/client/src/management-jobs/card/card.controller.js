@@ -12,12 +12,12 @@ export default
         'SchedulesList',
         'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
         '$state','$scope',
-        function( Wait, $location, $compile, CreateDialog, 
+        function( Wait, $location, $compile, CreateDialog,
             GetBasePath, SearchInit, PaginateInit,
             SchedulesList,
             Rest, ProcessErrors, managementJobsListObject, $rootScope,
             $state, $scope) {
-                
+
                 var defaultUrl = GetBasePath('system_job_templates');
 
                 var getManagementJobs = function(){
@@ -32,7 +32,7 @@ export default
                             msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
                         });
                 };
-                getManagementJobs(); 
+                getManagementJobs();
                 var scope = $rootScope.$new(),
                     parent_scope = scope,
                     list = managementJobsListObject;
@@ -51,9 +51,6 @@ export default
                     if (scope.searchCleanup) {
                         scope.searchCleanup();
                     }
-                    // if (!Empty(parent_scope) && parent_scope.restoreSearch) {
-                    //     parent_scope.restoreSearch();
-                    // }
                     else {
                         Wait('stop');
                     }
@@ -69,6 +66,7 @@ export default
                         height: 470,
                         minWidth: 200,
                         callback: 'PromptForDaysFacts',
+                        resizable: false,
                         onOpen: function(){
                             scope.$watch('prompt_for_days_facts_form.$invalid', function(invalid) {
                                 if (invalid === true) {
@@ -113,41 +111,40 @@ export default
                             fieldScope.keep_amount = 30;
                             fieldScope.granularity_keep_amount = 1;
                         },
-                        buttons: [{
-                            "label": "Cancel",
-                            "onClick": function() {
-                                $(this).dialog('close');
+                        buttons: [
+                            {
+                                "label": "Launch",
+                                "onClick": function() {
+                                    var extra_vars = {
+                                        "older_than": scope.keep_amount+scope.keep_unit.value,
+                                        "granularity": scope.granularity_keep_amount+scope.granularity_keep_unit.value
+                                    },
+                                    data = {};
+                                    data.extra_vars = JSON.stringify(extra_vars);
 
-                            },
-                            "icon": "fa-times",
-                            "class": "btn btn-default",
-                            "id": "prompt-for-days-facts-cancel"
-                        },{
-                            "label": "Launch",
-                            "onClick": function() {
-                                var extra_vars = {
-                                    "older_than": scope.keep_amount+scope.keep_unit.value,
-                                    "granularity": scope.granularity_keep_amount+scope.granularity_keep_unit.value
+                                    Rest.setUrl(defaultUrl);
+                                    Rest.post(data)
+                                        .success(function() {
+                                            Wait('stop');
+                                            $("#prompt-for-days-facts").dialog("close");
+                                            $("#configure-tower-dialog").dialog('close');
+                                            $location.path('/jobs/');
+                                        })
+                                        .error(function(data, status) {
+                                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                                msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
+                                        });
                                 },
-                                data = {};
-                                data.extra_vars = JSON.stringify(extra_vars);
-
-                                Rest.setUrl(defaultUrl);
-                                Rest.post(data)
-                                    .success(function() {
-                                        Wait('stop');
-                                        $("#prompt-for-days-facts").dialog("close");
-                                        $("#configure-tower-dialog").dialog('close');
-                                        $location.path('/jobs/');
-                                    })
-                                    .error(function(data, status) {
-                                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
-                                    });
+                                "class": "btn btn-primary",
+                                "id": "prompt-for-days-facts-launch",
                             },
-                            "icon":  "fa-rocket",
-                            "class": "btn btn-primary",
-                            "id": "prompt-for-days-facts-launch"
+                            {
+                                "label": "Cancel",
+                                "onClick": function() {
+                                    $(this).dialog('close');
+                                },
+                                "class": "btn btn-default",
+                                "id": "prompt-for-days-facts-cancel"
                         }]
                     });
 
@@ -162,12 +159,8 @@ export default
                     });
                 };
 
-                $scope.submitJob = function (id, name) {
+                $scope.submitJob = function (id, name, card) {
                     Wait('start');
-                    if(this.configure_job.job_type === "cleanup_facts"){
-                        scope.submitCleanupJob(id, name);
-                    }
-                    else {
                         defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
                         CreateDialog({
                             id: 'prompt-for-days'    ,
@@ -177,6 +170,7 @@ export default
                             height: 300,
                             minWidth: 200,
                             callback: 'PromptForDays',
+                            resizable: false,
                             onOpen: function(){
                                 scope.$watch('prompt_for_days_form.$invalid', function(invalid) {
                                     if (invalid === true) {
@@ -191,16 +185,8 @@ export default
                                 scope.prompt_for_days_form.$setPristine();
                                 scope.prompt_for_days_form.$invalid = false;
                             },
-                            buttons: [{
-                                "label": "Cancel",
-                                "onClick": function() {
-                                    $(this).dialog('close');
-
-                                },
-                                "icon": "fa-times",
-                                "class": "btn btn-default",
-                                "id": "prompt-for-days-cancel"
-                            },{
+                            buttons: [
+                            {
                                 "label": "Launch",
                                 "onClick": function() {
                                     var extra_vars = {"days": scope.days_to_keep },
@@ -220,9 +206,17 @@ export default
                                                 msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
                                         });
                                 },
-                                "icon":  "fa-rocket",
                                 "class": "btn btn-primary",
                                 "id": "prompt-for-days-launch"
+                            },
+                            {
+                                "label": "Cancel",
+                                "onClick": function() {
+                                    $(this).dialog('close');
+
+                                },
+                                "class": "btn btn-default",
+                                "id": "prompt-for-days-cancel"
                             }]
                         });
 
@@ -235,6 +229,14 @@ export default
                             $('#prompt-for-days').dialog('open');
                             Wait('stop');
                         });
+                };
+
+                $scope.chooseRunJob = function(id, name) {
+                    if(id === 4) {
+                        // Run only for 'Cleanup Fact Details'
+                        $scope.submitCleanupJob(id, name);
+                    } else {
+                        $scope.submitJob(id, name);
                     }
                 };
 
