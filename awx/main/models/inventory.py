@@ -118,6 +118,11 @@ class Inventory(CommonModel, ResourceMixin):
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
     )
+    read_role = ImplicitRoleField(
+        role_name='Read',
+        parent_role=['auditor_role', 'execute_role', 'update_role', 'use_role', 'admin_role'],
+        role_description='May view this inventory',
+    )
 
     def get_absolute_url(self):
         return reverse('api:inventory_detail', args=(self.pk,))
@@ -532,6 +537,10 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
         parent_role=['inventory.execute_role', 'parents.execute_role'],
+    )
+    read_role = ImplicitRoleField(
+        role_name='Inventory Group Executor',
+        parent_role=['execute_role', 'update_role', 'auditor_role', 'admin_role'],
     )
 
     def __unicode__(self):

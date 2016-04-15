@@ -217,6 +217,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         role_name='Job Template Runner',
         role_description='May run the job template',
     )
+    read_role = ImplicitRoleField(
+        role_name='Job Template Runner',
+        role_description='May run the job template',
+        parent_role=['execute_role', 'auditor_role', 'admin_role'],
+    )
 
     @classmethod
     def _get_unified_job_class(cls):
