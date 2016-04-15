@@ -3,7 +3,6 @@
 
 # Django
 from django.conf import settings # noqa
-from django.contrib.contenttypes.fields import GenericRelation
 
 # AWX
 from awx.main.models.base import * # noqa
