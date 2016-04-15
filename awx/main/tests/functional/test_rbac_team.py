@@ -65,9 +65,9 @@ def test_team_accessible_objects(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.member_role)
-    assert len(Project.accessible_objects(team, {'read':True})) == 1
-    assert not Project.accessible_objects(u, {'read':True})
+    assert len(Project.accessible_objects(team, 'read_role')) == 1
+    assert not Project.accessible_objects(u, 'read_role')
 
     team.member_role.members.add(u)
-    assert len(Project.accessible_objects(u, {'read':True})) == 1
+    assert len(Project.accessible_objects(u, 'read_role')) == 1
 

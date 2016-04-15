@@ -48,7 +48,7 @@ class ResourceMixin(models.Model):
                 roles = roles.filter(ancestors__in=accessor_roles)
 
             kwargs = {'id__in':roles.values_list('object_id', flat=True)}
-            return cls.objects.filter(**kwargs)
+            return cls.objects.filter(**kwargs).distinct()
 
         if type(accessor) == User:
             kwargs = {}
@@ -66,7 +66,7 @@ class ResourceMixin(models.Model):
             kwargs[role_name + '__ancestors__in'] = roles
             qs = cls.objects.filter(**kwargs)
 
-        return qs
+        return qs.distinct()
 
 
     def get_permissions(self, accessor):
