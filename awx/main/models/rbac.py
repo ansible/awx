@@ -93,13 +93,21 @@ class Role(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:role_detail', args=(self.pk,))
 
-    def __contains__(self, user):
-        if user.__class__.__name__ == 'Team':
-            team_type = ContentType.objects.get_for_model(user)
-            roles = Role.objects.filter(content_type__pk=team_type.id,
-                                        object_id=user.id)
+    def __contains__(self, accessor):
+        if type(accessor) == User:
+            return self.ancestors.filter(members=accessor).exists()
+        elif accessor.__class__.__name__ == 'Team':
+            return self.ancestors.filter(pk=accessor.member_role.id).exists()
+        elif type(accessor) == Role:
+            return self.ancestors.filter(pk=accessor).exists()
+        else:
+            accessor_type = ContentType.objects.get_for_model(accessor)
+            roles = Role.objects.filter(content_type__pk=accessor_type.id,
+                                        object_id=accessor.id)
             return self.ancestors.filter(pk__in=roles).exists()
-        return self.ancestors.filter(members=user).exists()
+
+
+
 
     def rebuild_role_ancestor_list(self):
         '''

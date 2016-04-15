@@ -216,6 +216,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     execute_role = ImplicitRoleField(
         role_name='Job Template Runner',
         role_description='May run the job template',
+        parent_role=['admin_role'],
     )
     read_role = ImplicitRoleField(
         role_name='Job Template Runner',
