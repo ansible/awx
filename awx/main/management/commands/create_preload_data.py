@@ -36,12 +36,12 @@ class Command(BaseCommand):
             i = Inventory.objects.create(name='Demo Inventory',
                                          organization=o,
                                          created_by=superuser)
-            h = Host.objects.create(name='localhost',
-                                    inventory=i,
-                                    variables="ansible_connection: local",
-                                    created_by=superuser)
-            jt = JobTemplate.objects.create(name='Demo Job Template',
-                                            project=p,
-                                            inventory=i,
-                                            credential=c)
+            Host.objects.create(name='localhost',
+                                inventory=i,
+                                variables="ansible_connection: local",
+                                created_by=superuser)
+            JobTemplate.objects.create(name='Demo Job Template',
+                                       project=p,
+                                       inventory=i,
+                                       credential=c)
         print('Default organization added.')
