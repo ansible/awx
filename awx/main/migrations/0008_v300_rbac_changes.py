@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='credential',
-            name='usage_role',
+            name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this credential, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Credential User', null=b'True', permissions={b'use': True}),
         ),
         migrations.AddField(
@@ -139,13 +139,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='group',
-            name='executor_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.executor_role', b'parents.executor_role'], to='main.Role', role_name=b'Inventory Group Executor', null=b'True', permissions={b'read': True, b'execute': True}),
+            name='execute_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.execute_role', b'parents.executor_role'], to='main.Role', role_name=b'Inventory Group Executor', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(
             model_name='group',
-            name='updater_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.updater_role', b'parents.updater_role'], to='main.Role', role_name=b'Inventory Group Updater', null=b'True', permissions={b'read': True, b'write': True, b'create': True, b'use': True}),
+            name='update_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.update_role', b'parents.updater_role'], to='main.Role', role_name=b'Inventory Group Updater', null=b'True', permissions={b'read': True, b'write': True, b'create': True, b'use': True}),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -159,17 +159,17 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventory',
-            name='executor_role',
+            name='execute_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May execute jobs against this inventory', parent_role=None, to='main.Role', role_name=b'Inventory Executor', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(
             model_name='inventory',
-            name='updater_role',
+            name='update_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May update the inventory', parent_role=None, to='main.Role', role_name=b'Inventory Updater', null=b'True', permissions={b'read': True, b'update': True}),
         ),
         migrations.AddField(
             model_name='inventory',
-            name='usage_role',
+            name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this inventory, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Inventory User', null=b'True', permissions={b'use': True}),
         ),
         migrations.AddField(
@@ -184,7 +184,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='jobtemplate',
-            name='executor_role',
+            name='execute_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May run the job template', parent_role=None, to='main.Role', role_name=b'Job Template Runner', null=b'True', permissions={b'read': True, b'execute': True}),
         ),
         migrations.AddField(

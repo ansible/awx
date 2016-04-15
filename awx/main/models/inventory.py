@@ -106,15 +106,15 @@ class Inventory(CommonModel, ResourceMixin):
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
     )
-    usage_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         role_name='Inventory User',
         role_description='May use this inventory, but not read sensitive portions or modify it',
     )
-    executor_role = ImplicitRoleField(
+    execute_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
     )
@@ -525,13 +525,13 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
-        parent_role=['inventory.updater_role', 'parents.updater_role'],
+        parent_role=['inventory.update_role', 'parents.updater_role'],
     )
-    executor_role = ImplicitRoleField(
+    execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
-        parent_role=['inventory.executor_role', 'parents.executor_role'],
+        parent_role=['inventory.execute_role', 'parents.executor_role'],
     )
 
     def __unicode__(self):
