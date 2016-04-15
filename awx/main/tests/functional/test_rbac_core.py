@@ -168,8 +168,8 @@ def test_content_object(user):
     assert org.admin_role.content_object.id == org.id
 
 @pytest.mark.django_db
-def test_hierarchy_rebuilding():
-    'Tests some subdtle cases around role hierarchy rebuilding'
+def test_hierarchy_rebuilding_multi_path():
+    'Tests a subdtle cases around role hierarchy rebuilding when you have multiple paths to the same role of different length'
 
     X = Role.objects.create(name='X')
     A = Role.objects.create(name='A')
@@ -194,6 +194,100 @@ def test_hierarchy_rebuilding():
     # This can be the stickler, the rebuilder needs to ensure that D's role
     # hierarchy is built after both A and C are updated.
     assert X.is_ancestor_of(D) is False
+
+
+@pytest.mark.django_db
+def test_hierarchy_rebuilding_loops1(organization, team):
+    'Tests ancestry rebuilding loops are involved'
+
+
+    assert team.admin_role.is_ancestor_of(organization.admin_role) is False
+    assert organization.admin_role.is_ancestor_of(team.admin_role)
+
+    team.admin_role.children.add(organization.admin_role)
+
+    assert team.admin_role.is_ancestor_of(organization.admin_role)
+    assert organization.admin_role.is_ancestor_of(team.admin_role)
+
+    team.admin_role.children.remove(organization.admin_role)
+
+    assert team.admin_role.is_ancestor_of(organization.admin_role) is False
+    assert organization.admin_role.is_ancestor_of(team.admin_role)
+
+    team.admin_role.children.add(organization.admin_role)
+
+
+    X = Role.objects.create(name='X')
+    X.children.add(organization.admin_role)
+    assert X.is_ancestor_of(team.admin_role)
+    assert X.is_ancestor_of(organization.admin_role)
+    assert organization.admin_role.is_ancestor_of(X) is False
+    assert team.admin_role.is_ancestor_of(X) is False
+
+    #print(X.descendents.filter(id=organization.admin_role.id).count())
+    #print(X.children.filter(id=organization.admin_role.id).count())
+    X.children.remove(organization.admin_role)
+    X.rebuild_role_ancestor_list()
+    #print(X.descendents.filter(id=organization.admin_role.id).count())
+    #print(X.children.filter(id=organization.admin_role.id).count())
+
+    assert X.is_ancestor_of(team.admin_role) is False
+    assert X.is_ancestor_of(organization.admin_role) is False
+
+
+
+@pytest.mark.django_db
+def test_hierarchy_rebuilding_loops():
+    'Tests ancestry rebuilding loops are involved'
+
+    X = Role.objects.create(name='X')
+    A = Role.objects.create(name='A')
+    B = Role.objects.create(name='B')
+    C = Role.objects.create(name='C')
+
+    A.children.add(B)
+    B.children.add(C)
+    C.children.add(A)
+    X.children.add(A)
+
+    assert X.is_ancestor_of(A)
+    assert X.is_ancestor_of(B)
+    assert X.is_ancestor_of(C)
+
+    assert A.is_ancestor_of(B)
+    assert A.is_ancestor_of(C)
+    assert B.is_ancestor_of(C)
+    assert B.is_ancestor_of(A)
+    assert C.is_ancestor_of(A)
+    assert C.is_ancestor_of(B)
+
+    X.children.remove(A)
+    X.rebuild_role_ancestor_list()
+
+    assert X.is_ancestor_of(A) is False
+    assert X.is_ancestor_of(B) is False
+    assert X.is_ancestor_of(C) is False
+
+    X.children.add(A)
+
+    assert X.is_ancestor_of(A)
+    assert X.is_ancestor_of(B)
+    assert X.is_ancestor_of(C)
+
+    C.children.remove(A)
+
+    assert A.is_ancestor_of(B)
+    assert A.is_ancestor_of(C)
+    assert B.is_ancestor_of(C)
+    assert B.is_ancestor_of(A) is False
+    assert C.is_ancestor_of(A) is False
+    assert C.is_ancestor_of(B) is False
+
+    assert X.is_ancestor_of(A)
+    assert X.is_ancestor_of(B)
+    assert X.is_ancestor_of(C)
+
+
 
 
 @pytest.mark.django_db

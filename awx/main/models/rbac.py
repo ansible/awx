@@ -7,7 +7,7 @@ import threading
 import contextlib
 
 # Django
-from django.db import models, transaction
+from django.db import models, transaction, connection
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.core.urlresolvers import reverse
@@ -65,9 +65,11 @@ def batch_role_ancestor_rebuilding(allow_nesting=False):
         if not batch_role_rebuilding:
             rebuild_set = getattr(tls, 'roles_needing_rebuilding')
             with transaction.atomic():
-                for role in Role.objects.filter(id__in=list(rebuild_set)).all():
-                    # TODO: We can reduce this to one rebuild call with our new upcoming rebuild method.. do this
-                    role.rebuild_role_ancestor_list()
+                Role._simultaneous_ancestry_rebuild(rebuild_set)
+
+                #for role in Role.objects.filter(id__in=list(rebuild_set)).all():
+                #    # TODO: We can reduce this to one rebuild call with our new upcoming rebuild method.. do this
+                #    role.rebuild_role_ancestor_list()
             delattr(tls, 'roles_needing_rebuilding')
 
 
@@ -97,7 +99,6 @@ class Role(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:role_detail', args=(self.pk,))
 
-
     def rebuild_role_ancestor_list(self):
         '''
         Updates our `ancestors` map to accurately reflect all of the ancestors for a role
@@ -115,12 +116,13 @@ class Role(CommonModelNameNotUnique):
             roles_needing_rebuilding.add(self.id)
             return
 
-        actual_ancestors = set(Role.objects.filter(id=self.id).values_list('parents__ancestors__id', flat=True))
-        actual_ancestors.add(self.id)
-        if None in actual_ancestors:
-            actual_ancestors.remove(None)
-        stored_ancestors = set(self.ancestors.all().values_list('id', flat=True))
+        #actual_ancestors = set(Role.objects.filter(id=self.id).values_list('parents__ancestors__id', flat=True))
+        #actual_ancestors.add(self.id)
+        #if None in actual_ancestors:
+        #    actual_ancestors.remove(None)
+        #stored_ancestors = set(self.ancestors.all().values_list('id', flat=True))
 
+        '''
         # If it differs, update, and then update all of our children
         if actual_ancestors != stored_ancestors:
             for id in actual_ancestors - stored_ancestors:
@@ -130,6 +132,209 @@ class Role(CommonModelNameNotUnique):
 
             for child in self.children.all():
                 child.rebuild_role_ancestor_list()
+        '''
+
+        # If our role heirarchy hasn't actually changed, don't do anything
+        #if actual_ancestors == stored_ancestors:
+        #    return
+
+        Role._simultaneous_ancestry_rebuild([self.id])
+
+
+    @staticmethod
+    def _simultaneous_ancestry_rebuild2(role_ids_to_rebuild):
+        #all_parents = Role.parents.through.values_list('to_role_id', 'from_role_id')
+
+        '''
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in role_ids_to_rebuild)
+        }
+        '''
+        #Expand our parent list
+        #Expand our child list
+        #Construct our ancestor list for
+        #apply diff
+
+
+
+    @staticmethod
+    def _simultaneous_ancestry_rebuild(role_ids_to_rebuild):
+        #
+        # The simple version of what this function is doing
+        # =================================================
+        #
+        #   When something changes in our role "hierarchy", we need to update
+        #   the `Role.ancestors` mapping to reflect these changes. The basic
+        #   idea, which the code in this method is modeled after, is to do
+        #   this: When a change happens to a role's parents list, we update
+        #   that role's ancestry list, then we recursively update any child
+        #   roles ancestry lists.  Because our role relationships are not
+        #   strictly hierarchical, and can even have loops, this process may
+        #   necessarily visit the same nodes more than once. To handle this
+        #   without having to keep track of what should be updated (again) and
+        #   in what order, we simply use the termination condition of stopping
+        #   when our stored ancestry list matches what our list should be, eg,
+        #   when nothing changes. This can be simply implemented:
+        #
+        #      if actual_ancestors != stored_ancestors:
+        #          for id in actual_ancestors - stored_ancestors:
+        #              self.ancestors.add(id)
+        #          for id in stored_ancestors - actual_ancestors:
+        #              self.ancestors.remove(id)
+        #
+        #          for child in self.children.all():
+        #              child.rebuild_role_ancestor_list()
+        #
+        #   However this results in a lot of calls to the database, so the
+        #   optimized implementation below effectively does this same thing,
+        #   but we update all children at once, so effectively we sweep down
+        #   through our hierarchy one layer at a time instead of one node at a
+        #   time. Because of how this method works, we can also start from many
+        #   roots at once and sweep down a large set of roles, which we take
+        #   advantage of when performing bulk operations.
+        #
+        #
+        # SQL Breakdown
+        # =============
+        #   The Role ancestors has three columns, (id, from_role_id, to_role_id)
+        #
+        #      id:           Unqiue row ID
+        #      from_role_id: Descendent role ID
+        #      to_role_id:   Ancestor role ID
+        #
+        #      *NOTE* In addition to mapping roles to parents, there also
+        #      always exists must exist an entry where
+        #
+        #           from_role_id == role_id == to_role_id
+        #
+        #      this makes our joins simple when we go to derive permissions or
+        #      accessible objects.
+        #
+        #
+        #   We operate under the assumption that our parent's ancestor list is
+        #   correct, thus we can always compute what our ancestor list should
+        #   be by taking the union of our parent's ancestor lists and adding
+        #   our self reference entry from_role_id == role_id == to_role_id
+        #
+        #   The inner query for the two SQL statements compute this union,
+        #   the union of the parent's ancestors and the self referncing entry,
+        #   for all roles in the current set of roles to rebuild.
+        #
+        #   The DELETE query uses this to select all entries on disk for the
+        #   roles we're dealing with, and removes the entries that are not in
+        #   this list.
+        #
+        #   The INSERT query uses this to select all entries in the list that
+        #   are not in the database yet, and inserts all of the missing
+        #   records.
+        #
+        #   Once complete, we select all of the children for the roles we are
+        #   working with, this list becomes the new role list we are working
+        #   with.
+        #
+        #   When our delete or insert query return that they have not performed
+        #   any work, then we know that our children will also not need to be
+        #   updated, and so we can terminate our loop.
+        #
+        #
+        #   *NOTE* Keen reader may realize that there are many instances where
+        #   fuck. cycles will never shake parents.
+        #
+        #
+
+        cursor = connection.cursor()
+        loop_ct = 0
+
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in role_ids_to_rebuild)
+        }
+
+        # This is our solution for dealing with updates to parents of nodes
+        # that are in cycles. It seems like we should be able to find a more
+        # clever way of just dealing with the issue in another way, but it's
+        # surefire and I'm not seeing the easy solution to dealing with that
+        # problem that's not this.
+
+        # TODO: Test to see if not deleting any entry that has a direct
+        # correponding entry in the parents table helps reduce the processing
+        # time significantly
+        cursor.execute('''
+            DELETE FROM %(ancestors_table)s
+              WHERE to_role_id IN (%(ids)s)
+                    AND from_role_id != to_role_id
+        ''' % sql_params)
+
+
+        while role_ids_to_rebuild:
+            if loop_ct > 1000:
+                raise Exception('Ancestry role rebuilding error: infinite loop detected')
+            loop_ct += 1
+
+            sql_params = {
+                'ancestors_table': Role.ancestors.through._meta.db_table,
+                'parents_table': Role.parents.through._meta.db_table,
+                'roles_table': Role._meta.db_table,
+                'ids': ','.join(str(x) for x in role_ids_to_rebuild)
+            }
+
+            delete_ct = 0
+
+            cursor.execute('''
+                DELETE FROM %(ancestors_table)s
+                WHERE from_role_id IN (%(ids)s)
+                      AND
+                      id NOT IN (
+                          SELECT %(ancestors_table)s.id FROM  (
+                                SELECT parents.from_role_id from_id, ancestors.to_role_id to_id
+                                  FROM %(parents_table)s as parents
+                                       LEFT JOIN %(ancestors_table)s as ancestors
+                                           ON (parents.to_role_id = ancestors.from_role_id)
+                                 WHERE parents.from_role_id IN (%(ids)s) AND ancestors.to_role_id IS NOT NULL
+
+                                 UNION
+
+                                 SELECT id from_id, id to_id from %(roles_table)s WHERE id IN (%(ids)s)
+                           ) new_ancestry_list
+                           LEFT JOIN %(ancestors_table)s ON (new_ancestry_list.from_id = %(ancestors_table)s.from_role_id
+                                                                   AND new_ancestry_list.to_id = %(ancestors_table)s.to_role_id)
+                           WHERE %(ancestors_table)s.id IS NOT NULL
+                     )
+            ''' % sql_params)
+            delete_ct = cursor.rowcount
+
+            cursor.execute('''
+                INSERT INTO %(ancestors_table)s (from_role_id, to_role_id)
+                SELECT from_id, to_id FROM  (
+                      SELECT parents.from_role_id from_id, ancestors.to_role_id to_id
+                        FROM %(parents_table)s as parents
+                             LEFT JOIN %(ancestors_table)s as ancestors
+                                 ON (parents.to_role_id = ancestors.from_role_id)
+                       WHERE parents.from_role_id IN (%(ids)s) AND ancestors.to_role_id IS NOT NULL
+
+                       UNION
+
+                       SELECT id from_id, id to_id from %(roles_table)s WHERE id IN (%(ids)s)
+                 ) new_ancestry_list
+                 LEFT JOIN %(ancestors_table)s ON (new_ancestry_list.from_id = %(ancestors_table)s.from_role_id
+                                                         AND new_ancestry_list.to_id = %(ancestors_table)s.to_role_id)
+                 WHERE %(ancestors_table)s.id IS NULL
+            ''' % sql_params)
+            insert_ct = cursor.rowcount
+
+            if insert_ct == 0 and delete_ct == 0:
+                break
+
+            role_ids_to_rebuild = Role.objects.distinct() \
+                                      .filter(id__in=role_ids_to_rebuild, children__id__isnull=False) \
+                                      .values_list('children__id', flat=True)
+
+
 
     @staticmethod
     def visible_roles(user):
