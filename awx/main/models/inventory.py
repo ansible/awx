@@ -114,9 +114,14 @@ class Inventory(CommonModel, ResourceMixin):
         role_name='Inventory User',
         role_description='May use this inventory, but not read sensitive portions or modify it',
     )
+    adhoc_role = ImplicitRoleField(
+        role_name='Inventory Ad Hoc',
+        role_description='May execute ad hoc commands against this inventory',
+    )
     execute_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
+        parent_role='adhoc_role',
     )
     read_role = ImplicitRoleField(
         role_name='Read',
@@ -534,9 +539,14 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         role_name='Inventory Group Updater',
         parent_role=['inventory.update_role', 'parents.update_role'],
     )
+    adhoc_role = ImplicitRoleField(
+        role_name='Inventory Ad Hoc',
+        parent_role=['inventory.adhoc_role', 'parents.adhoc_role'],
+        role_description='May execute ad hoc commands against this inventory',
+    )
     execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
-        parent_role=['inventory.execute_role', 'parents.execute_role'],
+        parent_role=['inventory.execute_role', 'parents.execute_role', 'adhoc_role'],
     )
     read_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
@@ -1308,6 +1318,11 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         role_name='CustomInventory Auditor',
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
+    )
+    read_role = ImplicitRoleField(
+        role_name='CustomInventory Read',
+        role_description='May view but not modify this inventory',
+        parent_role=['auditor_role', 'member_role', 'admin_role'],
     )
 
     def get_absolute_url(self):
