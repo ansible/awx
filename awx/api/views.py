@@ -831,8 +831,8 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
-        user_qs = Project.accessible_objects(self.request.user, 'read_role')
+        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role)).distinct()
+        user_qs = Project.accessible_objects(self.request.user, 'read_role').distinct()
         return team_qs & user_qs
 
 
@@ -1217,7 +1217,7 @@ class CredentialList(ListCreateAPIView):
             organization = Organization.objects.get(pk=request.data['organization'])
             obj = organization
 
-        if self.request.user not in obj.owner_role:
+        if self.request.user not in obj.admin_role:
             raise PermissionDenied()
 
         ret = super(CredentialList, self).post(request, *args, **kwargs)
@@ -1263,7 +1263,7 @@ class TeamCredentialsList(CredentialList):
             raise PermissionDenied()
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
-        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
+        team_creds = Credential.objects.filter(owner_role__parents=team.member_role).distinct()
         return team_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
