@@ -40,14 +40,14 @@ def test_user_queryset(user):
 def test_user_accessible_objects(user, organization):
     admin = user('admin', False)
     u = user('john', False)
-    assert User.accessible_objects(admin, {'read':True}).count() == 1
+    assert User.accessible_objects(admin, 'admin_role').count() == 1
 
     organization.member_role.members.add(u)
     organization.admin_role.members.add(admin)
-    assert User.accessible_objects(admin, {'read':True}).count() == 2
+    assert User.accessible_objects(admin, 'admin_role').count() == 2
 
     organization.member_role.members.remove(u)
-    assert User.accessible_objects(admin, {'read':True}).count() == 1
+    assert User.accessible_objects(admin, 'admin_role').count() == 1
 
 @pytest.mark.django_db
 def test_org_user_admin(user, organization):
