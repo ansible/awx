@@ -463,7 +463,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # not allowed to run ad hoc commands).
         user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.update_role.id}, expect=204)
         with self.current_user('other'):
             self.run_test_ad_hoc_command(expect=403)
         self.check_get_list(url, 'other', qs)
@@ -1014,7 +1014,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         other_cred = self.create_test_credential(user=self.other_django_user)
         user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.update_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)

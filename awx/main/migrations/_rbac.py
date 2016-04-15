@@ -214,7 +214,7 @@ def migrate_inventory(apps, schema_editor):
         elif perm.permission_type == 'read':
             return inventory.auditor_role
         elif perm.permission_type == 'write':
-            return inventory.updater_role
+            return inventory.update_role
         elif perm.permission_type == 'check' or perm.permission_type == 'run':
             # These permission types are handled differntly in RBAC now, nothing to migrate.
             return False

@@ -144,8 +144,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='group',
-            name='updater_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.updater_role', b'parents.updater_role'], to='main.Role', role_name=b'Inventory Group Updater', null=b'True', permissions={b'read': True, b'write': True, b'create': True, b'use': True}),
+            name='update_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'', parent_role=[b'inventory.update_role', b'parents.updater_role'], to='main.Role', role_name=b'Inventory Group Updater', null=b'True', permissions={b'read': True, b'write': True, b'create': True, b'use': True}),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventory',
-            name='updater_role',
+            name='update_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May update the inventory', parent_role=None, to='main.Role', role_name=b'Inventory Updater', null=b'True', permissions={b'read': True, b'update': True}),
         ),
         migrations.AddField(

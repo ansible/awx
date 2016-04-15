@@ -106,7 +106,7 @@ class Inventory(CommonModel, ResourceMixin):
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
     )
@@ -525,9 +525,9 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
-        parent_role=['inventory.updater_role', 'parents.updater_role'],
+        parent_role=['inventory.update_role', 'parents.updater_role'],
     )
     execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
