@@ -1518,8 +1518,10 @@ class ResourceAccessListElementSerializer(UserSerializer):
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
 
-        direct_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__id')
-        all_permissive_role_ids = RolePermission.objects.filter(content_type=content_type, object_id=obj.id).values_list('role__ancestors__id')
+
+        content_type = ContentType.objects.get_for_model(obj)
+        direct_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('id', flat=True)
+        all_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('ancestors__id', flat=True)
 
         direct_access_roles   = user.roles \
                                     .filter(id__in=direct_permissive_role_ids).all()
