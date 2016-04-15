@@ -24,7 +24,7 @@ def test_admin_executing_permissions(deploy_jobtemplate, inventory, machine_cred
 def test_job_template_start_access(deploy_jobtemplate, user):
 
     common_user = user('test-user', False)
-    deploy_jobtemplate.executor_role.members.add(common_user)
+    deploy_jobtemplate.execute_role.members.add(common_user)
 
     assert common_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
 

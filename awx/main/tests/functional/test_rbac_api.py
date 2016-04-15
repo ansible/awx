@@ -275,7 +275,7 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    res =post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, org_admin)
+    res =post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, org_admin)
 
     print(res.data)
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
@@ -287,12 +287,12 @@ def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemp
     org_admin = user('org-admin')
     joe = user('joe')
     organization.admin_role.members.add(org_admin)
-    check_jobtemplate.executor_role.members.add(joe)
+    check_jobtemplate.execute_role.members.add(joe)
 
     assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
 
-    post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'disassociate': True, 'id': joe.id}, org_admin)
+    post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, org_admin)
 
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
@@ -305,7 +305,7 @@ def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemp
     assert check_jobtemplate.accessible_by(rando, {'write': True}) is False
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, rando)
+    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, rando)
     print(res.data)
     assert res.status_code == 403
 
@@ -317,12 +317,12 @@ def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobt
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')
     joe = user('joe')
-    check_jobtemplate.executor_role.members.add(joe)
+    check_jobtemplate.execute_role.members.add(joe)
 
     assert check_jobtemplate.accessible_by(rando, {'write': True}) is False
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
+    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
     assert res.status_code == 403
 
     assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True

@@ -185,7 +185,7 @@ def grant_host_access_to_group_roles(instance, action, model, reverse, pk_set, *
             )
             RolePermission.objects.create(
                 resource=host,
-                role=group.executor_role,
+                role=group.execute_role,
                 auto_generated=True,
                 read=1,
                 execute=1
@@ -208,7 +208,7 @@ def grant_host_access_to_group_roles(instance, action, model, reverse, pk_set, *
                 content_type = host_content_type,
                 object_id = host.id,
                 auto_generated = True,
-                role__in = [group.admin_role, group.updater_role, group.auditor_role, group.executor_role]
+                role__in = [group.admin_role, group.updater_role, group.auditor_role, group.execute_role]
             ).delete()
 
         if reverse:
