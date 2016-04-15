@@ -9,8 +9,8 @@ from awx.main.models import (
 
 @pytest.mark.django_db
 def test_auto_inheritance_by_children(organization, alice):
-    A = Role.objects.create(name='A')
-    B = Role.objects.create(name='B')
+    A = Role.objects.create(name='A', role_field='')
+    B = Role.objects.create(name='B', role_field='')
     A.members.add(alice)
 
     assert alice not in organization.admin_role

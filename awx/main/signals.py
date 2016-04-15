@@ -131,16 +131,10 @@ def create_user_role(instance, **kwargs):
     except Role.DoesNotExist:
         role = Role.objects.create(
             name = 'Owner',
+            role_field='owner_role',
             content_object = instance,
         )
         role.members.add(instance)
-        RolePermission.objects.create(
-            role = role,
-            resource = instance,
-            auto_generated = True,
-            create=1, read=1, write=1, delete=1, update=1,
-            execute=1, scm_update=1, use=1,
-        )
 
 def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
     content_type = ContentType.objects.get_for_model(Organization)

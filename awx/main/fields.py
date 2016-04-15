@@ -183,6 +183,7 @@ class ImplicitRoleField(models.ForeignKey):
         role = Role_.objects.create(
             created=now(),
             modified=now(),
+            role_field=self.name,
             name=self.role_name,
             description=self.role_description
         )
@@ -233,6 +234,7 @@ class ImplicitRoleField(models.ForeignKey):
                 else:
                     role = Role_.objects.create(created=now(),
                                                 modified=now(),
+                                                role_field=path,
                                                 singleton_name=singleton_name,
                                                 name=singleton_name,
                                                 description=singleton_name)

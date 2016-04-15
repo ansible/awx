@@ -31,29 +31,25 @@ class ResourceMixin(models.Model):
         performant to resolve the resource in question then call
         `myresource.get_permissions(user)`.
         '''
-        return ResourceMixin._accessible_objects(cls, accessor, permissions)
+        return ResourceMixin._accessible_objects(cls, accessor, role_name)
 
     @staticmethod
-    def _accessible_objects(cls, accessor, permissions):
+    def _accessible_objects(cls, accessor, role_name):
         if type(accessor) == User:
-            qs = cls.objects.filter(
-                role_permissions__role__ancestors__members=accessor
-            )
+            kwargs = {}
+            kwargs[role_name + '__ancestors__members'] = accessor
+            qs = cls.objects.filter(**kwargs)
         elif type(accessor) == Role:
-            qs = cls.objects.filter(
-                role_permissions__role__ancestors=accessor
-            )
+            kwargs = {}
+            kwargs[role_name + '__ancestors'] = accessor
+            qs = cls.objects.filter(**kwargs)
         else:
             accessor_type = ContentType.objects.get_for_model(accessor)
             roles = Role.objects.filter(content_type__pk=accessor_type.id,
                                         object_id=accessor.id)
-            qs = cls.objects.filter(
-                role_permissions__role__ancestors__in=roles
-            )
-
-        for perm in permissions:
-            qs = qs.annotate(**{'max_' + perm: Max('role_permissions__' + perm)})
-            qs = qs.filter(**{'max_' + perm: int(permissions[perm])})
+            kwargs = {}
+            kwargs[role_name + '__ancestors__in'] = roles
+            qs = cls.objects.filter(**kwargs)
 
         #return cls.objects.filter(resource__in=qs)
         return qs
