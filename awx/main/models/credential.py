@@ -186,6 +186,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         role_name='Credential User',
         role_description='May use this credential, but not read sensitive portions or modify it',
     )
+    read_role = ImplicitRoleField(
+        role_name='Credential REad',
+        role_description='May read this credential',
+        parent_role=[
+            'use_role', 'auditor_role', 'owner_role'
+        ],
+    )
 
     @property
     def needs_ssh_password(self):
