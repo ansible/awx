@@ -110,7 +110,7 @@ class Inventory(CommonModel, ResourceMixin):
         role_name='Inventory Updater',
         role_description='May update the inventory',
     )
-    usage_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         role_name='Inventory User',
         role_description='May use this inventory, but not read sensitive portions or modify it',
     )

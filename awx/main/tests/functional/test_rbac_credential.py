@@ -19,9 +19,9 @@ def test_credential_migration_user(credential, user, permissions):
     assert credential.accessible_by(u, permissions['admin'])
 
 @pytest.mark.django_db
-def test_credential_usage_role(credential, user, permissions):
+def test_credential_use_role(credential, user, permissions):
     u = user('user', False)
-    credential.usage_role.members.add(u)
+    credential.use_role.members.add(u)
     assert credential.accessible_by(u, permissions['usage'])
 
 @pytest.mark.django_db
@@ -34,7 +34,7 @@ def test_credential_migration_team_member(credential, team, user, permissions):
 
     # No permissions pre-migration (this happens automatically so we patch this)
     team.admin_role.children.remove(credential.owner_role)
-    team.member_role.children.remove(credential.usage_role)
+    team.member_role.children.remove(credential.use_role)
     assert not credential.accessible_by(u, permissions['admin'])
 
     rbac.migrate_credential(apps, None)

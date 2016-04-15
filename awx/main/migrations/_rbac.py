@@ -113,7 +113,7 @@ def attrfunc(attr_path):
 
 def _update_credential_parents(org, cred):
     org.admin_role.children.add(cred.owner_role)
-    org.member_role.children.add(cred.usage_role)
+    org.member_role.children.add(cred.use_role)
     cred.deprecated_user, cred.deprecated_team = None, None
     cred.save()
 
@@ -147,7 +147,7 @@ def _discover_credentials(instances, cred, orgfunc):
 
                 # Unlink the old information from the new credential
                 cred.deprecated_user, cred.deprecated_team = None, None
-                cred.owner_role, cred.usage_role = None, None
+                cred.owner_role, cred.use_role = None, None
                 cred.save()
 
                 for i in orgs[org]:
@@ -189,7 +189,7 @@ def migrate_credential(apps, schema_editor):
 
         if cred.deprecated_team is not None:
             cred.deprecated_team.admin_role.children.add(cred.owner_role)
-            cred.deprecated_team.member_role.children.add(cred.usage_role)
+            cred.deprecated_team.member_role.children.add(cred.use_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host)))

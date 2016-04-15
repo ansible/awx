@@ -33,7 +33,7 @@ def test_job_template_start_access(deploy_jobtemplate, user):
 def test_credential_use_access(machine_credential, user):
 
     common_user = user('test-user', False)
-    machine_credential.usage_role.members.add(common_user)
+    machine_credential.use_role.members.add(common_user)
 
     assert common_user.can_access(Credential, 'use', machine_credential)
 
@@ -42,6 +42,6 @@ def test_credential_use_access(machine_credential, user):
 def test_inventory_use_access(inventory, user):
 
     common_user = user('test-user', False)
-    inventory.usage_role.members.add(common_user)
+    inventory.use_role.members.add(common_user)
 
     assert common_user.can_access(Inventory, 'use', inventory)

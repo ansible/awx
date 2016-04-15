@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='credential',
-            name='usage_role',
+            name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this credential, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Credential User', null=b'True', permissions={b'use': True}),
         ),
         migrations.AddField(
@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventory',
-            name='usage_role',
+            name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this inventory, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Inventory User', null=b'True', permissions={b'use': True}),
         ),
         migrations.AddField(

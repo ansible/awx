@@ -182,7 +182,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         ],
     )
-    usage_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         role_name='Credential User',
         role_description='May use this credential, but not read sensitive portions or modify it',
     )
