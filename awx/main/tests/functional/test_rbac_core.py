@@ -40,17 +40,17 @@ def test_auto_inheritance_by_parents(organization, alice):
     B = Role.objects.create(name='B')
     A.members.add(alice)
 
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.admin_role
     B.parents.add(A)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.admin_role
     organization.admin_role.parents.add(A)
-    assert organization.accessible_by(alice, {'read': True}) is True
+    assert alice in organization.admin_role
     organization.admin_role.parents.remove(A)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.admin_role
     organization.admin_role.parents.add(B)
-    assert organization.accessible_by(alice, {'read': True}) is True
+    assert alice in organization.admin_role
     organization.admin_role.parents.remove(B)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.admin_role
 
 
 
@@ -62,57 +62,54 @@ def test_accessible_objects(organization, alice, bob):
     B.members.add(alice)
     B.members.add(bob)
 
-    assert Organization.accessible_objects(alice, {'read': True, 'write': True}).count() == 0
-    RolePermission.objects.create(role=A, resource=organization, read=True)
-    assert Organization.accessible_objects(alice, {'read': True, 'write': True}).count() == 0
-    assert Organization.accessible_objects(bob, {'read': True, 'write': True}).count() == 0
-    RolePermission.objects.create(role=B, resource=organization, write=True)
-    assert Organization.accessible_objects(alice, {'read': True, 'write': True}).count() == 1
-    assert Organization.accessible_objects(bob, {'read': True, 'write': True}).count() == 0
-    assert Organization.accessible_objects(bob, {'read': True, 'write': True}).count() == 0
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 0
+    assert Organization.accessible_objects(bob, 'admin_role').count() == 0
+    A.children.add(organization.admin_role)
+    assert Organization.accessible_objects(alice, 'admin_role').count() == 1
+    assert Organization.accessible_objects(bob, 'admin_role').count() == 0
 
 @pytest.mark.django_db
 def test_team_symantics(organization, team, alice):
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.auditor_role
     team.member_role.children.add(organization.auditor_role)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.auditor_role
     team.member_role.members.add(alice)
-    assert organization.accessible_by(alice, {'read': True}) is True
+    assert alice in organization.auditor_role
     team.member_role.members.remove(alice)
-    assert organization.accessible_by(alice, {'read': True}) is False
+    assert alice not in organization.auditor_role
 
 @pytest.mark.django_db
-def test_auto_m2m_adjuments(organization, inventory, group, alice):
+def test_auto_m2m_adjustments(organization, inventory, group, alice):
     'Ensures the auto role reparenting is working correctly through m2m maps'
     g1 = group(name='g1')
     g1.admin_role.members.add(alice)
-    assert g1.accessible_by(alice, {'read': True}) is True
+    assert alice in g1.admin_role
     g2 = group(name='g2')
-    assert g2.accessible_by(alice, {'read': True}) is False
+    assert alice not in g2.admin_role
 
     g2.parents.add(g1)
-    assert g2.accessible_by(alice, {'read': True}) is True
+    assert alice in g2.admin_role
     g2.parents.remove(g1)
-    assert g2.accessible_by(alice, {'read': True}) is False
+    assert alice not in g2.admin_role
 
     g1.children.add(g2)
-    assert g2.accessible_by(alice, {'read': True}) is True
+    assert alice in g2.admin_role
     g1.children.remove(g2)
-    assert g2.accessible_by(alice, {'read': True}) is False
+    assert alice not in g2.admin_role
 
 
 @pytest.mark.django_db
-def test_auto_field_adjuments(organization, inventory, team, alice):
+def test_auto_field_adjustments(organization, inventory, team, alice):
     'Ensures the auto role reparenting is working correctly through non m2m fields'
     org2 = Organization.objects.create(name='Org 2', description='org 2')
     org2.admin_role.members.add(alice)
-    assert inventory.accessible_by(alice, {'read': True}) is False
+    assert alice not in inventory.admin_role
     inventory.organization = org2
     inventory.save()
-    assert inventory.accessible_by(alice, {'read': True}) is True
+    assert alice in inventory.admin_role
     inventory.organization = organization
     inventory.save()
-    assert inventory.accessible_by(alice, {'read': True}) is False
+    assert alice not in inventory.admin_role
     #assert False
 
 @pytest.mark.django_db
@@ -131,14 +128,12 @@ def test_implicit_deletes(alice):
     assert Role.objects.filter(id=auditor_role_id).count() == 1
     n_alice_roles = alice.roles.count()
     n_system_admin_children = Role.singleton('System Administrator').children.count()
-    rp = RolePermission.objects.create(role=delorg.admin_role, resource=delorg, read=True)
 
     delorg.delete()
 
     assert Role.objects.filter(id=admin_role_id).count() == 0
     assert Role.objects.filter(id=auditor_role_id).count() == 0
     assert alice.roles.count() == (n_alice_roles - 1)
-    assert RolePermission.objects.filter(id=rp.id).count() == 0
     assert Role.singleton('System Administrator').children.count() == (n_system_admin_children - 1)
     assert child.ancestors.count() == 1
     assert child.ancestors.all()[0] == child
