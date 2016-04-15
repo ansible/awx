@@ -6,7 +6,7 @@ from awx.main.models import (
     Host,
     CustomInventoryScript,
 )
-from awx.main.access import InventoryAccess
+from awx.main.access import InventoryAccess, HostAccess
 from django.apps import apps
 
 @pytest.mark.django_db
@@ -237,33 +237,35 @@ def test_host_access(organization, inventory, user, group):
     not_my_group = group('not-my-group')
     group_admin = user('group_admin', False)
 
+    inventory_admin_access = HostAccess(inventory_admin)
+    group_admin_access = HostAccess(group_admin)
 
     h1 = Host.objects.create(inventory=inventory, name='host1')
     h2 = Host.objects.create(inventory=inventory, name='host2')
     h1.groups.add(my_group)
     h2.groups.add(not_my_group)
 
-    assert h1.accessible_by(inventory_admin, {'read': True}) is False
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1) is False
+    assert group_admin_access.can_read(h1) is False
 
     inventory.admin_role.members.add(inventory_admin)
     my_group.admin_role.members.add(group_admin)
 
-    assert h1.accessible_by(inventory_admin, {'read': True})
-    assert h2.accessible_by(inventory_admin, {'read': True})
-    assert h1.accessible_by(group_admin, {'read': True})
-    assert h2.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1)
+    assert inventory_admin_access.can_read(h2)
+    assert group_admin_access.can_read(h1)
+    assert group_admin_access.can_read(h2) is False
 
     my_group.hosts.remove(h1)
 
-    assert h1.accessible_by(inventory_admin, {'read': True})
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1)
+    assert group_admin_access.can_read(h1) is False
 
     h1.inventory = other_inventory
     h1.save()
 
-    assert h1.accessible_by(inventory_admin, {'read': True}) is False
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1) is False
+    assert group_admin_access.can_read(h1) is False
 
 
 

@@ -368,7 +368,7 @@ class HostAccess(BaseAccess):
         return qs.prefetch_related('groups').all()
 
     def can_read(self, obj):
-        return obj and self.user in obj.read_role
+        return obj and any(self.user in grp.read_role for grp in obj.groups.all()) or self.user in obj.inventory.read_role
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
