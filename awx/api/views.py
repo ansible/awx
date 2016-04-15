@@ -667,7 +667,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        access_kwargs = {'accessor': self.request.user, 'permissions': {"read": True}}
+        access_kwargs = {'accessor': self.request.user, 'role_name': 'read_role'}
         direct_counts = Organization.objects.filter(id=org_id).annotate(
             users=Count('member_role__members', distinct=True),
             admins=Count('admin_role__members', distinct=True)

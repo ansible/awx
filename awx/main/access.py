@@ -65,8 +65,8 @@ def register_access(model_class, access_class):
 def user_admin_role(self):
     return Role.objects.get(content_type=ContentType.objects.get_for_model(User), object_id=self.id)
 
-def user_accessible_objects(user, role):
-    return ResourceMixin._accessible_objects(User, user, role)
+def user_accessible_objects(user, role_name):
+    return ResourceMixin._accessible_objects(User, user, role_name)
 
 def get_user_queryset(user, model_class):
     '''

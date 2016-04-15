@@ -70,7 +70,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     read_role = ImplicitRoleField(
         role_name='Organization Read Access',
         role_description='Read an organization',
-        parent_role='member_role',
+        parent_role=['member_role', 'auditor_role'],
     )
 
 
@@ -123,6 +123,11 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         role_name='Team Member',
         role_description='A member of this team',
         parent_role='admin_role',
+    )
+    read_role = ImplicitRoleField(
+        role_name='Read',
+        role_description='Can view this team',
+        parent_role=['auditor_role', 'member_role'],
     )
 
     def get_absolute_url(self):

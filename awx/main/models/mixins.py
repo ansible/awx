@@ -1,13 +1,11 @@
 # Django
 from django.db import models
-from django.db.models.aggregates import Max
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 
 # AWX
 from awx.main.models.rbac import (
-    Role,
+    Role, get_roles_on_resource
 )
 
 
@@ -55,45 +53,12 @@ class ResourceMixin(models.Model):
         return qs
 
 
-    def get_permissions(self, user):
+    def get_permissions(self, accessor):
         '''
-        Returns a dict (or None) of the permissions a user has for a given
-        resource.
-
-        Note: Each field in the dict is the `or` of all respective permissions
-        that have been granted to the roles that are applicable for the given
-        user.
-
-        In example, if a user has been granted read access through a permission
-        on one role and write access through a permission on a separate role,
-        the returned dict will denote that the user has both read and write
-        access.
+        Returns a dict (or None) of the roles a accessor has for a given resource.
+        An accessor can be either a User, Role, or an arbitrary resource that
+        contains one or more Roles associated with it.
         '''
 
-        return get_user_permissions_on_resource(self, user)
+        return get_roles_on_resource(self, accessor)
 
-
-    def get_role_permissions(self, role):
-        '''
-        Returns a dict (or None) of the permissions a role has for a given
-        resource.
-
-        Note: Each field in the dict is the `or` of all respective permissions
-        that have been granted to either the role or any descendents of that role.
-        '''
-
-        return get_role_permissions_on_resource(self, role)
-
-
-    def accessible_by(self, user, permissions):
-        '''
-        Returns true if the user has all of the specified permissions
-        '''
-
-        perms = self.get_permissions(user)
-        if perms is None:
-            return False
-        for k in permissions:
-            if k not in perms or perms[k] < permissions[k]:
-                return False
-        return True
