@@ -348,7 +348,7 @@ class InventoryAccess(BaseAccess):
         return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
-        return self.user in adhoc_role
+        return self.user in obj.adhoc_role
 
 class HostAccess(BaseAccess):
     '''
