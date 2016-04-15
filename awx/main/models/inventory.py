@@ -527,11 +527,11 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     )
     update_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
-        parent_role=['inventory.update_role', 'parents.updater_role'],
+        parent_role=['inventory.update_role', 'parents.update_role'],
     )
     execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
-        parent_role=['inventory.execute_role', 'parents.executor_role'],
+        parent_role=['inventory.execute_role', 'parents.execute_role'],
     )
 
     def __unicode__(self):
