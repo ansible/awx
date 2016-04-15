@@ -33,6 +33,23 @@ class ResourceMixin(models.Model):
 
     @staticmethod
     def _accessible_objects(cls, accessor, role_name):
+        if type(cls()) == User:
+            cls_type = ContentType.objects.get_for_model(cls)
+            roles = Role.objects.filter(content_type__pk=cls_type.id)
+
+            if type(accessor) == User:
+                roles = roles.filter(ancestors__members = accessor)
+            elif type(accessor) == Role:
+                roles = roles.filter(ancestors = accessor)
+            else:
+                accessor_type = ContentType.objects.get_for_model(accessor)
+                accessor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
+                                                     object_id=accessor.id)
+                roles = roles.filter(ancestors__in=accessor_roles)
+
+            kwargs = {'id__in':roles.values_list('object_id', flat=True)}
+            return cls.objects.filter(**kwargs)
+
         if type(accessor) == User:
             kwargs = {}
             kwargs[role_name + '__ancestors__members'] = accessor
@@ -49,7 +66,6 @@ class ResourceMixin(models.Model):
             kwargs[role_name + '__ancestors__in'] = roles
             qs = cls.objects.filter(**kwargs)
 
-        #return cls.objects.filter(resource__in=qs)
         return qs
 
 

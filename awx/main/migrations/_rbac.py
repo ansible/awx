@@ -34,7 +34,6 @@ def init_rbac_migration(apps, schema_editor):
 def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
-    RolePermission = apps.get_model('main', "RolePermission")
     ContentType = apps.get_model('contenttypes', "ContentType")
     user_content_type = ContentType.objects.get_for_model(User)
 
@@ -52,15 +51,6 @@ def migrate_users(apps, schema_editor):
                 object_id = user.id
             )
             role.members.add(user)
-            RolePermission.objects.create(
-                created=now(),
-                modified=now(),
-                role = role,
-                content_type = user_content_type,
-                object_id = user.id,
-                create=1, read=1, write=1, delete=1, update=1,
-                execute=1, scm_update=1, use=1,
-            )
             logger.info(smart_text(u"migrating to new role for user: {}".format(user.username)))
 
         if user.is_superuser:
