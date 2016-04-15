@@ -55,13 +55,13 @@ def test_org_user_admin(user, organization):
     member = user('orgmember')
 
     organization.member_role.members.add(member)
-    assert not member.accessible_by(admin, {'write':True})
+    assert admin not in member.admin_role
 
     organization.admin_role.members.add(admin)
-    assert member.accessible_by(admin, {'write':True})
+    assert admin in member.admin_role
 
     organization.admin_role.members.remove(admin)
-    assert not member.accessible_by(admin, {'write':True})
+    assert admin not in member.admin_role
 
 @pytest.mark.django_db
 def test_org_user_removed(user, organization):
@@ -71,7 +71,7 @@ def test_org_user_removed(user, organization):
     organization.admin_role.members.add(admin)
     organization.member_role.members.add(member)
 
-    assert member.accessible_by(admin, {'write':True})
+    assert admin in member.admin_role
 
     organization.member_role.members.remove(member)
-    assert not member.accessible_by(admin, {'write':True})
+    assert admin not in member.admin_role
