@@ -27,16 +27,16 @@ def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, use
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert check_jobtemplate.project.accessible_by(joe, {'read': True})
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert joe in check_jobtemplate.project.read_role
+    assert admin in check_jobtemplate.execute_role
+    assert joe not in check_jobtemplate.execute_role
 
     rbac.migrate_job_templates(apps, None)
 
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert admin in check_jobtemplate.execute_role
+    assert joe in check_jobtemplate.execute_role
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe not in deploy_jobtemplate.execute_role
 
 @pytest.mark.django_db
 def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, user):
@@ -55,16 +55,16 @@ def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, us
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert deploy_jobtemplate.project.accessible_by(joe, {'read': True})
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert joe in deploy_jobtemplate.project.read_role
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe not in deploy_jobtemplate.execute_role
 
     rbac.migrate_job_templates(apps, None)
 
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe in deploy_jobtemplate.execute_role
+    assert admin in check_jobtemplate.execute_role
+    assert joe in check_jobtemplate.execute_role
 
 
 @pytest.mark.django_db
@@ -87,17 +87,17 @@ def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert check_jobtemplate.project.accessible_by(joe, {'read': True})
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert joe in check_jobtemplate.read_role
+    assert admin in check_jobtemplate.execute_role
+    assert joe not in check_jobtemplate.execute_role
 
     rbac.migrate_job_templates(apps, None)
 
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert admin in check_jobtemplate.execute_role
+    assert joe in check_jobtemplate.execute_role
 
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe not in deploy_jobtemplate.execute_role
 
 
 @pytest.mark.django_db
@@ -120,17 +120,17 @@ def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplat
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert deploy_jobtemplate.project.accessible_by(joe, {'read': True})
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert joe in deploy_jobtemplate.read_role
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe not in deploy_jobtemplate.execute_role
 
     rbac.migrate_job_templates(apps, None)
 
-    assert deploy_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert deploy_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert admin in deploy_jobtemplate.execute_role
+    assert joe in deploy_jobtemplate.execute_role
 
-    assert check_jobtemplate.accessible_by(admin, {'execute': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert admin in check_jobtemplate.execute_role
+    assert joe in check_jobtemplate.execute_role
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)

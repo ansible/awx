@@ -239,7 +239,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     member_role = ImplicitRoleField(
         role_name='Project Member',
         role_description='Implies membership within this project',
+        parent_role='admin_role',
     )
+    read_role = ImplicitRoleField(
+        role_name='Project Read Access',
+        role_description='Read access to this project',
+        parent_role='member_role',
+    )
+
     scm_update_role = ImplicitRoleField(
         role_name='Project Updater',
         role_description='May update this project from the source control management system',

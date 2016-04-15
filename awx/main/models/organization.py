@@ -67,6 +67,11 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         role_description='A member of this organization',
         parent_role='admin_role',
     )
+    read_role = ImplicitRoleField(
+        role_name='Organization Read Access',
+        role_description='Read an organization',
+        parent_role='member_role',
+    )
 
 
     def get_absolute_url(self):

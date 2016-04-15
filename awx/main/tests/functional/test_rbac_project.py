@@ -138,11 +138,11 @@ def test_project_user_project(user_project, project, user):
     assert old_access.check_user_access(u, user_project.__class__, 'read', user_project)
     assert old_access.check_user_access(u, project.__class__, 'read', project) is False
 
-    assert user_project.accessible_by(u, {'read': True}) is False
-    assert project.accessible_by(u, {'read': True}) is False
+    assert u not in user_project.read_role
+    assert u not in project.read_role
     rbac.migrate_projects(apps, None)
-    assert user_project.accessible_by(u, {'read': True}) is True
-    assert project.accessible_by(u, {'read': True}) is False
+    assert u in user_project.read_role
+    assert u not in project.read_role
 
 @pytest.mark.django_db
 def test_project_accessible_by_sa(user, project):
@@ -150,21 +150,21 @@ def test_project_accessible_by_sa(user, project):
     # This gets setup by a signal, but we want to test the migration which will set this up too, so remove it
     Role.singleton('System Administrator').members.remove(u)
 
-    assert project.accessible_by(u, {'read': True}) is False
+    assert u not in project.read_role
     rbac.migrate_organization(apps, None)
     rbac.migrate_users(apps, None)
     rbac.migrate_projects(apps, None)
     print(project.admin_role.ancestors.all())
     print(project.admin_role.ancestors.all())
-    assert project.accessible_by(u, {'read': True, 'write': True}) is True
+    assert u in project.admin_role
 
 @pytest.mark.django_db
 def test_project_org_members(user, organization, project):
     admin = user('orgadmin')
     member = user('orgmember')
 
-    assert project.accessible_by(admin, {'read': True}) is False
-    assert project.accessible_by(member, {'read': True}) is False
+    assert admin not in project.read_role
+    assert member not in project.read_role
 
     organization.deprecated_admins.add(admin)
     organization.deprecated_users.add(member)
@@ -172,8 +172,8 @@ def test_project_org_members(user, organization, project):
     rbac.migrate_organization(apps, None)
     rbac.migrate_projects(apps, None)
 
-    assert project.accessible_by(admin, {'read': True, 'write': True}) is True
-    assert project.accessible_by(member, {'read': True})
+    assert admin in project.admin_role
+    assert member in project.read_role
 
 @pytest.mark.django_db
 def test_project_team(user, team, project):
@@ -183,15 +183,15 @@ def test_project_team(user, team, project):
     team.deprecated_users.add(member)
     project.deprecated_teams.add(team)
 
-    assert project.accessible_by(nonmember, {'read': True}) is False
-    assert project.accessible_by(member, {'read': True}) is False
+    assert nonmember not in project.read_role
+    assert member not in project.read_role
 
     rbac.migrate_team(apps, None)
     rbac.migrate_organization(apps, None)
     rbac.migrate_projects(apps, None)
 
-    assert project.accessible_by(member, {'read': True}) is True
-    assert project.accessible_by(nonmember, {'read': True}) is False
+    assert member in project.read_role
+    assert nonmember not in project.read_role
 
 @pytest.mark.django_db
 def test_project_explicit_permission(user, team, project, organization):
@@ -203,9 +203,9 @@ def test_project_explicit_permission(user, team, project, organization):
     p = Permission(user=u, project=project, permission_type='create', name='Perm name')
     p.save()
 
-    assert project.accessible_by(u, {'read': True}) is False
+    assert u not in project.read_role
 
     rbac.migrate_organization(apps, None)
     rbac.migrate_projects(apps, None)
 
-    assert project.accessible_by(u, {'read': True}) is True
+    assert u in project.read_role
