@@ -667,7 +667,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        access_kwargs = {'accessor': self.request.user, 'role_name': 'read_role'}
+        access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
         direct_counts = Organization.objects.filter(id=org_id).annotate(
             users=Count('member_role__members', distinct=True),
             admins=Count('admin_role__members', distinct=True)
@@ -784,8 +784,8 @@ class TeamList(ListCreateAPIView):
     serializer_class = TeamSerializer
 
     def get_queryset(self):
-        qs = Team.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'organization')
         return qs
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
@@ -1263,7 +1263,7 @@ class TeamCredentialsList(CredentialList):
             raise PermissionDenied()
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
-        team_creds = Credential.objects.filter(owner_role__parents=team.member_role).distinct()
+        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
         return team_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
