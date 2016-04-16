@@ -9,7 +9,7 @@ export default
     angular.module('AllJobsDefinition', ['sanitizeFilter', 'capitalizeFilter'])
     .value( 'AllJobsList', {
 
-        name: 'all_jobs',
+        name: 'jobs',
         basePath: 'unified_jobs',
         iterator: 'all_job',
         editTitle: 'All Jobs',
@@ -18,8 +18,9 @@ export default
         well: false,
         fields: {
             status: {
-                label: 'Status',
-                columnClass: 'List-staticColumn--smallStatus',
+                label: '',
+                searchLabel: 'Status',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
                 awToolTip: "{{ all_job.status_tip }}",
                 awTipPlacement: "right",
                 dataTitle: "{{ all_job.status_popover_title }}",
@@ -30,13 +31,10 @@ export default
                 searchType: 'select',
                 nosort: true,
                 searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
                 ]
             },
             id: {
+                key: true,
                 label: 'ID',
                 ngClick:"viewJobDetails(all_job)",
                 searchType: 'int',
@@ -45,6 +43,7 @@ export default
                 dataPlacement: 'top'
             },
             name: {
+                key: true,
                 label: 'Name',
                 columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(all_job)",

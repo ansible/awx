@@ -155,13 +155,13 @@ export default
                 Rest.post({})
                 .then(function () {
                     ngToast.success({
-                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> Test Notification Success: <b>${name}</b> `,
+                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Succeeded.`,
                      });
 
                 })
                 .catch(function () {
                     ngToast.danger({
-                        content: 'Test Notification Failure'
+                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
                      });
                 });
             };

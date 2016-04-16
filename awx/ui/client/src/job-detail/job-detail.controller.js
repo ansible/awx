@@ -13,19 +13,18 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile',
         '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
-        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
-        'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
+        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
-        'LoadPlays', 'LoadTasks', 'LoadHosts', 'HostsEdit',
+        'LoadPlays', 'LoadTasks', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
         'EditSchedule', 'ParseTypeChange', 'JobDetailService',
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
             $log, ClearScope, GetBasePath, Wait, ProcessErrors,
-            SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph,
-            LoadHostSummary, ReloadHostSummaryList, JobIsFinished,
+            SelectPlay, SelectTask, Socket, GetElapsed,
+            JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
-            PlaybookRun, LoadPlays, LoadTasks, LoadHosts,
+            PlaybookRun, LoadPlays, LoadTasks,
             HostsEdit, ParseVariableString, GetChoices, fieldChoices,
             fieldLabels, EditSchedule, ParseTypeChange, JobDetailService
         ) {
@@ -82,38 +81,6 @@ export default
                 }
             });
             scope.hosts = [];
-            scope.$watch('hosts', function(hosts) {
-                for (var host in hosts) {
-                    if (hosts[host].ok) {
-                        hosts[host].okTip = hosts[host].ok;
-                        hosts[host].okTip += (hosts[host].ok === 1) ? " host event was" : " host events were";
-                        hosts[host].okTip += " ok.";
-                    } else {
-                        hosts[host].okTip = "No host events were ok.";
-                    }
-                    if (hosts[host].changed) {
-                        hosts[host].changedTip = hosts[host].changed;
-                        hosts[host].changedTip += (hosts[host].changed === 1) ? " host event" : " host events";
-                        hosts[host].changedTip += " changed.";
-                    } else {
-                        hosts[host].changedTip = "No host events changed.";
-                    }
-                    if (hosts[host].failed) {
-                        hosts[host].failedTip = hosts[host].failed;
-                        hosts[host].failedTip += (hosts[host].failed === 1) ? " host event" : " host events";
-                        hosts[host].failedTip += " failed.";
-                    } else {
-                        hosts[host].failedTip = "No host events failed.";
-                    }
-                    if (hosts[host].unreachable) {
-                        hosts[host].unreachableTip = hosts[host].unreachable;
-                        hosts[host].unreachableTip += (hosts[host].unreachable === 1) ? " host event was" : " hosts events were";
-                        hosts[host].unreachableTip += " unreachable";
-                    } else {
-                        hosts[host].unreachableTip = "No host events were unreachable.";
-                    }
-                }
-            });
             scope.tasks = [];
             scope.$watch('tasks', function(tasks) {
                 for (var task in tasks) {
@@ -169,7 +136,6 @@ export default
             scope.hostResults = [];
 
             scope.hostResultsMaxRows = 200;
-            scope.hostSummariesMaxRows = 200;
             scope.tasksMaxRows = 200;
             scope.playsMaxRows = 200;
 
@@ -177,7 +143,6 @@ export default
             scope.playsLoading = true;
             scope.tasksLoading = true;
             scope.hostResultsLoading = true;
-            scope.hostSummariesLoading = true;
 
             // Turn on the 'Waiting...' message until events begin arriving
             scope.waiting = true;
@@ -192,24 +157,15 @@ export default
             scope.searchPlaysEnabled = true;
             scope.searchTasksEnabled = true;
             scope.searchHostsEnabled = true;
-            scope.searchHostSummaryEnabled = true;
             scope.search_play_status = 'all';
             scope.search_task_status = 'all';
             scope.search_host_status = 'all';
-            scope.search_host_summary_status = 'all';
 
             scope.haltEventQueue = false;
             scope.processing = false;
             scope.lessStatus = false;
             scope.lessDetail = false;
             scope.lessEvents = true;
-
-            scope.host_summary = {};
-            scope.host_summary.ok = 0;
-            scope.host_summary.changed = 0;
-            scope.host_summary.unreachable = 0;
-            scope.host_summary.failed = 0;
-            scope.host_summary.total = 0;
 
             scope.jobData = {};
             scope.jobData.hostSummaries = {};
@@ -230,7 +186,6 @@ export default
                 url: GetBasePath('unified_jobs'),
                 field: 'status',
                 variable: 'status_choices',
-                // callback: 'choicesReady'
             });
 
             scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
@@ -244,6 +199,7 @@ export default
                         data.event = data.event_name;
                         DigestEvent({ scope: scope, event: data });
                     }
+                    UpdateDOM({ scope: scope });
                 });
             }
             openSocket();
@@ -258,9 +214,6 @@ export default
                     if (data.status === 'failed' || data.status === 'canceled' ||
                             data.status === 'error' || data.status === 'successful' || data.status === 'running') {
                         $scope.liveEventProcessing = false;
-                        if ($rootScope.jobDetailInterval) {
-                            window.clearInterval($rootScope.jobDetailInterval);
-                        }
                         if (!scope.pauseLiveEvents) {
                             $scope.$emit('LoadJob'); //this is what is used for the refresh
                         }
@@ -274,9 +227,8 @@ export default
             $rootScope.removeJobSummaryComplete = $rootScope.$on('JobSummaryComplete', function() {
                 // the job host summary should now be available from the API
                 $log.debug('Trigging reload of job_host_summaries');
-                scope.$emit('LoadHostSummaries');
+                scope.$emit('InitialLoadComplete');
             });
-
 
             if (scope.removeInitialLoadComplete) {
                 scope.removeInitialLoadComplete();
@@ -292,73 +244,19 @@ export default
                     };
                     JobDetailService.getRelatedJobEvents(scope.job.id, params)
                         .success(function(data) {
-                            if (data.results.length > 0) {
-                                LoadHostSummary({
-                                    scope: scope,
-                                    data: data.results[0].event_data
-                                });
-                            }
                             UpdateDOM({ scope: scope });
                         })
                         .error(function(data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Call to ' + url + '. GET returned: ' + status });
                         });
-                    if ($rootScope.jobDetailInterval) {
-                        window.clearInterval($rootScope.jobDetailInterval);
-                    }
                     $log.debug('Job completed!');
                     $log.debug(scope.jobData);
                 }
                 else {
                     api_complete = true;  //trigger events to start processing
-                    if ($rootScope.jobDetailInterval) {
-                        window.clearInterval($rootScope.jobDetailInterval);
-                    }
-                    $rootScope.jobDetailInterval = setInterval(function() {
-                        UpdateDOM({ scope: scope });
-                    }, 2000);
+                    UpdateDOM({ scope: scope})
                 }
-            });
-
-            if (scope.removeLoadHostSummaries) {
-                scope.removeLoadHostSummaries();
-            }
-            scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
-                if(scope.job){
-                    var params = {
-                        page_size: scope.hostSummariesMaxRows,
-                        order: 'host_name'
-                    };
-                    JobDetailService.getJobHostSummaries(scope.job.id, params)
-                        .success(function(data) {
-                            scope.next_host_summaries = data.next;
-                            if (data.results.length > 0) {
-                                // only dump what's in memory when job_host_summaries is available.
-                                scope.jobData.hostSummaries = {};
-                            }
-                            data.results.forEach(function(event) {
-                                var name;
-                                if (event.host_name) {
-                                    name = event.host_name;
-                                }
-                                else {
-                                    name = "<deleted host>";
-                                }
-                                scope.jobData.hostSummaries[event.host] = {
-                                    id: event.host,
-                                    name: name,
-                                    ok: event.ok,
-                                    changed: event.changed,
-                                    unreachable: event.dark,
-                                    failed: event.failures,
-                                    status: (event.failed) ? 'failed' : 'successful'
-                                };
-                            });
-                            scope.$emit('InitialLoadComplete');
-                        });
-                }
-
             });
 
             if (scope.removeLoadHosts) {
@@ -376,81 +274,22 @@ export default
                         var params = {
                             parent: task.id,
                             event__startswith: 'runner',
-                            page_size: scope.hostResultsMaxRows 
                         };
                         JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
-                                var idx, event, status, status_text, item, msg;
+                                var event, status, status_text, item, msg;
                                 if (data.results.length > 0) {
                                     lastEventId =  data.results[0].id;
                                 }
                                 scope.next_host_results = data.next;
-                                for (idx=data.results.length - 1; idx >= 0; idx--) {
-                                    event = data.results[idx];
-                                    if (event.event === "runner_on_skipped") {
-                                        status = 'skipped';
-                                    }
-                                    else if (event.event === "runner_on_unreachable") {
-                                        status = 'unreachable';
-                                    }
-                                    else {
-                                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                                    }
-                                    switch(status) {
-                                        case "successful":
-                                            status_text = 'OK';
-                                            break;
-                                        case "changed":
-                                            status_text = "Changed";
-                                            break;
-                                        case "failed":
-                                            status_text = "Failed";
-                                            break;
-                                        case "unreachable":
-                                            status_text = "Unreachable";
-                                            break;
-                                        case "skipped":
-                                            status_text = "Skipped";
-                                    }
-
-                                    if (event.event_data && event.event_data.res) {
-                                        item = event.event_data.res.item;
-                                        if (typeof item === "object") {
-                                            item = JSON.stringify(item);
-                                        }
-                                    }
-
-                                    msg = '';
-                                    if (event.event_data && event.event_data.res) {
-                                        if (typeof event.event_data.res === 'object') {
-                                            msg = event.event_data.res.msg;
-                                        } else {
-                                            msg = event.event_data.res;
-                                        }
-                                    }
-
-                                    if (event.event !== "runner_on_no_hosts") {
-                                        task.hostResults[event.id] = {
-                                            id: event.id,
-                                            status: status,
-                                            status_text: status_text,
-                                            host_id: event.host,
-                                            task_id: event.parent,
-                                            name: event.event_data.host,
-                                            created: event.created,
-                                            msg: msg,
-                                            counter: event.counter,
-                                            item: item
-                                        };
-                                    }
-                                }
-                                scope.$emit('LoadHostSummaries');
+                                task.hostResults = JobDetailService.processHostEvents(data.results);
+                                scope.$emit('InitialLoadComplete');
                             });
                     } else {
-                        scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                     }
                 } else {
-                    scope.$emit('LoadHostSummaries');
+                scope.$emit('InitialLoadComplete');
                 }
             });
 
@@ -559,10 +398,10 @@ export default
                                     msg: 'Call to ' + url + '. GET returned: ' + status });
                             });
                     } else {
-                        scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                     }
                 } else {
-                    scope.$emit('LoadHostSummaries');
+                        scope.$emit('InitialLoadComplete');
                 }
             });
 
@@ -570,12 +409,6 @@ export default
                 scope.removeLoadPlays();
             }
             scope.removeLoadPlays = scope.$on('LoadPlays', function(e, events_url) {
-
-                scope.host_summary.ok = 0;
-                scope.host_summary.changed = 0;
-                scope.host_summary.unreachable = 0;
-                scope.host_summary.failed = 0;
-                scope.host_summary.total = 0;
                 scope.jobData.plays = {};
                 var params = {
                     order_by: 'id'
@@ -659,13 +492,6 @@ export default
                                 scope.jobData.plays[event.id].status_text = 'No matching hosts';
                                 scope.jobData.plays[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
                             }
-
-                            scope.host_summary.ok += ok;
-                            scope.host_summary.changed += changed;
-                            scope.host_summary.unreachable += (event.unreachable_count) ? event.unreachable_count : 0;
-                            scope.host_summary.failed += failed;
-                            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                                scope.host_summary.failed;
                         });
                         if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
                             scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
@@ -673,7 +499,7 @@ export default
                         scope.$emit('LoadTasks', events_url);
                     });
             });
-
+            
 
             if (scope.removeLoadJob) {
                 scope.removeLoadJob();
@@ -685,7 +511,6 @@ export default
                 scope.playsLoading = true;
                 scope.tasksLoading = true;
                 scope.hostResultsLoading = true;
-                scope.LoadHostSummaries = true;
 
                 // Load the job record
                 JobDetailService.getJob(job_id)
@@ -769,7 +594,6 @@ export default
                             scope.playsLoading = false;
                             scope.tasksLoading = false;
                             scope.hostResultsLoading = false;
-                            scope.hostSummariesLoading = false;
                         }
                         else {
                             scope.job_status.finished = null;
@@ -810,10 +634,6 @@ export default
                 if (refresh_count === 1) {
                     // First time. User just loaded page.
                     scope.$emit('LoadJob');
-                }
-                else {
-                    // Check if the graph needs to redraw
-                    setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
                 }
             });
 
@@ -859,11 +679,6 @@ export default
                     $('#tasks-table-detail').height(120 + (height * 0.20));
                     $('#hosts-table-detail').height(150 + (height * 0.70));
                 }
-                // Summary table height adjusting.
-                height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .JobDetail-searchHeaderRow').outerHeight() -
-                    $('#hosts-summary-section .table-header').outerHeight() - 20;
-                // $('#hosts-summary-table').height(height);
-                //$('#hosts-summary-table').mCustomScrollbar("update");
                 scope.$emit('RefreshCompleted');
             };
 
@@ -912,57 +727,22 @@ export default
                 }
             };
 
-            scope.toggleSummary = function(hide) {
-                var docw, doch, height = $('#job-detail-container').height(), slide_width;
-                if (!hide) {
-                    docw = $(window).width();
-                    doch = $(window).height();
-                    slide_width = (docw < 840) ? '100%' : '80%';
-                    $('#summary-button').hide();
-                    $('.overlay').css({
-                        width: $(document).width(),
-                        height: $(document).height()
-                    }).show();
-
-                    // Adjust the summary table height
-                    $('#job-summary-container .job_well').height(height - 18).css({
-                        'box-shadow': '-3px 3px 5px 0 #ccc'
-                    });
-                    height = Math.floor($('#job-detail-container').height() * 0.5) -
-                        $('#hosts-summary-section .header').outerHeight() -
-                        $('#hosts-summary-section .table-header').outerHeight() -
-                        $('#hide-summary-button').outerHeight() -
-                        $('#summary-search-section').outerHeight() -
-                        $('#hosts-summary-section .header').outerHeight() -
-                        $('#hosts-summary-section .legend').outerHeight();
-                    $('#hosts-summary-table').height(height - 50);
-                    //$('#hosts-summary-table').mCustomScrollbar("update");
-
-                    $('#hide-summary-button').show();
-
-                    $('#job-summary-container').css({
-                        top: 0,
-                        right: 0,
-                        width: slide_width,
-                        'z-index': 1090,
-                        'padding-right': '15px',
-                        'padding-left': '15px'
-                    }).show('slide', {'direction': 'right'});
-
-                    setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
-                }
-                else {
-                    $('.overlay').hide();
-                    $('#summary-button').show();
-                    $('#job-summary-container').hide('slide', {'direction': 'right'});
-                }
-            };
-
             scope.objectIsEmpty = function(obj) {
                 if (angular.isObject(obj)) {
                     return (Object.keys(obj).length > 0) ? false : true;
                 }
                 return true;
+            };
+
+            scope.toggleLessEvents = function() {
+                if (!scope.lessEvents) {
+                    $('#events-summary').slideUp(200);
+                    scope.lessEvents = true;
+                }
+                else {
+                    $('#events-summary').slideDown(200);
+                    scope.lessEvents = false;
+                }
             };
 
             scope.toggleLessStatus = function() {
@@ -984,18 +764,6 @@ export default
                 else {
                     $('#job-detail-details').slideDown(200);
                     scope.lessDetail = false;
-                }
-            };
-
-            scope.toggleLessEvents = function() {
-                if (!scope.lessEvents) {
-                    $('#events-summary').slideUp(200);
-                    scope.lessEvents = true;
-                }
-                else {
-                    $('#events-summary').slideDown(200);
-                    scope.lessEvents = false;
-                    DrawGraph({scope:scope});
                 }
             };
 
@@ -1037,6 +805,9 @@ export default
                     scope.searchTasksEnabled = true;
                 }
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+                    if (scope.search_task_status === 'failed'){
+                        params.failed = true;
+                    }
                     LoadTasks({
                         scope: scope
                     });
@@ -1058,66 +829,24 @@ export default
                     scope.searchHostsEnabled = true;
                 }
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadHosts({
-                        scope: scope
+                    scope.hostResultsLoading = true;
+                    var params = {
+                        parent: scope.selectedTask,
+                        event__startswith: 'runner',
+                        page_size: scope.hostResultsMaxRows,
+                        order: 'host_name,counter',
+                        host_name__icontains: scope.search_host_name                    
+                    }
+                    if (scope.search_host_status === 'failed'){
+                        params.failed = true;
+                    }
+                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                        scope.hostResults = JobDetailService.processHostEvents(res.results)
+                        scope.hostResultsLoading = false;
                     });
                 }
             };
 
-            scope.searchHostsKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHosts();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchHostSummary = function() {
-                if (scope.search_host_summary_name) {
-                    scope.searchHostSummaryEnabled = false;
-                }
-                else {
-                    scope.searchHostSummaryEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    ReloadHostSummaryList({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchHostSummaryKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHostSummary();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.filterTaskStatus = function() {
-                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterHostStatus = function() {
-                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadHosts({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterHostSummaryStatus = function() {
-                scope.search_host_summary_status = (scope.search_host_summary_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    ReloadHostSummaryList({
-                        scope: scope
-                    });
-                }
-            };
 
             if (scope.removeDeleteFinished) {
                 scope.removeDeleteFinished();
@@ -1350,41 +1079,6 @@ export default
                             $('#hostResultsMoreRows').fadeOut(400);
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Call to ' + scope.next_host_results + '. GET returned: ' + status });
-                        });
-                }
-            };
-
-            scope.hostSummariesScrollDown = function() {
-                // check for more hosts when user scrolls to bottom of host summaries list...
-                if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_summaries) {
-                    scope.hostSummariesLoading = true;
-                    JobDetailService.getNextPage(scope.next_host_summaries)
-                        .success(function(data) {
-                            scope.next_host_summaries = data.next;
-                            data.results.forEach(function(row) {
-                                var name;
-                                if (row.host_name) {
-                                    name = row.host_name;
-                                }
-                                else {
-                                    name = "<deleted host>";
-                                }
-                                scope.hosts.push({
-                                    id: row.id,
-                                    name: name,
-                                    ok: row.ok,
-                                    changed: row.changed,
-                                    unreachable: row.dark,
-                                    failed: row.failures
-                                });
-                            });
-                            $('#hostSummariesMoreRows').fadeOut();
-                            scope.hostSummariesLoading = false;
-                        })
-                        .error(function(data, status) {
-                            $('#hostSummariesMoreRows').fadeOut();
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + scope.next_host_summaries + '. GET returned: ' + status });
                         });
                 }
             };

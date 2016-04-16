@@ -16,6 +16,7 @@ export default
         hover: true,
         well: true,
         listTitle: 'Jobs',
+        searchSize: 'col-lg-8 col-md-8 col-sm-12 col-xs-12',
 
         fields: {
             status: {
@@ -27,23 +28,9 @@ export default
                 searchable: true,
                 nosort: true,
                 searchType: 'select',
-                searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
-                ]
+                searchOptions: [],
+                searchLabel: 'Status'
             },
-            /*
-            id: {
-                label: 'ID',
-                key: true,
-                noLink: true, //undocumented: 'key' above will automatically made the fields a link, but 'noLink' will override this setting
-                desc: true,
-                searchType: 'int',
-                columnClass: 'col-xs-2 List-staticColumnAdjacent',
-            },
-            */
             name: {
                 key: true,
                 label: 'Name',

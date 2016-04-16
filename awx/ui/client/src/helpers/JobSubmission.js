@@ -752,9 +752,9 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
       *
       */
       // Submit request to run a playbook
-      .factory('PlaybookRun', ['$location','$stateParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty',
+      .factory('PlaybookRun', ['$location', '$state', '$stateParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty',
       'PromptForCredential', 'PromptForVars', 'PromptForSurvey' , 'CreateLaunchDialog',
-      function ($location, $stateParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
+      function ($location, $state, $stateParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
         PromptForCredential, PromptForVars, PromptForSurvey, CreateLaunchDialog) {
           return function (params) {
             var //parent_scope = params.scope,
@@ -803,7 +803,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
               var job = data.job || data.system_job;
               if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) ||
                 (base === 'home')){
-                $location.path('/jobs/' + job);
+                // use $state.go with reload: true option to re-instantiate sockets in
+                $state.go('jobDetail', {id: job}, {reload: true})
               }
 
             });
