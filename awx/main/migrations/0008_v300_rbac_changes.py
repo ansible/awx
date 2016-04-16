@@ -49,6 +49,19 @@ class Migration(migrations.Migration):
         ),
 
         migrations.CreateModel(
+            name='RoleAncestorEntry',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('role_field', models.TextField()),
+                ('content_type_id', models.PositiveIntegerField(null=False)),
+                ('object_id', models.PositiveIntegerField(null=False)),
+            ],
+            options={
+                'db_table': 'main_rbac_role_ancestors',
+                'verbose_name_plural': 'role_ancestors',
+            },
+        ),
+        migrations.CreateModel(
             name='Role',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -58,7 +71,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512)),
                 ('singleton_name', models.TextField(default=None, unique=True, null=True, db_index=True)),
                 ('object_id', models.PositiveIntegerField(default=None, null=True)),
-                ('ancestors', models.ManyToManyField(related_name='descendents', to='main.Role')),
+                ('ancestors', models.ManyToManyField(related_name='descendents', through='main.RoleAncestorEntry', to='main.Role')),
                 ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType', null=True)),
                 ('created_by', models.ForeignKey(related_name="{u'class': 'role', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('members', models.ManyToManyField(related_name='roles', to=settings.AUTH_USER_MODEL)),
@@ -71,6 +84,20 @@ class Migration(migrations.Migration):
                 'db_table': 'main_rbac_roles',
                 'verbose_name_plural': 'roles',
             },
+        ),
+        migrations.AddField(
+            model_name='roleancestorentry',
+            name='ancestor',
+            field=models.ForeignKey(related_name='+', to='main.Role'),
+        ),
+        migrations.AddField(
+            model_name='roleancestorentry',
+            name='descendent',
+            field=models.ForeignKey(related_name='+', to='main.Role'),
+        ),
+        migrations.AlterIndexTogether(
+            name='roleancestorentry',
+            index_together=set([('descendent', 'content_type_id', 'role_field'), ('ancestor', 'content_type_id', 'role_field')]),
         ),
 
         migrations.AddField(

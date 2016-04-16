@@ -5,7 +5,7 @@ from django.contrib.auth.models import User # noqa
 
 # AWX
 from awx.main.models.rbac import (
-    Role, get_roles_on_resource
+    Role, RoleAncestorEntry, get_roles_on_resource
 )
 
 
@@ -17,7 +17,7 @@ class ResourceMixin(models.Model):
         abstract = True
 
     @classmethod
-    def accessible_objects(cls, accessor, role_name):
+    def accessible_objects(cls, accessor, role_field):
         '''
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
@@ -29,44 +29,26 @@ class ResourceMixin(models.Model):
         performant to resolve the resource in question then call
         `myresource.get_permissions(user)`.
         '''
-        return ResourceMixin._accessible_objects(cls, accessor, role_name)
+        return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
     @staticmethod
-    def _accessible_objects(cls, accessor, role_name):
-        if type(cls()) == User:
-            cls_type = ContentType.objects.get_for_model(cls)
-            roles = Role.objects.filter(content_type__pk=cls_type.id)
-
-            if type(accessor) == User:
-                roles = roles.filter(ancestors__members = accessor)
-            elif type(accessor) == Role:
-                roles = roles.filter(ancestors = accessor)
-            else:
-                accessor_type = ContentType.objects.get_for_model(accessor)
-                accessor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
-                                                     object_id=accessor.id)
-                roles = roles.filter(ancestors__in=accessor_roles)
-
-            kwargs = {'id__in':roles.values_list('object_id', flat=True)}
-            return cls.objects.filter(**kwargs).distinct()
-
+    def _accessible_objects(cls, accessor, role_field):
         if type(accessor) == User:
-            kwargs = {}
-            kwargs[role_name + '__ancestors__members'] = accessor
-            qs = cls.objects.filter(**kwargs)
+            ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:
-            kwargs = {}
-            kwargs[role_name + '__ancestors'] = accessor
-            qs = cls.objects.filter(**kwargs)
+            ancestor_roles = [accessor]
         else:
             accessor_type = ContentType.objects.get_for_model(accessor)
-            roles = Role.objects.filter(content_type__pk=accessor_type.id,
-                                        object_id=accessor.id)
-            kwargs = {}
-            kwargs[role_name + '__ancestors__in'] = roles
-            qs = cls.objects.filter(**kwargs)
-
-        return qs.distinct()
+            ancestor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
+                                                 object_id=accessor.id)
+        qs = cls.objects.filter(pk__in =
+                                RoleAncestorEntry.objects.filter(
+                                    ancestor__in=ancestor_roles,
+                                    content_type_id = ContentType.objects.get_for_model(cls).id,
+                                    role_field = role_field
+                                ).values_list('object_id').distinct()
+                                )
+        return qs
 
 
     def get_permissions(self, accessor):
