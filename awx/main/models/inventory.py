@@ -343,7 +343,7 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
-        ordering = ('inventory', 'name')
+        ordering = ('name',)
 
     inventory = models.ForeignKey(
         'Inventory',
