@@ -126,12 +126,12 @@ def create_user_role(instance, **kwargs):
         Role.objects.get(
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            name = 'Owner'
+            name = 'User Admin'
         )
     except Role.DoesNotExist:
         role = Role.objects.create(
-            name = 'Owner',
-            role_field='owner_role',
+            name = 'User Admin',
+            role_field='admin_role',
             content_object = instance,
         )
         role.members.add(instance)
