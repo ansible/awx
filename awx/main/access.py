@@ -365,10 +365,11 @@ class HostAccess(BaseAccess):
         inv_qs = Inventory.accessible_objects(self.user, 'read_role')
         group_qs = Group.accessible_objects(self.user, 'read_role')
         qs = (self.model.objects.filter(inventory=inv_qs) | self.model.objects.filter(groups=group_qs)).distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'inventory',
-                               'last_job__job_template',
-                               'last_job_host_summary__job')
-        return qs.prefetch_related('groups').all()
+        #qs = qs.select_related('created_by', 'modified_by', 'inventory',
+        #                       'last_job__job_template',
+        #                       'last_job_host_summary__job')
+        #return qs.prefetch_related('groups').all()
+        return qs
 
     def can_read(self, obj):
         return obj and any(self.user in grp.read_role for grp in obj.groups.all()) or self.user in obj.inventory.read_role
