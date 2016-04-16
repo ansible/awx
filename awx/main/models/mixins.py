@@ -22,7 +22,7 @@ class ResourceMixin(models.Model):
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
 
-        MyModel.accessible_objects(user, {'read': True}).filter(name__istartswith='bar');
+        MyModel.accessible_objects(user, 'read_role').filter(name__istartswith='bar');
 
         NOTE: This should only be used for list type things. If you have a
         specific resource you want to check permissions on, it is more
