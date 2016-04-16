@@ -361,7 +361,7 @@ class HostAccess(BaseAccess):
     def get_queryset(self):
         inv_qs = Inventory.accessible_objects(self.user, 'read_role')
         group_qs = Group.accessible_objects(self.user, 'read_role')
-        qs = (self.model.filter(inventory=inv_qs) | self.model.filter(group=group_qs)).distinct()
+        qs = (self.model.objects.filter(inventory=inv_qs) | self.model.objects.filter(groups=group_qs)).distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'last_job__job_template',
                                'last_job_host_summary__job')

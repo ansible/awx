@@ -1025,7 +1025,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Update permission to allow other user to run ad hoc commands.  Can
         # only see his own ad hoc commands (because of credential permission).
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.execute_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.adhoc_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)
