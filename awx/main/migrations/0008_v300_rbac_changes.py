@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterIndexTogether(
             name='roleancestorentry',
-            index_together=set([('descendent', 'content_type_id', 'role_field'), ('ancestor', 'content_type_id', 'role_field')]),
+            index_together=set([('ancestor', 'content_type_id', 'object_id'), ('ancestor', 'content_type_id', 'role_field')]),
         ),
 
         migrations.AddField(

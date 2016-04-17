@@ -360,8 +360,8 @@ class RoleAncestorEntry(models.Model):
         verbose_name_plural = _('role_ancestors')
         db_table = 'main_rbac_role_ancestors'
         index_together = [
-            ("ancestor", "content_type_id", "role_field"),
-            ("descendent", "content_type_id", "role_field"),
+            ("ancestor", "content_type_id", "object_id"),     # used by get_roles_on_resource
+            ("ancestor", "content_type_id", "role_field"),    # used by accessible_objects
         ]
 
     descendent      = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
