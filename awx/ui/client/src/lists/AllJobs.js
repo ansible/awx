@@ -33,21 +33,22 @@ export default
                 searchOptions: [
                 ]
             },
-            name: {
-                key: true,
-                label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
-                ngClick: "viewJobDetails(all_job)",
-                defaultSearchField: true,
-                awToolTip: "{{ all_job.name | sanitize }}",
-                dataPlacement: 'top'
-            },
             id: {
+                key: true,
+                desc: true,
                 label: 'ID',
                 ngClick:"viewJobDetails(all_job)",
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ all_job.status_tip }}",
+                dataPlacement: 'top'
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
+                ngClick: "viewJobDetails(all_job)",
+                defaultSearchField: true,
+                awToolTip: "{{ all_job.name | sanitize }}",
                 dataPlacement: 'top'
             },
             type: {
