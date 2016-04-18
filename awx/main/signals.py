@@ -106,13 +106,14 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         if inventory is not None:
             update_inventory_computed_fields.delay(inventory.id, True)
 
-def rebuild_role_ancestor_list(reverse, model, instance, pk_set, **kwargs):
+def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
     'When a role parent is added or removed, update our role hierarchy list'
-    if reverse:
-        for id in pk_set:
-            model.objects.get(id=id).rebuild_role_ancestor_list()
-    else:
-        instance.rebuild_role_ancestor_list()
+    if action in ['post_add', 'post_remove', 'post_clear']:
+        if reverse:
+            for id in pk_set:
+                model.objects.get(id=id).rebuild_role_ancestor_list()
+        else:
+            instance.rebuild_role_ancestor_list()
 
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
