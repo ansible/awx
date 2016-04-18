@@ -42,7 +42,7 @@ export default function() {
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
                 awRequiredWhen: {
-                    variable: "organizationrequired",
+                    reqExpression: "organizationrequired",
                     init: "true"
                 }
             },
@@ -60,7 +60,7 @@ export default function() {
                 label: 'Username',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "email_required",
+                    reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
@@ -76,7 +76,7 @@ export default function() {
                 label: 'Host',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "email_required",
+                    reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
@@ -86,7 +86,7 @@ export default function() {
                 label: 'Sender Email',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "email_required",
+                    reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
@@ -102,7 +102,7 @@ export default function() {
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
-                    variable: "email_required",
+                    reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
@@ -113,7 +113,7 @@ export default function() {
                 type: 'sensitive',
                 hasShowInputButton: true,
                 awRequiredWhen: {
-                    variable: "password_required" ,
+                    reqExpression: "password_required" ,
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
@@ -133,7 +133,7 @@ export default function() {
                 'class': "input-small",
                 min: 0,
                 awRequiredWhen: {
-                    variable: "port_required",
+                    reqExpression: "port_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc'",
@@ -149,7 +149,7 @@ export default function() {
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
-                    variable: "channel_required",
+                    reqExpression: "channel_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'slack' || notification_type.value == 'hipchat'",
@@ -160,7 +160,7 @@ export default function() {
                 type: 'sensitive',
                 hasShowInputButton: true,
                 awRequiredWhen: {
-                    variable: "token_required",
+                    reqExpression: "token_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'slack' || notification_type.value == 'pagerduty' || notification_type.value == 'hipchat'",
@@ -171,7 +171,7 @@ export default function() {
                 type: 'sensitive',
                 hasShowInputButton: true,
                 awRequiredWhen: {
-                    variable: "twilio_required",
+                    reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
@@ -181,7 +181,7 @@ export default function() {
                 label: 'Source Phone Number',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "twilio_required",
+                    reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
@@ -197,7 +197,7 @@ export default function() {
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
-                    variable: "twilio_required",
+                    reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
@@ -207,7 +207,7 @@ export default function() {
                 label: 'Account SID',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "twilio_required",
+                    reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
@@ -217,7 +217,7 @@ export default function() {
                 label: 'Pagerduty subdomain',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "pagerduty_required",
+                    reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
@@ -227,7 +227,7 @@ export default function() {
                 label: 'API Service/Integration Key',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "pagerduty_required",
+                    reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
@@ -237,7 +237,7 @@ export default function() {
                 label: 'Client Identifier',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "pagerduty_required",
+                    reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
@@ -247,7 +247,7 @@ export default function() {
                 label: 'Label to be shown with notification',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "hipchat_required",
+                    reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
@@ -257,7 +257,7 @@ export default function() {
                 label: 'API URL (e.g: https://mycompany.hiptchat.com)',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "hipchat_required",
+                    reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
@@ -267,7 +267,7 @@ export default function() {
                 label: 'Notification Color',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "hipchat_required",
+                    reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
@@ -277,7 +277,7 @@ export default function() {
                 label: 'Notify Channel',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "hipchat_required",
+                    reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
@@ -287,7 +287,7 @@ export default function() {
                 label: 'Target URL',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "webhook_required",
+                    reqExpression: "webhook_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'webhook' ",
@@ -297,7 +297,7 @@ export default function() {
                 label: 'HTTP Headers',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "webhook_required",
+                    reqExpression: "webhook_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'webhook' ",
@@ -307,7 +307,7 @@ export default function() {
                 label: 'IRC Server Address',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "irc_required",
+                    reqExpression: "irc_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
@@ -317,7 +317,7 @@ export default function() {
                 label: 'IRC Nick',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "irc_required",
+                    reqExpression: "irc_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
@@ -327,7 +327,7 @@ export default function() {
                 label: 'Destination Channels or Users',
                 type: 'text',
                 awRequiredWhen: {
-                    variable: "irc_required",
+                    reqExpression: "irc_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
