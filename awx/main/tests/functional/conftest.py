@@ -28,6 +28,7 @@ from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate
 from awx.main.models.inventory import (
     Group,
+    Inventory,
 )
 from awx.main.models.organization import (
     Organization,
@@ -174,6 +175,16 @@ def machine_credential():
 @pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
+
+@pytest.fixture
+def inventory_factory(organization):
+    def factory(name, org=organization):
+        try:
+            inv = Inventory.objects.get(name=name, organization=org)
+        except Inventory.DoesNotExist:
+            inv = Inventory.objects.create(name=name, organization=org)
+        return inv
+    return factory
 
 @pytest.fixture
 def label(organization):

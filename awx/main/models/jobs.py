@@ -463,9 +463,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.project.organization)))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.project.organization)))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.project.organization)))
+        if self.project is not None and self.project.organization is not None:
+            error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.project.organization)))
+            success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.project.organization)))
+            any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.project.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
 class Job(UnifiedJob, JobOptions):
@@ -533,14 +534,13 @@ class Job(UnifiedJob, JobOptions):
     def is_blocked_by(self, obj):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if type(obj) == Job:
-            if obj.job_template is not None and obj.job_template == self.job_template:
-                if obj.launch_type == 'callback' and self.launch_type == 'callback':
-                    if obj.limit != self.limit:
-                        # NOTE: This is overriden by api/views.py.JobTemplateCallback.post() check
-                        # which limits job runs on a JT to one per host in a callback scenario
-                        # I'm leaving this here in case we change that
+            if obj.job_template is not None and obj.inventory is not None:
+                if obj.job_template == self.job_template and \
+                   obj.inventory == self.inventory:
+                    if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
+                       obj.limit != self.limit:
                         return False
-                return True
+                    return True
             return False
         if type(obj) == InventoryUpdate:
             if self.inventory == obj.inventory_source.inventory:
