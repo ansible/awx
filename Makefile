@@ -245,7 +245,19 @@ rebase:
 push:
 	git push origin master
 
-virtualenv:
+virtualenv: virtualenv_ansible virtualenv_tower
+
+virtualenv_ansible:
+	if [ "$(VENV_BASE)" ]; then \
+		if [ ! -d "$(VENV_BASE)" ]; then \
+			mkdir $(VENV_BASE); \
+		fi; \
+		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/ansible; \
+		fi; \
+	fi
+
+virtualenv_tower:
 	if [ "$(VENV_BASE)" ]; then \
 		if [ ! -d "$(VENV_BASE)" ]; then \
 			mkdir $(VENV_BASE); \
@@ -253,12 +265,9 @@ virtualenv:
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages $(VENV_BASE)/tower; \
 		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/ansible; \
-		fi; \
 	fi
 
-requirements_ansible:
+requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
 		$(VENV_BASE)/ansible/bin/pip install -U pip==8.1.1; \
@@ -269,7 +278,7 @@ requirements_ansible:
 	fi
 
 # Install third-party requirements needed for Tower's environment.
-requirements_tower:
+requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 		$(VENV_BASE)/tower/bin/pip install -U pip==8.1.1; \
@@ -295,7 +304,7 @@ requirements_jenkins:
 	fi && \
 	$(NPM_BIN) install csslint jshint
 
-requirements: virtualenv requirements_ansible requirements_tower
+requirements: requirements_ansible requirements_tower
 
 requirements_dev: requirements requirements_tower_dev
 
