@@ -13,6 +13,9 @@ export default {
     templateUrl: templateUrl('system-tracking/system-tracking'),
     params: {hosts: null, inventory: null},
     reloadOnSearch: false,
+    ncyBreadcrumb: {
+        label: "SYSTEM TRACKING"
+    },
     resolve: {
             moduleOptions:
                 [   'getModuleOptions',
