@@ -360,9 +360,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
         any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
         # Get Organization Notifiers
-        error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.organization)))
-        success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.organization)))
-        any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.organization)))
+        if self.organization is not None:
+            error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.organization)))
+            success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.organization)))
+            any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.organization)))
         return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
 
     def get_absolute_url(self):
