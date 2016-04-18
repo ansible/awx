@@ -234,6 +234,9 @@ class Role(CommonModelNameNotUnique):
         #
         #
 
+        if len(role_ids_to_rebuild) == 0:
+            return
+
         cursor = connection.cursor()
         loop_ct = 0
 
