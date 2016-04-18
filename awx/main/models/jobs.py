@@ -531,14 +531,13 @@ class Job(UnifiedJob, JobOptions):
     def is_blocked_by(self, obj):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if type(obj) == Job:
-            if obj.job_template is not None and obj.job_template == self.job_template:
-                if obj.launch_type == 'callback' and self.launch_type == 'callback':
-                    if obj.limit != self.limit:
-                        # NOTE: This is overriden by api/views.py.JobTemplateCallback.post() check
-                        # which limits job runs on a JT to one per host in a callback scenario
-                        # I'm leaving this here in case we change that
+            if obj.job_template is not None and obj.inventory is not None:
+                if obj.job_template == self.job_template and \
+                   obj.inventory == self.inventory:
+                    if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
+                       obj.limit != self.limit:
                         return False
-                return True
+                    return True
             return False
         if type(obj) == InventoryUpdate:
             if self.inventory == obj.inventory_source.inventory:
