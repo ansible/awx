@@ -673,7 +673,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
             admins=Count('admin_role__members', distinct=True)
         ).values('users', 'admins')
 
-        if direct_counts.count() == 0:
+        if not direct_counts:
             return full_context
 
         org_counts = direct_counts[0]
