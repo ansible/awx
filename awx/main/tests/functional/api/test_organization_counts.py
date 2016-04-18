@@ -3,25 +3,68 @@ import pytest
 from django.core.urlresolvers import reverse
 
 @pytest.fixture
-def resourced_organization(organization, project, team, inventory, user):
-    admin_user = user('test-admin', True)
-    member_user = user('org-member')
+def organization_resource_creator(organization, user):
+    def rf(users, admins, job_templates, projects, inventories, teams):
 
-    # Associate one resource of every type with the organization
-    organization.member_role.members.add(member_user)
-    organization.admin_role.members.add(admin_user)
-    # organization.teams.create(name='org-team')
-    # inventory = organization.inventories.create(name="associated-inv")
-    project.jobtemplates.create(name="test-jt",
-                                description="test-job-template-desc",
-                                inventory=inventory,
-                                playbook="test_playbook.yml")
+        # Associate one resource of every type with the organization
+        for i in range(users):
+            member_user = user('org-member %s' % i)
+            organization.member_role.members.add(member_user)
+        for i in range(admins):
+            admin_user = user('org-admin %s' % i)
+            organization.admin_role.members.add(admin_user)
+        for i in range(teams):
+            organization.teams.create(name='org-team %s' % i)
+        for i in range(inventories):
+            inventory = organization.inventories.create(name="associated-inv %s" % i)
+        for i in range(projects):
+            organization.projects.create(name="test-proj %s" % i,
+                                         description="test-proj-desc",
+                                         scm_type="git",
+                                         scm_url="https://github.com/jlaska/ansible-playbooks")
+        # Mix up the inventories and projects used by the job templates
+        i_proj = 0
+        i_inv = 0
+        for i in range(job_templates):
+            project = organization.projects.all()[i_proj]
+            inventory = organization.inventories.all()[i_inv]
+            project.jobtemplates.create(name="test-jt %s" % i,
+                                        description="test-job-template-desc",
+                                        inventory=inventory,
+                                        playbook="test_playbook.yml")
+            i_proj += 1
+            i_inv += 1
+            if i_proj >= organization.projects.count():
+                i_proj = 0
+            if i_inv >= organization.inventories.count():
+                i_inv = 0
 
-    return organization
+        return organization
+    return rf
 
+COUNTS_PRIMES = {
+    'users': 11,
+    'admins': 5,
+    'job_templates': 3,
+    'projects': 3,
+    'inventories': 7,
+    'teams': 5
+}
+COUNTS_ZEROS = {
+    'users': 0,
+    'admins': 0,
+    'job_templates': 0,
+    'projects': 0,
+    'inventories': 0,
+    'teams': 0
+}
+
+@pytest.fixture
+def resourced_organization(organization_resource_creator):
+    return organization_resource_creator(**COUNTS_PRIMES)
 
 @pytest.mark.django_db
-def test_org_counts_detail_view(resourced_organization, user, get):
+def test_org_counts_detail_admin(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
     external_admin = user('admin', True)
     response = get(reverse('api:organization_detail',
@@ -29,46 +72,49 @@ def test_org_counts_detail_view(resourced_organization, user, get):
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
+    assert counts == COUNTS_PRIMES
+
+@pytest.mark.django_db
+def test_org_counts_detail_member(resourced_organization, user, get):
+    # Check that a non-admin org member can only see users / admin in detail view
+    member_user = resourced_organization.member_role.members.get(username='org-member 1')
+    response = get(reverse('api:organization_detail',
+                   args=[resourced_organization.pk]), member_user)
+    assert response.status_code == 200
+
+    counts = response.data['summary_fields']['related_field_counts']
     assert counts == {
-        'users': 1,
-        'admins': 1,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 1,
-        'teams': 1
+        'users': COUNTS_PRIMES['users'],  # Policy is that members can see other users and admins
+        'admins': COUNTS_PRIMES['admins'],
+        'job_templates': 0,
+        'projects': 0,
+        'inventories': 0,
+        'teams': 0
     }
 
 @pytest.mark.django_db
-@pytest.mark.skipif("True") # XXX: This needs to be implemented
-def test_org_counts_admin(resourced_organization, user, get):
+def test_org_counts_list_admin(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
     external_admin = user('admin', True)
     response = get(reverse('api:organization_list', args=[]), external_admin)
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
-    assert counts == {
-        'users': 1,
-        'admins': 1,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 1,
-        'teams': 1
-    }
+    assert counts == COUNTS_PRIMES
 
 @pytest.mark.django_db
-def test_org_counts_member(resourced_organization, get):
+def test_org_counts_list_member(resourced_organization, user, get):
     # Check that a non-admin user can only see the full project and
     #   user count, consistent with the RBAC rules
-    member_user = resourced_organization.member_role.members.get(username='org-member')
+    member_user = resourced_organization.member_role.members.get(username='org-member 1')
     response = get(reverse('api:organization_list', args=[]), member_user)
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
 
     assert counts == {
-        'users': 1,  # Policy is that members can see other users and admins
-        'admins': 1,
+        'users': COUNTS_PRIMES['users'],  # Policy is that members can see other users and admins
+        'admins': COUNTS_PRIMES['admins'],
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
@@ -86,17 +132,9 @@ def test_new_org_zero_counts(user, post):
 
     new_org_list = post_response.render().data
     counts_dict = new_org_list['summary_fields']['related_field_counts']
-    assert counts_dict == {
-        'users': 0,
-        'admins': 0,
-        'job_templates': 0,
-        'projects': 0,
-        'inventories': 0,
-        'teams': 0
-    }
+    assert counts_dict == COUNTS_ZEROS
 
 @pytest.mark.django_db
-@pytest.mark.skipif("True") # XXX: This needs to be implemented
 def test_two_organizations(resourced_organization, organizations, user, get):
     # Check correct results for two organizations are returned
     external_admin = user('admin', True)
@@ -111,26 +149,10 @@ def test_two_organizations(resourced_organization, organizations, user, get):
         org_id = response.data['results'][i]['id']
         counts[org_id] = response.data['results'][i]['summary_fields']['related_field_counts']
 
-    assert counts[org_id_full] == {
-        'users': 1,
-        'admins': 1,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 1,
-        'teams': 1
-    }
-    assert counts[org_id_zero] == {
-        'users': 0,
-        'admins': 0,
-        'job_templates': 0,
-        'projects': 0,
-        'inventories': 0,
-        'teams': 0
-    }
+    assert counts[org_id_full] == COUNTS_PRIMES
+    assert counts[org_id_zero] == COUNTS_ZEROS
 
-@pytest.mark.skip(reason="resolution planned for after RBAC merge")
 @pytest.mark.django_db
-@pytest.mark.skipif("True") # XXX: This needs to be implemented
 def test_JT_associated_with_project(organizations, project, user, get):
     # Check that adding a project to an organization gets the project's JT
     #  included in the organization's JT count
@@ -163,4 +185,3 @@ def test_JT_associated_with_project(organizations, project, user, get):
         'inventories': 0,
         'teams': 0
     }
-
