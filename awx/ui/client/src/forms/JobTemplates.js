@@ -58,7 +58,10 @@ export default
                     sourceModel: 'inventory',
                     sourceField: 'name',
                     ngClick: 'lookUpInventory()',
-                    awRequiredWhen: {variable: "inventoryrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: "inventoryrequired",
+                        init: "true"
+                    },
                     column: 1,
                     awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
                     dataTitle: 'Inventory',
@@ -71,7 +74,10 @@ export default
                     sourceModel: 'project',
                     sourceField: 'name',
                     ngClick: 'lookUpProject()',
-                    awRequiredWhen: {variable: "projectrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: "projectrequired",
+                        init: "true"
+                    },
                     column: 1,
                     awPopOver: "<p>Select the project containing the playbook you want this job to execute.</p>",
                     dataTitle: 'Project',
@@ -83,7 +89,10 @@ export default
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
                     id: 'playbook-select',
-                    awRequiredWhen: {variable: "playbookrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: "playbookrequired", 
+                        init: "true"
+                    },
                     column: 1,
                     awPopOver: "<p>Select the playbook to be executed by this job.</p>",
                     dataTitle: 'Playbook',

@@ -42,7 +42,7 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "organizationrequired",
+                        reqExpression: "organizationrequired",
                         init: "true"
                     }
                 },

@@ -46,7 +46,7 @@ export default
                     label: 'Username',
                     type: 'text',
                     awRequiredWhen: {
-                        variable: "not_ldap_user",
+                        reqExpression: "not_ldap_user",
                         init: true
                     },
                     autocomplete: false
@@ -61,7 +61,7 @@ export default
                     excludeMode: 'edit',
                     ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "orgrequired",
+                        reqExpression: "orgrequired",
                         init: true
                     }
                 },

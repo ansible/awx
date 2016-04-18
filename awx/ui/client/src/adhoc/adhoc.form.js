@@ -74,7 +74,7 @@ export default function() {
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 awRequiredWhen: {
-                    variable: 'credRequired',
+                    reqExpression: 'credRequired',
                     init: 'false'
                 }
             },

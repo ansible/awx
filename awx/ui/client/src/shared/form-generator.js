@@ -263,9 +263,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     var label, span;
                     if (Empty($(this).attr('aw-required-when'))) {
                         label = $(this).closest('.form-group').find('label').first();
-                        if ($(this).attr('type') === 'radio') {
-                            label = $(this).parent().parent().parent().find('label').first();
-                        }
                         if (label.length > 0) {
                             span = label.children('span');
                             if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
@@ -791,8 +788,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.awSurveyQuestion) ? "aw-survey-question" : "" ;
                             html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
-                            html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                                field.awRequiredWhen.variable + "\" " : "";
+                            if(field.awRequiredWhen) {
+                                html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                                html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
                             html += ">\n";
@@ -939,8 +938,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 html += "ng-disabled='" + _disabled + "'";
                             }
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
-                            html += (field.awRequiredWhen) ? "data-awrequired-init='" + field.awRequiredWhen.init + "' aw-required-when='" +
-                                field.awRequiredWhen.variable + "' " : "";
+                            if(field.awRequiredWhen) {
+                                html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                                html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_foo' " : "";
                             html += ">\n";
@@ -1050,8 +1051,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngRequired) ? "ng-required=\"" + field.ngRequired +"\"" : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
                         html += (field.awDropFile) ? "aw-drop-file " : "";
-                        html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                            field.awRequiredWhen.variable + "\" " : "";
+                        if(field.awRequiredWhen) {
+                            html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                            html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                        }
                         html += "aw-watch ></textarea>\n";
 
 
@@ -1089,8 +1092,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         //used for select2 combo boxes
                         html += (field.multiSelect) ? "multiple " : "";
                         html += (field.readonly) ? "disabled " : "";
-                        html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                            field.awRequiredWhen.variable + "\" " : "";
+                        if(field.awRequiredWhen) {
+                            html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                            html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                        }
                         html += ">\n";
                         if(!field.multiSelect){
                             html += "<option value=\"\">";
@@ -1147,8 +1152,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.readonly) ? "readonly " : "";
                         html += (field.integer) ? "integer " : "";
                         html += (field.disabled) ? "data-disabled=\"true\" " : "";
-                        html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                            field.awRequiredWhen.variable + "\" " : "";
+                        if(field.awRequiredWhen) {
+                            html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                            html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                        }
                         html += " >\n";
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
@@ -1332,8 +1339,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
-                        html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                            field.awRequiredWhen.variable + "\" " : "";
+                        if(field.awRequiredWhen) {
+                            html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                            html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                        }
                         html += " awlookup >\n";
                         html += "</div>\n";
                         // Add error messages
@@ -1383,26 +1392,26 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     tab, sectionShow, offset, width,ngDisabled, itm;
 
                 // title and exit button
-                html +=  "<div class=\"Form-header\">";
-                html += "<div class=\"Form-title ";
-                html += (this.form.titleClass) ? this.form.titleClass : "";
-                html += "\">";
-                html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
-                if(this.form.name === "user"){
-                    html+= "<span class=\"Form-title--is_superuser\" "+
-                        "ng-if=is_superuser>Admin</span>";
+                if(!(this.form.showHeader !== undefined && this.form.showHeader === false)) {
+                    html +=  "<div class=\"Form-header\">";
+                    html += "<div class=\"Form-title\">";
+                    html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
+                    if(this.form.name === "user"){
+                        html+= "<span class=\"Form-title--is_superuser\" "+
+                            "ng-if=is_superuser>Admin</span>";
+                    }
+                    html += "</div>\n";
+                    if(this.form.cancelButton !== undefined && this.form.cancelButton === false) {
+                        html += "<div class=\"Form-exitHolder\">";
+                        html += "</div>";
+                    } else {
+                        html += "<div class=\"Form-exitHolder\">";
+                        html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
+                        html += "<i class=\"fa fa-times-circle\"></i>";
+                        html += "</button></div>\n";
+                    }
+                        html += "</div>\n"; //end of Form-header
                 }
-                html += "</div>\n";
-                if(this.form.cancelButton !== undefined && this.form.cancelButton === false) {
-                    html += "<div class=\"Form-exitHolder\">";
-                    html += "</div>";
-                } else {
-                    html += "<div class=\"Form-exitHolder\">";
-                    html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
-                    html += "<i class=\"fa fa-times-circle\"></i>";
-                    html += "</button></div>\n";
-                }
-                html += "</div>\n"; //end of Form-header
 
                 if (!_.isEmpty(this.form.related)) {
                     var collection;

@@ -78,8 +78,8 @@ export default ['Rest', 'ProcessErrors', 'generateList',
                 }
                 if (parent_scope.mode === "add") {
                     if (parent_scope[sourceModel + "_field"].awRequiredWhen &&
-                        parent_scope[sourceModel + "_field"].awRequiredWhen.variable &&
-                        parent_scope[parent_scope[sourceModel + "_field"].awRequiredWhen.variable]) {
+                        parent_scope[sourceModel + "_field"].awRequiredWhen.reqExpression &&
+                        parent_scope.$eval(parent_scope[sourceModel + "_field"].awRequiredWhen.reqExpression)) {
                         return true;
                     } else if (parent_scope[sourceModel + "_field"].addRequired === true) {
                         return true;

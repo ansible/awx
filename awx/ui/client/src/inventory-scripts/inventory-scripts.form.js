@@ -36,7 +36,7 @@ export default function() {
                 label: 'Organization',
                 type: 'lookup',
                 awRequiredWhen: {
-                    variable: "orgrequired",
+                    reqExpression: "orgrequired",
                     init: true
                 },
                 sourceModel: 'organization',

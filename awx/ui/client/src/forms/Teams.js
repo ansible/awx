@@ -42,7 +42,7 @@ export default
                     editRequire: false,
                     ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "orgrequired",
+                        reqExpression: "orgrequired",
                         init: true
                     }
                 }
