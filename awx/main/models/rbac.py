@@ -304,9 +304,14 @@ class Role(CommonModelNameNotUnique):
             if insert_ct == 0 and delete_ct == 0:
                 break
 
-            role_ids_to_rebuild = Role.objects.distinct() \
-                                      .filter(id__in=role_ids_to_rebuild, children__id__isnull=False) \
-                                      .values_list('children__id', flat=True)
+            new_role_ids_to_rebuild = set()
+            for ids in split_ids_for_sqlite(role_ids_to_rebuild):
+                sql_params['ids'] = ','.join(str(x) for x in ids)
+                new_role_ids_to_rebuild.update(set(Role.objects.distinct()
+                                                   .filter(id__in=ids, children__id__isnull=False)
+                                                   .values_list('children__id', flat=True)))
+            role_ids_to_rebuild = list(new_role_ids_to_rebuild)
+
 
 
 
