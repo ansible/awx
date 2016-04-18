@@ -1,7 +1,7 @@
+@import "../../shared/branding/colors.default.less";
 .SystemTrackingContainer {
     display: flex;
     flex-direction: column;
-
     min-height: 85vh;
     > * {
         flex: 0 0 auto;
@@ -10,5 +10,28 @@
     &-main {
         flex: 1 0 auto;
         align-self: stretch;
+    }
+
+    .DatePicker {
+        flex: none;
+    }
+
+    .DatePicker-input {
+        width: 100%;
+        flex: none;
+    }
+
+    .DatePicker-icon {
+        i {
+            color: @default-icon;
+        }
+    }
+
+    .SystemTrackingContainer-main {
+        margin-top: 20px;
+    }
+
+    .FactDatum--divergent {
+        background-color: @default-err;
     }
 }

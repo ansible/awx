@@ -50,6 +50,8 @@ function InventoriesManage($log, $scope, $rootScope, $location,
         // you need this so that the event doesn't bubble to the watcher above
         // for the host list
         e.stopPropagation();
+        var trackingButton = angular.element(document.querySelector('.system-tracking'));
+        trackingButton.html('SYSTEM TRACKING');
         if (selection.length === 0) {
             $scope.hostsSelected = false;
         } else if (selection.length === 1) {
