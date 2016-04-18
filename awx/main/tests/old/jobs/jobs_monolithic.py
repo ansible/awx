@@ -798,7 +798,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(jobs_qs.count(), 0)
 
         # Create the job itself.
-        result = self.post(url, data, expect=202, remote_addr=host_ip)
+        result = self.post(url, data, expect=201, remote_addr=host_ip)
 
         # Establish that we got back what we expect, and made the changes
         # that we expect.
@@ -813,7 +813,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(job.hosts.all()[0], host)
 
         # Create the job itself using URL-encoded form data instead of JSON.
-        result = self.post(url, data, expect=202, remote_addr=host_ip, data_type='form')
+        result = self.post(url, data, expect=201, remote_addr=host_ip, data_type='form')
 
         # Establish that we got back what we expect, and made the changes
         # that we expect.
@@ -829,7 +829,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Run the callback job again with extra vars and verify their presence
         data.update(dict(extra_vars=dict(key="value")))
-        result = self.post(url, data, expect=202, remote_addr=host_ip)
+        result = self.post(url, data, expect=201, remote_addr=host_ip)
         jobs_qs = job_template.jobs.filter(launch_type='callback').order_by('-pk')
         job = jobs_qs[0]
         self.assertTrue("key" in job.extra_vars)
@@ -878,7 +878,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 break
         self.assertTrue(host)
         self.assertEqual(jobs_qs.count(), 3)
-        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.post(url, data, expect=201, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 4)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
@@ -903,7 +903,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 break
         self.assertTrue(host)
         self.assertEqual(jobs_qs.count(), 4)
-        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.post(url, data, expect=201, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 5)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
@@ -917,7 +917,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         host = host_qs[0]
         host_ip = host.variables_dict['ansible_ssh_host']
         self.assertEqual(jobs_qs.count(), 5)
-        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.post(url, data, expect=201, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 6)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
@@ -951,7 +951,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 break
         self.assertTrue(host)
         self.assertEqual(jobs_qs.count(), 6)
-        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.post(url, data, expect=201, remote_addr=host_ip)
         self.assertEqual(jobs_qs.count(), 7)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
@@ -1087,7 +1087,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 response = self.get(url)
                 self.assertTrue(response['can_start'])
                 self.assertFalse(response['passwords_needed_to_start'])
-                response = self.post(url, {}, expect=202)
+                response = self.post(url, {}, expect=201)
                 job = Job.objects.get(pk=job.pk)
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
@@ -1146,14 +1146,14 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             # should return, and should be able to launch template without error.
             response = self.get(launch_url)
             self.assertFalse(response['survey_enabled'])
-            self.post(launch_url, {}, expect=202)
+            self.post(launch_url, {}, expect=201)
             # Now post a survey spec and check that the answer is set in the
             # job's extra vars.
             self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
             response = self.get(launch_url)
             self.assertTrue(response['survey_enabled'])
             self.assertTrue('favorite_color' in response['variables_needed_to_start'])
-            response = self.post(launch_url, dict(extra_vars=dict(favorite_color="green")), expect=202)
+            response = self.post(launch_url, dict(extra_vars=dict(favorite_color="green")), expect=201)
             job = Job.objects.get(pk=response["job"])
             job_extra = json.loads(job.extra_vars)
             self.assertTrue("favorite_color" in job_extra)
@@ -1187,7 +1187,7 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
         with self.current_user(self.user_sue):
             response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
             # Just the required answer should work
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo")), expect=201)
             # Short answer but requires a long answer
             self.post(launch_url, dict(extra_vars=dict(long_answer='a', reqd_answer="foo")), expect=400)
             # Long answer but requires a short answer
@@ -1199,9 +1199,9 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             # Integer that's too big
             self.post(launch_url, dict(extra_vars=dict(int_answer=10, reqd_answer="foo")), expect=400)
             # Integer that's just riiiiight
-            self.post(launch_url, dict(extra_vars=dict(int_answer=3, reqd_answer="foo")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(int_answer=3, reqd_answer="foo")), expect=201)
             # Integer bigger than min with no max defined
-            self.post(launch_url, dict(extra_vars=dict(int_answer_no_max=3, reqd_answer="foo")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(int_answer_no_max=3, reqd_answer="foo")), expect=201)
             # Integer answer that's the wrong type
             self.post(launch_url, dict(extra_vars=dict(int_answer="test", reqd_answer="foo")), expect=400)
             # Float that's too big
@@ -1209,7 +1209,7 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             # Float that's too small
             self.post(launch_url, dict(extra_vars=dict(float_answer=1.995, reqd_answer="foo")), expect=400)
             # float that's just riiiiight
-            self.post(launch_url, dict(extra_vars=dict(float_answer=2.01, reqd_answer="foo")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(float_answer=2.01, reqd_answer="foo")), expect=201)
             # float answer that's the wrong type
             self.post(launch_url, dict(extra_vars=dict(float_answer="test", reqd_answer="foo")), expect=400)
             # Wrong choice in single choice
@@ -1219,11 +1219,11 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             # Wrong type for multi choicen
             self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice="two")), expect=400)
             # Right choice in single choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="two")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="two")), expect=201)
             # Right choices in multi choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["one", "two"])), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["one", "two"])), expect=201)
             # Nested json
-            self.post(launch_url, dict(extra_vars=dict(json_answer=dict(test="val", num=1), reqd_answer="foo")), expect=202)
+            self.post(launch_url, dict(extra_vars=dict(json_answer=dict(test="val", num=1), reqd_answer="foo")), expect=201)
 
         # Bob can access and update the survey because he's an org-admin
         with self.current_user(self.user_bob):
