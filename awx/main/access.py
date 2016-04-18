@@ -212,11 +212,18 @@ class UserAccess(BaseAccess):
         if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.exists():
             return User.objects.all()
 
-        viewable_users_set = set()
-        viewable_users_set.update(self.user.roles.values_list('ancestors__members__id', flat=True))
-        viewable_users_set.update(self.user.roles.values_list('descendents__members__id', flat=True))
+        return (
+            User.objects.filter(
+                pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members')
+            ) |
+            User.objects.filter(
+                pk=self.user.id
+            ) |
+            User.objects.filter(
+                pk__in=Role.objects.filter(singleton_name__in = [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
+            )
+        ).distinct()
 
-        return User.objects.filter(id__in=viewable_users_set)
 
     def can_add(self, data):
         if data is not None and 'is_superuser' in data:
@@ -576,11 +583,11 @@ class TeamAccess(BaseAccess):
     '''
     I can see a team when:
      - I'm a superuser.
-     - I'm an admin of the team's organization.
+     - I'm an admin of the team
      - I'm a member of that team.
     I can create/change a team when:
      - I'm a superuser.
-     - I'm an org admin for the team's org.
+     - I'm an admin for the team
     '''
 
     model = Team
@@ -604,7 +611,7 @@ class TeamAccess(BaseAccess):
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             raise PermissionDenied('Unable to change organization on a team')
-        return self.user in obj.organization.admin_role
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         return self.can_change(obj, None)

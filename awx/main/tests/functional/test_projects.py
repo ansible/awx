@@ -11,8 +11,10 @@ from awx.main.models import Project
 #
 
 @pytest.mark.django_db(transaction=True)
-def test_user_project_list(get, project_factory, admin, alice, bob):
+def test_user_project_list(get, project_factory, organization, admin, alice, bob):
     'List of projects a user has access to, filtered by projects you can also see'
+
+    organization.member_role.members.add(alice, bob)
 
     alice_project = project_factory('alice project')
     alice_project.admin_role.members.add(alice)

@@ -284,7 +284,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Read access to this project', parent_role=b'member_role', to='main.Role', role_name=b'Project Read Access', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Read access to this project', parent_role=[b'auditor_role', b'scm_update_role', b'member_role'], to='main.Role', role_name=b'Project Read Access', null=b'True'),
         ),
         migrations.AddField(
             model_name='role',
