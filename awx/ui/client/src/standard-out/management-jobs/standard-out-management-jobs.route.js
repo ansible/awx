@@ -22,7 +22,7 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        managementJobSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+        managementJobSocket: [function() {
             // TODO: determine whether or not we have socket support for management job standard out
             return true;
         }]

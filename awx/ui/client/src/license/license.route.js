@@ -16,4 +16,4 @@ export default {
 		parent: 'setup',
 		label: 'LICENSE'
 	}
-}
+};

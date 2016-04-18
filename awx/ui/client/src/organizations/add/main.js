@@ -5,7 +5,6 @@
  *************************************************/
 
 import route from './organizations-add.route';
-import controller from './organizations-add.controller';
 
 export default
     angular.module('organizationsAdd', [])

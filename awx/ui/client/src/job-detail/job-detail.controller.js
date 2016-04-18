@@ -42,7 +42,7 @@ export default
             scope.parseType = 'yaml';
             scope.previousTaskFailed = false;
             $scope.stdoutFullScreen = false;
-        
+
             scope.$watch('job_status', function(job_status) {
                 if (job_status && job_status.explanation && job_status.explanation.split(":")[0] === "Previous Task Failed") {
                     scope.previousTaskFailed = true;
@@ -248,14 +248,14 @@ export default
                         })
                         .error(function(data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + url + '. GET returned: ' + status });
+                                msg: 'Call failed. GET returned: ' + status });
                         });
                     $log.debug('Job completed!');
                     $log.debug(scope.jobData);
                 }
                 else {
                     api_complete = true;  //trigger events to start processing
-                    UpdateDOM({ scope: scope})
+                    UpdateDOM({ scope: scope});
                 }
             });
 
@@ -274,10 +274,11 @@ export default
                         var params = {
                             parent: task.id,
                             event__startswith: 'runner',
+                            page_size: scope.hostResultsMaxRows
                         };
                         JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
-                                var event, status, status_text, item, msg;
+                                var event, status, item, msg;
                                 if (data.results.length > 0) {
                                     lastEventId =  data.results[0].id;
                                 }
@@ -305,7 +306,7 @@ export default
                             event_id: play.id,
                             page_size: scope.tasksMaxRows,
                             order: 'id'
-                        }
+                        };
                         JobDetailService.getJobTasks(scope.job.id, params)
                             .success(function(data) {
                                 scope.next_tasks = data.next;
@@ -395,7 +396,7 @@ export default
                             })
                             .error(function(data) {
                                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Call to ' + url + '. GET returned: ' + status });
+                                    msg: 'Call failed. GET returned: ' + status });
                             });
                     } else {
                         scope.$emit('InitialLoadComplete');
@@ -413,7 +414,7 @@ export default
                 var params = {
                     order_by: 'id'
                 };
-                if (scope.job.summary_fields.unified_job_template.unified_job_type == 'job'){
+                if (scope.job.summary_fields.unified_job_template.unified_job_type === 'job'){
                     JobDetailService.getJobPlays(scope.job.id, params)
                     .success( function(data) {
                         scope.next_plays = data.next;
@@ -839,12 +840,12 @@ export default
                         page_size: scope.hostResultsMaxRows,
                         order: 'host_name,counter',
                         host_name__icontains: scope.search_host_name                    
-                    }
+                    };
                     if (scope.search_host_status === 'failed'){
                         params.failed = true;
                     }
                     JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                        scope.hostResults = JobDetailService.processHostEvents(res.results)
+                        scope.hostResults = JobDetailService.processHostEvents(res.results);
                         scope.hostResultsLoading = false;
                     });
                 }
@@ -1093,7 +1094,7 @@ export default
             // Click binding for the expand/collapse button on the standard out log
             $scope.toggleStdoutFullscreen = function() {
                 $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
-            }
+            };
 
             scope.editSchedule = function() {
             	// We need to get the schedule's ID out of the related links

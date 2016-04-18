@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName, ParseTypeChange, ParseVariableString) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
 
     ClearScope();
 
@@ -164,10 +164,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
     // Click binding for the expand/collapse button on the standard out log
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
-    }
+    };
 
     getJobDetails();
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName', 'ParseTypeChange', 'ParseVariableString'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];

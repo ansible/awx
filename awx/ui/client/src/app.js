@@ -50,15 +50,11 @@ import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
-import lookUpHelper from './lookup/main';
 import JobTemplates from './job-templates/main';
 import search from './search/main';
-import {ScheduleEditController} from './controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
 import OrganizationsAdd from './organizations/add/organizations-add.controller';
-import OrganizationsEdit from './organizations/edit/organizations-edit.controller';
-import {InventoriesAdd, InventoriesEdit, InventoriesList, InventoriesManage} from './inventories/main';
 import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
@@ -199,7 +195,7 @@ var tower = angular.module('Tower', [
     'pendolytics',
     'ui.router',
     'ncy-angular-breadcrumb',
-    'scheduler',
+    scheduler.name,
     'ApiModelHelper',
     'ActivityStreamHelper',
     'dndLists'
@@ -917,7 +913,7 @@ var tower = angular.module('Tower', [
                     activateTab();
                 });
 
-                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
                     // catch license expiration notifications immediately after user logs in, redirect
                     if (fromState.name === 'signIn'){
                         CheckLicense.notify();

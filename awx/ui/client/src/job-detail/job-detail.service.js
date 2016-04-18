@@ -1,7 +1,6 @@
 export default
     ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', function($rootScope, Rest, GetBasePath, ProcessErrors){
         return {
-
         stringifyParams: function(params){
             return  _.reduce(params, (result, value, key) => {
                 return result + key + '=' + value + '&'}, '');
@@ -14,15 +13,15 @@ export default
             var result = $.extend(true, {}, data);
             // configure fields to ignore
             var ignored = [
-            'event_data', 
-            'related', 
-            'summary_fields', 
-            'url', 
+            'event_data',
+            'related',
+            'summary_fields',
+            'url',
             'ansible_facts',
             ];
 
             // remove ignored properties
-            Object.keys(result).forEach(function(key, index){
+            Object.keys(result).forEach(function(key){
                 if (ignored.indexOf(key) > -1) {
                     delete result[key];
                 }
@@ -31,7 +30,7 @@ export default
             // flatten Ansible's passed-through response
             try{
                 result.event_data = {};
-                Object.keys(data.event_data.res).forEach(function(key, index){
+                Object.keys(data.event_data.res).forEach(function(key){
                     if (ignored.indexOf(key) > -1) {
                         return;
                     }

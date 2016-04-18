@@ -12,5 +12,5 @@ export default
 				var onChange = scope.$eval(attrs.fileOnChange);
 				el.bind('change', onChange);
 			}
-		}
+		};
 	}];

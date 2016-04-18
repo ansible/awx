@@ -263,26 +263,21 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit',
-    'PaginateInit', 'generateList', 'FormatDate', 'BuildDescription', 'FixUrl', 'BuildUrl',
-    'ShowDetail', 'setStreamHeight', 'Find', 'Store',
-    function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight,
-        Find, Store) {
+.factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
+    'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 'PaginateInit',
+    'generateList', 'FormatDate', 'BuildDescription', 'FixUrl', 'BuildUrl',
+    'ShowDetail', 'setStreamHeight',
+    function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
+        Wait, StreamList, SearchInit, PaginateInit, GenerateList, FormatDate,
+        BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight) {
         return function (params) {
 
             var list = StreamList,
                 defaultUrl = GetBasePath('activity_stream'),
                 view = GenerateList,
-                base = $location.path().replace(/^\//, '').split('/')[0],
                 parent_scope = params.scope,
                 scope = parent_scope.$new(),
-                search_iterator = params.search_iterator, // use to get correct current_search_params from local store
-                PreviousSearchParams = (search_iterator) ? Store(search_iterator + '_current_search_params') : Store('CurrentSearchParams'),
-                inventory_name = (params && params.inventory_name) ? params.inventory_name : null,
-                onClose = params.onClose, // optional callback to $emit after AS closes
-                url = (params && params.url) ? params.url : null,
-                type, paths, itm;
+                url = (params && params.url) ? params.url : null;
 
             $rootScope.flashMessage = null;
 

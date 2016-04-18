@@ -21,7 +21,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         // Open up a socket for events depending on the type of job
         function openSockets() {
-            if ($state.current.name == 'jobDetail') {
+            if ($state.current.name === 'jobDetail') {
                        $log.debug("socket watching on job_events-" + job_id);
                        $rootScope.event_socket.on("job_events-" + job_id, function() {
                            $log.debug("socket fired on job_events-" + job_id);
@@ -30,7 +30,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                            }
                        });
                    }
-            if ($state.current.name == 'adHocJobStdout') {
+            if ($state.current.name === 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
                 $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
                     $log.debug("socket fired on ad_hoc_command_events-" + job_id);
@@ -50,7 +50,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         }
         $scope.removeLoadStdout = $scope.$on('LoadStdout', function() {
             if (loaded_sections.length === 0) {
-                loadStdout()
+                loadStdout();
             }
             else if (live_event_processing) {
                 getNextSection();
@@ -80,7 +80,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         // This watcher fires off loadStdout() when the endpoint becomes
         // available.
         $scope.$watch('stdoutEndpoint', function(newVal, oldVal) {
-            if(newVal && newVal != oldVal) {
+            if(newVal && newVal !== oldVal) {
                 // Fire off the server call
                 loadStdout();
             }
@@ -112,7 +112,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
                 });
-        };
+        }
 
         function getNextSection() {
             // get the next range of data from the API

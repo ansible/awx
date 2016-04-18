@@ -6,9 +6,9 @@
 
  export default
  	[ 'Wait', '$state', '$scope', 'jobTemplateCopyService',
-   'ProcessErrors', 'GetBasePath',
+   'ProcessErrors', '$rootScope',
  	function(Wait, $state, $scope, jobTemplateCopyService,
-   ProcessErrors, GetBasePath){
+   ProcessErrors, $rootScope){
   	// GETs the job_template to copy
  		// POSTs a new job_template
  		// routes to JobTemplates.edit when finished
@@ -24,9 +24,9 @@
  				})
   			.error(function(res, status){
           ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
-             msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
+             msg: 'Call failed. Return status: '+ status});
         });
  		};
  		init();
- 	}	
+ 	}
  	];

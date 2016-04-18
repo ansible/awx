@@ -34,8 +34,7 @@ export default
                 };
                 getManagementJobs();
                 var scope = $rootScope.$new(),
-                    parent_scope = scope,
-                    list = managementJobsListObject;
+                    parent_scope = scope;
                 scope.cleanupJob = true;
 
 

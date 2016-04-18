@@ -54,7 +54,7 @@ export default
 
                 scope.userInteractionSelect = function() {
                     scope.$emit("selectedOrDeselected", scope.decoratedItem);
-                }
+                };
 
             }
         };
