@@ -238,7 +238,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='team',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'A member of this team', parent_role=b'admin_role', to='main.Role', role_name=b'Team Member', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'A member of this team', to='main.Role', role_name=b'Team Member', null=b'True'),
         ),
 
         migrations.AddField(
@@ -294,7 +294,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='team',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Can view this team', parent_role=[b'auditor_role', b'member_role'], to='main.Role', role_name=b'Read', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Can view this team', parent_role=[b'admin_role', b'auditor_role', b'member_role'], to='main.Role', role_name=b'Read', null=b'True'),
         ),
         migrations.AlterField(
             model_name='credential',
