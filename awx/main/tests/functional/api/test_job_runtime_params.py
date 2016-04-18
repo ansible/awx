@@ -95,7 +95,6 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     admin_user = user('admin', True)
 
     job_template.inventory.execute_role.members.add(admin_user)
-    job_template.inventory.save()
 
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     runtime_data, admin_user)
@@ -186,15 +185,12 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
 def test_job_launch_fails_without_inventory_access(deploy_jobtemplate, machine_credential, post, user):
     deploy_jobtemplate.ask_inventory_on_launch = True
     deploy_jobtemplate.credential = machine_credential
+    deploy_jobtemplate.save()
     common_user = user('test-user', False)
     deploy_jobtemplate.execute_role.members.add(common_user)
-    deploy_jobtemplate.save()
     deploy_jobtemplate.inventory.use_role.members.add(common_user)
-    deploy_jobtemplate.inventory.save()
     deploy_jobtemplate.project.member_role.members.add(common_user)
-    deploy_jobtemplate.project.save()
     deploy_jobtemplate.credential.use_role.members.add(common_user)
-    deploy_jobtemplate.credential.save()
 
     # Assure that the base job template can be launched to begin with
     response = post(reverse('api:job_template_launch',
