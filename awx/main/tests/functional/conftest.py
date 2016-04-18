@@ -168,6 +168,10 @@ def credential():
     return Credential.objects.create(kind='aws', name='test-cred')
 
 @pytest.fixture
+def machine_credential():
+    return Credential.objects.create(name='machine-cred', kind='ssh', username='test_user', password='pas4word')
+
+@pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
 

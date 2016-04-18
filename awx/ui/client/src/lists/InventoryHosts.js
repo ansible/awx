@@ -91,6 +91,7 @@ export default
                 dataPlacement: 'top',
                 awFeature: 'system_tracking',
                 ngDisabled: 'systemTrackingDisabled',
+                actionClass: 'btn List-buttonDefault system-tracking',
                 ngShow: 'hostsSelected'
             },
             refresh: {

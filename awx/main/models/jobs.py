@@ -53,7 +53,9 @@ class JobOptions(BaseModel):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
+        blank=True,
         null=True,
+        default=None,
         on_delete=models.SET_NULL,
     )
     project = models.ForeignKey(
@@ -194,6 +196,26 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         blank=True,
         default=False,
     )
+    ask_limit_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_tags_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_job_type_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_inventory_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_credential_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
 
     survey_enabled = models.BooleanField(
         default=False,
@@ -236,6 +258,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels',]
 
+    def clean(self):
+        if self.job_type == 'scan' and (self.inventory is None or self.ask_inventory_on_launch):
+            raise ValidationError('Scan jobs must be assigned a fixed inventory')
+        if (not self.ask_inventory_on_launch) and self.inventory is None:
+            raise ValidationError('Job Template must either have an inventory or allow prompting for inventory')
+        if (not self.ask_credential_on_launch) and self.credential is None:
+            raise ValidationError('Job Template must either have a credential or allow prompting for credential')
+        return super(JobTemplate, self).clean()
+
     def create_job(self, **kwargs):
         '''
         Create a new job based on this template.
@@ -250,7 +281,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start) and not len(self.variables_needed_to_start))
+        return bool(self.credential and not len(self.passwords_needed_to_start) and
+                    not len(self.variables_needed_to_start) and
+                    self.inventory)
 
     @property
     def variables_needed_to_start(self):
@@ -364,6 +397,50 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         extra_vars.update(kwargs_extra_vars)
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
+
+    def _ask_for_vars_dict(self):
+        return dict(
+            extra_vars=self.ask_variables_on_launch,
+            limit=self.ask_limit_on_launch,
+            job_tags=self.ask_tags_on_launch,
+            skip_tags=self.ask_tags_on_launch,
+            job_type=self.ask_job_type_on_launch,
+            inventory=self.ask_inventory_on_launch,
+            credential=self.ask_credential_on_launch
+        )
+
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
+        # Sort the runtime fields allowed and disallowed by job template
+        ignored_fields = {}
+        prompted_fields = {}
+
+        ask_for_vars_dict = self._ask_for_vars_dict()
+
+        for field in ask_for_vars_dict:
+            if field in kwargs:
+                if field == 'extra_vars':
+                    prompted_fields[field] = {}
+                    ignored_fields[field] = {}
+                if ask_for_vars_dict[field]:
+                    prompted_fields[field] = kwargs[field]
+                else:
+                    if field == 'extra_vars' and self.survey_enabled:
+                        # Accept vars defined in the survey and no others
+                        survey_vars = [question['variable'] for question in self.survey_spec['spec']]
+                        for key in kwargs[field]:
+                            if key in survey_vars:
+                                prompted_fields[field][key] = kwargs[field][key]
+                            else:
+                                ignored_fields[field][key] = kwargs[field][key]
+                    else:
+                        ignored_fields[field] = kwargs[field]
+
+        # Special case to ignore inventory if it is a scan job
+        if prompted_fields.get('job_type', None) == 'scan' or self.job_type == 'scan':
+            if 'inventory' in prompted_fields:
+                ignored_fields['inventory'] = prompted_fields.pop('inventory')
+
+        return prompted_fields, ignored_fields
 
     @property
     def cache_timeout_blocked(self):
