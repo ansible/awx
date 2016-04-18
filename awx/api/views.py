@@ -2082,17 +2082,23 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     def update_raw_data(self, data):
         obj = self.get_object()
-        extra_vars = data.get('extra_vars') or {}
+        extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for p in obj.passwords_needed_to_start:
                 data[p] = u''
-            if obj.credential:
-                data.pop('credential', None)
-            else:
-                data['credential'] = None
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
-        data['extra_vars'] = extra_vars
+            if extra_vars:
+                data['extra_vars'] = extra_vars
+            ask_for_vars_dict = obj._ask_for_vars_dict()
+            ask_for_vars_dict.pop('extra_vars')
+            for field in ask_for_vars_dict:
+                if not ask_for_vars_dict[field]:
+                    data.pop(field, None)
+                elif field == 'inventory' or field == 'credential':
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                else:
+                    data[field] = getattr(obj, field)
         return data
 
     def post(self, request, *args, **kwargs):
@@ -2102,21 +2108,27 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
         if 'credential' not in request.data and 'credential_id' in request.data:
             request.data['credential'] = request.data['credential_id']
+        if 'inventory' not in request.data and 'inventory_id' in request.data:
+            request.data['inventory'] = request.data['inventory_id']
 
         passwords = {}
         serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # At this point, a credential is gauranteed to exist at serializer.instance.credential
-        if not request.user.can_access(Credential, 'read', serializer.instance.credential):
-            raise PermissionDenied()
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
-        kv = {
-            'credential': serializer.instance.credential.pk,
-        }
-        if 'extra_vars' in request.data:
-            kv['extra_vars'] = request.data['extra_vars']
+        if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
+            new_credential = Credential.objects.get(pk=prompted_fields['credential'])
+            if not request.user.can_access(Credential, 'use', new_credential):
+                raise PermissionDenied()
+
+        if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
+            new_inventory = Inventory.objects.get(pk=prompted_fields['inventory'])
+            if not request.user.can_access(Inventory, 'use', new_inventory):
+                raise PermissionDenied()
+
+        kv = prompted_fields
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
@@ -2126,8 +2138,11 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             new_job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = dict(job=new_job.id)
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            data = OrderedDict()
+            data['ignored_fields'] = ignored_fields
+            data.update(JobSerializer(new_job).to_representation(new_job))
+            data['job'] = new_job.id
+            return Response(data, status=status.HTTP_201_CREATED)
 
 class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
@@ -2411,7 +2426,7 @@ class JobTemplateCallback(GenericAPIView):
 
         # Return the location of the new job.
         headers = {'Location': job.get_absolute_url()}
-        return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+        return Response(status=status.HTTP_201_CREATED, headers=headers)
 
 
 class JobTemplateJobsList(SubListCreateAPIView):
@@ -2459,7 +2474,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         new_job = obj.create_unified_job(**request.data)
         new_job.signal_start(**request.data)
         data = dict(system_job=new_job.id)
-        return Response(data, status=status.HTTP_202_ACCEPTED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 

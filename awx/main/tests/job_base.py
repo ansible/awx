@@ -503,6 +503,7 @@ class BaseJobTestMixin(BaseTestMixin):
             playbook=self.proj_dev.playbooks[0],
             host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
+            ask_credential_on_launch=True,
         )
         # self.job_eng_run = self.jt_eng_run.create_job(
         #     created_by=self.user_sue,
