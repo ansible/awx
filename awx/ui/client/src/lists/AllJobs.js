@@ -35,6 +35,7 @@ export default
             },
             id: {
                 key: true,
+                desc: true,
                 label: 'ID',
                 ngClick:"viewJobDetails(all_job)",
                 searchType: 'int',
@@ -43,7 +44,6 @@ export default
                 dataPlacement: 'top'
             },
             name: {
-                key: true,
                 label: 'Name',
                 columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(all_job)",
