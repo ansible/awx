@@ -673,6 +673,9 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
             admins=Count('admin_role__members', distinct=True)
         ).values('users', 'admins')
 
+        if direct_counts.count() == 0:
+            return full_context
+
         org_counts = direct_counts[0]
         org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
