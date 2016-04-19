@@ -120,7 +120,7 @@ class ImplicitRoleField(models.ForeignKey):
 
         pre_save.connect(self._pre_save, cls, True, dispatch_uid='implicit-role-pre-save')
         post_save.connect(self._post_save, cls, True, dispatch_uid='implicit-role-post-save')
-        post_delete.connect(self._post_delete, cls, True)
+        post_delete.connect(self._post_delete, cls, True, dispatch_uid='implicit-role-post-delete')
         add_lazy_relation(cls, self, "self", self.bind_m2m_changed)
 
     def bind_m2m_changed(self, _self, _role_class, cls):
@@ -246,9 +246,11 @@ class ImplicitRoleField(models.ForeignKey):
         return parent_roles
 
     def _post_delete(self, instance, *args, **kwargs):
-        this_role = getattr(instance, self.name)
-        children = [c for c in this_role.children.all()]
-        this_role.delete()
-        with batch_role_ancestor_rebuilding():
-            for child in children:
-                child.rebuild_role_ancestor_list()
+        role_ids = []
+        for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+            role_ids.append(getattr(instance, implicit_role_field.name + '_id'))
+
+        Role_ = get_current_apps().get_model('main', 'Role')
+        child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
+        Role_.objects.filter(id__in=role_ids).delete()
+        Role_._simultaneous_ancestry_rebuild(child_ids)
