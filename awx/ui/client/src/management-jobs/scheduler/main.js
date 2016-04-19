@@ -35,12 +35,15 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService){
                         return FeaturesService.get();
-                    }]
+                    }],
+                    JobTemplateExtraVars: function(){
+                        return null;
+                    }
                 } 
             });
             $stateExtender.addState({
                 name: 'managementJobSchedules.edit',
-                route: '/add',
+                route: '/edit/:schedule_id',
                 templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
                 controller: 'managementJobEditController',
                 resolve: {

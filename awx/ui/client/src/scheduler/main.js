@@ -40,7 +40,7 @@ export default
                         Rest.setUrl(defaultUrl);
                         return Rest.get().then(function(res){ 
                             // handle unescaped newlines
-                            return JSON.parse(JSON.stringify(res.data.extra_vars))
+                            return JSON.parse(JSON.stringify(res.data.extra_vars));
                         });
                      }]
                 }
@@ -64,7 +64,10 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }]
+                    }],
+                    JobTemplateExtraVars: function(){
+                        return null;
+                    }
                 }
             });
             $stateExtender.addState({
@@ -75,7 +78,10 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }]
+                    }],
+                        JobTemplateExtraVars: function(){
+                        return null;
+                    }
                 }
             });
             $stateExtender.addState({
