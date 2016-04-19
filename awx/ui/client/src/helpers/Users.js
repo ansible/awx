@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
      /**
  * @ngdoc function
  * @name helpers.function:Users
@@ -30,12 +30,12 @@ export default
                     UserForm.fields.email.readonly = false;
                     UserForm.fields.email.editRequired = true;
                     UserForm.fields.organization.awRequiredWhen = {
-                        variable: "orgrequired",
+                        reqExpression: "orgrequired",
                         init: true
                     };
                     UserForm.fields.organization.readonly = false;
                     UserForm.fields.username.awRequiredWhen = {
-                        variable: "not_ldap_user",
+                        reqExpression: "not_ldap_user",
                         init: true
                     };
                     UserForm.fields.username.readonly = false;

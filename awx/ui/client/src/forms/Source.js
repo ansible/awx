@@ -35,7 +35,7 @@ export default
                     ngShow: "source && source.value == 'file'",
                     type: 'text',
                     awRequiredWhen: {
-                        variable: "sourcePathRequired",
+                        reqExpression: "sourcePathRequired",
                         init: "false"
                     }
                 },
@@ -47,7 +47,7 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
                     awRequiredWhen: {
-                        variable: "cloudCredentialRequired",
+                        reqExpression: "cloudCredentialRequired",
                         init: "false"
                     }
                 },

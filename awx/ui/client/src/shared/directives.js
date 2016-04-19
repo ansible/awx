@@ -328,9 +328,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
     })
 
     //
-    // awRequiredWhen: { variable: "<variable to watch for true|false>", init:"true|false" }
+    // awRequiredWhen: { reqExpression: "<expression to watch for true|false>", init: "true|false" }
     //
-    // Make a field required conditionally using a scope variable. If the scope variable is true, the
+    // Make a field required conditionally using an expression. If the expression evaluates to true, the
     // field will be required. Otherwise, the required attribute will be removed.
     //
     .directive('awRequiredWhen', function() {
@@ -338,47 +338,35 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
 
-                function checkIt () {
+                function updateRequired () {
+                    var isRequired = scope.$eval(attrs.awRequiredWhen);
+
                     var viewValue = elm.val(), label, validity = true;
-                    if ( scope[attrs.awRequiredWhen] && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
+                    label = $(elm).closest('.form-group').find('label').first();
+                    if ( isRequired && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
                         $(elm).attr('required','required');
-                        if ($(elm).hasClass('lookup') || $(elm).hasClass('ui-spinner-input')) {
-                            $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
-                        }
-                        else {
-                            $(elm).parent().parent().find('label').first().addClass('prepend-asterisk');
-                        }
+                        $(label).addClass('prepend-asterisk');
                     }
-                    else if (!scope[attrs.awRequiredWhen]) {
+                    else if (!isRequired) {
                         elm.removeAttr('required');
-                        if ($(elm).hasClass('lookup')) {
-                            label = $(elm).parent().parent().parent().find('label').first();
-                            label.removeClass('prepend-asterisk');
-                        }
-                        else {
-                            $(elm).parent().parent().find('label').first().removeClass('prepend-asterisk');
-                        }
+                        $(label).removeClass('prepend-asterisk');
                     }
-                    if (scope[attrs.awRequiredWhen] && (viewValue === undefined || viewValue === null || viewValue === '')) {
+                    if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
                         validity = false;
                     }
                     ctrl.$setValidity('required', validity);
                 }
 
+                scope.$watchGroup([attrs.awRequiredWhen, $(elm).attr('name')], function() {
+                    // watch for the aw-required-when expression to change value
+                    updateRequired();
+                });
+
                 if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
+                    // We already set a watcher on the attribute above so no need to call updateRequired() in here
                     scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
-                    checkIt();
                 }
 
-                scope.$watch(attrs.awRequiredWhen, function() {
-                    // watch for the aw-required-when expression to change value
-                    checkIt();
-                });
-
-                scope.$watch($(elm).attr('name'), function() {
-                    // watch for the field to change value
-                    checkIt();
-                });
             }
         };
     })

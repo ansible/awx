@@ -103,7 +103,7 @@ export default
                     type: 'text',
                     ngShow: "kind.value == 'aws'",
                     awRequiredWhen: {
-                        variable: "aws_required",
+                        reqExpression: "aws_required",
                         init: false
                     },
                     autocomplete: false,
@@ -115,7 +115,7 @@ export default
                     type: 'sensitive',
                     ngShow: "kind.value == 'aws'",
                     awRequiredWhen: {
-                        variable: "aws_required",
+                        reqExpression: "aws_required",
                         init: false
                     },
                     autocomplete: false,
@@ -149,7 +149,7 @@ export default
                     dataContainer: "body",
                     autocomplete: false,
                     awRequiredWhen: {
-                        variable: 'host_required',
+                        reqExpression: 'host_required',
                         init: false
                     },
                     subForm: 'credentialSubForm'
@@ -160,7 +160,7 @@ export default
                     ngShow: "kind.value && kind.value !== 'aws' && " +
                             "kind.value !== 'gce' && kind.value!=='azure'",
                     awRequiredWhen: {
-                        variable: 'username_required',
+                        reqExpression: 'username_required',
                         init: false
                     },
                     autocomplete: false,
@@ -171,7 +171,7 @@ export default
                     type: 'email',
                     ngShow: "kind.value === 'gce'",
                     awRequiredWhen: {
-                        variable: 'email_required',
+                        reqExpression: 'email_required',
                         init: false
                     },
                     autocomplete: false,
@@ -186,7 +186,7 @@ export default
                     type: 'text',
                     ngShow: "kind.value == 'azure'",
                     awRequiredWhen: {
-                        variable: 'subscription_required',
+                        reqExpression: 'subscription_required',
                         init: false
                     },
                     addRequired: false,
@@ -203,7 +203,7 @@ export default
                     type: 'sensitive',
                     ngShow: "kind.value == 'rax'",
                     awRequiredWhen: {
-                        variable: "rackspace_required",
+                        reqExpression: "rackspace_required",
                         init: false
                     },
                     autocomplete: false,
@@ -223,7 +223,7 @@ export default
                     autocomplete: false,
                     hasShowInputButton: true,
                     awRequiredWhen: {
-                        variable: "password_required",
+                        reqExpression: "password_required",
                         init: false
                     },
                     subForm: "credentialSubForm"
@@ -245,7 +245,7 @@ export default
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm' || " +
                             "kind.value == 'gce' || kind.value == 'azure'",
                     awRequiredWhen: {
-                        variable: 'key_required',
+                        reqExpression: 'key_required',
                         init: true
                     },
                     class: 'Form-textAreaLabel',
@@ -319,7 +319,7 @@ export default
                     addRequired: false,
                     editRequired: false,
                     awRequiredWhen: {
-                        variable: 'project_required',
+                        reqExpression: 'project_required',
                         init: false
                     },
                     subForm: 'credentialSubForm'

@@ -45,7 +45,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
                 awRequiredWhen: {
-                    variable: "organizationrequired",
+                    reqExpression: "organizationrequired",
                     init: "true"
                 },
                 awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
@@ -95,7 +95,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 id: 'local-path-select',
                 ngOptions: 'path.label for path in project_local_paths',
                 awRequiredWhen: {
-                    variable: "pathRequired",
+                    reqExpression: "pathRequired",
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
@@ -111,7 +111,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 awRequiredWhen: {
-                    variable: "scmRequired",
+                    reqExpression: "scmRequired",
                     init: false
                 },
                 subForm: 'sourceSubForm',
