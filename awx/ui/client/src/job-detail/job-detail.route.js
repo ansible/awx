@@ -38,19 +38,9 @@ export default {
                     endpoint: "jobs"
             });
             job_socket.init();
-                // returns should really be providing $rootScope.job_socket
-                // otherwise, we have to inject the entire $rootScope into the controller
             return job_socket;
         }]
     },
-    views: {
-        '': {
-            templateUrl: templateUrl('job-detail/job-detail'),
-            controller: 'JobDetailController',
-        },
-        'host-summary@jobDetail': {
-            templateUrl: templateUrl('job-detail/host-summary/host-summary'),
-            controller: HostSummaryController
-        }
-    }
+    templateUrl: templateUrl('job-detail/job-detail'),
+    controller: 'JobDetailController'
 };

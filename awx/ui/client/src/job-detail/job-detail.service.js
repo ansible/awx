@@ -213,9 +213,11 @@ export default
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });                 
         },
-        getJob: function(id){
-            var url = GetBasePath('jobs');
-            url = url + id;
+        getJob: function(params){
+            var url = GetBasePath('unified_jobs') + '?';
+            Object.keys(params).forEach(function(key, index) {
+                url = url + '&' + key + '=' + params[key];
+            });
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){

@@ -8,14 +8,13 @@
     ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'jobSocket', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, jobSocket, DrawGraph){
 
         var page_size = 200;
-
         $scope.loading = $scope.hosts.length > 0 ? false : true;
         $scope.filter = 'all';
         $scope.search = null;
 
-        var buildTooltips = function(hosts){
+        var buildGraph = function(hosts){
             //  status waterfall: unreachable > failed > changed > ok > skipped
-            var count, grammar, text = {};
+            var count
             count = {
                 ok : _.filter(hosts, function(o){
                     return o.failures === 0 && o.changed === 0 && o.ok > 0;
@@ -33,23 +32,7 @@
                     return o.changed > 0;
                 })       
             };
-            var grammar = function(n, status){
-                var dict = {
-                    0: 'No host events were ',
-                    1: ' host event was ',
-                    2: ' host events were '
-                };
-                if (n >= 2){
-                    return n + dict[2] + status;
-                }
-                else{
-                    return n !== 0 ? n + dict[n] + status : dict[n] + status;
-                }
-            };
-            _.forIn(count, function(value, key){
-                text[key] = grammar(value.length, key);
-            });
-            return {count, text}
+            return count
         };
         var socketListener = function(){
             // emitted by the API in the same function used to persist host summary data
@@ -67,7 +50,27 @@
                 }
             });
         };
-
+        $scope.buildTooltip = function(n, status){
+            var grammar = function(n, status){
+                var dict = {
+                    0: 'No host events were ',
+                    1: ' host event was ',
+                    2: ' host events were '
+                };
+                if (n >= 2){
+                    return n + dict[2] + status;
+                }
+                else{
+                    return n !== 0 ? n + dict[n] + status : dict[n] + status;
+                }
+            };
+            /*
+            _.forIn(count, function(value, key){
+                text[key] = grammar(value.length, key);
+            });
+            */
+            return grammar(n, status)
+        };
         $scope.getNextPage = function(){
             if ($scope.next){
                 JobDetailService.getNextPage($scope.next).success(function(res){
@@ -117,8 +120,7 @@
         };
 
         $scope.$watchCollection('hosts', function(curr, prev){
-            $scope.tooltips = buildTooltips(curr);
-            DrawGraph({count: $scope.tooltips.count, resize:true});
+            DrawGraph({count: buildGraph(curr), resize:true});
         });
 
         var init = function(){
@@ -129,7 +131,7 @@
                 $scope.next = res.next;
                 Wait('stop');
             });
-            JobDetailService.getJob($stateParams.id)
+            JobDetailService.getJob({id: $stateParams.id})
             .success(function(res){
                 $scope.status = status;
             });

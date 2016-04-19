@@ -413,7 +413,8 @@ export default
                 var params = {
                     order_by: 'id'
                 };
-                JobDetailService.getJobPlays(scope.job.id, params)
+                if (scope.job.summary_fields.unified_job_template.unified_job_type == 'job'){
+                    JobDetailService.getJobPlays(scope.job.id, params)
                     .success( function(data) {
                         scope.next_plays = data.next;
                         if (data.results.length > 0) {
@@ -498,6 +499,7 @@ export default
                         }
                         scope.$emit('LoadTasks', events_url);
                     });
+                }
             });
             
 
@@ -513,9 +515,10 @@ export default
                 scope.hostResultsLoading = true;
 
                 // Load the job record
-                JobDetailService.getJob(job_id)
-                    .success(function(data) {
-                        var i;
+                JobDetailService.getJob({id: job_id})
+                    .success(function(res) {
+                        var i, 
+                            data = res.results[0];
                         scope.job = data;
                         scope.job_template_name = data.name;
                         scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
