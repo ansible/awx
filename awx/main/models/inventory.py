@@ -750,8 +750,8 @@ class InventorySourceOptions(BaseModel):
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
-        ('foreman', _('Satellite 6')),
-        ('cloudforms', _('CloudForms')),
+        ('foreman', _('Red Hat Satellite 6')),
+        ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
     ]
