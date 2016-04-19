@@ -35,10 +35,7 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService){
                         return FeaturesService.get();
-                    }],
-                    JobTemplateExtraVars: function(){
-                        return null;
-                    }
+                    }]
                 } 
             });
             $stateExtender.addState({

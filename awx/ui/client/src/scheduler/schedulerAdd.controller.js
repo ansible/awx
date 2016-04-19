@@ -1,4 +1,4 @@
-export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'JobTemplateExtraVars', function($compile, $state, $stateParams, AddSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, JobTemplateExtraVars) {
+export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath', 'Rest', function($compile, $state, $stateParams, AddSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest) {
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
@@ -46,14 +46,20 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
     };
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
-    if ($state.current.name !== ('managementJobSchedules.add' || 'managementJobSchedules.edit')){
+    if ($state.current.name === 'jobTemplateSchedules.add'){
         $scope.parseType = 'yaml';
-        $scope.extraVars = JobTemplateExtraVars === '' || JobTemplateExtraVars === null  ? '---' :  JobTemplateExtraVars;
-        ParseTypeChange({ 
-            scope: $scope, 
-            variable: 'extraVars', 
-            parse_variable: 'parseType',
-            field_id: 'SchedulerForm-extraVars' 
+        var defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
+        Rest.setUrl(defaultUrl);
+        Rest.get().then(function(res){ 
+            // sanitize
+            var data = JSON.parse(JSON.stringify(res.data.extra_vars));
+            $scope.extraVars = data === '' ? '---' :  data;
+            ParseTypeChange({ 
+                scope: $scope, 
+                variable: 'extraVars', 
+                parse_variable: 'parseType',
+                field_id: 'SchedulerForm-extraVars' 
+            });
         });
         $scope.$watch('extraVars', function(){
             if ($scope.parseType === 'yaml'){
@@ -70,7 +76,16 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
             }
         });
     }
-
+    else if ($state.current.name === 'projectSchedules.add'){
+        $scope.extraVars = '---';
+        $scope.parseType = 'yaml';
+        ParseTypeChange({ 
+                scope: $scope, 
+                variable: 'extraVars', 
+                parse_variable: 'parseType',
+                field_id: 'SchedulerForm-extraVars' 
+            });
+    }
 
     AddSchedule({
         scope: $scope,

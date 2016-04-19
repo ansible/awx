@@ -34,15 +34,7 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }],
-                    JobTemplateExtraVars: ['Rest', 'GetBasePath', 'ToJSON', '$stateParams', function(Rest, GetBasePath, ToJSON, $stateParams) {
-                        var defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
-                        Rest.setUrl(defaultUrl);
-                        return Rest.get().then(function(res){ 
-                            // handle unescaped newlines
-                            return JSON.parse(JSON.stringify(res.data.extra_vars));
-                        });
-                     }]
+                    }]
                 }
             });
             $stateExtender.addState({
@@ -64,10 +56,7 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }],
-                    JobTemplateExtraVars: function(){
-                        return null;
-                    }
+                    }]
                 }
             });
             $stateExtender.addState({
@@ -78,10 +67,7 @@ export default
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {
                         return FeaturesService.get();
-                    }],
-                        JobTemplateExtraVars: function(){
-                        return null;
-                    }
+                    }]
                 }
             });
             $stateExtender.addState({
