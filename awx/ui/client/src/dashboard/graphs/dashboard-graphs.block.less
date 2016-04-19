@@ -14,60 +14,20 @@
 
 .DashboardGraphs-headerSection{
     display: flex;
-    // align-items: baseline;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: flex-start;
 }
 
-.DashboardGraphs-tab {
-    color: @btn-txt;
-    background-color: @btn-bg;
-    font-size: 12px;
-    border: 1px solid @btn-bord;
-    height: 30px;
-    border-radius: 5px;
-    margin-right: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    padding-top: 5px;
-    transition: background-color 0.2s;
-    text-transform: uppercase;
-    text-align: center;
+.DashboardGraphs-headerText {
+    flex: 1;
+    margin: 0px;
+    font-size: 14px;
+    font-weight: bold;
+    color: @default-interface-txt;
     white-space: nowrap;
-}
-
-.DashboardGraphs-tab--firstTab {
-    width: 90px;
-}
-
-.DashboardGraphs-tab--lastTab {
-    width:100px;
     margin-right: auto;
-}
-
-.DashboardGraphs-tab:hover {
-    color: @btn-txt;
-    background-color: @btn-bg-hov;
-    cursor: pointer;
-}
-
-.DashboardGraphs-tab:active {
-    color: @btn-txt-sel;
-    background-color: @btn-bg-sel;
-    cursor: pointer;
-}
-
-.DashboardGraphs-tab:focus {
-    color: @btn-txt-sel;
-}
-
-.DashboardGraphs-tab.is-selected {
-    color: @btn-txt-sel;
-    background-color: @btn-bg-sel;
-    border-color: @btn-bord-sel;
 }
 
 .DashboardGraphs-graphSection {
@@ -217,12 +177,4 @@
 
 .DashboardGraphs-statusFilterIcon{
     padding-right: 5px;
-}
-
-.DashboardGraphs-hostStatusLabel--successful{
-    text-anchor: start !important;
-}
-
-.DashboardGraphs-hostStatusLabel--failed{
-    text-anchor: end !important;
 }
