@@ -2,6 +2,7 @@ import pytest
 import datetime
 
 from django.apps import apps
+from django.conf import settings
 
 from awx.main.models.inventory import Host
 from awx.main.models.fact import Fact
@@ -14,6 +15,7 @@ from awx.fact.models.fact import FactVersion, FactHost
 def micro_to_milli(micro):
     return micro - (((int)(micro / 1000)) * 1000)
 
+@pytest.mark.skipif(not getattr(settings, 'MONGO_DB', None), reason="MongoDB not configured")
 @pytest.mark.django_db
 @pytest.mark.mongo_db
 def test_migrate_facts(inventories, hosts, hosts_mongo, fact_scans):
@@ -27,7 +29,7 @@ def test_migrate_facts(inventories, hosts, hosts_mongo, fact_scans):
     assert migrated_count == 24
     assert not_migrated_count == 0
 
-    
+
     for fact_mongo, fact_version in facts_known:
         host = Host.objects.get(inventory_id=fact_mongo.host.inventory_id, name=fact_mongo.host.hostname)
         t = fact_mongo.timestamp - datetime.timedelta(microseconds=micro_to_milli(fact_mongo.timestamp.microsecond))
@@ -36,6 +38,7 @@ def test_migrate_facts(inventories, hosts, hosts_mongo, fact_scans):
         assert len(fact) == 1
         assert fact[0] is not None
 
+@pytest.mark.skipif(not getattr(settings, 'MONGO_DB', None), reason="MongoDB not configured")
 @pytest.mark.django_db
 @pytest.mark.mongo_db
 def test_migrate_facts_hostname_does_not_exist(inventories, hosts, hosts_mongo, fact_scans):
@@ -60,7 +63,8 @@ def test_migrate_facts_hostname_does_not_exist(inventories, hosts, hosts_mongo, 
 
         assert len(fact) == 1
         assert fact[0] is not None
-   
+
+@pytest.mark.skipif(not getattr(settings, 'MONGO_DB', None), reason="MongoDB not configured")
 @pytest.mark.django_db
 @pytest.mark.mongo_db
 def test_drop_system_tracking_db(inventories, hosts, hosts_mongo, fact_scans):
@@ -73,7 +77,7 @@ def test_drop_system_tracking_db(inventories, hosts, hosts_mongo, fact_scans):
     assert FactHost.objects.all().count() > 0
 
     system_tracking.drop_system_tracking_db()
-  
+
     assert FactMongo.objects.all().count() == 0
     assert FactVersion.objects.all().count() == 0
     assert FactHost.objects.all().count() == 0
