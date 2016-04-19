@@ -116,9 +116,3 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando)
             assert Project.objects.filter(name='Project %d' % i, organization=organization).exists()
         else:
             assert not Project.objects.filter(name='Project %d' % i, organization=organization).exists()
-
-
-@pytest.mark.django_db(transaction=True)
-def test_cant_create_project_without_org(post, organization, org_admin, org_member, admin, rando):
-    assert post(reverse('api:project_list'), { 'name': 'Project foo', }, admin).status_code == 400
-    assert post(reverse('api:project_list'), { 'name': 'Project foo', 'organization': None}, admin).status_code == 400
