@@ -1,6 +1,7 @@
 import mock # noqa
 import pytest
 
+from django.db import transaction
 from django.core.urlresolvers import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 
@@ -266,7 +267,7 @@ def test_remove_user_to_role(post, admin, role):
     post(url, {'disassociate': True, 'id': admin.id}, admin)
     assert role.members.filter(id=admin.id).count() == 0
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
@@ -280,8 +281,8 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     assert joe in check_jobtemplate.execute_role
 
 
-@pytest.mark.django_db(transaction=True)
-def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemplate, user):
+@pytest.mark.django_db
+def test_org_admin_remove_user_from_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user with permissions to assign/revoke membership to a particular role can do so'
     org_admin = user('org-admin')
     joe = user('joe')
@@ -295,7 +296,7 @@ def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemp
     assert joe not in check_jobtemplate.execute_role
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')
@@ -304,13 +305,14 @@ def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemp
     assert rando not in check_jobtemplate.admin_role
     assert joe not in check_jobtemplate.execute_role
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, rando)
+    with transaction.atomic():
+        res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, rando)
     assert res.status_code == 403
 
     assert joe not in check_jobtemplate.execute_role
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobtemplate, user):
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')
@@ -320,7 +322,8 @@ def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobt
     assert rando not in check_jobtemplate.admin_role
     assert joe in check_jobtemplate.execute_role
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
+    with transaction.atomic():
+        res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
     assert res.status_code == 403
 
     assert joe in check_jobtemplate.execute_role
