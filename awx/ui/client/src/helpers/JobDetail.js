@@ -985,7 +985,7 @@ export default
                 .showLabels(true)
                 .showLegend(false)
                 .growOnHover(false)
-                //.labelThreshold(0)
+                .labelThreshold(0.01)
                 .tooltipContent(function(x, y) {
                     return '<p>'+x+'</p>'+ '<p>' +  Math.floor(y.replace(',','')) + ' HOSTS ' +  '</p>';
                 })

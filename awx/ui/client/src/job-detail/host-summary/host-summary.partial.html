@@ -16,7 +16,7 @@
                 ng-click="setFilter('all')"
                 class="JobDetail-tableToggle btn btn-xs" ng-class="{'btn-default': filter == 'failed', 'btn-primary': filter == 'all'}">All</button>
                 <button ng-click="setFilter('failed')"
-                ng-class="{'btn-default': filter == 'all', 'btn-primary': filter == 'failed'}" class="JobDetail-tableToggle btn btn-xs">Failed</button>
+                ng-class="{'btn-default': filter == 'all', 'btn-primary': filter == 'failed'}" ng-disabled='count.failures == 0' class="JobDetail-tableToggle btn btn-xs">Failed</button>
             </div>
         </div>
     </div>

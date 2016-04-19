@@ -14,7 +14,7 @@
 
         var buildGraph = function(hosts){
             //  status waterfall: unreachable > failed > changed > ok > skipped
-            var count
+            var count;
             count = {
                 ok : _.filter(hosts, function(o){
                     return o.failures === 0 && o.changed === 0 && o.ok > 0;
@@ -32,7 +32,7 @@
                     return o.changed > 0;
                 })       
             };
-            return count
+            return count;
         };
         var socketListener = function(){
             // emitted by the API in the same function used to persist host summary data
@@ -40,7 +40,7 @@
             jobSocket.on('summary_complete', function(data) {
                 // discard socket msgs we don't care about in this context
                 if ($stateParams.id == data['unified_job_id']){
-                    init()
+                    init();
                 }
             });
             // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py 
@@ -83,14 +83,14 @@
             }
         };
         $scope.search = function(){
-            Wait('start')
+            Wait('start');
             JobDetailService.getJobHostSummaries($stateParams.id, {
                 page_size: page_size,
                 host_name__icontains: $scope.searchTerm,
             }).success(function(res){
                 $scope.hosts = res.results;
                 $scope.next = res.next;
-                Wait('stop')
+                Wait('stop');
             })
         };
         $scope.setFilter = function(filter){
@@ -116,11 +116,12 @@
                     $scope.next = res.next;
                 });                
             }
-            var get = filter == 'all' ? getAll() : getFailed()
+            var get = filter == 'all' ? getAll() : getFailed();
         };
 
         $scope.$watchCollection('hosts', function(curr, prev){
-            DrawGraph({count: buildGraph(curr), resize:true});
+            $scope.count = buildGraph(curr);
+            DrawGraph({count: $scope.count, resize:true});
         });
 
         var init = function(){
@@ -133,7 +134,7 @@
             });
             JobDetailService.getJob({id: $stateParams.id})
             .success(function(res){
-                $scope.status = status;
+                $scope.status = res.results[0].status;
             });
         };
         socketListener();
