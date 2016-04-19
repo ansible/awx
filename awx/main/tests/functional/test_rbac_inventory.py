@@ -6,7 +6,7 @@ from awx.main.models import (
     Host,
     CustomInventoryScript,
 )
-from awx.main.access import InventoryAccess
+from awx.main.access import InventoryAccess, HostAccess
 from django.apps import apps
 
 @pytest.mark.django_db
@@ -16,10 +16,10 @@ def test_custom_inv_script_access(organization, user):
     custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test')
     custom_inv.organization = organization
     custom_inv.save()
-    assert not custom_inv.accessible_by(u, {'read':True})
+    assert u not in custom_inv.read_role
 
     organization.member_role.members.add(u)
-    assert custom_inv.accessible_by(u, {'read':True})
+    assert u in custom_inv.read_role
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
@@ -27,13 +27,13 @@ def test_inventory_admin_user(inventory, permissions, user):
     perm = Permission(user=u, inventory=inventory, permission_type='admin')
     perm.save()
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
+    assert u not in inventory.admin_role
 
     rbac.migrate_inventory(apps, None)
 
-    assert inventory.accessible_by(u, permissions['admin'])
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
+    assert u in inventory.admin_role
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 @pytest.mark.django_db
 def test_inventory_auditor_user(inventory, permissions, user):
@@ -41,15 +41,15 @@ def test_inventory_auditor_user(inventory, permissions, user):
     perm = Permission(user=u, inventory=inventory, permission_type='read')
     perm.save()
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_inventory(apps, None)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is True
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
+    assert u not in inventory.admin_role
+    assert u in inventory.auditor_role
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 @pytest.mark.django_db
 def test_inventory_updater_user(inventory, permissions, user):
@@ -57,14 +57,14 @@ def test_inventory_updater_user(inventory, permissions, user):
     perm = Permission(user=u, inventory=inventory, permission_type='write')
     perm.save()
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_inventory(apps, None)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists()
+    assert u not in inventory.admin_role
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists()
 
 @pytest.mark.django_db
 def test_inventory_executor_user(inventory, permissions, user):
@@ -72,15 +72,15 @@ def test_inventory_executor_user(inventory, permissions, user):
     perm = Permission(user=u, inventory=inventory, permission_type='read', run_ad_hoc_commands=True)
     perm.save()
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_inventory(apps, None)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is True
-    assert inventory.executor_role.members.filter(id=u.id).exists()
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
+    assert u not in inventory.admin_role
+    assert u in inventory.read_role
+    assert inventory.execute_role.members.filter(id=u.id).exists()
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 
 
@@ -91,7 +91,7 @@ def test_inventory_admin_team(inventory, permissions, user, team):
     perm.save()
     team.deprecated_users.add(u)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
+    assert u not in inventory.admin_role
 
     rbac.migrate_team(apps, None)
     rbac.migrate_inventory(apps, None)
@@ -99,10 +99,10 @@ def test_inventory_admin_team(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
-    assert inventory.accessible_by(u, permissions['auditor'])
-    assert inventory.accessible_by(u, permissions['admin'])
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
+    assert u in inventory.read_role
+    assert u in inventory.admin_role
 
 
 @pytest.mark.django_db
@@ -112,8 +112,8 @@ def test_inventory_auditor(inventory, permissions, user, team):
     perm.save()
     team.deprecated_users.add(u)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_team(apps,None)
     rbac.migrate_inventory(apps, None)
@@ -121,10 +121,10 @@ def test_inventory_auditor(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
-    assert inventory.accessible_by(u, permissions['auditor'])
-    assert inventory.accessible_by(u, permissions['admin']) is False
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
+    assert u in inventory.read_role
+    assert u not in inventory.admin_role
 
 @pytest.mark.django_db
 def test_inventory_updater(inventory, permissions, user, team):
@@ -133,8 +133,8 @@ def test_inventory_updater(inventory, permissions, user, team):
     perm.save()
     team.deprecated_users.add(u)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_team(apps,None)
     rbac.migrate_inventory(apps, None)
@@ -142,10 +142,10 @@ def test_inventory_updater(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
-    assert team.member_role.is_ancestor_of(inventory.updater_role)
-    assert team.member_role.is_ancestor_of(inventory.executor_role) is False
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
+    assert team.member_role.is_ancestor_of(inventory.update_role)
+    assert team.member_role.is_ancestor_of(inventory.execute_role) is False
 
 
 @pytest.mark.django_db
@@ -155,8 +155,8 @@ def test_inventory_executor(inventory, permissions, user, team):
     perm.save()
     team.deprecated_users.add(u)
 
-    assert inventory.accessible_by(u, permissions['admin']) is False
-    assert inventory.accessible_by(u, permissions['auditor']) is False
+    assert u not in inventory.admin_role
+    assert u not in inventory.auditor_role
 
     rbac.migrate_team(apps, None)
     rbac.migrate_inventory(apps, None)
@@ -164,10 +164,10 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.auditor_role.members.filter(id=u.id).exists() is False
-    assert inventory.executor_role.members.filter(id=u.id).exists() is False
-    assert inventory.updater_role.members.filter(id=u.id).exists() is False
-    assert team.member_role.is_ancestor_of(inventory.updater_role) is False
-    assert team.member_role.is_ancestor_of(inventory.executor_role)
+    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.update_role.members.filter(id=u.id).exists() is False
+    assert team.member_role.is_ancestor_of(inventory.update_role) is False
+    assert team.member_role.is_ancestor_of(inventory.execute_role)
 
 @pytest.mark.django_db
 def test_group_parent_admin(group, permissions, user):
@@ -177,21 +177,21 @@ def test_group_parent_admin(group, permissions, user):
     childA = group('child-1')
 
     parent1.admin_role.members.add(u)
-    assert parent1.accessible_by(u, permissions['admin'])
-    assert not parent2.accessible_by(u, permissions['admin'])
-    assert not childA.accessible_by(u, permissions['admin'])
+    assert u in parent1.admin_role
+    assert u not in parent2.admin_role
+    assert u not in childA.admin_role
 
     childA.parents.add(parent1)
-    assert childA.accessible_by(u, permissions['admin'])
+    assert u in childA.admin_role
 
     childA.parents.remove(parent1)
-    assert not childA.accessible_by(u, permissions['admin'])
+    assert u not in childA.admin_role
 
     parent2.children.add(childA)
-    assert not childA.accessible_by(u, permissions['admin'])
+    assert u not in childA.admin_role
 
     parent2.admin_role.members.add(u)
-    assert childA.accessible_by(u, permissions['admin'])
+    assert u in childA.admin_role
 
 @pytest.mark.django_db
 def test_access_admin(organization, inventory, user):
@@ -237,33 +237,35 @@ def test_host_access(organization, inventory, user, group):
     not_my_group = group('not-my-group')
     group_admin = user('group_admin', False)
 
+    inventory_admin_access = HostAccess(inventory_admin)
+    group_admin_access = HostAccess(group_admin)
 
     h1 = Host.objects.create(inventory=inventory, name='host1')
     h2 = Host.objects.create(inventory=inventory, name='host2')
     h1.groups.add(my_group)
     h2.groups.add(not_my_group)
 
-    assert h1.accessible_by(inventory_admin, {'read': True}) is False
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1) is False
+    assert group_admin_access.can_read(h1) is False
 
     inventory.admin_role.members.add(inventory_admin)
     my_group.admin_role.members.add(group_admin)
 
-    assert h1.accessible_by(inventory_admin, {'read': True})
-    assert h2.accessible_by(inventory_admin, {'read': True})
-    assert h1.accessible_by(group_admin, {'read': True})
-    assert h2.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1)
+    assert inventory_admin_access.can_read(h2)
+    assert group_admin_access.can_read(h1)
+    assert group_admin_access.can_read(h2) is False
 
     my_group.hosts.remove(h1)
 
-    assert h1.accessible_by(inventory_admin, {'read': True})
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1)
+    assert group_admin_access.can_read(h1) is False
 
     h1.inventory = other_inventory
     h1.save()
 
-    assert h1.accessible_by(inventory_admin, {'read': True}) is False
-    assert h1.accessible_by(group_admin, {'read': True}) is False
+    assert inventory_admin_access.can_read(h1) is False
+    assert group_admin_access.can_read(h1) is False
 
 
 

@@ -34,7 +34,6 @@ def init_rbac_migration(apps, schema_editor):
 def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
-    RolePermission = apps.get_model('main', "RolePermission")
     ContentType = apps.get_model('contenttypes', "ContentType")
     user_content_type = ContentType.objects.get_for_model(User)
 
@@ -52,15 +51,6 @@ def migrate_users(apps, schema_editor):
                 object_id = user.id
             )
             role.members.add(user)
-            RolePermission.objects.create(
-                created=now(),
-                modified=now(),
-                role = role,
-                content_type = user_content_type,
-                object_id = user.id,
-                create=1, read=1, write=1, delete=1, update=1,
-                execute=1, scm_update=1, use=1,
-            )
             logger.info(smart_text(u"migrating to new role for user: {}".format(user.username)))
 
         if user.is_superuser:
@@ -113,7 +103,7 @@ def attrfunc(attr_path):
 
 def _update_credential_parents(org, cred):
     org.admin_role.children.add(cred.owner_role)
-    org.member_role.children.add(cred.usage_role)
+    org.member_role.children.add(cred.use_role)
     cred.deprecated_user, cred.deprecated_team = None, None
     cred.save()
 
@@ -147,7 +137,7 @@ def _discover_credentials(instances, cred, orgfunc):
 
                 # Unlink the old information from the new credential
                 cred.deprecated_user, cred.deprecated_team = None, None
-                cred.owner_role, cred.usage_role = None, None
+                cred.owner_role, cred.use_role = None, None
                 cred.save()
 
                 for i in orgs[org]:
@@ -189,7 +179,7 @@ def migrate_credential(apps, schema_editor):
 
         if cred.deprecated_team is not None:
             cred.deprecated_team.admin_role.children.add(cred.owner_role)
-            cred.deprecated_team.member_role.children.add(cred.usage_role)
+            cred.deprecated_team.member_role.children.add(cred.use_role)
             cred.deprecated_user, cred.deprecated_team = None, None
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host)))
@@ -214,7 +204,7 @@ def migrate_inventory(apps, schema_editor):
         elif perm.permission_type == 'read':
             return inventory.auditor_role
         elif perm.permission_type == 'write':
-            return inventory.updater_role
+            return inventory.update_role
         elif perm.permission_type == 'check' or perm.permission_type == 'run':
             # These permission types are handled differntly in RBAC now, nothing to migrate.
             return False
@@ -232,7 +222,7 @@ def migrate_inventory(apps, schema_editor):
                 raise Exception(smart_text(u'Unhandled permission type for inventory: {}'.format( perm.permission_type)))
 
             if perm.run_ad_hoc_commands:
-                execrole = inventory.executor_role
+                execrole = inventory.execute_role
 
             if perm.team:
                 if role:
@@ -392,20 +382,20 @@ def migrate_job_templates(apps, schema_editor):
 
         for team in Team.objects.iterator():
             if permission.filter(team=team).exists():
-                team.member_role.children.add(jt.executor_role)
+                team.member_role.children.add(jt.execute_role)
                 logger.info(smart_text(u'adding Team({}) access to JobTemplate({})'.format(team.name, jt.name)))
 
         for user in User.objects.iterator():
             if permission.filter(user=user).exists():
-                jt.executor_role.members.add(user)
+                jt.execute_role.members.add(user)
                 logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))
 
-            if jt.accessible_by(user, {'execute': True}):
+            if user in jt.execute_role:
                 # If the job template is already accessible by the user, because they
                 # are a sytem, organization, or project admin, then don't add an explicit
                 # role entry for them
                 continue
 
             if old_access.check_user_access(user, jt.__class__, 'start', jt, False):
-                jt.executor_role.members.add(user)
+                jt.execute_role.members.add(user)
                 logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))

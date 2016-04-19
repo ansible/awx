@@ -220,7 +220,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, {'write': True}).exists():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, 'admin_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -566,7 +566,7 @@ class OrganizationList(ListCreateAPIView):
     serializer_class = OrganizationSerializer
 
     def get_queryset(self):
-        qs = Organization.accessible_objects(self.request.user, {'read': True})
+        qs = Organization.accessible_objects(self.request.user, 'read_role')
         qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
         return qs
 
@@ -595,27 +595,27 @@ class OrganizationList(ListCreateAPIView):
             return full_context
 
         db_results = {}
-        org_qs = self.model.accessible_objects(self.request.user, {"read": True})
+        org_qs = self.model.accessible_objects(self.request.user, 'read_role')
         org_id_list = org_qs.values('id')
         if len(org_id_list) == 0:
             if self.request.method == 'POST':
                 full_context['related_field_counts'] = {}
             return full_context
 
-        inv_qs = Inventory.accessible_objects(self.request.user, {"read": True})
-        project_qs = Project.accessible_objects(self.request.user, {"read": True})
+        inv_qs = Inventory.accessible_objects(self.request.user, 'read_role')
+        project_qs = Project.accessible_objects(self.request.user, 'read_role')
 
         # Produce counts of Foreign Key relationships
         db_results['inventories'] = inv_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['teams'] = Team.accessible_objects(
-            self.request.user, {"read": True}).values('organization').annotate(
+            self.request.user, 'read_role').values('organization').annotate(
             Count('organization')).order_by('organization')
 
         JT_reference = 'project__organization'
         db_results['job_templates'] = JobTemplate.accessible_objects(
-            self.request.user, {"read": True}).values(JT_reference).annotate(
+            self.request.user, 'read_role').values(JT_reference).annotate(
             Count(JT_reference)).order_by(JT_reference)
 
         db_results['projects'] = project_qs\
@@ -667,7 +667,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        access_kwargs = {'accessor': self.request.user, 'permissions': {"read": True}}
+        access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
         direct_counts = Organization.objects.filter(id=org_id).annotate(
             users=Count('member_role__members', distinct=True),
             admins=Count('admin_role__members', distinct=True)
@@ -784,8 +784,8 @@ class TeamList(ListCreateAPIView):
     serializer_class = TeamSerializer
 
     def get_queryset(self):
-        qs = Team.accessible_objects(self.request.user, {'read': True})
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'organization')
         return qs
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
@@ -831,8 +831,8 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
-        user_qs = Project.accessible_objects(self.request.user, {'read': True})
+        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role)).distinct()
+        user_qs = Project.accessible_objects(self.request.user, 'read_role').distinct()
         return team_qs & user_qs
 
 
@@ -860,8 +860,8 @@ class TeamActivityStreamList(SubListAPIView):
 
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(team=parent) |
-                         Q(project__in=Project.accessible_objects(parent, {'read':True})) |
-                         Q(credential__in=Credential.accessible_objects(parent, {'read':True})))
+                         Q(project__in=Project.accessible_objects(parent, 'read_role')) |
+                         Q(credential__in=Credential.accessible_objects(parent, 'read_role')))
 
 class TeamAccessList(ResourceAccessList):
 
@@ -875,7 +875,7 @@ class ProjectList(ListCreateAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
-        projects_qs = Project.accessible_objects(self.request.user, {'read': True})
+        projects_qs = Project.accessible_objects(self.request.user, 'read_role')
         projects_qs = projects_qs.select_related(
             'organization',
             'admin_role',
@@ -1065,7 +1065,7 @@ class UserTeamsList(ListAPIView):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
-        return Team.accessible_objects(self.request.user, {'read': True}).filter(member_role__members=u)
+        return Team.accessible_objects(self.request.user, 'read_role').filter(member_role__members=u)
 
 class UserRolesList(SubListCreateAttachDetachAPIView):
 
@@ -1103,8 +1103,8 @@ class UserProjectsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = Project.accessible_objects(self.request.user, {'read': True})
-        user_qs = Project.accessible_objects(parent, {'read': True})
+        my_qs = Project.accessible_objects(self.request.user, 'read_role')
+        user_qs = Project.accessible_objects(parent, 'read_role')
         return my_qs & user_qs
 
 class UserOrganizationsList(SubListAPIView):
@@ -1117,7 +1117,7 @@ class UserOrganizationsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        my_qs = Organization.accessible_objects(self.request.user, 'read_role')
         user_qs = Organization.objects.filter(member_role__members=parent)
         return my_qs & user_qs
 
@@ -1131,7 +1131,7 @@ class UserAdminOfOrganizationsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = Organization.accessible_objects(self.request.user, {'read': True})
+        my_qs = Organization.accessible_objects(self.request.user, 'read_role')
         user_qs = Organization.objects.filter(admin_role__members=parent)
         return my_qs & user_qs
 
@@ -1217,7 +1217,7 @@ class CredentialList(ListCreateAPIView):
             organization = Organization.objects.get(pk=request.data['organization'])
             obj = organization
 
-        if not obj.accessible_by(self.request.user, {'write': True}):
+        if self.request.user not in obj.admin_role:
             raise PermissionDenied()
 
         ret = super(CredentialList, self).post(request, *args, **kwargs)
@@ -1242,8 +1242,8 @@ class UserCredentialsList(CredentialList):
         if not self.request.user.can_access(User, 'read', user):
             raise PermissionDenied()
 
-        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
-        user_creds = Credential.accessible_objects(user, {'read': True})
+        visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
+        user_creds = Credential.accessible_objects(user, 'read_role')
         return user_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
@@ -1262,7 +1262,7 @@ class TeamCredentialsList(CredentialList):
         if not self.request.user.can_access(Team, 'read', team):
             raise PermissionDenied()
 
-        visible_creds = Credential.accessible_objects(self.request.user, {'read': True})
+        visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
         team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
         return team_creds & visible_creds
 
@@ -1282,8 +1282,8 @@ class OrganizationCredentialList(CredentialList):
         if not self.request.user.can_access(Organization, 'read', organization):
             raise PermissionDenied()
 
-        user_visible = Credential.accessible_objects(self.request.user, {'read': True}).all()
-        org_set = Credential.accessible_objects(organization.admin_role, {'read': True}).all()
+        user_visible = Credential.accessible_objects(self.request.user, 'read_role').all()
+        org_set = Credential.accessible_objects(organization.admin_role, 'read_role').all()
 
         if self.request.user.is_superuser:
             return org_set
@@ -1353,8 +1353,8 @@ class InventoryList(ListCreateAPIView):
     serializer_class = InventorySerializer
 
     def get_queryset(self):
-        qs = Inventory.accessible_objects(self.request.user, {'read': True})
-        qs = qs.select_related('admin_role', 'auditor_role', 'updater_role', 'executor_role')
+        qs = Inventory.accessible_objects(self.request.user, 'read_role')
+        qs = qs.select_related('admin_role', 'auditor_role', 'update_role', 'execute_role')
         return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
@@ -2120,12 +2120,12 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
         if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
             new_credential = Credential.objects.get(pk=prompted_fields['credential'])
-            if not request.user.can_access(Credential, 'use', new_credential):
+            if request.user not in new_credential.use_role:
                 raise PermissionDenied()
 
         if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
             new_inventory = Inventory.objects.get(pk=prompted_fields['inventory'])
-            if not request.user.can_access(Inventory, 'use', new_inventory):
+            if request.user not in new_inventory.use_role:
                 raise PermissionDenied()
 
         kv = prompted_fields

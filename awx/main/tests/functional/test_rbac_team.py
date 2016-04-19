@@ -54,20 +54,20 @@ def test_team_accessible_by(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.member_role)
-    assert project.accessible_by(team, {'read':True})
-    assert not project.accessible_by(u, {'read':True})
+    assert team in project.read_role
+    assert u not in project.read_role
 
     team.member_role.members.add(u)
-    assert project.accessible_by(u, {'read':True})
+    assert u in project.read_role
 
 @pytest.mark.django_db
 def test_team_accessible_objects(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.member_role)
-    assert len(Project.accessible_objects(team, {'read':True})) == 1
-    assert not Project.accessible_objects(u, {'read':True})
+    assert len(Project.accessible_objects(team, 'read_role')) == 1
+    assert not Project.accessible_objects(u, 'read_role')
 
     team.member_role.members.add(u)
-    assert len(Project.accessible_objects(u, {'read':True})) == 1
+    assert len(Project.accessible_objects(u, 'read_role')) == 1
 

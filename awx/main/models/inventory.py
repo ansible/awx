@@ -100,28 +100,36 @@ class Inventory(CommonModel, ResourceMixin):
         role_name='Inventory Administrator',
         role_description='May manage this inventory',
         parent_role='organization.admin_role',
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Auditor',
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
-        permissions = {'read': True}
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Updater',
         role_description='May update the inventory',
-        permissions = {'read': True, 'update': True}
+        parent_role=['admin_role'],
     )
-    usage_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         role_name='Inventory User',
         role_description='May use this inventory, but not read sensitive portions or modify it',
-        permissions = {'use': True}
+        parent_role=['admin_role'],
     )
-    executor_role = ImplicitRoleField(
+    adhoc_role = ImplicitRoleField(
+        role_name='Inventory Ad Hoc',
+        role_description='May execute ad hoc commands against this inventory',
+        parent_role=['admin_role'],
+    )
+    execute_role = ImplicitRoleField(
         role_name='Inventory Executor',
         role_description='May execute jobs against this inventory',
-        permissions = {'read': True, 'execute': True}
+        parent_role='adhoc_role',
+    )
+    read_role = ImplicitRoleField(
+        role_name='Read',
+        parent_role=['auditor_role', 'execute_role', 'update_role', 'use_role', 'admin_role'],
+        role_description='May view this inventory',
     )
 
     def get_absolute_url(self):
@@ -335,7 +343,7 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
-        ordering = ('inventory', 'name')
+        ordering = ('name',)
 
     inventory = models.ForeignKey(
         'Inventory',
@@ -525,22 +533,27 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         role_name='Inventory Group Administrator',
         parent_role=['inventory.admin_role', 'parents.admin_role'],
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
-        permissions = {'read': True}
     )
-    updater_role = ImplicitRoleField(
+    update_role = ImplicitRoleField(
         role_name='Inventory Group Updater',
-        parent_role=['inventory.updater_role', 'parents.updater_role'],
-        permissions = {'read': True, 'write': True, 'create': True, 'use': True},
+        parent_role=['inventory.update_role', 'parents.update_role', 'admin_role'],
     )
-    executor_role = ImplicitRoleField(
+    adhoc_role = ImplicitRoleField(
+        role_name='Inventory Ad Hoc',
+        parent_role=['inventory.adhoc_role', 'parents.adhoc_role', 'admin_role'],
+        role_description='May execute ad hoc commands against this inventory',
+    )
+    execute_role = ImplicitRoleField(
         role_name='Inventory Group Executor',
-        parent_role=['inventory.executor_role', 'parents.executor_role'],
-        permissions = {'read':True, 'execute':True},
+        parent_role=['inventory.execute_role', 'parents.execute_role', 'adhoc_role'],
+    )
+    read_role = ImplicitRoleField(
+        role_name='Inventory Group Executor',
+        parent_role=['execute_role', 'update_role', 'auditor_role', 'admin_role'],
     )
 
     def __unicode__(self):
@@ -1296,21 +1309,23 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         role_name='CustomInventory Administrator',
         role_description='May manage this inventory',
         parent_role='organization.admin_role',
-        permissions = {'all': True}
     )
 
     member_role = ImplicitRoleField(
         role_name='CustomInventory Member',
         role_description='May view but not modify this inventory',
         parent_role='organization.member_role',
-        permissions = {'read': True}
     )
 
     auditor_role = ImplicitRoleField(
         role_name='CustomInventory Auditor',
         role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
-        permissions = {'read': True}
+    )
+    read_role = ImplicitRoleField(
+        role_name='CustomInventory Read',
+        role_description='May view but not modify this inventory',
+        parent_role=['auditor_role', 'member_role', 'admin_role'],
     )
 
     def get_absolute_url(self):

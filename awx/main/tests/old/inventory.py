@@ -77,7 +77,7 @@ class InventoryTest(BaseTest):
         self.check_get_list(url, self.normal_django_user, normal_qs)
 
         # a user who is on a team who has a read permissions on an inventory can see filtered inventories
-        other_qs = Inventory.accessible_objects(self.other_django_user, {'read': True}).distinct()
+        other_qs = Inventory.accessible_objects(self.other_django_user, 'read_role').distinct()
         self.check_get_list(url, self.other_django_user, other_qs)
 
         # a regular user not part of anything cannot see any inventories
@@ -401,7 +401,7 @@ class InventoryTest(BaseTest):
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
                                      args=(Group.objects.get(name='nondel').pk,))
-        assert(inv.accessible_by(self.normal_django_user, {'read': True}))
+        assert self.normal_django_user in inv.read_role
         del_group.delete()
         nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
         self.post(del_children_url, data=nondel_detail, expect=400, auth=self.get_normal_credentials())

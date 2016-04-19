@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
+from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
@@ -475,7 +476,9 @@ class ResourceAccessList(ListAPIView):
         resource_model = getattr(self, 'resource_model')
         obj = resource_model.objects.get(pk=self.object_id)
 
-        roles = set([p.role for p in obj.role_permissions.all()])
+        content_type = ContentType.objects.get_for_model(obj)
+        roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))
+
         ancestors = set()
         for r in roles:
             ancestors.update(set(r.ancestors.all()))

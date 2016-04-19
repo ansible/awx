@@ -295,14 +295,14 @@ class BaseJobTestMixin(BaseTestMixin):
             password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_bob.usage_role.members.add(self.user_bob)
+        self.cred_bob.use_role.members.add(self.user_bob)
 
         self.cred_chuck = Credential.objects.create(
             username='chuck',
             ssh_key_data=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
-        self.cred_chuck.usage_role.members.add(self.user_chuck)
+        self.cred_chuck.use_role.members.add(self.user_chuck)
 
         self.cred_doug = Credential.objects.create(
             username='doug',
@@ -310,7 +310,7 @@ class BaseJobTestMixin(BaseTestMixin):
                      'is why we dont\'t let doug actually run jobs.',
             created_by=self.user_sue,
         )
-        self.cred_doug.usage_role.members.add(self.user_doug)
+        self.cred_doug.use_role.members.add(self.user_doug)
 
         self.cred_eve = Credential.objects.create(
             username='eve',
@@ -320,14 +320,14 @@ class BaseJobTestMixin(BaseTestMixin):
             become_password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_eve.usage_role.members.add(self.user_eve)
+        self.cred_eve.use_role.members.add(self.user_eve)
 
         self.cred_frank = Credential.objects.create(
             username='frank',
             password='fr@nk the t@nk',
             created_by=self.user_sue,
         )
-        self.cred_frank.usage_role.members.add(self.user_frank)
+        self.cred_frank.use_role.members.add(self.user_frank)
 
         self.cred_greg = Credential.objects.create(
             username='greg',
@@ -335,21 +335,21 @@ class BaseJobTestMixin(BaseTestMixin):
             ssh_key_unlock='ASK',
             created_by=self.user_sue,
         )
-        self.cred_greg.usage_role.members.add(self.user_greg)
+        self.cred_greg.use_role.members.add(self.user_greg)
 
         self.cred_holly = Credential.objects.create(
             username='holly',
             password='holly rocks',
             created_by=self.user_sue,
         )
-        self.cred_holly.usage_role.members.add(self.user_holly)
+        self.cred_holly.use_role.members.add(self.user_holly)
 
         self.cred_iris = Credential.objects.create(
             username='iris',
             password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_iris.usage_role.members.add(self.user_iris)
+        self.cred_iris.use_role.members.add(self.user_iris)
 
         # Each operations team also has shared credentials they can use.
         self.cred_ops_east = Credential.objects.create(
@@ -358,14 +358,14 @@ class BaseJobTestMixin(BaseTestMixin):
             ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
             created_by = self.user_sue,
         )
-        self.team_ops_east.member_role.children.add(self.cred_ops_east.usage_role)
+        self.team_ops_east.member_role.children.add(self.cred_ops_east.use_role)
 
         self.cred_ops_west = Credential.objects.create(
             username='west',
             password='Heading270',
             created_by = self.user_sue,
         )
-        self.team_ops_west.member_role.children.add(self.cred_ops_west.usage_role)
+        self.team_ops_west.member_role.children.add(self.cred_ops_west.use_role)
 
 
         # FIXME: This code can be removed (probably)
@@ -391,7 +391,7 @@ class BaseJobTestMixin(BaseTestMixin):
             password='HeadingNone',
             created_by = self.user_sue,
         )
-        self.team_ops_testers.member_role.children.add(self.cred_ops_test.usage_role)
+        self.team_ops_testers.member_role.children.add(self.cred_ops_test.use_role)
 
         self.ops_east_permission = Permission.objects.create(
             inventory       = self.inv_ops_east,

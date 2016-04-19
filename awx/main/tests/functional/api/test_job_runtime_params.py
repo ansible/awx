@@ -3,6 +3,7 @@ import yaml
 
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
+from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import Job, JobTemplate
 
 from django.core.urlresolvers import reverse
@@ -93,8 +94,7 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     job_template = job_template_prompts(True)
     admin_user = user('admin', True)
 
-    job_template.inventory.executor_role.members.add(admin_user)
-    job_template.inventory.save()
+    job_template.inventory.execute_role.members.add(admin_user)
 
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     runtime_data, admin_user)
@@ -112,20 +112,19 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     assert job_obj.job_tags == runtime_data['job_tags']
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="JT can_start without inventory needs to be fixed before passing")
 @pytest.mark.job_runtime_vars
 def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, post, user):
     job_template = job_template_prompts_null
-    common_user = user('admin', False)
+    common_user = user('not-admin', False)
 
-    job_template.executor_role.members.add(common_user)
-    job_template.save()
-    job_template.project.member_role.members.add(common_user)
-    job_template.project.save()
+    # Give user permission to execute the job template
+    job_template.execute_role.members.add(common_user)
 
+    # Give user permission to use inventory and credential at runtime
     credential = Credential.objects.get(pk=runtime_data['credential'])
-    credential.usage_role.members.add(common_user)
-    credential.save()
+    credential.use_role.members.add(common_user)
+    inventory = Inventory.objects.get(pk=runtime_data['inventory'])
+    inventory.use_role.members.add(common_user)
 
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     runtime_data, common_user)
@@ -186,15 +185,12 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
 def test_job_launch_fails_without_inventory_access(deploy_jobtemplate, machine_credential, post, user):
     deploy_jobtemplate.ask_inventory_on_launch = True
     deploy_jobtemplate.credential = machine_credential
-    common_user = user('test-user', False)
-    deploy_jobtemplate.executor_role.members.add(common_user)
     deploy_jobtemplate.save()
-    deploy_jobtemplate.inventory.usage_role.members.add(common_user)
-    deploy_jobtemplate.inventory.save()
+    common_user = user('test-user', False)
+    deploy_jobtemplate.execute_role.members.add(common_user)
+    deploy_jobtemplate.inventory.use_role.members.add(common_user)
     deploy_jobtemplate.project.member_role.members.add(common_user)
-    deploy_jobtemplate.project.save()
-    deploy_jobtemplate.credential.usage_role.members.add(common_user)
-    deploy_jobtemplate.credential.save()
+    deploy_jobtemplate.credential.use_role.members.add(common_user)
 
     # Assure that the base job template can be launched to begin with
     response = post(reverse('api:job_template_launch',

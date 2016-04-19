@@ -16,11 +16,11 @@ def test_organization_migration_admin(organization, permissions, user):
 
     # Undo some automatic work that we're supposed to be testing with our migration
     organization.admin_role.members.remove(u)
-    assert not organization.accessible_by(u, permissions['admin'])
+    assert u not in organization.admin_role
 
     rbac.migrate_organization(apps, None)
 
-    assert organization.accessible_by(u, permissions['admin'])
+    assert u in organization.admin_role
 
 @pytest.mark.django_db
 def test_organization_migration_user(organization, permissions, user):
@@ -29,11 +29,11 @@ def test_organization_migration_user(organization, permissions, user):
 
     # Undo some automatic work that we're supposed to be testing with our migration
     organization.member_role.members.remove(u)
-    assert not organization.accessible_by(u, permissions['auditor'])
+    assert u not in organization.read_role
 
     rbac.migrate_organization(apps, None)
 
-    assert organization.accessible_by(u, permissions['auditor'])
+    assert u in organization.read_role
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)

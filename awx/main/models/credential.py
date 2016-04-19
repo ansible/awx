@@ -174,7 +174,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         parent_role=[
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
-        permissions = {'all': True}
     )
     auditor_role = ImplicitRoleField(
         role_name='Credential Auditor',
@@ -182,12 +181,18 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         parent_role=[
             'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         ],
-        permissions = {'read': True}
     )
-    usage_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         role_name='Credential User',
         role_description='May use this credential, but not read sensitive portions or modify it',
-        permissions = {'use': True}
+        parent_role=['owner_role']
+    )
+    read_role = ImplicitRoleField(
+        role_name='Credential REad',
+        role_description='May read this credential',
+        parent_role=[
+            'use_role', 'auditor_role', 'owner_role'
+        ],
     )
 
     @property

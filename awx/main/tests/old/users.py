@@ -420,10 +420,10 @@ class UsersTest(BaseTest):
         self.assertEquals(data1['count'], 3)
         # Normal user can no longer see all users after the organization he
         # admins is marked inactive, nor can he see any other users that were
-        # in that org, so he only sees himself.
+        # in that org, so he only sees himself and the system admin.
         self.organizations[0].delete()
         data3 = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data3['count'], 1)
+        self.assertEquals(data3['count'], 2)
 
     # Test no longer relevant since we've moved away from active / inactive.
     # However there was talk about keeping is_active for users, so this test will

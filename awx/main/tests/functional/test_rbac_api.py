@@ -176,8 +176,9 @@ def test_get_teams_roles_list(get, team, organization, admin):
     response = get(url, admin)
     assert response.status_code == 200
     roles = response.data
-    assert roles['count'] == 1
-    assert roles['results'][0]['id'] == organization.admin_role.id
+
+    assert roles['count'] == 2
+    assert roles['results'][0]['id'] == organization.admin_role.id or roles['results'][1]['id'] == organization.admin_role.id
 
 
 @pytest.mark.django_db
@@ -272,13 +273,11 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     joe = user('joe')
     organization.admin_role.members.add(org_admin)
 
-    assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert org_admin in check_jobtemplate.admin_role
+    assert joe not in check_jobtemplate.execute_role
 
-    res =post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, org_admin)
-
-    print(res.data)
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, org_admin)
+    assert joe in check_jobtemplate.execute_role
 
 
 @pytest.mark.django_db(transaction=True)
@@ -287,14 +286,14 @@ def test_org_admin_remove_user_to_job_template(post, organization, check_jobtemp
     org_admin = user('org-admin')
     joe = user('joe')
     organization.admin_role.members.add(org_admin)
-    check_jobtemplate.executor_role.members.add(joe)
+    check_jobtemplate.execute_role.members.add(joe)
 
-    assert check_jobtemplate.accessible_by(org_admin, {'write': True}) is True
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert org_admin in check_jobtemplate.admin_role
+    assert joe in check_jobtemplate.execute_role
 
-    post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'disassociate': True, 'id': joe.id}, org_admin)
+    post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, org_admin)
+    assert joe not in check_jobtemplate.execute_role
 
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
 
 @pytest.mark.django_db(transaction=True)
 def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemplate, user):
@@ -302,14 +301,13 @@ def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemp
     rando = user('rando')
     joe = user('joe')
 
-    assert check_jobtemplate.accessible_by(rando, {'write': True}) is False
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert rando not in check_jobtemplate.admin_role
+    assert joe not in check_jobtemplate.execute_role
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'id': joe.id}, rando)
-    print(res.data)
+    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, rando)
     assert res.status_code == 403
 
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is False
+    assert joe not in check_jobtemplate.execute_role
 
 
 @pytest.mark.django_db(transaction=True)
@@ -317,16 +315,15 @@ def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobt
     'Tests that a user without permissions to assign/revoke membership to a particular role cannot do so'
     rando = user('rando')
     joe = user('joe')
-    check_jobtemplate.executor_role.members.add(joe)
+    check_jobtemplate.execute_role.members.add(joe)
 
-    assert check_jobtemplate.accessible_by(rando, {'write': True}) is False
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
+    assert rando not in check_jobtemplate.admin_role
+    assert joe in check_jobtemplate.execute_role
 
-    res = post(reverse('api:role_users_list', args=(check_jobtemplate.executor_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
+    res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
     assert res.status_code == 403
 
-    assert check_jobtemplate.accessible_by(joe, {'execute': True}) is True
-
+    assert joe in check_jobtemplate.execute_role
 
 #
 # /roles/<id>/teams/
@@ -384,8 +381,8 @@ def test_role_children(get, team, admin, role):
     url = reverse('api:role_children_list', args=(team.member_role.id,))
     response = get(url, admin)
     assert response.status_code == 200
-    assert response.data['count'] == 1
-    assert response.data['results'][0]['id'] == role.id
+    assert response.data['count'] == 2
+    assert response.data['results'][0]['id'] == role.id or response.data['results'][1]['id'] == role.id
 
 
 
@@ -421,7 +418,7 @@ def test_ensure_permissions_is_present(organization, get, user):
 
     assert 'summary_fields' in org
     assert 'permissions' in org['summary_fields']
-    assert org['summary_fields']['permissions']['read'] > 0
+    assert org['summary_fields']['permissions']['read_role'] > 0
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):

@@ -3,7 +3,6 @@
 
 # Django
 from django.conf import settings # noqa
-from django.contrib.contenttypes.fields import GenericRelation
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -43,10 +42,8 @@ from awx.main.access import * # noqa
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
-User.add_to_class('accessible_by', user_accessible_by)
 User.add_to_class('accessible_objects', user_accessible_objects)
 User.add_to_class('admin_role', user_admin_role)
-User.add_to_class('role_permissions', GenericRelation('main.RolePermission'))
 
 @property
 def user_get_organizations(user):

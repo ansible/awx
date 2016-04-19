@@ -780,10 +780,10 @@ class Command(NoArgsCommand):
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
         if self.inventory_source.group:
-            groups_qs = self.inventory_source.group.all_children
+            groups_qs = self.inventory_source.group.all_children.all()
             # FIXME: Also include groups from inventory_source.managed_groups?
         else:
-            groups_qs = self.inventory.groups
+            groups_qs = self.inventory.groups.all()
         # Build list of all group pks, remove those that should not be deleted.
         del_group_pks = set(groups_qs.values_list('pk', flat=True))
         all_group_names = self.all_group.all_groups.keys()
@@ -1273,42 +1273,43 @@ class Command(NoArgsCommand):
                                                    self.is_custom)
             self.all_group.debug_tree()
 
-            # Ensure that this is managed as an atomic SQL transaction,
-            # and thus properly rolled back if there is an issue.
-            with transaction.atomic():
-                # Merge/overwrite inventory into database.
-                if settings.SQL_DEBUG:
-                    self.logger.warning('loading into database...')
-                with ignore_inventory_computed_fields():
-                    if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                        self.load_into_database()
-                    else:
-                        with disable_activity_stream():
+            with batch_role_ancestor_rebuilding():
+                # Ensure that this is managed as an atomic SQL transaction,
+                # and thus properly rolled back if there is an issue.
+                with transaction.atomic():
+                    # Merge/overwrite inventory into database.
+                    if settings.SQL_DEBUG:
+                        self.logger.warning('loading into database...')
+                    with ignore_inventory_computed_fields():
+                        if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                             self.load_into_database()
-                    if settings.SQL_DEBUG:
-                        queries_before2 = len(connection.queries)
-                    self.inventory.update_computed_fields()
-                    if settings.SQL_DEBUG:
-                        self.logger.warning('update computed fields took %d queries',
-                                            len(connection.queries) - queries_before2)
-                try:
-                    self.check_license()
-                except CommandError as e:
-                    self.mark_license_failure(save=True)
-                    raise e
+                        else:
+                            with disable_activity_stream():
+                                self.load_into_database()
+                        if settings.SQL_DEBUG:
+                            queries_before2 = len(connection.queries)
+                        self.inventory.update_computed_fields()
+                        if settings.SQL_DEBUG:
+                            self.logger.warning('update computed fields took %d queries',
+                                                len(connection.queries) - queries_before2)
+                    try:
+                        self.check_license()
+                    except CommandError as e:
+                        self.mark_license_failure(save=True)
+                        raise e
 
-                if self.inventory_source.group:
-                    inv_name = 'group "%s"' % (self.inventory_source.group.name)
-                else:
-                    inv_name = '"%s" (id=%s)' % (self.inventory.name,
-                                                 self.inventory.id)
-                if settings.SQL_DEBUG:
-                    self.logger.warning('Inventory import completed for %s in %0.1fs',
-                                        inv_name, time.time() - begin)
-                else:
-                    self.logger.info('Inventory import completed for %s in %0.1fs',
-                                     inv_name, time.time() - begin)
-                status = 'successful'
+                    if self.inventory_source.group:
+                        inv_name = 'group "%s"' % (self.inventory_source.group.name)
+                    else:
+                        inv_name = '"%s" (id=%s)' % (self.inventory.name,
+                                                     self.inventory.id)
+                    if settings.SQL_DEBUG:
+                        self.logger.warning('Inventory import completed for %s in %0.1fs',
+                                            inv_name, time.time() - begin)
+                    else:
+                        self.logger.info('Inventory import completed for %s in %0.1fs',
+                                         inv_name, time.time() - begin)
+                    status = 'successful'
 
             # If we're in debug mode, then log the queries and time
             # used to do the operation.

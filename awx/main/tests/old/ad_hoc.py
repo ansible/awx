@@ -463,7 +463,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # not allowed to run ad hoc commands).
         user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.update_role.id}, expect=204)
         with self.current_user('other'):
             self.run_test_ad_hoc_command(expect=403)
         self.check_get_list(url, 'other', qs)
@@ -471,7 +471,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Add executor role permissions to other. Fails
         # when other user can't read credential.
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.execute_role.id}, expect=204)
         with self.current_user('other'):
             self.run_test_ad_hoc_command(expect=403)
 
@@ -504,7 +504,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Give the nobody user the run_ad_hoc_commands flag, and can now see
         # the one ad hoc command previously run.
         with self.current_user('admin'):
-            response = self.post(nobody_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.execute_role.id}, expect=204)
         qs = AdHocCommand.objects.filter(credential_id=nobody_cred.pk)
         self.assertEqual(qs.count(), 1)
         self.check_get_list(url, 'nobody', qs)
@@ -1006,7 +1006,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # can_run_ad_hoc_commands = True when we shouldn't.
         nobody_roles_list_url = reverse('api:user_roles_list', args=(self.nobody_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(nobody_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.execute_role.id}, expect=204)
 
         # Create a credential for the other user and explicitly give other
         # user admin permission on the inventory (still not allowed to run ad
@@ -1014,7 +1014,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         other_cred = self.create_test_credential(user=self.other_django_user)
         user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.updater_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.update_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)
@@ -1025,7 +1025,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Update permission to allow other user to run ad hoc commands.  Can
         # only see his own ad hoc commands (because of credential permission).
         with self.current_user('admin'):
-            response = self.post(user_roles_list_url, {"id": self.inventory.executor_role.id}, expect=204)
+            response = self.post(user_roles_list_url, {"id": self.inventory.adhoc_role.id}, expect=204)
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)
