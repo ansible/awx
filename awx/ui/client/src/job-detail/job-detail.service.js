@@ -129,12 +129,10 @@ export default
         // ?parent=206&event__startswith=runner&page_size=200&order=host_name,counter
         getRelatedJobEvents: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_events/?';
-            Object.keys(params).forEach(function(key, index) {
-                // the API is tolerant of extra ampersands
-                // ?&event=playbook_on_start == ?event=playbook_on_stats
-                url = url + '&' + key + '=' + params[key];
-            });
+            url = url + id + '/job_events/?' +
+                 _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'
+                }, '');
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -162,11 +160,10 @@ export default
         // e.g. ?page_size=200&order=host_name
         getJobHostSummaries: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_host_summaries/?';
-            Object.keys(params).forEach(function(key, index) {
-                // the API is tolerant of extra ampersands
-                url = url + '&' + key + '=' + params[key];
-            });
+            url = url + id + '/job_host_summaries/?' + 
+                _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'
+                }, '');
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -181,11 +178,10 @@ export default
         // e.g. ?page_size=200
         getJobPlays: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_plays/?';
-            Object.keys(params).forEach(function(key, index) {
-                // the API is tolerant of extra ampersands
-                url = url + '&' + key + '=' + params[key];
-            });
+            url = url + id + '/job_plays/?' + 
+                _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'
+                }, '');
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -198,11 +194,10 @@ export default
         },
         getJobTasks: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_tasks/?';
-            Object.keys(params).forEach(function(key, index) {
-                // the API is tolerant of extra ampersands
-                url = url + '&' + key + '=' + params[key];
-            });
+            url = url + id + '/job_tasks/?' + 
+                _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'
+                }, '');
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -214,10 +209,10 @@ export default
                 });                 
         },
         getJob: function(params){
-            var url = GetBasePath('unified_jobs') + '?';
-            Object.keys(params).forEach(function(key, index) {
-                url = url + '&' + key + '=' + params[key];
-            });
+            var url = GetBasePath('unified_jobs') + '?'; +
+                 _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'
+                }, '');
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
