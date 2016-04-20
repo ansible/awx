@@ -167,7 +167,8 @@ endif
 
 .DEFAULT_GOAL := build
 
-.PHONY: clean rebase push requirements requirements_dev requirements_jenkins \
+.PHONY: clean clean-tmp rebase push requirements requirements_dev \
+	requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -219,6 +220,9 @@ clean-static:
 
 clean-build-test:
 	rm -rf awx/ui/build_test/
+
+clean-tmp:
+	rm -rf tmp/
 
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle
@@ -527,9 +531,9 @@ build-ui: awx/ui/static
 #		proxy tower and refresh the ui when a change is made.
 DOCKER_MACHINE_NAME ?= none
 ifeq ($(DOCKER_MACHINE_NAME),none)
-   sync-ui: node_modules brocolli-watcher
+   sync-ui: node_modules clean-tmp brocolli-watcher
 else
-   sync-ui: node_modules
+   sync-ui: node_modules clean-tmp
 	   tmux new-session -d -s ui_sync 'exec make brocolli-watcher'
 	   tmux rename-window 'UI Sync'
 	   tmux select-window -t ui_sync:0
