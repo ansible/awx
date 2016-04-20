@@ -5,6 +5,7 @@
 # Tower
 awx/settings/local_settings.py*
 awx/*.sqlite3
+awx/*.sqlite3_*
 awx/job_status
 awx/projects
 awx/job_output
@@ -67,7 +68,7 @@ awx/awx_test.sqlite3-journal
 *.DS_Store
 
 # Editors
-*.swp
+*.sw[poj]
 *~
 
 # Vagrant
@@ -93,6 +94,13 @@ tower-backup-*
 env/*
 nohup.out
 reports
+*.bak
+*.bak[0-9]
+*.dot
+*.log
+*.log.[0-9]
+*.results
+local/
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
