@@ -5,7 +5,6 @@ import json
 
 # Django
 from django.db.models.signals import (
-    pre_save,
     post_save,
     post_delete,
 )
@@ -118,9 +117,8 @@ class ImplicitRoleField(models.ForeignKey):
             setattr(cls, '__implicit_role_fields', [])
         getattr(cls, '__implicit_role_fields').append(self)
 
-        pre_save.connect(self._pre_save, cls, True, dispatch_uid='implicit-role-pre-save')
         post_save.connect(self._post_save, cls, True, dispatch_uid='implicit-role-post-save')
-        post_delete.connect(self._post_delete, cls, True)
+        post_delete.connect(self._post_delete, cls, True, dispatch_uid='implicit-role-post-delete')
         add_lazy_relation(cls, self, "self", self.bind_m2m_changed)
 
     def bind_m2m_changed(self, _self, _role_class, cls):
@@ -175,39 +173,44 @@ class ImplicitRoleField(models.ForeignKey):
                             getattr(instance, self.name).parents.remove(getattr(obj, field_attr))
         return _m2m_update
 
-    def _create_role_instance_if_not_exists(self, instance):
-        role = getattr(instance, self.name, None)
-        if role:
-            return
-        Role_ = get_current_apps().get_model('main', 'Role')
-        role = Role_.objects.create(
-            created=now(),
-            modified=now(),
-            role_field=self.name,
-            name=self.role_name,
-            description=self.role_description
-        )
-        setattr(instance, self.name, role)
-
-    def _patch_role_content_object(self, instance):
-        role = getattr(instance, self.name)
-        role.content_object = instance
-        role.save()
-
-    def _pre_save(self, instance, *args, **kwargs):
-        for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-            implicit_role_field._create_role_instance_if_not_exists(instance)
 
     def _post_save(self, instance, created, *args, **kwargs):
-        if created:
-            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                implicit_role_field._patch_role_content_object(instance)
-
+        Role_ = get_current_apps().get_model('main', 'Role')
+        ContentType_ = get_current_apps().get_model('contenttypes', 'ContentType')
+        ct_id = ContentType_.objects.get_for_model(instance).id
         with batch_role_ancestor_rebuilding():
+            # Create any missing role objects
+            missing_roles = []
             for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                cur_role         = getattr(instance, implicit_role_field.name)
+                cur_role = getattr(instance, implicit_role_field.name, None)
+                if cur_role is None:
+                    missing_roles.append(
+                        Role_(
+                            created=now(),
+                            modified=now(),
+                            role_field=implicit_role_field.name,
+                            name=implicit_role_field.role_name,
+                            description=implicit_role_field.role_description,
+                            content_type_id=ct_id,
+                            object_id=instance.id
+                        )
+                    )
+            if len(missing_roles) > 0:
+                Role_.objects.bulk_create(missing_roles)
+                updates = {}
+                role_ids = []
+                for role in Role_.objects.filter(content_type_id=ct_id, object_id=instance.id):
+                    setattr(instance, role.role_field, role)
+                    updates[role.role_field] = role.id
+                    role_ids.append(role.id)
+                type(instance).objects.filter(pk=instance.pk).update(**updates)
+                Role_._simultaneous_ancestry_rebuild(role_ids)
+
+            # Update parentage if necessary
+            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+                cur_role = getattr(instance, implicit_role_field.name)
                 original_parents = set(json.loads(cur_role.implicit_parents))
-                new_parents      = implicit_role_field._resolve_parent_roles(instance)
+                new_parents = implicit_role_field._resolve_parent_roles(instance)
                 cur_role.parents.remove(*list(original_parents - new_parents))
                 cur_role.parents.add(*list(new_parents - original_parents))
                 new_parents_list = list(new_parents)
@@ -246,9 +249,11 @@ class ImplicitRoleField(models.ForeignKey):
         return parent_roles
 
     def _post_delete(self, instance, *args, **kwargs):
-        this_role = getattr(instance, self.name)
-        children = [c for c in this_role.children.all()]
-        this_role.delete()
-        with batch_role_ancestor_rebuilding():
-            for child in children:
-                child.rebuild_role_ancestor_list()
+        role_ids = []
+        for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+            role_ids.append(getattr(instance, implicit_role_field.name + '_id'))
+
+        Role_ = get_current_apps().get_model('main', 'Role')
+        child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
+        Role_.objects.filter(id__in=role_ids).delete()
+        Role_._simultaneous_ancestry_rebuild(child_ids)

@@ -19,9 +19,7 @@ def organization_resource_creator(organization, user):
             inventory = organization.inventories.create(name="associated-inv %s" % i)
         for i in range(projects):
             organization.projects.create(name="test-proj %s" % i,
-                                         description="test-proj-desc",
-                                         scm_type="git",
-                                         scm_url="https://github.com/jlaska/ansible-playbooks")
+                                         description="test-proj-desc")
         # Mix up the inventories and projects used by the job templates
         i_proj = 0
         i_inv = 0

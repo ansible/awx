@@ -121,14 +121,6 @@ class Role(CommonModelNameNotUnique):
 
         Note that this method relies on any parents' ancestor list being correct.
         '''
-        global tls
-        batch_role_rebuilding = getattr(tls, 'batch_role_rebuilding', False)
-
-        if batch_role_rebuilding:
-            roles_needing_rebuilding = getattr(tls, 'roles_needing_rebuilding')
-            roles_needing_rebuilding.add(self.id)
-            return
-
         Role._simultaneous_ancestry_rebuild([self.id])
 
 
@@ -216,6 +208,15 @@ class Role(CommonModelNameNotUnique):
         if len(role_ids_to_rebuild) == 0:
             return
 
+        global tls
+        batch_role_rebuilding = getattr(tls, 'batch_role_rebuilding', False)
+
+        if batch_role_rebuilding:
+            roles_needing_rebuilding = getattr(tls, 'roles_needing_rebuilding')
+            roles_needing_rebuilding.update(set(role_ids_to_rebuild))
+            return
+
+
         cursor = connection.cursor()
         loop_ct = 0
 
@@ -225,18 +226,9 @@ class Role(CommonModelNameNotUnique):
             'roles_table': Role._meta.db_table,
         }
 
-
         def split_ids_for_sqlite(role_ids):
             for i in xrange(0, len(role_ids), 999):
                 yield role_ids[i:i + 999]
-
-        for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-            sql_params['ids'] = ','.join(str(x) for x in ids)
-            cursor.execute('''
-                 DELETE FROM %(ancestors_table)s
-                  WHERE ancestor_id IN (%(ids)s)
-            ''' % sql_params)
-
 
         while role_ids_to_rebuild:
             if loop_ct > 1000:
@@ -371,4 +363,3 @@ def get_roles_on_resource(resource, accessor):
             object_id=resource.id
         ).values_list('role_field', flat=True)
     }
-

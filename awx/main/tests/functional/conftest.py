@@ -106,8 +106,6 @@ def team_member(user, team):
 def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
                                  description="test-proj-desc",
-                                 scm_type="git",
-                                 scm_url="https://github.com/jlaska/ansible-playbooks",
                                  organization=organization
                                  )
     return prj
@@ -120,8 +118,6 @@ def project_factory(organization):
         except Project.DoesNotExist:
             prj = Project.objects.create(name=name,
                                          description="description for " + name,
-                                         scm_type="git",
-                                         scm_url="https://github.com/jlaska/ansible-playbooks",
                                          organization=organization
                                          )
         return prj
