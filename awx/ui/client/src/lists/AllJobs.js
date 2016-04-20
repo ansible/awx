@@ -77,7 +77,14 @@ export default
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
-            }
+            },
+            labels: {
+                label: 'Labels',
+                searchOnly: true,
+                searchType: 'related',
+                sourceModel: 'labels',
+                sourceField: 'name'
+            },
         },
 
         actions: { },
