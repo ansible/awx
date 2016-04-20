@@ -157,7 +157,7 @@
             <!--- end of results-->
 
             <!--beginning of details-->
-            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
+            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
                 <div class="JobDetail-panelHeader">
                     <div class="JobDetail-expandContainer">
                         <a class="JobDetail-panelHeaderText" ng-show="lessDetail" href="" ng-click="toggleLessDetail()">
@@ -376,21 +376,21 @@
         <div class="JobDetail-rightSide">
 
             <!--beginning of events summary-->
-            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
+            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
                     <div class="JobDetail-panelHeader">
                         <div class="JobDetail-expandContainer">
-                            <a class="JobDetail-panelHeaderText" ng-show="lessEvents" href="" ng-click="toggleLessEvents()">
+                            <a class="JobDetail-panelHeaderText" ng-show="lessEvents" ui-sref="jobDetail.host-summary" ng-click="toggleLessEvents()">
                                 EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-left"></i>
                             </a>
-                            <a class="JobDetail-panelHeaderText" ng-show="!lessEvents" href="" ng-click="toggleLessEvents()">
+                            <a class="JobDetail-panelHeaderText" ng-show="!lessEvents" ui-sref="jobDetail" ng-click="toggleLessEvents()">
                                 EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-down"></i>
                             </a>
                         </div>
                     </div>
 
                     <!-- Host Summary view -->
-                     <div  id="events-summary" ng-hide="lessEvents">
-                        <div ui-view="host-summary@jobDetail"></div>
+                     <div id="events-summary" ng-hide="lessEvents">
+                        <div ui-view="host-summary"></div>
                      </div>
             </div>
             <!-- end of events summary-->

@@ -14,9 +14,9 @@
             <div class="btn-group" >
                 <button 
                 ng-click="setFilter('all')"
-                class="JobDetail-tableToggle btn btn-xs" ng-class="{'btn-default': filter == 'failed', 'btn-primary': filter == 'all'}">All</button>
+                class="JobDetail-tableToggle btn btn-xs" ng-class="{'btn-default': filter === 'failed', 'btn-primary': filter === 'all'}">All</button>
                 <button ng-click="setFilter('failed')"
-                ng-class="{'btn-default': filter == 'all', 'btn-primary': filter == 'failed'}" class="JobDetail-tableToggle btn btn-xs">Failed</button>
+                ng-class="{'btn-default': filter === 'all', 'btn-primary': filter === 'failed'}" ng-disabled='count.failures == 0' class="JobDetail-tableToggle btn btn-xs">Failed</button>
             </div>
         </div>
     </div>
@@ -40,11 +40,11 @@
                         <a ui-sref="jobDetail.host-events({hostName: host.host_name})" aw-tool-tip="View  events" data-placement="top">{{ host.host_name }}</a>
                     </td>
                     <td class="List-tableCell col-lg-6 col-md-5 col-sm-5 col-xs-5 badge-column">
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ tooltips.text.ok }}" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok - host.changed }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{ tooltips.text.changed }}" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{ tooltips.text.skipped }}" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{ tooltips.text.unreachable}}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ tooltips.text.failures}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ buildTooltip(host.ok - host.changed, 'ok') }}" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok - host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{buildTooltip(host.changed, 'changed')}}" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{buildTooltip(host.skipped, 'skipped')}}" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{buildTooltip(host.dark, 'unreachable')}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ buildTooltip(host.failures, 'failed')}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
                     </td>
                 </tr>
                 <tr ng-show="hosts.length === 0 && status === 'pending'">

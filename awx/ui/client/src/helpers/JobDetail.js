@@ -42,7 +42,7 @@ export default
     .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
         'GetElapsed', 'UpdateTaskStatus', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
     function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
-        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay, longDateFilter) {
+        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay) {
         return function(params) {
 
             var scope = params.scope,
@@ -485,8 +485,7 @@ export default
                 created = params.created,
                 msg = params.message,
                 item = params.item,
-                counter = params.counter,
-                h, host;
+                counter = params.counter;
 
             if (scope.jobData.hostSummaries[host_id] !== undefined) {
                 scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
@@ -920,7 +919,7 @@ export default
                 order: 'host_name,counter',  
             };
             JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                scope.hostResults = JobDetailService.processHostEvents(res.results)
+                scope.hostResults = JobDetailService.processHostEvents(res.results);
                 scope.hostResultsLoading = false;
             });
         };
