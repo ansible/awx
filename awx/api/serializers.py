@@ -2109,7 +2109,8 @@ class JobLaunchSerializer(BaseSerializer):
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
                   'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_limit_on_launch',
+                  'ask_job_type_on_launch', 'ask_limit_on_launch',
+                  'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
