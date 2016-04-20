@@ -40,7 +40,7 @@ export default
             });
             $stateExtender.addState({
                 name: 'managementJobSchedules.edit',
-                route: '/add',
+                route: '/edit/:schedule_id',
                 templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
                 controller: 'managementJobEditController',
                 resolve: {
