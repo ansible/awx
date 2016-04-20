@@ -121,14 +121,6 @@ class Role(CommonModelNameNotUnique):
 
         Note that this method relies on any parents' ancestor list being correct.
         '''
-        global tls
-        batch_role_rebuilding = getattr(tls, 'batch_role_rebuilding', False)
-
-        if batch_role_rebuilding:
-            roles_needing_rebuilding = getattr(tls, 'roles_needing_rebuilding')
-            roles_needing_rebuilding.add(self.id)
-            return
-
         Role._simultaneous_ancestry_rebuild([self.id])
 
 
@@ -215,6 +207,15 @@ class Role(CommonModelNameNotUnique):
 
         if len(role_ids_to_rebuild) == 0:
             return
+
+        global tls
+        batch_role_rebuilding = getattr(tls, 'batch_role_rebuilding', False)
+
+        if batch_role_rebuilding:
+            roles_needing_rebuilding = getattr(tls, 'roles_needing_rebuilding')
+            roles_needing_rebuilding.update(set(role_ids_to_rebuild))
+            return
+
 
         cursor = connection.cursor()
         loop_ct = 0
