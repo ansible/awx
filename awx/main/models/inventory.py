@@ -981,6 +981,16 @@ class InventorySourceOptions(BaseModel):
         """I don't think openstack has regions"""
         return [('all', 'All')]
 
+    @classmethod
+    def get_foreman_region_choices(self):
+        """Red Hat Satellite 6 region choices (not implemented)"""
+        return [('all', 'All')]
+
+    @classmethod
+    def get_cloudforms_region_choices(self):
+        """Red Hat CloudForms region choices (not implemented)"""
+        return [('all', 'All')]
+
     def clean_credential(self):
         if not self.source:
             return None
