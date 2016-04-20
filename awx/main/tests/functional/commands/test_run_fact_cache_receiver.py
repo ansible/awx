@@ -80,12 +80,11 @@ def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible):
 
     fact_obj = Fact.objects.get(id=fact_returned.id)
     assert key in fact_obj.facts
-    assert json.loads(fact_obj.facts) == fact_msg_ansible['facts']
-    assert value == json.loads(fact_obj.facts)[key]
+    assert fact_msg_ansible['facts'] == (json.loads(fact_obj.facts) if isinstance(fact_obj.facts, unicode) else fact_obj.facts) # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
 
 # Ensure that the message flows from the socket through to process_fact_message()
 @pytest.mark.django_db
-def test_run_receiver(mocker, fact_msg_ansible): 
+def test_run_receiver(mocker, fact_msg_ansible):
     mocker.patch("awx.main.socket.Socket.listen", return_value=[fact_msg_ansible])
 
     receiver = FactCacheReceiver()
