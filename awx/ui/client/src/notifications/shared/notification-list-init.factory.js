@@ -14,8 +14,8 @@
  *
  */
 
-export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
-    function(Wait, GetBasePath, ProcessErrors, Rest) {
+export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
+    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices) {
     return function(params) {
         var scope = params.scope,
             url = params.url,

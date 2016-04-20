@@ -316,6 +316,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                               }
 
                               html += "</div>";
+                              if(options.cancelButton === true) {
+                                  html += "<div class=\"Form-exitHolder\">";
+                                  html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
+                                  html += "<i class=\"fa fa-times-circle\"></i>";
+                                  html += "</button></div>\n";
+                              }
                               html += "<div class=\"List-actionHolder\">";
                               if(list.toolbarAuxAction) {
                                   html += "<div class=\"List-auxAction\">";

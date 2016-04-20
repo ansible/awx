@@ -159,6 +159,13 @@ export default
                     });
                 };
 
+                $scope.goToNotifications = function(card){
+                    $state.transitionTo('managementJobsList.notifications',{
+                        card: card,
+                        management_id: card.id
+                    });
+                };
+
                 $scope.submitJob = function (id, name, card) {
                     Wait('start');
                         defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
