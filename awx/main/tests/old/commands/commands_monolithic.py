@@ -108,6 +108,7 @@ grandchild
 parent
 '''
 
+
 class BaseCommandMixin(object):
     '''
     Base class for tests that run management commands.
@@ -381,6 +382,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertFalse(ad_hoc_commands_after)
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class CleanupActivityStreamTest(BaseCommandMixin, BaseTest):
     '''
     Test cases for cleanup_activitystream management command.
@@ -447,6 +449,7 @@ class CleanupActivityStreamTest(BaseCommandMixin, BaseTest):
                         'create took %0.3fs, cleanup took %0.3fs, expected < %0.3fs' % (create_elapsed, cleanup_elapsed, create_elapsed / 4))
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     '''
     Test cases for inventory_import management command.

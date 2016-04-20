@@ -8,6 +8,8 @@ import os
 import re
 import tempfile
 import time
+import unittest2 as unittest
+
 
 # Django
 from django.conf import settings
@@ -37,6 +39,7 @@ inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].
 print json.dumps(inventory)
 """
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class InventoryTest(BaseTest):
 
     def setUp(self):
@@ -1097,6 +1100,7 @@ class InventoryTest(BaseTest):
         self.assertEqual(response['hosts']['failed'], 8)
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    IGNORE_CELERY_INSPECTOR=True,

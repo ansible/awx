@@ -237,6 +237,7 @@ TEST_VAULT_PLAYBOOK = '''$ANSIBLE_VAULT;1.1;AES256
 
 TEST_VAULT_PASSWORD = '1234'
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class RunJobTest(BaseJobExecutionTest):
     '''
     Test cases for RunJob celery task.
@@ -337,10 +338,9 @@ class RunJobTest(BaseJobExecutionTest):
             print
             qs = self.super_django_user.get_queryset(JobEvent)
             for je in qs.filter(job=job):
-                print je.get_event_display2()
-                print je.event, je, je.failed
-                print je.event_data
-                print
+                print(je.get_event_display2())
+                print(je.event, je, je.failed)
+                print(je.event_data)
         for job_event in job_events:
             unicode(job_event)  # For test coverage.
             job_event.save()

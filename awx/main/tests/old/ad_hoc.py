@@ -58,6 +58,7 @@ class BaseAdHocCommandTest(BaseJobExecutionTest):
         return self.credential
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class RunAdHocCommandTest(BaseAdHocCommandTest):
     '''
     Test cases for RunAdHocCommand celery task.
@@ -375,6 +376,7 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
 def run_pexpect_mock(self, *args, **kwargs):
     return 'successful', 0
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class AdHocCommandApiTest(BaseAdHocCommandTest):
     '''
     Test API list/detail views for ad hoc commands.
