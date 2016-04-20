@@ -27,9 +27,6 @@
                 <div ng-show="!survey_enabled" class="ScheduleToggle-switch" ng-click="toggleSurveyEnabled()">OFF</div>
             </div>
         </div>
-        <button id="delete-survey" class="SurveyMaker-deleteButton" data-placement="top" ng-show="survey_exists" ng-click="showDeleteOverlay('survey')" aw-tool-tip="Delete survey" data-original-title="" title="">
-            <i class="fa fa-trash-o"></i>
-        </button>
         <div class="SurveyMaker-close">
             <button class="SurveyMaker-exit" ng-click="closeSurvey('survey-modal-dialog')"><i class="fa fa-times-circle"></i></button>
         </div>
@@ -86,6 +83,7 @@
                     <div class="Form-buttons">
                         <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null">SAVE</button>
                         <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')">CANCEL</button>
+                        <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists" ng-click="showDeleteOverlay('survey')">DELETE SURVEY</button>
                     </div>
                 </div>
             </div>
