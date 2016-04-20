@@ -226,18 +226,9 @@ class Role(CommonModelNameNotUnique):
             'roles_table': Role._meta.db_table,
         }
 
-
         def split_ids_for_sqlite(role_ids):
             for i in xrange(0, len(role_ids), 999):
                 yield role_ids[i:i + 999]
-
-        for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-            sql_params['ids'] = ','.join(str(x) for x in ids)
-            cursor.execute('''
-                 DELETE FROM %(ancestors_table)s
-                  WHERE ancestor_id IN (%(ids)s)
-            ''' % sql_params)
-
 
         while role_ids_to_rebuild:
             if loop_ct > 1000:
@@ -372,4 +363,3 @@ def get_roles_on_resource(resource, accessor):
             object_id=resource.id
         ).values_list('role_field', flat=True)
     }
-
