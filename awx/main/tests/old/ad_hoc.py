@@ -7,6 +7,8 @@ import os
 import subprocess
 import tempfile
 import mock
+import unittest2 as unittest
+
 
 # Django
 from django.conf import settings
