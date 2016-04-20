@@ -3,6 +3,8 @@
 
 # Python
 from __future__ import absolute_import
+import os
+import unittest2 as unittest
 
 # Django
 import django
@@ -15,6 +17,7 @@ import yaml
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateLaunchTest, self).setUp()
@@ -183,6 +186,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         with self.current_user(self.user_sue):
             self.post(self.launch_url, {}, expect=400)
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateLaunchPasswordsTest, self).setUp()

@@ -9,6 +9,9 @@ import struct
 import threading
 import time
 import urlparse
+import os
+import unittest2 as unittest
+
 
 # Django
 import django.test
@@ -183,6 +186,7 @@ TEST_SURVEY_REQUIREMENTS = '''
 }
 '''
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
     JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields',
@@ -501,6 +505,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
         with self.current_user(self.user_doug):
             self.get(detail_url, expect=403)
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
     def test_get_job_list(self):
@@ -653,6 +658,7 @@ class JobTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # and that jobs come back nicely serialized with related resources and so on ...
         # that we can drill all the way down and can get at host failure lists, etc ...
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local')
@@ -1028,6 +1034,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.post(url, data, expect=400, remote_addr=host_ip)
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local')
@@ -1092,6 +1099,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
         super(JobTemplateSurveyTest, self).setUp()
