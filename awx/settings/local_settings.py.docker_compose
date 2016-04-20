@@ -51,7 +51,7 @@ if is_testing(sys.argv):
 BROKER_URL = 'redis://redis/'
 
 # Mongo host configuration
-MONGO_HOST = 'mongo'
+MONGO_HOST = NotImplemented
 
 # Set True to enable additional logging from the job_event_callback plugin
 JOB_CALLBACK_DEBUG = False

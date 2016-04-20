@@ -20,6 +20,10 @@ def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
     Host = apps.get_model('main', "Host")
 
+    if (not hasattr(settings, 'MONGO_HOST')) or settings.MONGO_HOST == NotImplemented:
+        # If settings do not specify a mongo database, do not raise error or drop db
+        return (0, 0)
+
     try:
         n = FactVersion.objects.all().count()
     except ConnectionError:
