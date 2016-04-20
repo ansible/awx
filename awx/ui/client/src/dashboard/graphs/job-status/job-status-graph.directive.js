@@ -140,6 +140,14 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                         scope.$parent.isSuccessful = true;
                         recreateGraph(period, job_type);
                     });
+
+                    $('.o').on('click', function() {
+                        var job_status = this.getAttribute('id');
+                        $('#status-dropdown').replaceWith("<a id=\"status-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        scope.$broadcast("jobStatusChange", job_status);
+                    });
+
                     adjustGraphSize(job_status_chart, element);
                 }
 
