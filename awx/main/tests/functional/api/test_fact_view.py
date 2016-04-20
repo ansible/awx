@@ -1,5 +1,6 @@
 import mock
 import pytest
+import json
 
 from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
@@ -93,7 +94,7 @@ def test_content(hosts, fact_scans, get, user, fact_ansible_json):
     (fact_known, response) = setup_common(hosts, fact_scans, get, user)
 
     assert fact_known.host_id == response.data['host']
-    assert fact_ansible_json == response.data['facts']
+    assert fact_ansible_json == json.loads(response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert fact_known.module == response.data['module']
 
@@ -103,7 +104,7 @@ def _test_search_by_module(hosts, fact_scans, get, user, fact_json, module_name)
     }
     (fact_known, response) = setup_common(hosts, fact_scans, get, user, module_name=module_name, get_params=params)
 
-    assert fact_json == response.data['facts']
+    assert fact_json == json.loads(response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert module_name == response.data['module']
 
