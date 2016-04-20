@@ -41,6 +41,7 @@ class Command(BaseCommand):
                                 variables="ansible_connection: local",
                                 created_by=superuser)
             JobTemplate.objects.create(name='Demo Job Template',
+                                       playbook='hello_world.yml',
                                        project=p,
                                        inventory=i,
                                        credential=c)
