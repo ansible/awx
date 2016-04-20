@@ -1,4 +1,4 @@
-export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(Rest, $q, GetBasePath, Wait, ProcessErrors) {
+export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', function(Rest, $q, GetBasePath, Wait, ProcessErrors, $log) {
     var that = this;
     // parse the field config object to return
     // one of the searchTypes (for the left dropdown)
@@ -79,11 +79,12 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
 
         if (needsRequest.length) {
             // make the options request to reutrn the typeOptions
-            Rest.setUrl(basePath);
+            Rest.setUrl(needsRequest[0].basePath ? needsRequest[0].basePath : basePath);
             Rest.options()
                 .success(function (data) {
-                    var options = data.actions.GET;
-                    needsRequest = needsRequest
+                    try { 
+                        var options = data.actions.GET;
+                        needsRequest = needsRequest
                         .map(function (option) {
                             option.typeOptions = options[option
                                 .value]
@@ -94,8 +95,15 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', function(R
                                             label: i[1]
                                         };
                                     });
-                        return option;
-                    });
+                            return option;
+                        });
+                    }
+                    catch(err){
+                        if (basePath === ''){
+                            $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
+                        }
+                        else { $log.error(err); }
+                    }
                     Wait("stop");
                     defer.resolve(joinOptions());
                 })

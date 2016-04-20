@@ -11,13 +11,13 @@ export default function(){
         iterator: 'notification',
         index: false,
         hover: false,
-
+        basePath: 'notifications',
         fields: {
             name: {
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notifications/{{notifier.id}}'
+                linkTo: '/#/notifications/{{notifier.id}}',
             },
             notification_type: {
                 label: 'Type',
