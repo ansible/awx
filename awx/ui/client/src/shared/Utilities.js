@@ -616,7 +616,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             options = params.opts,
             multiple = (params.multiple!==undefined) ? params.multiple : true,
             placeholder = params.placeholder,
-            customDropdownAdapter = (params.customDropdownAdapter!==undefined) ? params.customDropdownAdapter : true;
+            customDropdownAdapter = (params.customDropdownAdapter!==undefined) ? params.customDropdownAdapter : true,
+            addNew = params.addNew;
 
             $.fn.select2.amd.require([
                 'select2/utils',
@@ -624,11 +625,12 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 'select2/dropdown/search',
                 'select2/dropdown/attachContainer',
                 'select2/dropdown/closeOnSelect',
-                'select2/dropdown/minimumResultsForSearch'
-          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch) {
+                'select2/dropdown/minimumResultsForSearch',
+                'select2/data/tokenizer'
+          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer) {
 
               var CustomAdapter =
-                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch],
+                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer],
                            function(Adapter, Decorator) {
                                return Utils.Decorate(Adapter, Decorator);
                            }, Dropdown);
@@ -639,12 +641,18 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     containerCssClass: 'Form-dropDown',
                     width: '100%',
                     minimumResultsForSearch: Infinity,
-                }
+                };
 
                 // multiple-choice directive calls select2 but needs to do so without this custom adapter
                 // to allow the element to be draggable on survey preview.
-                if(customDropdownAdapter) {
+                if (customDropdownAdapter) {
                     config.dropdownAdapter = CustomAdapter;
+                }
+
+                if (addNew) {
+                    $(element).prepend("<option></option>");
+                    config.tags = true;
+                    config.tokenSeparators = [];
                 }
 
                 $(element).select2(config);
@@ -884,7 +892,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
     }
 ])
 .factory('ParamPass', function() {
-    var savedData = undefined;
+    var savedData;
 
     function set(data) {
         savedData = data;
@@ -899,5 +907,5 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
     return {
         set: set,
         get: get
-    }
+    };
 });

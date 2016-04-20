@@ -37,7 +37,8 @@ define([
     this.hideLoading();
 
     var $message = $(
-      '<li role="treeitem" class="select2-results__option"></li>'
+      '<li role="treeitem" aria-live="assertive"' +
+      ' class="select2-results__option"></li>'
     );
 
     var message = this.options.get('translations').get(params.message);
@@ -48,7 +49,13 @@ define([
       )
     );
 
+    $message[0].className += ' select2-results__message';
+
     this.$results.append($message);
+  };
+
+  Results.prototype.hideMessages = function () {
+    this.$results.find('.select2-results__message').remove();
   };
 
   Results.prototype.append = function (data) {
@@ -250,6 +257,7 @@ define([
     });
 
     container.on('query', function (params) {
+      self.hideMessages();
       self.showLoading(params);
     });
 
@@ -305,7 +313,7 @@ define([
       var data = $highlighted.data('data');
 
       if ($highlighted.attr('aria-selected') == 'true') {
-        self.trigger('close');
+        self.trigger('close', {});
       } else {
         self.trigger('select', {
           data: data
@@ -389,11 +397,7 @@ define([
       this.$results.on('mousewheel', function (e) {
         var top = self.$results.scrollTop();
 
-        var bottom = (
-          self.$results.get(0).scrollHeight -
-          self.$results.scrollTop() +
-          e.deltaY
-        );
+        var bottom = self.$results.get(0).scrollHeight - top + e.deltaY;
 
         var isAtTop = e.deltaY > 0 && top - e.deltaY <= 0;
         var isAtBottom = e.deltaY < 0 && bottom <= self.$results.height();
@@ -427,7 +431,7 @@ define([
             data: data
           });
         } else {
-          self.trigger('close');
+          self.trigger('close', {});
         }
 
         return;
@@ -493,7 +497,7 @@ define([
     var template = this.options.get('templateResult');
     var escapeMarkup = this.options.get('escapeMarkup');
 
-    var content = template(result);
+    var content = template(result, container);
 
     if (content == null) {
       container.style.display = 'none';

@@ -3,7 +3,7 @@ define([
   '../utils'
 ], function ($, Utils) {
   function AttachBody (decorated, $element, options) {
-    this.$dropdownParent = options.get('dropdownParent') || document.body;
+    this.$dropdownParent = options.get('dropdownParent') || $(document.body);
 
     decorated.call(this, $element, options);
   }
@@ -44,6 +44,12 @@ define([
     });
   };
 
+  AttachBody.prototype.destroy = function (decorated) {
+    decorated.call(this);
+
+    this.$dropdownContainer.remove();
+  };
+
   AttachBody.prototype.position = function (decorated, $dropdown, $container) {
     // Clone all of the container classes
     $dropdown.attr('class', $container.attr('class'));
@@ -74,7 +80,8 @@ define([
     this.$dropdownContainer.detach();
   };
 
-  AttachBody.prototype._attachPositioningHandler = function (container) {
+  AttachBody.prototype._attachPositioningHandler =
+      function (decorated, container) {
     var self = this;
 
     var scrollEvent = 'scroll.select2.' + container.id;
@@ -101,7 +108,8 @@ define([
     });
   };
 
-  AttachBody.prototype._detachPositioningHandler = function (container) {
+  AttachBody.prototype._detachPositioningHandler =
+      function (decorated, container) {
     var scrollEvent = 'scroll.select2.' + container.id;
     var resizeEvent = 'resize.select2.' + container.id;
     var orientationEvent = 'orientationchange.select2.' + container.id;
@@ -120,7 +128,6 @@ define([
 
     var newDirection = null;
 
-    var position = this.$container.position();
     var offset = this.$container.offset();
 
     offset.bottom = offset.top + this.$container.outerHeight(false);
@@ -148,6 +155,20 @@ define([
       left: offset.left,
       top: container.bottom
     };
+
+    // Determine what the parent element is to use for calciulating the offset
+    var $offsetParent = this.$dropdownParent;
+
+    // For statically positoned elements, we need to get the element
+    // that is determining the offset
+    if ($offsetParent.css('position') === 'static') {
+      $offsetParent = $offsetParent.offsetParent();
+    }
+
+    var parentOffset = $offsetParent.offset();
+
+    css.top -= parentOffset.top;
+    css.left -= parentOffset.left;
 
     if (!isCurrentlyAbove && !isCurrentlyBelow) {
       newDirection = 'below';
@@ -177,8 +198,6 @@ define([
   };
 
   AttachBody.prototype._resizeDropdown = function () {
-    this.$dropdownContainer.width();
-
     var css = {
       width: this.$container.outerWidth(false) + 'px'
     };

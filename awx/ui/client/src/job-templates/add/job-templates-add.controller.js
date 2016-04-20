@@ -11,14 +11,14 @@
          'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList',
          'LookUpInit', 'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON',
          'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state',
-         'CreateSelect2',
+         'CreateSelect2', '$q',
          function(
              Refresh, $filter, $scope, $rootScope, $compile,
              $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, InventoryList,
              CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices,
-             $state, CreateSelect2
+             $state, CreateSelect2, $q
          ) {
 
             ClearScope();
@@ -113,7 +113,7 @@
             }
             $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
                 selectCount++;
-                if (selectCount === 2) {
+                if (selectCount === 3) {
                     var verbosity;
                     // this sets the default options for the selects as specified by the controller.
                     for (verbosity in $scope.verbosity_options) {
@@ -145,7 +145,11 @@
                         element:'#job_templates_job_type',
                         multiple: false
                     });
-
+                    CreateSelect2({
+                        element:'#job_templates_labels',
+                        multiple: true,
+                        addNew: true
+                    });
                     CreateSelect2({
                         element:'#playbook-select',
                         multiple: false
@@ -177,6 +181,21 @@
                 variable: 'job_type_options',
                 callback: 'choicesReadyVerbosity'
             });
+
+            Rest.setUrl('api/v1/labels');
+            Rest.get()
+                .success(function (data) {
+                    $scope.labelOptions = data.results
+                        .map((i) => ({label: i.name, value: i.id}));
+                    $scope.$emit("choicesReadyVerbosity");
+                })
+                .error(function (data, status) {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get labels. GET returned ' +
+                            'status: ' + status
+                    });
+                });
 
             // Update playbook select whenever project value changes
             selectPlaybook = function (oldValue, newValue) {
@@ -265,12 +284,6 @@
                 }
             };
 
-
-            // $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (newval, oldval) {
-            //     selectPlaybook(oldval, newval);
-            //     checkSCMStatus(oldval, newval);
-            // });
-
             // Register a watcher on project_name
             if ($scope.selectPlaybookUnregister) {
                 $scope.selectPlaybookUnregister();
@@ -311,14 +324,126 @@
             }
             $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
                 Wait('stop');
-                if (data.related && data.related.callback) {
-                    Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
-                        '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
-                        '<p>The host configuration key is: <strong>' + $filter('sanitize')(data.host_config_key) + '</strong></p>', 'alert-info', saveCompleted, null, null, null, true);
+                if (data.related &&
+                    data.related.callback) {
+                    Alert('Callback URL',
+`
+<p>Host callbacks are enabled for this template. The callback URL is:</p>
+<p style=\"padding: 10px 0;\">
+    <strong>
+        ${$scope.callback_server_path}
+        ${data.related.callback}
+    </string>
+</p>
+<p>The host configuration key is:
+    <strong>
+        ${$filter('sanitize')(data.host_config_key)}
+    </string>
+</p>
+`,
+                        'alert-info', saveCompleted, null, null,
+                        null, true);
                 }
-                else {
-                    saveCompleted();
-                }
+                var orgDefer = $q.defer();
+                var associationDefer = $q.defer();
+
+                Rest.setUrl(data.related.labels);
+
+                var currentLabels = Rest.get()
+                    .then(function(data) {
+                        return data.data.results
+                            .map(val => val.id);
+                    });
+
+                currentLabels.then(function (current) {
+                    var labelsToAdd = $scope.labels
+                        .map(val => val.value);
+                    var labelsToDisassociate = current
+                        .filter(val => labelsToAdd
+                            .indexOf(val) === -1)
+                        .map(val => ({id: val, disassociate: true}));
+                    var labelsToAssociate = labelsToAdd
+                        .filter(val => current
+                            .indexOf(val) === -1)
+                        .map(val => ({id: val, associate: true}));
+                    var pass = labelsToDisassociate
+                        .concat(labelsToAssociate);
+                    associationDefer.resolve(pass);
+                });
+
+                Rest.setUrl(GetBasePath("organizations"));
+                Rest.get()
+                    .success(function(data) {
+                        orgDefer.resolve(data.results[0].id);
+                    });
+
+                orgDefer.promise.then(function(orgId) {
+                    var toPost = [];
+                    $scope.newLabels = $scope.newLabels
+                        .map(function(i, val) {
+                            val.organization = orgId;
+                            return val;
+                        });
+
+                    $scope.newLabels.each(function(i, val) {
+                        toPost.push(val);
+                    });
+
+                    associationDefer.promise.then(function(arr) {
+                        toPost = toPost
+                            .concat(arr);
+
+                        Rest.setUrl(data.related.labels);
+
+                        var defers = [];
+                        for (var i = 0; i < toPost.length; i++) {
+                            defers.push(Rest.post(toPost[i]));
+                        }
+                        $q.all(defers)
+                            .then(function() {
+                                $scope.addedItem = data.id;
+
+                                Refresh({
+                                    scope: $scope,
+                                    set: 'job_templates',
+                                    iterator: 'job_template',
+                                    url: $scope.current_url
+                                });
+
+                                if($scope.survey_questions &&
+                                    $scope.survey_questions.length > 0){
+                                    //once the job template information
+                                    // is saved we submit the survey
+                                    // info to the correct endpoint
+                                    var url = data.url+ 'survey_spec/';
+                                    Rest.setUrl(url);
+                                    Rest.post({ name: $scope.survey_name,
+                                        description: $scope.survey_description,
+                                        spec: $scope.survey_questions })
+                                        .success(function () {
+                                            Wait('stop');
+                                        })
+                                        .error(function (data,
+                                            status) {
+                                                ProcessErrors(
+                                                    $scope,
+                                                    data,
+                                                    status,
+                                                    form,
+                                                    {
+                                                        hdr: 'Error!',
+                                                        msg: 'Failed to add new ' +
+                                                        'survey. Post returned ' +
+                                                        'status: ' +
+                                                        status
+                                                    });
+                                        });
+                                }
+
+                                saveCompleted();
+                            });
+                    });
+                });
             });
 
             // Save
@@ -327,11 +452,13 @@
                 $scope.invalid_survey = false;
 
                 // users can't save a survey with a scan job
-                if($scope.job_type.value === "scan" && $scope.survey_enabled === true){
+                if($scope.job_type.value === "scan" &&
+                    $scope.survey_enabled === true){
                     $scope.survey_enabled = false;
                 }
                 // Can't have a survey enabled without a survey
-                if($scope.survey_enabled === true && $scope.survey_exists!==true){
+                if($scope.survey_enabled === true &&
+                    $scope.survey_exists!==true){
                     $scope.survey_enabled = false;
                 }
 
@@ -341,70 +468,61 @@
 
                 try {
                     for (fld in form.fields) {
-                        if (form.fields[fld].type === 'select' && fld !== 'playbook') {
+                        if (form.fields[fld].type === 'select' &&
+                            fld !== 'playbook') {
                             data[fld] = $scope[fld].value;
                         } else {
-                            if (fld !== 'variables' && fld !== 'survey') {
+                            if (fld !== 'variables' &&
+                                fld !== 'survey') {
                                 data[fld] = $scope[fld];
                             }
                         }
                     }
-                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-                    if(data.job_type === 'scan' && $scope.default_scan === true){
+                    data.extra_vars = ToJSON($scope.parseType,
+                        $scope.variables, true);
+                    if(data.job_type === 'scan' &&
+                        $scope.default_scan === true){
                         data.project = "";
                         data.playbook = "";
                     }
-                    // We only want to set the survey_enabled flag to true for this job template if a survey exists
-                    // and it's been enabled.  By default, survey_enabled is explicitly set to true but if no survey
-                    // is created then we don't want it enabled.
-                    data.survey_enabled = ($scope.survey_enabled && $scope.survey_exists) ? $scope.survey_enabled : false;
+                    // We only want to set the survey_enabled flag to
+                    // true for this job template if a survey exists
+                    // and it's been enabled.  By default,
+                    // survey_enabled is explicitly set to true but
+                    // if no survey is created then we don't want
+                    // it enabled.
+                    data.survey_enabled = ($scope.survey_enabled &&
+                        $scope.survey_exists) ? $scope.survey_enabled : false;
+
+                    $scope.newLabels = $("#job_templates_labels > option")
+                        .filter("[data-select2-tag=true]")
+                        .map((i, val) => ({name: $(val).text()}));
+
                     Rest.setUrl(defaultUrl);
                     Rest.post(data)
                         .success(function(data) {
-                            $scope.$emit('templateSaveSuccess', data);
-
-                            $scope.addedItem = data.id;
-
-                            Refresh({
-                                scope: $scope,
-                                set: 'job_templates',
-                                iterator: 'job_template',
-                                url: $scope.current_url
-                            });
-
-                            if($scope.survey_questions && $scope.survey_questions.length > 0){
-                                //once the job template information is saved we submit the survey info to the correct endpoint
-                                var url = data.url+ 'survey_spec/';
-                                Rest.setUrl(url);
-                                Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec: $scope.survey_questions })
-                                    .success(function () {
-                                        Wait('stop');
-
-                                    })
-                                    .error(function (data, status) {
-                                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                            msg: 'Failed to add new survey. Post returned status: ' + status });
-                                    });
-                            }
-
-
+                            $scope.$emit('templateSaveSuccess',
+                                data);
                         })
                         .error(function (data, status) {
-                            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                msg: 'Failed to add new job template. POST returned status: ' + status
-                            });
+                            ProcessErrors($scope, data, status, form,
+                                {
+                                    hdr: 'Error!',
+                                    msg: 'Failed to add new job ' +
+                                    'template. POST returned status: ' +
+                                    status
+                                });
                         });
 
                 } catch (err) {
                     Wait('stop');
-                    Alert("Error", "Error parsing extra variables. Parser returned: " + err);
+                    Alert("Error", "Error parsing extra variables. " +
+                        "Parser returned: " + err);
                 }
-
             };
 
             $scope.formCancel = function () {
                 $state.transitionTo('jobTemplates');
             };
         }
-
     ];
