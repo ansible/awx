@@ -76,7 +76,7 @@ DEBUILD_OPTS = --source-option="-I"
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
 REPREPRO_BIN ?= reprepro
-REPREPRO_OPTS ?= -b reprepro --export=force
+REPREPRO_OPTS ?= -b reprepro --export=changed
 DEB_DIST ?=
 ifeq ($(OFFICIAL),yes)
     # Sign official builds
