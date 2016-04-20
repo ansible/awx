@@ -2,13 +2,10 @@ export default
     ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', function($rootScope, Rest, GetBasePath, ProcessErrors){
         return {
 
-        /* 
-        * For ES6 
-        * it might be useful to set some default params here, e.g.
-        * getJobHostSummaries: function(id, page_size=200, order='host_name'){}
-        * without ES6, we'd have to supply defaults like this:
-        * this.page_size = params.page_size ? params.page_size : 200;
-        */
+        stringifyParams: function(params){
+            return  _.reduce(params, (result, value, key) => {
+                return result + key + '=' + value + '&'}, '');
+        },
 
         // the the API passes through Ansible's event_data response
         // we need to massage away the verbose and redundant properties
@@ -129,10 +126,7 @@ export default
         // ?parent=206&event__startswith=runner&page_size=200&order=host_name,counter
         getRelatedJobEvents: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_events/?' +
-                 _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'
-                }, '');
+            url = url + id + '/job_events/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -160,10 +154,7 @@ export default
         // e.g. ?page_size=200&order=host_name
         getJobHostSummaries: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_host_summaries/?' + 
-                _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'
-                }, '');
+            url = url + id + '/job_host_summaries/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -178,10 +169,7 @@ export default
         // e.g. ?page_size=200
         getJobPlays: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_plays/?' + 
-                _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'
-                }, '');
+            url = url + id + '/job_plays/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -194,10 +182,7 @@ export default
         },
         getJobTasks: function(id, params){
             var url = GetBasePath('jobs');
-            url = url + id + '/job_tasks/?' + 
-                _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'
-                }, '');
+            url = url + id + '/job_tasks/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
@@ -209,10 +194,7 @@ export default
                 });                 
         },
         getJob: function(params){
-            var url = GetBasePath('unified_jobs') + '?'; +
-                 _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'
-                }, '');
+            var url = GetBasePath('unified_jobs') + '?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
