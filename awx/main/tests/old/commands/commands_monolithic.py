@@ -935,6 +935,11 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.total_groups, 0)
         self.assertElapsedLessThan(60)
 
+    @unittest.skipIf(True,
+                     'This test is deprecated and being removed from '
+                     'integration and unit tests in favor of writing '
+                     'an explicit unit test around what the original '
+                     'problem was')
     def test_splunk_inventory(self):
         new_inv = self.organizations[0].inventories.create(name='splunk')
         self.assertEqual(new_inv.hosts.count(), 0)
