@@ -427,16 +427,17 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
+TEST_DIRS=awx/main/tests
 # Run all API unit tests.
 test:
-	py.test awx/main/tests awx/api/tests
+	py.test $(TEST_DIRS)
 
 test_unit:
 	py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml awx/main/tests awx/api/tests
+	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
