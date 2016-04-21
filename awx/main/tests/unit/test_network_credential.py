@@ -12,8 +12,8 @@ def options():
         'username':'test',
         'password':'test',
         'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
-        'become_method': 'sudo',
-        'become_password': 'passwd',
+        'authorize': True,
+        'authorize_password': 'passwd',
     }
 
 
@@ -30,7 +30,7 @@ def test_net_cred_parse(mocker, options):
         assert env['ANSIBLE_NET_USERNAME'] == options['username']
         assert env['ANSIBLE_NET_PASSWORD'] == options['password']
         assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
-        assert env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] == options['become_password']
+        assert env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] == options['authorize_password']
 
 
 def test_net_cred_ssh_agent(mocker, options):

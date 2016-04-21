@@ -23,6 +23,16 @@ class Migration(migrations.Migration):
             name='network_credential',
             field=models.ForeignKey(related_name='jobtemplates_as_network_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
         ),
+        migrations.AddField(
+            model_name='credential',
+            name='authorize',
+            field=models.BooleanField(default=False, help_text='Whether to use the authorize mechanism.'),
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='authorize_password',
+            field=models.CharField(default=b'', help_text='Password used by the authorize mechanism.', max_length=1024, blank=True),
+        ),
         migrations.AlterField(
             model_name='credential',
             name='deprecated_team',

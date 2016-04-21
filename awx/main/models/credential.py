@@ -56,7 +56,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     ]
 
     PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data', 'ssh_key_unlock',
-                       'become_password', 'vault_password', 'secret')
+                       'become_password', 'vault_password', 'secret', 'authorize_password')
 
     class Meta:
         app_label = 'main'
@@ -168,6 +168,16 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
+    )
+    authorize = models.BooleanField(
+        default=False,
+        help_text=_('Whether to use the authorize mechanism.'),
+    )
+    authorize_password = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Password used by the authorize mechanism.'),
     )
     client = models.CharField(
         max_length=128,
