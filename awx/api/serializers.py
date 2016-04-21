@@ -319,7 +319,7 @@ class BaseSerializer(serializers.ModelSerializer):
         # RBAC summary fields
         request = self.context.get('request', None)
         if request and isinstance(obj, ResourceMixin) and request.user.is_authenticated():
-            summary_fields['permissions'] = obj.get_permissions(request.user)
+            summary_fields['active_roles'] = obj.get_permissions(request.user)
         roles = {}
         for field in obj._meta.get_fields():
             if type(field) is ImplicitRoleField:
@@ -1479,7 +1479,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
-        ret['summary_fields']['permissions'] = get_roles_on_resource(obj, user)
+        ret['summary_fields']['active_roles'] = get_roles_on_resource(obj, user)
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
@@ -1489,7 +1489,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'permissions': get_roles_on_resource(obj, role)}
+            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
             role = team_role.children.filter(id__in=permissive_role_ids)[0]
@@ -1507,7 +1507,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'permissions': get_roles_on_resource(obj, team_role)}
+            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, team_role)}
 
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)

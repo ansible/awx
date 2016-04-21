@@ -4,6 +4,8 @@ from awx.main.models import (
     Role,
     Organization,
     Project,
+    JobTemplate,
+    Inventory,
 )
 
 
@@ -220,3 +222,29 @@ def test_auto_parenting():
     assert org2.admin_role.is_ancestor_of(prj1.admin_role)
     assert org2.admin_role.is_ancestor_of(prj2.admin_role)
 
+@pytest.mark.django_db
+def test_OR_parents(alice, bob):
+    org1 = Organization.objects.create(name="org1")
+
+    inv = Inventory.objects.create(name='inv1', organization=org1)
+    prj = Project.objects.create(name='prj1', organization=org1)
+
+    jt1 = JobTemplate.objects.create(name='jt1', inventory=inv)
+    jt2 = JobTemplate.objects.create(name='jt2', project=prj)
+    jt3 = JobTemplate.objects.create(name='jt3', inventory=inv, project=prj)
+
+    assert bob not in jt1.admin_role
+    assert alice not in jt2.admin_role
+    assert bob not in jt3.admin_role
+    assert alice not in jt3.admin_role
+
+    inv.admin_role.members.add(bob)
+    assert bob in jt1.admin_role
+    assert alice not in jt1.admin_role
+
+    prj.admin_role.members.add(alice)
+    assert alice in jt2.admin_role
+    assert bob not in jt2.admin_role
+
+    assert alice in jt3.admin_role
+    assert bob not in jt3.admin_role
