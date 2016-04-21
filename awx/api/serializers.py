@@ -1560,7 +1560,7 @@ class CredentialSerializer(BaseSerializer):
                   'password', 'security_token', 'project', 'domain',
                   'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
-                  'vault_password')
+                  'vault_password', 'subscription', 'tenant', 'secret', 'client')
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)

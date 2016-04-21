@@ -466,10 +466,10 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     '''
     Load inventory from given source directory or file.
     '''
-    # Sanity check: We need the "azure" module to be titled "windows_azure.py",
-    # because it depends on the "azure" package from PyPI, and naming the
-    # module the same way makes the importer sad.
-    source = source.replace('azure', 'windows_azure')
+    # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
+    # good naming conventions
+    if source == 'azure':
+        source = 'windows_azure'
 
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group

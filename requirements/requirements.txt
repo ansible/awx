@@ -3,7 +3,6 @@ amqp==1.4.5
 anyjson==0.3.3
 apache-libcloud==0.15.1
 appdirs==1.4.0
-azure==0.9.0
 Babel==2.2.0
 billiard==3.3.0.16
 boto==2.34.0

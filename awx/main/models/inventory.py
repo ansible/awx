@@ -355,7 +355,7 @@ class Host(CommonModelNameNotUnique, ResourceMixin):
         help_text=_('Is this host online and available for running jobs?'),
     )
     instance_id = models.CharField(
-        max_length=100,
+        max_length=1024,
         blank=True,
         default='',
     )
@@ -748,7 +748,8 @@ class InventorySourceOptions(BaseModel):
         ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
-        ('azure', _('Microsoft Azure')),
+        ('azure', _('Microsoft Azure Classic (deprecated)')),
+        ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
         ('foreman', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
@@ -968,6 +969,10 @@ class InventorySourceOptions(BaseModel):
         regions = list(getattr(settings, 'AZURE_REGION_CHOICES', []))
         regions.insert(0, ('all', 'All'))
         return regions
+
+    @classmethod
+    def get_azure_rm_region_choices(self):
+        return InventorySourceOptions.get_azure_region_choices()
 
     @classmethod
     def get_vmware_region_choices(self):
