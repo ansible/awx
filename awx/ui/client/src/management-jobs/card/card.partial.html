@@ -1,4 +1,5 @@
 <div class="tab-pane" id="management_jobs">
+	<div ui-view></div>
 	<div class="MgmtCards">
 		<div class="MgmtCards-card"
 			ng-repeat="card in mgmtCards track by card.id">
@@ -6,6 +7,10 @@
 			<div class="MgmtCards-header">
 				<h3 class="MgmtCards-label"> {{ card.name }}</h3>
 				<div class="MgmtCards-actionItems">
+					<button class="MgmtCards-actionItem List-actionButton"
+						ng-click='goToNotifications(card, card.id)'>
+						<i class="MgmtCards-actionItemIcon fa fa-bell-o"></i>
+					</button>
 					<button class="MgmtCards-actionItem List-actionButton"
 						ng-click='chooseRunJob(card.id, card.name)'>
 						<i class="MgmtCards-actionItemIcon fa fa-rocket"></i>

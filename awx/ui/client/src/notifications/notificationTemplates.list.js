@@ -40,7 +40,7 @@ export default function(){
             notification_type: {
                     label: 'Type',
                     searchType: 'select',
-                    searchOptions: [], // will be set by Options call to projects resource
+                    searchOptions: [],
                     excludeModal: true,
                     columnClass: 'col-md-4 hidden-sm hidden-xs'
             }
