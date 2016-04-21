@@ -1374,10 +1374,10 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'azure_rm':
             if len(passwords.get('source_client', '')) and \
                len(passwords.get('source_tenant', '')):
-                   env['AZURE_CLIENT_ID'] = passwords.get('source_client', '')
-                   env['AZURE_SECRET'] = passwords.get('source_secret', '')
-                   env['AZURE_TENANT'] = passwords.get('source_tenant', '')
-                   env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
+                env['AZURE_CLIENT_ID'] = passwords.get('source_client', '')
+                env['AZURE_SECRET'] = passwords.get('source_secret', '')
+                env['AZURE_TENANT'] = passwords.get('source_tenant', '')
+                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
             else:
                 env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
                 env['AZURE_AD_USER'] = passwords.get('source_username', '')
