@@ -132,6 +132,7 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
+        data['job_events'] = reverse('api:job_event_list')
         data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list')
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
