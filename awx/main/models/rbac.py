@@ -82,20 +82,19 @@ def batch_role_ancestor_rebuilding(allow_nesting=False):
     try:
         setattr(tls, 'batch_role_rebuilding', True)
         if not batch_role_rebuilding:
-            setattr(tls, 'roles_needing_rebuilding', set())
+            setattr(tls, 'additions', set())
+            setattr(tls, 'removals', set())
         yield
 
     finally:
         setattr(tls, 'batch_role_rebuilding', batch_role_rebuilding)
         if not batch_role_rebuilding:
-            rebuild_set = getattr(tls, 'roles_needing_rebuilding')
+            additions = getattr(tls, 'additions')
+            removals = getattr(tls, 'removals')
             with transaction.atomic():
-                Role._simultaneous_ancestry_rebuild(list(rebuild_set))
-
-                #for role in Role.objects.filter(id__in=list(rebuild_set)).all():
-                #    # TODO: We can reduce this to one rebuild call with our new upcoming rebuild method.. do this
-                #    role.rebuild_role_ancestor_list()
-            delattr(tls, 'roles_needing_rebuilding')
+                Role.rebuild_role_ancestor_list(list(additions), list(removals))
+            delattr(tls, 'additions')
+            delattr(tls, 'removals')
 
 
 class Role(models.Model):
@@ -125,7 +124,7 @@ class Role(models.Model):
 
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
-        self.rebuild_role_ancestor_list()
+        self.rebuild_role_ancestor_list([self.id], [])
 
     def get_absolute_url(self):
         return reverse('api:role_detail', args=(self.pk,))
@@ -143,17 +142,6 @@ class Role(models.Model):
                                         object_id=accessor.id)
             return self.ancestors.filter(pk__in=roles).exists()
 
-    def rebuild_role_ancestor_list(self):
-        '''
-        Updates our `ancestors` map to accurately reflect all of the ancestors for a role
-
-        You should never need to call this. Signal handlers should be calling
-        this method when the role hierachy changes automatically.
-
-        Note that this method relies on any parents' ancestor list being correct.
-        '''
-        Role._simultaneous_ancestry_rebuild([self.id])
-
     @property
     def name(self):
         global role_names
@@ -165,7 +153,13 @@ class Role(models.Model):
         return role_descriptions[self.role_field]
 
     @staticmethod
-    def _simultaneous_ancestry_rebuild(role_ids_to_rebuild):
+    def rebuild_role_ancestor_list(additions, removals):
+        '''
+        Updates our `ancestors` map to accurately reflect all of the ancestors for a role
+
+        You should never need to call this. Signal handlers should be calling
+        this method when the role hierachy changes automatically.
+        '''
         # The ancestry table
         # =================================================
         #
@@ -238,15 +232,15 @@ class Role(models.Model):
         #
         #
 
-        if len(role_ids_to_rebuild) == 0:
+        if len(additions) == 0 and len(removals) == 0:
             return
 
         global tls
         batch_role_rebuilding = getattr(tls, 'batch_role_rebuilding', False)
 
         if batch_role_rebuilding:
-            roles_needing_rebuilding = getattr(tls, 'roles_needing_rebuilding')
-            roles_needing_rebuilding.update(set(role_ids_to_rebuild))
+            getattr(tls, 'additions').update(set(additions))
+            getattr(tls, 'removals').update(set(removals))
             return
 
         cursor = connection.cursor()
@@ -268,77 +262,88 @@ class Role(models.Model):
             for i in xrange(0, len(role_ids), 40000):
                 yield role_ids[i:i + 40000]
 
+
         with transaction.atomic():
-            while role_ids_to_rebuild:
+            while len(additions) > 0 or len(removals) > 0:
                 if loop_ct > 100:
                     raise Exception('Role ancestry rebuilding error: infinite loop detected')
                 loop_ct += 1
 
                 delete_ct = 0
-                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-                    sql_params['ids'] = ','.join(str(x) for x in ids)
-                    cursor.execute('''
-                        DELETE FROM %(ancestors_table)s
-                        WHERE descendent_id IN (%(ids)s)
-                              AND descendent_id != ancestor_id
-                              AND NOT EXISTS (
-                                  SELECT 1
-                                    FROM %(parents_table)s as parents
-                                         INNER JOIN %(ancestors_table)s as inner_ancestors
-                                                 ON (parents.to_role_id = inner_ancestors.descendent_id)
-                                   WHERE parents.from_role_id = %(ancestors_table)s.descendent_id
-                                         AND %(ancestors_table)s.ancestor_id = inner_ancestors.ancestor_id
-                              )
-                    ''' % sql_params)
+                if len(removals) > 0:
+                    for ids in split_ids_for_sqlite(removals):
+                        sql_params['ids'] = ','.join(str(x) for x in ids)
+                        cursor.execute('''
+                            DELETE FROM %(ancestors_table)s
+                            WHERE descendent_id IN (%(ids)s)
+                                  AND descendent_id != ancestor_id
+                                  AND NOT EXISTS (
+                                      SELECT 1
+                                        FROM %(parents_table)s as parents
+                                             INNER JOIN %(ancestors_table)s as inner_ancestors
+                                                     ON (parents.to_role_id = inner_ancestors.descendent_id)
+                                       WHERE parents.from_role_id = %(ancestors_table)s.descendent_id
+                                             AND %(ancestors_table)s.ancestor_id = inner_ancestors.ancestor_id
+                                  )
+                        ''' % sql_params)
 
-                    delete_ct += cursor.rowcount
+                        delete_ct += cursor.rowcount
 
                 insert_ct = 0
-                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-                    sql_params['ids'] = ','.join(str(x) for x in ids)
-                    cursor.execute('''
-                        INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
-                        SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
-                              SELECT roles.id from_id,
-                                     ancestors.ancestor_id to_id,
-                                     roles.role_field,
-                                     COALESCE(roles.content_type_id, 0) content_type_id,
-                                     COALESCE(roles.object_id, 0) object_id
-                                FROM %(roles_table)s as roles
-                                     INNER JOIN %(parents_table)s as parents
-                                             ON (parents.from_role_id = roles.id)
-                                     INNER JOIN %(ancestors_table)s as ancestors
-                                             ON (parents.to_role_id = ancestors.descendent_id)
-                               WHERE roles.id IN (%(ids)s)
+                if len(additions) > 0:
+                    for ids in split_ids_for_sqlite(additions):
+                        sql_params['ids'] = ','.join(str(x) for x in ids)
+                        cursor.execute('''
+                            INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
+                            SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
+                                  SELECT roles.id from_id,
+                                         ancestors.ancestor_id to_id,
+                                         roles.role_field,
+                                         COALESCE(roles.content_type_id, 0) content_type_id,
+                                         COALESCE(roles.object_id, 0) object_id
+                                    FROM %(roles_table)s as roles
+                                         INNER JOIN %(parents_table)s as parents
+                                                 ON (parents.from_role_id = roles.id)
+                                         INNER JOIN %(ancestors_table)s as ancestors
+                                                 ON (parents.to_role_id = ancestors.descendent_id)
+                                   WHERE roles.id IN (%(ids)s)
 
-                               UNION
+                                   UNION
 
-                              SELECT id from_id,
-                                     id to_id,
-                                     role_field,
-                                     COALESCE(content_type_id, 0) content_type_id,
-                                     COALESCE(object_id, 0) object_id
-                               from %(roles_table)s WHERE id IN (%(ids)s)
-                         ) new_ancestry_list
-                         WHERE NOT EXISTS (
-                            SELECT 1 FROM %(ancestors_table)s
-                             WHERE %(ancestors_table)s.descendent_id = new_ancestry_list.from_id
-                                   AND %(ancestors_table)s.ancestor_id = new_ancestry_list.to_id
-                         )
+                                  SELECT id from_id,
+                                         id to_id,
+                                         role_field,
+                                         COALESCE(content_type_id, 0) content_type_id,
+                                         COALESCE(object_id, 0) object_id
+                                   from %(roles_table)s WHERE id IN (%(ids)s)
+                             ) new_ancestry_list
+                             WHERE NOT EXISTS (
+                                SELECT 1 FROM %(ancestors_table)s
+                                 WHERE %(ancestors_table)s.descendent_id = new_ancestry_list.from_id
+                                       AND %(ancestors_table)s.ancestor_id = new_ancestry_list.to_id
+                             )
 
-                    ''' % sql_params)
-                    insert_ct += cursor.rowcount
+                        ''' % sql_params)
+                        insert_ct += cursor.rowcount
 
                 if insert_ct == 0 and delete_ct == 0:
                     break
 
-                new_role_ids_to_rebuild = set()
-                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
+                new_additions = set()
+                for ids in split_ids_for_sqlite(additions):
                     sql_params['ids'] = ','.join(str(x) for x in ids)
                     # get all children for the roles we're operating on
                     cursor.execute('SELECT DISTINCT from_role_id FROM %(parents_table)s WHERE to_role_id IN (%(ids)s)' % sql_params)
-                    new_role_ids_to_rebuild.update([row[0] for row in cursor.fetchall()])
-                role_ids_to_rebuild = list(new_role_ids_to_rebuild)
+                    new_additions.update([row[0] for row in cursor.fetchall()])
+                additions = list(new_additions)
+
+                new_removals = set()
+                for ids in split_ids_for_sqlite(removals):
+                    sql_params['ids'] = ','.join(str(x) for x in ids)
+                    # get all children for the roles we're operating on
+                    cursor.execute('SELECT DISTINCT from_role_id FROM %(parents_table)s WHERE to_role_id IN (%(ids)s)' % sql_params)
+                    new_removals.update([row[0] for row in cursor.fetchall()])
+                removals = list(new_removals)
 
 
     @staticmethod
@@ -362,7 +367,7 @@ class RoleAncestorEntry(models.Model):
         index_together = [
             ("ancestor", "content_type_id", "object_id"),     # used by get_roles_on_resource
             ("ancestor", "content_type_id", "role_field"),    # used by accessible_objects
-            ("ancestor", "descendent"),                       # used by _simultaneous_ancestry_rebuild in the NOT EXISTS clauses.
+            ("ancestor", "descendent"),                       # used by rebuild_role_ancestor_list in the NOT EXISTS clauses.
         ]
 
     descendent      = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
