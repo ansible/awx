@@ -18,7 +18,7 @@ export default
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', 'SearchHelper',
                'PaginationHelpers', listGenerator.name, 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
                'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
-               'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'StandardOutHelper',
+               'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'StandardOutHelper',
                'SchedulesHelper'
 ])
 
@@ -713,11 +713,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 .factory('GroupsEdit', ['$filter', '$rootScope', '$location', '$log', '$stateParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
          'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
-         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
+         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
          function ($filter, $rootScope, $location, $log, $stateParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
-                   SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
+                   SetSchedulesInnerDialogSize, CreateSelect2) {
                        return function (params) {
 
                            var parent_scope = params.scope,
@@ -756,14 +756,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            var form_scope =
                            generator.inject(GroupForm, { mode: mode, id: 'properties-tab', related: false, scope: properties_scope });
                            var source_form_scope =
-                           generator.inject(SourceForm, { mode: mode, id: 'sources-tab', related: false, scope: sources_scope });
+                           generator.inject(GroupForm, { mode: mode, id: 'sources-tab', related: false, scope: sources_scope });
 
                            //generator.reset();
 
                            GetSourceTypeOptions({ scope: sources_scope, variable: 'source_type_options' });
-                           sources_scope.source = SourceForm.fields.source['default'];
+                           sources_scope.source = GroupForm.fields.source['default'];
                            sources_scope.sourcePathRequired = false;
-                           sources_scope[SourceForm.fields.source_vars.parseTypeName] = 'yaml';
+                           sources_scope[GroupForm.fields.source_vars.parseTypeName] = 'yaml';
                            sources_scope.update_cache_timeout = 0;
                            properties_scope.parseType = 'yaml';
 
@@ -795,7 +795,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 
                            function initSourceChange() {
                                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
-                               SourceChange({ scope: sources_scope, form: SourceForm });
+                               SourceChange({ scope: sources_scope, form: GroupForm });
                            }
 
                            // Set modal dimensions based on viewport width
@@ -921,17 +921,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                else if ($(e.target).text() === 'Source') {
                                    if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                                        Wait('start');
-                                       ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
+                                       ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: GroupForm.fields.source_vars.parseTypeName,
                                                        field_id: 'source_source_vars', onReady: waitStop });
                                    } else if (sources_scope.source && (sources_scope.source.value === 'vmware' ||
                                                                        sources_scope.source.value === 'openstack')) {
                                        Wait('start');
-                                       ParseTypeChange({ scope: sources_scope, variable: 'inventory_variables', parse_variable: SourceForm.fields.inventory_variables.parseTypeName,
+                                       ParseTypeChange({ scope: sources_scope, variable: 'inventory_variables', parse_variable: GroupForm.fields.inventory_variables.parseTypeName,
                                                        field_id: 'source_inventory_variables', onReady: waitStop });
                                    }
                                    else if (sources_scope.source && (sources_scope.source.value === 'custom')) {
                                        Wait('start');
-                                       ParseTypeChange({ scope: sources_scope, variable: 'extra_vars', parse_variable: SourceForm.fields.extra_vars.parseTypeName,
+                                       ParseTypeChange({ scope: sources_scope, variable: 'extra_vars', parse_variable: GroupForm.fields.extra_vars.parseTypeName,
                                                        field_id: 'source_extra_vars', onReady: waitStop });
                                    }
                                }
@@ -975,7 +975,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    Rest.get()
                                    .success(function (data) {
                                        var fld, i, j, flag, found, set, opts, list, form;
-                                       form = SourceForm;
+                                       form = GroupForm;
                                        for (fld in form.fields) {
                                            if (fld === 'checkbox_group') {
                                                for (i = 0; i < form.fields[fld].fields.length; i++) {
@@ -1320,7 +1320,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    })
                                    .error(function (data, status) {
                                        $('#group_tabs a:eq(1)').tab('show');
-                                       ProcessErrors(sources_scope, data, status, SourceForm, { hdr: 'Error!',
+                                       ProcessErrors(sources_scope, data, status, GroupForm, { hdr: 'Error!',
                                                      msg: 'Failed to update group inventory source. PUT status: ' + status });
                                    });
                                }

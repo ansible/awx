@@ -24,7 +24,6 @@ import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
 import ProjectStatus from "./forms/ProjectStatus";
 import Projects from "./forms/Projects";
-import Source from "./forms/Source";
 import Teams from "./forms/Teams";
 import Users from "./forms/Users";
 
@@ -50,7 +49,6 @@ export
         Organizations,
         ProjectStatus,
         Projects,
-        Source,
         Teams,
         Users
     };
