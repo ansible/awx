@@ -29,8 +29,39 @@ __all__ = [
 
 logger = logging.getLogger('awx.main.models.rbac')
 
-ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='System Administrator'
-ROLE_SINGLETON_SYSTEM_AUDITOR='System Auditor'
+ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='system_administrator'
+ROLE_SINGLETON_SYSTEM_AUDITOR='system_auditor'
+
+role_names = {
+    'system_administrator' : 'System Administrator',
+    'system_auditor'       : 'System Auditor',
+    'adhoc_role'           : 'Ad Hoc',
+    'admin_role'           : 'Admin',
+    'auditor_role'         : 'Auditor',
+    'execute_role'         : 'Execute',
+    'member_role'          : 'Member',
+    'owner_role'           : 'Owner',
+    'read_role'            : 'Read',
+    'scm_update_role'      : 'SCM Update',
+    'update_role'          : 'Update',
+    'use_role'             : 'Use',
+}
+
+role_descriptions = {
+    'system_administrator' : '[TODO] System Administrator',
+    'system_auditor'       : '[TODO] System Auditor',
+    'adhoc_role'           : '[TODO] Ad Hoc',
+    'admin_role'           : '[TODO] Admin',
+    'auditor_role'         : '[TODO] Auditor',
+    'execute_role'         : '[TODO] Execute',
+    'member_role'          : '[TODO] Member',
+    'owner_role'           : '[TODO] Owner',
+    'read_role'            : '[TODO] Read',
+    'scm_update_role'      : '[TODO] SCM Update',
+    'update_role'          : '[TODO] Update',
+    'use_role'             : '[TODO] Use',
+}
+
 
 tls = threading.local() # thread local storage
 
@@ -67,7 +98,7 @@ def batch_role_ancestor_rebuilding(allow_nesting=False):
             delattr(tls, 'roles_needing_rebuilding')
 
 
-class Role(CommonModelNameNotUnique):
+class Role(models.Model):
     '''
     Role model
     '''
@@ -77,8 +108,8 @@ class Role(CommonModelNameNotUnique):
         verbose_name_plural = _('roles')
         db_table = 'main_rbac_roles'
 
+    role_field = models.TextField(null=False)
     singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
-    role_field = models.TextField(null=False, default='')
     parents = models.ManyToManyField('Role', related_name='children')
     implicit_parents = models.TextField(null=False, default='[]')
     ancestors = models.ManyToManyField(
@@ -122,6 +153,17 @@ class Role(CommonModelNameNotUnique):
         Note that this method relies on any parents' ancestor list being correct.
         '''
         Role._simultaneous_ancestry_rebuild([self.id])
+
+    @property
+    def name(self):
+        global role_names
+        return role_names[self.role_field]
+
+    @property
+    def description(self):
+        global role_descriptions
+        return role_descriptions[self.role_field]
+
 
 
     @staticmethod
@@ -226,12 +268,18 @@ class Role(CommonModelNameNotUnique):
             'roles_table': Role._meta.db_table,
         }
 
+        # SQLlite has a 1M sql statement limit.. since the django sqllite
+        # driver isn't letting us pass in the ids through the preferred
+        # parameter binding system, this function exists to obey this.
+        # est max 12 bytes per number, used up to 3 times in a query,
+        # minus 4k of padding for the other parts of the query, leads us
+        # to the magic number of 20748, or 20500 for a nice round number
         def split_ids_for_sqlite(role_ids):
-            for i in xrange(0, len(role_ids), 999):
-                yield role_ids[i:i + 999]
+            for i in xrange(0, len(role_ids), 20500):
+                yield role_ids[i:i + 20500]
 
         while role_ids_to_rebuild:
-            if loop_ct > 1000:
+            if loop_ct > 100:
                 raise Exception('Ancestry role rebuilding error: infinite loop detected')
             loop_ct += 1
 
@@ -313,7 +361,7 @@ class Role(CommonModelNameNotUnique):
 
     @staticmethod
     def singleton(name):
-        role, _ = Role.objects.get_or_create(singleton_name=name, name=name)
+        role, _ = Role.objects.get_or_create(singleton_name=name, role_field=name)
         return role
 
     def is_ancestor_of(self, role):

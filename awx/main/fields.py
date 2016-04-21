@@ -92,9 +92,7 @@ class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
 class ImplicitRoleField(models.ForeignKey):
     """Implicitly creates a role entry for a resource"""
 
-    def __init__(self, role_name=None, role_description=None, parent_role=None, *args, **kwargs):
-        self.role_name = role_name
-        self.role_description = role_description if role_description else ""
+    def __init__(self, parent_role=None, *args, **kwargs):
         self.parent_role = parent_role
 
         kwargs.setdefault('to', 'Role')
@@ -104,8 +102,6 @@ class ImplicitRoleField(models.ForeignKey):
 
     def deconstruct(self):
         name, path, args, kwargs = super(ImplicitRoleField, self).deconstruct()
-        kwargs['role_name'] = self.role_name
-        kwargs['role_description'] = self.role_description
         kwargs['parent_role'] = self.parent_role
         return name, path, args, kwargs
 
@@ -190,11 +186,7 @@ class ImplicitRoleField(models.ForeignKey):
                 if cur_role is None:
                     missing_roles.append(
                         Role_(
-                            created=now(),
-                            modified=now(),
                             role_field=implicit_role_field.name,
-                            name=implicit_role_field.role_name,
-                            description=implicit_role_field.role_description,
                             content_type_id=ct_id,
                             object_id=instance.id
                         )
@@ -247,12 +239,7 @@ class ImplicitRoleField(models.ForeignKey):
                 if qs.count() >= 1:
                     role = qs[0]
                 else:
-                    role = Role_.objects.create(created=now(),
-                                                modified=now(),
-                                                role_field=path,
-                                                singleton_name=singleton_name,
-                                                name=singleton_name,
-                                                description=singleton_name)
+                    role = Role_.objects.create(singleton_name=singleton_name, role_field=singleton_name)
                 parents = [role.id]
             else:
                 parents = resolve_role_field(instance, path)

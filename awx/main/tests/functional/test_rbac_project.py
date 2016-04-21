@@ -148,7 +148,7 @@ def test_project_user_project(user_project, project, user):
 def test_project_accessible_by_sa(user, project):
     u = user('systemadmin', is_superuser=True)
     # This gets setup by a signal, but we want to test the migration which will set this up too, so remove it
-    Role.singleton('System Administrator').members.remove(u)
+    Role.singleton('system_administrator').members.remove(u)
 
     assert u not in project.read_role
     rbac.migrate_organization(apps, None)

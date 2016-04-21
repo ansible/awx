@@ -97,39 +97,25 @@ class Inventory(CommonModel, ResourceMixin):
         help_text=_('Number of external inventory sources in this inventory with failures.'),
     )
     admin_role = ImplicitRoleField(
-        role_name='Inventory Administrator',
-        role_description='May manage this inventory',
         parent_role='organization.admin_role',
     )
     auditor_role = ImplicitRoleField(
-        role_name='Inventory Auditor',
-        role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
     )
     update_role = ImplicitRoleField(
-        role_name='Inventory Updater',
-        role_description='May update the inventory',
         parent_role=['admin_role'],
     )
     use_role = ImplicitRoleField(
-        role_name='Inventory User',
-        role_description='May use this inventory, but not read sensitive portions or modify it',
         parent_role=['admin_role'],
     )
     adhoc_role = ImplicitRoleField(
-        role_name='Inventory Ad Hoc',
-        role_description='May execute ad hoc commands against this inventory',
         parent_role=['admin_role'],
     )
     execute_role = ImplicitRoleField(
-        role_name='Inventory Executor',
-        role_description='May execute jobs against this inventory',
         parent_role='adhoc_role',
     )
     read_role = ImplicitRoleField(
-        role_name='Read',
         parent_role=['auditor_role', 'execute_role', 'update_role', 'use_role', 'admin_role'],
-        role_description='May view this inventory',
     )
 
     def get_absolute_url(self):
@@ -531,28 +517,21 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         help_text=_('Inventory source(s) that created or modified this group.'),
     )
     admin_role = ImplicitRoleField(
-        role_name='Inventory Group Administrator',
         parent_role=['inventory.admin_role', 'parents.admin_role'],
     )
     auditor_role = ImplicitRoleField(
-        role_name='Inventory Group Auditor',
         parent_role=['inventory.auditor_role', 'parents.auditor_role'],
     )
     update_role = ImplicitRoleField(
-        role_name='Inventory Group Updater',
         parent_role=['inventory.update_role', 'parents.update_role', 'admin_role'],
     )
     adhoc_role = ImplicitRoleField(
-        role_name='Inventory Ad Hoc',
         parent_role=['inventory.adhoc_role', 'parents.adhoc_role', 'admin_role'],
-        role_description='May execute ad hoc commands against this inventory',
     )
     execute_role = ImplicitRoleField(
-        role_name='Inventory Group Executor',
         parent_role=['inventory.execute_role', 'parents.execute_role', 'adhoc_role'],
     )
     read_role = ImplicitRoleField(
-        role_name='Inventory Group Executor',
         parent_role=['execute_role', 'update_role', 'auditor_role', 'admin_role'],
     )
 
@@ -1321,25 +1300,15 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
     )
 
     admin_role = ImplicitRoleField(
-        role_name='CustomInventory Administrator',
-        role_description='May manage this inventory',
         parent_role='organization.admin_role',
     )
-
     member_role = ImplicitRoleField(
-        role_name='CustomInventory Member',
-        role_description='May view but not modify this inventory',
         parent_role='organization.member_role',
     )
-
     auditor_role = ImplicitRoleField(
-        role_name='CustomInventory Auditor',
-        role_description='May view but not modify this inventory',
         parent_role='organization.auditor_role',
     )
     read_role = ImplicitRoleField(
-        role_name='CustomInventory Read',
-        role_description='May view but not modify this inventory',
         parent_role=['auditor_role', 'member_role', 'admin_role'],
     )
 

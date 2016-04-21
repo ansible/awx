@@ -53,23 +53,15 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         related_name='deprecated_organizations',
     )
     admin_role = ImplicitRoleField(
-        role_name='Organization Administrator',
-        role_description='May manage all aspects of this organization',
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )
     auditor_role = ImplicitRoleField(
-        role_name='Organization Auditor',
-        role_description='May read all settings associated with this organization',
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
     )
     member_role = ImplicitRoleField(
-        role_name='Organization Member',
-        role_description='A member of this organization',
         parent_role='admin_role',
     )
     read_role = ImplicitRoleField(
-        role_name='Organization Read Access',
-        role_description='Read an organization',
         parent_role=['member_role', 'auditor_role'],
     )
 
@@ -110,22 +102,13 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         related_name='deprecated_teams',
     )
     admin_role = ImplicitRoleField(
-        role_name='Team Administrator',
-        role_description='May manage this team',
         parent_role='organization.admin_role',
     )
     auditor_role = ImplicitRoleField(
-        role_name='Team Auditor',
-        role_description='May read all settings associated with this team',
         parent_role='organization.auditor_role',
     )
-    member_role = ImplicitRoleField(
-        role_name='Team Member',
-        role_description='A member of this team',
-    )
+    member_role = ImplicitRoleField()
     read_role = ImplicitRoleField(
-        role_name='Read',
-        role_description='Can view this team',
         parent_role=['admin_role', 'auditor_role', 'member_role'],
     )
 
