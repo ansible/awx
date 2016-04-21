@@ -130,6 +130,10 @@ class ImplicitRoleField(models.ForeignKey):
             field_names = [field_names]
 
         for field_name in field_names:
+            # Handle the OR syntax for role parents
+            if type(field_name) == tuple:
+                continue
+
             if field_name.startswith('singleton:'):
                 continue
 
@@ -227,8 +231,16 @@ class ImplicitRoleField(models.ForeignKey):
 
         paths = self.parent_role if type(self.parent_role) is list else [self.parent_role]
         parent_roles = set()
+
         for path in paths:
-            if path.startswith("singleton:"):
+            if type(path) == tuple:
+                for or_path in path:
+                    if or_path.startswith("singleton:"):
+                        raise Exception("Unable to use Singleton role in an OR context.")
+                    parents = resolve_role_field(instance, or_path)
+                    if len(parents) is not 0:
+                        break
+            elif path.startswith("singleton:"):
                 singleton_name = path[10:]
                 Role_ = get_current_apps().get_model('main', 'Role')
                 qs = Role_.objects.filter(singleton_name=singleton_name)
@@ -244,6 +256,7 @@ class ImplicitRoleField(models.ForeignKey):
                 parents = [role.id]
             else:
                 parents = resolve_role_field(instance, path)
+
             for parent in parents:
                 parent_roles.add(parent)
         return parent_roles

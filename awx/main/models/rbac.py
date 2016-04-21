@@ -333,15 +333,13 @@ class RoleAncestorEntry(models.Model):
     descendent      = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
     ancestor        = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
     role_field      = models.TextField(null=False)
-    #content_type_id = models.PositiveIntegerField(null=False)
-    #object_id       = models.PositiveIntegerField(null=False)
     content_type_id = models.PositiveIntegerField(null=False)
     object_id       = models.PositiveIntegerField(null=False)
 
 
 def get_roles_on_resource(resource, accessor):
     '''
-    Returns a dict (or None) of the roles a accessor has for a given resource.
+    Returns a string list of the roles a accessor has for a given resource.
     An accessor can be either a User, Role, or an arbitrary resource that
     contains one or more Roles associated with it.
     '''
@@ -355,11 +353,11 @@ def get_roles_on_resource(resource, accessor):
         roles = Role.objects.filter(content_type__pk=accessor_type.id,
                                     object_id=accessor.id)
 
-    return {
-        role_field: True for role_field in
+    return [
+        role_field for role_field in
         RoleAncestorEntry.objects.filter(
             ancestor__in=roles,
             content_type_id=ContentType.objects.get_for_model(resource).id,
             object_id=resource.id
         ).values_list('role_field', flat=True)
-    }
+    ]

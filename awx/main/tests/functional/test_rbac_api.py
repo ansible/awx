@@ -420,8 +420,8 @@ def test_ensure_permissions_is_present(organization, get, user):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'permissions' in org['summary_fields']
-    assert org['summary_fields']['permissions']['read_role'] > 0
+    assert 'active_roles' in org['summary_fields']
+    assert 'read_role' in org['summary_fields']['active_roles']
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):
