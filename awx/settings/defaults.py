@@ -651,6 +651,16 @@ AZURE_HOST_FILTER = r'^.+$'
 AZURE_EXCLUDE_EMPTY_GROUPS = True
 AZURE_INSTANCE_ID_VAR = 'private_id'
 
+# --------------------------------------
+# -- Microsoft Azure Resource Manager --
+# --------------------------------------
+AZURE_RM_GROUP_FILTER = r'^.+$'
+AZURE_RM_HOST_FILTER = r'^.+$'
+AZURE_RM_ENABLED_VAR = 'powerstate'
+AZURE_RM_ENABLED_VALUE = 'running'
+AZURE_RM_INSTANCE_ID_VAR = 'id'
+AZURE_RM_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- OpenStack -----
 # ---------------------

@@ -801,6 +801,16 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
             env['AZURE_CERT_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+        elif cloud_cred and cloud_cred.kind == 'azure_rm':
+            if len(cloud_cred.client) and len(cloud_cred.tenant):
+                env['AZURE_CLIENT_ID'] = cloud_cred.client
+                env['AZURE_SECRET'] = decrypt_field(cloud_cred, 'secret')
+                env['AZURE_TENANT'] = cloud_cred.tenant
+                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+            else:
+                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+                env['AZURE_AD_USER'] = cloud_cred.username
+                env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
         elif cloud_cred and cloud_cred.kind == 'vmware':
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
@@ -1278,6 +1288,14 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, 'username', credential.username)
                 cp.set(section, 'password', decrypt_field(credential, 'password'))
 
+        elif inventory_update.source == 'azure_rm':
+            section = 'azure'
+            cp.add_section(section)
+            cp.set(section, 'include_powerstate', 'yes')
+            cp.set(section, 'group_by_resource_group', 'yes')
+            cp.set(section, 'group_by_location', 'yes')
+            cp.set(section, 'group_by_tag', 'yes')
+
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -1298,9 +1316,9 @@ class RunInventoryUpdate(BaseTask):
         # passwords dictionary.
         credential = inventory_update.credential
         if credential:
-            for subkey in ('username', 'host', 'project'):
+            for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
-            for passkey in ('password', 'ssh_key_data', 'security_token'):
+            for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
                 k = 'source_%s' % passkey
                 passwords[k] = decrypt_field(credential, passkey)
         return passwords
@@ -1353,6 +1371,17 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
             env['AZURE_CERT_PATH'] = cloud_credential
+        elif inventory_update.source == 'azure_rm':
+            if len(passwords.get('source_client', '')) and \
+               len(passwords.get('source_tenant', '')):
+                   env['AZURE_CLIENT_ID'] = passwords.get('source_client', '')
+                   env['AZURE_SECRET'] = passwords.get('source_secret', '')
+                   env['AZURE_TENANT'] = passwords.get('source_tenant', '')
+                   env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
+            else:
+                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
+                env['AZURE_AD_USER'] = passwords.get('source_username', '')
+                env['AZURE_PASSWORD'] = passwords.get('source_password', '')
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')

@@ -41,7 +41,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ('foreman', _('Satellite 6')),
         ('cloudforms', _('CloudForms')),
         ('gce', _('Google Compute Engine')),
-        ('azure', _('Microsoft Azure')),
+        ('azure', _('Microsoft Azure Classic (deprecated)')),
+        ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('openstack', _('OpenStack')),
     ]
 
@@ -55,7 +56,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     ]
 
     PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data', 'ssh_key_unlock',
-                       'become_password', 'vault_password')
+                       'become_password', 'vault_password', 'secret')
 
     class Meta:
         app_label = 'main'
@@ -167,6 +168,30 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
+    )
+    client = models.CharField(
+        max_length=128,
+        blank=True,
+        default='',
+        help_text=_('Client Id or Application Id for the credential'),
+    )
+    secret = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Secret Token for this credential'),
+    )
+    subscription = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Subscription identifier for this credential'),
+    )
+    tenant = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Tenant identifier for this credential'),
     )
     owner_role = ImplicitRoleField(
         role_name='Credential Owner',
