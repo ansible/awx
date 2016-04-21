@@ -164,10 +164,20 @@ class Role(models.Model):
         global role_descriptions
         return role_descriptions[self.role_field]
 
-
-
     @staticmethod
     def _simultaneous_ancestry_rebuild(role_ids_to_rebuild):
+        # The ancestry table
+        # =================================================
+        #
+        #   The role ancestors table denormalizes the parental relations
+        #   between all roles in the system. If you have role A which is a
+        #   parent of B which is a parent of C, then the ancestors table will
+        #   contain a row noting that B is a descendent of A, and two rows for
+        #   denoting that C is a descendent of both A and B. In addition to
+        #   storing entries for each descendent relationship, we also store an
+        #   entry that states that C is a 'descendent' of itself, C. This makes
+        #   usage of this table simple in our queries as it enables us to do
+        #   straight joins where we would have to do unions otherwise.
         #
         # The simple version of what this function is doing
         # =================================================
@@ -205,37 +215,18 @@ class Role(models.Model):
         #
         # SQL Breakdown
         # =============
-        #   The Role ancestors has three columns, (id, from_role_id, to_role_id)
-        #
-        #      id:           Unqiue row ID
-        #      from_role_id: Descendent role ID
-        #      to_role_id:   Ancestor role ID
-        #
-        #      *NOTE* In addition to mapping roles to parents, there also
-        #      always exists must exist an entry where
-        #
-        #           from_role_id == role_id == to_role_id
-        #
-        #      this makes our joins simple when we go to derive permissions or
-        #      accessible objects.
-        #
-        #
         #   We operate under the assumption that our parent's ancestor list is
         #   correct, thus we can always compute what our ancestor list should
         #   be by taking the union of our parent's ancestor lists and adding
-        #   our self reference entry from_role_id == role_id == to_role_id
+        #   our self reference entry where ancestor_id = descendent_id
         #
-        #   The inner query for the two SQL statements compute this union,
-        #   the union of the parent's ancestors and the self referncing entry,
-        #   for all roles in the current set of roles to rebuild.
+        #   The DELETE query deletes all entries in the ancestor table that
+        #   should no longer be there (as determined by the NOT EXISTS query,
+        #   which checks to see if the ancestor is still an ancestor of one
+        #   or more of our parents)
         #
-        #   The DELETE query uses this to select all entries on disk for the
-        #   roles we're dealing with, and removes the entries that are not in
-        #   this list.
-        #
-        #   The INSERT query uses this to select all entries in the list that
-        #   are not in the database yet, and inserts all of the missing
-        #   records.
+        #   The INSERT query computes the list of what our ancestor maps should
+        #   be, and inserts any missing entries.
         #
         #   Once complete, we select all of the children for the roles we are
         #   working with, this list becomes the new role list we are working
@@ -258,7 +249,6 @@ class Role(models.Model):
             roles_needing_rebuilding.update(set(role_ids_to_rebuild))
             return
 
-
         cursor = connection.cursor()
         loop_ct = 0
 
@@ -271,88 +261,84 @@ class Role(models.Model):
         # SQLlite has a 1M sql statement limit.. since the django sqllite
         # driver isn't letting us pass in the ids through the preferred
         # parameter binding system, this function exists to obey this.
-        # est max 12 bytes per number, used up to 3 times in a query,
+        # est max 12 bytes per number, used up to 2 times in a query,
         # minus 4k of padding for the other parts of the query, leads us
-        # to the magic number of 20748, or 20500 for a nice round number
+        # to the magic number of 41496, or 40000 for a nice round number
         def split_ids_for_sqlite(role_ids):
-            for i in xrange(0, len(role_ids), 20500):
-                yield role_ids[i:i + 20500]
+            for i in xrange(0, len(role_ids), 40000):
+                yield role_ids[i:i + 40000]
 
-        while role_ids_to_rebuild:
-            if loop_ct > 100:
-                raise Exception('Ancestry role rebuilding error: infinite loop detected')
-            loop_ct += 1
+        with transaction.atomic():
+            while role_ids_to_rebuild:
+                if loop_ct > 100:
+                    raise Exception('Role ancestry rebuilding error: infinite loop detected')
+                loop_ct += 1
 
-            delete_ct = 0
-            for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-                sql_params['ids'] = ','.join(str(x) for x in ids)
-                cursor.execute('''
-                    DELETE FROM %(ancestors_table)s
-                    WHERE descendent_id IN (%(ids)s)
-                          AND
-                          id NOT IN (
-                              SELECT %(ancestors_table)s.id FROM  (
-                                    SELECT parents.from_role_id from_id, ancestors.ancestor_id to_id
-                                      FROM %(parents_table)s as parents
-                                           LEFT JOIN %(ancestors_table)s as ancestors
-                                               ON (parents.to_role_id = ancestors.descendent_id)
-                                     WHERE parents.from_role_id IN (%(ids)s) AND ancestors.ancestor_id IS NOT NULL
+                delete_ct = 0
+                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
+                    sql_params['ids'] = ','.join(str(x) for x in ids)
+                    cursor.execute('''
+                        DELETE FROM %(ancestors_table)s
+                        WHERE descendent_id IN (%(ids)s)
+                              AND descendent_id != ancestor_id
+                              AND NOT EXISTS (
+                                  SELECT 1
+                                    FROM %(parents_table)s as parents
+                                         INNER JOIN %(ancestors_table)s as inner_ancestors
+                                                 ON (parents.to_role_id = inner_ancestors.descendent_id)
+                                   WHERE parents.from_role_id = %(ancestors_table)s.descendent_id
+                                         AND %(ancestors_table)s.ancestor_id = inner_ancestors.ancestor_id
+                              )
+                    ''' % sql_params)
 
-                                     UNION
+                    delete_ct += cursor.rowcount
 
-                                     SELECT id from_id, id to_id from %(roles_table)s WHERE id IN (%(ids)s)
-                               ) new_ancestry_list
-                               LEFT JOIN %(ancestors_table)s ON (new_ancestry_list.from_id = %(ancestors_table)s.descendent_id
-                                                                       AND new_ancestry_list.to_id = %(ancestors_table)s.ancestor_id)
-                               WHERE %(ancestors_table)s.id IS NOT NULL
+                insert_ct = 0
+                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
+                    sql_params['ids'] = ','.join(str(x) for x in ids)
+                    cursor.execute('''
+                        INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
+                        SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
+                              SELECT roles.id from_id,
+                                     ancestors.ancestor_id to_id,
+                                     roles.role_field,
+                                     COALESCE(roles.content_type_id, 0) content_type_id,
+                                     COALESCE(roles.object_id, 0) object_id
+                                FROM %(roles_table)s as roles
+                                     INNER JOIN %(parents_table)s as parents
+                                             ON (parents.from_role_id = roles.id)
+                                     INNER JOIN %(ancestors_table)s as ancestors
+                                             ON (parents.to_role_id = ancestors.descendent_id)
+                               WHERE roles.id IN (%(ids)s)
+
+                               UNION
+
+                              SELECT id from_id,
+                                     id to_id,
+                                     role_field,
+                                     COALESCE(content_type_id, 0) content_type_id,
+                                     COALESCE(object_id, 0) object_id
+                               from %(roles_table)s WHERE id IN (%(ids)s)
+                         ) new_ancestry_list
+                         WHERE NOT EXISTS (
+                            SELECT 1 FROM %(ancestors_table)s
+                             WHERE %(ancestors_table)s.descendent_id = new_ancestry_list.from_id
+                                   AND %(ancestors_table)s.ancestor_id = new_ancestry_list.to_id
                          )
-                ''' % sql_params)
-                delete_ct += cursor.rowcount
 
-            insert_ct = 0
-            for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-                sql_params['ids'] = ','.join(str(x) for x in ids)
-                cursor.execute('''
-                    INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
-                    SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
-                          SELECT parents.from_role_id from_id,
-                                 ancestors.ancestor_id to_id,
-                                 roles.role_field,
-                                 COALESCE(roles.content_type_id, 0) content_type_id,
-                                 COALESCE(roles.object_id, 0) object_id
-                            FROM %(parents_table)s as parents
-                                 INNER JOIN %(roles_table)s as roles ON (parents.from_role_id = roles.id)
-                                 LEFT OUTER JOIN %(ancestors_table)s as ancestors
-                                     ON (parents.to_role_id = ancestors.descendent_id)
-                           WHERE parents.from_role_id IN (%(ids)s) AND ancestors.ancestor_id IS NOT NULL
+                    ''' % sql_params)
+                    insert_ct += cursor.rowcount
 
-                           UNION
+                if insert_ct == 0 and delete_ct == 0:
+                    break
 
-                          SELECT id from_id,
-                                 id to_id,
-                                 role_field,
-                                 COALESCE(content_type_id, 0) content_type_id,
-                                 COALESCE(object_id, 0) object_id
-                           from %(roles_table)s WHERE id IN (%(ids)s)
-                     ) new_ancestry_list
-                     LEFT JOIN %(ancestors_table)s ON (new_ancestry_list.from_id = %(ancestors_table)s.descendent_id
-                                                             AND new_ancestry_list.to_id = %(ancestors_table)s.ancestor_id)
-                     WHERE %(ancestors_table)s.id IS NULL
-                ''' % sql_params)
-                insert_ct += cursor.rowcount
-
-            if insert_ct == 0 and delete_ct == 0:
-                break
-
-            new_role_ids_to_rebuild = set()
-            for ids in split_ids_for_sqlite(role_ids_to_rebuild):
-                sql_params['ids'] = ','.join(str(x) for x in ids)
-                new_role_ids_to_rebuild.update(set(Role.objects.distinct()
-                                                   .filter(id__in=ids, children__id__isnull=False)
-                                                   .values_list('children__id', flat=True)))
-            role_ids_to_rebuild = list(new_role_ids_to_rebuild)
-
-
+                new_role_ids_to_rebuild = set()
+                for ids in split_ids_for_sqlite(role_ids_to_rebuild):
+                    sql_params['ids'] = ','.join(str(x) for x in ids)
+                    # get all children for the roles we're operating on
+                    cursor.execute('SELECT DISTINCT from_role_id FROM %(parents_table)s WHERE to_role_id IN (%(ids)s)' % sql_params)
+                    new_role_ids_to_rebuild.update([row[0] for row in cursor.fetchall()])
+                role_ids_to_rebuild = list(new_role_ids_to_rebuild)
 
 
     @staticmethod
@@ -376,6 +362,7 @@ class RoleAncestorEntry(models.Model):
         index_together = [
             ("ancestor", "content_type_id", "object_id"),     # used by get_roles_on_resource
             ("ancestor", "content_type_id", "role_field"),    # used by accessible_objects
+            ("ancestor", "descendent"),                       # used by _simultaneous_ancestry_rebuild in the NOT EXISTS clauses.
         ]
 
     descendent      = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
