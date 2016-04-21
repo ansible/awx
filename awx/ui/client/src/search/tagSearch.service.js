@@ -99,7 +99,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
                         });
                     }
                     catch(err){
-                        if (basePath === ''){
+                        if (!basePath){
                             $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
                         }
                         else { $log.error(err); }
