@@ -351,7 +351,6 @@ export default
                 },
                 "notifications": {
                     include: "NotificationsList"
-
                 }
             },
 
