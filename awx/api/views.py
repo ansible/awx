@@ -1205,6 +1205,10 @@ class CredentialList(ListCreateAPIView):
     serializer_class = CredentialSerializer
 
     def post(self, request, *args, **kwargs):
+        for field in [x for x in ['user', 'team', 'organization'] if x in request.data and request.data[x] in ('', None)]:
+            request.data.pop(field)
+            kwargs.pop(field, None)
+
         if not any([x in request.data for x in ['user', 'team', 'organization']]):
             return Response({'detail': 'Missing user, team, or organization'}, status=status.HTTP_400_BAD_REQUEST)
 

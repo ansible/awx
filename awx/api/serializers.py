@@ -796,6 +796,7 @@ class OrganizationSerializer(BaseSerializer):
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
+            credentials = reverse('api:organization_credential_list',     args=(obj.pk,)),
             activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
             notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
             notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
@@ -1553,6 +1554,18 @@ class ResourceAccessListElementSerializer(UserSerializer):
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
+    user = serializers.CharField(
+        required=False, default=None, write_only=True,
+        help_text='Write-only field used to add user to owner role. If provided, '
+                  'do not give either team or organization. Only valid for creation.')
+    team = serializers.CharField(
+        required=False, default=None, write_only=True,
+        help_text='Write-only field used to add team to owner role. If provided, '
+                  'do not give either user or organization. Only valid for creation.')
+    organization = serializers.CharField(
+        required=False, default=None, write_only=True,
+        help_text='Write-only field used to add organization to owner role. If provided, '
+                  'do not give either team or team. Only valid for creation.')
 
     class Meta:
         model = Credential
@@ -1561,7 +1574,14 @@ class CredentialSerializer(BaseSerializer):
                   'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password', 'subscription', 'tenant', 'secret', 'client',
-                  'authorize', 'authorize_password')
+                  'authorize', 'authorize_password',
+                  'user', 'team', 'organization')
+
+    def create(self, validated_data):
+        # Remove the user, team, and organization processed in view
+        for field in ['user', 'team', 'organization']:
+            validated_data.pop(field, None)
+        return super(CredentialSerializer, self).create(validated_data)
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)
