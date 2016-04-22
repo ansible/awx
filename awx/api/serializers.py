@@ -1623,7 +1623,7 @@ class JobOptionsSerializer(BaseSerializer):
         return res
 
     def _summary_field_labels(self, obj):
-        return [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('-name')[:10]]
+        return [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
 
     def get_summary_fields(self, obj):
         res = super(JobOptionsSerializer, self).get_summary_fields(obj)
