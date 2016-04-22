@@ -11,8 +11,8 @@ from awx.main.models import (
 
 @pytest.mark.django_db
 def test_auto_inheritance_by_children(organization, alice):
-    A = Role.objects.create(name='A', role_field='')
-    B = Role.objects.create(name='B', role_field='')
+    A = Role.objects.create()
+    B = Role.objects.create()
     A.members.add(alice)
 
     assert alice not in organization.admin_role
@@ -38,8 +38,8 @@ def test_auto_inheritance_by_children(organization, alice):
 
 @pytest.mark.django_db
 def test_auto_inheritance_by_parents(organization, alice):
-    A = Role.objects.create(name='A')
-    B = Role.objects.create(name='B')
+    A = Role.objects.create()
+    B = Role.objects.create()
     A.members.add(alice)
 
     assert alice not in organization.admin_role
@@ -58,9 +58,9 @@ def test_auto_inheritance_by_parents(organization, alice):
 
 @pytest.mark.django_db
 def test_accessible_objects(organization, alice, bob):
-    A = Role.objects.create(name='A')
+    A = Role.objects.create()
     A.members.add(alice)
-    B = Role.objects.create(name='B')
+    B = Role.objects.create()
     B.members.add(alice)
     B.members.add(bob)
 
@@ -118,7 +118,7 @@ def test_auto_field_adjustments(organization, inventory, team, alice):
 def test_implicit_deletes(alice):
     'Ensures implicit resources and roles delete themselves'
     delorg = Organization.objects.create(name='test-org')
-    child = Role.objects.create(name='child-role')
+    child = Role.objects.create()
     child.parents.add(delorg.admin_role)
     delorg.admin_role.members.add(alice)
 
@@ -129,14 +129,14 @@ def test_implicit_deletes(alice):
     assert Role.objects.filter(id=admin_role_id).count() == 1
     assert Role.objects.filter(id=auditor_role_id).count() == 1
     n_alice_roles = alice.roles.count()
-    n_system_admin_children = Role.singleton('System Administrator').children.count()
+    n_system_admin_children = Role.singleton('system_administrator').children.count()
 
     delorg.delete()
 
     assert Role.objects.filter(id=admin_role_id).count() == 0
     assert Role.objects.filter(id=auditor_role_id).count() == 0
     assert alice.roles.count() == (n_alice_roles - 1)
-    assert Role.singleton('System Administrator').children.count() == (n_system_admin_children - 1)
+    assert Role.singleton('system_administrator').children.count() == (n_system_admin_children - 1)
     assert child.ancestors.count() == 1
     assert child.ancestors.all()[0] == child
 
@@ -152,11 +152,11 @@ def test_content_object(user):
 def test_hierarchy_rebuilding_multi_path():
     'Tests a subdtle cases around role hierarchy rebuilding when you have multiple paths to the same role of different length'
 
-    X = Role.objects.create(name='X')
-    A = Role.objects.create(name='A')
-    B = Role.objects.create(name='B')
-    C = Role.objects.create(name='C')
-    D = Role.objects.create(name='D')
+    X = Role.objects.create()
+    A = Role.objects.create()
+    B = Role.objects.create()
+    C = Role.objects.create()
+    D = Role.objects.create()
 
     A.children.add(B)
     A.children.add(D)

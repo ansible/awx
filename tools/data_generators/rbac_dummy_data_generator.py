@@ -114,8 +114,8 @@ class Rollback(Exception):
 
 try:
 
-    with batch_role_ancestor_rebuilding():
-        with transaction.atomic():
+    with transaction.atomic():
+        with batch_role_ancestor_rebuilding():
             admin, _      = User.objects.get_or_create(username = 'admin', is_superuser=True)
             org_admin, _  = User.objects.get_or_create(username = 'org_admin')
             org_member, _ = User.objects.get_or_create(username = 'org_member')

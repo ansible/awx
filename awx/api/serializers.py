@@ -340,16 +340,18 @@ class BaseSerializer(serializers.ModelSerializer):
             return None
         elif isinstance(obj, User):
             return obj.date_joined
-        else:
+        elif hasattr(obj, 'created'):
             return obj.created
+        return None
 
     def get_modified(self, obj):
         if obj is None:
             return None
         elif isinstance(obj, User):
             return obj.last_login # Not actually exposed for User.
-        else:
+        elif hasattr(obj, 'modified'):
             return obj.modified
+        return None
 
     def build_standard_field(self, field_name, model_field):
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits

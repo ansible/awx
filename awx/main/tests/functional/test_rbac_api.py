@@ -10,6 +10,10 @@ def mock_feature_enabled(feature, bypass_database=None):
 
 #@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 
+@pytest.fixture
+def role():
+    return Role.objects.create()
+
 
 #
 # /roles
@@ -85,7 +89,7 @@ def test_get_user_roles_list(get, admin):
     response = get(url, admin)
     assert response.status_code == 200
     roles = response.data
-    assert roles['count'] > 0 # 'System Administrator' role if nothing else
+    assert roles['count'] > 0 # 'system_administrator' role if nothing else
 
 @pytest.mark.django_db
 def test_user_view_other_user_roles(organization, inventory, team, get, alice, bob):

@@ -44,9 +44,7 @@ def migrate_users(apps, schema_editor):
             logger.info(smart_text(u"found existing role for user: {}".format(user.username)))
         except Role.DoesNotExist:
             role = Role.objects.create(
-                created=now(),
-                modified=now(),
-                singleton_name = smart_text(u'{}-admin_role'.format(user.username)),
+                role_field='admin_role',
                 content_type = user_content_type,
                 object_id = user.id
             )
@@ -54,14 +52,12 @@ def migrate_users(apps, schema_editor):
             logger.info(smart_text(u"migrating to new role for user: {}".format(user.username)))
 
         if user.is_superuser:
-            if Role.objects.filter(singleton_name='System Administrator').exists():
-                sa_role = Role.objects.get(singleton_name='System Administrator')
+            if Role.objects.filter(singleton_name='system_administrator').exists():
+                sa_role = Role.objects.get(singleton_name='system_administrator')
             else:
                 sa_role = Role.objects.create(
-                    created=now(),
-                    modified=now(),
-                    singleton_name='System Administrator',
-                    name='System Administrator'
+                    singleton_name='system_administrator',
+                    role_field='system_administrator'
                 )
 
             sa_role.members.add(user)

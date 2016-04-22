@@ -108,12 +108,17 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
 
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
     'When a role parent is added or removed, update our role hierarchy list'
-    if action in ['post_add', 'post_remove', 'post_clear']:
+    if action == 'post_add':
         if reverse:
-            for id in pk_set:
-                model.objects.get(id=id).rebuild_role_ancestor_list()
+            model.rebuild_role_ancestor_list(list(pk_set), [])
         else:
-            instance.rebuild_role_ancestor_list()
+            model.rebuild_role_ancestor_list([instance.id], [])
+
+    if action in ['post_remove', 'post_clear']:
+        if reverse:
+            model.rebuild_role_ancestor_list([], list(pk_set))
+        else:
+            model.rebuild_role_ancestor_list([], [instance.id])
 
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
@@ -127,11 +132,10 @@ def create_user_role(instance, **kwargs):
         Role.objects.get(
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            name = 'User Admin'
+            role_field='admin_role'
         )
     except Role.DoesNotExist:
         role = Role.objects.create(
-            name = 'User Admin',
             role_field='admin_role',
             content_object = instance,
         )
