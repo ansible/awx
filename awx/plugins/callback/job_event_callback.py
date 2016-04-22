@@ -98,6 +98,8 @@ def censor(obj, no_log=False):
             if k in obj:
                 new_obj[k] = obj[k]
             if k == 'cmd' and k in obj:
+                if isinstance(obj['cmd'], list):
+                    obj['cmd'] = ' '.join(obj['cmd'])
                 if re.search(r'\s', obj['cmd']):
                     new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
                                             r'\1 <censored>',
@@ -110,7 +112,6 @@ def censor(obj, no_log=False):
                 obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
         elif obj.get('_ansible_no_log', False):
             obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-
     return obj
 
 class TokenAuth(requests.auth.AuthBase):
@@ -218,7 +219,6 @@ class BaseCallbackModule(object):
                                    r'\1 <censored>',
                                    res['invocation']['module_args']['_raw_params'])
                     msg['event_data']['res'] = res
-
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
@@ -524,6 +524,13 @@ class JobCallbackModule(BaseCallbackModule):
 
     def v2_playbook_on_play_start(self, play):
         setattr(self, 'play', play)
+        # Ansible 2.0.0.2 doesn't default .name to hosts like it did in 1.9.4,
+        # though that default will likely return in a future version of Ansible.
+        if (not hasattr(play, 'name') or not play.name) and hasattr(play, 'hosts'):
+            if isinstance(play.hosts, list):
+                play.name = ','.join(play.hosts)
+            else:
+                play.name = play.hosts
         self._log_event('playbook_on_play_start', name=play.name,
                         pattern=play.hosts)
 
@@ -570,7 +577,6 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     def runner_on_skipped(self, host, item=None):
         super(AdHocCommandCallbackModule, self).runner_on_skipped(host, item)
         self.skipped_hosts.add(host)
-
 
 if os.getenv('JOB_ID', ''):
     CallbackModule = JobCallbackModule

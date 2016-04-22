@@ -5,7 +5,7 @@ apache-libcloud==0.15.1
 appdirs==1.4.0
 Babel==2.2.0
 billiard==3.3.0.16
-boto==2.34.0
+boto==2.39.0
 celery==3.1.10
 cffi==1.5.0
 cliff==1.15.0
