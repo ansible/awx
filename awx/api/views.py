@@ -3573,7 +3573,7 @@ class RoleChildrenList(SubListAPIView):
         # XXX: This should be the intersection between the roles of the user
         # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.children
+        return role.children.all()
 
 
 
