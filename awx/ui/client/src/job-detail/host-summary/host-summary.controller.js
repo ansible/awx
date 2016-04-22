@@ -12,6 +12,20 @@
         $scope.filter = 'all';
         $scope.search = null;
 
+        var init = function(){
+            Wait('start');
+            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
+            .success(function(res){
+                $scope.hosts = res.results;
+                $scope.next = res.next;
+                Wait('stop');
+            });
+            JobDetailService.getJob({id: $stateParams.id})
+            .success(function(res){
+                $scope.status = res.results[0].status;
+            });
+        };
+
         var buildGraph = function(hosts){
             //  status waterfall: unreachable > failed > changed > ok > skipped
             var count;
@@ -30,23 +44,23 @@
                 }),
                 changed : _.filter(hosts, function(o){
                     return o.changed > 0;
-                })       
+                })
             };
             return count;
         };
         var socketListener = function(){
             // emitted by the API in the same function used to persist host summary data
-            // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py 
+            // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
             jobSocket.on('summary_complete', function(data) {
                 // discard socket msgs we don't care about in this context
-                if ($stateParams.id == data['unified_job_id']){
+                if ($stateParams.id === data.unified_job_id){
                     init();
                 }
             });
-            // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py 
+            // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
             jobSocket.on('status_changed', function(data) {
-                if ($stateParams.id == data['unified_job_id']){
-                    $scope.status = data['status'];
+                if ($stateParams.id === data.unified_job_id){
+                    $scope.status = data.status;
                 }
             });
         };
@@ -69,14 +83,14 @@
                 text[key] = grammar(value.length, key);
             });
             */
-            return grammar(n, status)
+            return grammar(n, status);
         };
         $scope.getNextPage = function(){
             if ($scope.next){
                 JobDetailService.getNextPage($scope.next).success(function(res){
                     res.results.forEach(function(key, index){
-                        $scope.hosts.push(res.results[index]);  
-                    })
+                        $scope.hosts.push(res.results[index]);
+                    });
                     $scope.hosts.push(res.results);
                     $scope.next = res.next;
                 });
@@ -91,7 +105,7 @@
                 $scope.hosts = res.results;
                 $scope.next = res.next;
                 Wait('stop');
-            })
+            });
         };
         $scope.setFilter = function(filter){
             $scope.filter = filter;
@@ -100,7 +114,7 @@
                 JobDetailService.getJobHostSummaries($stateParams.id, {
                     page_size: page_size
                 }).success(function(res){
-                    Wait('stop')           
+                    Wait('stop');
                     $scope.hosts = res.results;
                     $scope.next = res.next;
                 });
@@ -111,32 +125,18 @@
                     page_size: page_size,
                     failed: true
                 }).success(function(res){
-                    Wait('stop')
+                    Wait('stop');
                     $scope.hosts = res.results;
                     $scope.next = res.next;
-                });                
-            }
-            var get = filter == 'all' ? getAll() : getFailed();
+                });
+            };
+            $scope.get = filter === 'all' ? getAll() : getFailed();
         };
 
-        $scope.$watchCollection('hosts', function(curr, prev){
+        $scope.$watchCollection('hosts', function(curr){
             $scope.count = buildGraph(curr);
             DrawGraph({count: $scope.count, resize:true});
         });
-
-        var init = function(){
-            Wait('start');
-            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
-            .success(function(res){
-                $scope.hosts = res.results;
-                $scope.next = res.next;
-                Wait('stop');
-            });
-            JobDetailService.getJob({id: $stateParams.id})
-            .success(function(res){
-                $scope.status = res.results[0].status;
-            });
-        };
         socketListener();
         init();
     }];

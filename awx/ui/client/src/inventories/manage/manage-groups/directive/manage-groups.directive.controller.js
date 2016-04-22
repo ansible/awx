@@ -60,14 +60,13 @@ function manageGroupsDirectiveController($filter, $location, $log,
 
     $scope.parseType = 'yaml';
 
-    var form_scope =
-        generator.inject(GroupForm, {
-            mode: mode,
-            id: 'properties-tab',
-            related: false,
-            scope: properties_scope,
-            cancelButton: false,
-        });
+    generator.inject(GroupForm, {
+        mode: mode,
+        id: 'properties-tab',
+        related: false,
+        scope: $scope,
+        cancelButton: false,
+    });
 
     generator.reset();
 

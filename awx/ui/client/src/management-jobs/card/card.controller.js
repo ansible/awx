@@ -165,7 +165,7 @@ export default
                     });
                 };
 
-                $scope.submitJob = function (id, name, card) {
+                $scope.submitJob = function (id, name) {
                     Wait('start');
                         defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
                         CreateDialog({

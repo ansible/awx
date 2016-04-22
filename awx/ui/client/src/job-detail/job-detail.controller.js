@@ -13,7 +13,7 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile',
         '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
-        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 
+        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
         'LoadPlays', 'LoadTasks', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
@@ -243,7 +243,7 @@ export default
                         event: 'playbook_on_stats'
                     };
                     JobDetailService.getRelatedJobEvents(scope.job.id, params)
-                        .success(function(data) {
+                        .success(function() {
                             UpdateDOM({ scope: scope });
                         })
                         .error(function(data, status) {
@@ -278,7 +278,6 @@ export default
                         };
                         JobDetailService.getRelatedJobEvents(scope.job.id, params)
                             .success(function(data) {
-                                var event, status, item, msg;
                                 if (data.results.length > 0) {
                                     lastEventId =  data.results[0].id;
                                 }
@@ -502,7 +501,7 @@ export default
                     });
                 }
             });
-            
+
 
             if (scope.removeLoadJob) {
                 scope.removeLoadJob();
@@ -518,7 +517,7 @@ export default
                 // Load the job record
                 JobDetailService.getJob({id: job_id})
                     .success(function(res) {
-                        var i, 
+                        var i,
                             data = res.results[0];
                         scope.job = data;
                         scope.job_template_name = data.name;
@@ -802,6 +801,7 @@ export default
             };
 
             scope.searchTasks = function() {
+                var params;
                 if (scope.search_task_name) {
                     scope.searchTasksEnabled = false;
                 }
@@ -826,6 +826,7 @@ export default
             };
 
             scope.searchHosts = function() {
+                var params;
                 if (scope.search_host_name) {
                     scope.searchHostsEnabled = false;
                 }
@@ -834,12 +835,12 @@ export default
                 }
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
                     scope.hostResultsLoading = true;
-                    var params = {
+                    params = {
                         parent: scope.selectedTask,
                         event__startswith: 'runner',
                         page_size: scope.hostResultsMaxRows,
                         order: 'host_name,counter',
-                        host_name__icontains: scope.search_host_name                    
+                        host_name__icontains: scope.search_host_name
                     };
                     if (scope.search_host_status === 'failed'){
                         params.failed = true;

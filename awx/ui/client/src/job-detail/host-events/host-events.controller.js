@@ -71,9 +71,8 @@
  		}
  		if (filter === 'ok'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				host_name: $stateParams.hostName, 
+ 				host_name: $stateParams.hostName,
  				or__field__event: 'runner_on_ok',
- 				or__field__event: 'runner_on_ok_async',  
  				changed: false
  				})
  				.success(function(res){

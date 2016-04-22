@@ -3,7 +3,8 @@ export default
         return {
         stringifyParams: function(params){
             return  _.reduce(params, (result, value, key) => {
-                return result + key + '=' + value + '&'}, '');
+                return result + key + '=' + value + '&';
+            }, '');
         },
 
         // the the API passes through Ansible's event_data response
@@ -45,7 +46,7 @@ export default
         },
         // Return Ansible's passed-through response msg on a job_event
         processEventMsg: function(event){
-            return typeof event.event_data.res === 'object' ? event.event_data.res.msg : event.event_data.res;   
+            return typeof event.event_data.res === 'object' ? event.event_data.res.msg : event.event_data.res;
         },
         // Return only Ansible's passed-through response item on a job_event
         processEventItem: function(event){
@@ -58,7 +59,7 @@ export default
         // Generate a helper class for job_event statuses
         // the stack for which status to display is
         // unreachable > failed > changed > ok
-        // uses the API's runner events and convenience properties .failed .changed to determine status. 
+        // uses the API's runner events and convenience properties .failed .changed to determine status.
         // see: job_event_callback.py for more filters to support
         processEventStatus: function(event){
             if (event.event === 'runner_on_unreachable'){
@@ -72,7 +73,7 @@ export default
                 return {
                     class: 'HostEvents-status--failed',
                     status: 'failed'
-                }
+                };
             }
             // catch the changed case before ok, because both can be true
             if (event.changed){
@@ -120,7 +121,7 @@ export default
             return results;
         },
         // GET events related to a job run
-        // e.g. 
+        // e.g.
         // ?event=playbook_on_stats
         // ?parent=206&event__startswith=runner&page_size=200&order=host_name,counter
         getRelatedJobEvents: function(id, params){
@@ -134,7 +135,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                });         
+                });
         },
         getJobEventChildren: function(id){
             var url = GetBasePath('job_events');
@@ -142,12 +143,12 @@ export default
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
-                    return data
+                    return data;
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                });            
+                });
         },
         // GET job host summaries related to a job run
         // e.g. ?page_size=200&order=host_name
@@ -162,7 +163,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                });                     
+                });
         },
         // GET job plays related to a job run
         // e.g. ?page_size=200
@@ -177,7 +178,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                }); 
+                });
         },
         getJobTasks: function(id, params){
             var url = GetBasePath('jobs');
@@ -190,7 +191,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                });                 
+                });
         },
         getJob: function(params){
             var url = GetBasePath('unified_jobs') + '?' + this.stringifyParams(params);
@@ -202,7 +203,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                }); 
+                });
         },
         // GET next set of paginated results
         // expects 'next' param returned by the API e.g.
@@ -216,7 +217,7 @@ export default
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
-                }); 
+                });
         }
         };
     }];
