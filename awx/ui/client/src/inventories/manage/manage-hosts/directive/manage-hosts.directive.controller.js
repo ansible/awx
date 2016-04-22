@@ -30,23 +30,22 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
         url, form_scope;
 
     var host_id = $stateParams.host_id || undefined;
-
+    var hostName = '';
     form_scope =
         generator.inject(HostForm, {
-            mode: 'edit',
+            mode: mode,
             id: 'host-panel-form',
             related: false,
             scope: scope,
-            cancelButton: false
         });
     generator.reset();
-
     // Retrieve detail record and prepopulate the form
     if (mode === 'edit') {
         defaultUrl = GetBasePath('hosts') + host_id + '/';
         Rest.setUrl(defaultUrl);
         Rest.get()
             .success(function(data) {
+                vm.hostName = data.name;
                 var set, fld, related;
                 for (fld in form.fields) {
                     if (data[fld]) {
@@ -187,7 +186,8 @@ function manageHostsDirectiveController($rootScope, $location, $log, $stateParam
     angular.extend(vm, {
         cancelPanel: cancelPanel,
         saveHost: saveHost,
-        mode: mode
+        mode: mode,
+        hostName: hostName
     });
 }
 
