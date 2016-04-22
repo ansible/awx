@@ -38,6 +38,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
+from rest_framework.pagination import CursorPagination
 from rest_framework import status
 
 # Django REST Framework YAML
@@ -3475,6 +3476,9 @@ class RoleList(ListAPIView):
     model = Role
     serializer_class = RoleSerializer
     permission_classes = (IsAuthenticated,)
+    class CursorPaginationById(CursorPagination):
+        ordering = 'id'
+    pagination_class = CursorPaginationById
     new_in_300 = True
 
     def get_queryset(self):
