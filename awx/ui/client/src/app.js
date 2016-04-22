@@ -20,7 +20,7 @@ import './lists';
 import './widgets';
 import './help';
 import './filters';
-import {Home, HomeGroups, HomeHosts} from './controllers/Home';
+import {Home, HomeGroups} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
@@ -175,7 +175,6 @@ var tower = angular.module('Tower', [
     'CredentialsHelper',
     'StreamListDefinition',
     'HomeGroupListDefinition',
-    'HomeHostListDefinition',
     'ActivityDetailDefinition',
     'VariablesHelper',
     'SchedulesListDefinition',
@@ -261,25 +260,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: 'dashboard',
                     label: "GROUPS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            state('dashboardHosts', {
-                url: '/home/hosts?has_active_failures&name&id',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeHosts,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'host'
-                },
-                ncyBreadcrumb: {
-                    parent: 'dashboard',
-                    label: "HOSTS"
                 },
                 resolve: {
                     features: ['FeaturesService', function(FeaturesService) {

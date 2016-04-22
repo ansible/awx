@@ -11,7 +11,6 @@ import AllJobs from "./lists/AllJobs";
 import Credentials from "./lists/Credentials";
 import Groups from "./lists/Groups";
 import HomeGroups from "./lists/HomeGroups";
-import HomeHosts from "./lists/HomeHosts";
 import Hosts from "./lists/Hosts";
 import Inventories from "./lists/Inventories";
 import InventoryGroups from "./lists/InventoryGroups";
@@ -39,7 +38,6 @@ export
         Credentials,
         Groups,
         HomeGroups,
-        HomeHosts,
         Hosts,
         Inventories,
         InventoryGroups,
