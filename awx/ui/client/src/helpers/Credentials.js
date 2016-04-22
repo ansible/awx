@@ -165,7 +165,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.password_required = true;
                             scope.passwordLabel = 'Password';
                             scope.sshKeyDataLabel = 'SSH Key';
-                            scope.key_required = true;
                          break;
                      }
                  }
