@@ -20,6 +20,8 @@ export default
             well: false,
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
+            cancelButton: false,
+            showHeader: false,
 
             fields: {
                 name: {
