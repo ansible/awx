@@ -523,6 +523,30 @@ class Job(UnifiedJob, JobOptions):
             return self.job_template.ask_variables_on_launch
         return False
 
+    @property
+    def ask_limit_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_limit_on_launch
+        return False
+
+    @property
+    def ask_tags_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_tags_on_launch
+        return False
+
+    @property
+    def ask_job_type_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_job_type_on_launch
+        return False
+
+    @property
+    def ask_inventory_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_inventory_on_launch
+        return False
+
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
