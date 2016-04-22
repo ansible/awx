@@ -348,7 +348,22 @@ class Role(models.Model):
 
     @staticmethod
     def visible_roles(user):
-        return Role.objects.filter(Q(descendents__in=user.roles.filter()) | Q(ancestors__in=user.roles.filter()))
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True))
+        }
+        qs = Role.objects.extra(
+            where = ['''
+                    %(roles_table)s.id IN (
+                        SELECT descendent_id FROM %(ancestors_table)s WHERE ancestor_id IN (%(ids)s)
+                        UNION
+                        SELECT ancestor_id FROM %(ancestors_table)s WHERE descendent_id IN (%(ids)s)
+                    )
+                    ''' % sql_params]
+        )
+        return qs
 
     @staticmethod
     def singleton(name):
