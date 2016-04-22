@@ -146,7 +146,7 @@ class TestJobOptionsSerializerGetSummaryFields(GetSummaryFieldsMixin):
         serializer = JobOptionsSerializer()
         summary_labels = serializer._summary_field_labels(job_template)
 
-        job_template.labels.all.order_by.assert_called_with('-name')
+        job_template.labels.all.order_by.assert_called_with('name')
         assert len(summary_labels) == 10
         assert summary_labels == [{'id': x.id, 'name': x.name} for x in labels[:10]]
 
