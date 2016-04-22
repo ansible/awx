@@ -321,7 +321,7 @@ class Inventory(CommonModel, ResourceMixin):
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
 
-class Host(CommonModelNameNotUnique, ResourceMixin):
+class Host(CommonModelNameNotUnique):
     '''
     A managed node
     '''
