@@ -1021,7 +1021,7 @@ export default
                                 }
                             }
 
-                            if (event.event !== "runner_on_no_hosts") {
+                            if (event.event !== "runner_on_no_hosts" && (!event.event_data || (!event.event_data.event_loop || event.event_data.event_loop === null))) {
                                 scope.hostResults.push({
                                     id: event.id,
                                     status: status,

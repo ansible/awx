@@ -2,10 +2,10 @@
 # This file is a utility Ansible plugin that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
 #
@@ -66,13 +66,19 @@ CENSOR_FIELD_WHITELIST=[
     'skip_reason',
 ]
 
-def censor(obj):
-    if obj.get('_ansible_no_log', False):
+def censor(obj, no_log=False):
+    if not isinstance(obj, dict):
+        if no_log:
+            return "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        return obj
+    if obj.get('_ansible_no_log', no_log):
         new_obj = {}
         for k in CENSOR_FIELD_WHITELIST:
             if k in obj:
                 new_obj[k] = obj[k]
             if k == 'cmd' and k in obj:
+                if isinstance(obj['cmd'], list):
+                    obj['cmd'] = ' '.join(obj['cmd'])
                 if re.search(r'\s', obj['cmd']):
                     new_obj['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
                                             r'\1 <censored>',
@@ -80,8 +86,12 @@ def censor(obj):
         new_obj['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         obj = new_obj
     if 'results' in obj:
-        for i in xrange(len(obj['results'])):
-            obj['results'][i] = censor(obj['results'][i])
+        if isinstance(obj['results'], list):
+            for i in xrange(len(obj['results'])):
+                obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
+        elif obj.get('_ansible_no_log', False):
+            obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+
     return obj
 
 
@@ -165,7 +175,6 @@ class BaseCallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
-
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
@@ -214,16 +223,19 @@ class BaseCallbackModule(object):
                         ignore_errors=ignore_errors)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_failed', host=result._host.name,
                         res=result._result, task=result._task,
-                        ignore_errors=ignore_errors)
+                        ignore_errors=ignore_errors, event_loop=event_is_loop)
 
     def runner_on_ok(self, host, res):
         self._log_event('runner_on_ok', host=host, res=res)
 
     def v2_runner_on_ok(self, result):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_ok', host=result._host.name,
-                        task=result._task, res=result._result)
+                        task=result._task, res=result._result,
+                        event_loop=event_is_loop)
 
     def runner_on_error(self, host, msg):
         self._log_event('runner_on_error', host=host, msg=msg)
@@ -235,8 +247,9 @@ class BaseCallbackModule(object):
         self._log_event('runner_on_skipped', host=host, item=item)
 
     def v2_runner_on_skipped(self, result):
+        event_is_loop = result._task.loop if hasattr(result._task, 'loop') else None
         self._log_event('runner_on_skipped', host=result._host.name,
-                        task=result._task)
+                        task=result._task, event_loop=event_is_loop)
 
     def runner_on_unreachable(self, host, res):
         self._log_event('runner_on_unreachable', host=host, res=res)
@@ -269,6 +282,18 @@ class BaseCallbackModule(object):
     def v2_runner_on_file_diff(self, result, diff):
         self._log_event('runner_on_file_diff', host=result._host.name,
                         task=result._task, diff=diff)
+
+    def v2_runner_item_on_ok(self, result):
+        self._log_event('runner_item_on_ok', res=result._result, host=result._host.name,
+                        task=result._task)
+
+    def v2_runner_item_on_failed(self, result):
+        self._log_event('runner_item_on_failed', res=result._result, host=result._host.name,
+                        task=result._task)
+
+    def v2_runner_item_on_skipped(self, result):
+        self._log_event('runner_item_on_skipped', res=result._result, host=result._host.name,
+                        task=result._task)
 
     @staticmethod
     def terminate_ssh_control_masters():
@@ -410,7 +435,7 @@ class JobCallbackModule(BaseCallbackModule):
         # this from a normal task
         self._log_event('playbook_on_task_start', task=task,
                         name=task.get_name())
-                        
+
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
                                 salt=None, default=None):
@@ -455,6 +480,13 @@ class JobCallbackModule(BaseCallbackModule):
 
     def v2_playbook_on_play_start(self, play):
         setattr(self, 'play', play)
+        # Ansible 2.0.0.2 doesn't default .name to hosts like it did in 1.9.4,
+        # though that default will likely return in a future version of Ansible.
+        if (not hasattr(play, 'name') or not play.name) and hasattr(play, 'hosts'):
+            if isinstance(play.hosts, list):
+                play.name = ','.join(play.hosts)
+            else:
+                play.name = play.hosts
         self._log_event('playbook_on_play_start', name=play.name,
                         pattern=play.hosts)
 
@@ -479,6 +511,7 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     def __init__(self):
         self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
         self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id
+        self.skipped_hosts = set()
         super(AdHocCommandCallbackModule, self).__init__()
 
     def _log_event(self, event, **event_data):
@@ -488,6 +521,19 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
 
     def runner_on_file_diff(self, host, diff):
         pass # Ignore file diff for ad hoc commands.
+
+    def runner_on_ok(self, host, res):
+        # When running in check mode using a module that does not support check
+        # mode, Ansible v1.9 will call runner_on_skipped followed by
+        # runner_on_ok for the same host; only capture the skipped event and
+        # ignore the ok event.
+        if host not in self.skipped_hosts:
+            super(AdHocCommandCallbackModule, self).runner_on_ok(host, res)
+
+    def runner_on_skipped(self, host, item=None):
+        super(AdHocCommandCallbackModule, self).runner_on_skipped(host, item)
+        self.skipped_hosts.add(host)
+
 
 
 if os.getenv('JOB_ID', ''):

@@ -12,7 +12,7 @@ from django.conf import settings
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        for j in orm.UnifiedJob.objects.filter(active=True):
+        for j in orm.UnifiedJob.objects.filter(active=True).only('id'):
             cur = connection.cursor()
             stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (j.pk, str(uuid.uuid1())))
             fd = open(stdout_filename, 'w')
@@ -20,7 +20,7 @@ class Migration(DataMigration):
             fd.close()
             j.result_stdout_file = stdout_filename
             j.result_stdout_text = ""
-            j.save()
+            j.save(update_fields=['result_stdout_file', 'result_stdout_text'])
             sed_command = subprocess.Popen(["sed", "-i", "-e", "s/\\\\r\\\\n/\\n/g", stdout_filename])
             sed_command.wait()
 

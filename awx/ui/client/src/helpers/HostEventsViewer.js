@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:HostEventsViewer
@@ -273,6 +273,13 @@ export default
                     .success(function(data) {
                         var lastID;
                         scope.hostViewSearching = false;
+                        // Loop across the events and remove any events where
+                        // event_data.event_loop is not null
+                        for(var i=data.results.length-1; i>=0; i--){
+                            if(data.results[i].event_data && data.results[i].event_data.event_loop) {
+                                data.results.splice(i, 1);
+                            }
+                        }
                         if (data.results.length > 0) {
                             lastID = data.results[data.results.length - 1].id;
                         }
