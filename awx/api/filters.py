@@ -131,9 +131,9 @@ class FieldLookupBackend(BaseFilterBackend):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
+            if not value:
+                raise ValueError('cannot provide empty value for __in')
             for item in value.split(','):
-                if not item:
-                    raise ValueError('cannot provide empty value for __in')
                 items.append(self.value_to_python_for_field(field, item))
             value = items
         elif new_lookup.endswith('__regex') or new_lookup.endswith('__iregex'):
