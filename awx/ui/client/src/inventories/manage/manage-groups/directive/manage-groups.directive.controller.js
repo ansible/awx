@@ -37,6 +37,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
     Rest.get()
         .success(function(data) {
             group = data;
+            $scope.source_id = data.related.inventory_source.split('/')[4];
             for (var fld in form.fields) {
                 if (data[fld]) {
                     $scope[fld] = data[fld];
@@ -44,10 +45,8 @@ function manageGroupsDirectiveController($filter, $location, $log,
                 }
             }
             if(mode === 'edit') {
-                // schedules_url = data.related.inventory_source + 'schedules/';
                 $scope.variable_url = data.related.variable_data;
                 $scope.source_url = data.related.inventory_source;
-                $scope.source_id = $scope.source_url.split('/')[4];
                 $scope.$emit('LoadSourceData');
             }
         })
