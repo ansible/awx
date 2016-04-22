@@ -18,7 +18,6 @@ from django.db.models.fields.related import (
     ReverseManyRelatedObjectsDescriptor,
 )
 from django.utils.encoding import smart_text
-from django.utils.timezone import now
 
 # AWX
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
