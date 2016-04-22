@@ -1733,12 +1733,13 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     ask_tags_on_launch = serializers.ReadOnlyField()
     ask_job_type_on_launch = serializers.ReadOnlyField()
     ask_inventory_on_launch = serializers.ReadOnlyField()
+    ask_credential_on_launch = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
-                  'ask_inventory_on_launch')
+                  'ask_inventory_on_launch', 'ask_credential_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

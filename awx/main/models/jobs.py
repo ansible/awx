@@ -547,6 +547,12 @@ class Job(UnifiedJob, JobOptions):
             return self.job_template.ask_inventory_on_launch
         return False
 
+    @property
+    def ask_credential_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_credential_on_launch
+        return False
+
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
