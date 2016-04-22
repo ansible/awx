@@ -135,11 +135,6 @@ class JobOptions(BaseModel):
     become_enabled = models.BooleanField(
         default=False,
     )
-    labels = models.ManyToManyField(
-        "Label",
-        blank=True,
-        related_name='%(class)s_labels'
-    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
