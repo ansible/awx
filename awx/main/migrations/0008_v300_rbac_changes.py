@@ -175,12 +175,12 @@ class Migration(migrations.Migration):
             name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'May use this inventory, but not read sensitive portions or modify it', parent_role=None, to='main.Role', role_name=b'Inventory User', null=b'True'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Full access to all settings', parent_role=[(b'project.admin_role', b'inventory.admin_role')], to='main.Role', role_name=b'Job Template Administrator', null=b'True'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='jobtemplate',
             name='auditor_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', role_description=b'Read-only access to all settings', parent_role=[(b'project.auditor_role', b'inventory.auditor_role')], to='main.Role', role_name=b'Job Template Auditor', null=b'True'),
