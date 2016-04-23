@@ -141,6 +141,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default='ok',
         editable=False,
     )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='%(class)s_labels'
+    )
 
     def get_absolute_url(self):
         real_instance = self.get_real_instance()
@@ -476,6 +481,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='%(class)s_labels'
+    )
+
 
     def get_absolute_url(self):
         real_instance = self.get_real_instance()
