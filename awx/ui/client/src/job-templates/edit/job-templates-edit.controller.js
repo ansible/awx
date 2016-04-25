@@ -117,6 +117,10 @@ export default
             $scope.jobTypeChange = function(){
               if($scope.job_type){
                 if($scope.job_type.value === 'scan'){
+                    // If the job_type is 'scan' then we don't want the user to be
+                    // able to prompt for job type or inventory
+                    $scope.ask_job_type_on_launch = false;
+                    $scope.ask_inventory_on_launch = false;
                     $scope.toggleScanInfo();
                   }
                   else if($scope.project_name === "Default"){
@@ -549,6 +553,14 @@ export default
                             }
                         }
                     }
+
+                    data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
+                    data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;
+                    data.ask_job_type_on_launch = $scope.ask_job_type_on_launch ? $scope.ask_job_type_on_launch : false;
+                    data.ask_inventory_on_launch = $scope.ask_inventory_on_launch ? $scope.ask_inventory_on_launch : false;
+                    data.ask_variables_on_launch = $scope.ask_variables_on_launch ? $scope.ask_variables_on_launch : false;
+                    data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
+
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);
                     if(data.job_type === 'scan' &&

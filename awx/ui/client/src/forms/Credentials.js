@@ -119,7 +119,10 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    ask: false,
+                    subCheckbox: {
+                        variable: 'secret_key_ask',
+                        text: 'Ask at runtime?'
+                    },
                     clear: false,
                     hasShowInputButton: true,
                     apiField: 'password',
@@ -207,7 +210,6 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    ask: false,
                     hasShowInputButton: true,
                     clear: false,
                     subForm: 'credentialSubForm'
@@ -216,7 +218,6 @@ export default
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
                     ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'|| kind.value == 'foreman'|| kind.value == 'cloudforms'|| kind.value == 'net' || kind.value == 'azure_rm'",
-                    ask: false,
                     clear: false,
                     autocomplete: false,
                     hasShowInputButton: true,
@@ -232,7 +233,10 @@ export default
                     ngShow: "kind.value == 'ssh'",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'ssh_password_ask',
+                        text: 'Ask at runtime?'
+                    },
                     hasShowInputButton: true,
                     autocomplete: false,
                     subForm: 'credentialSubForm'
@@ -266,9 +270,12 @@ export default
                     addRequired: false,
                     editRequired: false,
                     ngDisabled: "keyEntered === false",
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'ssh_key_unlock_ask',
+                        ngShow: "kind.value == 'ssh'",
+                        text: 'Ask at runtime?'
+                    },
                     hasShowInputButton: true,
-                    askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
                     subForm: 'credentialSubForm'
                 },
                 "become_method": {
@@ -300,7 +307,10 @@ export default
                     ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'become_password_ask',
+                        text: 'Ask at runtime?'
+                    },
                     hasShowInputButton: true,
                     autocomplete: false,
                     subForm: 'credentialSubForm'
@@ -391,7 +401,10 @@ export default
                     ngShow: "kind.value == 'ssh'",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'vault_password_ask',
+                        text: 'Ask at runtime?'
+                    },
                     hasShowInputButton: true,
                     autocomplete: false,
                     subForm: 'credentialSubForm'

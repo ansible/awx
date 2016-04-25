@@ -343,13 +343,16 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 
                     var viewValue = elm.val(), label, validity = true;
                     label = $(elm).closest('.form-group').find('label').first();
+
                     if ( isRequired && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
                         $(elm).attr('required','required');
-                        $(label).addClass('prepend-asterisk');
+                        $(label).removeClass('prepend-asterisk').addClass('prepend-asterisk');
                     }
                     else if (!isRequired) {
                         elm.removeAttr('required');
-                        $(label).removeClass('prepend-asterisk');
+                        if(!attrs.awrequiredAlwaysShowAsterisk) {
+                            $(label).removeClass('prepend-asterisk');
+                        }
                     }
                     if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
                         validity = false;
