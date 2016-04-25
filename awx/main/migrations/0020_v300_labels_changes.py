@@ -24,4 +24,9 @@ class Migration(migrations.Migration):
             name='labels',
             field=models.ManyToManyField(related_name='unifiedjob_labels', to='main.Label', blank=True),
         ),
+        migrations.AddField(
+            model_name='unifiedjobtemplate',
+            name='labels',
+            field=models.ManyToManyField(related_name='unifiedjobtemplate_labels', to='main.Label', blank=True),
+        ),
     ]
