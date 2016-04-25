@@ -70,7 +70,7 @@ import psutil
 #             pass
 #     statsd = NoStatsClient()
 
-CENSOR_FIELD_WHITELIST=[
+CENSOR_FIELD_WHITELIST = [
     'msg',
     'failed',
     'changed',
@@ -80,7 +80,6 @@ CENSOR_FIELD_WHITELIST=[
     'delta',
     'cmd',
     '_ansible_no_log',
-    'cmd',
     'rc',
     'failed_when_result',
     'skipped',
@@ -113,6 +112,7 @@ def censor(obj, no_log=False):
         elif obj.get('_ansible_no_log', False):
             obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
     return obj
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -194,31 +194,7 @@ class BaseCallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
-                if 'res' in event_data and hasattr(event_data['res'], 'get') \
-                        and event_data['res'].get('_ansible_no_log', False):
-                    res = event_data['res']
-                    if 'stdout' in res and res['stdout']:
-                        res['stdout'] = '<censored>'
-                    if 'stdout_lines' in res and res['stdout_lines']:
-                        res['stdout_lines'] = ['<censored>']
-                    if 'stderr' in res and res['stderr']:
-                        res['stderr'] = '<censored>'
-                    if 'stderr_lines' in res and res['stderr_lines']:
-                        res['stderr_lines'] = ['<censored>']
-                    if res.get('cmd', None) and re.search(r'\s', res['cmd']):
-                        res['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$', 
-                                            r'\1 <censored>',
-                                            res['cmd'])
-                    if 'invocation' in res \
-                        and 'module_args' in res['invocation'] \
-                        and '_raw_params' in res['invocation']['module_args'] \
-                        and re.search(r'\s',
-                                      res['invocation']['module_args']['_raw_params']):
-                        res['invocation']['module_args']['_raw_params'] = \
-                            re.sub(r'^(([^\s\\]|\\\s)+).*$',
-                                   r'\1 <censored>',
-                                   res['invocation']['module_args']['_raw_params'])
-                    msg['event_data']['res'] = res
+
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
