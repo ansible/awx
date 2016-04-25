@@ -230,6 +230,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     this.scope[fld + '_field'].name = fld;
                 }
 
+                for (fld in form.headerFields){
+                    this.scope[fld + '_field'] = form.headerFields[fld];
+                    this.scope[fld + '_field'].name = fld;
+                }
+
                 $compile(element)(this.scope);
 
                 if (!options.html) {
@@ -606,9 +611,26 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return html;
             },
 
+            buildHeaderField: function(key, field, options, form){
+                var html = '';
+                // extend these blocks to include elements similarly buildField()
+                if (field.type === 'toggle'){
+                    html += "<div class=\"Field-header--" + key;
+                    html += (field['class']) ? " " + field['class'] : "";
+                    html += " " + field.columnClass;
+                    html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
+                    html += (field.flag) ? field.flag : "enabled";
+                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
+                    html += (field.flag) ? field.flag : 'enabled';
+                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
+                    html += (field.flag) ? field.flag : "enabled";
+                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></div>";
+                }
+                return html;
+            },
+
 
             buildField: function (fld, field, options, form) {
-
                 var i, fldWidth, offset, html = '',
                     horizontal = (this.form.horizontal) ? true : false;
 
@@ -725,6 +747,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     return html;
                 }
 
+                if (field.type === 'toggle'){
+                    html += "<td class=\"List-tableCell " + fld + "-column";
+                    html += (field['class']) ? " " + field['class'] : "";
+                    html += " " + field.columnClass;
+                    html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
+                    html += (field.flag) ? field.flag : "enabled";
+                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
+                    html += (field.flag) ? field.flag : 'enabled';
+                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
+                    html += (field.flag) ? field.flag : "enabled";
+                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
+                }
 
                 if (field.type === 'alertblock') {
                     html += "<div class=\"row\">\n";
@@ -1429,17 +1463,26 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html+= "<span class=\"Form-title--is_superuser\" "+
                             "ng-if=is_superuser>Admin</span>";
                     }
-                    html += "</div>\n";
+                    html += "</div>\n"; 
+                    html += "<div class=\"Form-header--fields\">";
+                    if(this.form.headerFields){
+                        var that = this;
+                        _.forEach(this.form.headerFields, function(value, key){
+                            html += that.buildHeaderField(key, value, options, that.form);
+                        });
+                        html += "</div>\n"; 
+                    }
+                    else{ html += "</div>\n"; }
                     if(this.form.cancelButton !== undefined && this.form.cancelButton === false) {
                         html += "<div class=\"Form-exitHolder\">";
-                        html += "</div>";
+                        html += "</div></div>";
                     } else {
                         html += "<div class=\"Form-exitHolder\">";
                         html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
                         html += "<i class=\"fa fa-times-circle\"></i>";
                         html += "</button></div>\n";
                     }
-                        html += "</div>\n"; //end of Form-header
+                        html += "</div></div>\n"; //end of Form-header
                 }
 
                 if (!_.isEmpty(this.form.related)) {

@@ -5,12 +5,13 @@
  *************************************************/
 
 export default
-	['$scope', '$state', '$stateParams', 'Rest', 'GetBasePath', 'DashboardHostsList', 
-	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostsService', 'hosts',  
-	function($scope, $state, $stateParams, Rest, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostsService, hosts){
+	['$scope', '$state', '$stateParams', 'PageRangeSetup', 'GetBasePath', 'DashboardHostsList', 
+	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts',  
+	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts){
 		var generator = GenerateList,
 			list = DashboardHostsList,
 			defaultUrl = GetBasePath('hosts');
+		$scope.hostPageSize = 10;
 		$scope.editHost = function(id){
 			$state.go('dashboardHosts.edit', {id: id});
 		};
@@ -21,6 +22,14 @@ export default
 				$scope.hosts[index].enabled = res.data.enabled;
 			});
 		};
+		$scope.$on('PostRefresh', function(){
+        	$scope.hosts = _.map($scope.hosts, function(value, key){
+    			value.inventory_name = value.summary_fields.inventory.name;
+    			value.inventory_id = value.summary_fields.inventory.id;
+    			return value;
+        	});
+        	setJobStatus();
+		});
 		var setJobStatus = function(){
 			_.forEach($scope.hosts, function(value, key){
 				SetStatus({
@@ -30,19 +39,26 @@ export default
 			});
 		};
 		var init = function(){
-				$scope.list = list;
-				$scope.host_active_search = false;
-				$scope.host_total_rows = hosts.length;
-				$scope.hosts = hosts;
-				setJobStatus();
-				generator.inject(list, {mode: 'edit', scope: $scope});
-				PaginateInit({
-					scope: $scope,
-					list: list,
-					url: defaultUrl
-				});
-				console.log($scope)
-				$scope.hostLoading = false;
+			$scope.list = list;
+			$scope.host_active_search = false;
+			$scope.host_total_rows = hosts.results.length;
+			$scope.hosts = hosts.results;
+			setJobStatus();
+			generator.inject(list, {mode: 'edit', scope: $scope});
+			PaginateInit({
+				scope: $scope,
+				list: list,
+				url: defaultUrl,
+				pageSize: 10
+			});
+            PageRangeSetup({
+                scope: $scope,
+                count: hosts.count,
+                next: hosts.next,
+                previous: hosts.previous,
+                iterator: list.iterator
+            });
+			$scope.hostLoading = false;
 		};
 		init();
 	}];

@@ -11,7 +11,7 @@ import service from './dashboard-hosts.service';
 
 export default
     angular.module('dashboardHosts', [])
-    .service('DashboardHostsService', service)
+    .service('DashboardHostService', service)
     .factory('DashboardHostsList', list)
     .factory('DashboardHostsForm', form)
     .run(['$stateExtender', function($stateExtender){

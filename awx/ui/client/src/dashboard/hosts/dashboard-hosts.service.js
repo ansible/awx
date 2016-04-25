@@ -13,6 +13,18 @@ export default
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
+		},
+		putHost: function(host){
+			var url = GetBasePath('hosts') + host.id;
+			Rest.setUrl(url);
+			return Rest.put(host)
+				.success(function(data){
+					return data;
+				})
+                .error(function(data, status) {
+                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
 		}
 		};
 	}];

@@ -54,7 +54,9 @@ export default function(){
                 type: 'toggle',
                 ngClick: 'toggleHostEnabled(host)',
                 searchable: false,
-                nosort: true
+                nosort: true,
+                awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
+                dataTitle: 'Host Enabled',
             },
             has_active_failures: {
                 label: 'Has failed jobs?',
