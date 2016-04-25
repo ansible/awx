@@ -814,8 +814,10 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
     relationship='member_role.children'
 
     def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        return team.member_role.children.filter(id__in=Role.visible_roles(self.request.user))
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Team, 'read', team):
+            raise PermissionDenied()
+        return Role.filter_visible_roles(self.request.user, team.member_role.children.all())
 
     # XXX: Need to enforce permissions
     def post(self, request, *args, **kwargs):
@@ -1081,8 +1083,10 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        #u = User.objects.get(pk=self.kwargs['pk'])
-        return Role.visible_roles(self.request.user).filter(members__in=[int(self.kwargs['pk']), ])
+        u = get_object_or_404(User, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(User, 'read', u):
+            raise PermissionDenied()
+        return Role.filter_visible_roles(self.request.user, u.roles.all())
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here

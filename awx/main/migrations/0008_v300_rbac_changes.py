@@ -130,6 +130,10 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(related_name='descendents', through='main.RoleAncestorEntry', to='main.Role'),
         ),
         migrations.AlterIndexTogether(
+            name='role',
+            index_together=set([('content_type', 'object_id')]),
+        ),
+        migrations.AlterIndexTogether(
             name='roleancestorentry',
             index_together=set([('ancestor', 'content_type_id', 'object_id'), ('ancestor', 'content_type_id', 'role_field'), ('ancestor', 'descendent')]),
         ),

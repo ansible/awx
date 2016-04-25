@@ -8,7 +8,6 @@ import contextlib
 
 # Django
 from django.db import models, transaction, connection
-from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
@@ -106,6 +105,9 @@ class Role(models.Model):
         app_label = 'main'
         verbose_name_plural = _('roles')
         db_table = 'main_rbac_roles'
+        index_together = [
+            ("content_type", "object_id")
+        ]
 
     role_field = models.TextField(null=False)
     singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
@@ -348,7 +350,43 @@ class Role(models.Model):
 
     @staticmethod
     def visible_roles(user):
-        return Role.objects.filter(Q(descendents__in=user.roles.filter()) | Q(ancestors__in=user.roles.filter()))
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True))
+        }
+
+        qs = Role.objects.extra(
+            where = ['''
+                    %(roles_table)s.id IN (
+                        SELECT descendent_id FROM %(ancestors_table)s WHERE ancestor_id IN (%(ids)s)
+                        UNION
+                        SELECT ancestor_id FROM %(ancestors_table)s WHERE descendent_id IN (%(ids)s)
+                    )
+                    ''' % sql_params]
+        )
+        return qs
+
+    @staticmethod
+    def filter_visible_roles(user, roles_qs):
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in user.roles.all().values_list('id', flat=True))
+        }
+
+        qs = roles_qs.extra(
+            where = ['''
+                EXISTS (
+                    SELECT 1 FROM
+                    %(ancestors_table)s
+                    WHERE (descendent_id = %(roles_table)s.id AND ancestor_id IN (%(ids)s))
+                       OR (ancestor_id = %(roles_table)s.id AND descendent_id IN (%(ids)s))
+                ) ''' % sql_params]
+        )
+        return qs
 
     @staticmethod
     def singleton(name):

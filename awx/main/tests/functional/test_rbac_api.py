@@ -96,6 +96,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     'Users can see roles for other users, but only the roles that that user has access to see as well'
     organization.member_role.members.add(alice)
     organization.admin_role.members.add(bob)
+    organization.member_role.members.add(bob)
     custom_role = Role.objects.create(name='custom_role-test_user_view_admin_roles_list')
     organization.member_role.children.add(custom_role)
     team.member_role.members.add(bob)
