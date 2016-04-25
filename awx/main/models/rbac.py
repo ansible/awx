@@ -106,6 +106,9 @@ class Role(models.Model):
         app_label = 'main'
         verbose_name_plural = _('roles')
         db_table = 'main_rbac_roles'
+        index_together = [
+            ("content_type", "object_id")
+        ]
 
     role_field = models.TextField(null=False)
     singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
