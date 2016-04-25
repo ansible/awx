@@ -220,7 +220,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         q = Q(**{k:v})
                     queryset = queryset.filter(q)
                 queryset = queryset.filter(*args)
-            return queryset.distinct()
+            return queryset
         except (FieldError, FieldDoesNotExist, ValueError), e:
             raise ParseError(e.args[0])
         except ValidationError, e:
