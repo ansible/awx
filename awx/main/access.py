@@ -379,12 +379,16 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         inv_qs = Inventory.accessible_objects(self.user, 'read_role')
-        group_qs = Group.accessible_objects(self.user, 'read_role')
-        qs = (self.model.objects.filter(inventory=inv_qs) | self.model.objects.filter(groups=group_qs)).distinct()
-        #qs = qs.select_related('created_by', 'modified_by', 'inventory',
-        #                       'last_job__job_template',
-        #                       'last_job_host_summary__job')
-        #return qs.prefetch_related('groups').all()
+        group_qs = Group.accessible_objects(self.user, 'read_role').exclude(inventory__in=inv_qs)
+        if group_qs.count():
+            qs = self.model.objects.filter(Q(inventory__in=inv_qs) | Q(groups__in=group_qs))
+        else:
+            qs = self.model.objects.filter(inventory__in=inv_qs)
+
+        qs = qs.select_related('created_by', 'modified_by', 'inventory',
+                               'last_job__job_template',
+                               'last_job_host_summary__job')
+        qs =qs.prefetch_related('groups').all()
         return qs
 
     def can_read(self, obj):
@@ -491,7 +495,7 @@ class InventorySourceAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects.all()
         qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
-        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        inventory_ids = self.user.get_queryset(Inventory)
         return qs.filter(Q(inventory_id__in=inventory_ids) |
                          Q(group__inventory_id__in=inventory_ids))
 
