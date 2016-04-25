@@ -207,24 +207,47 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
-            'SchedulePost', '$state',
-        function($location, $stateParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost, $state) {
+        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit',
+            'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
+            'SchedulePost', '$state', 'Rest', 'ProcessErrors',
+        function($location, $stateParams, SchedulerInit, ShowSchedulerModal,
+            Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
+            ProcessErrors) {
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
-                    url =  GetBasePath(base),
+                    url,
                     scheduler;
+
                 if (!Empty($stateParams.template_id)) {
-                    url += $stateParams.template_id + '/schedules/';
+                    url = GetBasePath(base) + $stateParams.template_id + '/schedules/';
                 }
-                else if (!Empty($stateParams.id) && base !== 'system_job_templates') {
-                    url += $stateParams.id + '/schedules/';
+                else if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
-                else if (base === 'system_job_templates') {
-                    url += $stateParams.id + '/schedules/';
-                    if($stateParams.id  === 4){
+                else if(base === "inventory"){
+                    if (!params.url){
+                        url = GetBasePath('groups') + $stateParams.id + '/';
+                        Rest.setUrl(url);
+                        Rest.get().
+                        then(function (data) {
+                                url = data.data.related.inventory_source + 'schedules/';
+                            }).catch(function (response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get inventory group info. GET returned status: ' +
+                                response.status
+                            });
+                        });
+                    }
+                    else {
+                        url = params.url;
+                    }
+                }
+                else if (base == 'system_job_templates') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
+                    if($stateParams.id  == 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -528,10 +551,10 @@ export default
             };
         }])
 
-
-        .factory('SchedulesControllerInit', ['$state', '$location', 'ToggleSchedule',
-        'DeleteSchedule',
-            function($state, $location, ToggleSchedule, DeleteSchedule) {
+        .factory('SchedulesControllerInit', ['$state', '$location',
+        'ToggleSchedule', 'DeleteSchedule', 'ParamPass',
+            function($state, $location, ToggleSchedule, DeleteSchedule,
+                ParamPass) {
             return function(params) {
                 var scope = params.scope,
                     parent_scope = params.parent_scope,
@@ -567,7 +590,8 @@ export default
 
                 scope.addSchedule = function() {
                     var base = $state.current.name.split(".")[0];
-                    $state.go(base + ".add", {passedScope: scope});
+                    ParamPass.set(scope.schedule_url);
+                    $state.go(base + ".add");
                 };
 
                 scope.refreshSchedules = function() {

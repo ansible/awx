@@ -1,4 +1,15 @@
-export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath', 'Rest', function($compile, $state, $stateParams, AddSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest) {
+/*************************************************
+ * Copyright (c) 2016 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
+    '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
+    'Rest', 'ParamPass',
+    function($compile, $state, $stateParams, AddSchedule, Wait, $scope,
+        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass) {
+
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
@@ -40,6 +51,7 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
 
     $scope.hideForm = true;
 
+    var schedule_url = ParamPass.get();
 
     $scope.formCancel = function() {
         $state.go("^");
@@ -79,18 +91,19 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait', '$s
     else if ($state.current.name === 'projectSchedules.add'){
         $scope.extraVars = '---';
         $scope.parseType = 'yaml';
-        ParseTypeChange({ 
-                scope: $scope, 
-                variable: 'extraVars', 
+        ParseTypeChange({
+                scope: $scope,
+                variable: 'extraVars',
                 parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars' 
+                field_id: 'SchedulerForm-extraVars'
             });
     }
 
     AddSchedule({
         scope: $scope,
         callback: 'SchedulesRefresh',
-        base: $scope.base ? $scope.base : null
+        base: $scope.base ? $scope.base : null,
+        url: schedule_url
     });
 
     var callSelect2 = function() {

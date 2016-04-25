@@ -81,4 +81,37 @@ export default
                     }]
                 }
             });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules',
+                route: '/inventory/:inventory_id/manage/:id/schedules',
+                templateUrl: templateUrl("scheduler/scheduler"),
+                controller: 'schedulerController',
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules.add',
+                route: '/add',
+                templateUrl: templateUrl("scheduler/schedulerForm"),
+                controller: 'schedulerAddController',
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules.edit',
+                route: '/:schedule_id',
+                templateUrl: templateUrl("scheduler/schedulerForm"),
+                controller: 'schedulerEditController',
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
+            });
         }]);
