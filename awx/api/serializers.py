@@ -1447,6 +1447,19 @@ class RoleSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(RoleSerializer, self).to_representation(obj)
+
+        def spacify_type_name(cls):
+            return re.sub(r'([a-z])([A-Z])', '\g<1> \g<2>', cls.__name__)
+
+        if obj.object_id:
+            content_object = obj.content_object
+            if hasattr(content_object, 'username'):
+                ret['summary_fields']['resource_name'] = obj.content_object.username
+            if hasattr(content_object, 'name'):
+                ret['summary_fields']['resource_name'] = obj.content_object.name
+            ret['summary_fields']['resource_type'] = obj.content_type.name
+            ret['summary_fields']['resource_type_display_name'] = spacify_type_name(obj.content_type.model_class())
+
         ret.pop('created')
         ret.pop('modified')
         return ret
