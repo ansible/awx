@@ -357,6 +357,7 @@ class Role(models.Model):
             'roles_table': Role._meta.db_table,
             'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True))
         }
+
         qs = Role.objects.extra(
             where = ['''
                     %(roles_table)s.id IN (
@@ -365,6 +366,26 @@ class Role(models.Model):
                         SELECT ancestor_id FROM %(ancestors_table)s WHERE descendent_id IN (%(ids)s)
                     )
                     ''' % sql_params]
+        )
+        return qs
+
+    @staticmethod
+    def filter_visible_roles(user, roles_qs):
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in user.roles.all().values_list('id', flat=True))
+        }
+
+        qs = roles_qs.extra(
+            where = ['''
+                EXISTS (
+                    SELECT 1 FROM
+                    %(ancestors_table)s
+                    WHERE (descendent_id = %(roles_table)s.id AND ancestor_id IN (%(ids)s))
+                       OR (ancestor_id = %(roles_table)s.id AND descendent_id IN (%(ids)s))
+                ) ''' % sql_params]
         )
         return qs
 
