@@ -8,7 +8,6 @@ import contextlib
 
 # Django
 from django.db import models, transaction, connection
-from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
