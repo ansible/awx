@@ -3480,9 +3480,6 @@ class RoleList(ListAPIView):
     model = Role
     serializer_class = RoleSerializer
     permission_classes = (IsAuthenticated,)
-    class CursorPaginationById(CursorPagination):
-        ordering = 'id'
-    pagination_class = CursorPaginationById
     new_in_300 = True
 
     def get_queryset(self):
