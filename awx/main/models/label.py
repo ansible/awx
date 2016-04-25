@@ -39,3 +39,13 @@ class Label(CommonModelNameNotUnique):
                 jobtemplate_labels__isnull=True
             )
 
+    @staticmethod
+    def is_detached(id):
+        return bool(
+            Label.objects.filter(
+                id=id, 
+                unifiedjob_labels__isnull=True,
+                unifiedjobtemplate_labels__isnull=True
+            ).count())
+
+

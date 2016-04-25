@@ -3359,7 +3359,7 @@ class NotificationDetail(RetrieveAPIView):
     serializer_class = NotificationSerializer
     new_in_300 = True
 
-class LabelList(ListCreateAPIView):
+class LabelList(ListCreateAPIView, DeleteLastUnattachLabelMixin):
 
     model = Label
     serializer_class = LabelSerializer

@@ -1,13 +1,14 @@
 
 # Python
 import pytest
+import mock
 
 # DRF
 from rest_framework import status
 from rest_framework.response import Response
 
 # AWX
-from awx.api.generics import ParentMixin, SubListCreateAttachDetachAPIView
+from awx.api.generics import ParentMixin, SubListCreateAttachDetachAPIView, DeleteLastUnattachLabelMixin
 
 @pytest.fixture
 def get_object_or_404(mocker):
@@ -37,7 +38,7 @@ def parent_relationship_factory(mocker):
         return (serializer, mock_parent_relationship)
     return rf
 
-# TODO: Test create and associate failure (i.e. id doesn't exist or record already exists)
+# TODO: Test create and associate failure (i.e. id doesn't exist, record already exists, permission denied)
 # TODO: Mock and check return (Response)
 class TestSubListCreateAttachDetachAPIView:
     def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory, mock_response_new):
@@ -64,6 +65,97 @@ class TestSubListCreateAttachDetachAPIView:
         serializer.create.assert_not_called()
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
         mock_response_new.assert_called_with(Response, status=status.HTTP_204_NO_CONTENT)
+
+    def test_unattach_validate_ok(self, mocker):
+        mock_request = mocker.MagicMock(data=dict(id=1))
+        serializer = SubListCreateAttachDetachAPIView()
+
+        (sub_id, res) = serializer.unattach_validate(mock_request)
+
+        assert sub_id == 1
+        assert res is None
+    
+    def test_unattach_validate_missing_id(self, mocker):
+        mock_request = mocker.MagicMock(data=dict())
+        serializer = SubListCreateAttachDetachAPIView()
+
+        (sub_id, res) = serializer.unattach_validate(mock_request)
+
+        assert sub_id is None
+        assert type(res) is Response
+ 
+    def test_unattach_by_id_ok(self, mocker, parent_relationship_factory, get_object_or_400):
+        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        mock_request = mocker.MagicMock()
+        mock_sub = mocker.MagicMock(name="object to unattach")
+        get_object_or_400.return_value = mock_sub
+
+        res = serializer.unattach_by_id(mock_request, 1)
+
+        assert type(res) is Response
+        assert res.status_code == status.HTTP_204_NO_CONTENT
+        mock_parent_relationship.wife.remove.assert_called_with(mock_sub)
+
+    def test_unattach_ok(self, mocker):
+        mock_request = mocker.MagicMock()
+        mock_sub_id = mocker.MagicMock()
+        view = SubListCreateAttachDetachAPIView()
+        view.unattach_validate = mocker.MagicMock()
+        view.unattach_by_id = mocker.MagicMock()
+        view.unattach_validate.return_value = (mock_sub_id, None)
+
+        view.unattach(mock_request)
+
+        view.unattach_validate.assert_called_with(mock_request)
+        view.unattach_by_id.assert_called_with(mock_request, mock_sub_id)
+
+    def test_unattach_invalid(self, mocker):
+        mock_request = mocker.MagicMock()
+        mock_res = mocker.MagicMock()
+        view = SubListCreateAttachDetachAPIView()
+        view.unattach_validate = mocker.MagicMock()
+        view.unattach_by_id = mocker.MagicMock()
+        view.unattach_validate.return_value = (None, mock_res)
+
+        view.unattach(mock_request)
+
+        view.unattach_validate.assert_called_with(mock_request)
+        view.unattach_by_id.assert_not_called()
+
+class TestDeleteLastUnattachLabelMixin:
+    @mock.patch('awx.api.generics.super')
+    def test_unattach_ok(self, super, mocker):
+        mock_request = mocker.MagicMock()
+        mock_sub_id = mocker.MagicMock()
+        super.return_value = super
+        super.unattach_validate = mocker.MagicMock(return_value=(mock_sub_id, None))
+        super.unattach_by_id = mocker.MagicMock()
+        mock_label = mocker.patch('awx.api.generics.Label')
+        mock_label.objects.get.return_value = mock_label
+        mock_label.is_detached.return_value = True
+
+        view = DeleteLastUnattachLabelMixin()
+
+        view.unattach(mock_request, None, None)
+
+        super.unattach_validate.assert_called_with(mock_request, None, None)
+        super.unattach_by_id.assert_called_with(mock_request, mock_sub_id)
+        mock_label.is_detached.assert_called_with(mock_sub_id)
+        mock_label.objects.get.assert_called_with(id=mock_sub_id)
+        mock_label.delete.assert_called_with()
+
+    @mock.patch('awx.api.generics.super')
+    def test_unattach_fail(self, super, mocker):
+        mock_request = mocker.MagicMock()
+        mock_response = mocker.MagicMock()
+        super.return_value = super
+        super.unattach_validate = mocker.MagicMock(return_value=(None, mock_response))
+        view = DeleteLastUnattachLabelMixin()
+
+        res = view.unattach(mock_request, None, None)
+
+        super.unattach_validate.assert_called_with(mock_request, None, None)
+        assert mock_response == res
 
 class TestParentMixin:
     def test_get_parent_object(self, mocker, get_object_or_404):
