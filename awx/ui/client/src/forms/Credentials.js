@@ -141,7 +141,7 @@ export default
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'foreman' || kind.value === 'cloudforms'",
                     awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
@@ -152,6 +152,23 @@ export default
                         reqExpression: 'host_required',
                         init: false
                     },
+                    subForm: 'credentialSubForm'
+                },
+                "subscription": {
+                    label: "Subscription ID",
+                    type: 'text',
+                    ngShow: "kind.value == 'azure' || kind.value == 'azure_rm'",
+                    awRequiredWhen: {
+                        reqExpression: 'subscription_required',
+                        init: false
+                    },
+                    addRequired: false,
+                    editRequired: false,
+                    autocomplete: false,
+                    awPopOver: '<p>Subscription ID is an Azure construct, which is mapped to a username.</p>',
+                    dataTitle: 'Subscription ID',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
                     subForm: 'credentialSubForm'
                 },
                 "username": {
@@ -181,23 +198,6 @@ export default
                     dataContainer: "body",
                     subForm: 'credentialSubForm'
                 },
-                "subscription_id": {
-                    labelBind: "usernameLabel",
-                    type: 'text',
-                    ngShow: "kind.value == 'azure'",
-                    awRequiredWhen: {
-                        reqExpression: 'subscription_required',
-                        init: false
-                    },
-                    addRequired: false,
-                    editRequired: false,
-                    autocomplete: false,
-                    awPopOver: '<p>Subscription ID is an Azure construct, which is mapped to a username.</p>',
-                    dataTitle: 'Subscription ID',
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    subForm: 'credentialSubForm'
-                },
                 "api_key": {
                     label: 'API Key',
                     type: 'sensitive',
@@ -215,9 +215,7 @@ export default
                 "password": {
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'",
-                    addRequired: false,
-                    editRequired: false,
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'|| kind.value == 'foreman'|| kind.value == 'cloudforms'|| kind.value == 'net' || kind.value == 'azure_rm'",
                     ask: false,
                     clear: false,
                     autocomplete: false,
@@ -229,7 +227,7 @@ export default
                     subForm: "credentialSubForm"
                 },
                 "ssh_password": {
-                    label: 'Password', // formally 'SSH Password'
+                    label: 'Password',
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
                     addRequired: false,
@@ -243,7 +241,7 @@ export default
                     labelBind: 'sshKeyDataLabel',
                     type: 'textarea',
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm' || " +
-                            "kind.value == 'gce' || kind.value == 'azure'",
+                            "kind.value == 'gce' || kind.value == 'azure' || kind.value == 'net'",
                     awRequiredWhen: {
                         reqExpression: 'key_required',
                         init: true
@@ -288,24 +286,71 @@ export default
                     subForm: 'credentialSubForm'
                 },
                 "become_username": {
-                    label: 'Privilege Escalation Username',
+                    labelBind: 'becomeUsernameLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
+                    ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
                     addRequired: false,
                     editRequired: false,
                     autocomplete: false,
                     subForm: 'credentialSubForm'
                 },
                 "become_password": {
-                    label: 'Privilege Escalation Password',
+                    labelBind: 'becomePasswordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
+                    ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
                     addRequired: false,
                     editRequired: false,
                     ask: true,
                     hasShowInputButton: true,
                     autocomplete: false,
                     subForm: 'credentialSubForm'
+                },
+                client:{
+                    type: 'text',
+                    label: 'Client ID',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                secret:{
+                    type: 'sensitive',
+                    hasShowInputButton: true,
+                    autocomplete: false,
+                    label: 'Client Secret',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                tenant: {
+                    type: 'text',
+                    label: 'Tenent ID',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                authorize: {
+                    label: 'Authorize',
+                    type: 'checkbox',
+                    ngChange: "toggleCallback('host_config_key')",
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'net'"
+                },
+                authorize_password: {
+                    label: 'Authorize Password',
+                    type: 'sensitive',
+                    hasShowInputButton: true,
+                    autocomplete: false,
+                    subForm: 'credentialSubForm',
+                    ngShow: "authorize && authorize !== 'false'",
                 },
                 "project": {
                     labelBind: 'projectLabel',

@@ -88,6 +88,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'ssh':
                              scope.usernameLabel = 'Username'; //formally 'SSH Username'
+                             scope.becomeUsernameLabel = 'Privilege Escalation Username';
+                             scope.becomePasswordLabel = 'Privilege Escalation Password';
                          break;
                          case 'scm':
                              scope.sshKeyDataLabel = 'SCM Private Key';
@@ -109,12 +111,19 @@ angular.module('CredentialsHelper', ['Utilities'])
                              "as: </p><p>adjective-noun-000</p>";
                          break;
                          case 'azure':
-                             scope.usernameLabel = "Subscription ID";
                              scope.sshKeyDataLabel = 'Management Certificate';
                              scope.subscription_required = true;
                              scope.key_required = true;
                              scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
                              scope.key_hint= "drag and drop a management certificate file on the field below";
+                         break;
+                         case 'azure_rm':
+                             scope.usernameLabel = "Username";
+                             scope.subscription_required = true;
+                             scope.username_required = true;
+                             scope.password_required = true;
+                             scope.passwordLabel = 'Password';
+                             scope.azure_rm_required = true;
                          break;
                          case 'vmware':
                              scope.username_required = true;
@@ -136,6 +145,26 @@ angular.module('CredentialsHelper', ['Utilities'])
                                  " as the username.</p>";
                              scope.hostPopOver = "<p>The host to authenticate with." +
                                  "<br />For example, https://openstack.business.com/v2.0/";
+                         break;
+                         case 'foreman':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.host_required = true;
+                            scope.hostLabel = "Satellite 6 Host";
+                         break;
+                         case 'cloudforms':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.host_required = true;
+                            scope.hostLabel = "CloudForms Host";
+                         break;
+                         case 'net':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.sshKeyDataLabel = 'SSH Key';
                          break;
                      }
                  }
@@ -238,7 +267,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                      data.project = scope.project;
                      break;
                      case 'azure':
-                         data.username = scope.subscription_id;
+                         data.username = scope.subscription;
                  }
 
                  Wait('start');
