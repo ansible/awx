@@ -616,8 +616,13 @@ class OrganizationList(ListCreateAPIView):
 
         JT_reference = 'project__organization'
         db_results['job_templates'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').values(JT_reference).annotate(
+            self.request.user, 'read_role').exclude(job_type='scan').values(JT_reference).annotate(
             Count(JT_reference)).order_by(JT_reference)
+
+        JT_scan_reference = 'inventory__organization'
+        db_results['job_templates_scan'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').filter(job_type='scan').values(JT_scan_reference).annotate(
+            Count(JT_scan_reference)).order_by(JT_scan_reference)
 
         db_results['projects'] = project_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
@@ -638,6 +643,8 @@ class OrganizationList(ListCreateAPIView):
         for res in db_results:
             if res == 'job_templates':
                 org_reference = JT_reference
+            elif res == 'job_templates_scan':
+                org_reference = JT_scan_reference
             elif res == 'users':
                 org_reference = 'id'
             else:
@@ -650,6 +657,12 @@ class OrganizationList(ListCreateAPIView):
                         count_context[org_id]['users'] = entry['users']
                         continue
                     count_context[org_id][res] = entry['%s__count' % org_reference]
+
+        # Combine the counts for job templates with scan job templates
+        for org in org_id_list:
+            org_id = org['id']
+            if 'job_templates_scan' in count_context[org_id]:
+                count_context[org_id]['job_templates'] += count_context[org_id].pop('job_templates_scan')
 
         full_context['related_field_counts'] = count_context
 
@@ -684,8 +697,10 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
             organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
-            project__organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).exclude(
+            job_type='scan').filter(project__organization__id=org_id).count()
+        org_counts['job_templates'] += JobTemplate.accessible_objects(**access_kwargs).filter(
+            job_type='scan').filter(inventory__organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts
