@@ -438,8 +438,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (f.awPassMatch && scope[form.name + '_form'][fld]) {
                         scope[form.name + '_form'][fld].$setValidity('awpassmatch', true);
                     }
-                    if (f.ask) {
-                        scope[fld + '_ask'] = false;
+                    if (f.subCheckbox) {
+                        scope[f.subCheckbox.variable] = false;
                     }
                 }
 
@@ -786,14 +786,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                             html += (field.capitalize) ? "capitalize " : "";
                             html += (field.awSurveyQuestion) ? "aw-survey-question" : "" ;
-                            html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                             if(field.awRequiredWhen) {
                                 html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                                 html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                                html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                             }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
-                            html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
                             html += ">\n";
                         }
 
@@ -802,18 +802,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "id=\"" + this.form.name + "_" + fld + "_clear_btn\" ";
                             html += "class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " +
                                 "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
-                            html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += " ><i class=\"fa fa-undo\"></i></button>\n";
                             html += "</span>\n</div>\n";
-                            if (field.ask) {
-                                html += "<label class=\"checkbox-inline ask-checkbox\" ";
-                                html += (field.askShow) ? "ng-show=\"" + field.askShow + "\" " : "";
-                                html += ">";
-                                html += "<input type=\"checkbox\" ng-model=\"" +
-                                    fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
-                                html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                                html += "> Ask at runtime?</label>";
-                            }
                         }
 
                         if (field.genMD5) {
@@ -822,11 +813,23 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
                         }
 
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" + field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
+                        }
+
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "</div>\n";
                         }
                         if (field.type === "email") {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-email-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
@@ -877,19 +880,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
-                            if (field.ngDisabled || field.ask) {
-                                var disabled = "";
-                                if (field.ngDisabled) {
-                                    disabled += field.ngDisabled;
-                                }
-                                if (field.ngDisabled && field.ask) {
-                                    disabled += " || ";
-                                }
-                                if (field.ask) {
-                                    disabled += fld + "_ask";
-                                }
-                                html += "ng-disabled='" + disabled + "'";
-                            }
+                            html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
                             html += ">\n" + field.showInputInnerHTML;
                             html += "\n</button>\n";
                             html += "</span>\n";
@@ -924,66 +915,41 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.capitalize) ? "capitalize " : "";
                             html += (field.awSurveyQuestion) ? "aw-survey-question" : "";
 
-                            if (field.ngDisabled || field.ask) {
-                                var _disabled = "";
-                                if (field.ngDisabled) {
-                                    _disabled += field.ngDisabled;
-                                }
-                                if (field.ngDisabled && field.ask) {
-                                    _disabled += " || ";
-                                }
-                                if (field.ask) {
-                                    _disabled += fld + "_ask";
-                                }
-                                html += "ng-disabled='" + _disabled + "'";
-                            }
+                            html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
+
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                             if(field.awRequiredWhen) {
                                 html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                                 html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                                html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                             }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
-                            html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_foo' " : "";
                             html += ">\n";
                         }
 
                         html += "</div>\n";
 
-                        // if (field.clear) {
-                        //     html += "<span class=\"input-group-btn\"><button type=\"button\" ";
-                        //     html += "id=\"" + this.form.name + "_" + fld + "_clear_btn\" ";
-                        //     html += "class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " +
-                        //         "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
-                        //     html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
-                        //     html += " ><i class=\"fa fa-undo\"></i></button>\n";
-                        //     html += "</span>\n</div>\n";
-                        //
-                        // }
-
-                        if (field.ask) {
-                            html += "<label class=\"checkbox-inline ask-checkbox\" ";
-                            html += (field.askShow) ? "ng-show=\"" + field.askShow + "\" " : "";
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
                             html += ">";
                             html += "<input type=\"checkbox\" ng-model=\"" +
-                                fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
+                                field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.ngDisabled) {
-                                html += "ng-disabled='" + field.ngDisabled + "'";
+                            if (field.subCheckbox.ngDisabled) {
+                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
                             }
-                            html += "> Ask at runtime?</label>";
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
                         }
-
-                        // if (field.genMD5) {
-                        //     html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " +
-                        //         "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
-                        //         "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
-                        // }
 
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-required-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
-                                this.form.name + "_form." + fld + ".$error.required'>\nPlease enter a value.\n</div>\n";
+                                this.form.name + "_form." + fld + ".$error.required'>\n" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "\n</div>\n";
                         }
                         if (field.type === "email") {
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-email-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
@@ -1054,14 +1020,30 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(field.awRequiredWhen) {
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += "aw-watch ></textarea>\n";
 
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" +
+                                field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            if (field.subCheckbox.ngDisabled) {
+                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
+                            }
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
+                        }
 
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                         html += "</div>\n";
@@ -1095,6 +1077,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(field.awRequiredWhen) {
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += ">\n";
                         if(!field.multiSelect){
@@ -1107,11 +1090,27 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "</select>\n";
                         html += "</div>\n";
 
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" +
+                                field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            if (field.subCheckbox.ngDisabled) {
+                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
+                            }
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
+                        }
+
                             // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please select a value.</div>\n";
+                                html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
+                                    this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
 
@@ -1155,12 +1154,27 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(field.awRequiredWhen) {
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += " >\n";
+
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" +
+                                field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
+                        }
+
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
                         }
                         if (field.integer) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please enter a number.</div>\n";
@@ -1193,7 +1207,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please select at least one value.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select at least one value.") + "</div>\n";
                         }
                         if (field.integer) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please select a number.</div>\n";
@@ -1342,9 +1356,24 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(field.awRequiredWhen) {
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                            html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += " awlookup >\n";
                         html += "</div>\n";
+
+                        if (field.subCheckbox) {
+                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
+                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" +
+                                field.subCheckbox.variable + "\" ";
+                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            html += ">";
+                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
+                            html += "</label>";
+                        }
+
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
@@ -1352,7 +1381,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 this.form.name + '_form.' +
                                 field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                                ".$error.required\">Please select a value.</div>\n";
+                                ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
                         }
                         html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
                             this.form.name + '_form.' +
