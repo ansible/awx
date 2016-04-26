@@ -1225,7 +1225,7 @@ class CredentialList(ListCreateAPIView):
             organization = Organization.objects.get(pk=request.data['organization'])
             obj = organization
 
-        if self.request.user not in obj.admin_role:
+        if not self.request.user.can_access(type(obj), 'admin', obj, request.data):
             raise PermissionDenied()
 
         ret = super(CredentialList, self).post(request, *args, **kwargs)
