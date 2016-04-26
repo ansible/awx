@@ -60,6 +60,7 @@ import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
 
 import RestServices from './rest/main';
+import './lookup/main';
 import './shared/api-loader';
 import './shared/form-generator';
 import './shared/Modal';
