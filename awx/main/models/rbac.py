@@ -437,5 +437,5 @@ def get_roles_on_resource(resource, accessor):
             ancestor__in=roles,
             content_type_id=ContentType.objects.get_for_model(resource).id,
             object_id=resource.id
-        ).values_list('role_field', flat=True)
+        ).values_list('role_field', flat=True).distinct()
     ]
