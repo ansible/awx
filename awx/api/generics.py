@@ -449,8 +449,10 @@ class DeleteLastUnattachLabelMixin(object):
 
         res = super(DeleteLastUnattachLabelMixin, self).unattach_by_id(request, sub_id)
 
-        if Label.is_detached(sub_id):
-            Label.objects.get(id=sub_id).delete()
+        label = Label.objects.get(id=sub_id)
+
+        if label.is_detached():
+            label.delete()
 
         return res
 
