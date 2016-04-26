@@ -5,6 +5,7 @@ from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import Job, JobTemplate
+from awx.main.access import JobAccess
 
 from django.core.urlresolvers import reverse
 
@@ -171,7 +172,8 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime_data, machine_credential, post, user, mocker):
+def test_job_launch_fails_without_inventory_or_cred_access(
+        job_template_prompts, runtime_data, machine_credential, post, user, mocker):
     job_template = job_template_prompts(True)
     common_user = user('test-user', False)
     job_template.execute_role.members.add(common_user)
@@ -189,6 +191,14 @@ def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime
     new_inv = job_template.project.organization.inventories.create(name="user-can-not-use")
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                     dict(inventory=new_inv.pk), common_user)
+
+    assert response.status_code == 403
+    assert response.data['detail'] == u'You do not have permission to perform this action.'
+
+    # Assure that giving a credential without access blocks the launch
+    new_cred = Credential.objects.create(name='machine-cred-you-cant-use', kind='ssh', username='test_user', password='pas4word')
+    response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+                    dict(credential=new_cred.pk), common_user)
 
     assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
@@ -212,6 +222,33 @@ def test_job_relaunch_copy_vars(runtime_data, job_template_prompts, project, pos
     assert original_job.job_type == second_job.job_type
     assert original_job.inventory.pk == second_job.inventory.pk
     assert original_job.job_tags == second_job.job_tags
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_job_relaunch_resource_access(runtime_data, project, user):
+    the_cred = Credential.objects.get(pk=runtime_data['credential'])
+    the_inv = Inventory.objects.get(pk=runtime_data['inventory'])
+
+    original_job = Job.objects.create(
+        name='existing-job', credential=the_cred, inventory=the_inv
+    )
+    ordinary_user = user('commoner', False)
+    inventory_user = user('user1', False)
+    credential_user = user('user2', False)
+    both_user = user('user3', False)
+
+    # Confirm that a user with inventory & credential access can launch
+    the_cred.use_role.members.add(both_user)
+    the_inv.use_role.members.add(both_user)
+    assert both_user.can_access(Job, 'start', original_job)
+
+    # Confirm that a user with credential access alone can not launch
+    the_cred.use_role.members.add(credential_user)
+    assert not credential_user.can_access(Job, 'start', original_job)
+
+    # Confirm that a user with inventory access alone can not launch
+    the_inv.use_role.members.add(inventory_user)
+    assert not inventory_user.can_access(Job, 'start', original_job)
 
 @pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):

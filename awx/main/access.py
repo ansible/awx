@@ -875,11 +875,12 @@ class JobAccess(BaseAccess):
             return self.user in obj.job_template.execute_role
 
         inventory_access = self.user in obj.inventory.use_role
+        credential_access = self.user in obj.credential.use_role
 
         org_access = self.user in obj.inventory.organization.admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
 
-        return inventory_access and (org_access or project_access)
+        return inventory_access and credential_access and (org_access or project_access)
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
