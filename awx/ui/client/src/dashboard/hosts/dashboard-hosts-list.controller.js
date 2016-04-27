@@ -16,7 +16,7 @@ export default
 			$state.go('dashboardHosts.edit', {id: id});
 		};
 		$scope.toggleHostEnabled = function(host){
-			DashboardHostsService.setHostStatus(host, !host.enabled)
+			DashboardHostService.setHostStatus(host, !host.enabled)
 			.then(function(res){
 				var index = _.findIndex($scope.hosts, function(o) {return o.id === res.data.id;});
 				$scope.hosts[index].enabled = res.data.enabled;
