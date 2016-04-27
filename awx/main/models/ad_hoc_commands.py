@@ -88,7 +88,7 @@ class AdHocCommand(UnifiedJob):
     def clean_inventory(self):
         inv = self.inventory
         if not inv:
-            raise ValidationError('Inventory is no longer available.')
+            raise ValidationError('No valid inventory.')
         return inv
 
     def clean_credential(self):
