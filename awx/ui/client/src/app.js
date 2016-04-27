@@ -716,6 +716,66 @@ var tower = angular.module('Tower', [
                     });
                 };
 
+            $rootScope.deletePermissionFromUser = function (userId, userName, roleName, roleType, url) {
+                var action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": userId})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "permission");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
+<div class="Prompt-bodyQuery">
+    Confirm  the removal of the ${roleType}
+        <span class="Prompt-emphasis"> ${roleName} </span>
+    role associated with ${userName}.
+</div>
+                    `,
+                    action: action,
+                    actionText: 'REMOVE'
+                });
+            };
+
+            $rootScope.deletePermissionFromTeam = function (teamId, teamName, roleName, roleType, url) {
+                var action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": teamId})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "role");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
+<div class="Prompt-bodyQuery">
+    Confirm  the removal of the ${roleType}
+        <span class="Prompt-emphasis"> ${roleName} </span>
+    role associated with the ${teamName} team.
+</div>
+                    `,
+                    action: action,
+                    actionText: 'REMOVE'
+                });
+            };
+
             function activateTab() {
                 // Make the correct tab active
                 var base = $location.path().replace(/^\//, '').split('/')[0];

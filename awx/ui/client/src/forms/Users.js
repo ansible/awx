@@ -162,8 +162,6 @@ export default
                     iterator: 'permission',
                     open: false,
                     index: false,
-                    actions: {},
-
                     fields: {
                         name: {
                             label: 'Name',
@@ -180,6 +178,14 @@ export default
                             label: 'Role',
                             ngBind: 'permission.name',
                             noSort: true
+                        },
+                    },
+                    fieldActions: {
+                        "delete": {
+                            label: 'Remove',
+                            ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
+                            iconClass: 'fa fa-times',
+                            awToolTip: 'Dissasociate permission from user'
                         }
                     },
                     hideOnSuperuser: true

@@ -118,7 +118,16 @@ export default
                             noSort: true
                         }
                     },
+                    fieldActions: {
+                        "delete": {
+                            label: 'Remove',
+                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, role.name, role.summary_fields.resource_name, role.related.teams)',
+                            class: "List-actionButton--delete",
+                            iconClass: 'fa fa-times',
+                            awToolTip: 'Dissasociate permission from team'
+                        }
+                    },
                     hideOnSuperuser: true
                 }
-            }
+            },
         }); //InventoryForm
