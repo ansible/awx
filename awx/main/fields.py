@@ -20,8 +20,9 @@ from django.db.models.fields.related import (
 from django.utils.encoding import smart_text
 
 # AWX
-from awx.main.models.rbac import batch_role_ancestor_rebuilding
+from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main.utils import get_current_apps
+
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField']
 
@@ -199,7 +200,7 @@ class ImplicitRoleField(models.ForeignKey):
                     updates[role.role_field] = role.id
                     role_ids.append(role.id)
                 type(instance).objects.filter(pk=instance.pk).update(**updates)
-                Role_.rebuild_role_ancestor_list(role_ids, [])
+                Role.rebuild_role_ancestor_list(role_ids, [])
 
             # Update parentage if necessary
             for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
@@ -255,4 +256,4 @@ class ImplicitRoleField(models.ForeignKey):
         Role_ = get_current_apps().get_model('main', 'Role')
         child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
         Role_.objects.filter(id__in=role_ids).delete()
-        Role_.rebuild_role_ancestor_list([], child_ids)
+        Role.rebuild_role_ancestor_list([], child_ids)
