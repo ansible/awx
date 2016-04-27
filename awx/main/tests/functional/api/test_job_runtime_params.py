@@ -23,6 +23,10 @@ def runtime_data(organization):
     )
 
 @pytest.fixture
+def job_with_links(machine_credential, inventory):
+    return Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+
+@pytest.fixture
 def job_template_prompts(project, inventory, machine_credential):
     def rf(on_off):
         return JobTemplate.objects.create(
@@ -204,49 +208,38 @@ def test_job_launch_fails_without_inventory_or_cred_access(
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_relaunch_copy_vars(runtime_data, job_template_prompts, project, post, mocker):
-    job_template = job_template_prompts(True)
-
-    # Create a job with the given data that will be relaunched
-    job_create_kwargs = runtime_data
-    inv_obj = Inventory.objects.get(pk=job_create_kwargs.pop('inventory'))
-    cred_obj = Credential.objects.get(pk=job_create_kwargs.pop('credential'))
-    original_job = Job.objects.create(inventory=inv_obj, credential=cred_obj, job_template=job_template, **job_create_kwargs)
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names', return_value=runtime_data.keys()):
-        second_job = original_job.copy()
+def test_job_relaunch_copy_vars(job_with_links, machine_credential, inventory,
+                                deploy_jobtemplate, post, mocker):
+    job_with_links.job_template = deploy_jobtemplate
+    job_with_links.limit = "my_server"
+    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
+                      return_value=['inventory', 'credential', 'limit']):
+        second_job = job_with_links.copy()
 
     # Check that job data matches the original variables
-    assert 'job_launch_var' in yaml.load(second_job.extra_vars)
-    assert original_job.limit == second_job.limit
-    assert original_job.job_type == second_job.job_type
-    assert original_job.inventory.pk == second_job.inventory.pk
-    assert original_job.job_tags == second_job.job_tags
+    assert second_job.credential == job_with_links.credential
+    assert second_job.inventory == job_with_links.inventory
+    assert second_job.limit == 'my_server'
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_relaunch_resource_access(runtime_data, project, user):
-    the_cred = Credential.objects.get(pk=runtime_data['credential'])
-    the_inv = Inventory.objects.get(pk=runtime_data['inventory'])
-
-    original_job = Job.objects.create(
-        name='existing-job', credential=the_cred, inventory=the_inv
-    )
+def test_job_relaunch_resource_access(job_with_links, user):
     inventory_user = user('user1', False)
     credential_user = user('user2', False)
     both_user = user('user3', False)
 
     # Confirm that a user with inventory & credential access can launch
-    the_cred.use_role.members.add(both_user)
-    the_inv.use_role.members.add(both_user)
-    assert both_user.can_access(Job, 'start', original_job)
+    job_with_links.credential.use_role.members.add(both_user)
+    job_with_links.inventory.use_role.members.add(both_user)
+    assert both_user.can_access(Job, 'start', job_with_links)
 
     # Confirm that a user with credential access alone can not launch
-    the_cred.use_role.members.add(credential_user)
-    assert not credential_user.can_access(Job, 'start', original_job)
+    job_with_links.credential.use_role.members.add(credential_user)
+    assert not credential_user.can_access(Job, 'start', job_with_links)
 
     # Confirm that a user with inventory access alone can not launch
-    the_inv.use_role.members.add(inventory_user)
-    assert not inventory_user.can_access(Job, 'start', original_job)
+    job_with_links.inventory.use_role.members.add(inventory_user)
+    assert not inventory_user.can_access(Job, 'start', job_with_links)
 
 @pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
