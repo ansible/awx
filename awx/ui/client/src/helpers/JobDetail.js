@@ -351,29 +351,30 @@ export default
         };
     }])
 
-    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', function(GetElapsed, Empty, JobIsFinished) {
+    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', 'longDateFilter', function(GetElapsed, Empty, JobIsFinished, longDateFilter) {
         return function(params) {
             var scope = params.scope,
                 failed = params.failed,
                 modified = params.modified,
-                started =  params.started;
+                started =  params.started,
+                finished = params.finished;
 
             if (failed && scope.job_status.status !== 'failed' && scope.job_status.status !== 'error' &&
                 scope.job_status.status !== 'canceled') {
                 scope.job_status.status = 'failed';
             }
             if (JobIsFinished(scope) && !Empty(modified)) {
-                scope.job_status.finished = longDateFilter(modified)
+                scope.job_status.finished = longDateFilter(modified);
             }
             if (!Empty(started) && Empty(scope.job_status.started)) {
-                scope.job_status.started = longDateFilter(modified)
+                scope.job_status.started = longDateFilter(modified);
             }
             if (!Empty(scope.job_status.finished) && !Empty(scope.job_status.started)) {
                 scope.job_status.elapsed = GetElapsed({
                     start: started,
                     end: finished
                 });
-            }            
+            }
         };
     }])
 
@@ -900,8 +901,7 @@ export default
     .factory('SelectTask', ['JobDetailService', function(JobDetailService) {
         return function(params) {
             var scope = params.scope,
-                id = params.id,
-                callback = params.callback;
+                id = params.id;
 
             scope.selectedTask = id;
             scope.tasks.forEach(function(task, idx) {
@@ -912,11 +912,11 @@ export default
                     scope.tasks[idx].taskActiveClass = '';
                 }
             });
-            var params = {
+            params = {
                 parent: scope.selectedTask,
                 event__startswith: 'runner',
                 page_size: scope.hostResultsMaxRows,
-                order: 'host_name,counter',  
+                order: 'host_name,counter',
             };
             JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
                 scope.hostResults = JobDetailService.processHostEvents(res.results);

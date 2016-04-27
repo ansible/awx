@@ -11,5 +11,5 @@ export default
 	angular.module('jobDetail.hostEvents', [])
 		.controller('HostEventsController', controller)
 		.run(['$stateExtender', function($stateExtender){
-			$stateExtender.addState(route)
+			$stateExtender.addState(route);
 		}]);

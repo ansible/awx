@@ -44,7 +44,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
 
         var paginationContainer = $('#pagination-container');
         paginationContainer.html($scope.PaginateWidget);
-        $compile(paginationContainer.contents())($scope)
+        $compile(paginationContainer.contents())($scope);
 
         var parseCardData = function(cards) {
             return cards.map(function(card) {
@@ -187,4 +187,4 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             });
         };
     }
-]
+];

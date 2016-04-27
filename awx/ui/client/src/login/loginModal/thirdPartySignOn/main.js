@@ -10,4 +10,4 @@ import thirdPartySignOnService from './thirdPartySignOn.service';
 export default
     angular.module('thirdPartySignOn', [])
         .directive('thirdPartySignOn', thirdPartySignOnDirective)
-        .factory('thirdPartySignOnService', thirdPartySignOnService)
+        .factory('thirdPartySignOnService', thirdPartySignOnService);

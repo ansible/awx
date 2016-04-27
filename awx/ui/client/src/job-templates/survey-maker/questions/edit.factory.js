@@ -4,7 +4,6 @@ export default
 
             var scope = params.scope,
                 index = params.index,
-                element,
                 tmpVar,
                 i,
                 question = params.question,
@@ -12,7 +11,7 @@ export default
 
             // Update the index so that we know which question is being edited.
             scope.editQuestionIndex = index;
-            
+
             scope.text_min = null;
             scope.text_max = null;
             scope.int_min = null;

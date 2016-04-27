@@ -29,7 +29,7 @@ export default {
         hosts: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
              return JobDetailService.getRelatedJobEvents($stateParams.id, {
                 host_name: $stateParams.hostName
-            }).success(function(res){ return res.results[0]})
+            }).success(function(res){ return res.results[0];});
          }]
     }
 };

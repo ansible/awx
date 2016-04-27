@@ -342,7 +342,7 @@ function InventoriesManage($log, $scope, $rootScope, $location,
             inventory_id: $scope.inventory.id,
             group_id: $scope.selected_group_id,
             mode: 'add'
-        }
+        };
         ParamPass.set(params);
         $state.go('inventoryManage.addGroup');
     };
@@ -354,7 +354,7 @@ function InventoriesManage($log, $scope, $rootScope, $location,
             inventory_id: $scope.inventory.id,
             group_id: id,
             mode: 'edit'
-        }
+        };
         ParamPass.set(params);
         $state.go('inventoryManage.editGroup', {group_id: id});
     };

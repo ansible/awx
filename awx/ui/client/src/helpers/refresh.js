@@ -67,24 +67,26 @@ export default
                     });
             };
 
+            var id, restUrl, pageSize;
+
             // if you're editing an object, make sure you're on the right
             // page to display the element you are editing
             if (scope.addedItem) {
-                var id = scope.addedItem + "";
+                id = scope.addedItem + "";
                 delete scope.addedItem;
                 $rootScope.rowBeingEdited = id;
                 $rootScope.listBeingEdited = set;
                 $rootScope.addedAnItem = true;
-                var restUrl = params.url.split("?")[0];
-                var pageSize = scope[iterator + '_page_size'];
+                restUrl = params.url.split("?")[0];
+                pageSize = scope[iterator + '_page_size'];
                 pagination.getInitialPageForList(id, restUrl, pageSize)
                     .then(function (currentPage) {
                         scope.getPage(currentPage, set, iterator);
                     });
             } else if ($location.$$url.split("/")[1] === params.set && $location.$$url.split("/")[2] && $location.$$url.split("/")[2] !== "add" && !scope.getNewPage) {
-                var id = $location.$$url.split("/")[2];
-                var restUrl = params.url.split("?")[0];
-                var pageSize = scope[iterator + '_page_size'];
+                id = $location.$$url.split("/")[2];
+                restUrl = params.url.split("?")[0];
+                pageSize = scope[iterator + '_page_size'];
                 pagination.getInitialPageForList(id, restUrl, pageSize)
                     .then(function (currentPage) {
                         scope[iterator + '_page'] = currentPage;

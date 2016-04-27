@@ -12,7 +12,7 @@ export default
 					Rest.setUrl(defaultUrl);
 					return Rest.get()
 						.success(function(res){
-							return res
+							return res;
 						})
 	                    .error(function(res, status){
 	                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
@@ -26,7 +26,7 @@ export default
 					data.eula_accepted = eula;
 					return Rest.post(JSON.stringify(data))
 						.success(function(res){
-							return res
+							return res;
 						})
 						.error(function(res, status){
 	                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
@@ -38,25 +38,27 @@ export default
 				// Returns false if invalid
 				valid: function(license) {
 					 	if (!license.valid_key){
-					 		return false
+					 		return false;
 					 	}
 					 	else if (license.free_instances <= 0){
-					 		return false
+					 		return false;
 					 	}
-					 	// notify if less than 15 days remaining 
+					 	// notify if less than 15 days remaining
 					 	else if (license.time_remaining / 1000 / 60 / 60 / 24 > 15){
-					 		return false
+					 		return false;
 					 	}
-					 	return true
+					 	return true;
 				},
 				notify: function(){
-					self = this;
+					var self = this;
 					this.get()
 						.then(function(res){
-							self.valid(res.data.license_info) ? null : $state.go('license');
+							if(self.valid(res.data.license_info) === false) {
+								$state.go('license');
+							}
 						});
 				}
 
-			}
+			};
 		}
 		];

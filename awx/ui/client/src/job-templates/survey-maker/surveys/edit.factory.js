@@ -3,7 +3,7 @@ export default
         return function(params) {
             var scope = params.scope,
                 id = params.id,
-                url = GetBasePath('job_templates') + id + '/survey_spec/', i;
+                url = GetBasePath('job_templates') + id + '/survey_spec/';
 
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();

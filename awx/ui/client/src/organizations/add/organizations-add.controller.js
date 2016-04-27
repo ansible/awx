@@ -63,4 +63,4 @@ export default ['$scope', '$rootScope', '$compile', '$location',
             $state.transitionTo('organizations');
         };
     }
-]
+];

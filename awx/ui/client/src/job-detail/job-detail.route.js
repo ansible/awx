@@ -5,7 +5,6 @@
  *************************************************/
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
-import HostSummaryController from './host-summary/host-summary.controller';
 
 export default {
     name: 'jobDetail',

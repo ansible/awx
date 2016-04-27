@@ -24,7 +24,7 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        scmUpdateSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+        scmUpdateSocket: [function() {
             // TODO: determine whether or not we have socket support for scm update standard out
             return true;
         }]

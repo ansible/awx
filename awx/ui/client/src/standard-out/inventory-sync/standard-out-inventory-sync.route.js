@@ -24,7 +24,7 @@ export default {
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        inventorySyncSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
+        inventorySyncSocket: [function() {
             // TODO: determine whether or not we have socket support for inventory sync standard out
             return true;
         }]

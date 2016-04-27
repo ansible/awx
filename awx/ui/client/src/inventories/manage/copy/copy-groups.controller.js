@@ -3,18 +3,21 @@ function CopyGroupsCtrl($compile, $state, $scope, $location, Rest, ProcessErrors
     var vm = this;
     var name;
 
-    var params = ParamPass.get();
+    var params = ParamPass.get(),
+        group_id,
+        parent_scope,
+        scope;
 
     if (params !== undefined) {
-        var group_id = $state.params.group_id,
-            parent_scope = params.scope,
-            scope = parent_scope.$new(),
-            parent_group = parent_scope.selected_group_id,
+        group_id = $state.params.group_id;
+        parent_scope = params.scope;
+        scope = parent_scope.$new();
+        var parent_group = parent_scope.selected_group_id,
             url, group;
     } else {
-        var group_id = $state.params.group_id;
-        var parent_scope = $scope.$new();
-        var scope = parent_scope.$new();
+        group_id = $state.params.group_id;
+        parent_scope = $scope.$new();
+        scope = parent_scope.$new();
     }
 
     var inventory_id = $state.params.inventory_id;
@@ -132,7 +135,7 @@ function CopyGroupsCtrl($compile, $state, $scope, $location, Rest, ProcessErrors
         });
         $scope.refreshHostsOnGroupRefresh = true;
         //$scope.search(InventoryGroups.iterator, null, true, false, true);
-    }
+    };
 
     var cancel = function() {
         restoreSearch(); // Restore all parent search stuff and refresh hosts and groups lists
@@ -296,7 +299,7 @@ function CopyGroupsCtrl($compile, $state, $scope, $location, Rest, ProcessErrors
         name: name,
         allowSave: allowSave
     });
-};
+}
 
 export default ['$compile', '$state', '$scope', '$location', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
     'PaginateInit', 'GetRootGroups', 'ParamPass', 'Store', CopyGroupsCtrl

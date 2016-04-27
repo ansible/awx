@@ -31,7 +31,9 @@ function link($sce, $filter, Empty, scope, element, attrs) {
 
     function sanitizeDefault() {
 
-        var defaultValue = "";
+        var defaultValue = "",
+        min,
+        max;
 
         if(scope.question.type === 'text'|| scope.question.type === "password" ){
             defaultValue = (scope.question.default) ? scope.question.default : "";
@@ -61,14 +63,14 @@ function link($sce, $filter, Empty, scope, element, attrs) {
         }
 
         if(scope.question.type === 'integer'){
-            var min = (!Empty(scope.question.min)) ? scope.question.min : "";
-            var max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
+            min = (!Empty(scope.question.min)) ? scope.question.min : "";
+            max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
             defaultValue = (!Empty(scope.question.default)) ? scope.question.default : (!Empty(scope.question.default_int)) ? scope.question.default_int : "" ;
 
         }
         if(scope.question.type === "float"){
-            var min = (!Empty(scope.question.min)) ? scope.question.min : "";
-            var max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
+            min = (!Empty(scope.question.min)) ? scope.question.min : "";
+            max = (!Empty(scope.question.max)) ? scope.question.max : "" ;
             defaultValue = (!Empty(scope.question.default)) ? scope.question.default : (!Empty(scope.question.default_float)) ? scope.question.default_float : "" ;
 
         }

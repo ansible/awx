@@ -4,8 +4,6 @@ export default
         return function(params) {
             var scope = params.scope,
                 id = params.id,
-                i, url, html, element,
-                questions = [],
                 form = SurveyQuestionForm,
                 sce = params.sce;
             scope.sce = sce;
@@ -73,7 +71,7 @@ export default
                     scope.survey_questions = [];
                 }
                 $('#' + id).dialog('destroy');
-            }
+            };
 
             // Gets called when a user actually hits the save button.  Functionality differs
             // based on the mode.  scope.mode="add" cleans up scope.survey_questions and
@@ -83,8 +81,8 @@ export default
                 Wait('start');
                 if(scope.mode ==="add"){
                     // Loop across the survey questions and remove any new_question flags
-                    angular.forEach(scope.survey_questions, function(question, key) {
-                        delete question['new_question'];
+                    angular.forEach(scope.survey_questions, function(question) {
+                        delete question.new_question;
                     });
 
                     $('#survey-modal-dialog').dialog('destroy');
@@ -100,28 +98,28 @@ export default
                     var updateSurveyQuestions = function() {
                         Rest.setUrl(GetBasePath('job_templates') + id + '/survey_spec/');
                         return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                        .success(function (data) {
+                        .success(function () {
 
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to add new survey. POST returned status: ' + status });
                         });
-                    }
+                    };
 
                     var updateSurveyEnabled = function() {
                         Rest.setUrl(GetBasePath('job_templates') + id+ '/');
                         return Rest.patch({"survey_enabled": scope.survey_enabled})
-                        .success(function (data) {
+                        .success(function () {
 
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, form, {
                                 hdr: 'Error!',
-                                msg: 'Failed to retrieve save survey_enabled: ' + $routeParams.template_id + '. GET status: ' + status
+                                msg: 'Failed to save survey_enabled: GET status: ' + status
                             });
                         });
-                    }
+                    };
 
                     updateSurveyQuestions()
                     .then(function() {
@@ -130,7 +128,7 @@ export default
                     .then(function() {
                         scope.closeSurvey('survey-modal-dialog');
                         scope.$emit('SurveySaved');
-                    })
+                    });
 
                 }
             };
@@ -173,7 +171,7 @@ export default
                 scope.questionToBeDeleted = deleteIndex;
                 // Show the delete overlay with mode='question'
                 scope.showDeleteOverlay('question');
-            }
+            };
 
             // Called after a user confirms question deletion (hitting the DELETE button on the delete question overlay).
             scope.deleteQuestion = function(index){
@@ -181,7 +179,7 @@ export default
                 // one being edited in the array.  This makes sure that our pointer to the question
                 // currently being edited gets updated independently from a deleted question.
                 if(GenerateForm.mode === 'edit' && !isNaN(scope.editQuestionIndex)){
-                    if(scope.editQuestionIndex == index) {
+                    if(scope.editQuestionIndex === index) {
                         // The user is deleting the question being edited - need to roll back to Add Question mode
                         scope.editQuestionIndex = null;
                         scope.generateAddQuestionForm();
@@ -238,7 +236,7 @@ export default
 
                 // Set the whole form to pristine
                 scope.survey_question_form.$setPristine();
-            }
+            };
 
             // Gets called when the "type" dropdown value changes.  In that case, we want to clear out
             // all the "type" specific fields/errors and start fresh.
@@ -258,12 +256,11 @@ export default
             // Function that gets called when a user hits ADD/UPDATE on the survey question form.  This
             // function handles some validation as well as eventually adding the question to the
             // scope.survey_questions array.
-            scope.submitQuestion = function(event){
+            scope.submitQuestion = function(){
                 var data = {},
                 fld, i,
                 choiceArray,
-                answerArray,
-                key, elementID;
+                answerArray;
                 scope.invalidChoice = false;
                 scope.duplicate = false;
                 scope.minTextError = false;
@@ -333,7 +330,7 @@ export default
                 if(GenerateForm.mode === 'edit'){
                     // Loop across the survey questions and see if a different question already has
                     // the same variable name
-                    for(var i=0; i<scope.survey_questions.length; i++){
+                    for( i=0; i<scope.survey_questions.length; i++){
                         if(scope.survey_questions[i].variable === scope.variable && i!==scope.editQuestionIndex){
                             scope.duplicate = true;
                         }
@@ -475,11 +472,11 @@ export default
                         break;
                     }
 
-                };
+                }
 
                 // return true here signals that the drop is allowed, but that we've already taken care of inserting the element
                 return true;
-            }
+            };
 
             // Gets called when a user is creating/editing a question that has a password
             // field.  The password field in the form has a SHOW/HIDE button that calls this.
@@ -508,7 +505,7 @@ export default
                 scope.deleteMode = mode;
                 // Flip the deleteOverlayVisible flag so that the overlay becomes visible via ng-show
                 scope.deleteOverlayVisible = true;
-            }
+            };
 
             // Called by the cancel/close buttons on the delete overlay.  Also called after deletion has been confirmed.
             scope.hideDeleteOverlay = function() {
@@ -518,14 +515,14 @@ export default
                 scope.questionToBeDeleted = null;
                 // Hide the delete overlay
                 scope.deleteOverlayVisible = false;
-            }
+            };
 
             /* END DELETE OVERLAY RELATED FUNCTIONS */
 
             // Watcher that updates the survey enabled/disabled tooltip based on scope.survey_enabled
-            scope.$watch('survey_enabled', function(newVal, oldVal) {
+            scope.$watch('survey_enabled', function(newVal) {
                 scope.surveyEnabledTooltip = (newVal) ? "Disable survey" : "Enable survey";
-            })
+            });
 
         };
     }

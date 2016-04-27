@@ -60,11 +60,12 @@ function manageGroupsDirectiveController($filter, $location, $log,
 
     $scope.parseType = 'yaml';
 
-    generator.inject(form, {
+    generator.inject(GroupForm, {
         mode: mode,
-        id: 'group-manage-panel',
-        tabs: true,
-        scope: $scope
+        id: 'properties-tab',
+        related: false,
+        scope: $scope,
+        cancelButton: false,
     });
 
     generator.reset();
@@ -74,12 +75,12 @@ function manageGroupsDirectiveController($filter, $location, $log,
         variable: 'source_type_options'
     });
 
-
     $scope.source = form.fields.source['default'];
     $scope.sourcePathRequired = false;
     $scope[form.fields.source_vars.parseTypeName] = 'yaml';
     $scope.update_cache_timeout = 0;
     $scope.parseType = 'yaml';
+
 
     function initSourceChange() {
         $scope.showSchedulesTab = (mode === 'edit' && $scope.source && $scope.source.value !== "manual") ? true : false;
@@ -144,7 +145,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
                             master.source_vars = $scope.variables;
                         } else if (fld === "inventory_script") {
                             // the API stores it as 'source_script', we call it inventory_script
-                            data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                            data.summary_fields.inventory_script = data.summary_fields.source_script;
                             $scope.inventory_script = data.source_script;
                             master.inventory_script = $scope.inventory_script;
                         } else if (fld === "source_regions") {

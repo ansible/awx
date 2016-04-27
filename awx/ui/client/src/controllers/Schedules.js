@@ -16,7 +16,7 @@ GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
 
     ClearScope();
 
-    var base, e, id, url, parentObject;
+    var base, id, url, parentObject;
 
     base = $location.path().replace(/^\//, '').split('/')[0];
 

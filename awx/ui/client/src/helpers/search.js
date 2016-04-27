@@ -502,7 +502,7 @@ export default
                         scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                     }
 
-                    if(scope[iterator + 'SearchValue' + modifier] && scope[iterator + 'SearchValue' + modifier] != '') {
+                    if(scope[iterator + 'SearchValue' + modifier] && scope[iterator + 'SearchValue' + modifier] !== '') {
                         scope[iterator + '_active_search'] = true;
                     }
                     else {

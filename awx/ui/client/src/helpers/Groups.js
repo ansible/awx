@@ -1011,7 +1011,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            }
                                            else if(fld === "inventory_script"){
                                                // the API stores it as 'source_script', we call it inventory_script
-                                               data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                                               data.summary_fields.inventory_script = data.summary_fields.source_script;
                                                sources_scope.inventory_script = data.source_script;
                                                master.inventory_script = sources_scope.inventory_script;
                                            } else if (fld === "source_regions") {

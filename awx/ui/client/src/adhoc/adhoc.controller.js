@@ -22,6 +22,10 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
     var privateFn = {};
     this.privateFn = privateFn;
 
+    var id = $stateParams.inventory_id,
+        urls = privateFn.setAvailableUrls(),
+        hostPattern = $rootScope.hostPatterns || "all";
+
     // note: put any urls that the controller will use in here!!!!
     privateFn.setAvailableUrls = function() {
         return {
@@ -30,10 +34,6 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
             machineCredentialUrl: GetBasePath('credentials') + '?kind=ssh'
         };
     };
-
-    var id = $stateParams.inventory_id,
-        urls = privateFn.setAvailableUrls(),
-        hostPattern = $rootScope.hostPatterns || "all";
 
     // set the default options for the selects of the adhoc form
     privateFn.setFieldDefaults = function(verbosity_options, forks_default) {
@@ -164,7 +164,7 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
 
     $scope.formCancel = function(){
         $state.go('inventoryManage');
-    }
+    };
 
     // remove all data input into the form and reset the form back to defaults
     $scope.formReset = function () {

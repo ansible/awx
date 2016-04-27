@@ -4,18 +4,18 @@ function CopyHostsCtrl($compile, $state, $scope, Rest, ProcessErrors, CreateDial
 
     var host_id = $state.params.host_id;
     var inventory_id = $state.params.inventory_id;
-    var url, host;
+    var url, host, group_scope, parent_scope, scope, parent_group;
 
     var params = ParamPass.get();
     if (params !== undefined) {
-        var group_scope = params.group_scope,
-            parent_scope = params.host_scope,
-            parent_group = group_scope.selected_group_id,
-            scope = parent_scope.$new();
+        group_scope = params.group_scope;
+        parent_scope = params.host_scope;
+        parent_group = group_scope.selected_group_id;
+        scope = parent_scope.$new();
     } else {
-        var group_scope = $scope.$new();
-        var parent_scope = $scope.$new();
-        var scope = parent_scope.$new();
+        group_scope = $scope.$new();
+        parent_scope = $scope.$new();
+        scope = parent_scope.$new();
     }
 
     var PreviousSearchParams = Store('group_current_search_params');
@@ -91,6 +91,21 @@ function CopyHostsCtrl($compile, $state, $scope, Rest, ProcessErrors, CreateDial
             });
         });
 
+    var restoreSearch = function() {
+        // Restore search params and related stuff, plus refresh
+        // groups and hosts lists
+        SearchInit({
+            scope: $scope,
+            set: PreviousSearchParams.set,
+            list: PreviousSearchParams.list,
+            url: PreviousSearchParams.defaultUrl,
+            iterator: PreviousSearchParams.iterator,
+            sort_order: PreviousSearchParams.sort_order,
+            setWidgets: false
+        });
+        $scope.refreshHostsOnGroupRefresh = true;
+    };
+
     var cancel = function() {
         $(document).off("keydown");
         restoreSearch(); // Restore all parent search stuff and refresh hosts and groups lists
@@ -127,21 +142,6 @@ function CopyHostsCtrl($compile, $state, $scope, Rest, ProcessErrors, CreateDial
         } else {
             vm.allowSave = true;
         }
-    };
-
-    var restoreSearch = function() {
-        // Restore search params and related stuff, plus refresh
-        // groups and hosts lists
-        SearchInit({
-            scope: $scope,
-            set: PreviousSearchParams.set,
-            list: PreviousSearchParams.list,
-            url: PreviousSearchParams.defaultUrl,
-            iterator: PreviousSearchParams.iterator,
-            sort_order: PreviousSearchParams.sort_order,
-            setWidgets: false
-        });
-        $scope.refreshHostsOnGroupRefresh = true;
     };
 
     var performCopy = function() {

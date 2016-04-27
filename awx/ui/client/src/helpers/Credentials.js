@@ -234,7 +234,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                      if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
                          fld !== 'ssh_password') {
                          if (fld === "organization" && !scope[fld]) {
-                             data["user"] = $rootScope.current_user.id;
+                             data.user = $rootScope.current_user.id;
                          } else if (scope[fld] === null) {
                              data[fld] = "";
                          } else {

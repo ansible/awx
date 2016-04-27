@@ -92,4 +92,4 @@ export default['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'InventoryForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit',
-    'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', '$state', InventoriesAdd]
+    'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', '$state', InventoriesAdd];
