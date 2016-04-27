@@ -175,19 +175,10 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_fails_without_inventory_or_cred_access(
-        job_template_prompts, runtime_data, post, user, mocker):
+def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime_data, post, user):
     job_template = job_template_prompts(True)
     common_user = user('test-user', False)
     job_template.execute_role.members.add(common_user)
-
-    # Assure that the base job template can be launched to begin with
-    mock_job = mocker.MagicMock(spec=Job, id=968)
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
-        with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', args=[job_template.pk]), {}, common_user)
-
-    assert response.status_code == 201
 
     # Assure that giving an inventory without access to the inventory blocks the launch
     runtime_inventory = Inventory.objects.get(pk=runtime_data['inventory'])
@@ -196,6 +187,13 @@ def test_job_launch_fails_without_inventory_or_cred_access(
 
     assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_job_launch_fails_without_credential_access(job_template_prompts, runtime_data, post, user):
+    job_template = job_template_prompts(True)
+    common_user = user('test-user', False)
+    job_template.execute_role.members.add(common_user)
 
     # Assure that giving a credential without access blocks the launch
     runtime_credential = Credential.objects.get(pk=runtime_data['credential'])
