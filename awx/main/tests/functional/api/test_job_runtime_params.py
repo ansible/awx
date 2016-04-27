@@ -176,32 +176,31 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_fails_without_inventory_or_cred_access(
-        job_template_prompts, runtime_data, machine_credential, post, user, mocker):
+        job_template_prompts, runtime_data, post, user, mocker):
     job_template = job_template_prompts(True)
     common_user = user('test-user', False)
     job_template.execute_role.members.add(common_user)
 
     # Assure that the base job template can be launched to begin with
-    mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
+    mock_job = mocker.MagicMock(spec=Job, id=968)
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch',
-                            args=[job_template.pk]), {}, common_user)
+            response = post(reverse('api:job_template_launch', args=[job_template.pk]), {}, common_user)
 
     assert response.status_code == 201
 
     # Assure that giving an inventory without access to the inventory blocks the launch
-    new_inv = job_template.project.organization.inventories.create(name="user-can-not-use")
+    runtime_inventory = Inventory.objects.get(pk=runtime_data['inventory'])
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    dict(inventory=new_inv.pk), common_user)
+                    dict(inventory=runtime_inventory.pk), common_user)
 
     assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
 
     # Assure that giving a credential without access blocks the launch
-    new_cred = Credential.objects.create(name='machine-cred-you-cant-use', kind='ssh', username='test_user', password='pas4word')
+    runtime_credential = Credential.objects.get(pk=runtime_data['credential'])
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    dict(credential=new_cred.pk), common_user)
+                    dict(credential=runtime_credential.pk), common_user)
 
     assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
