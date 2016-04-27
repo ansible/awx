@@ -231,7 +231,8 @@ export function UsersEdit($scope, $rootScope, $location,
         form = UserForm,
         master = {},
         id = $stateParams.user_id,
-        relatedSets = {};
+        relatedSets = {},
+        set;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
@@ -248,17 +249,25 @@ export function UsersEdit($scope, $rootScope, $location,
         return;
     };
 
+    $scope.convertApiUrl = function(str) {
+        if (str) {
+            return str.replace("api/v1", "#");
+        } else {
+            return null;
+        }
+    };
+
     var setScopeRelated = function(data, related){
         _(related)
-        .pick(function(value, key){
-            return data.related.hasOwnProperty(key) === true;
-        })
-        .forEach(function(value, key){
-            relatedSets[key] = {
-                url: data.related[key],
-                iterator: value.iterator
-            };
-        })
+            .pick(function(value, key){
+                return data.related.hasOwnProperty(key) === true;
+            })
+            .forEach(function(value, key){
+                relatedSets[key] = {
+                    url: data.related[key],
+                    iterator: value.iterator
+                };
+            })
         .value();
     };
     // prepares a data payload for a PUT request to the API
@@ -295,6 +304,11 @@ export function UsersEdit($scope, $rootScope, $location,
                 scope: $scope,
                 relatedSets: relatedSets
             });
+
+            for (set in relatedSets) {
+                $scope.search(relatedSets[set].iterator);
+            }
+
             Wait('stop');
         })
         .error(function (data, status) {

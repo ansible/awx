@@ -1462,7 +1462,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                     if(this.form.name === "user"){
                         html+= "<span class=\"Form-title--is_superuser\" "+
-                            "ng-if=is_superuser>Admin</span>";
+                            "ng-if=is_superuser>System Administrator</span>";
                     }
                     html += "</div>\n"; 
                     html += "<div class=\"Form-header--fields\">";
@@ -1781,14 +1781,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     });
 
                 html += `
-<div class=\"row\">
+<div class=\"row\"
+    ng-show=\"${collection.hideSearchAndActions ? true : false}\">
     <div class=\"col-lg-8\"
         ng-show=\"${collection.iterator}Loading == true ||
             ${collection.iterator}_active_search == true || (
                 ${collection.iterator}Loading == false &&
                 ${collection.iterator}_active_search == false &&
-                ${collection.iterator}_total_rows > 0
-            )\">
+                ${collection.iterator}_total_rows > 0)\"
+        ng-hide=\"is_superuser && ${collection.hideOnSuperuser}\"
+    >
         ${tagSearch}
     </div>
     <div class=\"col-lg-4\">
@@ -1800,18 +1802,39 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
-                html += "<div class=\"row\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == true && " + itm + ".length == 0\">\n";
-                html += "<div class=\"col-lg-12 List-searchNoResults\">No records matched your search.</div>\n";
-                html += "</div>\n";
+                var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
+                html += `
+<div
+    class=\"row\"
+    ng-show=\" ${collection.iterator}Loading == false &&
+        ${collection.iterator}_active_search == true &&
+        ${itm}.length == 0 &&
+        !(is_superuser && ${collection.hideOnSuperuser})\">
+    <div class=\"col-lg-12 List-searchNoResults\">
+        No records matched your search.
+    </div>
+</div>
+                `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                 html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
 
+                html += `
+<div class=\"List-noItems\" ng-show=\"is_superuser\">
+    System Administrators have access to all ${collection.iterator}s
+</div>
+                `;
+
                 // Start the list
-                html += "<div class=\"list-wrapper\"  ng-show=\"" + collection.iterator + "Loading == true || (" + collection.iterator + "Loading == false && " + itm + ".length > 0)\">\n";
-                html += "<table id=\"" + itm + "_table" + "\" class=\"" + collection.iterator + " List-table\">\n";
-                html += "<thead>\n";
-                html += "<tr class=\"List-tableHeaderRow\">\n";
+                html += `
+<div class=\"list-wrapper\"
+    ng-show=\"(${collection.iterator}Loading == true ||
+        (${collection.iterator}Loading == false && ${itm}.length > 0)) &&
+        !(is_superuser && ${collection.hideOnSuperuser})\">
+    <table id=\"${itm}_table\" class=\"${collection.iterator} List-table\">
+        <thead>
+        <tr class=\"List-tableHeaderRow\">
+                `;
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
                     html += "<th class=\"List-tableHeader list-header ";
@@ -1918,7 +1941,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += PaginateWidget({
                     set: itm,
                     iterator: collection.iterator,
-                    mini: true
+                    mini: true,
+                    hideOnSuperuser: collection.hideOnSuperuser
                 });
                 return html;
             }

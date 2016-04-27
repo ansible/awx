@@ -16,6 +16,7 @@ export default ['GetBasePath', function(GetBasePath) {
                 delete f[i].ngClass;
                 delete f[i].ngClick;
                 delete f[i].icon;
+                delete f[i].linkTo;
                 return {[i]: f[i]};
             }).reduce(function (acc, i) {
                 var key = Object.keys(i);
