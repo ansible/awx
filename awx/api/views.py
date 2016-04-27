@@ -2263,7 +2263,7 @@ class JobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
     parent_model = JobTemplate
     relationship = 'notifiers_success'
 
-class JobTemplateLabelList(SubListCreateAttachDetachAPIView):
+class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachLabelMixin):
 
     model = Label
     serializer_class = LabelSerializer
@@ -3359,7 +3359,7 @@ class NotificationDetail(RetrieveAPIView):
     serializer_class = NotificationSerializer
     new_in_300 = True
 
-class LabelList(ListCreateAPIView, DeleteLastUnattachLabelMixin):
+class LabelList(ListCreateAPIView):
 
     model = Label
     serializer_class = LabelSerializer
