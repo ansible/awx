@@ -1,11 +1,13 @@
 import logging
+from time import time
 
 from django.utils.encoding import smart_text
 from django.db.models import Q
-from django.utils.timezone import now
+#from django.utils.timezone import now
 
 from collections import defaultdict
-from awx.main.utils import getattrd, set_current_apps
+from awx.main.utils import getattrd
+from awx.main.models.rbac import Role
 
 import _old_access as old_access
 logger = logging.getLogger(__name__)
@@ -26,9 +28,6 @@ def log_migration(wrapped):
         return wrapped(*args, **kwargs)
     return wrapper
 
-@log_migration
-def init_rbac_migration(apps, schema_editor):
-    set_current_apps(apps)
 
 @log_migration
 def migrate_users(apps, schema_editor):
@@ -395,3 +394,22 @@ def migrate_job_templates(apps, schema_editor):
             if old_access.check_user_access(user, jt.__class__, 'start', jt, False):
                 jt.execute_role.members.add(user)
                 logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))
+
+@log_migration
+def rebuild_role_hierarchy(apps, schema_editor):
+        logger.info('Computing role roots..')
+        start = time()
+        roots = Role.objects \
+                    .all() \
+                    .exclude(pk__in=Role.parents.through.objects.all()
+                                        .values_list('from_role_id', flat=True).distinct()) \
+                    .values_list('id', flat=True)
+        stop = time()
+        logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
+        start = time()
+        Role.rebuild_role_ancestor_list(roots, [])
+        stop = time()
+        logger.info('Rebuild completed in %f seconds' % (stop - start))
+        logger.info('Done.')
+
+
