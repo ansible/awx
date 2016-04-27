@@ -24,7 +24,8 @@
  				id: $scope.host.id,
  				variables: $scope.extraVars === '---' || $scope.extraVars === '{}' ? null : $scope.extraVars,
  				name: $scope.name,
- 				description: $scope.description
+ 				description: $scope.description,
+ 				enabled: $scope.host.enabled
  			};
  			DashboardHostService.putHost(host).then(function(res){
  				$state.go('^', null, {reload: true});
