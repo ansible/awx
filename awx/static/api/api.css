@@ -47,8 +47,9 @@ body .navbar .navbar-brand:hover {
 }
 body .navbar .navbar-brand img {
   display: inline-block;
-  max-width: 150px;
-  max-height: 50px;
+  width: 93px;
+  height: 30px;
+  margin-right:14px;
 }
 body .navbar .navbar-brand > span {
   display: inline-block;

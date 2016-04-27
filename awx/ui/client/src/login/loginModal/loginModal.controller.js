@@ -92,7 +92,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
             scope.customLogo = "custom_console_logo.png";
             scope.customLogoPresent = true;
         } else {
-            scope.customLogo = "login_modal_logo.png";
+            scope.customLogo = "tower-logo-login.svg";
             scope.customLogoPresent = false;
         }
 
