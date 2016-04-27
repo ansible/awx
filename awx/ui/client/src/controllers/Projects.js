@@ -28,7 +28,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         mode = (base === 'projects') ? 'edit' : 'select',
         url = (base === 'teams') ? GetBasePath('teams') + $stateParams.team_id + '/projects/' : defaultUrl,
         choiceCount = 0;
-
     view.inject(list, { mode: mode, scope: $scope });
 
     $rootScope.flashMessage = null;

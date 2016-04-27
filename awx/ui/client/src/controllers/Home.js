@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -155,7 +155,6 @@ export function HomeGroups($rootScope, $log, $scope, $filter, $compile, $locatio
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
-
     var generator = GenerateList,
         list = HomeGroupList,
         defaultUrl = GetBasePath('groups'),
@@ -516,112 +515,3 @@ HomeGroups.$inject = ['$rootScope', '$log', '$scope', '$filter', '$compile', '$l
  * @description This loads the page for 'home/hosts'
  *
 */
-
-export function HomeHosts($scope, $location, $stateParams, HomeHostList, GenerateList, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Find, ShowJobSummary) {
-
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
-
-    var generator = GenerateList,
-        list = HomeHostList,
-        defaultUrl = GetBasePath('hosts');
-
-    if ($scope.removePostRefresh) {
-        $scope.removePostRefresh();
-    }
-    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        for (var i = 0; i < $scope.hosts.length; i++) {
-            $scope.hosts[i].inventory_name = $scope.hosts[i].summary_fields.inventory.name;
-            //SetHostStatus($scope['hosts'][i]);
-            SetStatus({
-                $scope: $scope,
-                host: $scope.hosts[i]
-            });
-        }
-
-        generator.inject(list, { mode: 'edit', scope: $scope });
-
-    });
-
-    SearchInit({
-        scope: $scope,
-        set: 'hosts',
-        list: list,
-        url: defaultUrl
-    });
-
-    PaginateInit({
-        scope: $scope,
-        list: list,
-        url: defaultUrl
-    });
-
-    // Process search params
-    if ($stateParams.name) {
-        $scope[HomeHostList.iterator + 'InputDisable'] = false;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.name;
-        $scope[HomeHostList.iterator + 'SearchField'] = 'name';
-        $scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields.name.label;
-    }
-
-    if ($stateParams.id) {
-        $scope[HomeHostList.iterator + 'InputDisable'] = false;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.id;
-        $scope[HomeHostList.iterator + 'SearchField'] = 'id';
-        $scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields.id.label;
-        $scope[HomeHostList.iterator + 'SearchSelectValue'] = null;
-    }
-
-    if ($stateParams.has_active_failures) {
-        $scope[HomeHostList.iterator + 'InputDisable'] = true;
-        $scope[HomeHostList.iterator + 'SearchValue'] = $stateParams.has_active_failures;
-        $scope[HomeHostList.iterator + 'SearchField'] = 'has_active_failures';
-        $scope[HomeHostList.iterator + 'SearchFieldLabel'] = HomeHostList.fields.has_active_failures.label;
-        $scope[HomeHostList.iterator + 'SearchSelectValue'] = ($stateParams.has_active_failures === 'true') ? { value: 1 } : { value: 0 };
-    }
-
-    $scope.search(list.iterator);
-
-    $scope.refreshHosts = function() {
-        $scope.search(list.iterator);
-    };
-
-    $scope.toggleHostEnabled = function (id, sources) {
-        ToggleHostEnabled({
-            host_id: id,
-            external_source: sources,
-            host_scope: $scope
-        });
-    };
-
-    $scope.editHost = function (host_id) {
-        var host = Find({
-            list: $scope.hosts,
-            key: 'id',
-            val: host_id
-        });
-        if (host) {
-            HostsEdit({
-                host_scope: $scope,
-                host_id: host_id,
-                inventory_id: host.inventory,
-                group_id: null,
-                hostsReload: false,
-                mode: 'edit'
-            });
-        }
-    };
-
-    $scope.showJobSummary = function (job_id) {
-        ShowJobSummary({
-            job_id: job_id
-        });
-    };
-
-}
-
-HomeHosts.$inject = ['$scope', '$location', '$stateParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'ReturnToCaller',
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit',
-    'Find', 'ShowJobSummary'
-];
