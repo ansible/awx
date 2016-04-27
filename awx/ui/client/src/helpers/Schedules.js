@@ -245,7 +245,7 @@ export default
                         url = params.url;
                     }
                 }
-                else if (base == 'system_job_templates') {
+                else if (base === 'system_job_templates') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                     if($stateParams.id  == 4){
                         scope.isFactCleanup = true;
@@ -325,7 +325,9 @@ export default
             };
         }])
 
-        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait', function(Rest, ProcessErrors, RRuleToAPI, Wait) {
+        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait',
+            'ToJSON',
+            function(Rest, ProcessErrors, RRuleToAPI, Wait, ToJSON) {
             return function(params) {
                 var scope = params.scope,
                     url = params.url,
@@ -356,6 +358,10 @@ export default
                     }
                     else if (scope.serializedExtraVars){
                         schedule.extra_data = scope.serializedExtraVars;
+                    }
+                    else if(scope.extraVars){
+                        schedule.extra_data = ToJSON(scope.parseType,
+                            scope.extraVars, false);
                     }
                     Rest.setUrl(url);
                     if (mode === 'add') {

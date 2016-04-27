@@ -62,15 +62,15 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
         $scope.parseType = 'yaml';
         var defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
         Rest.setUrl(defaultUrl);
-        Rest.get().then(function(res){ 
+        Rest.get().then(function(res){
             // sanitize
             var data = JSON.parse(JSON.stringify(res.data.extra_vars));
             $scope.extraVars = data === '' ? '---' :  data;
-            ParseTypeChange({ 
-                scope: $scope, 
-                variable: 'extraVars', 
+            ParseTypeChange({
+                scope: $scope,
+                variable: 'extraVars',
                 parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars' 
+                field_id: 'SchedulerForm-extraVars'
             });
         });
         $scope.$watch('extraVars', function(){
@@ -89,6 +89,16 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
         });
     }
     else if ($state.current.name === 'projectSchedules.add'){
+        $scope.extraVars = '---';
+        $scope.parseType = 'yaml';
+        ParseTypeChange({
+                scope: $scope,
+                variable: 'extraVars',
+                parse_variable: 'parseType',
+                field_id: 'SchedulerForm-extraVars'
+            });
+    }
+    else if ($state.current.name === 'inventoryManageSchedules.add'){
         $scope.extraVars = '---';
         $scope.parseType = 'yaml';
         ParseTypeChange({
