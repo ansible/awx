@@ -5,7 +5,6 @@ from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import Job, JobTemplate
-from awx.main.access import JobAccess
 
 from django.core.urlresolvers import reverse
 
@@ -232,7 +231,6 @@ def test_job_relaunch_resource_access(runtime_data, project, user):
     original_job = Job.objects.create(
         name='existing-job', credential=the_cred, inventory=the_inv
     )
-    ordinary_user = user('commoner', False)
     inventory_user = user('user1', False)
     credential_user = user('user2', False)
     both_user = user('user3', False)
