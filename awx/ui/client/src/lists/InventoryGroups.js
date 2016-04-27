@@ -31,7 +31,7 @@ export default
                 nosort: true,
                 label: '',
                 type: 'badgeCount',
-                ngHide: '{{group.total_groups == 0}}',        
+                ngHide: 'group.total_groups == 0',        
             },
             source: {
                 label: 'Source',
