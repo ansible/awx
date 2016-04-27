@@ -5,9 +5,17 @@
  *************************************************/
 
 export default
-	['$scope', '$state', '$stateParams', 'PageRangeSetup', 'GetBasePath', 'DashboardHostsList', 
-	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts',  
+	['$scope', '$state', '$stateParams', 'PageRangeSetup', 'GetBasePath', 'DashboardHostsList',
+	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts',
 	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts){
+		var setJobStatus = function(){
+			_.forEach($scope.hosts, function(value){
+				SetStatus({
+					scope: $scope,
+					host: value
+				});
+			});
+		};
 		var generator = GenerateList,
 			list = DashboardHostsList,
 			defaultUrl = GetBasePath('hosts');
@@ -23,21 +31,13 @@ export default
 			});
 		};
 		$scope.$on('PostRefresh', function(){
-        	$scope.hosts = _.map($scope.hosts, function(value, key){
+        	$scope.hosts = _.map($scope.hosts, function(value){
     			value.inventory_name = value.summary_fields.inventory.name;
     			value.inventory_id = value.summary_fields.inventory.id;
     			return value;
         	});
         	setJobStatus();
 		});
-		var setJobStatus = function(){
-			_.forEach($scope.hosts, function(value, key){
-				SetStatus({
-					scope: $scope,
-					host: value
-				});
-			});
-		};
 		var init = function(){
 			$scope.list = list;
 			$scope.host_active_search = false;

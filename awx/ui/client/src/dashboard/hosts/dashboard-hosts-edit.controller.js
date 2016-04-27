@@ -27,10 +27,10 @@
  				description: $scope.description,
  				enabled: $scope.host.enabled
  			};
- 			DashboardHostService.putHost(host).then(function(res){
+ 			DashboardHostService.putHost(host).then(function(){
  				$state.go('^', null, {reload: true});
  			});
- 			
+
  		};
  		var init = function(){
  			$scope.host = host;
@@ -38,11 +38,11 @@
  			generator.inject(form, {mode: 'edit', related: false, scope: $scope});
      		$scope.extraVars = $scope.host.variables === '' ? '---' : $scope.host.variables;
     		$scope.name = host.name;
- 			$scope.description = host.description;  		
-        	ParseTypeChange({ 
-        		scope: $scope, 
-        		field_id: 'host_variables', 
-        		variable: 'extraVars',  
+ 			$scope.description = host.description;
+        	ParseTypeChange({
+        		scope: $scope,
+        		field_id: 'host_variables',
+        		variable: 'extraVars',
         	});
  		};
 
