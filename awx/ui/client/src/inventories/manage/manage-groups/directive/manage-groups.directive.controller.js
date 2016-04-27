@@ -60,12 +60,12 @@ function manageGroupsDirectiveController($filter, $location, $log,
 
     $scope.parseType = 'yaml';
 
-    generator.inject(GroupForm, {
+    generator.inject(form, {
         mode: mode,
-        id: 'properties-tab',
-        related: false,
+        id: 'group-manage-panel',
         scope: $scope,
-        cancelButton: false,
+        related: false,
+        cancelButton: false
     });
 
     generator.reset();
