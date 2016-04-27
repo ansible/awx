@@ -25,6 +25,7 @@ from rest_framework import views
 
 # AWX
 from awx.main.models import *  # noqa
+from awx.main.models import Label
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
 
@@ -35,7 +36,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
            'SubDetailAPIView',
            'ResourceAccessList',
-           'ParentMixin',]
+           'ParentMixin',
+           'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
 
@@ -399,12 +401,15 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         else:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def unattach(self, request, *args, **kwargs):
+    def unattach_validate(self, request):
         sub_id = request.data.get('id', None)
+        res = None
         if not sub_id:
             data = dict(msg='"id" is required to disassociate')
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            res = Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return (sub_id, res)
 
+    def unattach_by_id(self, request, sub_id):
         parent = self.get_parent_object()
         parent_key = getattr(self, 'parent_key', None)
         relationship = getattrd(parent, self.relationship)
@@ -421,6 +426,12 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def unattach(self, request, *args, **kwargs):
+        (sub_id, res) = self.unattach_validate(request)
+        if res:
+            return res
+        return self.unattach_by_id(request, sub_id)
+       
     def post(self, request, *args, **kwargs):
         if not isinstance(request.data, dict):
             return Response('invalid type for post data',
@@ -429,6 +440,21 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return self.unattach(request, *args, **kwargs)
         else:
             return self.attach(request, *args, **kwargs)
+
+class DeleteLastUnattachLabelMixin(object):
+    def unattach(self, request, *args, **kwargs):
+        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request, *args, **kwargs)
+        if res:
+            return res
+
+        res = super(DeleteLastUnattachLabelMixin, self).unattach_by_id(request, sub_id)
+
+        label = Label.objects.get(id=sub_id)
+
+        if label.is_detached():
+            label.delete()
+
+        return res
 
 class SubDetailAPIView(generics.RetrieveAPIView, GenericAPIView, ParentMixin):
     pass

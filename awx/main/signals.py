@@ -156,6 +156,10 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
                 if action == 'pre_remove':
                     instance.content_object.admin_role.children.remove(user.admin_role)
 
+def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
+    for l in instance.labels.all():
+        if l.is_candidate_for_detach():
+            l.delete()
 
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -175,7 +179,8 @@ m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
-
+pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
+pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted
 

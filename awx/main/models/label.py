@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique
+from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 
 __all__ = ('Label', )
 
@@ -38,4 +39,20 @@ class Label(CommonModelNameNotUnique):
                 organization=None,
                 jobtemplate_labels__isnull=True
             )
+
+    def is_detached(self):
+        return bool(
+            Label.objects.filter(
+                id=self.id, 
+                unifiedjob_labels__isnull=True,
+                unifiedjobtemplate_labels__isnull=True
+            ).count())
+
+    def is_candidate_for_detach(self):
+        c1 = UnifiedJob.objects.filter(labels__in=[self.id]).count()
+        c2 = UnifiedJobTemplate.objects.filter(labels__in=[self.id]).count()
+        if (c1 + c2 - 1) == 0:
+            return True
+        else:
+            return False
 
