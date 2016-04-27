@@ -268,29 +268,27 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 .factory('BadgeCount', [
     function () {
         return function (params) {
-
             // Adds a badge count with optional tooltip
 
             var list = params.list,
                 fld = params.fld,
                 field = list.fields[fld],
-                html;
-
-            html = "<td class=\"" + fld + "-column";
-            html += (field.columnClass) ? " " + field.columnClass : "";
-            html += (field.columnNgClass) ? "\" ng-class=\"" + field.columnNgClass : "";
-            html += "\">\n";
-            html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
-            html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
-            html += ">";
-            html += "<span class=\"badge";
-            html += (field['class']) ? " " + field['class'] : "";
-            html += "\">";
-            html += "{{ " + list.iterator + '.' + fld + " }}";
-            html += "</span>";
-            html += (field.badgeLabel) ? " " + field.badgeLabel : "";
-            html += "</a>\n";
-            html += "</td>\n";
+                html = '';
+                html = "<td class=\"" + fld + "-column";
+                html += (field.columnClass) ? " " + field.columnClass : "";
+                html += "\">\n";
+                html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+                html += ">";
+                html += "<span class=\"badge";
+                html += (field['class']) ? " " + field['class'] : "";
+                html += (field.ngHide) ? "\" ng-hide=\"" + field.ngHide : "";
+                html += "\">";
+                html += "{{ " + list.iterator + '.' + fld + " }}";
+                html += "</span>";
+                html += (field.badgeLabel) ? " " + field.badgeLabel : "";
+                html += "</a>\n";
+                html += "</td>\n";
             return html;
         };
     }
