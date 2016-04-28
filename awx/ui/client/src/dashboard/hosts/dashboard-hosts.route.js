@@ -29,13 +29,13 @@ var dashboardHostsList =  {
         	var defaultUrl = GetBasePath('hosts') + '?page_size=10';
         	Rest.setUrl(defaultUrl);
         	return Rest.get().then(function(res){
-        		var results = _.map(res.data.results, function(value, key){
+        		var results = _.map(res.data.results, function(value){
         			value.inventory_name = value.summary_fields.inventory.name;
         			value.inventory_id = value.summary_fields.inventory.id;
         			return value;
         		});
                 res.data.results = results;
-                return res.data
+                return res.data;
         	});
         }]
     }

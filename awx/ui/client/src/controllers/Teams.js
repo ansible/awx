@@ -199,7 +199,8 @@ export function TeamsEdit($scope, $rootScope, $location,
         generator = GenerateForm,
         form = TeamForm,
         id = $stateParams.team_id,
-        relatedSets = {};
+        relatedSets = {},
+        set;
 
     $scope.team_id = id;
 
@@ -263,6 +264,12 @@ export function TeamsEdit($scope, $rootScope, $location,
                 relatedSets: relatedSets
             });
 
+            for (set in relatedSets) {
+                $scope.search(relatedSets[set].iterator);
+            }
+
+            $scope.team_obj = data;
+
             LookUpInit({
                 url: GetBasePath('organizations'),
                 scope: $scope,
@@ -297,6 +304,14 @@ export function TeamsEdit($scope, $rootScope, $location,
     };
 
     init();
+
+    $scope.convertApiUrl = function(str) {
+        if (str) {
+            return str.replace("api/v1", "#");
+        } else {
+            return null;
+        }
+    };
 
     /* Related Set implementation TDB */
 }

@@ -115,71 +115,6 @@ export default
             },
 
             related: {
-                /*
-                permissions: {
-                    basePath: 'teams/:id/access_list/',
-                    type: 'collection',
-                    title: 'Permissions',
-                    iterator: 'permission',
-                    index: false,
-                    open: false,
-                    searchType: 'select',
-                    actions: {
-                        add: {
-                            ngClick: "addPermission",
-                            label: 'Add',
-                            awToolTip: 'Add a permission',
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
-                        }
-                    }
-                },
-                */
-
-                credentials: {
-                    type: 'collection',
-                    title: 'Credentials',
-                    iterator: 'credential',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('credentials')",
-                            label: 'Add',
-                            awToolTip: 'Add a credential for this user',
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('credentials', credential.id, credential.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the credential',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('credentials', credential.id, credential.name, 'credential')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the credential'
-                        }
-                    }
-                },
                 organizations: {
                     type: 'collection',
                     title: 'Organizations',
@@ -197,9 +132,9 @@ export default
                         description: {
                             label: 'Description'
                         }
-                    }
+                    },
+                    hideOnSuperuser: true
                 },
-
                 teams: {
                     type: 'collection',
                     title: 'Teams',
@@ -217,8 +152,44 @@ export default
                         description: {
                             label: 'Description'
                         }
-                    }
+                    },
+                    hideOnSuperuser: true
+                },
+                roles: {
+                    hideSearchAndActions: true,
+                    type: 'collection',
+                    title: 'Permissions',
+                    iterator: 'permission',
+                    open: false,
+                    index: false,
+                    fields: {
+                        name: {
+                            label: 'Name',
+                            ngBind: 'permission.summary_fields.resource_name',
+                            linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
+                            noSort: true
+                        },
+                        type: {
+                            label: 'Type',
+                            ngBind: 'permission.summary_fields.resource_type_display_name',
+                            noSort: true
+                        },
+                        role: {
+                            label: 'Role',
+                            ngBind: 'permission.name',
+                            noSort: true
+                        },
+                    },
+                    fieldActions: {
+                        "delete": {
+                            label: 'Remove',
+                            ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
+                            iconClass: 'fa fa-times',
+                            awToolTip: 'Dissasociate permission from user'
+                        }
+                    },
+                    hideOnSuperuser: true
                 }
             }
 
-        }); //UserForm
+        });

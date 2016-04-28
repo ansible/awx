@@ -35,7 +35,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         obj.value = value;
         obj.label = label;
         obj.type = type;
-        obj.basePath = field['basePath'] || null;
+        obj.basePath = field.basePath || null;
 
         // return the built option
         if (type === 'select') {
@@ -81,7 +81,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
             Rest.setUrl(needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath);
             Rest.options()
                 .success(function (data) {
-                    try { 
+                    try {
                         var options = data.actions.GET;
                         needsRequest = needsRequest
                         .map(function (option) {

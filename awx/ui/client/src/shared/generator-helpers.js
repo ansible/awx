@@ -772,9 +772,13 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         return function (params) {
             var iterator = params.iterator,
                 set = params.set,
+                hideOnSuperuser = (params.hideOnSuperuser) ? true : false,
                 html = '';
             html += "<!-- Paginate Widget -->\n";
-            html += "<div id=\"" + iterator + "-pagination\" class=\"List-pagination page-row\">\n";
+            html += `
+<div id=\"${iterator}-pagination\" class=\"List-pagination page-row\"
+    ng-hide=\"is_superuser && ${hideOnSuperuser}\">
+            `;
             html += "<div class=\"List-paginationPagerHolder\">";
             html += "<div class=\"List-paginationPager\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">";
             html += "<ul id=\"pagination-links\" class=\"pagination\">\n";
