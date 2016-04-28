@@ -1554,16 +1554,16 @@ class ResourceAccessListElementSerializer(UserSerializer):
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
-    user = serializers.CharField(
-        required=False, default=None, write_only=True,
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False, default=None, write_only=True,
         help_text='Write-only field used to add user to owner role. If provided, '
                   'do not give either team or organization. Only valid for creation.')
-    team = serializers.CharField(
-        required=False, default=None, write_only=True,
+    team = serializers.PrimaryKeyRelatedField(
+        queryset=Team.objects.all(), required=False, default=None, write_only=True,
         help_text='Write-only field used to add team to owner role. If provided, '
                   'do not give either user or organization. Only valid for creation.')
-    organization = serializers.CharField(
-        required=False, default=None, write_only=True,
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(), required=False, default=None, write_only=True,
         help_text='Write-only field used to add organization to owner role. If provided, '
                   'do not give either team or team. Only valid for creation.')
 
