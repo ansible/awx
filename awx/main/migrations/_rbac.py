@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from collections import defaultdict
 from awx.main.utils import getattrd
-from awx.main.models.rbac import Role
+from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
 import _old_access as old_access
 logger = logging.getLogger(__name__)
@@ -26,6 +26,36 @@ def log_migration(wrapped):
         logger.addHandler(handler)
         return wrapped(*args, **kwargs)
     return wrapper
+
+@log_migration
+def create_roles(apps, schema_editor):
+    '''
+    Implicit role creation happens in our post_save hook for all of our
+    resources. Here we iterate through all of our resource types and call
+    .save() to ensure all that happens for every object in the system before we
+    get busy with the actual migration work.
+
+    This gets run after migrate_users, which does role creation for users a
+    little differently.
+    '''
+
+    models = [
+        apps.get_model('main', m) for m in [
+            'Organization',
+            'Team',
+            'Inventory',
+            'Group',
+            'Project',
+            'Credential',
+            'CustomInventoryScript',
+            'JobTemplate',
+        ]
+    ]
+
+    with batch_role_ancestor_rebuilding():
+        for model in models:
+            for obj in model.objects.iterator():
+                obj.save()
 
 
 @log_migration
@@ -65,7 +95,6 @@ def migrate_users(apps, schema_editor):
 def migrate_organization(apps, schema_editor):
     Organization = apps.get_model('main', "Organization")
     for org in Organization.objects.iterator():
-        org.save() # force creates missing roles
         for admin in org.deprecated_admins.all():
             org.admin_role.members.add(admin)
             logger.info(smart_text(u"added admin: {}, {}".format(org.name, admin.username)))
@@ -77,7 +106,6 @@ def migrate_organization(apps, schema_editor):
 def migrate_team(apps, schema_editor):
     Team = apps.get_model('main', 'Team')
     for t in Team.objects.iterator():
-        t.save()
         for user in t.deprecated_users.all():
             t.member_role.members.add(user)
             logger.info(smart_text(u"team: {}, added user: {}".format(t.name, user.username)))
@@ -151,7 +179,6 @@ def migrate_credential(apps, schema_editor):
     user_content_type = ContentType.objects.get_for_model(User)
 
     for cred in Credential.objects.iterator():
-        cred.save()
         results = (JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all() or
                    InventorySource.objects.filter(credential=cred).all())
         if results:
@@ -206,7 +233,6 @@ def migrate_inventory(apps, schema_editor):
             return None
 
     for inventory in Inventory.objects.iterator():
-        inventory.save()
         for perm in Permission.objects.filter(inventory=inventory):
             role = None
             execrole = None
@@ -254,7 +280,6 @@ def migrate_projects(apps, schema_editor):
 
     # Migrate projects to single organizations, duplicating as necessary
     for project in Project.objects.iterator():
-        project.save()
         original_project_name = project.name
         project_orgs = project.deprecated_organizations.distinct().all()
 
@@ -367,7 +392,6 @@ def migrate_job_templates(apps, schema_editor):
     Permission = apps.get_model('main', 'Permission')
 
     for jt in JobTemplate.objects.iterator():
-        jt.save()
         permission = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,

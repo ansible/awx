@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(migration_utils.set_current_apps_for_migrations),
         migrations.RunPython(rbac.migrate_users),
+        migrations.RunPython(rbac.create_roles),
         migrations.RunPython(rbac.migrate_organization),
         migrations.RunPython(rbac.migrate_team),
         migrations.RunPython(rbac.migrate_inventory),
