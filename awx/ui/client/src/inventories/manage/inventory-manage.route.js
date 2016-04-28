@@ -9,7 +9,7 @@ import InventoriesManage from './inventory-manage.controller';
 
 export default {
     name: 'inventoryManage',
-    url: '/inventories/:inventory_id/manage?groups',
+    url: '/inventories/:inventory_id/manage',
     templateUrl: templateUrl('inventories/manage/inventory-manage'),
     controller: InventoriesManage,
     data: {
