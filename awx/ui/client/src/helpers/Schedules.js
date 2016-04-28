@@ -247,7 +247,7 @@ export default
                 }
                 else if (base === 'system_job_templates') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
-                    if($stateParams.id  == 4){
+                    if($stateParams.id  === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
