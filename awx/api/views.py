@@ -836,10 +836,6 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(Team, 'change', team):
-            raise PermissionDenied()
-
         sub_id = request.data.get('id', None)
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
