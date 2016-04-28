@@ -99,8 +99,8 @@ def migrate_organization(apps, schema_editor):
             org.admin_role.members.add(admin)
             logger.info(smart_text(u"added admin: {}, {}".format(org.name, admin.username)))
         for user in org.deprecated_users.all():
-            org.auditor_role.members.add(user)
-            logger.info(smart_text(u"added auditor: {}, {}".format(org.name, user.username)))
+            org.member_role.members.add(user)
+            logger.info(smart_text(u"added member: {}, {}".format(org.name, user.username)))
 
 @log_migration
 def migrate_team(apps, schema_editor):
