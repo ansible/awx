@@ -1109,6 +1109,10 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if sub_id == self.request.user.admin_role.pk:
+            raise PermissionDenied('You may not remove your own admin_role')
+
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
     def check_parent_access(self, parent=None):
