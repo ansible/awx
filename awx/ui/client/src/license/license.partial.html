@@ -1,5 +1,5 @@
 <div class="License-container">
-	<div class="License-details">
+	<div class="License-details" ng-if="!licenseMissing">
 		<div class="Panel">
 			<div class="License-titleText">Details</div>
 			<div class="License-fields">
@@ -69,11 +69,32 @@
 			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-default">Upgrade</button></a>
 		</div>
 	</div>
-	<div class="License-management">
+	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">
 		<div class="Panel">
-			<div class="License-titleText">License Management</div>
+			<div class="License-titleText">{{title}}</div>
 			<div class="License-body">
-				<p class="License-helperText">Choose your license file, agree to the End User License Agreement, and click submit.</p>
+				<div class="AddPermissions-directions" ng-if="licenseMissing">
+					<span class="AddPermissions-directionNumber">
+						1.
+					</span>
+					<span class="License-helperText">
+						Please click the button below to visit Ansible's website to get a Tower license key.
+					</span>
+				</div>
+
+					<button class="License-downloadLicenseButton btn" ng-if="licenseMissing" ng-click="downloadLicense()">
+						Request License
+					</button>
+
+				<div class="AddPermissions-directions">
+					<span class="AddPermissions-directionNumber" ng-if="licenseMissing">
+						2.
+					</span>
+					<span class="License-helperText">
+						Choose your license file, agree to the End User License Agreement, and click submit.
+					</span>
+				</div>
+
 				<form id="License-form" name="license">
 					<div class="License-subTitleText prepend-asterisk"> License File</div>
 					<div class="input-group License-file--container">
@@ -89,11 +110,11 @@
 					<div class="form-group">
 						<div class="checkbox">
 							<div class="License-details--label"><input type="checkbox" ng-model="newLicense.eula" required>  I agree to the End User License Agreement</div>
-							<div class="License-submit--container pull-right">
-								<span ng-show="success == true" class="License-greenText License-submit--success pull-left">Save successful!</span>
-								<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null">Submit</button>
-							</div>
 						</div>
+					</div>
+					<div class="License-submit--container">
+						<span ng-show="success == true" class="License-greenText License-submit--success pull-left">Save successful!</span>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null">Submit</button>
 					</div>
 				</form>
 			</div>

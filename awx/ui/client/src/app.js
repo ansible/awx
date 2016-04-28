@@ -755,6 +755,9 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
+                    if (next.name !== 'signOut'){
+                        CheckLicense.notify();
+                    }
                     $rootScope.$broadcast("closePermissionsModal");
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
@@ -847,6 +850,7 @@ var tower = angular.module('Tower', [
                             $rootScope.sessionTimer = timer;
                             $rootScope.$emit('OpenSocket');
                             pendoService.issuePendoIdentity();
+                            CheckLicense.notify();
                         });
                     }
                 }
