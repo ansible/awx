@@ -3,7 +3,6 @@ from time import time
 
 from django.utils.encoding import smart_text
 from django.db.models import Q
-#from django.utils.timezone import now
 
 from collections import defaultdict
 from awx.main.utils import getattrd
