@@ -400,6 +400,12 @@ function InventoriesManage($log, $scope, $rootScope, $location,
         });
     };
 
+    $scope.scheduleGroup = function(id) {
+        $state.go('inventoryManageSchedules', {
+            inventory_id: $scope.inventory.id, id: id
+        });
+    };
+
     $scope.copyGroup = function(id) {
         PreviousSearchParams = Store('group_current_search_params');
 			var params = {

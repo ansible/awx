@@ -161,6 +161,14 @@ export default
                 ngShow: "group.id > 0",
                 dataPlacement: "top"
             },
+            schedule: {
+                mode: 'all',
+                ngClick: "scheduleGroup(group.id)",
+                awToolTip: "{{ group.group_schedule_tooltip }}",
+                ngClass: "group.scm_type_class",
+                dataPlacement: 'top',
+                ngHide: "group.summary_fields.inventory_source.source === ''"
+            },
             edit: {
                 //label: 'Edit',
                 mode: 'all',

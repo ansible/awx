@@ -214,6 +214,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
                             master.source_regions = opts;
                             CreateSelect2({
                                 element: "group_source_regions",
+                                multiple: true,
                                 opts: opts
                             });
 
@@ -241,7 +242,8 @@ function manageGroupsDirectiveController($filter, $location, $log,
                         }
                         master.group_by = opts;
                         CreateSelect2({
-                            element: "#source_group_by",
+                            element: "#group_group_by",
+                            multiple:  true,
                             opts: opts
                         });
                     }
@@ -407,7 +409,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
         if ($scope.source && ($scope.source.value === 'ec2')) {
             data.instance_filters = $scope.instance_filters;
             // Create a string out of selected list of regions
-            group_by = $('#source_group_by').select2("data");
+            group_by = $('#group_group_by').select2("data");
             r = [];
             for (i = 0; i < group_by.length; i++) {
                 r.push(group_by[i].id);
