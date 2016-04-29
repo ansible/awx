@@ -206,9 +206,9 @@ class UserAccess(BaseAccess):
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |
-            Q(organizations__in=self.user.deprecated_admin_of_organizations) |
-            Q(organizations__in=self.user.deprecated_organizations) |
-            Q(deprecated_teams__in=self.user.deprecated_teams)
+            Q(deprecated_organizations__in=self.user.deprecated_admin_of_organizations.all()) |
+            Q(deprecated_organizations__in=self.user.deprecated_organizations.all()) |
+            Q(deprecated_teams__in=self.user.deprecated_teams.all())
         ).distinct()
 
     def can_add(self, data):
