@@ -19,10 +19,5 @@ export default {
     },
     ncyBreadcrumb: {
         label: "INVENTORY MANAGE"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

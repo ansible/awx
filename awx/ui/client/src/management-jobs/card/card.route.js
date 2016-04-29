@@ -15,11 +15,6 @@ export default {
         activityStream: true,
         activityStreamTarget: 'management_job'
     },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    },
     ncyBreadcrumb: {
         parent: 'setup',
         label: 'MANAGEMENT JOBS'

@@ -18,11 +18,6 @@ export default {
         },
         ncyBreadcrumb: {
             label: "INVENTORY EDIT GROUPS"
-        },
-        resolve: {
-            features: ['FeaturesService', function(FeaturesService) {
-                return FeaturesService.get();
-            }]
         }
     },
 
@@ -35,11 +30,6 @@ export default {
         },
         data: {
             mode: 'add'
-        },
-        resolve: {
-            features: ['FeaturesService', function(FeaturesService) {
-                return FeaturesService.get();
-            }]
         }
     },
 

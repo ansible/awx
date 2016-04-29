@@ -1,13 +1,29 @@
 export default function($stateProvider) {
     this.$get = function() {
         return {
+            getResolves: function(state){
+                var resolve = state.resolve || {},
+                routes = ["login", "logout", "socket"];
+                if(_.indexOf(routes, state.name)>-1){
+                    return;
+                }
+                else{
+                    resolve.features = ['FeaturesService', function(FeaturesService) {
+                            return FeaturesService.get();
+                        }];
+                    return resolve;
+                }
+            },
+            
             addState: function(state) {
-                var route = state.route || state.url;
+                var route = state.route || state.url,
+                resolve = this.getResolves(state);
+
                 $stateProvider.state(state.name, {
                     url: route,
                     controller: state.controller,
                     templateUrl: state.templateUrl,
-                    resolve: state.resolve,
+                    resolve: resolve,
                     params: state.params,
                     data: state.data,
                     ncyBreadcrumb: state.ncyBreadcrumb,

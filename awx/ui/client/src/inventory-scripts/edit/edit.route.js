@@ -13,9 +13,6 @@ export default {
     controller: 'inventoryScriptsEditController',
     params: {inventory_script: null},
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         inventory_script:
         [   '$state',
             '$stateParams',

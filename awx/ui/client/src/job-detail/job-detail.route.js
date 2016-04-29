@@ -14,9 +14,6 @@ export default {
         label: "{{ job.id }} - {{ job.name }}"
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
             if (!$rootScope.event_socket) {
                 $rootScope.event_socket = Socket({

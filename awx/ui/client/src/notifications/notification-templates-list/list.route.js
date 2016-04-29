@@ -10,10 +10,5 @@ export default {
     name: 'notifications',
     route: '/notifications',
     templateUrl: templateUrl('notifications/notification-templates-list/list'),
-    controller: 'notificationTemplatesListController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    controller: 'notificationTemplatesListController'
 };

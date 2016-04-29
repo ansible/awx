@@ -19,15 +19,12 @@ var ManageHostsEdit = {
         mode: 'edit'
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         host: ['$stateParams', 'ManageHostsService', function($stateParams, ManageHostsService){
             return ManageHostsService.get({id: $stateParams.host_id}).then(function(res){
                 return res.data.results[0];
             });
         }]
-    }    
+    }
 };
 var ManageHostsAdd = {
     name: 'inventoryManage.addHost',
@@ -39,11 +36,6 @@ var ManageHostsAdd = {
     },
     data: {
         mode: 'add'
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };
 export {ManageHostsAdd, ManageHostsEdit};

@@ -15,11 +15,6 @@ export default {
         activityStream: true,
         activityStreamTarget: 'inventory_script'
     },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    },
     ncyBreadcrumb: {
         parent: 'setup',
         label: 'INVENTORY SCRIPTS'

@@ -21,9 +21,6 @@ export default {
         jobType: 'inventory_updates'
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         inventorySyncSocket: [function() {
             // TODO: determine whether or not we have socket support for inventory sync standard out
             return true;
