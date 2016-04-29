@@ -360,7 +360,7 @@
                     });
 
                 currentLabels.then(function (current) {
-                    var labelsToAdd = $scope.labels
+                    var labelsToAdd = ($scope.labels || [])
                         .map(val => val.value);
                     var labelsToDisassociate = current
                         .filter(val => labelsToAdd
