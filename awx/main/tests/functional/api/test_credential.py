@@ -24,6 +24,7 @@ def test_create_user_credential_via_credentials_list(post, get, alice):
 @pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list(post, get, alice):
     response = post(reverse('api:user_credentials_list', args=(alice.pk,)), {
+        'user': alice.pk,
         'name': 'Some name',
         'username': 'someusername',
     }, alice)
@@ -45,6 +46,7 @@ def test_create_user_credential_via_credentials_list_xfail(post, alice, bob):
 @pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list_xfail(post, alice, bob):
     response = post(reverse('api:user_credentials_list', args=(bob.pk,)), {
+        'user': bob.pk,
         'name': 'Some name',
         'username': 'someusername'
     }, alice)
@@ -71,6 +73,7 @@ def test_create_team_credential(post, get, team, org_admin, team_member):
 @pytest.mark.django_db
 def test_create_team_credential_via_team_credentials_list(post, get, team, org_admin, team_member):
     response = post(reverse('api:team_credentials_list', args=(team.pk,)), {
+        'team': team.pk,
         'name': 'Some name',
         'username': 'someusername',
     }, org_admin)

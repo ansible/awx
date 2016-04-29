@@ -572,8 +572,22 @@ class CredentialAccess(BaseAccess):
         return self.user in obj.read_role
 
     def can_add(self, data):
-        # Access enforced in our view where we have context enough to make a decision
-        return True
+        if self.user.is_superuser:
+            return True
+        user_pk = get_pk_from_dict(data, 'user')
+        if user_pk:
+            user_obj = get_object_or_400(User, pk=user_pk)
+            return check_user_access(self.user, User, 'change', user_obj, None)
+        team_pk = get_pk_from_dict(data, 'team')
+        if team_pk:
+            team_obj = get_object_or_400(Team, pk=team_pk)
+            return check_user_access(self.user, Team, 'change', team_obj, None)
+        organization_pk = get_pk_from_dict(data, 'organization')
+        if organization_pk:
+            organization_obj = get_object_or_400(Organization, pk=organization_pk)
+            return check_user_access(self.user, Organization, 'change', organization_obj, None)
+        return False
+
 
     @check_superuser
     def can_use(self, obj):
