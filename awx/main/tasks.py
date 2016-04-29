@@ -558,7 +558,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if tower_settings.AWX_PROOT_ENABLED:
+                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
