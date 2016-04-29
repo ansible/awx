@@ -22,7 +22,6 @@
          ) {
 
             ClearScope();
-
             // Inject dynamic view
             var defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),
@@ -319,8 +318,8 @@
             });
 
 
-            function saveCompleted() {
-                $state.go('jobTemplates', null, {reload: true});
+            function saveCompleted(id) {
+                $state.go('jobTemplates.edit', {template_id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -407,13 +406,6 @@
                             .then(function() {
                                 $scope.addedItem = data.id;
 
-                                Refresh({
-                                    scope: $scope,
-                                    set: 'job_templates',
-                                    iterator: 'job_template',
-                                    url: $scope.current_url
-                                });
-
                                 if($scope.survey_questions &&
                                     $scope.survey_questions.length > 0){
                                     //once the job template information
@@ -444,7 +436,7 @@
                                         });
                                 }
 
-                                saveCompleted();
+                                saveCompleted(data.id);
                             });
                     });
                 });
@@ -514,7 +506,8 @@
                     Rest.post(data)
                         .success(function(data) {
                             $scope.$emit('templateSaveSuccess',
-                                data);
+                                data
+                            );
                         })
                         .error(function (data, status) {
                             ProcessErrors($scope, data, status, form,
