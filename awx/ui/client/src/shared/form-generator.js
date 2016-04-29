@@ -1464,14 +1464,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html+= "<span class=\"Form-title--is_superuser\" "+
                             "ng-if=is_superuser>System Administrator</span>";
                     }
-                    html += "</div>\n"; 
+                    html += "</div>\n";
                     html += "<div class=\"Form-header--fields\">";
                     if(this.form.headerFields){
                         var that = this;
                         _.forEach(this.form.headerFields, function(value, key){
                             html += that.buildHeaderField(key, value, options, that.form);
                         });
-                        html += "</div>\n"; 
+                        html += "</div>\n";
                     }
                     else{ html += "</div>\n"; }
                     if(this.form.cancelButton !== undefined && this.form.cancelButton === false) {
@@ -1782,7 +1782,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 html += `
 <div class=\"row\"
-    ng-show=\"${collection.hideSearchAndActions ? true : false}\">
+    ng-show=\"${collection.hideSearchAndActions ? false : true}\">
     <div class=\"col-lg-8\"
         ng-show=\"${collection.iterator}Loading == true ||
             ${collection.iterator}_active_search == true || (
