@@ -236,47 +236,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
            };
        }])
 
-.factory('ToggleHostEnabled', [ 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Alert', 'Find', 'SetEnabledMsg',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
-            return function(params) {
-
-                var id = params.host_id,
-                external_source = params.external_source,
-                parent_scope = params.parent_scope,
-                host_scope = params.host_scope,
-                host;
-
-                function setMsg(host) {
-                    host.enabled = (host.enabled) ? false : true;
-                    host.enabled_flag = host.enabled;
-                    SetEnabledMsg(host);
-                }
-
-                if (!external_source) {
-                    // Host is not managed by an external source
-                    Wait('start');
-                    host = Find({ list: host_scope.hosts, key: 'id', val: id });
-                    setMsg(host);
-
-                    Rest.setUrl(GetBasePath('hosts') + id + '/');
-                    Rest.put(host)
-                    .success( function() {
-                        Wait('stop');
-                    })
-                    .error( function(data, status) {
-                        // Flip the enabled flag back
-                        setMsg(host);
-                        ProcessErrors(parent_scope, data, status, null,
-                                      { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
-                    });
-                }
-                else {
-                    Alert('Action Not Allowed', 'This host is managed by an external cloud source. Disable it at the external source, ' +
-                          'then run an inventory sync to update Tower with the new status.', 'alert-info');
-                }
-            };
-        }])
-
 .factory('HostsList', ['$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'HostList', 'generateList',
          'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload', 'SelectionInit',
          function($rootScope, $location, $log, $stateParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,

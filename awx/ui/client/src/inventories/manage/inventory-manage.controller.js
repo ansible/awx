@@ -16,7 +16,7 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg,
     GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
     ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
-    EditInventoryProperties, ToggleHostEnabled, ShowJobSummary,
+    EditInventoryProperties, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog,
     GroupsCopy, HostsCopy, $stateParams, ParamPass) {
 
@@ -331,8 +331,15 @@ function InventoriesManage($log, $scope, $rootScope, $location,
         }
         groups.push(group.id);
         groups = groups.join();
-        $state.transitionTo('inventoryManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false });
+        $state.transitionTo('inventoryManage', {inventory_id: $state.params.inventory_id, groups: groups}, { notify: false});
         loadGroups(group.related.children, group.id);
+        $scope.selected_group_id = group.id;        
+        HostsReload({
+            scope: hostScope,
+            group_id: $scope.selected_group_id,
+            inventory_id: $scope.inventory.id,
+            pageSize: hostScope.host_page_size
+        });
     };
 
     $scope.createGroup = function () {
@@ -470,15 +477,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
         $state.go('inventoryManage.copy.host', {host_id: id});
     };
 
-    hostScope.toggleHostEnabled = function (host_id, external_source) {
-        ToggleHostEnabled({
-            parent_scope: $scope,
-            host_scope: hostScope,
-            host_id: host_id,
-            external_source: external_source
-        });
-    };
-
     hostScope.showJobSummary = function (job_id) {
         ShowJobSummary({
             job_id: job_id
@@ -527,7 +525,6 @@ export default [
         'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
         'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
         'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
-        'EditInventoryProperties', 'ToggleHostEnabled', 'ShowJobSummary',
-        'InventoryGroupsHelp', 'HelpDialog', 'GroupsCopy',
+        'EditInventoryProperties', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'GroupsCopy',
         'HostsCopy', '$stateParams', 'ParamPass', InventoriesManage,
 ];
