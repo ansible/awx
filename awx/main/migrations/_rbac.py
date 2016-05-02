@@ -408,7 +408,7 @@ def migrate_job_templates(apps, schema_editor):
                 jt.execute_role.members.add(user)
                 logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))
 
-            if user in jt.execute_role:
+            if jt.execute_role.ancestors.filter(members=user).exists(): # aka "user in jt.execute_role"
                 # If the job template is already accessible by the user, because they
                 # are a sytem, organization, or project admin, then don't add an explicit
                 # role entry for them
