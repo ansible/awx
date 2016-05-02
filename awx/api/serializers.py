@@ -38,7 +38,7 @@ from polymorphic import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
@@ -2145,6 +2145,8 @@ class JobLaunchSerializer(BaseSerializer):
     inventory_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
+    job_template_data = serializers.SerializerMethodField()
+    defaults = serializers.SerializerMethodField()
 
     class Meta:
         model = JobTemplate
@@ -2154,7 +2156,8 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
-                  'credential_needed_to_start', 'inventory_needed_to_start',)
+                  'credential_needed_to_start', 'inventory_needed_to_start',
+                  'job_template_data', 'defaults')
         read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
                             'ask_tags_on_launch', 'ask_job_type_on_launch',
                             'ask_inventory_on_launch', 'ask_credential_on_launch')
@@ -2177,6 +2180,23 @@ class JobLaunchSerializer(BaseSerializer):
         if obj:
             return obj.survey_enabled and 'spec' in obj.survey_spec
         return False
+
+    def get_defaults(self, obj):
+        ask_for_vars_dict = obj._ask_for_vars_dict()
+        defaults_dict = {}
+        for field in ask_for_vars_dict:
+            if not ask_for_vars_dict[field]:
+                continue
+            elif field in ('inventory', 'credential'):
+                defaults_dict[field] = dict(
+                    name=getattrd(obj, '%s.name' % field, None),
+                    id=getattrd(obj, '%s.pk' % field, None))
+            else:
+                defaults_dict[field] = getattr(obj, field)
+        return defaults_dict
+
+    def get_job_template_data(self, obj):
+        return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
         errors = {}
