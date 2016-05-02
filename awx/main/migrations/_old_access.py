@@ -563,18 +563,18 @@ class CredentialAccess(BaseAccess):
         # If the user is a superuser, and therefore can see everything, this
         # is also sufficient, and we are done.
         qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'user', 'team')
+        qs = qs.select_related('created_by', 'modified_by')
         if self.user.is_superuser:
             return qs
 
         # Get the list of organizations for which the user is an admin
         orgs_as_admin_ids = set(self.user.deprecated_admin_of_organizations.values_list('id', flat=True))
         return qs.filter(
-            Q(user=self.user) |
-            Q(user__deprecated_organizations__id__in=orgs_as_admin_ids) |
-            Q(user__deprecated_admin_of_organizations__id__in=orgs_as_admin_ids) |
-            Q(team__organization__id__in=orgs_as_admin_ids) |
-            Q(team__deprecated_users__in=[self.user])
+            Q(deprecated_user=self.user) |
+            Q(deprecated_user__deprecated_organizations__id__in=orgs_as_admin_ids) |
+            Q(deprecated_user__deprecated_admin_of_organizations__id__in=orgs_as_admin_ids) |
+            Q(deprecated_team__organization__id__in=orgs_as_admin_ids) |
+            Q(deprecated_team__deprecated_users__in=[self.user])
         )
 
     def can_add(self, data):
@@ -597,22 +597,22 @@ class CredentialAccess(BaseAccess):
             return False
         if self.user == obj.created_by:
             return True
-        if obj.user:
-            if self.user == obj.user:
+        if obj.deprecated_user:
+            if self.user == obj.deprecated_user:
                 return True
-            if obj.user.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists():
+            if obj.deprecated_user.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists():
                 return True
-            if obj.user.deprecated_admin_of_organizations.filter(deprecated_admins__in=[self.user]).exists():
+            if obj.deprecated_user.deprecated_admin_of_organizations.filter(deprecated_admins__in=[self.user]).exists():
                 return True
-        if obj.team:
-            if self.user in obj.team.organization.deprecated_admins.all():
+        if obj.deprecated_team:
+            if self.user in obj.deprecated_team.organization.deprecated_admins.all():
                 return True
         return False
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
         # shouldn't ever end up with those.
-        if obj.user is None and obj.team is None:
+        if obj.deprecated_user is None and obj.deprecated_team is None:
             return True
         return self.can_change(obj, None)
 
