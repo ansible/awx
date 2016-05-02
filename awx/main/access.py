@@ -595,6 +595,8 @@ class CredentialAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        if not self.can_add(data):
+            return False
         return self.user in obj.owner_role
 
     def can_delete(self, obj):
