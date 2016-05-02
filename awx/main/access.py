@@ -679,7 +679,6 @@ class ProjectAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
-    @check_superuser
     def can_start(self, obj):
         return self.can_change(obj, {}) and obj.can_update
 
