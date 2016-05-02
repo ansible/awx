@@ -631,12 +631,13 @@ class TeamAccess(BaseAccess):
             return True
         return False
 
-    @check_superuser
     def can_change(self, obj, data):
         # Prevent moving a team to a different organization.
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             raise PermissionDenied('Unable to change organization on a team')
+        if self.user.is_superuser:
+            return True
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
