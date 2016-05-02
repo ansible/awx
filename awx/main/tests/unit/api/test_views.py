@@ -1,14 +1,16 @@
-# Python
 import pytest
 
-# AWX
-from awx.api.views import ApiV1RootView
+from awx.api.views import (
+    ApiV1RootView,
+)
+
 
 @pytest.fixture
 def mock_response_new(mocker):
     m = mocker.patch('awx.api.views.Response.__new__')
     m.return_value = m
     return m
+
 
 class TestApiV1RootView:
     def test_get_endpoints(self, mocker, mock_response_new):

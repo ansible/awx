@@ -834,7 +834,6 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             raise PermissionDenied()
         return Role.filter_visible_roles(self.request.user, team.member_role.children.all())
 
-    # XXX: Need to enforce permissions
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
