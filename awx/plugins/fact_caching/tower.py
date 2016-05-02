@@ -32,7 +32,7 @@
 import sys
 import os
 import time
-from copy import deepcopy
+from copy import copy
 from ansible import constants as C
 try:
     from ansible.cache.base import BaseCacheModule
@@ -110,7 +110,7 @@ class CacheModule(BaseCacheModule):
         # Assume ansible fact triggered the set if no new module found
         facts = self.filter_ansible_facts(value) if not module else dict({ module : value[module]})
         self._cache[key] = value
-        self._cache_prev = deepcopy(self._cache)
+        self._cache_prev = copy(self._cache)
         packet = {
             'host': key,
             'inventory_id': os.environ['INVENTORY_ID'],
