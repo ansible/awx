@@ -3,7 +3,7 @@ export default function($stateProvider) {
         return {
             getResolves: function(state){
                 var resolve = state.resolve || {},
-                routes = ["login", "logout", "socket"];
+                routes = ["signIn", "signOut"];
                 if(_.indexOf(routes, state.name)>-1){
                     return;
                 }
