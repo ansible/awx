@@ -729,8 +729,7 @@ class JobTemplateAccess(BaseAccess):
                                  'credential', 'cloud_credential', 'next_schedule').all()
 
     def can_read(self, obj):
-        # you can only see the job templates that you have permission to launch.
-        return self.can_start(obj, validate_license=False)
+        return self.user in obj.read_role
 
     def can_add(self, data):
         '''
