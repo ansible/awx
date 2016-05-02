@@ -258,11 +258,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: 'dashboard',
                     label: "GROUPS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -272,11 +267,6 @@ var tower = angular.module('Tower', [
                 controller: JobsListController,
                 ncyBreadcrumb: {
                     label: "JOBS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -290,11 +280,6 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     label: "PROJECTS"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -305,11 +290,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: "projects",
                     label: "CREATE PROJECT"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -319,77 +299,42 @@ var tower = angular.module('Tower', [
                 controller: ProjectsEdit,
                 data: {
                     activityStreamId: 'id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
             state('projectOrganizations', {
                 url: '/projects/:project_id/organizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: OrganizationsList
             }).
 
             state('projectOrganizationAdd', {
                 url: '/projects/:project_id/organizations/add',
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: OrganizationsAdd
             }).
 
             state('organizationAdmins', {
                 url: '/organizations/:organization_id/admins',
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: AdminsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: AdminsList
             }).
 
             state('organizationUsers', {
                 url:'/organizations/:organization_id/users',
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: UsersList
             }).
 
             state('organizationUserAdd', {
                 url: '/organizations/:organization_id/users/add',
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: UsersAdd
             }).
 
             state('organizationUserEdit', {
                 url: '/organizations/:organization_id/users/:user_id',
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: UsersEdit
             }).
 
             state('teams', {
@@ -403,11 +348,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'TEAMS'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -418,11 +358,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: "teams",
                     label: "CREATE TEAM"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -432,100 +367,55 @@ var tower = angular.module('Tower', [
                 controller: TeamsEdit,
                 data: {
                     activityStreamId: 'team_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
             state('teamUsers', {
                 url: '/teams/:team_id/users',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: UsersList
             }).
 
             state('teamUserEdit', {
                 url: '/teams/:team_id/users/:user_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: UsersEdit
             }).
 
             state('teamProjects', {
                 url: '/teams/:team_id/projects',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: ProjectsList
             }).
 
             state('teamProjectAdd', {
                 url: '/teams/:team_id/projects/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: ProjectsAdd
             }).
 
             state('teamProjectEdit', {
                 url: '/teams/:team_id/projects/:project_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: ProjectsEdit
             }).
 
             state('teamCredentials', {
                 url: '/teams/:team_id/credentials',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsList
             }).
 
             state('teamCredentialAdd', {
                 url: '/teams/:team_id/credentials/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsAdd
             }).
 
             state('teamCredentialEdit', {
                 url: '/teams/:team_id/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsEdit
             }).
 
             state('credentials', {
@@ -539,11 +429,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'CREDENTIALS'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -554,11 +439,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: "credentials",
                     label: "CREATE CREDENTIAL"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -568,11 +448,6 @@ var tower = angular.module('Tower', [
                 controller: CredentialsEdit,
                 data: {
                     activityStreamId: 'credential_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -587,11 +462,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: 'setup',
                     label: 'USERS'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -602,11 +472,6 @@ var tower = angular.module('Tower', [
                 ncyBreadcrumb: {
                     parent: "users",
                     label: "CREATE USER"
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
@@ -616,45 +481,25 @@ var tower = angular.module('Tower', [
                 controller: UsersEdit,
                 data: {
                     activityStreamId: 'user_id'
-                },
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
                 }
             }).
 
             state('userCredentials', {
                 url: '/users/:user_id/credentials',
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsList
             }).
 
             state('userCredentialAdd', {
                 url: '/users/:user_id/credentials/add',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsAdd
             }).
 
             state('teamUserCredentialEdit', {
                 url: '/teams/:user_id/credentials/:credential_id',
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: CredentialsEdit
             }).
 
             state('sockets', {

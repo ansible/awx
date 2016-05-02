@@ -10,10 +10,5 @@ export default {
     name: 'inventoryJobTemplateAdd',
     url: '/inventories/:inventory_id/job_templates/add',
     templateUrl: templateUrl('job-templates/add/job-templates-add'),
-    controller: 'JobTemplatesAdd',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    controller: 'JobTemplatesAdd'
 };

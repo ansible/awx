@@ -11,11 +11,6 @@ export default {
     route: '/add',
     templateUrl: templateUrl('inventory-scripts/add/add'),
     controller: 'inventoryScriptsAddController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    },
     ncyBreadcrumb: {
         parent: 'inventoryScripts',
         label: 'CREATE INVENTORY SCRIPT'

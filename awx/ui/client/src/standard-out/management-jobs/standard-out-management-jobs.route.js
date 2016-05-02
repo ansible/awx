@@ -19,9 +19,6 @@ export default {
         jobType: 'system_jobs'
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         managementJobSocket: [function() {
             // TODO: determine whether or not we have socket support for management job standard out
             return true;

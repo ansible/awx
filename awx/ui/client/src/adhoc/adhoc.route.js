@@ -10,10 +10,5 @@ export default {
     route: '/adhoc',
     name: 'inventoryManage.adhoc',
     templateUrl: templateUrl('adhoc/adhoc'),
-    controller: 'adhocController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    controller: 'adhocController'
 };

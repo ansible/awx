@@ -10,10 +10,5 @@ export default {
     name: 'userPermissionsList',
     route: '/users/:user_id/permissions',
     templateUrl: templateUrl('permissions/shared/user-permissions'),
-    controller: 'permissionsListController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    controller: 'permissionsListController'
 };

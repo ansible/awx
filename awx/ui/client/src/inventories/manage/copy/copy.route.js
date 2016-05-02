@@ -19,11 +19,6 @@ export default {
         ncyBreadcrumb: {
             label: "COPY"
         },
-        resolve: {
-            features: ['FeaturesService', function(FeaturesService) {
-                return FeaturesService.get();
-            }],
-        },
         controller: inventoryManageCopyCtrl,
         controllerAs: 'vm',
         bindToController: true,

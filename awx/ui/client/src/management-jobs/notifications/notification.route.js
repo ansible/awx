@@ -13,9 +13,6 @@ export default {
     controller: 'managementJobsNotificationsController',
     params: {card: null},
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         management_job:
         [   '$stateParams',
             '$q',

@@ -20,10 +20,5 @@ export default {
     ncyBreadcrumb: {
         parent: "organizations",
         label: "{{name}}"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

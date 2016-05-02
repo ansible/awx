@@ -10,10 +10,5 @@ export default {
     name: 'teamPermissionsEdit',
     route: '/teams/:team_id/permissions/:permission_id',
     templateUrl: templateUrl('permissions/shared/team-permissions'),
-    controller: 'permissionsEditController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    }
+    controller: 'permissionsEditController'
 };

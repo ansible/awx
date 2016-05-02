@@ -12,9 +12,6 @@ export default {
     templateUrl: templateUrl('notifications/edit/edit'),
     controller: 'notificationsEditController',
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         notifier:
         [   '$state',
             '$stateParams',
