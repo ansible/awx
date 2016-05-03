@@ -156,6 +156,14 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
                 if action == 'pre_remove':
                     instance.content_object.admin_role.children.remove(user.admin_role)
 
+def rbac_activity_stream(instance, sender, **kwargs):
+    user_type = ContentType.objects.get_for_model(User)
+    # Only if we are associating/disassociating
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
+        # Only if this isn't for the User.admin_role
+        if instance.content_type is not None and user_type is not instance.content_type:
+            activity_stream_associate(sender, instance.content_object, role=instance, **kwargs)
+
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
     for l in instance.labels.all():
         if l.is_candidate_for_detach():
@@ -177,6 +185,7 @@ post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.members.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
@@ -354,7 +363,7 @@ def activity_stream_delete(sender, instance, **kwargs):
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    if 'pre_add' in kwargs['action'] or 'pre_remove' in kwargs['action']:
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
         if kwargs['action'] == 'pre_add':
             action = 'associate'
         elif kwargs['action'] == 'pre_remove':
@@ -382,6 +391,15 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
+            # Record the role for RBAC changes
+            if 'role' in kwargs:
+                role = kwargs['role']
+                obj_rel = '.'.join([instance.__module__,
+                                   instance.__class__.__name__,
+                                   role.role_field])
+                activity_entry.role.add(role)
+                activity_entry.object_relationship_type = obj_rel
+                activity_entry.save()
 
 
 @receiver(current_user_getter)
