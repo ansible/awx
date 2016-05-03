@@ -1615,6 +1615,9 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
+        if ad_hoc_command.extra_vars_dict:
+            args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
+
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])
 
