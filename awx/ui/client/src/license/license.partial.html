@@ -7,32 +7,32 @@
 				<div class="License-field">
 					<div class="License-field--label">License</div>
 					<div class="License-field--content">
-					<span ng-show='valid'><i class="fa fa-circle License-greenText"></i>   Valid</span>
-					<span ng-show='invalid'><i class="fa fa-circle License-redText"></i>   Invalid</span>
+					<span ng-show='valid'><i class="fa fa-circle License-greenText"></i>Valid</span>
+					<span ng-show='invalid'><i class="fa fa-circle License-redText"></i>Invalid</span>
 					</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">Version</div>
 					<div class="License-field--content">
-					{{license.version || "No result found"}}
+					{{license.version}}
 					</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">License Type</div>
 					<div class="License-field--content">
-					{{license.license_info.license_type || "No result found"}}
+					{{license.license_info.license_type}}
 					</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">Subscription</div>
 					<div class="License-field--content">
-					{{license.license_info.subscription_name || "No result found"}}
+					{{license.license_info.subscription_name}}
 					</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">License Key</div>
 					<div class="License-field--content">
-					{{license.license_info.license_key || "No result found"}}
+					{{license.license_info.license_key}}
 					</div>
 				</div>
 				<div class="License-field">
@@ -50,24 +50,24 @@
 				<div class="License-field">
 					<div class="License-field--label">Hosts Available</div>
 					<div class="License-field--content">
-					{{license.license_info.available_instances || "No result found"}}
+					{{license.license_info.available_instances}}
 					</div>
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">Hosts Used</div>
 					<div class="License-field--content">
-					{{license.license_info.current_instances || "No result found"}}
+					{{license.license_info.current_instances}}
 					</div>
 				</div>
 				<div class="License-field License-greenText">
 					<div class="License-field--label">Hosts Remaining</div>
 					<div class="License-field--content">
-					{{license.license_info.free_instances || "No result found"}}
+					{{license.license_info.free_instances}}
 					</div>
 				</div>
 			</div>
 			<div class="License-upgradeText">If you are ready to upgrade, please contact us by clicking the button below</div>
-			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-default">Upgrade</button></a>
+			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-primary">Upgrade</button></a>
 		</div>
 	</div>
 	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">

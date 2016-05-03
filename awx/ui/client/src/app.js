@@ -110,6 +110,7 @@ var tower = angular.module('Tower', [
     JobTemplates.name,
     portalMode.name,
     search.name,
+    AdminsList.name,
     'ngToast',
     'templates',
     'Utilities',
