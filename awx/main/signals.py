@@ -161,8 +161,14 @@ def rbac_activity_stream(instance, sender, **kwargs):
     # Only if we are associating/disassociating
     if kwargs['action'] in ['pre_add', 'pre_remove']:
         # Only if this isn't for the User.admin_role
-        if instance.content_type is not None and user_type is not instance.content_type:
-            activity_stream_associate(sender, instance.content_object, role=instance, **kwargs)
+        if hasattr(instance, 'content_type'):
+            if instance.content_type in [None, user_type]:
+                return
+            role = instance
+            instance = instance.content_object
+        else:
+            role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+        activity_stream_associate(sender, instance, role=role, **kwargs)
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
     for l in instance.labels.all():
@@ -394,9 +400,15 @@ def activity_stream_associate(sender, instance, **kwargs):
             # Record the role for RBAC changes
             if 'role' in kwargs:
                 role = kwargs['role']
-                obj_rel = '.'.join([instance.__module__,
-                                   instance.__class__.__name__,
-                                   role.role_field])
+                obj_rel = '.'.join([role.content_object.__module__,
+                                    role.content_object.__class__.__name__,
+                                    role.role_field])
+
+                # If the m2m is from the User side we need to
+                # set the content_object of the Role for our entry.
+                if type(instance) == User:
+                    getattr(activity_entry, role.content_type.name).add(role.content_object)
+
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel
                 activity_entry.save()
