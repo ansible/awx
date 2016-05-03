@@ -153,8 +153,6 @@ function InventoriesManage($log, $scope, $rootScope, $location,
     }
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
         var rows;
-
-        // Add groups view
         generateList.inject(InventoryGroups, {
             mode: 'edit',
             id: 'group-list-container',
@@ -532,5 +530,5 @@ export default [
         'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
         'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
         'EditInventoryProperties', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'GroupsCopy',
-        'HostsCopy', '$stateParams', 'ParamPass', InventoriesManage,
+        'HostsCopy', '$stateParams', 'ParamPass', InventoriesManage
 ];
