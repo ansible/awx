@@ -142,7 +142,12 @@ def _discover_credentials(instances, cred, orgfunc):
     '''
     orgs = defaultdict(list)
     for inst in instances:
-        orgs[orgfunc(inst)].append(inst)
+        try:
+            orgs[orgfunc(inst)].append(inst)
+        except AttributeError:
+            # JobTemplate.inventory can be NULL sometimes, eg when an inventory
+            # has been deleted. This protects against that.
+            pass
 
     if len(orgs) == 1:
         _update_credential_parents(orgfunc(instances[0]), cred)
