@@ -156,6 +156,20 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
                 if action == 'pre_remove':
                     instance.content_object.admin_role.children.remove(user.admin_role)
 
+def rbac_activity_stream(instance, sender, **kwargs):
+    user_type = ContentType.objects.get_for_model(User)
+    # Only if we are associating/disassociating
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
+        # Only if this isn't for the User.admin_role
+        if hasattr(instance, 'content_type'):
+            if instance.content_type in [None, user_type]:
+                return
+            role = instance
+            instance = instance.content_object
+        else:
+            role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+        activity_stream_associate(sender, instance, role=role, **kwargs)
+
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
     for l in instance.labels.all():
         if l.is_candidate_for_detach():
@@ -177,6 +191,7 @@ post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.members.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
@@ -354,7 +369,7 @@ def activity_stream_delete(sender, instance, **kwargs):
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    if 'pre_add' in kwargs['action'] or 'pre_remove' in kwargs['action']:
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
         if kwargs['action'] == 'pre_add':
             action = 'associate'
         elif kwargs['action'] == 'pre_remove':
@@ -382,6 +397,23 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
+
+            # Record the role for RBAC changes
+            if 'role' in kwargs:
+                role = kwargs['role']
+                if role.content_object is not None:
+                    obj_rel = '.'.join([role.content_object.__module__,
+                                        role.content_object.__class__.__name__,
+                                        role.role_field])
+
+                # If the m2m is from the User side we need to
+                # set the content_object of the Role for our entry.
+                if type(instance) == User and role.content_object is not None:
+                    getattr(activity_entry, role.content_type.name).add(role.content_object)
+
+                activity_entry.role.add(role)
+                activity_entry.object_relationship_type = obj_rel
+                activity_entry.save()
 
 
 @receiver(current_user_getter)

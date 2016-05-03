@@ -59,3 +59,29 @@ def test_middleware_actor_added(monkeypatch, post, get, user):
 
     assert response.status_code == 200
     assert response.data['summary_fields']['actor']['username'] == 'admin-poster'
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_rbac_stream_resource_roles(mocker, organization, user):
+    member = user('test', False)
+    organization.admin_role.members.add(member)
+
+    activity_stream = ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
+    assert activity_stream.user.first() == member
+    assert activity_stream.organization.first() == organization
+    assert activity_stream.role.first() == organization.admin_role
+    assert activity_stream.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_rbac_stream_user_roles(mocker, organization, user):
+    member = user('test', False)
+    member.roles.add(organization.admin_role)
+
+    activity_stream = ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
+    assert activity_stream.user.first() == member
+    assert activity_stream.organization.first() == organization
+    assert activity_stream.role.first() == organization.admin_role
+    assert activity_stream.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'

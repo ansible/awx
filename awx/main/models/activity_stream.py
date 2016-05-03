@@ -56,6 +56,7 @@ class ActivityStream(models.Model):
     notifier = models.ManyToManyField("Notifier", blank=True)
     notification = models.ManyToManyField("Notification", blank=True)
     label = models.ManyToManyField("Label", blank=True)
+    role = models.ManyToManyField("Role", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))
