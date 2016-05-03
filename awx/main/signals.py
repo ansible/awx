@@ -397,16 +397,18 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
+
             # Record the role for RBAC changes
             if 'role' in kwargs:
                 role = kwargs['role']
-                obj_rel = '.'.join([role.content_object.__module__,
-                                    role.content_object.__class__.__name__,
-                                    role.role_field])
+                if role.content_object is not None:
+                    obj_rel = '.'.join([role.content_object.__module__,
+                                        role.content_object.__class__.__name__,
+                                        role.role_field])
 
                 # If the m2m is from the User side we need to
                 # set the content_object of the Role for our entry.
-                if type(instance) == User:
+                if type(instance) == User and role.content_object is not None:
                     getattr(activity_entry, role.content_type.name).add(role.content_object)
 
                 activity_entry.role.add(role)
