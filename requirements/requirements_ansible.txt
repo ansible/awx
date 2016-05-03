@@ -1,5 +1,5 @@
 anyjson==0.3.3
-apache-libcloud==0.15.1
+apache-libcloud==0.20.1
 appdirs==1.4.0
 azure==2.0.0rc2
 Babel==2.2.0
