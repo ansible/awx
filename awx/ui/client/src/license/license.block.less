@@ -10,6 +10,13 @@
 .License-container{
 	.OnePlusTwo-container;
 }
+
+.License-container--missing {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
 .License-field--label{
 	.OnePlusTwo-left--detailsLabel;
 }
@@ -33,10 +40,22 @@
 .License-submit--success.ng-hide{
 	opacity: 0;
 }
-.License-eula textarea{
+
+.License-eulaNotice{
+	font-size: 12px;
 	width: 100%;
-	height: 200px;
+	max-height: 129px;
+	padding: 15px;
+	padding-top: 10px;
+	margin-bottom: 10px;
+	border-radius: 4px;
+	border: 1px solid @login-notice-border;
+	background-color: @login-notice-bg;
+	color: @login-notice-text;
+	overflow-y: scroll;
+	overflow-x: visible;
 }
+
 .License-field label{
 	width: 155px;
 }
@@ -76,9 +95,11 @@
 	color:@default-bg;
 }
 .License-downloadLicenseButton:hover{
+	background-color: @default-link-hov !important;
 	color:@default-bg !important;
 }
 .License-downloadLicenseButton:focus{
+	background-color: @default-link-hov !important;
 	color:@default-bg !important;
 }
 .License-submit--container{
@@ -110,4 +131,8 @@
 .License-input--fake{
 	border-top-right-radius: 4px !important;
 	border-bottom-right-radius: 4px !important;
+}
+
+.License-detailsGroup {
+	margin-bottom: 20px;
 }

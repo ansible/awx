@@ -1,4 +1,5 @@
-<div class="License-container">
+<div class="License-container"
+	ng-class="{'License-container--missing': licenseMissing}">
 	<div class="License-details" ng-if="!licenseMissing">
 		<div class="Panel">
 			<div class="License-titleText">Details</div>
@@ -102,14 +103,18 @@
 						<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
-					<div class="License-subTitleText prepend-asterisk"> End User License Agreement</div>
-					<div class="form-group License-eula">
-						<textarea class="form-control">{{license.eula}}
-						</textarea>
+					<div class="License-subTitleText prepend-asterisk"> End User License Agreement
 					</div>
-					<div class="form-group">
+					<div id="eula_notice"
+						class="License-eulaNotice">
+						{{ license.eula }}
+					</div>
+					<div class="form-group License-detailsGroup">
 						<div class="checkbox">
-							<div class="License-details--label"><input type="checkbox" ng-model="newLicense.eula" required>  I agree to the End User License Agreement</div>
+							<label class="License-details--label">
+								<input type="checkbox" ng-model="newLicense.eula" required>
+								I agree to the End User License Agreement
+							</label>
 						</div>
 					</div>
 					<div class="License-submit--container">
