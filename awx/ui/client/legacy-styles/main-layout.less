@@ -8,18 +8,19 @@
  */
 
 @import "src/shared/branding/colors.less";
+@import "src/shared/branding/colors.default.less";
 
 html { height: 100%; }
 
 body {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    color: @black;
+    color: @default-data-txt;
     padding-top: 100px;
     min-height: 100%;
     padding-bottom: 50px;
     position: relative;
-    background-color: #f6f6f6;
+    background-color: @default-secondary-bg;
 }
 
 .container-fluid {
@@ -107,7 +108,7 @@ body {
         position: relative;
         top: 1px;
         left: 10px;
-        color: @black;
+        color: @default-data-txt;
         text-transform:capitalize;
     }
     #account-menu {

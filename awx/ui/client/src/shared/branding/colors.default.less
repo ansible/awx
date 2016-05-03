@@ -4,22 +4,28 @@
 @default-icon:          #B7B7B7;
 @default-icon-hov:      #D7D7D7; // also selected button
 @default-border:        #E8E8E8;
-@default-second-border: #D7D7D7;
+@d7grey:                #D7D7D7; // used for random things, like the close button on top-right corner of panes
 @default-bg:            #FFFFFF; // also selected btn txt
 @default-secondary-bg:  #FCFCFC; // page/input field bg, just adds depth
 @default-tertiary-bg:   #FAFAFA; // hover bg, alt-list
-@default-err:           #FF5850;
-@default-err-hov:       #FF1105;
-@default-succ:          #3CB878;
-@default-succ-hov:      #60D66F;
-@default-succ-disabled: lighten(@default-succ, 30);
-@default-link:          #1678C4;
-@default-link-hov:      #4498DA;
-@default-button-hov:    #F2F2F2;
+@default-err:           #D9534F; // used to be FF5850
+@default-err-hov:       #C9302C; // used to be FF1105
+@default-succ:          #3CB878; //used to be 3CB878
+@default-succ-hov:      #449D44; //used to be 60D66F
+@default-succ-disabled: #D7D7D7; // no different than other disableds...remove sometime
+@default-link:          #337AB7; // used to be 1678C4
+@default-link-hov:      #286090; // used to be 4498DA
 @default-list-header-bg:#EBEBEB;
-@default-no-items-bord: #F6F6F6;
-@default-as-detail-txt: #707070;
+@default-no-items-bord: #F6F6F6; // also white button hovers
+@default-stdout-txt:    #707070;
 @default-dark:          #000000;
+
+// TODO: not used yet!
+@default-warning:     #F0AD4E;
+@default-warning-hov: #EC971F;
+@default-unreachable:   #FF0000;
+@default-unreachable-hov:#D81F1F;
+@default-white-button-bord:#E1E1E1;
 
 // layout
 @page-bg:               @default-secondary-bg;
@@ -55,7 +61,7 @@
 @list-actn-bord-hov:    @default-link;
 @list-row-select-bord:  @default-link;
 @list-pagin-text:       @default-interface-txt;
-@list-pagin-bord:       @default-second-border;
+@list-pagin-bord:       @d7grey;
 @list-pagin-bord-act:   @default-icon-hov;
 @list-pagin-bg-act:     @default-icon-hov;
 @list-title-txt:        @default-interface-txt;
@@ -63,7 +69,7 @@
 @list-srch-inpt-bg:     @default-secondary-bg;
 @list-srch-inpt-txt:    @default-data-txt;
 @list-srch-inpt-ph-txt: @default-icon;
-@list-srch-inpt-bord:   @default-second-border;
+@list-srch-inpt-bord:   @d7grey;
 @list-srch-inpt-focus:  @default-link;
 @list-srch-btn-icon:    @default-icon;
 @list-srch-btn-bg:      @default-bg;
@@ -87,7 +93,7 @@
 @login-notice-title:    @default-interface-txt;
 @login-notice-bg:       @default-secondary-bg;
 @login-notice-border:   @default-secondary-bg;
-@login-notice-text:     @default-as-detail-txt;
+@login-notice-text:     @default-stdout-txt;
 
 // login modal third party auth
 @third-party-label:     @default-interface-txt;
@@ -102,16 +108,16 @@
 @field-input-text:      @default-data-txt;
 @field-bg:              @default-tertiary-bg;
 @field-secondary-bg:    @default-secondary-bg;
-@field-border:          @default-second-border;
+@field-border:          @d7grey;
 @field-border-sel:      @default-link;
 @field-dropdown-icon:   @default-icon;
 @field-button-bg:       @default-bg;
-@field-button-hov:      @default-button-hov;
+@field-button-hov:      @default-no-iterms-bord;
 @submit-button-text:    @default-bg;
 @submit-button-bg:      @default-succ;
 @submit-button-bg-hov:  @default-succ-hov;
 @submit-button-bg-dis:  @default-icon-hov;
-@code-mirror-gutter:    @default-button-hov;
+@code-mirror-gutter:    @default-no-iterms-bord;
 @radio-bg:              @default-interface-txt;
 @field-lookup-btn-icon: @default-icon;
 @field-lookup-btn-bg:   @default-bg;
@@ -166,4 +172,4 @@
 @panel-border:          @default-border;
 
 // activity stream details modal
-@as-detail-changes-txt: @default-as-detail-txt;
+@as-detail-changes-txt: @default-stdout-txt;
