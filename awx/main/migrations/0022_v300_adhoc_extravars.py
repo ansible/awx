@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0020_v300_labels_changes'),
+        ('main', '0021_v300_activity_stream'),
     ]
 
     operations = [
