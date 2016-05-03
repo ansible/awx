@@ -2185,9 +2185,7 @@ class JobLaunchSerializer(BaseSerializer):
         ask_for_vars_dict = obj._ask_for_vars_dict()
         defaults_dict = {}
         for field in ask_for_vars_dict:
-            if not ask_for_vars_dict[field]:
-                continue
-            elif field in ('inventory', 'credential'):
+            if field in ('inventory', 'credential'):
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
                     id=getattrd(obj, '%s.pk' % field, None))
