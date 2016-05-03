@@ -98,8 +98,8 @@
 				<form id="License-form" name="license">
 					<div class="License-subTitleText prepend-asterisk"> License File</div>
 					<div class="input-group License-file--container">
-						<span class="btn btn-default input-group-addon" ng-click="fakeClick()">Browse...</span>
-						<input class="form-control License-input--fake" ng-disabled="true" placeholder="{{fileName}}" />
+						<span class="btn btn-primary" ng-click="fakeClick()">Browse</span>
+						<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
 					<div class="License-subTitleText prepend-asterisk"> End User License Agreement</div>
