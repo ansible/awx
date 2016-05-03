@@ -55,7 +55,6 @@ import search from './search/main';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
 import OrganizationsAdd from './organizations/add/organizations-add.controller';
-import {AdminsList} from './controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
 
@@ -110,7 +109,6 @@ var tower = angular.module('Tower', [
     JobTemplates.name,
     portalMode.name,
     search.name,
-    AdminsList.name,
     'ngToast',
     'templates',
     'Utilities',
@@ -127,7 +125,6 @@ var tower = angular.module('Tower', [
     'SearchHelper',
     'PaginationHelpers',
     'RefreshHelper',
-    'AdminListDefinition',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
