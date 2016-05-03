@@ -84,6 +84,12 @@ class AdHocCommand(UnifiedJob):
         editable=False,
         through='AdHocCommandEvent',
     )
+    extra_vars = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     def clean_inventory(self):
         inv = self.inventory

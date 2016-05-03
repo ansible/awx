@@ -1917,7 +1917,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
     class Meta:
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
-                  'module_name', 'module_args', 'forks', 'verbosity',
+                  'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
                   'become_enabled', '-unified_job_template', '-description')
         extra_kwargs = {
             'name': {
