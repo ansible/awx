@@ -15,7 +15,7 @@ export default function(){
         index: false,
         hover: true,
         well: true,
-
+        emptyListText: 'NO ACTIVE FAILURES FOUND',
         fields: {
             status: {
                 basePath: 'unified_jobs',
