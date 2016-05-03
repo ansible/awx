@@ -24,7 +24,7 @@ export default
 
         fields: {
             timestamp: {
-                label: 'Event Time',
+                label: 'Time',
                 key: true,
                 desc: true,
                 noLink: true,
@@ -44,11 +44,11 @@ export default
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
             },
             description: {
-                label: 'Action',
+                label: 'Event',
                 ngBindHtml: 'activity.description',
                 nosort: true,
                 searchable: false,
-                columnClass: 'col-lg-5 col-md-6 col-sm-4 col-xs-4'
+                columnClass: 'ActivityStream-eventColumnHeader col-lg-5 col-md-6 col-sm-4 col-xs-4'
             },
             actor: {
                 label: 'System event',
@@ -263,7 +263,7 @@ export default
                 id: 'activity-stream-refresh-btn',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()",
-                actionClass: 'btn List-buttonDefault',
+                actionClass: 'btn List-buttonDefault ActivityStream-refreshButton',
                 buttonContent: 'REFRESH'
             }
         },
