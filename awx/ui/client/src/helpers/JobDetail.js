@@ -955,7 +955,7 @@ export default
                 graph_data.push({
                     label: 'FAILED',
                     value: count.failures.length,
-                    color: '#ff5850'
+                    color: '#D9534F'
                 });
             }
             DonutChart({

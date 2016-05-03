@@ -58,12 +58,12 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     scope.status = status;
 
                     var timeFormat, graphData = [
-                        {   "color": "#3CB878",
+                        {   "color": "#5CB85C",
                             "key": "SUCCESSFUL",
                             "values": data.jobs.successful
                         },
                         {   "key" : "FAILED" ,
-                            "color" : "#ff5850",
+                            "color" : "#D9534F",
                             "values": data.jobs.failed
                         }
                     ];
