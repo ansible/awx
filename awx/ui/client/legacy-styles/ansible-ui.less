@@ -627,7 +627,7 @@ dd {
 
 /* Outline required fields in Red when there is an error */
   .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
-      border-color: rgba(255, 88, 80, 0.8);
+      border-color: @default-err;
       outline: 0;
       -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
               box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
@@ -635,7 +635,7 @@ dd {
 
   .form-control.ng-dirty.ng-invalid + .select2 .select2-selection,
   .form-control.ng-dirty.ng-invalid + .select2 .select2-selection:focus {
-      border-color: rgba(255, 88, 80, 0.8) !important;
+      border-color: @default-err !important;
       outline: 0 !important;
       box-shadow: none !important;
   }
