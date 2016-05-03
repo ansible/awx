@@ -30,6 +30,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
+from django.contrib.contenttypes.models import ContentType
+
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
@@ -1100,7 +1102,9 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
-        return Role.filter_visible_roles(self.request.user, u.roles.all())
+        content_type = ContentType.objects.get_for_model(User)
+        return Role.filter_visible_roles(self.request.user, u.roles.all()) \
+                   .exclude(content_type=content_type, object_id=u.id)
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
