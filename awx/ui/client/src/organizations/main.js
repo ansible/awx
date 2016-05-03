@@ -7,10 +7,12 @@
 import organizationsList from './list/main';
 import organizationsAdd from './add/main';
 import organizationsEdit from './edit/main';
+import organizationsLinkout from './linkout/main';
 
 export default
 angular.module('organizations', [
     organizationsList.name,
     organizationsAdd.name,
     organizationsEdit.name,
+    organizationsLinkout.name
 ]);

@@ -312,31 +312,6 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd
             }).
-
-            state('organizationAdmins', {
-                url: '/organizations/:organization_id/admins',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: AdminsList
-            }).
-
-            state('organizationUsers', {
-                url:'/organizations/:organization_id/users',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList
-            }).
-
-            state('organizationUserAdd', {
-                url: '/organizations/:organization_id/users/add',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd
-            }).
-
-            state('organizationUserEdit', {
-                url: '/organizations/:organization_id/users/:user_id',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit
-            }).
-
             state('teams', {
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',

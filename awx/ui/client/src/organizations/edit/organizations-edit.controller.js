@@ -25,6 +25,8 @@ export default ['$scope', '$rootScope', '$compile', '$location',
             id = $stateParams.organization_id,
             relatedSets = {};
 
+        $scope.$parent.activeMode = 'edit';
+
         $scope.$emit("HideOrgListHeader");
 
         $scope.$emit("ReloadOrganzationCards", id);

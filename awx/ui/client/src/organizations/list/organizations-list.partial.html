@@ -28,7 +28,7 @@
                 <div class="OrgCards-actionItems">
                     <button class="OrgCards-actionItem
                         List-actionButton"
-                        ng-class="{'List-editButton--selected': activeCard === card.id || card.isActiveCard }"
+                        ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
                         ng-click="editOrganization(card.id)">
                         <i class="OrgCards-actionItemIcon fa fa-pencil">
                         </i>
@@ -46,7 +46,8 @@
             <div class="OrgCards-links">
                 <div class="OrgCards-link" ng-repeat="link in card.links">
                     <span class="badge List-titleBadge
-                        OrgCards-linkBadge">
+                        OrgCards-linkBadge"
+                        ng-class="{'List-titleBadge--selected': (activeCard === card.id || card.isActiveCard) && activeMode === link.activeMode }">
                         {{ link.count }}
                     </span>
                     <a class="OrgCards-linkName"
