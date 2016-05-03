@@ -15,5 +15,14 @@ export default {
 	ncyBreadcrumb: {
 		parent: 'setup',
 		label: 'LICENSE'
-	}
+	},
+	resolve: {
+		features: ['CheckLicense', '$rootScope',
+			function(CheckLicense, $rootScope) {
+				if($rootScope.licenseMissing === undefined){
+					return CheckLicense.notify();
+				}
+
+		}]
+	},
 };

@@ -5,10 +5,10 @@
  *************************************************/
 
 export default
-	[	'Wait', '$state', '$scope', '$rootScope', '$location',
-	 'GetBasePath', 'Rest', 'ProcessErrors', 'CheckLicense', 'moment',
-	 function( Wait, $state, $scope, $rootScope, $location,
-	 	GetBasePath, Rest, ProcessErrors, CheckLicense, moment){
+	['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
+	'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
+	function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
+		ProcessErrors, CheckLicense, moment, $window){
 	 	$scope.getKey = function(event){
 	 		// Mimic HTML5 spec, show filename
 	 		$scope.fileName = event.target.files[0].name;
@@ -35,6 +35,11 @@ export default
 	 	$scope.fakeClick = function(){
 	 		$('#License-file').click();
 	 	};
+
+		$scope.downloadLicense = function(){
+            $window.open('https://www.ansible.com/license', '_blank');
+        };
+
 		$scope.newLicense = {};
 		$scope.submit = function(){
 			Wait('start');
@@ -48,6 +53,13 @@ export default
 						$scope.success = false;
 						clearTimeout(successTimeout);
 					}, 4000);
+					if($rootScope.licenseMissing === true){
+						$rootScope.licenseMissing = false;
+						$state.go('dashboard');
+					}
+					else{
+						$rootScope.licenseMissing = false;
+					}
 			});
 		};
 	 	var calcDaysRemaining = function(ms){
@@ -62,6 +74,7 @@ export default
 	 	};
 	 	var init = function(){
 	 		$scope.fileName = "Please choose a file...";
+			$scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
 	 		Wait('start');
 	 		CheckLicense.get()
 	 		.then(function(res){

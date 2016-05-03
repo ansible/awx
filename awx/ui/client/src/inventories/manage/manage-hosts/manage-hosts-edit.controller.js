@@ -24,7 +24,7 @@
                 description: $scope.description,
                 enabled: $scope.host.enabled
             };
-            ManageHostsService.put(host).then(function(res){
+            ManageHostsService.put(host).then(function(){
                 $state.go('^', null, {reload: true});
             });
         };
@@ -34,12 +34,12 @@
             generator.inject(form, {mode: 'edit', related: false, id: 'Inventory-hostManage--panel', scope: $scope});
             $scope.extraVars = $scope.host.variables === '' ? '---' : $scope.host.variables;
             $scope.name = host.name;
-            $scope.description = host.description;          
-            ParseTypeChange({ 
-                scope: $scope, 
-                field_id: 'host_variables', 
-                variable: 'extraVars',  
+            $scope.description = host.description;
+            ParseTypeChange({
+                scope: $scope,
+                field_id: 'host_variables',
+                variable: 'extraVars',
             });
-        };           
+        };
         init();
     }];

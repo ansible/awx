@@ -5,13 +5,15 @@
  *************************************************/
 
 export default
-	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', function($state, $rootScope, Rest, GetBasePath, ProcessErrors){
+	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
+	function($state, $rootScope, Rest, GetBasePath, ProcessErrors, $q){
 			return {
 				get: function() {
 					var defaultUrl = GetBasePath('config');
 					Rest.setUrl(defaultUrl);
 					return Rest.get()
 						.success(function(res){
+							$rootScope.license_tested = true;
 							return res;
 						})
 	                    .error(function(res, status){
@@ -50,13 +52,26 @@ export default
 					 	return true;
 				},
 				notify: function(){
-					var self = this;
-					this.get()
-						.then(function(res){
-							if(self.valid(res.data.license_info) === false) {
-								$state.go('license');
-							}
-						});
+					var deferred = $q.defer(),
+						self = this;
+					if($rootScope.license_tested !== true){
+						this.get()
+							.then(function(res){
+								if(self.valid(res.data.license_info) === false) {
+									$rootScope.licenseMissing = true;
+									deferred.resolve();
+									$state.go('license');
+								}
+								else {
+									$rootScope.licenseMissing = false;
+								}
+							});
+					}
+					else{
+						deferred.resolve();
+					}
+
+					return deferred.promise;
 				}
 
 			};

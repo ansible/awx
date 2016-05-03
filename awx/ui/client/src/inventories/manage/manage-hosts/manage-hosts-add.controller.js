@@ -17,7 +17,7 @@
         $scope.toggleEnabled = function(){
             $scope.host.enabled = !$scope.host.enabled;
         };
-        $scope.formSave = function(){;
+        $scope.formSave = function(){
             var params = {
                 variables: $scope.extraVars === '---' || $scope.extraVars === '{}' ? null : $scope.extraVars,
                 name: $scope.name,
@@ -25,17 +25,17 @@
                 enabled: $scope.host.enabled,
                 inventory: $stateParams.inventory_id
             };
-            ManageHostsService.post(params).then(function(res){
+            ManageHostsService.post(params).then(function(){
                 $state.go('^', null, {reload: true});
             });
         };
         var init = function(){
             $scope.host = {enabled: true};
             generator.inject(form, {mode: 'add', related: false, id: 'Inventory-hostManage--panel', scope: $scope});
-            ParseTypeChange({ 
-                scope: $scope, 
-                field_id: 'host_variables', 
-                variable: 'extraVars',  
+            ParseTypeChange({
+                scope: $scope,
+                field_id: 'host_variables',
+                variable: 'extraVars',
             });
         };
         init();
