@@ -1,4 +1,5 @@
 django-debug-toolbar==1.4
+pprofile
 unittest2
 pep8
 flake8
