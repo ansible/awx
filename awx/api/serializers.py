@@ -1546,6 +1546,15 @@ class ResourceAccessListElementSerializer(UserSerializer):
                                     .filter(content_type=team_content_type,
                                             members=user,
                                             children__in=direct_permissive_role_ids)
+        if content_type == team_content_type:
+            # When looking at the access list for a team, exclude the entries
+            # for that team. This exists primarily so we don't list the read role
+            # as a direct role when a user is a member or admin of a team
+            direct_team_roles = direct_team_roles.exclude(
+                children__content_type=team_content_type,
+                children__object_id=obj.id
+            )
+
 
         indirect_team_roles   = Role.objects \
                                     .filter(content_type=team_content_type,
