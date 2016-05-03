@@ -1,4 +1,5 @@
 /** @define MgmtCards */
+@import '../shared/branding/colors.default.less';
 
 .MgmtCards {
     display: flex;
@@ -6,10 +7,10 @@
 }
 
 .MgmtCards-card {
-    background-color: #fff;
+    background-color: @default-bg;
     padding: 20px;
     border-radius: 5px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid @default-border;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -33,7 +34,7 @@
     text-transform: uppercase;
     font-size: 14px;
     font-weight: bold;
-    color: #848992;
+    color: @default-interface-txt;
     margin-bottom: 25px;
     white-space: nowrap;
 }

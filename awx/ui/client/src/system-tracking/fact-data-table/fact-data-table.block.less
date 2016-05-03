@@ -10,7 +10,7 @@
       padding: .5em 0;
       align-items: center;
       transition: background-color 100ms, border-color 100ms;
-      border: solid 1px #fff;
+      border: solid 1px @default-bg;
 
       &:nth-child(even) {
           background-color: @default-no-items-bord;
@@ -137,7 +137,7 @@
         //margin-bottom: 0.5rem;
         background-color: @default-err;
         border: none;
-        color: #FFFFFF;
+        color: @default-bg;
 
         &:hover {
             background-color: @default-err;

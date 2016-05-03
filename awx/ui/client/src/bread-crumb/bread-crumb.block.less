@@ -44,21 +44,21 @@
 .BreadCrumb-list {
       padding: 0px 20px;
       list-style: none;
-      background-color: #FFFFFF;
+      background-color: @default-bg;
       border-radius: 4px;
       line-height: 40px;
 }
 
 .BreadCrumb-item {
     display: inline-block;
-    color: #B7B7B7;
+    color: @default-data-txt;
     text-transform: uppercase;
 }
 
 .BreadCrumb-item + .BreadCrumb-item:before {
     content: "/";
     padding: 0 5px;
-    color: #B7B7B7;
+    color: @default-data-txt;
 }
 
 @breadcrumb-breakpoint: 900px;
