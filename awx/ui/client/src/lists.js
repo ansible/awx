@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import Admins from "./lists/Admins";
 import CloudCredentials from "./lists/CloudCredentials";
 import CompletedJobs from "./lists/CompletedJobs";
 import AllJobs from "./lists/AllJobs";
@@ -31,8 +30,7 @@ import Teams from "./lists/Teams";
 import Users from "./lists/Users";
 
 export
-    {   Admins,
-        CloudCredentials,
+    {   CloudCredentials,
         CompletedJobs,
         AllJobs,
         Credentials,
