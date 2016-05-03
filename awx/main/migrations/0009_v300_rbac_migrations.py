@@ -21,5 +21,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(rbac.migrate_inventory),
         migrations.RunPython(rbac.migrate_projects),
         migrations.RunPython(rbac.migrate_credential),
+        migrations.RunPython(rbac.migrate_job_templates),
         migrations.RunPython(rbac.rebuild_role_hierarchy),
     ]

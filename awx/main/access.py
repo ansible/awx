@@ -349,7 +349,7 @@ class InventoryAccess(BaseAccess):
             if self.user not in org.admin_role:
                 return False
         # Otherwise, just check for write permission.
-        return self.user in obj.admin_role
+        return self.user in obj.update_role
 
     @check_superuser
     def can_admin(self, obj, data):
@@ -401,7 +401,7 @@ class HostAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        if self.user not in inventory.admin_role:
+        if self.user not in inventory.update_role:
             return False
 
         # Check to see if we have enough licenses
@@ -415,7 +415,7 @@ class HostAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a host')
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
-        return obj and self.user in obj.inventory.admin_role
+        return obj and self.user in obj.inventory.update_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -452,7 +452,7 @@ class GroupAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        return self.user in inventory.admin_role
+        return self.user in inventory.update_role
 
     def can_change(self, obj, data):
         # Prevent moving a group to a different inventory.
@@ -461,7 +461,7 @@ class GroupAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a group')
         # Checks for admin or change permission on inventory, controls whether
         # the user can attach subgroups or edit variable data.
-        return obj and self.user in obj.inventory.admin_role
+        return obj and self.user in obj.inventory.update_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -514,7 +514,7 @@ class InventorySourceAccess(BaseAccess):
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.group:
-            return self.user in obj.group.admin_role
+            return self.user in obj.group.update_role
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
         else:
@@ -572,8 +572,22 @@ class CredentialAccess(BaseAccess):
         return self.user in obj.read_role
 
     def can_add(self, data):
-        # Access enforced in our view where we have context enough to make a decision
-        return True
+        if self.user.is_superuser:
+            return True
+        user_pk = get_pk_from_dict(data, 'user')
+        if user_pk:
+            user_obj = get_object_or_400(User, pk=user_pk)
+            return check_user_access(self.user, User, 'change', user_obj, None)
+        team_pk = get_pk_from_dict(data, 'team')
+        if team_pk:
+            team_obj = get_object_or_400(Team, pk=team_pk)
+            return check_user_access(self.user, Team, 'change', team_obj, None)
+        organization_pk = get_pk_from_dict(data, 'organization')
+        if organization_pk:
+            organization_obj = get_object_or_400(Organization, pk=organization_pk)
+            return check_user_access(self.user, Organization, 'change', organization_obj, None)
+        return False
+
 
     @check_superuser
     def can_use(self, obj):
@@ -581,6 +595,8 @@ class CredentialAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        if not self.can_add(data):
+            return False
         return self.user in obj.owner_role
 
     def can_delete(self, obj):
@@ -615,12 +631,13 @@ class TeamAccess(BaseAccess):
             return True
         return False
 
-    @check_superuser
     def can_change(self, obj, data):
         # Prevent moving a team to a different organization.
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             raise PermissionDenied('Unable to change organization on a team')
+        if self.user.is_superuser:
+            return True
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -662,7 +679,6 @@ class ProjectAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
-    @check_superuser
     def can_start(self, obj):
         return self.can_change(obj, {}) and obj.can_update
 
@@ -715,8 +731,7 @@ class JobTemplateAccess(BaseAccess):
                                  'credential', 'cloud_credential', 'next_schedule').all()
 
     def can_read(self, obj):
-        # you can only see the job templates that you have permission to launch.
-        return self.can_start(obj, validate_license=False)
+        return self.user in obj.read_role
 
     def can_add(self, data):
         '''

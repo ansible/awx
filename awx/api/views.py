@@ -1239,15 +1239,15 @@ class CredentialList(ListCreateAPIView):
 
         if 'user' in request.data:
             user = User.objects.get(pk=request.data['user'])
-            obj = user
+            can_add_params = {'user': user.id}
         if 'team' in request.data:
             team = Team.objects.get(pk=request.data['team'])
-            obj = team
+            can_add_params = {'team': team.id}
         if 'organization' in request.data:
             organization = Organization.objects.get(pk=request.data['organization'])
-            obj = organization
+            can_add_params = {'organization': organization.id}
 
-        if not self.request.user.can_access(type(obj), 'change', obj, request.data):
+        if not self.request.user.can_access(Credential, 'add', can_add_params):
             raise PermissionDenied()
 
         ret = super(CredentialList, self).post(request, *args, **kwargs)
@@ -1277,8 +1277,7 @@ class UserCredentialsList(CredentialList):
         return user_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        request.data['user'] = user.id
+        request.data['user'] = self.kwargs['pk']
         # The following post takes care of ensuring the current user can add a cred to this user
         return super(UserCredentialsList, self).post(request, args, kwargs)
 
@@ -1297,8 +1296,7 @@ class TeamCredentialsList(CredentialList):
         return team_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        request.data['team'] = team.id
+        request.data['team'] = self.kwargs['pk']
         # The following post takes care of ensuring the current user can add a cred to this user
         return super(TeamCredentialsList, self).post(request, args, kwargs)
 
