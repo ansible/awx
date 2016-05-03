@@ -62,7 +62,7 @@ export default
                             {
                                 url: "/#/projects/?status=failed",
                                 number: scope.data.projects.failed,
-                                label: "Projects Sync Failures",
+                                label: "Project Sync Failures",
                                 isFailureCount: true
                             }
                         ], function(val) { return addFailureToCount(val); });
