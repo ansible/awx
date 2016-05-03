@@ -431,7 +431,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         if res:
             return res
         return self.unattach_by_id(request, sub_id)
-       
+
     def post(self, request, *args, **kwargs):
         if not isinstance(request.data, dict):
             return Response('invalid type for post data',
@@ -500,7 +500,7 @@ class ResourceAccessList(ListAPIView):
     def get_queryset(self):
         self.object_id = self.kwargs['pk']
         resource_model = getattr(self, 'resource_model')
-        obj = resource_model.objects.get(pk=self.object_id)
+        obj = get_object_or_404(resource_model, pk=self.object_id)
 
         content_type = ContentType.objects.get_for_model(obj)
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))
@@ -509,4 +509,3 @@ class ResourceAccessList(ListAPIView):
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
         return User.objects.filter(roles__in=list(ancestors))
-
