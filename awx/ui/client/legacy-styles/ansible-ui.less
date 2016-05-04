@@ -2118,3 +2118,37 @@ a:hover {
    fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
    font-family: 'Open Sans' !important;
 }
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    cursor: default;
+    float: left;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding-left: 0px;
+    border-left-width: 0px;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
+    padding-right: 10px;
+    border-right-width: 0px;
+    background-color: @default-link;
+    color: @default-bg;
+    border-radius: 5px;
+    line-height: 21px;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 8px !important;
+    padding: 0 6px;
+    color: @default-bg !important;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: @default-link;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background-color: @default-err;
+}
