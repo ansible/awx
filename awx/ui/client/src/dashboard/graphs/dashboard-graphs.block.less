@@ -28,6 +28,8 @@
     color: @default-interface-txt;
     white-space: nowrap;
     margin-right: auto;
+    margin-bottom: 20px;
+    margin-top: 5px;
 }
 
 .DashboardGraphs-graphSection {
@@ -68,17 +70,6 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-}
-
-.nv-axislabel {
-  font-weight: bold !important;
-  fill: @db-graph-axis-label !important;
-  font-family: 'Open Sans' !important;
-}
-
-.nv-axis text {
-   fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
-   font-family: 'Open Sans' !important;
 }
 
 .DashboardGraphs-graphToolbar {
@@ -141,7 +132,11 @@
 }
 
 .DashboardGraphs-filterDropdownItems--jobType {
-    margin-left: -84px;
+    margin-left: -95px;
+}
+
+.DashboardGraphs-filterDropdownItems--status {
+    margin-left: -96px;
 }
 
 .DashboardGraphs-statusFilters{
@@ -177,4 +172,32 @@
 
 .DashboardGraphs-statusFilterIcon{
     padding-right: 5px;
+}
+
+.DashboardGraphs-filteringDropdowns {
+    display: inherit;
+}
+
+.DashboardGraphs-filterDropdownItems {
+    li > a {
+        color: @default-interface-txt;
+    }
+}
+
+@media only screen and (max-width: 540px) {
+    .DashboardGraphs-filteringDropdowns {
+        float: left;
+        width: 100%;
+        margin-left: -10px;
+    }
+
+    .DashboardGraphs-filterLabel {
+        width: 50%;
+        float:left;
+    }
+
+    .DashboardGraphs-periodDropdown {
+        width: 50%;
+        float: left;
+    }
 }

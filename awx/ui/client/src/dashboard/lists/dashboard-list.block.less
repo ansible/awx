@@ -153,3 +153,24 @@
 .DashboardList-noJobs {
     color: @list-empty-txt;
 }
+
+@media only screen and (max-width: 360px) {
+    .DashboardList-headerText {
+        white-space: normal;
+        line-height: 22px;
+        padding-top: 10px;
+    }
+
+    .DashboardList-timeCell {
+        white-space: normal;
+    }
+}
+
+@media only screen and (max-width: 540px) {
+    .DashboardList-container {
+        th {
+            width: 25%;
+            white-space: nowrap;
+        }
+    }
+}

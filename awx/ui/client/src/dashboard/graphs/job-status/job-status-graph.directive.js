@@ -124,7 +124,8 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     // when the Period drop down filter is used, create a new graph based on the
                     $('.n').on("click", function(){
                         period = this.getAttribute("id");
-                        $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        $('#period-dropdown')
+                            .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
                         "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
@@ -134,7 +135,7 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     //On click, update with new data
                     $('.m').on("click", function(){
                         job_type = this.getAttribute("id");
-                        $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--jobType\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
                         "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
@@ -143,7 +144,7 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
 
                     $('.o').on('click', function() {
                         var job_status = this.getAttribute('id');
-                        $('#status-dropdown').replaceWith("<a id=\"status-dropdown\" class=\"DashboardGraphs-filterDropdownText\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
+                        $('#status-dropdown').replaceWith("<a id=\"status-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownText--status\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
                         "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$broadcast("jobStatusChange", job_status);
                     });
