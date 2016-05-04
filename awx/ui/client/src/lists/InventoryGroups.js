@@ -12,6 +12,7 @@ export default
         iterator: 'group',
         editTitle: '{{ inventory.name }}',
         listTitle: 'Groups',
+        searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         showTitle: false,
         well: true,
         index: false,
@@ -31,7 +32,7 @@ export default
                 nosort: true,
                 label: '',
                 type: 'badgeCount',
-                ngHide: 'group.total_groups == 0',        
+                ngHide: 'group.total_groups == 0',
             },
             source: {
                 label: 'Source',
