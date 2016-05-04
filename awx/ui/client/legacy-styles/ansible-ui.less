@@ -2083,3 +2083,29 @@ tr td button i {
 body.is-modalOpen {
     overflow: hidden;
 }
+
+input[type=file]:focus, input[type=radio]:focus, input[type=checkbox]:focus {
+    outline: 0 !important;
+}
+
+.btn-success.disabled, .btn-success[disabled], fieldset[disabled] .btn-success, .btn-success.disabled:hover, .btn-success[disabled]:hover, fieldset[disabled] .btn-success:hover, .btn-success.disabled:focus, .btn-success[disabled]:focus, fieldset[disabled] .btn-success:focus, .btn-success.disabled:active, .btn-success[disabled]:active, fieldset[disabled] .btn-success:active, .btn-success.disabled.active, .btn-success[disabled].active, fieldset[disabled] .btn-success.active {
+    background-color: @d7grey;
+    color: @default-bg;
+    border: 0;
+}
+
+.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
+    border-color: #5CB85C;
+}
+
+a {
+    color: @default-link;
+}
+
+a:hover {
+    color: @default-link-hov;
+}
+
+.form-control:active, .form-control:focus {
+    border-color: @default-link;
+}
