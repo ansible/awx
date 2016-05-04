@@ -702,7 +702,7 @@ class UserSerializer(BaseSerializer):
 
     def validate_password(self, value):
         if not self.instance and value in (None, ''):
-            raise serializers.ValidationError('Password required for new User')
+            raise serializers.ValidationError('Password required for new User.')
         return value
 
     def _update_password(self, obj, new_password):
@@ -766,7 +766,7 @@ class UserSerializer(BaseSerializer):
             ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             if field_name in ldap_managed_fields:
                 if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP' % field_name)
+                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP.' % field_name)
         return value
 
     def validate_username(self, value):
@@ -965,7 +965,7 @@ class BaseSerializerWithVariables(BaseSerializer):
             try:
                 yaml.safe_load(value)
             except yaml.YAMLError:
-                raise serializers.ValidationError('Must be valid JSON or YAML')
+                raise serializers.ValidationError('Must be valid JSON or YAML.')
         return value
 
 
@@ -1117,7 +1117,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     vars_dict['ansible_ssh_port'] = port
                     attrs['variables'] = yaml.dump(vars_dict)
                 except (yaml.YAMLError, TypeError):
-                    raise serializers.ValidationError('Must be valid JSON or YAML')
+                    raise serializers.ValidationError('Must be valid JSON or YAML.')
 
         return super(HostSerializer, self).validate(attrs)
 
@@ -1174,7 +1174,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
-            raise serializers.ValidationError('Invalid group name')
+            raise serializers.ValidationError('Invalid group name.')
         return value
 
     def to_representation(self, obj):
@@ -1307,10 +1307,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             else:
                 try:
                     if source_script.organization != self.instance.inventory.organization:
-                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory'
+                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory.'
                 except Exception:
                     # TODO: Log
-                    errors['source_script'] = 'source_script doesn\'t exist'
+                    errors['source_script'] = 'source_script doesn\'t exist.'
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1707,9 +1707,9 @@ class JobOptionsSerializer(BaseSerializer):
             if not project and job_type != PERM_INVENTORY_SCAN:
                 raise serializers.ValidationError({'project': 'This field is required.'})
             if project and playbook and force_text(playbook) not in project.playbooks:
-                raise serializers.ValidationError({'playbook': 'Playbook not found for project'})
+                raise serializers.ValidationError({'playbook': 'Playbook not found for project.'})
             if project and not playbook:
-                raise serializers.ValidationError({'playbook': 'Must select playbook for project'})
+                raise serializers.ValidationError({'playbook': 'Must select playbook for project.'})
 
         return super(JobOptionsSerializer, self).validate(attrs)
 
@@ -1770,7 +1770,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
         job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs'})
+            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs.'})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
@@ -1916,9 +1916,9 @@ class JobRelaunchSerializer(JobSerializer):
         if not obj.credential:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
         if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined."]))
         if obj.inventory is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined."]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
@@ -2247,9 +2247,9 @@ class JobLaunchSerializer(BaseSerializer):
                 errors['variables_needed_to_start'] = validation_errors
 
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
-            errors['project'] = 'Job Template Project is missing or undefined'
+            errors['project'] = 'Job Template Project is missing or undefined.'
         if (obj.inventory is None) and not attrs.get('inventory', None):
-            errors['inventory'] = 'Job Template Inventory is missing or undefined'
+            errors['inventory'] = 'Job Template Inventory is missing or undefined.'
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -2387,7 +2387,7 @@ class ScheduleSerializer(BaseSerializer):
 
     def validate_unified_job_template(self, value):
         if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
-            raise serializers.ValidationError('Inventory Source must be a cloud resource')
+            raise serializers.ValidationError('Inventory Source must be a cloud resource.')
         return value
 
     # We reject rrules if:
@@ -2579,7 +2579,7 @@ class TowerSettingsSerializer(BaseSerializer):
     def validate(self, attrs):
         manifest = settings.TOWER_SETTINGS_MANIFEST
         if attrs['key'] not in manifest:
-            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
+            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key.".format(attrs['key'])]))
 
         if attrs['value_type'] == 'json':
             attrs['value'] = json.dumps(attrs['value'])
@@ -2613,7 +2613,7 @@ class AuthTokenSerializer(serializers.Serializer):
             else:
                 raise serializers.ValidationError('Unable to login with provided credentials.')
         else:
-            raise serializers.ValidationError('Must include "username" and "password"')
+            raise serializers.ValidationError('Must include "username" and "password".')
 
 
 class FactVersionSerializer(BaseFactSerializer):
