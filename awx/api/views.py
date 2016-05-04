@@ -1228,7 +1228,7 @@ class UserAccessList(ResourceAccessList):
 class CredentialList(ListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = CredentialSerializerCreate
 
     def post(self, request, *args, **kwargs):
         for field in [x for x in ['user', 'team', 'organization'] if x in request.data and request.data[x] in ('', None)]:
