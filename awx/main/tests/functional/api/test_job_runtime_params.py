@@ -171,7 +171,7 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
                     args=[deploy_jobtemplate.pk]), {}, user('admin', True))
 
     assert response.status_code == 400
-    assert response.data['inventory'] == ['Job Template Inventory is missing or undefined']
+    assert response.data['inventory'] == ['Job Template Inventory is missing or undefined.']
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
