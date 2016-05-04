@@ -150,7 +150,10 @@ def _discover_credentials(instances, cred, orgfunc):
             pass
 
     if len(orgs) == 1:
-        _update_credential_parents(orgfunc(instances[0]), cred)
+        try:
+            _update_credential_parents(orgfunc(instances[0]), cred)
+        except AttributeError:
+            pass
     else:
         for pos, org in enumerate(orgs):
             if pos == 0:
