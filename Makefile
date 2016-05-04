@@ -649,7 +649,7 @@ tar-build/$(SETUP_TAR_FILE):
 	@cp -a setup tar-build/$(SETUP_TAR_NAME)
 	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
+	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" --exclude "**/test/*" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 
 tar-build/$(SETUP_TAR_CHECKSUM):
