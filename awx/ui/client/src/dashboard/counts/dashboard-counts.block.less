@@ -42,6 +42,52 @@
     }
 }
 
+@media only screen and (max-width: 360px) {
+    .DashboardCounts-label {
+        font-size: 10px;
+    }
+
+    .DashboardList-headerText {
+        white-space: normal;
+        line-height: 22px;
+        padding-top: 10px;
+    }
+
+    .DashboardList-timeCell {
+        white-space: normal;
+    }
+}
+
+.DashboardGraphs-filteringDropdowns {
+    display: inherit;
+}
+
+@media only screen and (max-width: 540px) {
+    .DashboardGraphs-filteringDropdowns {
+        float: left;
+        width: 100%;
+    }
+
+    .DashboardGraphs-filterLabel {
+        width: 50%;
+        float:left;
+    }
+
+    .DashboardGraphs-periodDropdown {
+        width: 50%;
+        float: left;
+    }
+
+    .DashboardList-container {
+        th {
+            width: 25%;
+            white-space: nowrap;
+        }
+    }
+}
+
+
+
 .DashboardCounts-buttonStyle:hover {
     background-color: @db-count-succ;
     border-color: @db-count-succ;

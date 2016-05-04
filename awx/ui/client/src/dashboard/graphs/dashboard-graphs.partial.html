@@ -4,74 +4,80 @@
             JOB STATUS
         </h3>
         <div class="DashboardGraphs-graphToolbar" ng-show="!hostStatusSelected">
-            <div class="DashboardGraphs-filterLabel">Period</div>
-            <div class="DashboardGraphs-periodDropdown">
-                <a id="period-dropdown" role="button"
-                data-toggle="dropdown"
-                data-target="#"
-                href="/page.html"
-                class="DashboardGraphs-filterDropdownText">
-                    Past Month <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
-                </a>
-                <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
-                    DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="period-dropdown">
-                    <li>
-                        <a class="n" id="day" >Past 24 Hours </a>
-                    </li>
-                    <li>
-                        <a class="n" id="week">Past Week</a>
-                    </li>
-                    <li>
-                        <a class="n" id="month">Past Month</a>
-                    </li>
-                </ul>
+            <div class="DashboardGraphs-filteringDropdowns">
+                <div class="DashboardGraphs-filterLabel">Period</div>
+                <div class="DashboardGraphs-periodDropdown">
+                    <a id="period-dropdown" role="button"
+                    data-toggle="dropdown"
+                    data-target="#"
+                    href="/page.html"
+                    class="DashboardGraphs-filterDropdownText">
+                        Past Month <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
+                    </a>
+                    <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+                        DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="period-dropdown">
+                        <li>
+                            <a class="n" id="day" >Past 24 Hours </a>
+                        </li>
+                        <li>
+                            <a class="n" id="week">Past Week</a>
+                        </li>
+                        <li>
+                            <a class="n" id="month">Past Month</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="DashboardGraphs-filterLabel">Job Type</div>
-            <div class="DashboardGraphs-jobTypeDropdown">
+            <div class="DashboardGraphs-filteringDropdowns">
+                <div class="DashboardGraphs-filterLabel">Job Type</div>
+                <div class="DashboardGraphs-jobTypeDropdown">
 
-                    <a id="type-dropdown" role="button" data-toggle="dropdown" data-target="#" class="DashboardGraphs-filterDropdownText"
-                    href="/page.html">
+                        <a id="type-dropdown" role="button" data-toggle="dropdown" data-target="#" class="DashboardGraphs-filterDropdownText"
+                        href="/page.html">
+                            All <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
+                        </a>
+
+                    <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+                        DashboardGraphs-filterDropdownItems--jobType" role="menu" aria-labelledby="type-dropdown">
+                        <li>
+                            <a class="m" id="all">All</a>
+                        </li>
+                        <li>
+                            <a class="m" id="inv_sync">Inventory Sync</a>
+                        </li>
+                        <li>
+                            <a class="m" id="scm_update">SCM Update</a>
+                        </li>
+                        <li>
+                            <a class="m" id="playbook_run">Playbook Run</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="DashboardGraphs-filteringDropdowns">
+                <div class="DashboardGraphs-filterLabel">View</div>
+                <div class="DashboardGraphs-periodDropdown">
+                    <a id="status-dropdown" role="button"
+                    data-toggle="dropdown"
+                    data-target="#"
+                    href="/page.html"
+                    class="DashboardGraphs-filterDropdownText">
                         All <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
                     </a>
 
-                <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
-                    DashboardGraphs-filterDropdownItems--jobType" role="menu" aria-labelledby="type-dropdown">
-                    <li>
-                        <a class="m" id="all">All</a>
-                    </li>
-                    <li>
-                        <a class="m" id="inv_sync">Inventory Sync</a>
-                    </li>
-                    <li>
-                        <a class="m" id="scm_update">SCM Update</a>
-                    </li>
-                    <li>
-                        <a class="m" id="playbook_run">Playbook Run</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="DashboardGraphs-filterLabel">View</div>
-            <div class="DashboardGraphs-periodDropdown">
-                <a id="status-dropdown" role="button"
-                data-toggle="dropdown"
-                data-target="#"
-                href="/page.html"
-                class="DashboardGraphs-filterDropdownText">
-                    All <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
-                </a>
-
-                <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
-                    DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="status-dropdown">
-                    <li>
-                        <a class="o" id="both" >All</a>
-                    </li>
-                    <li>
-                        <a class="o" id="failed">Successful</a>
-                    </li>
-                    <li>
-                        <a class="o" id="successful">Failed</a>
-                    </li>
-                </ul>
+                    <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+                        DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="status-dropdown">
+                        <li>
+                            <a class="o" id="both" >All</a>
+                        </li>
+                        <li>
+                            <a class="o" id="failed">Successful</a>
+                        </li>
+                        <li>
+                            <a class="o" id="successful">Failed</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
