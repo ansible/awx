@@ -32,7 +32,6 @@
 import sys
 import os
 import time
-from copy import copy
 from ansible import constants as C
 try:
     from ansible.cache.base import BaseCacheModule
