@@ -468,9 +468,8 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     '''
     # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
     # good naming conventions
-    if source == 'azure':
-        source = 'windows_azure'
-
+    print "SOURCE IS {}".format(source)
+    source = source.replace('azure.py', 'windows_azure.py')
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group
     if not os.path.exists(source):
