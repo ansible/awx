@@ -47,6 +47,10 @@ table, tbody {
     text-align: right;
 }
 
+.List-tableHeader:not([ng-click]) {
+    cursor: default !important;
+}
+
 .List-tableHeaderSort {
     color: @list-header-icon;
 }
@@ -181,10 +185,6 @@ table, tbody {
 .List-actionHolder {
     justify-content: flex-end;
     display: flex;
-}
-
-.List-actions {
-    margin-top: -10px;
 }
 
 .List-auxAction + .List-actions {

@@ -4,21 +4,27 @@ export default ['$scope', '$stateParams', '$state', 'Rest', 'UserList', 'Invento
         var list = {};
         if (mode === 'users') {
             list = _.cloneDeep(UserList);
+            list.emptyListText = "Please add items to this list";
             list.actions.add.buttonContent = '&#43; ADD user';
         } else if (mode === 'inventories') {
             list = _.cloneDeep(InventoryList);
+            list.emptyListText = "List is empty";
             delete list.actions.add;
         } else if (mode === 'job_templates') {
             list = _.cloneDeep(JobTemplateList);
+            list.emptyListText = "List is empty";
             delete list.actions.add;
         } else if (mode === 'teams') {
             list = _.cloneDeep(TeamList);
+            list.emptyListText = "List is empty";
             delete list.actions.add;
         } else if (mode === 'projects') {
             list = _.cloneDeep(ProjectList);
+            list.emptyListText = "List is empty";
             delete list.actions.add;
         } else if (mode === 'admins') {
             list = _.cloneDeep(UserList);
+            list.emptyListText = "Please add items to this list";
             list.actions.add.buttonContent = '&#43; ADD administrator';
         }
         return list;

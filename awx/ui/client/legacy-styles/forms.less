@@ -463,7 +463,7 @@ input[type='radio']:checked:before {
 }
 
 .Form-formGroup--singleColumn {
-    width: 100%;
+    width: 100% !important;
     padding-right: 0px;
 }
 
@@ -473,10 +473,15 @@ input[type='radio']:checked:before {
     color: @default-interface-txt;
 }
 
+.Form-formGroup {
+    max-width: 33%;
+}
+
 @media only screen and (max-width: 650px) {
     .Form-formGroup {
         flex: 1 0 auto;
         margin-bottom: 25px;
+        max-width: 100%;
         width: 100%;
         padding-right: 50px;
     }
@@ -486,6 +491,7 @@ input[type='radio']:checked:before {
     .Form-formGroup {
         flex: 1 0 auto;
         margin-bottom: 25px;
+        max-width: 50%;
         width: 50%;
         padding-right: 50px;
     }
