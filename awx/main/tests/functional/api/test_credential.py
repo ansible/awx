@@ -22,6 +22,16 @@ def test_create_user_credential_via_credentials_list(post, get, alice):
     assert response.data['count'] == 1
 
 @pytest.mark.django_db
+def test_credential_validation_error_with_bad_user(post, alice):
+    response = post(reverse('api:credential_list'), {
+        'user': 'asdf',
+        'name': 'Some name',
+        'username': 'someusername'
+    }, alice)
+    assert response.status_code == 403
+    assert response.data['detail'] == 'You do not have permission to perform this action.'
+
+@pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list(post, get, alice):
     response = post(reverse('api:user_credentials_list', args=(alice.pk,)), {
         'user': alice.pk,
