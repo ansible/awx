@@ -1292,7 +1292,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             return value
         except yaml.YAMLError:
             pass
-        raise serializers.ValidationError('Must be valid JSON or YAML')
+        raise serializers.ValidationError('Must be valid JSON or YAML.')
 
     def validate(self, attrs):
         # TODO: Validate source, validate source_regions
@@ -2426,36 +2426,36 @@ class ScheduleSerializer(BaseSerializer):
         if not len(match_multiple_dtstart):
             raise serializers.ValidationError('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ')
         if len(match_multiple_dtstart) > 1:
-            raise serializers.ValidationError('Multiple DTSTART is not supported')
+            raise serializers.ValidationError('Multiple DTSTART is not supported.')
         if not len(match_multiple_rrule):
-            raise serializers.ValidationError('RRULE require in rrule')
+            raise serializers.ValidationError('RRULE require in rrule.')
         if len(match_multiple_rrule) > 1:
-            raise serializers.ValidationError('Multiple RRULE is not supported')
+            raise serializers.ValidationError('Multiple RRULE is not supported.')
         if 'interval' not in rrule_value.lower():
-            raise serializers.ValidationError('INTERVAL required in rrule')
+            raise serializers.ValidationError('INTERVAL required in rrule.')
         if 'tzid' in rrule_value.lower():
-            raise serializers.ValidationError('TZID is not supported')
+            raise serializers.ValidationError('TZID is not supported.')
         if 'secondly' in rrule_value.lower():
-            raise serializers.ValidationError('SECONDLY is not supported')
+            raise serializers.ValidationError('SECONDLY is not supported.')
         if re.match(multi_by_month_day, rrule_value):
-            raise serializers.ValidationError('Multiple BYMONTHDAYs not supported')
+            raise serializers.ValidationError('Multiple BYMONTHDAYs not supported.')
         if re.match(multi_by_month, rrule_value):
-            raise serializers.ValidationError('Multiple BYMONTHs not supported')
+            raise serializers.ValidationError('Multiple BYMONTHs not supported.')
         if re.match(by_day_with_numeric_prefix, rrule_value):
-            raise serializers.ValidationError("BYDAY with numeric prefix not supported")
+            raise serializers.ValidationError("BYDAY with numeric prefix not supported.")
         if 'byyearday' in rrule_value.lower():
-            raise serializers.ValidationError("BYYEARDAY not supported")
+            raise serializers.ValidationError("BYYEARDAY not supported.")
         if 'byweekno' in rrule_value.lower():
-            raise serializers.ValidationError("BYWEEKNO not supported")
+            raise serializers.ValidationError("BYWEEKNO not supported.")
         if match_count:
             count_val = match_count.groups()[0].strip().split("=")
             if int(count_val[1]) > 999:
-                raise serializers.ValidationError("COUNT > 999 is unsupported")
+                raise serializers.ValidationError("COUNT > 999 is unsupported.")
         try:
             rrule.rrulestr(rrule_value)
         except Exception:
             # TODO: Log
-            raise serializers.ValidationError("rrule parsing failed validation")
+            raise serializers.ValidationError("rrule parsing failed validation.")
         return value
 
 class ActivityStreamSerializer(BaseSerializer):

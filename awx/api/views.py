@@ -925,7 +925,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(Project, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete project")
+            raise PermissionDenied("Cannot delete project.")
         for pu in obj.project_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(ProjectDetail, self).destroy(request, *args, **kwargs)
@@ -1114,7 +1114,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied('You may not remove your own admin_role')
+            raise PermissionDenied('You may not remove your own admin_role.')
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -1210,13 +1210,13 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
                 if left is not None and right is not None and left != right:
                     changed[field] = (left, right)
             if changed:
-                raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
+                raise PermissionDenied('Cannot change %s.' % ', '.join(changed.keys()))
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied('Cannot delete user')
+            raise PermissionDenied('Cannot delete user.')
         return super(UserDetail, self).destroy(request, *args, **kwargs)
 
 class UserAccessList(ResourceAccessList):
@@ -1373,7 +1373,7 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         can_delete = request.user.can_access(self.model, 'delete', instance)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory script")
+            raise PermissionDenied("Cannot delete inventory script.")
         for inv_src in InventorySource.objects.filter(source_script=instance):
             inv_src.source_script = None
             inv_src.save()
@@ -1957,7 +1957,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(InventorySource, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory source")
+            raise PermissionDenied("Cannot delete inventory source.")
         for pu in obj.inventory_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
@@ -2099,7 +2099,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(JobTemplate, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete job template")
+            raise PermissionDenied("Cannot delete job template.")
         for pu in obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
@@ -2482,7 +2482,7 @@ class SystemJobTemplateList(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser:
-            raise PermissionDenied("Superuser privileges needed")
+            raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 class SystemJobTemplateDetail(RetrieveAPIView):
@@ -3212,7 +3212,7 @@ class SystemJobList(ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser:
-            raise PermissionDenied("Superuser privileges needed")
+            raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
