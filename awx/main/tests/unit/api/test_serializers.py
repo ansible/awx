@@ -6,6 +6,9 @@ import mock
 from awx.api.serializers import JobTemplateSerializer, JobSerializer, JobOptionsSerializer
 from awx.main.models import Label, Job
 
+#DRF
+from rest_framework import serializers
+
 @pytest.fixture
 def job_template(mocker):
     return mocker.MagicMock(pk=5)
@@ -49,7 +52,7 @@ class GetSummaryFieldsMixin:
         summary = self._mock_and_run(serializer_class, model_obj)
         self._assert(summary, summary_field_name)
         return summary
- 
+
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})
 @mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x,y: {})
 class TestJobTemplateSerializerGetRelated(GetRelatedMixin):
@@ -153,3 +156,14 @@ class TestJobOptionsSerializerGetSummaryFields(GetSummaryFieldsMixin):
     def test_labels_exists(self, mocker, job_template):
         self._test_get_summary_fields(JobOptionsSerializer, job_template, 'labels')
 
+class TestJobTemplateSerializerValidation(object):
+
+    good_extra_vars = ["{\"test\": \"keys\"}", "---\ntest: key"]
+    bad_extra_vars = ["{\"test\": \"keys\"", "---\ntest: [2"]
+    def test_validate_extra_vars(self):
+        serializer = JobTemplateSerializer()
+        for ev in self.good_extra_vars:
+            serializer.validate_extra_vars(ev)
+        for ev in self.bad_extra_vars:
+            with pytest.raises(serializers.ValidationError):
+                serializer.validate_extra_vars(ev)

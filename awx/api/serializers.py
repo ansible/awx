@@ -1773,6 +1773,21 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
+    def validate_extra_vars(self, value):
+        # extra_vars must be blank, a valid JSON or YAML dict, or ...
+        # FIXME: support key=value pairs.
+        try:
+            json.loads((value or '').strip() or '{}')
+            return value
+        except ValueError:
+            pass
+        try:
+            yaml.safe_load(value)
+            return value
+        except yaml.YAMLError:
+            pass
+        raise serializers.ValidationError('Must be valid JSON or YAML')
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
