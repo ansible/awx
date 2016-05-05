@@ -410,11 +410,20 @@ textarea.allowresize {
   .popover-title {
       padding-top: 5px;
       padding-bottom: 5px;
+      background-color: @default-interface-txt;
+      color: @default-bg;
+      font-weight: 600;
+      border-bottom: none;
   }
   .popover {
       z-index: 2000;
       min-width: 200px;
       max-width: 325px;
+      background-color: @default-interface-txt;
+      color: @default-bg; //white
+  }
+  .popover.right>.arrow:after {
+      border-right-color: @default-interface-txt;
   }
   .popover pre {
       white-space: pre-wrap;
@@ -568,7 +577,7 @@ dd {
 
 .help-link:hover,
 .ui-widget-content a.help-link:hover {
-  color: @black;
+  color: @default-icon;
   text-decoration: none;
 }
 
@@ -2041,7 +2050,6 @@ tr td button i {
 .form-control.ng-dirty.ng-invalid + .select2 .select2-selection, .form-control.ng-dirty.ng-invalid:focus + .select2 .select2-selection {
     box-shadow: none !important;
 }
-
 
 .error {
     opacity: 1;

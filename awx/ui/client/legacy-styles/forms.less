@@ -162,13 +162,12 @@
 .Form-subForm {
     width: 100%;
     border-left: 5px solid @default-border;
-    margin-left: -20px;
     padding-left: 15px;
     margin-bottom: 15px;
-
-    .Form-formGroup {
-        float: left;
-    }
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .Form-subForm--title {

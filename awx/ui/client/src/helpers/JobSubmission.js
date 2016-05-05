@@ -496,7 +496,7 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
           "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
           "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
           "JSON:<br />\n" +
-          "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+          "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
           "YAML:<br />\n" +
           "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n";
 

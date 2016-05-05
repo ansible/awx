@@ -248,7 +248,7 @@ export default
                     awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
                         "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
                         "JSON:<br />\n" +
-                        "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataTitle: 'Extra Variables',
