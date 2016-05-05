@@ -37,7 +37,7 @@ class TestApiV1RootView:
             'system_job_templates',
             'system_jobs',
             'schedules',
-            'notifiers',
+            'notification_templates',
             'notifications',
             'labels',
             'unified_job_templates',

@@ -20,7 +20,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
-from awx.main.models.notifications import Notifier
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
@@ -346,17 +346,28 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         return False
 
     @property
-    def notifiers(self):
-        base_notifiers = Notifier.objects
-        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors=self))
-        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success=self))
-        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any=self))
-        # Get Organization Notifiers
+    def notification_templates(self):
+        base_notification_templates = NotificationTemplate.objects
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors=self))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success=self))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(unifiedjobtemplate_notification_templates_for_any=self))
+        # Get Organization NotificationTemplates
         if self.organization is not None:
-            error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.organization)))
-            success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.organization)))
-            any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.organization)))
-        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
+            error_notification_templates = set(error_notification_templates +
+                                               list(base_notification_templates
+                                                    .filter(organization_notification_templates_for_errors=self.organization)))
+            success_notification_templates = set(success_notification_templates +
+                                                 list(base_notification_templates
+                                                      .filter(organization_notification_templates_for_success=self.organization)))
+            any_notification_templates = set(any_notification_templates +
+                                             list(base_notification_templates
+                                                  .filter(organization_notification_templates_for_any=self.organization)))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))

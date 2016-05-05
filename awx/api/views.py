@@ -140,7 +140,7 @@ class ApiV1RootView(APIView):
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
         data['roles'] = reverse('api:role_list')
-        data['notifiers'] = reverse('api:notifier_list')
+        data['notification_templates'] = reverse('api:notification_template_list')
         data['notifications'] = reverse('api:notification_list')
         data['labels'] = reverse('api:label_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
@@ -764,34 +764,34 @@ class OrganizationActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
 
-class OrganizationNotifiersList(SubListCreateAttachDetachAPIView):
+class OrganizationNotificationTemplatesList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Organization
-    relationship = 'notifiers'
+    relationship = 'notification_templates'
     parent_key = 'organization'
 
-class OrganizationNotifiersAnyList(SubListCreateAttachDetachAPIView):
+class OrganizationNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Organization
-    relationship = 'notifiers_any'
+    relationship = 'notification_templates_any'
 
-class OrganizationNotifiersErrorList(SubListCreateAttachDetachAPIView):
+class OrganizationNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Organization
-    relationship = 'notifiers_error'
+    relationship = 'notification_templates_error'
 
-class OrganizationNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Organization
-    relationship = 'notifiers_success'
+    relationship = 'notification_templates_success'
 
 class OrganizationAccessList(ResourceAccessList):
 
@@ -981,26 +981,26 @@ class ProjectActivityStreamList(SubListAPIView):
             return qs.filter(project=parent)
         return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
 
-class ProjectNotifiersAnyList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Project
-    relationship = 'notifiers_any'
+    relationship = 'notification_templates_any'
 
-class ProjectNotifiersErrorList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Project
-    relationship = 'notifiers_error'
+    relationship = 'notification_templates_error'
 
-class ProjectNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = Project
-    relationship = 'notifiers_success'
+    relationship = 'notification_templates_success'
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -1991,26 +1991,26 @@ class InventorySourceActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
 
-class InventorySourceNotifiersAnyList(SubListCreateAttachDetachAPIView):
+class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = InventorySource
-    relationship = 'notifiers_any'
+    relationship = 'notification_templates_any'
 
-class InventorySourceNotifiersErrorList(SubListCreateAttachDetachAPIView):
+class InventorySourceNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = InventorySource
-    relationship = 'notifiers_error'
+    relationship = 'notification_templates_error'
 
-class InventorySourceNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+class InventorySourceNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = InventorySource
-    relationship = 'notifiers_success'
+    relationship = 'notification_templates_success'
 
 class InventorySourceHostsList(SubListAPIView):
 
@@ -2270,26 +2270,26 @@ class JobTemplateActivityStreamList(SubListAPIView):
         # Okay, let it through.
         return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
 
-class JobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
-    relationship = 'notifiers_any'
+    relationship = 'notification_templates_any'
 
-class JobTemplateNotifiersErrorList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
-    relationship = 'notifiers_error'
+    relationship = 'notification_templates_error'
 
-class JobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
-    relationship = 'notifiers_success'
+    relationship = 'notification_templates_success'
 
 class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachLabelMixin):
 
@@ -2526,26 +2526,26 @@ class SystemJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'system_job_template'
 
-class SystemJobTemplateNotifiersAnyList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
-    relationship = 'notifiers_any'
+    relationship = 'notification_templates_any'
 
-class SystemJobTemplateNotifiersErrorList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
-    relationship = 'notifiers_error'
+    relationship = 'notification_templates_error'
 
-class SystemJobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
-    relationship = 'notifiers_success'
+    relationship = 'notification_templates_success'
 
 class JobList(ListCreateAPIView):
 
@@ -3335,22 +3335,22 @@ class AdHocCommandStdout(UnifiedJobStdout):
     model = AdHocCommand
     new_in_220 = True
 
-class NotifierList(ListCreateAPIView):
+class NotificationTemplateList(ListCreateAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     new_in_300 = True
 
-class NotifierDetail(RetrieveUpdateDestroyAPIView):
+class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
-    model = Notifier
-    serializer_class = NotifierSerializer
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
     new_in_300 = True
 
-class NotifierTest(GenericAPIView):
+class NotificationTemplateTest(GenericAPIView):
 
-    view_name = 'Notifier Test'
-    model = Notifier
+    view_name = 'NotificationTemplate Test'
+    model = NotificationTemplate
     serializer_class = EmptySerializer
     new_in_300 = True
 
@@ -3367,13 +3367,13 @@ class NotifierTest(GenericAPIView):
                             headers=headers,
                             status=status.HTTP_202_ACCEPTED)
 
-class NotifierNotificationList(SubListAPIView):
+class NotificationTemplateNotificationList(SubListAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
-    parent_model = Notifier
+    parent_model = NotificationTemplate
     relationship = 'notifications'
-    parent_key = 'notifier'
+    parent_key = 'notification_template'
 
 class NotificationList(ListAPIView):
 

@@ -800,10 +800,10 @@ class OrganizationSerializer(BaseSerializer):
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
             credentials = reverse('api:organization_credential_list',     args=(obj.pk,)),
             activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
-            notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:organization_notifiers_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:organization_notifiers_error_list', args=(obj.pk,)),
+            notification_templates = reverse('api:organization_notification_templates_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:organization_access_list',         args=(obj.pk,)),
         ))
         return res
@@ -885,9 +885,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
             schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:project_notifiers_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:project_notifiers_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:project_notifiers_error_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:project_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list', args=(obj.pk,)),
         ))
         if obj.organization:
@@ -1347,9 +1347,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
-            notifiers_any = reverse('api:inventory_source_notifiers_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:inventory_source_notifiers_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:inventory_source_notifiers_error_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:inventory_source_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:inventory_source_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:inventory_source_notification_templates_error_list', args=(obj.pk,)),
         ))
         if obj.inventory:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1730,9 +1730,9 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
             launch = reverse('api:job_template_launch', args=(obj.pk,)),
-            notifiers_any = reverse('api:job_template_notifiers_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:job_template_notifiers_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:job_template_notifiers_error_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:job_template_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:job_template_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:job_template_notification_templates_error_list', args=(obj.pk,)),
             access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
@@ -2028,9 +2028,9 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
             jobs = reverse('api:system_job_template_jobs_list', args=(obj.pk,)),
             schedules = reverse('api:system_job_template_schedules_list', args=(obj.pk,)),
             launch = reverse('api:system_job_template_launch', args=(obj.pk,)),
-            notifiers_any = reverse('api:system_job_template_notifiers_any_list', args=(obj.pk,)),
-            notifiers_success = reverse('api:system_job_template_notifiers_success_list', args=(obj.pk,)),
-            notifiers_error = reverse('api:system_job_template_notifiers_error_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
 
         ))
         return res
@@ -2286,10 +2286,10 @@ class JobLaunchSerializer(BaseSerializer):
         obj.credential = JT_credential
         return attrs
 
-class NotifierSerializer(BaseSerializer):
+class NotificationTemplateSerializer(BaseSerializer):
 
     class Meta:
-        model = Notifier
+        model = NotificationTemplate
         fields = ('*', 'organization', 'notification_type', 'notification_configuration')
 
     type_map = {"string": (str, unicode),
@@ -2300,7 +2300,7 @@ class NotifierSerializer(BaseSerializer):
                 "object": (dict, OrderedDict)}
 
     def to_representation(self, obj):
-        ret = super(NotifierSerializer, self).to_representation(obj)
+        ret = super(NotificationTemplateSerializer, self).to_representation(obj)
         for field in obj.notification_class.init_parameters:
             if field in ret['notification_configuration'] and \
                force_text(ret['notification_configuration'][field]).startswith('$encrypted$'):
@@ -2308,10 +2308,10 @@ class NotifierSerializer(BaseSerializer):
         return ret
 
     def get_related(self, obj):
-        res = super(NotifierSerializer, self).get_related(obj)
+        res = super(NotificationTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            test = reverse('api:notifier_test', args=(obj.pk,)),
-            notifications = reverse('api:notifier_notification_list', args=(obj.pk,)),
+            test = reverse('api:notification_template_test', args=(obj.pk,)),
+            notifications = reverse('api:notification_template_notification_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
@@ -2321,12 +2321,12 @@ class NotifierSerializer(BaseSerializer):
         return [{'id': x.id, 'status': x.status, 'created': x.created} for x in obj.notifications.all().order_by('-created')[:5]]
 
     def get_summary_fields(self, obj):
-        d = super(NotifierSerializer, self).get_summary_fields(obj)
+        d = super(NotificationTemplateSerializer, self).get_summary_fields(obj)
         d['recent_notifications'] = self._recent_notifications(obj)
         return d
 
     def validate(self, attrs):
-        notification_class = Notifier.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
+        notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         incorrect_type_fields = []
         if 'notification_configuration' not in attrs:
@@ -2362,13 +2362,13 @@ class NotificationSerializer(BaseSerializer):
 
     class Meta:
         model = Notification
-        fields = ('*', '-name', '-description', 'notifier', 'error', 'status', 'notifications_sent',
+        fields = ('*', '-name', '-description', 'notification_template', 'error', 'status', 'notifications_sent',
                   'notification_type', 'recipients', 'subject')
 
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)
         res.update(dict(
-            notifier = reverse('api:notifier_detail', args=(obj.notifier.pk,)),
+            notification_template = reverse('api:notification_template_detail', args=(obj.notification_template.pk,)),
         ))
         return res
 

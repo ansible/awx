@@ -293,12 +293,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         return kwargs   # Override if needed in subclass.
 
     @property
-    def notifiers(self):
+    def notification_templates(self):
         '''
-        Return notifiers relevant to this Unified Job Template
+        Return notification_templates relevant to this Unified Job Template
         '''
         # NOTE: Derived classes should implement
-        return Notifier.objects.none()
+        return NotificationTemplate.objects.none()
 
     def create_unified_job(self, **kwargs):
         '''

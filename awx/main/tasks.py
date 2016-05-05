@@ -77,7 +77,7 @@ def send_notifications(notification_list, job_id=None):
     for notification_id in notification_list:
         notification = Notification.objects.get(id=notification_id)
         try:
-            sent = notification.notifier.send(notification.subject, notification.body)
+            sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
             notification.notifications_sent = sent
         except Exception as e:
@@ -181,27 +181,27 @@ def handle_work_success(self, result, task_actual):
     if task_actual['type'] == 'project_update':
         instance = ProjectUpdate.objects.get(id=task_actual['id'])
         instance_name = instance.name
-        notifiers = instance.project.notifiers
+        notification_templates = instance.project.notification_templates
         friendly_name = "Project Update"
     elif task_actual['type'] == 'inventory_update':
         instance = InventoryUpdate.objects.get(id=task_actual['id'])
         instance_name = instance.name
-        notifiers = instance.inventory_source.notifiers
+        notification_templates = instance.inventory_source.notification_templates
         friendly_name = "Inventory Update"
     elif task_actual['type'] == 'job':
         instance = Job.objects.get(id=task_actual['id'])
         instance_name = instance.job_template.name
-        notifiers = instance.job_template.notifiers
+        notification_templates = instance.job_template.notification_templates
         friendly_name = "Job"
     elif task_actual['type'] == 'ad_hoc_command':
         instance = AdHocCommand.objects.get(id=task_actual['id'])
         instance_name = instance.module_name
-        notifiers = [] # TODO: Ad-hoc commands need to notify someone
+        notification_templates = [] # TODO: Ad-hoc commands need to notify someone
         friendly_name = "AdHoc Command"
     elif task_actual['type'] == 'system_job':
         instance = SystemJob.objects.get(id=task_actual['id'])
         instance_name = instance.system_job_template.name
-        notifiers = instance.system_job_template.notifiers
+        notification_templates = instance.system_job_template.notification_templates
         friendly_name = "System Job"
     else:
         return
@@ -212,7 +212,7 @@ def handle_work_success(self, result, task_actual):
                                                                                notification_body['url'])
     notification_body['friendly_name'] = friendly_name
     send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                              for n in set(notifiers.get('success', []) + notifiers.get('any', []))],
+                              for n in set(notification_templates.get('success', []) + notification_templates.get('any', []))],
                              job_id=task_actual['id'])
 
 @task(bind=True)
@@ -229,27 +229,27 @@ def handle_work_error(self, task_id, subtasks=None):
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
-                notifiers = instance.project.notifiers
+                notification_templates = instance.project.notification_templates
                 friendly_name = "Project Update"
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
-                notifiers = instance.inventory_source.notifiers
+                notification_templates = instance.inventory_source.notification_templates
                 friendly_name = "Inventory Update"
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
-                notifiers = instance.job_template.notifiers
+                notification_templates = instance.job_template.notification_templates
                 friendly_name = "Job"
             elif each_task['type'] == 'ad_hoc_command':
                 instance = AdHocCommand.objects.get(id=each_task['id'])
                 instance_name = instance.module_name
-                notifiers = []
+                notification_templates = []
                 friendly_name = "AdHoc Command"
             elif each_task['type'] == 'system_job':
                 instance = SystemJob.objects.get(id=each_task['id'])
                 instance_name = instance.system_job_template.name
-                notifiers = instance.system_job_template.notifiers
+                notification_templates = instance.system_job_template.notification_templates
                 friendly_name = "System Job"
             else:
                 # Unknown task type
@@ -274,7 +274,7 @@ def handle_work_error(self, task_id, subtasks=None):
                                                                                 notification_body['url'])
         notification_body['friendly_name'] = first_task_friendly_name
         send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in set(notifiers.get('error', []) + notifiers.get('any', []))],
+                                  for n in set(notification_templates.get('error', []) + notification_templates.get('any', []))],
                                  job_id=first_task_id)
 
 

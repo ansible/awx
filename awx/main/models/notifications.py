@@ -24,9 +24,9 @@ from jsonfield import JSONField
 
 logger = logging.getLogger('awx.main.models.notifications')
 
-__all__ = ['Notifier', 'Notification']
+__all__ = ['NotificationTemplate', 'Notification']
 
-class Notifier(CommonModel):
+class NotificationTemplate(CommonModel):
 
     NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                           ('slack', _('Slack'), SlackBackend),
@@ -46,7 +46,7 @@ class Notifier(CommonModel):
         blank=False,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='notifiers',
+        related_name='notification_templates',
     )
 
     notification_type = models.CharField(
@@ -57,7 +57,7 @@ class Notifier(CommonModel):
     notification_configuration = JSONField(blank=False)
 
     def get_absolute_url(self):
-        return reverse('api:notifier_detail', args=(self.pk,))
+        return reverse('api:notification_template_detail', args=(self.pk,))
 
     @property
     def notification_class(self):
@@ -79,7 +79,7 @@ class Notifier(CommonModel):
                 self.notification_configuration[field] = encrypted
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')
-        super(Notifier, self).save(*args, **kwargs)
+        super(NotificationTemplate, self).save(*args, **kwargs)
         if new_instance:
             update_fields = []
             for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password",
@@ -95,7 +95,7 @@ class Notifier(CommonModel):
         return self.notification_configuration[self.notification_class.recipient_parameter]
 
     def generate_notification(self, subject, message):
-        notification = Notification(notifier=self,
+        notification = Notification(notification_template=self,
                                     notification_type=self.notification_type,
                                     recipients=smart_str(self.recipients),
                                     subject=subject,
@@ -119,7 +119,7 @@ class Notifier(CommonModel):
 
 class Notification(CreatedModifiedModel):
     '''
-    A notification event emitted when a Notifier is run
+    A notification event emitted when a NotificationTemplate is run
     '''
 
     NOTIFICATION_STATE_CHOICES = [
@@ -132,8 +132,8 @@ class Notification(CreatedModifiedModel):
         app_label = 'main'
         ordering = ('pk',)
 
-    notifier = models.ForeignKey(
-        'Notifier',
+    notification_template = models.ForeignKey(
+        'NotificationTemplate',
         related_name='notifications',
         on_delete=models.CASCADE,
         editable=False
@@ -155,7 +155,7 @@ class Notification(CreatedModifiedModel):
     )
     notification_type = models.CharField(
         max_length = 32,
-        choices=Notifier.NOTIFICATION_TYPE_CHOICES,
+        choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES,
     )
     recipients = models.TextField(
         blank=True,

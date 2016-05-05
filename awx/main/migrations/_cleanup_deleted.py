@@ -71,7 +71,7 @@ def cleanup_deleted(apps, schema_editor):
             apps.get_model('main', 'Group'),
             apps.get_model('main', 'Host'),
             apps.get_model('main', 'Inventory'),
-            apps.get_model('main', 'Notifier'),
+            apps.get_model('main', 'NotificationTemplate'),
             apps.get_model('main', 'Organization'),
             apps.get_model('main', 'Permission'),
             apps.get_model('main', 'Schedule'),
