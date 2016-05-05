@@ -188,10 +188,10 @@ def label(organization):
 @pytest.fixture
 def notification_template(organization):
     return NotificationTemplate.objects.create(name='test-notification_template',
-                                   organization=organization,
-                                   notification_type="webhook",
-                                   notification_configuration=dict(url="http://localhost",
-                                                                   headers={"Test": "Header"}))
+                                               organization=organization,
+                                               notification_type="webhook",
+                                               notification_configuration=dict(url="http://localhost",
+                                                                               headers={"Test": "Header"}))
 @pytest.fixture
 def admin(user):
     return user('admin', True)
@@ -276,10 +276,10 @@ def notification_template_factory(organization):
             notification_template = NotificationTemplate.objects.get(name=name)
         except NotificationTemplate.DoesNotExist:
             notification_template = NotificationTemplate(name=name,
-                                organization=organization,
-                                notification_type="webhook",
-                                notification_configuration=dict(url="http://localhost",
-                                                                headers={"Test": "Header"}))
+                                                         organization=organization,
+                                                         notification_type="webhook",
+                                                         notification_configuration=dict(url="http://localhost",
+                                                                                         headers={"Test": "Header"}))
             notification_template.save()
         return notification_template
     return n
