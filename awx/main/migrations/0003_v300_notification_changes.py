@@ -42,7 +42,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default=b'', blank=True)),
-                ('active', models.BooleanField(default=True, editable=False)),
                 ('name', models.CharField(unique=True, max_length=512)),
                 ('notification_type', models.CharField(max_length=32, choices=[(b'email', 'Email'), (b'slack', 'Slack'), (b'twilio', 'Twilio'), (b'pagerduty', 'Pagerduty'), (b'hipchat', 'HipChat'), (b'webhook', 'Webhook'), (b'irc', 'IRC')])),
                 ('notification_configuration', jsonfield.fields.JSONField(default=dict)),

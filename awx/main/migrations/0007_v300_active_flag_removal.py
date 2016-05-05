@@ -32,10 +32,6 @@ class Migration(migrations.Migration):
             name='active',
         ),
         migrations.RemoveField(
-            model_name='notifier',
-            name='active',
-        ),
-        migrations.RemoveField(
             model_name='organization',
             name='active',
         ),
