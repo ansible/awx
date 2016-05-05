@@ -53,7 +53,7 @@ class ActivityStream(models.Model):
     ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)
     schedule = models.ManyToManyField("Schedule", blank=True)
     custom_inventory_script = models.ManyToManyField("CustomInventoryScript", blank=True)
-    notifier = models.ManyToManyField("Notifier", blank=True)
+    notification_template = models.ManyToManyField("NotificationTemplate", blank=True)
     notification = models.ManyToManyField("Notification", blank=True)
     label = models.ManyToManyField("Label", blank=True)
     role = models.ManyToManyField("Role", blank=True)

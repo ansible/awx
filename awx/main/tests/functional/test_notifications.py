@@ -1,15 +1,15 @@
 import mock
 import pytest
 
-from awx.main.models.notifications import Notifier
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.models.inventory import Inventory, Group
 from awx.main.models.jobs import JobTemplate
 
 from django.core.urlresolvers import reverse
 
 @pytest.mark.django_db
-def test_get_notifier_list(get, user, notifier):
-    url = reverse('api:notifier_list')
+def test_get_notification_template_list(get, user, notification_template):
+    url = reverse('api:notification_template_list')
     response = get(url, user('admin', True))
     assert response.status_code == 200
     assert len(response.data['results']) == 1
@@ -17,7 +17,7 @@ def test_get_notifier_list(get, user, notifier):
 @pytest.mark.django_db
 def test_basic_parameterization(get, post, user, organization):
     u = user('admin-poster', True)
-    url = reverse('api:notifier_list')
+    url = reverse('api:notification_template_list')
     response = post(url,
                     dict(name="test-webhook",
                          description="test webhook",
@@ -27,7 +27,7 @@ def test_basic_parameterization(get, post, user, organization):
                                                          headers={"Test": "Header"})),
                     u)
     assert response.status_code == 201
-    url = reverse('api:notifier_detail', args=(response.data['id'],))
+    url = reverse('api:notification_template_detail', args=(response.data['id'],))
     response = get(url, u)
     assert 'related' in response.data
     assert 'organization' in response.data['related']
@@ -44,7 +44,7 @@ def test_encrypted_subfields(get, post, user, organization):
         assert self.account_token == "shouldhide"
         return 1
     u = user('admin-poster', True)
-    url = reverse('api:notifier_list')
+    url = reverse('api:notification_template_list')
     response = post(url,
                     dict(name="test-twilio",
                          description="test twilio",
@@ -56,18 +56,18 @@ def test_encrypted_subfields(get, post, user, organization):
                                                          to_numbers=["9998887777"])),
                     u)
     assert response.status_code == 201
-    notifier_actual = Notifier.objects.get(id=response.data['id'])
-    url = reverse('api:notifier_detail', args=(response.data['id'],))
+    notification_template_actual = NotificationTemplate.objects.get(id=response.data['id'])
+    url = reverse('api:notification_template_detail', args=(response.data['id'],))
     response = get(url, u)
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
-    with mock.patch.object(notifier_actual.notification_class, "send_messages", assert_send):
-        notifier_actual.send("Test", {'body': "Test"})
+    with mock.patch.object(notification_template_actual.notification_class, "send_messages", assert_send):
+        notification_template_actual.send("Test", {'body': "Test"})
 
 @pytest.mark.django_db
-def test_inherited_notifiers(get, post, user, organization, project):
+def test_inherited_notification_templates(get, post, user, organization, project):
     u = user('admin-poster', True)
-    url = reverse('api:notifier_list')
-    notifiers = []
+    url = reverse('api:notification_template_list')
+    notification_templates = []
     for nfiers in xrange(3):
         response = post(url,
                         dict(name="test-webhook-{}".format(nfiers),
@@ -78,29 +78,29 @@ def test_inherited_notifiers(get, post, user, organization, project):
                                                              headers={"Test": "Header"})),
                         u)
         assert response.status_code == 201
-        notifiers.append(response.data['id'])
+        notification_templates.append(response.data['id'])
     i = Inventory.objects.create(name='test', organization=organization)
     i.save()
     g = Group.objects.create(name='test', inventory=i)
     g.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
-    url = reverse('api:organization_notifiers_any_list', args=(organization.id,))
-    response = post(url, dict(id=notifiers[0]), u)
+    url = reverse('api:organization_notification_templates_any_list', args=(organization.id,))
+    response = post(url, dict(id=notification_templates[0]), u)
     assert response.status_code == 204
-    url = reverse('api:project_notifiers_any_list', args=(project.id,))
-    response = post(url, dict(id=notifiers[1]), u)
+    url = reverse('api:project_notification_templates_any_list', args=(project.id,))
+    response = post(url, dict(id=notification_templates[1]), u)
     assert response.status_code == 204
-    url = reverse('api:job_template_notifiers_any_list', args=(jt.id,))
-    response = post(url, dict(id=notifiers[2]), u)
+    url = reverse('api:job_template_notification_templates_any_list', args=(jt.id,))
+    response = post(url, dict(id=notification_templates[2]), u)
     assert response.status_code == 204
-    assert len(jt.notifiers['any']) == 3
-    assert len(project.notifiers['any']) == 2
-    assert len(g.inventory_source.notifiers['any']) == 1
+    assert len(jt.notification_templates['any']) == 3
+    assert len(project.notification_templates['any']) == 2
+    assert len(g.inventory_source.notification_templates['any']) == 1
 
 @pytest.mark.django_db
-def test_notifier_merging(get, post, user, organization, project, notifier):
+def test_notification_template_merging(get, post, user, organization, project, notification_template):
     user('admin-poster', True)
-    organization.notifiers_any.add(notifier)
-    project.notifiers_any.add(notifier)
-    assert len(project.notifiers['any']) == 1
+    organization.notification_templates_any.add(notification_template)
+    project.notification_templates_any.add(notification_template)
+    assert len(project.notification_templates['any']) == 1

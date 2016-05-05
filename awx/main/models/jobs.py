@@ -23,7 +23,7 @@ from jsonfield import JSONField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.notifications import Notifier
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
@@ -441,20 +441,20 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         return self.can_start_without_user_input()
 
     @property
-    def notifiers(self):
-        # Return all notifiers defined on the Job Template, on the Project, and on the Organization for each trigger type
+    def notification_templates(self):
+        # Return all notification_templates defined on the Job Template, on the Project, and on the Organization for each trigger type
         # TODO: Currently there is no org fk on project so this will need to be added once that is
         #       available after the rbac pr
-        base_notifiers = Notifier.objects
-        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self, self.project]))
-        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self, self.project]))
-        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self, self.project]))
-        # Get Organization Notifiers
+        base_notification_templates = NotificationTemplate.objects
+        error_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
+        success_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
+        any_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_any__in=[self, self.project]))
+        # Get Organization NotificationTemplates
         if self.project is not None and self.project.organization is not None:
-            error_notifiers = set(error_notifiers + list(base_notifiers.filter(organization_notifiers_for_errors=self.project.organization)))
-            success_notifiers = set(success_notifiers + list(base_notifiers.filter(organization_notifiers_for_success=self.project.organization)))
-            any_notifiers = set(any_notifiers + list(base_notifiers.filter(organization_notifiers_for_any=self.project.organization)))
-        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_errors=self.project.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.project.organization)))
+            any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
+        return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
 class Job(UnifiedJob, JobOptions):
     '''
@@ -1204,13 +1204,18 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         return False
 
     @property
-    def notifiers(self):
-        # TODO: Go through RBAC instead of calling all(). Need to account for orphaned Notifiers
-        base_notifiers = Notifier.objects.all()
-        error_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_errors__in=[self]))
-        success_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_success__in=[self]))
-        any_notifiers = list(base_notifiers.filter(unifiedjobtemplate_notifiers_for_any__in=[self]))
-        return dict(error=list(error_notifiers), success=list(success_notifiers), any=list(any_notifiers))
+    def notification_templates(self):
+        # TODO: Go through RBAC instead of calling all(). Need to account for orphaned NotificationTemplates
+        base_notification_templates = NotificationTemplate.objects.all()
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
 
 class SystemJob(UnifiedJob, SystemJobOptions):

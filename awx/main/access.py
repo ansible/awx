@@ -1204,11 +1204,11 @@ class ScheduleAccess(BaseAccess):
         else:
             return False
 
-class NotifierAccess(BaseAccess):
+class NotificationTemplateAccess(BaseAccess):
     '''
-    I can see/use a notifier if I have permission to
+    I can see/use a notification_template if I have permission to
     '''
-    model = Notifier
+    model = NotificationTemplate
 
     def get_queryset(self):
         qs = self.model.objects.all()
@@ -1257,13 +1257,13 @@ class NotificationAccess(BaseAccess):
         qs = self.model.objects.all()
         if self.user.is_superuser:
             return qs
-        return self.model.objects.filter(notifier__organization__in=Organization.accessible_objects(self.user, 'admin_role'))
+        return self.model.objects.filter(notification_template__organization__in=Organization.accessible_objects(self.user, 'admin_role'))
 
     def can_read(self, obj):
-        return self.user.can_access(Notifier, 'read', obj.notifier)
+        return self.user.can_access(NotificationTemplate, 'read', obj.notification_template)
 
     def can_delete(self, obj):
-        return self.user.can_access(Notifier, 'delete', obj.notifier)
+        return self.user.can_access(NotificationTemplate, 'delete', obj.notification_template)
 
 class LabelAccess(BaseAccess):
     '''
@@ -1483,6 +1483,6 @@ register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
 register_access(TowerSettings, TowerSettingsAccess)
 register_access(Role, RoleAccess)
-register_access(Notifier, NotifierAccess)
+register_access(NotificationTemplate, NotificationTemplateAccess)
 register_access(Notification, NotificationAccess)
 register_access(Label, LabelAccess)

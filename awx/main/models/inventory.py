@@ -25,7 +25,7 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
-from awx.main.models.notifications import Notifier
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import _inventory_updates
 from awx.main.conf import tower_settings
 
@@ -1183,12 +1183,17 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         return False
 
     @property
-    def notifiers(self):
-        base_notifiers = Notifier.objects
-        error_notifiers = list(base_notifiers.filter(organization_notifiers_for_errors=self.inventory.organization))
-        success_notifiers = list(base_notifiers.filter(organization_notifiers_for_success=self.inventory.organization))
-        any_notifiers = list(base_notifiers.filter(organization_notifiers_for_any=self.inventory.organization))
-        return dict(error=error_notifiers, success=success_notifiers, any=any_notifiers)
+    def notification_templates(self):
+        base_notification_templates = NotificationTemplate.objects
+        error_notification_templates = list(base_notification_templates
+                                            .filter(organization_notification_templates_for_errors=self.inventory.organization))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(organization_notification_templates_for_success=self.inventory.organization))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(organization_notification_templates_for_any=self.inventory.organization))
+        return dict(error=error_notification_templates,
+                    success=success_notification_templates,
+                    any=any_notification_templates)
 
     def clean_source(self):
         source = self.source

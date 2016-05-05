@@ -36,7 +36,7 @@ from awx.main.models.organization import (
     Team,
 )
 
-from awx.main.models.notifications import Notifier
+from awx.main.models.notifications import NotificationTemplate
 
 '''
 Disable all django model signals.
@@ -186,8 +186,8 @@ def label(organization):
     return organization.labels.create(name="test-label", description="test-label-desc")
 
 @pytest.fixture
-def notifier(organization):
-    return Notifier.objects.create(name='test-notifier',
+def notification_template(organization):
+    return NotificationTemplate.objects.create(name='test-notification_template',
                                    organization=organization,
                                    notification_type="webhook",
                                    notification_configuration=dict(url="http://localhost",
@@ -270,18 +270,18 @@ def permissions():
     }
 
 @pytest.fixture
-def notifier_factory(organization):
-    def n(name="test-notifier"):
+def notification_template_factory(organization):
+    def n(name="test-notification_template"):
         try:
-            notifier = Notifier.objects.get(name=name)
-        except Notifier.DoesNotExist:
-            notifier = Notifier(name=name,
+            notification_template = NotificationTemplate.objects.get(name=name)
+        except NotificationTemplate.DoesNotExist:
+            notification_template = NotificationTemplate(name=name,
                                 organization=organization,
                                 notification_type="webhook",
                                 notification_configuration=dict(url="http://localhost",
                                                                 headers={"Test": "Header"}))
-            notifier.save()
-        return notifier
+            notification_template.save()
+        return notification_template
     return n
 
 @pytest.fixture
