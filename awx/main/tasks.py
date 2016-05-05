@@ -208,7 +208,7 @@ def handle_work_success(self, result, task_actual):
     notification_body = instance.notification_data()
     notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
                                                                                task_actual['id'],
-                                                                               instance_name,
+                                                                               smart_text(instance_name),
                                                                                notification_body['url'])
     notification_body['friendly_name'] = friendly_name
     send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
@@ -246,8 +246,8 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance_name = instance.module_name
                 notifiers = []
                 friendly_name = "AdHoc Command"
-            elif task_actual['type'] == 'system_job':
-                instance = SystemJob.objects.get(id=task_actual['id'])
+            elif each_task['type'] == 'system_job':
+                instance = SystemJob.objects.get(id=each_task['id'])
                 instance_name = instance.system_job_template.name
                 notifiers = instance.system_job_template.notifiers
                 friendly_name = "System Job"
@@ -270,7 +270,7 @@ def handle_work_error(self, task_id, subtasks=None):
         notification_body = first_task.notification_data()
         notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
                                                                                 first_task_id,
-                                                                                first_task_name,
+                                                                                smart_text(first_task_name),
                                                                                 notification_body['url'])
         notification_body['friendly_name'] = first_task_friendly_name
         send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
@@ -558,7 +558,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if tower_settings.AWX_PROOT_ENABLED:
+                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
@@ -1614,6 +1614,9 @@ class RunAdHocCommand(BaseTask):
             args.append('--forks=%d' % ad_hoc_command.forks)
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
+
+        if ad_hoc_command.extra_vars_dict:
+            args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])

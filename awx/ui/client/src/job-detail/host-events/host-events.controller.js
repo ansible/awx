@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
- export default 
+ export default
  	['$stateParams', '$scope', '$rootScope', '$state', 'Wait',
  	 'JobDetailService', 'CreateSelect2', 'hosts',
  	function($stateParams, $scope, $rootScope, $state, Wait,
@@ -18,8 +18,8 @@
 
  	$scope.search = function(){
  		Wait('start');
- 		if ($scope.searchStr == undefined){
- 			return
+ 		if ($scope.searchStr === undefined){
+ 			return;
  		}
  		//http://docs.ansible.com/ansible-tower/latest/html/towerapi/intro.html#filtering
  		// SELECT WHERE host_name LIKE str OR WHERE play LIKE str OR WHERE task LIKE str AND host_name NOT ""
@@ -32,7 +32,7 @@
 	 		page_size: $scope.pageSize})
 	 			.success(function(res){
 	 				$scope.results = res.results;
-	 				Wait('stop')
+	 				Wait('stop');
 	 	});
  	};
 
@@ -41,7 +41,7 @@
  	var filter = function(filter){
  		Wait('start');
 
- 		if (filter == 'all'){
+ 		if (filter === 'all'){
 	 		return JobDetailService.getRelatedJobEvents($stateParams.id, {
 	 			host_name: $stateParams.hostName,
 	 			page_size: $scope.pageSize})
@@ -51,59 +51,58 @@
 	 		});
  		}
  		// handle runner cases
- 		if (filter == 'skipped'){
+ 		if (filter === 'skipped'){
  			return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				host_name: $stateParams.hostName, 
+ 				host_name: $stateParams.hostName,
  				event: 'runner_on_skipped'})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');
  				});
  		}
- 		if (filter == 'unreachable'){
+ 		if (filter === 'unreachable'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				host_name: $stateParams.hostName, 
+ 				host_name: $stateParams.hostName,
  				event: 'runner_on_unreachable'})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');
  				});
  		}
- 		if (filter == 'ok'){
+ 		if (filter === 'ok'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				host_name: $stateParams.hostName, 
+ 				host_name: $stateParams.hostName,
  				or__field__event: 'runner_on_ok',
- 				or__field__event: 'runner_on_ok_async',  
  				changed: false
  				})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');
- 				}); 			
+ 				});
  		}
   		// handle convience properties .changed .failed
- 		if (filter == 'changed'){
+ 		if (filter === 'changed'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				host_name: $stateParams.hostName, 
+ 				host_name: $stateParams.hostName,
  				changed: true})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');
- 				}); 			
+ 				});
  		}
- 		if (filter == 'failed'){
+ 		if (filter === 'failed'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				host_name: $stateParams.hostName,
  				failed: true})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');
- 				}); 			
- 		} 		
+ 				});
+ 		}
  	};
 
  	// watch select2 for changes
- 	$('.HostEvents-select').on("select2:select", function (e) {
+ 	$('.HostEvents-select').on("select2:select", function () {
  	 	filter($('.HostEvents-select').val());
  	});
 
@@ -121,12 +120,12 @@
 	 				$scope.results = res.results;
 	 				Wait('stop');
 	 				$('#HostEvents').modal('show');
-	 		});;
+	 		});
  		}
  		else{
  			$scope.results = hosts.data.results;
 	 		$('#HostEvents').modal('show');
- 		}	
+ 		}
  	};
 
 

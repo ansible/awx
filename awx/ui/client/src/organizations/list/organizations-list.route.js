@@ -22,10 +22,5 @@ export default {
             return "setup";
         },
         label: "ORGANIZATIONS"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

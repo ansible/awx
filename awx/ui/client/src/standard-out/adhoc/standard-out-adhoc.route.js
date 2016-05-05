@@ -19,9 +19,6 @@ export default {
         jobType: 'ad_hoc_commands'
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
             if (!$rootScope.adhoc_event_socket) {
                 $rootScope.adhoc_event_socket = Socket({

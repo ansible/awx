@@ -14,5 +14,5 @@ export default ['Rest', 'GetBasePath', function(Rest, GetBasePath){
             Rest.setUrl(url);
             return Rest.destroy();
         }
-    }
-}]
+    };
+}];

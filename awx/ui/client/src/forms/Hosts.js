@@ -15,12 +15,23 @@ export default
         .value('HostForm', {
 
             addTitle: 'Create Host',
-            editTitle: '{{ name }}',
+            editTitle: '{{ host.name }}',
             name: 'host',
             well: false,
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
-
+            iterator: 'host',
+            headerFields:{
+                enabled: {
+                    class: 'Form-header-field',
+                    ngClick: 'toggleHostEnabled(host)',
+                    type: 'toggle',
+                    editRequired: false,
+                    awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
+                    "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
+                    dataTitle: 'Host Enabled',
+                }
+            },
             fields: {
                 name: {
                     label: 'Host Name',
@@ -42,19 +53,6 @@ export default
                     type: 'text',
                     addRequired: false,
                     editRequired: false
-                },
-                enabled: {
-                    label: 'Enabled?',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequired: false,
-                    "default": true,
-                    awPopOver: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
-                        "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
-                    dataTitle: 'Host Enabled',
-                    dataPlacement: 'right',
-                    dataContainer: 'body',
-                    ngDisabled: 'has_inventory_sources == true'
                 },
                 variables: {
                     label: 'Variables',
@@ -82,17 +80,15 @@ export default
                 }
             },
 
-            buttons: { //for now always generates <button> tags
-               /*
+            buttons: {
                 save: {
-                    ngClick: 'formSave()', //$scope.function to call on click, optional
-                    ngDisabled: true //Disable when $pristine or $invalid, optional
+                    ngClick: 'formSave()',
+                    ngDisabled: true
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
+                cancel: {
+                    ngClick: 'formCancel()',
+                    ngDisabled: true 
                 }
-                */
             },
 
             related: {}

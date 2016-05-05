@@ -20,14 +20,12 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('ShowSchedulerModal', ['$rootScope', 'Wait', 'CreateDialog', function($rootScope, Wait, CreateDialog) {
+        .factory('ShowSchedulerModal', ['$rootScope', function($rootScope) {
             return function(params) {
                 // Set modal dimensions based on viewport width
 
                 var buttons,
-                    scope = params.scope,
-                    callback = params.callback,
-                    title = params.title;
+                    scope = params.scope;
 
                 buttons = [{
                     "label": "Cancel",
@@ -209,24 +207,47 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
-            'SchedulePost', '$state',
-        function($location, $stateParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost, $state) {
+        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit',
+            'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
+            'SchedulePost', '$state', 'Rest', 'ProcessErrors',
+        function($location, $stateParams, SchedulerInit, ShowSchedulerModal,
+            Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
+            ProcessErrors) {
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
-                    url =  GetBasePath(base),
+                    url,
                     scheduler;
+
                 if (!Empty($stateParams.template_id)) {
-                    url += $stateParams.template_id + '/schedules/';
+                    url = GetBasePath(base) + $stateParams.template_id + '/schedules/';
                 }
-                else if (!Empty($stateParams.id) && base != 'system_job_templates') {
-                    url += $stateParams.id + '/schedules/';
+                else if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
-                else if (base == 'system_job_templates') {
-                    url += $stateParams.id + '/schedules/';
-                    if($stateParams.id  == 4){
+                else if(base === "inventory"){
+                    if (!params.url){
+                        url = GetBasePath('groups') + $stateParams.id + '/';
+                        Rest.setUrl(url);
+                        Rest.get().
+                        then(function (data) {
+                                url = data.data.related.inventory_source + 'schedules/';
+                            }).catch(function (response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get inventory group info. GET returned status: ' +
+                                response.status
+                            });
+                        });
+                    }
+                    else {
+                        url = params.url;
+                    }
+                }
+                else if (base === 'system_job_templates') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
+                    if($stateParams.id  === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -304,7 +325,9 @@ export default
             };
         }])
 
-        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait', function(Rest, ProcessErrors, RRuleToAPI, Wait) {
+        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait',
+            'ToJSON',
+            function(Rest, ProcessErrors, RRuleToAPI, Wait, ToJSON) {
             return function(params) {
                 var scope = params.scope,
                     url = params.url,
@@ -335,6 +358,10 @@ export default
                     }
                     else if (scope.serializedExtraVars){
                         schedule.extra_data = scope.serializedExtraVars;
+                    }
+                    else if(scope.extraVars){
+                        schedule.extra_data = ToJSON(scope.parseType,
+                            scope.extraVars, false);
                     }
                     Rest.setUrl(url);
                     if (mode === 'add') {
@@ -530,11 +557,10 @@ export default
             };
         }])
 
-
-        .factory('SchedulesControllerInit', ['$state', '$location', 'ToggleSchedule',
-        'DeleteSchedule', 'EditSchedule', 'AddSchedule',
-            function($state, $location, ToggleSchedule, DeleteSchedule, EditSchedule,
-                AddSchedule) {
+        .factory('SchedulesControllerInit', ['$state', '$location',
+        'ToggleSchedule', 'DeleteSchedule', 'ParamPass',
+            function($state, $location, ToggleSchedule, DeleteSchedule,
+                ParamPass) {
             return function(params) {
                 var scope = params.scope,
                     parent_scope = params.parent_scope,
@@ -570,7 +596,8 @@ export default
 
                 scope.addSchedule = function() {
                     var base = $state.current.name.split(".")[0];
-                    $state.go(base + ".add", {passedScope: scope});
+                    ParamPass.set(scope.schedule_url);
+                    $state.go(base + ".add");
                 };
 
                 scope.refreshSchedules = function() {

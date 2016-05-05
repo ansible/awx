@@ -13,5 +13,5 @@ export default
  		.service('jobTemplateCopyService', service)
  		.controller('jobTemplateCopyController', controller)
  		.run(['$stateExtender', function($stateExtender) {
- 			$stateExtender.addState(route)
+ 			$stateExtender.addState(route);
  		}]);

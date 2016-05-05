@@ -12,20 +12,14 @@ var hostEventModal = {
  	controller: 'HostEventController',
  	templateUrl: templateUrl('job-detail/host-event/host-event-modal'),
  	resolve: {
- 		features: ['FeaturesService', function(FeaturesService){
- 			return FeaturesService.get();
- 		}],
-        event: ['JobDetailService','$stateParams', 'moment', function(JobDetailService, $stateParams, moment) {
-            return JobDetailService.getRelatedJobEvents($stateParams.id, {
- 				id: $stateParams.eventId,
- 			}).then(function(res){ 
- 				res.data.results[0].created = moment(res.data.results[0].created).format('MMMM Do YYYY, h:mm:ss a');
- 				return res.data.results[0];
- 			});
+        event: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
+             return JobDetailService.getRelatedJobEvents($stateParams.id, {
+ 				id: $stateParams.eventId
+ 			}).success(function(res){ return res.results[0];});
          }]
  	},
- 	onExit: function($state){
- 		// close the modal
+ 	onExit: function(){
+	    // close the modal
 	    // using an onExit event to handle cases where the user navs away using the url bar / back and not modal "X"
 	    $('#HostEvent').modal('hide');
 	    // hacky way to handle user browsing away via URL bar
@@ -55,4 +49,4 @@ var hostEventModal = {
  	templateUrl: templateUrl('job-detail/host-event/host-event-stdout')
  };
 
- export {hostEventDetails, hostEventJson, hostEventStdout, hostEventModal}
+ export {hostEventDetails, hostEventJson, hostEventStdout, hostEventModal};

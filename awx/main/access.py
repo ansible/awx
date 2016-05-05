@@ -110,6 +110,18 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
+def check_superuser(func):
+    '''
+    check_superuser is a decorator that provides a simple short circuit
+    for access checks. If the User object is a superuser, return True, otherwise
+    execute the logic of the can_access method.
+    '''
+    def wrapper(self, *args, **kwargs):
+        if self.user.is_superuser:
+            return True
+        return func(self, *args, **kwargs)
+    return wrapper
+
 class BaseAccess(object):
     '''
     Base class for checking user access to a given model.  Subclasses should
@@ -242,10 +254,8 @@ class UserAccess(BaseAccess):
         # that a user should be able to edit for themselves.
         return bool(self.user == obj or self.can_admin(obj, data))
 
+    @check_superuser
     def can_admin(self, obj, data):
-        # Admin implies changing all user fields.
-        if self.user.is_superuser:
-            return True
         return Organization.objects.filter(member_role__members=obj, admin_role__members=self.user).exists()
 
     def can_delete(self, obj):
@@ -277,9 +287,8 @@ class OrganizationAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by').all()
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -312,27 +321,25 @@ class InventoryAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by', 'organization').all()
 
+    @check_superuser
     def can_read(self, obj):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.read_role
 
+    @check_superuser
     def can_use(self, obj):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.use_role
 
+    @check_superuser
     def can_add(self, data):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        if self.user.is_superuser:
-            return True
 
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         return self.user in org.admin_role
 
+    @check_superuser
     def can_change(self, obj, data):
         # Verify that the user has access to the new organization if moving an
         # inventory to a new organization.
@@ -342,8 +349,9 @@ class InventoryAccess(BaseAccess):
             if self.user not in org.admin_role:
                 return False
         # Otherwise, just check for write permission.
-        return self.user in obj.admin_role
+        return self.user in obj.update_role
 
+    @check_superuser
     def can_admin(self, obj, data):
         # Verify that the user has access to the new organization if moving an
         # inventory to a new organization.
@@ -371,12 +379,16 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         inv_qs = Inventory.accessible_objects(self.user, 'read_role')
-        group_qs = Group.accessible_objects(self.user, 'read_role')
-        qs = (self.model.objects.filter(inventory=inv_qs) | self.model.objects.filter(groups=group_qs)).distinct()
-        #qs = qs.select_related('created_by', 'modified_by', 'inventory',
-        #                       'last_job__job_template',
-        #                       'last_job_host_summary__job')
-        #return qs.prefetch_related('groups').all()
+        group_qs = Group.accessible_objects(self.user, 'read_role').exclude(inventory__in=inv_qs)
+        if group_qs.count():
+            qs = self.model.objects.filter(Q(inventory__in=inv_qs) | Q(groups__in=group_qs))
+        else:
+            qs = self.model.objects.filter(inventory__in=inv_qs)
+
+        qs = qs.select_related('created_by', 'modified_by', 'inventory',
+                               'last_job__job_template',
+                               'last_job_host_summary__job')
+        qs =qs.prefetch_related('groups').all()
         return qs
 
     def can_read(self, obj):
@@ -389,7 +401,7 @@ class HostAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        if self.user not in inventory.admin_role:
+        if self.user not in inventory.update_role:
             return False
 
         # Check to see if we have enough licenses
@@ -403,7 +415,7 @@ class HostAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a host')
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
-        return obj and self.user in obj.inventory.admin_role
+        return obj and self.user in obj.inventory.update_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -440,7 +452,7 @@ class GroupAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        return self.user in inventory.admin_role
+        return self.user in inventory.update_role
 
     def can_change(self, obj, data):
         # Prevent moving a group to a different inventory.
@@ -449,7 +461,7 @@ class GroupAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a group')
         # Checks for admin or change permission on inventory, controls whether
         # the user can attach subgroups or edit variable data.
-        return obj and self.user in obj.inventory.admin_role
+        return obj and self.user in obj.inventory.update_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -483,7 +495,7 @@ class InventorySourceAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects.all()
         qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
-        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        inventory_ids = self.user.get_queryset(Inventory)
         return qs.filter(Q(inventory_id__in=inventory_ids) |
                          Q(group__inventory_id__in=inventory_ids))
 
@@ -502,7 +514,7 @@ class InventorySourceAccess(BaseAccess):
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.group:
-            return self.user in obj.group.admin_role
+            return self.user in obj.group.update_role
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
         else:
@@ -555,21 +567,36 @@ class CredentialAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by').all()
 
+    @check_superuser
     def can_read(self, obj):
         return self.user in obj.read_role
 
     def can_add(self, data):
-        # Access enforced in our view where we have context enough to make a decision
-        return True
-
-    def can_use(self, obj):
         if self.user.is_superuser:
             return True
+        user_pk = get_pk_from_dict(data, 'user')
+        if user_pk:
+            user_obj = get_object_or_400(User, pk=user_pk)
+            return check_user_access(self.user, User, 'change', user_obj, None)
+        team_pk = get_pk_from_dict(data, 'team')
+        if team_pk:
+            team_obj = get_object_or_400(Team, pk=team_pk)
+            return check_user_access(self.user, Team, 'change', team_obj, None)
+        organization_pk = get_pk_from_dict(data, 'organization')
+        if organization_pk:
+            organization_obj = get_object_or_400(Organization, pk=organization_pk)
+            return check_user_access(self.user, Organization, 'change', organization_obj, None)
+        return False
+
+
+    @check_superuser
+    def can_use(self, obj):
         return self.user in obj.use_role
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
+        if not self.can_add(data):
+            return False
         return self.user in obj.owner_role
 
     def can_delete(self, obj):
@@ -596,14 +623,12 @@ class TeamAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by', 'organization').all()
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
+        org_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=org_pk)
+        if self.user in org.admin_role:
             return True
-        else:
-            org_pk = get_pk_from_dict(data, 'organization')
-            org = get_object_or_400(Organization, pk=org_pk)
-            if self.user in org.admin_role:
-                return True
         return False
 
     def can_change(self, obj, data):
@@ -611,6 +636,8 @@ class TeamAccess(BaseAccess):
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             raise PermissionDenied('Unable to change organization on a team')
+        if self.user.is_superuser:
+            return True
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -640,15 +667,13 @@ class ProjectAccess(BaseAccess):
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('modified_by', 'credential', 'current_job', 'last_job').all()
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
-            return True
         qs = Organization.accessible_objects(self.user, 'admin_role')
         return qs.exists()
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -674,9 +699,11 @@ class ProjectUpdateAccess(BaseAccess):
         project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
         return qs.filter(project_id__in=project_ids)
 
+    @check_superuser
     def can_cancel(self, obj):
         return self.can_change(obj, {}) and obj.can_cancel
 
+    @check_superuser
     def can_delete(self, obj):
         return obj and self.user in obj.project.admin_role
 
@@ -704,8 +731,7 @@ class JobTemplateAccess(BaseAccess):
                                  'credential', 'cloud_credential', 'next_schedule').all()
 
     def can_read(self, obj):
-        # you can only see the job templates that you have permission to launch.
-        return self.can_start(obj, validate_license=False)
+        return self.user in obj.read_role
 
     def can_add(self, data):
         '''
@@ -847,10 +873,8 @@ class JobAccess(BaseAccess):
     def can_change(self, obj, data):
         return obj.status == 'new' and self.can_read(obj) and self.can_add(data)
 
+    @check_superuser
     def can_delete(self, obj):
-        # Allow org admins and superusers to delete jobs
-        if self.user.is_superuser:
-            return True
         return self.user in obj.inventory.admin_role
 
     def can_start(self, obj):
@@ -866,11 +890,12 @@ class JobAccess(BaseAccess):
             return self.user in obj.job_template.execute_role
 
         inventory_access = self.user in obj.inventory.use_role
+        credential_access = self.user in obj.credential.use_role
 
         org_access = self.user in obj.inventory.organization.admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
 
-        return inventory_access and (org_access or project_access)
+        return inventory_access and credential_access and (org_access or project_access)
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
@@ -1146,18 +1171,16 @@ class ScheduleAccess(BaseAccess):
             UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
         return qs.filter(unified_job_template__in=unified_qs)
 
+    @check_superuser
     def can_read(self, obj):
-        if self.user.is_superuser:
-            return True
         if obj and obj.unified_job_template:
             job_class = obj.unified_job_template
             return self.user.can_access(type(job_class), 'read', obj.unified_job_template)
         else:
             return False
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
-            return True
         pk = get_pk_from_dict(data, 'unified_job_template')
         obj = get_object_or_400(UnifiedJobTemplate, pk=pk)
         if obj:
@@ -1165,18 +1188,16 @@ class ScheduleAccess(BaseAccess):
         else:
             return False
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
         if obj and obj.unified_job_template:
             job_class = obj.unified_job_template
             return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
+    @check_superuser
     def can_delete(self, obj):
-        if self.user.is_superuser:
-            return True
         if obj and obj.unified_job_template:
             job_class = obj.unified_job_template
             return self.user.can_access(type(job_class), 'change', job_class, None)
@@ -1195,25 +1216,22 @@ class NotifierAccess(BaseAccess):
             return qs
         return self.model.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role').all())
 
+    @check_superuser
     def can_read(self, obj):
-        if self.user.is_superuser:
-            return True
         if obj.organization is not None:
             return self.user in obj.organization.admin_role
         return False
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
-            return True
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         return self.user in org.admin_role
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             org = get_object_or_400(Organization, pk=org_pk)
@@ -1260,15 +1278,12 @@ class LabelAccess(BaseAccess):
             organization__in=Organization.accessible_objects(self.user, 'read_role')
         )
 
+    @check_superuser
     def can_read(self, obj):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.organization.read_role
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
-            return True
-
         if not data or '_method' in data:  # So the browseable API will work?
             return True
 
@@ -1276,10 +1291,8 @@ class LabelAccess(BaseAccess):
         org = get_object_or_400(Organization, pk=org_pk)
         return self.user in org.read_role
 
+    @check_superuser
     def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
-
         if self.can_add(data) is False:
             return False
 
@@ -1376,25 +1389,9 @@ class CustomInventoryScriptAccess(BaseAccess):
             return self.model.objects.distinct().all()
         return self.model.accessible_objects(self.user, 'read_role').all()
 
+    @check_superuser
     def can_read(self, obj):
-        if self.user.is_superuser:
-            return True
         return self.user in obj.read_role
-
-    def can_add(self, data):
-        if self.user.is_superuser:
-            return True
-        return False
-
-    def can_change(self, obj, data):
-        if self.user.is_superuser:
-            return True
-        return False
-
-    def can_delete(self, obj):
-        if self.user.is_superuser:
-            return True
-        return False
 
 
 class TowerSettingsAccess(BaseAccess):
@@ -1409,17 +1406,6 @@ class TowerSettingsAccess(BaseAccess):
 
     model = TowerSettings
 
-    def get_queryset(self):
-        if self.user.is_superuser:
-            return self.model.objects.all()
-        return self.model.objects.none()
-
-    def can_change(self, obj, data):
-        return self.user.is_superuser
-
-    def can_delete(self, obj):
-        return self.user.is_superuser
-
 
 class RoleAccess(BaseAccess):
     '''
@@ -1431,14 +1417,6 @@ class RoleAccess(BaseAccess):
     '''
 
     model = Role
-
-    def get_queryset(self):
-        if self.user.is_superuser:
-            return self.model.objects.all()
-        return Role.objects.none()
-
-    def can_change(self, obj, data):
-        return self.user.is_superuser
 
     def can_read(self, obj):
         if not obj:
@@ -1463,9 +1441,8 @@ class RoleAccess(BaseAccess):
                    skip_sub_obj_read_check=False):
         return self.can_unattach(obj, sub_obj, relationship)
 
+    @check_superuser
     def can_unattach(self, obj, sub_obj, relationship):
-        if self.user.is_superuser:
-            return True
         if obj.object_id and \
            isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:

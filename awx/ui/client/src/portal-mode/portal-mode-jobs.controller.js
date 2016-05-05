@@ -21,6 +21,7 @@ export function PortalModeJobsController($scope, $state, $rootScope, GetBasePath
 			id: 'portal-jobs',
 			mode: 'edit',
 			scope: $scope,
+            searchSize: 'col-md-10 col-xs-12'
 		});
 
 		SearchInit({
@@ -56,4 +57,4 @@ export function PortalModeJobsController($scope, $state, $rootScope, GetBasePath
 }
 
 PortalModeJobsController.$inject = ['$scope', '$state', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobsList', 'SearchInit',
-	'PaginateInit']
+	'PaginateInit'];

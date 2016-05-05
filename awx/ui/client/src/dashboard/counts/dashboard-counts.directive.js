@@ -38,7 +38,7 @@ export default
                                 label: "Hosts"
                             },
                             {
-                                url: "/#/home/hosts?has_active_failures=true",
+                                url: "/#/home/hosts?active-failures=true",
                                 number: scope.data.hosts.failed,
                                 label: "Failed Hosts",
                                 isFailureCount: true

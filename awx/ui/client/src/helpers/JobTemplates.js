@@ -115,8 +115,23 @@ angular.module('JobTemplatesHelper', ['Utilities'])
 
                                   scope.survey_enabled = data.survey_enabled;
 
-                                  scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
+                                  scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? true : false;
                                   master.ask_variables_on_launch = scope.ask_variables_on_launch;
+
+                                  scope.ask_limit_on_launch = (data.ask_limit_on_launch) ? true : false;
+                                  master.ask_limit_on_launch = scope.ask_limit_on_launch;
+
+                                  scope.ask_tags_on_launch = (data.ask_tags_on_launch) ? true : false;
+                                  master.ask_tags_on_launch = scope.ask_tags_on_launch;
+
+                                  scope.ask_job_type_on_launch = (data.ask_job_type_on_launch) ? true : false;
+                                  master.ask_job_type_on_launch = scope.ask_job_type_on_launch;
+
+                                  scope.ask_inventory_on_launch = (data.ask_inventory_on_launch) ? true : false;
+                                  master.ask_inventory_on_launch = scope.ask_inventory_on_launch;
+
+                                  scope.ask_credential_on_launch = (data.ask_credential_on_launch) ? true : false;
+                                  master.ask_credential_on_launch = scope.ask_credential_on_launch;
 
                                   relatedSets = form.relatedSets(data.related);
 

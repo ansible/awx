@@ -46,7 +46,7 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
 
     $scope.formCancel = function() {
         $state.go("^");
-    }
+    };
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name !== ('managementJobSchedules.add' || 'managementJobSchedules.edit')){

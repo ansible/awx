@@ -7,8 +7,7 @@
 export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePath, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
 
-        var jobs_scope,
-        list = PortalJobTemplateList,
+        var list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
         pageSize = 12;
@@ -40,7 +39,7 @@ export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePat
 
             $scope.search(list.iterator);
         };
-        init()
+        init();
     }
 
 PortalModeJobTemplatesController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'

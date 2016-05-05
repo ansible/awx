@@ -135,11 +135,6 @@ class JobOptions(BaseModel):
     become_enabled = models.BooleanField(
         default=False,
     )
-    labels = models.ManyToManyField(
-        "Label",
-        blank=True,
-        related_name='%(class)s_labels'
-    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -226,23 +221,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         default={},
     )
     admin_role = ImplicitRoleField(
-        role_name='Job Template Administrator',
-        role_description='Full access to all settings',
         parent_role=[('project.admin_role', 'inventory.admin_role')]
     )
     auditor_role = ImplicitRoleField(
-        role_name='Job Template Auditor',
-        role_description='Read-only access to all settings',
         parent_role=[('project.auditor_role', 'inventory.auditor_role')]
     )
     execute_role = ImplicitRoleField(
-        role_name='Job Template Runner',
-        role_description='May run the job template',
         parent_role=['admin_role'],
     )
     read_role = ImplicitRoleField(
-        role_name='Job Template Runner',
-        role_description='May run the job template',
         parent_role=['execute_role', 'auditor_role', 'admin_role'],
     )
 
@@ -521,6 +508,36 @@ class Job(UnifiedJob, JobOptions):
     def ask_variables_on_launch(self):
         if self.job_template is not None:
             return self.job_template.ask_variables_on_launch
+        return False
+
+    @property
+    def ask_limit_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_limit_on_launch
+        return False
+
+    @property
+    def ask_tags_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_tags_on_launch
+        return False
+
+    @property
+    def ask_job_type_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_job_type_on_launch
+        return False
+
+    @property
+    def ask_inventory_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_inventory_on_launch
+        return False
+
+    @property
+    def ask_credential_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_credential_on_launch
         return False
 
     def get_passwords_needed_to_start(self):

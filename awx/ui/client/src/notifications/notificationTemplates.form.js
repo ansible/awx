@@ -51,7 +51,7 @@ export default function() {
                 type: 'select',
                 addRequired: true,
                 editRequired: true,
-                class: 'NotificationsForm-typeSelect prepend-asterisk',
+                class: 'NotificationsForm-typeSelect',
                 ngOptions: 'type.label for type in notification_type_options track by type.value',
                 ngChange: 'typeChange()',
                 hasSubForm: true
@@ -144,7 +144,7 @@ export default function() {
                 type: 'textarea',
                 rows: 3,
                 awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n support<br>\n',
+                            '<p>For example:<br>engineering<br>\n #support<br>\n',
                 dataTitle: 'Destination Channels',
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -326,6 +326,11 @@ export default function() {
             targets: {
                 label: 'Destination Channels or Users',
                 type: 'text',
+                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
+                            '<p>For example:<br>#support or support<br>\n @username or username<br>\n',
+                dataTitle: 'Destination Channels',
+                dataPlacement: 'right',
+                dataContainer: "body",
                 awRequiredWhen: {
                     reqExpression: "irc_required",
                     init: "false"

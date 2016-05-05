@@ -36,7 +36,7 @@ export default ['templateUrl', function(templateUrl) {
 
             $scope.changeStreamTarget = function(){
 
-                if($scope.streamTarget && $scope.streamTarget == 'dashboard') {
+                if($scope.streamTarget && $scope.streamTarget === 'dashboard') {
                     // Just navigate to the base activity stream
                     $state.go('activityStream', {}, {inherit: false});
                 }
@@ -45,7 +45,7 @@ export default ['templateUrl', function(templateUrl) {
                     $state.go('activityStream', {target: $scope.streamTarget}, {inherit: false});
                 }
 
-            }
+            };
         }],
     };
 }];

@@ -12,22 +12,26 @@
 
 
 export default [
-    '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-        'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices',
+    '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
+    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait',
+    'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', '$q',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
+    GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices,
+    $q) {
 
         ClearScope();
 
-        var base, e, id, url, parentObject;
+        var base, id, url,parentObject, title;
+
         base = $location.path().replace(/^\//, '').split('/')[0];
-        if (base == 'management_jobs') {
+        if (base === 'management_jobs') {
             $scope.base = base = 'system_job_templates';
         }
         if ($stateParams.job_type){
             $scope.job_type = $stateParams.job_type;
         }
+
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
@@ -46,7 +50,8 @@ export default [
             SchedulesList.well = true;
 
             // include name of item in listTitle
-            SchedulesList.listTitle = parentObject.name + "<div class='List-titleLockup'></div>Schedules";
+            SchedulesList.listTitle = title ? title : parentObject.name;
+            SchedulesList.listTitle = `${SchedulesList.listTitle}<div class='List-titleLockup'></div>Schedules`;
 
             LoadSchedulesScope({
                 parent_scope: $scope,
@@ -58,6 +63,28 @@ export default [
             });
         });
 
+        function getUrl(){
+            if($stateParams.inventory_id){
+                url = GetBasePath('groups') + $stateParams.id + '/';
+                Rest.setUrl(url);
+                var promise;
+                promise = Rest.get();
+                return promise.then(function (data) {
+                        url = data.data.related.inventory_source;
+                        title = data.data.name;
+                    }).catch(function (response) {
+                    ProcessErrors(null, response.data, response.status, null, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get inventory group info. GET returned status: ' +
+                        response.status
+                    });
+                });
+            }
+            else{
+                url =  GetBasePath(base) + id + '/';
+                return $q.when(url);
+            }
+        }
 
         if ($scope.removeChoicesReady) {
             $scope.removeChocesReady();
@@ -65,17 +92,18 @@ export default [
         $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
             // Load the parent object
             id = $stateParams.id;
-            url = GetBasePath(base) + id + '/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    parentObject = data;
-                    $scope.$emit('ParentLoaded');
-                })
-                .error(function(data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-                });
+            getUrl().then(function(){
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        parentObject = data;
+                        $scope.$emit('ParentLoaded');
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+                    });
+            });
         });
 
         $scope.refreshJobs = function() {

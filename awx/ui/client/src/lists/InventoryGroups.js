@@ -25,7 +25,13 @@ export default
                 key: true,
                 ngClick: "groupSelect(group.id)",
                 columnClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
+            },
+            total_groups: {
+                nosort: true,
+                label: '',
+                type: 'badgeCount',
+                ngHide: 'group.total_groups == 0',        
             },
             source: {
                 label: 'Source',
@@ -160,6 +166,14 @@ export default
                 awToolTip: 'Copy or move group',
                 ngShow: "group.id > 0",
                 dataPlacement: "top"
+            },
+            schedule: {
+                mode: 'all',
+                ngClick: "scheduleGroup(group.id)",
+                awToolTip: "{{ group.group_schedule_tooltip }}",
+                ngClass: "group.scm_type_class",
+                dataPlacement: 'top',
+                ngHide: "group.summary_fields.inventory_source.source === ''"
             },
             edit: {
                 //label: 'Edit',

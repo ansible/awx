@@ -24,7 +24,7 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="{% url 'api:api_root_view' %}">
-          <img class="logo" src="{% static 'assets/main_menu_logo.png' %}">
+          <img class="logo" src="{% static 'assets/tower-logo-header.svg' %}">
           <span>{% trans 'REST API' %}</span>
         </a>
         <a class="navbar-title" href="{{ request.get_full_path }}">
@@ -49,10 +49,7 @@
 <div id="footer">
   <div class="container">
     <div class="row">
-      <div class="col-sm-6 footer-logo">
-        <a href="http://www.ansible.com" target="_blank">
-          <img alt="Red Hat, Inc. | Ansible, Inc." src="{% static 'assets/footer-logo.png' %}" />
-        </a>
+      <div class="col-sm-6">
       </div>
       <div class="col-sm-6 footer-copyright">
         Copyright &copy; 2016 <a href="http://www.redhat.com" target="_blank">Red Hat</a>, Inc. All Rights Reserved.

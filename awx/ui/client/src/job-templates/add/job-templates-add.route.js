@@ -14,10 +14,5 @@ export default {
     ncyBreadcrumb: {
         parent: "jobTemplates",
         label: "CREATE JOB TEMPLATE"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

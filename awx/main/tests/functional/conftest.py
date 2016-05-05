@@ -36,7 +36,6 @@ from awx.main.models.organization import (
     Team,
 )
 
-from awx.main.models.rbac import Role
 from awx.main.models.notifications import Notifier
 
 '''
@@ -193,11 +192,6 @@ def notifier(organization):
                                    notification_type="webhook",
                                    notification_configuration=dict(url="http://localhost",
                                                                    headers={"Test": "Header"}))
-
-@pytest.fixture
-def role():
-    return Role.objects.create(name='role')
-
 @pytest.fixture
 def admin(user):
     return user('admin', True)

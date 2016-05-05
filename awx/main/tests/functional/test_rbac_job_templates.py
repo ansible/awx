@@ -87,7 +87,7 @@ def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert joe in check_jobtemplate.read_role
+    assert joe not in check_jobtemplate.read_role
     assert admin in check_jobtemplate.execute_role
     assert joe not in check_jobtemplate.execute_role
 
@@ -120,12 +120,13 @@ def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplat
     rbac.migrate_projects(apps, None)
     rbac.migrate_inventory(apps, None)
 
-    assert joe in deploy_jobtemplate.read_role
+    assert joe not in deploy_jobtemplate.read_role
     assert admin in deploy_jobtemplate.execute_role
     assert joe not in deploy_jobtemplate.execute_role
 
     rbac.migrate_job_templates(apps, None)
 
+    assert joe in deploy_jobtemplate.read_role
     assert admin in deploy_jobtemplate.execute_role
     assert joe in deploy_jobtemplate.execute_role
 

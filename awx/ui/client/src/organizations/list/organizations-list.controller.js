@@ -44,11 +44,11 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
 
         var paginationContainer = $('#pagination-container');
         paginationContainer.html($scope.PaginateWidget);
-        $compile(paginationContainer.contents())($scope)
+        $compile(paginationContainer.contents())($scope);
 
         var parseCardData = function(cards) {
             return cards.map(function(card) {
-                var val = {};
+                var val = {}, url = '/#/organizations/' + card.id + '/';
                 val.name = card.name;
                 val.id = card.id;
                 if (card.id + "" === cards.activeCard) {
@@ -57,34 +57,40 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 val.description = card.description || undefined;
                 val.links = [];
                 val.links.push({
-                    href: card.related.users,
+                    href: url + 'users',
                     name: "USERS",
-                    count: card.summary_fields.related_field_counts.users
+                    count: card.summary_fields.related_field_counts.users,
+                    activeMode: 'users'
                 });
                 val.links.push({
-                    href: card.related.teams,
+                    href: url + 'teams',
                     name: "TEAMS",
-                    count: card.summary_fields.related_field_counts.teams
+                    count: card.summary_fields.related_field_counts.teams,
+                    activeMode: 'teams'
                 });
                 val.links.push({
-                    href: card.related.inventories,
+                    href: url + 'inventories',
                     name: "INVENTORIES",
-                    count: card.summary_fields.related_field_counts.inventories
+                    count: card.summary_fields.related_field_counts.inventories,
+                    activeMode: 'inventories'
                 });
                 val.links.push({
-                    href: card.related.projects,
+                    href: url + 'projects',
                     name: "PROJECTS",
-                    count: card.summary_fields.related_field_counts.projects
+                    count: card.summary_fields.related_field_counts.projects,
+                    activeMode: 'projects'
                 });
                 val.links.push({
-                    href: card.related.job_templates,
+                    href: url + 'job_templates',
                     name: "JOB TEMPLATES",
-                    count: card.summary_fields.related_field_counts.job_templates
+                    count: card.summary_fields.related_field_counts.job_templates,
+                    activeMode: 'job_templates'
                 });
                 val.links.push({
-                    href: card.related.admins,
+                    href: url + 'admins',
                     name: "ADMINS",
-                    count: card.summary_fields.related_field_counts.admins
+                    count: card.summary_fields.related_field_counts.admins,
+                    activeMode: 'admins'
                 });
                 return val;
             });
@@ -187,4 +193,4 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             });
         };
     }
-]
+];

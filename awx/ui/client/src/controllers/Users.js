@@ -229,10 +229,10 @@ export function UsersEdit($scope, $rootScope, $location,
     var defaultUrl = GetBasePath('users'),
         generator = GenerateForm,
         form = UserForm,
-        base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
         id = $stateParams.user_id,
-        relatedSets = {};
+        relatedSets = {},
+        set;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
@@ -246,20 +246,28 @@ export function UsersEdit($scope, $rootScope, $location,
             $scope[key] = value;
         })
         .value();
-        return
+        return;
+    };
+
+    $scope.convertApiUrl = function(str) {
+        if (str) {
+            return str.replace("api/v1", "#");
+        } else {
+            return null;
+        }
     };
 
     var setScopeRelated = function(data, related){
         _(related)
-        .pick(function(value, key){
-            return data.related.hasOwnProperty(key) === true;
-        })
-        .forEach(function(value, key){
-            relatedSets[key] = {
-                url: data.related[key],
-                iterator: value.iterator
-            };
-        })
+            .pick(function(value, key){
+                return data.related.hasOwnProperty(key) === true;
+            })
+            .forEach(function(value, key){
+                relatedSets[key] = {
+                    url: data.related[key],
+                    iterator: value.iterator
+                };
+            })
         .value();
     };
     // prepares a data payload for a PUT request to the API
@@ -270,7 +278,7 @@ export function UsersEdit($scope, $rootScope, $location,
              data[key] = $scope[key];
             }
         });
-        return data
+        return data;
     };
 
     var init = function(){
@@ -296,6 +304,11 @@ export function UsersEdit($scope, $rootScope, $location,
                 scope: $scope,
                 relatedSets: relatedSets
             });
+
+            for (set in relatedSets) {
+                $scope.search(relatedSets[set].iterator);
+            }
+
             Wait('stop');
         })
         .error(function (data, status) {
@@ -315,13 +328,13 @@ export function UsersEdit($scope, $rootScope, $location,
         if ($scope[form.name + '_form'].$valid){
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
-            Rest.put(data).success(function(res){
-                $state.go('users', null, {reload: true})
+            Rest.put(data).success(function(){
+                $state.go('users', null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
                 $stateParams.id + '. GET status: ' + status });
-            });            
+            });
         }
     };
 
@@ -338,7 +351,7 @@ export function UsersEdit($scope, $rootScope, $location,
 }
 
 UsersEdit.$inject = ['$scope', '$rootScope', '$location',
-    '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'ProcessErrors', 
+    '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'ProcessErrors',
     'RelatedSearchInit', 'RelatedPaginateInit', 'ClearScope', 'GetBasePath',
     'ResetForm', 'Wait', '$state'
 ];

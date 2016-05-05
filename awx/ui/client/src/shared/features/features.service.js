@@ -33,7 +33,7 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
                 }
             },
             featureEnabled: function(feature) {
-                if($rootScope.features && $rootScope.features[feature] && $rootScope.features[feature] == true) {
+                if($rootScope.features && $rootScope.features[feature] && $rootScope.features[feature] === true) {
                     return true;
                 }
                 else {

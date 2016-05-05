@@ -1,7 +1,6 @@
 git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.5
 anyjson==0.3.3
-apache-libcloud==0.15.1
 appdirs==1.4.0
 Babel==2.2.0
 billiard==3.3.0.16

@@ -281,7 +281,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          CreateSelect2({
                              element: '#source_source_regions'
                          });
-                    } else if (scope.source.value === 'azure') {
+                    } else if (scope.source.value === 'azure' || scope.source.value === 'azure_rm') {
                         scope.source_region_choices = scope.azure_regions;
                         $('#source_form').addClass('squeeze');
                         CreateSelect2({
@@ -312,8 +312,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                     }
                     if (scope.source.value === 'rax' ||
                         scope.source.value === 'ec2' ||
-                        scope.source.value==='gce' ||
+                        scope.source.value ==='gce' ||
+                        scope.source.value === 'foreman' ||
+                        scope.source.value ==='cloudforms' ||
                         scope.source.value === 'azure' ||
+                        scope.source.value === 'azure_rm' ||
                         scope.source.value === 'vmware' ||
                         scope.source.value === 'openstack') {
                         if (scope.source.value === 'ec2') {
@@ -1008,7 +1011,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            }
                                            else if(fld === "inventory_script"){
                                                // the API stores it as 'source_script', we call it inventory_script
-                                               data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                                               data.summary_fields.inventory_script = data.summary_fields.source_script;
                                                sources_scope.inventory_script = data.source_script;
                                                master.inventory_script = sources_scope.inventory_script;
                                            } else if (fld === "source_regions") {

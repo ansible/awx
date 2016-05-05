@@ -14,11 +14,6 @@ export default {
     data: {
         activityStreamId: 'template_id'
     },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    },
     params: {
         copied: null
     }

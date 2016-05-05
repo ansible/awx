@@ -22,7 +22,6 @@
          ) {
 
             ClearScope();
-
             // Inject dynamic view
             var defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),
@@ -230,6 +229,10 @@
             $scope.jobTypeChange = function(){
               if($scope.job_type){
                 if($scope.job_type.value === 'scan'){
+                    // If the job_type is 'scan' then we don't want the user to be
+                    // able to prompt for job type or inventory
+                    $scope.ask_job_type_on_launch = false;
+                    $scope.ask_inventory_on_launch = false;
                     $scope.toggleScanInfo();
                   }
                   else if($scope.project_name === "Default"){
@@ -315,8 +318,8 @@
             });
 
 
-            function saveCompleted() {
-                $state.go('jobTemplates', null, {reload: true});
+            function saveCompleted(id) {
+                $state.go('jobTemplates.edit', {template_id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -356,7 +359,7 @@
                     });
 
                 currentLabels.then(function (current) {
-                    var labelsToAdd = $scope.labels
+                    var labelsToAdd = ($scope.labels || [])
                         .map(val => val.value);
                     var labelsToDisassociate = current
                         .filter(val => labelsToAdd
@@ -403,13 +406,6 @@
                             .then(function() {
                                 $scope.addedItem = data.id;
 
-                                Refresh({
-                                    scope: $scope,
-                                    set: 'job_templates',
-                                    iterator: 'job_template',
-                                    url: $scope.current_url
-                                });
-
                                 if($scope.survey_questions &&
                                     $scope.survey_questions.length > 0){
                                     //once the job template information
@@ -440,7 +436,7 @@
                                         });
                                 }
 
-                                saveCompleted();
+                                saveCompleted(data.id);
                             });
                     });
                 });
@@ -478,6 +474,14 @@
                             }
                         }
                     }
+
+                    data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
+                    data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;
+                    data.ask_job_type_on_launch = $scope.ask_job_type_on_launch ? $scope.ask_job_type_on_launch : false;
+                    data.ask_inventory_on_launch = $scope.ask_inventory_on_launch ? $scope.ask_inventory_on_launch : false;
+                    data.ask_variables_on_launch = $scope.ask_variables_on_launch ? $scope.ask_variables_on_launch : false;
+                    data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
+
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);
                     if(data.job_type === 'scan' &&
@@ -502,7 +506,8 @@
                     Rest.post(data)
                         .success(function(data) {
                             $scope.$emit('templateSaveSuccess',
-                                data);
+                                data
+                            );
                         })
                         .error(function (data, status) {
                             ProcessErrors($scope, data, status, form,

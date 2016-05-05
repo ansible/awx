@@ -1,11 +1,12 @@
-<nav id="main_menu" class="MainMenu">
+<nav id="main_menu" class="MainMenu" ng-class="{'MainMenu--licenseMissing' : licenseMissing}">
     <!-- Menu logo item -->
     <a id="main_menu_logo"
         href="/#/"
         class="MainMenu-logo"
+        ng-if="!licenseMissing"
         ng-class="{'is-loggedOut' : !$root.current_user.username}">
         <img class="MainMenu-logoImage"
-            ng-src="/static/assets/main_menu_logo.png">
+            ng-src="/static/assets/tower-logo-header.svg">
     </a>
 
     <!-- Mobile menu items -->
@@ -88,6 +89,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_projects_link"
         href="/#/projects"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('projects'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             PROJECTS
@@ -96,6 +98,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_inventories_link"
         href="/#/inventories"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             INVENTORIES
@@ -104,6 +107,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_job_templates_link"
         href="/#/job_templates"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             JOB TEMPLATES
@@ -112,6 +116,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left MainMenu-item--lastLeft"
         id="main_menu_jobs_link"
         href="/#/jobs"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('jobs'), 'is-loggedOut' : !$root.current_user.username}">
         <span class="MainMenu-itemText">
             JOBS
@@ -120,6 +125,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--user MainMenu-item--right"
         id="main_menu_current_user_link"
         ng-href="/#/users/{{ $root.current_user.id }}"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('users.edit'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="{{currentUserTip}}"
         aw-tip-watch="currentUserTip"
@@ -136,6 +142,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_setup_link"
         ng-href="/#/setup"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('setup'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Settings"
         data-placement="bottom"
@@ -148,6 +155,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_portal_link"
         ng-href="/#/portal"
+        ng-if="!licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('portalMode'), 'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="Portal Mode"
         data-placement="bottom"
@@ -160,6 +168,7 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_docs_link"
         ng-href="http://docs.ansible.com/ansible-tower/"
+        ng-if="!licenseMissing"
         ng-class="{'is-loggedOut' : !$root.current_user.username}"
         aw-tool-tip="View Documentation"
         data-placement="bottom"
@@ -204,6 +213,7 @@
     <button
         id="main_menu_mobile_toggle_button"
         class="MainMenu-toggle"
+        ng-if="!licenseMissing"
         ng-class="{'is-active': !isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}"
         ng-click="toggleMenu()">
         <i class="fa fa-bars MainMenu-toggleImage"></i>

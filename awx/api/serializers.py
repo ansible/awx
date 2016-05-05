@@ -38,7 +38,7 @@ from polymorphic import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore
+from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
 from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
@@ -78,7 +78,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
-    'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
@@ -90,6 +89,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
     'source_script': ('name', 'description'),
+    'role': ('id', 'role_field')
 }
 
 
@@ -340,16 +340,18 @@ class BaseSerializer(serializers.ModelSerializer):
             return None
         elif isinstance(obj, User):
             return obj.date_joined
-        else:
+        elif hasattr(obj, 'created'):
             return obj.created
+        return None
 
     def get_modified(self, obj):
         if obj is None:
             return None
         elif isinstance(obj, User):
             return obj.last_login # Not actually exposed for User.
-        else:
+        elif hasattr(obj, 'modified'):
             return obj.modified
+        return None
 
     def build_standard_field(self, field_name, model_field):
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
@@ -699,7 +701,7 @@ class UserSerializer(BaseSerializer):
 
     def validate_password(self, value):
         if not self.instance and value in (None, ''):
-            raise serializers.ValidationError('Password required for new User')
+            raise serializers.ValidationError('Password required for new User.')
         return value
 
     def _update_password(self, obj, new_password):
@@ -763,7 +765,7 @@ class UserSerializer(BaseSerializer):
             ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             if field_name in ldap_managed_fields:
                 if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP' % field_name)
+                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP.' % field_name)
         return value
 
     def validate_username(self, value):
@@ -796,6 +798,7 @@ class OrganizationSerializer(BaseSerializer):
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
+            credentials = reverse('api:organization_credential_list',     args=(obj.pk,)),
             activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
             notifiers = reverse('api:organization_notifiers_list', args=(obj.pk,)),
             notifiers_any = reverse('api:organization_notifiers_any_list', args=(obj.pk,)),
@@ -961,7 +964,7 @@ class BaseSerializerWithVariables(BaseSerializer):
             try:
                 yaml.safe_load(value)
             except yaml.YAMLError:
-                raise serializers.ValidationError('Must be valid JSON or YAML')
+                raise serializers.ValidationError('Must be valid JSON or YAML.')
         return value
 
 
@@ -1113,7 +1116,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     vars_dict['ansible_ssh_port'] = port
                     attrs['variables'] = yaml.dump(vars_dict)
                 except (yaml.YAMLError, TypeError):
-                    raise serializers.ValidationError('Must be valid JSON or YAML')
+                    raise serializers.ValidationError('Must be valid JSON or YAML.')
 
         return super(HostSerializer, self).validate(attrs)
 
@@ -1170,7 +1173,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
-            raise serializers.ValidationError('Invalid group name')
+            raise serializers.ValidationError('Invalid group name.')
         return value
 
     def to_representation(self, obj):
@@ -1303,10 +1306,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             else:
                 try:
                     if source_script.organization != self.instance.inventory.organization:
-                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory'
+                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory.'
                 except Exception:
                     # TODO: Log
-                    errors['source_script'] = 'source_script doesn\'t exist'
+                    errors['source_script'] = 'source_script doesn\'t exist.'
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1441,8 +1444,26 @@ class RoleSerializer(BaseSerializer):
 
     class Meta:
         model = Role
-        fields = ('*', 'description', 'name')
-        read_only_fields = ('description', 'name')
+        read_only_fields = ('id', 'role_field', 'description', 'name')
+
+    def to_representation(self, obj):
+        ret = super(RoleSerializer, self).to_representation(obj)
+
+        def spacify_type_name(cls):
+            return re.sub(r'([a-z])([A-Z])', '\g<1> \g<2>', cls.__name__)
+
+        if obj.object_id:
+            content_object = obj.content_object
+            if hasattr(content_object, 'username'):
+                ret['summary_fields']['resource_name'] = obj.content_object.username
+            if hasattr(content_object, 'name'):
+                ret['summary_fields']['resource_name'] = obj.content_object.name
+            ret['summary_fields']['resource_type'] = obj.content_type.name
+            ret['summary_fields']['resource_type_display_name'] = spacify_type_name(obj.content_type.model_class())
+
+        ret.pop('created')
+        ret.pop('modified')
+        return ret
 
     def get_related(self, obj):
         ret = super(RoleSerializer, self).get_related(obj)
@@ -1524,6 +1545,15 @@ class ResourceAccessListElementSerializer(UserSerializer):
                                     .filter(content_type=team_content_type,
                                             members=user,
                                             children__in=direct_permissive_role_ids)
+        if content_type == team_content_type:
+            # When looking at the access list for a team, exclude the entries
+            # for that team. This exists primarily so we don't list the read role
+            # as a direct role when a user is a member or admin of a team
+            direct_team_roles = direct_team_roles.exclude(
+                children__content_type=team_content_type,
+                children__object_id=obj.id
+            )
+
 
         indirect_team_roles   = Role.objects \
                                     .filter(content_type=team_content_type,
@@ -1553,6 +1583,18 @@ class ResourceAccessListElementSerializer(UserSerializer):
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False, default=None, write_only=True,
+        help_text='Write-only field used to add user to owner role. If provided, '
+                  'do not give either team or organization. Only valid for creation.')
+    team = serializers.PrimaryKeyRelatedField(
+        queryset=Team.objects.all(), required=False, default=None, write_only=True,
+        help_text='Write-only field used to add team to owner role. If provided, '
+                  'do not give either user or organization. Only valid for creation.')
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(), required=False, default=None, write_only=True,
+        help_text='Write-only field used to add organization to owner role. If provided, '
+                  'do not give either team or team. Only valid for creation.')
 
     class Meta:
         model = Credential
@@ -1561,7 +1603,14 @@ class CredentialSerializer(BaseSerializer):
                   'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password', 'subscription', 'tenant', 'secret', 'client',
-                  'authorize', 'authorize_password')
+                  'authorize', 'authorize_password',
+                  'user', 'team', 'organization')
+
+    def create(self, validated_data):
+        # Remove the user, team, and organization processed in view
+        for field in ['user', 'team', 'organization']:
+            validated_data.pop(field, None)
+        return super(CredentialSerializer, self).create(validated_data)
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)
@@ -1657,9 +1706,9 @@ class JobOptionsSerializer(BaseSerializer):
             if not project and job_type != PERM_INVENTORY_SCAN:
                 raise serializers.ValidationError({'project': 'This field is required.'})
             if project and playbook and force_text(playbook) not in project.playbooks:
-                raise serializers.ValidationError({'playbook': 'Playbook not found for project'})
+                raise serializers.ValidationError({'playbook': 'Playbook not found for project.'})
             if project and not playbook:
-                raise serializers.ValidationError({'playbook': 'Must select playbook for project'})
+                raise serializers.ValidationError({'playbook': 'Must select playbook for project.'})
 
         return super(JobOptionsSerializer, self).validate(attrs)
 
@@ -1720,7 +1769,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
         job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs'})
+            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs.'})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
@@ -1733,12 +1782,13 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     ask_tags_on_launch = serializers.ReadOnlyField()
     ask_job_type_on_launch = serializers.ReadOnlyField()
     ask_inventory_on_launch = serializers.ReadOnlyField()
+    ask_credential_on_launch = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
-                  'ask_inventory_on_launch')
+                  'ask_inventory_on_launch', 'ask_credential_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -1865,9 +1915,9 @@ class JobRelaunchSerializer(JobSerializer):
         if not obj.credential:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
         if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined."]))
         if obj.inventory is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined."]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
@@ -1876,7 +1926,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
     class Meta:
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
-                  'module_name', 'module_args', 'forks', 'verbosity',
+                  'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
                   'become_enabled', '-unified_job_template', '-description')
         extra_kwargs = {
             'name': {
@@ -2104,6 +2154,8 @@ class JobLaunchSerializer(BaseSerializer):
     inventory_needed_to_start = serializers.SerializerMethodField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
+    job_template_data = serializers.SerializerMethodField()
+    defaults = serializers.SerializerMethodField()
 
     class Meta:
         model = JobTemplate
@@ -2113,7 +2165,8 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
-                  'credential_needed_to_start', 'inventory_needed_to_start',)
+                  'credential_needed_to_start', 'inventory_needed_to_start',
+                  'job_template_data', 'defaults')
         read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
                             'ask_tags_on_launch', 'ask_job_type_on_launch',
                             'ask_inventory_on_launch', 'ask_credential_on_launch')
@@ -2136,6 +2189,21 @@ class JobLaunchSerializer(BaseSerializer):
         if obj:
             return obj.survey_enabled and 'spec' in obj.survey_spec
         return False
+
+    def get_defaults(self, obj):
+        ask_for_vars_dict = obj._ask_for_vars_dict()
+        defaults_dict = {}
+        for field in ask_for_vars_dict:
+            if field in ('inventory', 'credential'):
+                defaults_dict[field] = dict(
+                    name=getattrd(obj, '%s.name' % field, None),
+                    id=getattrd(obj, '%s.pk' % field, None))
+            else:
+                defaults_dict[field] = getattr(obj, field)
+        return defaults_dict
+
+    def get_job_template_data(self, obj):
+        return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
         errors = {}
@@ -2166,8 +2234,9 @@ class JobLaunchSerializer(BaseSerializer):
             except (ValueError, TypeError):
                 try:
                     extra_vars = yaml.safe_load(extra_vars)
-                except (yaml.YAMLError, TypeError, AttributeError):
-                    errors['extra_vars'] = 'Must be valid JSON or YAML'
+                    assert isinstance(extra_vars, dict)
+                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
@@ -2178,9 +2247,9 @@ class JobLaunchSerializer(BaseSerializer):
                 errors['variables_needed_to_start'] = validation_errors
 
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
-            errors['project'] = 'Job Template Project is missing or undefined'
+            errors['project'] = 'Job Template Project is missing or undefined.'
         if (obj.inventory is None) and not attrs.get('inventory', None):
-            errors['inventory'] = 'Job Template Inventory is missing or undefined'
+            errors['inventory'] = 'Job Template Inventory is missing or undefined.'
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -2318,7 +2387,7 @@ class ScheduleSerializer(BaseSerializer):
 
     def validate_unified_job_template(self, value):
         if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
-            raise serializers.ValidationError('Inventory Source must be a cloud resource')
+            raise serializers.ValidationError('Inventory Source must be a cloud resource.')
         return value
 
     # We reject rrules if:
@@ -2510,7 +2579,7 @@ class TowerSettingsSerializer(BaseSerializer):
     def validate(self, attrs):
         manifest = settings.TOWER_SETTINGS_MANIFEST
         if attrs['key'] not in manifest:
-            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key".format(attrs['key'])]))
+            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key.".format(attrs['key'])]))
 
         if attrs['value_type'] == 'json':
             attrs['value'] = json.dumps(attrs['value'])
@@ -2544,7 +2613,7 @@ class AuthTokenSerializer(serializers.Serializer):
             else:
                 raise serializers.ValidationError('Unable to login with provided credentials.')
         else:
-            raise serializers.ValidationError('Must include "username" and "password"')
+            raise serializers.ValidationError('Must include "username" and "password".')
 
 
 class FactVersionSerializer(BaseFactSerializer):

@@ -151,6 +151,26 @@ def test_two_organizations(resourced_organization, organizations, user, get):
     assert counts[org_id_zero] == COUNTS_ZEROS
 
 @pytest.mark.django_db
+def test_scan_JT_counted(resourced_organization, user, get):
+    admin_user = user('admin', True)
+    # Add a scan job template to the org
+    resourced_organization.projects.all()[0].jobtemplates.create(
+        job_type='scan', inventory=resourced_organization.inventories.all()[0],
+        name='scan-job-template')
+    counts_dict = COUNTS_PRIMES
+    counts_dict['job_templates'] += 1
+
+    # Test list view
+    list_response = get(reverse('api:organization_list', args=[]), admin_user)
+    assert list_response.status_code == 200
+    assert list_response.data['results'][0]['summary_fields']['related_field_counts'] == counts_dict
+
+    # Test detail view
+    detail_response = get(reverse('api:organization_detail', args=[resourced_organization.pk]), admin_user)
+    assert detail_response.status_code == 200
+    assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
+
+@pytest.mark.django_db
 def test_JT_associated_with_project(organizations, project, user, get):
     # Check that adding a project to an organization gets the project's JT
     #  included in the organization's JT count

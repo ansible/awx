@@ -30,6 +30,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
+from django.contrib.contenttypes.models import ContentType
+
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
@@ -616,8 +618,13 @@ class OrganizationList(ListCreateAPIView):
 
         JT_reference = 'project__organization'
         db_results['job_templates'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').values(JT_reference).annotate(
+            self.request.user, 'read_role').exclude(job_type='scan').values(JT_reference).annotate(
             Count(JT_reference)).order_by(JT_reference)
+
+        JT_scan_reference = 'inventory__organization'
+        db_results['job_templates_scan'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').filter(job_type='scan').values(JT_scan_reference).annotate(
+            Count(JT_scan_reference)).order_by(JT_scan_reference)
 
         db_results['projects'] = project_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
@@ -638,6 +645,8 @@ class OrganizationList(ListCreateAPIView):
         for res in db_results:
             if res == 'job_templates':
                 org_reference = JT_reference
+            elif res == 'job_templates_scan':
+                org_reference = JT_scan_reference
             elif res == 'users':
                 org_reference = 'id'
             else:
@@ -650,6 +659,12 @@ class OrganizationList(ListCreateAPIView):
                         count_context[org_id]['users'] = entry['users']
                         continue
                     count_context[org_id][res] = entry['%s__count' % org_reference]
+
+        # Combine the counts for job templates with scan job templates
+        for org in org_id_list:
+            org_id = org['id']
+            if 'job_templates_scan' in count_context[org_id]:
+                count_context[org_id]['job_templates'] += count_context[org_id].pop('job_templates_scan')
 
         full_context['related_field_counts'] = count_context
 
@@ -684,8 +699,10 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
             organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
-            project__organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).exclude(
+            job_type='scan').filter(project__organization__id=org_id).count()
+        org_counts['job_templates'] += JobTemplate.accessible_objects(**access_kwargs).filter(
+            job_type='scan').filter(inventory__organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts
@@ -814,10 +831,11 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
     relationship='member_role.children'
 
     def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        return team.member_role.children.filter(id__in=Role.visible_roles(self.request.user))
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Team, 'read', team):
+            raise PermissionDenied()
+        return Role.filter_visible_roles(self.request.user, team.member_role.children.all())
 
-    # XXX: Need to enforce permissions
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
@@ -1081,8 +1099,12 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        #u = User.objects.get(pk=self.kwargs['pk'])
-        return Role.visible_roles(self.request.user).filter(members__in=[int(self.kwargs['pk']), ])
+        u = get_object_or_404(User, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(User, 'read', u):
+            raise PermissionDenied()
+        content_type = ContentType.objects.get_for_model(User)
+        return Role.filter_visible_roles(self.request.user, u.roles.all()) \
+                   .exclude(content_type=content_type, object_id=u.id)
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
@@ -1090,6 +1112,10 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg='Role "id" field is missing')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if sub_id == self.request.user.admin_role.pk:
+            raise PermissionDenied('You may not remove your own admin_role')
+
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
     def check_parent_access(self, parent=None):
@@ -1205,6 +1231,10 @@ class CredentialList(ListCreateAPIView):
     serializer_class = CredentialSerializer
 
     def post(self, request, *args, **kwargs):
+        for field in [x for x in ['user', 'team', 'organization'] if x in request.data and request.data[x] in ('', None)]:
+            request.data.pop(field)
+            kwargs.pop(field, None)
+
         if not any([x in request.data for x in ['user', 'team', 'organization']]):
             return Response({'detail': 'Missing user, team, or organization'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1213,15 +1243,15 @@ class CredentialList(ListCreateAPIView):
 
         if 'user' in request.data:
             user = User.objects.get(pk=request.data['user'])
-            obj = user
+            can_add_params = {'user': user.id}
         if 'team' in request.data:
             team = Team.objects.get(pk=request.data['team'])
-            obj = team
+            can_add_params = {'team': team.id}
         if 'organization' in request.data:
             organization = Organization.objects.get(pk=request.data['organization'])
-            obj = organization
+            can_add_params = {'organization': organization.id}
 
-        if self.request.user not in obj.admin_role:
+        if not self.request.user.can_access(Credential, 'add', can_add_params):
             raise PermissionDenied()
 
         ret = super(CredentialList, self).post(request, *args, **kwargs)
@@ -1251,8 +1281,7 @@ class UserCredentialsList(CredentialList):
         return user_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        request.data['user'] = user.id
+        request.data['user'] = self.kwargs['pk']
         # The following post takes care of ensuring the current user can add a cred to this user
         return super(UserCredentialsList, self).post(request, args, kwargs)
 
@@ -1271,8 +1300,7 @@ class TeamCredentialsList(CredentialList):
         return team_creds & visible_creds
 
     def post(self, request, *args, **kwargs):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        request.data['team'] = team.id
+        request.data['team'] = self.kwargs['pk']
         # The following post takes care of ensuring the current user can add a cred to this user
         return super(TeamCredentialsList, self).post(request, args, kwargs)
 
@@ -1479,7 +1507,7 @@ class HostAllGroupsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = parent.all_groups.distinct()
         return qs & sublist_qs
 
@@ -2263,7 +2291,7 @@ class JobTemplateNotifiersSuccessList(SubListCreateAttachDetachAPIView):
     parent_model = JobTemplate
     relationship = 'notifiers_success'
 
-class JobTemplateLabelList(SubListCreateAttachDetachAPIView):
+class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachLabelMixin):
 
     model = Label
     serializer_class = LabelSerializer
@@ -2454,7 +2482,7 @@ class SystemJobTemplateList(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise PermissionDenied("Superuser privileges needed")
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 class SystemJobTemplateDetail(RetrieveAPIView):
@@ -3184,7 +3212,7 @@ class SystemJobList(ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise PermissionDenied("Superuser privileges needed")
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
@@ -3573,7 +3601,7 @@ class RoleChildrenList(SubListAPIView):
         # XXX: This should be the intersection between the roles of the user
         # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.children
+        return role.children.all()
 
 
 

@@ -84,11 +84,17 @@ class AdHocCommand(UnifiedJob):
         editable=False,
         through='AdHocCommandEvent',
     )
+    extra_vars = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     def clean_inventory(self):
         inv = self.inventory
         if not inv:
-            raise ValidationError('Inventory is no longer available.')
+            raise ValidationError('No valid inventory.')
         return inv
 
     def clean_credential(self):

@@ -37,7 +37,6 @@ function manageGroupsDirectiveController($filter, $location, $log,
     Rest.get()
         .success(function(data) {
             group = data;
-            $scope.source_id = data.related.inventory_source.split('/')[4];
             for (var fld in form.fields) {
                 if (data[fld]) {
                     $scope[fld] = data[fld];
@@ -47,6 +46,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
             if(mode === 'edit') {
                 $scope.variable_url = data.related.variable_data;
                 $scope.source_url = data.related.inventory_source;
+                $scope.source_id = data.related.inventory_source.split('/')[4];
                 $scope.$emit('LoadSourceData');
             }
         })
@@ -63,8 +63,9 @@ function manageGroupsDirectiveController($filter, $location, $log,
     generator.inject(form, {
         mode: mode,
         id: 'group-manage-panel',
-        tabs: true,
-        scope: $scope
+        scope: $scope,
+        related: false,
+        cancelButton: false
     });
 
     generator.reset();
@@ -74,12 +75,12 @@ function manageGroupsDirectiveController($filter, $location, $log,
         variable: 'source_type_options'
     });
 
-
     $scope.source = form.fields.source['default'];
     $scope.sourcePathRequired = false;
     $scope[form.fields.source_vars.parseTypeName] = 'yaml';
     $scope.update_cache_timeout = 0;
     $scope.parseType = 'yaml';
+
 
     function initSourceChange() {
         $scope.showSchedulesTab = (mode === 'edit' && $scope.source && $scope.source.value !== "manual") ? true : false;
@@ -144,7 +145,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
                             master.source_vars = $scope.variables;
                         } else if (fld === "inventory_script") {
                             // the API stores it as 'source_script', we call it inventory_script
-                            data.summary_fields['inventory_script'] = data.summary_fields.source_script;
+                            data.summary_fields.inventory_script = data.summary_fields.source_script;
                             $scope.inventory_script = data.source_script;
                             master.inventory_script = $scope.inventory_script;
                         } else if (fld === "source_regions") {
@@ -213,6 +214,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
                             master.source_regions = opts;
                             CreateSelect2({
                                 element: "group_source_regions",
+                                multiple: true,
                                 opts: opts
                             });
 
@@ -240,7 +242,8 @@ function manageGroupsDirectiveController($filter, $location, $log,
                         }
                         master.group_by = opts;
                         CreateSelect2({
-                            element: "#source_group_by",
+                            element: "#group_group_by",
+                            multiple:  true,
                             opts: opts
                         });
                     }
@@ -406,7 +409,7 @@ function manageGroupsDirectiveController($filter, $location, $log,
         if ($scope.source && ($scope.source.value === 'ec2')) {
             data.instance_filters = $scope.instance_filters;
             // Create a string out of selected list of regions
-            group_by = $('#source_group_by').select2("data");
+            group_by = $('#group_group_by').select2("data");
             r = [];
             for (i = 0; i < group_by.length; i++) {
                 r.push(group_by[i].id);

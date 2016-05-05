@@ -50,7 +50,12 @@ export default
                         " syntax, test environment setup and report problems.</p>",
                     dataTitle: 'Job Type',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_job_type_on_launch',
+                        ngShow: "!job_type.value || job_type.value !== 'scan'",
+                        text: 'Prompt on launch'
+                    }
                 },
                 inventory: {
                     label: 'Inventory',
@@ -59,14 +64,20 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpInventory()',
                     awRequiredWhen: {
-                        reqExpression: "inventoryrequired",
-                        init: "true"
+                        reqExpression: '!ask_inventory_on_launch',
+                        alwaysShowAsterisk: true
                     },
+                    requiredErrorMsg: "Please select an Inventory or check the Prompt on launch option.",
                     column: 1,
                     awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
                     dataTitle: 'Inventory',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_inventory_on_launch',
+                        ngShow: "!job_type.value || job_type.value !== 'scan'",
+                        text: 'Prompt on launch'
+                    }
                 },
                 project: {
                     label: 'Project',
@@ -90,7 +101,7 @@ export default
                     ngOptions: 'book for book in playbook_options track by book',
                     id: 'playbook-select',
                     awRequiredWhen: {
-                        reqExpression: "playbookrequired", 
+                        reqExpression: "playbookrequired",
                         init: "true"
                     },
                     column: 1,
@@ -111,14 +122,21 @@ export default
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
-                    addRequired: false,
-                    editRequired: false,
+                    awRequiredWhen: {
+                        reqExpression: '!ask_credential_on_launch',
+                        alwaysShowAsterisk: true
+                    },
+                    requiredErrorMsg: "Please select a Machine Credential or check the Prompt on launch option.",
                     column: 1,
                     awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
                      " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>",
                     dataTitle: 'Credential',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_credential_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 cloud_credential: {
                     label: 'Cloud Credential',
@@ -165,7 +183,11 @@ export default
                         "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>",
                     dataTitle: 'Limit',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_limit_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 verbosity: {
                     label: 'Verbosity',
@@ -196,7 +218,11 @@ export default
                         "in the Job Tags field:</p>\n<blockquote>configuration,packages</blockquote>\n",
                     dataTitle: "Job Tags",
                     dataPlacement: "right",
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_tags_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 labels: {
                     label: 'Labels',
@@ -227,20 +253,11 @@ export default
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataTitle: 'Extra Variables',
                     dataPlacement: 'right',
-                    dataContainer: "body"
-                },
-                ask_variables_on_launch: {
-                    label: 'Prompt for Extra Variables',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    trueValue: 'true',
-                    falseValue: 'false',
-                    column: 2,
-                    awPopOver: "<p>If checked, user will be prompted at job launch with a dialog allowing override of the extra variables setting.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Prompt for Extra Variables',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 become_enabled: {
                   label: 'Enable Privilege Escalation',

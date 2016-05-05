@@ -8,7 +8,7 @@ export default
             link: function(scope, element, attrs) {
 
                 scope.isCurrentState = function(name){
-                    return $state.current.name == name
+                    return $state.current.name === name;
                 };
 
                 // set up the user tooltip

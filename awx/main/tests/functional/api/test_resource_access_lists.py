@@ -1,6 +1,7 @@
 import pytest
 
 from django.core.urlresolvers import reverse
+from awx.main.models import Role
 
 @pytest.mark.django_db
 def test_indirect_access_list(get, organization, project, team_factory, user, admin):
@@ -53,5 +54,5 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
     assert org_admin_team_member_entry['team_name'] == org_admin_team.name
 
     admin_entry = admin_res['summary_fields']['indirect_access'][0]['role']
-    assert admin_entry['name'] == 'System Administrator'
+    assert admin_entry['name'] == Role.singleton('system_administrator').name
 

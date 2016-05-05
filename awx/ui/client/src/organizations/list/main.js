@@ -5,7 +5,6 @@
  *************************************************/
 
 import route from './organizations-list.route';
-import controller from './organizations-list.controller';
 
 export default
     angular.module('organizationsList', [])

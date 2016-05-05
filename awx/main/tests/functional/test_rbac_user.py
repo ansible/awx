@@ -13,7 +13,7 @@ def test_user_admin(user_project, project, user):
 
     joe = user(username, is_superuser = False)
     admin = user('admin', is_superuser = True)
-    sa = Role.singleton('System Administrator')
+    sa = Role.singleton('system_administrator')
 
     # this should happen automatically with our signal
     assert sa.members.filter(id=admin.id).exists() is True

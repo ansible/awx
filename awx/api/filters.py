@@ -131,6 +131,8 @@ class FieldLookupBackend(BaseFilterBackend):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
+            if not value:
+                raise ValueError('cannot provide empty value for __in')
             for item in value.split(','):
                 items.append(self.value_to_python_for_field(field, item))
             value = items
@@ -218,7 +220,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         q = Q(**{k:v})
                     queryset = queryset.filter(q)
                 queryset = queryset.filter(*args)
-            return queryset.distinct()
+            return queryset
         except (FieldError, FieldDoesNotExist, ValueError), e:
             raise ParseError(e.args[0])
         except ValidationError, e:

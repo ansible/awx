@@ -27,7 +27,7 @@ def test_credential_use_role(credential, user, permissions):
 @pytest.mark.django_db
 def test_credential_migration_team_member(credential, team, user, permissions):
     u = user('user', False)
-    team.admin_role.members.add(u)
+    team.member_role.members.add(u)
     credential.deprecated_team = team
     credential.save()
 
@@ -91,7 +91,8 @@ def test_credential_access_admin(user, team, credential):
     assert access.can_change(credential, {'user': u.pk})
 
 @pytest.mark.django_db
-def test_cred_job_template(user, deploy_jobtemplate):
+def test_cred_job_template_xfail(user, deploy_jobtemplate):
+    ' Personal credential migration '
     a = user('admin', False)
     org = deploy_jobtemplate.project.organization
     org.admin_role.members.add(a)
@@ -102,19 +103,17 @@ def test_cred_job_template(user, deploy_jobtemplate):
 
     access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
-    assert access.can_change(cred, {'organization': org.pk})
-
-    org.admin_role.members.remove(a)
     assert not access.can_change(cred, {'organization': org.pk})
 
 @pytest.mark.django_db
-def test_cred_multi_job_template_single_org(user, deploy_jobtemplate):
+def test_cred_job_template(user, team, deploy_jobtemplate):
+    ' Team credential migration => org credential '
     a = user('admin', False)
     org = deploy_jobtemplate.project.organization
     org.admin_role.members.add(a)
 
     cred = deploy_jobtemplate.credential
-    cred.deprecated_user = user('john', False)
+    cred.deprecated_team = team
     cred.save()
 
     access = CredentialAccess(a)
@@ -125,8 +124,42 @@ def test_cred_multi_job_template_single_org(user, deploy_jobtemplate):
     assert not access.can_change(cred, {'organization': org.pk})
 
 @pytest.mark.django_db
-def test_single_cred_multi_job_template_multi_org(user, organizations, credential):
+def test_cred_multi_job_template_single_org_xfail(user, deploy_jobtemplate):
+    a = user('admin', False)
+    org = deploy_jobtemplate.project.organization
+    org.admin_role.members.add(a)
+
+    cred = deploy_jobtemplate.credential
+    cred.deprecated_user = user('john', False)
+    cred.save()
+
+    access = CredentialAccess(a)
+    rbac.migrate_credential(apps, None)
+    assert not access.can_change(cred, {'organization': org.pk})
+
+@pytest.mark.django_db
+def test_cred_multi_job_template_single_org(user, team, deploy_jobtemplate):
+    a = user('admin', False)
+    org = deploy_jobtemplate.project.organization
+    org.admin_role.members.add(a)
+
+    cred = deploy_jobtemplate.credential
+    cred.deprecated_team = team
+    cred.save()
+
+    access = CredentialAccess(a)
+    rbac.migrate_credential(apps, None)
+    assert access.can_change(cred, {'organization': org.pk})
+
+    org.admin_role.members.remove(a)
+    assert not access.can_change(cred, {'organization': org.pk})
+
+@pytest.mark.django_db
+def test_single_cred_multi_job_template_multi_org(user, organizations, credential, team):
     orgs = organizations(2)
+    credential.deprecated_team = team
+    credential.save()
+
     jts = []
     for org in orgs:
         inv = org.inventories.create(name="inv-%d" % org.pk)
@@ -169,7 +202,7 @@ def test_cred_inventory_source(user, inventory, credential):
     assert u not in credential.use_role
 
     rbac.migrate_credential(apps, None)
-    assert u in credential.use_role
+    assert u not in credential.use_role
 
 @pytest.mark.django_db
 def test_cred_project(user, credential, project):
@@ -181,7 +214,7 @@ def test_cred_project(user, credential, project):
     assert u not in credential.use_role
 
     rbac.migrate_credential(apps, None)
-    assert u in credential.use_role
+    assert u not in credential.use_role
 
 @pytest.mark.django_db
 def test_cred_no_org(user, credential):

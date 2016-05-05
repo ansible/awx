@@ -13,10 +13,5 @@ export default {
     controller: 'JobTemplatesEdit',
     data: {
         activityStreamId: 'template_id'
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

@@ -188,7 +188,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 ];
 
 
-export function TeamsEdit($scope, $rootScope, $location, 
+export function TeamsEdit($scope, $rootScope, $location,
     $stateParams, TeamForm, GenerateForm, Rest, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ClearScope,
     LookUpInit, GetBasePath, OrganizationList, Wait, $state) {
@@ -198,16 +198,15 @@ export function TeamsEdit($scope, $rootScope, $location,
     var defaultUrl = GetBasePath('teams'),
         generator = GenerateForm,
         form = TeamForm,
-        base = $location.path().replace(/^\//, '').split('/')[0],
-        master = {},
         id = $stateParams.team_id,
-        relatedSets = {};
+        relatedSets = {},
+        set;
 
     $scope.team_id = id;
 
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    generator.reset()
+    generator.reset();
 
     var setScopeFields = function(data){
         _(data)
@@ -218,7 +217,7 @@ export function TeamsEdit($scope, $rootScope, $location,
             $scope[key] = value;
         })
         .value();
-        return
+        return;
     };
     var setScopeRelated = function(data, related){
         _(related)
@@ -242,7 +241,7 @@ export function TeamsEdit($scope, $rootScope, $location,
              data[key] = $scope[key];
             }
         });
-        return data
+        return data;
     };
 
     var init = function(){
@@ -251,7 +250,7 @@ export function TeamsEdit($scope, $rootScope, $location,
         Wait('start');
         Rest.get(url).success(function(data){
             setScopeFields(data);
-            setScopeRelated(data, form.related)
+            setScopeRelated(data, form.related);
             $scope.organization_name = data.summary_fields.organization.name;
 
             RelatedSearchInit({
@@ -265,6 +264,12 @@ export function TeamsEdit($scope, $rootScope, $location,
                 relatedSets: relatedSets
             });
 
+            for (set in relatedSets) {
+                $scope.search(relatedSets[set].iterator);
+            }
+
+            $scope.team_obj = data;
+
             LookUpInit({
                 url: GetBasePath('organizations'),
                 scope: $scope,
@@ -275,11 +280,11 @@ export function TeamsEdit($scope, $rootScope, $location,
                 input_type: 'radio'
             });
         });
-    }
+    };
 
     $scope.formCancel = function(){
         $state.go('teams', null, {reload: true});
-    }
+    };
 
     $scope.formSave = function(){
         generator.clearApiErrors();
@@ -288,23 +293,31 @@ export function TeamsEdit($scope, $rootScope, $location,
         if ($scope[form.name + '_form'].$valid){
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
-            Rest.put(data).success(function(res){
+            Rest.put(data).success(function(){
                 $state.go('teams', null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
                 $stateParams.id + '. GET status: ' + status });
-            });   
+            });
         }
     };
 
     init();
 
+    $scope.convertApiUrl = function(str) {
+        if (str) {
+            return str.replace("api/v1", "#");
+        } else {
+            return null;
+        }
+    };
+
     /* Related Set implementation TDB */
 }
 
 TeamsEdit.$inject = ['$scope', '$rootScope',  '$location',
-    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 
+    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
      'ClearScope', 'LookUpInit', 'GetBasePath',
      'OrganizationList', 'Wait', '$state'

@@ -32,7 +32,6 @@
 import sys
 import os
 import time
-from copy import deepcopy
 from ansible import constants as C
 try:
     from ansible.cache.base import BaseCacheModule
@@ -50,7 +49,7 @@ class CacheModule(BaseCacheModule):
     def __init__(self, *args, **kwargs):
         # Basic in-memory caching for typical runs
         self._cache = {}
-        self._cache_prev = {}
+        self._all_keys = {}
 
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
@@ -72,12 +71,10 @@ class CacheModule(BaseCacheModule):
     def identify_new_module(self, key, value):
         # Return the first key found that doesn't exist in the
         # previous set of facts
-        if key in self._cache_prev:
-            value_old = self._cache_prev[key]
-            for k,v in value.iteritems():
-                if k not in value_old:
-                    if not k.startswith('ansible_'):
-                        return k
+        if key in self._all_keys:
+            for k in value.iterkeys():
+                if k not in self._all_keys[key] and not k.startswith('ansible_'):
+                    return k
         # First time we have seen facts from this host
         # it's either ansible facts or a module facts (including module_setup)
         elif len(value) == 1:
@@ -110,7 +107,7 @@ class CacheModule(BaseCacheModule):
         # Assume ansible fact triggered the set if no new module found
         facts = self.filter_ansible_facts(value) if not module else dict({ module : value[module]})
         self._cache[key] = value
-        self._cache_prev = deepcopy(self._cache)
+        self._all_keys[key] = value.keys()
         packet = {
             'host': key,
             'inventory_id': os.environ['INVENTORY_ID'],

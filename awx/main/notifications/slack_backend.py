@@ -43,6 +43,8 @@ class SlackBackend(TowerBaseEmailBackend):
         for m in messages:
             try:
                 for r in m.recipients():
+                    if r.startswith('#'):
+                        r = r[1:]
                     self.connection.rtm_send_message(r, m.subject)
                     sent_messages += 1
             except Exception as e:

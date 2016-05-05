@@ -5,7 +5,6 @@
  *************************************************/
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
-import HostSummaryController from './host-summary/host-summary.controller';
 
 export default {
     name: 'jobDetail',
@@ -15,9 +14,6 @@ export default {
         label: "{{ job.id }} - {{ job.name }}"
     },
     resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }],
         jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
             if (!$rootScope.event_socket) {
                 $rootScope.event_socket = Socket({

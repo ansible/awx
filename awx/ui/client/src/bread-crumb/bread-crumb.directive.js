@@ -3,7 +3,7 @@ export default
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
-            link: function(scope, element, attrs) {
+            link: function(scope) {
 
                 var streamConfig = {};
 
@@ -15,15 +15,15 @@ export default
 
                     if(streamConfig && streamConfig.activityStream) {
                         if(streamConfig.activityStreamTarget) {
-                            stateGoParams['target'] = streamConfig.activityStreamTarget;
+                            stateGoParams.target = streamConfig.activityStreamTarget;
                         }
                         if(streamConfig.activityStreamId) {
-                            stateGoParams['id'] = $state.params[streamConfig.activityStreamId];
+                            stateGoParams.id = $state.params[streamConfig.activityStreamId];
                         }
                     }
 
                     $state.go('activityStream', stateGoParams);
-                }
+                };
 
                 scope.$on("$stateChangeSuccess", function updateActivityStreamButton(event, toState) {
 
@@ -38,7 +38,7 @@ export default
                         // attached to the $rootScope.
 
                         FeaturesService.get()
-                        .then(function(features) {
+                        .then(function() {
                             if(FeaturesService.featureEnabled('activity_streams')) {
                                 scope.showActivityStreamButton = true;
                             }

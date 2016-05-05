@@ -19,66 +19,54 @@ export default
                 name: 'jobTemplateSchedules',
                 route: '/job_templates/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerController'
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerAddController'
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerEditController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules',
                 route: '/projects/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerAddController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
+                controller: 'schedulerEditController'
+            });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules',
+                route: '/inventory/:inventory_id/manage/:id/schedules',
+                templateUrl: templateUrl("scheduler/scheduler"),
+                controller: 'schedulerController'
+            });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules.add',
+                route: '/add',
+                templateUrl: templateUrl("scheduler/schedulerForm"),
+                controller: 'schedulerAddController'
+            });
+            $stateExtender.addState({
+                name: 'inventoryManageSchedules.edit',
+                route: '/:schedule_id',
+                templateUrl: templateUrl("scheduler/schedulerForm"),
+                controller: 'schedulerEditController'
             });
         }]);

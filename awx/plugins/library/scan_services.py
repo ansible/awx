@@ -59,8 +59,8 @@ class ServiceScanService(BaseService):
         initctl_path = self.module.get_bin_path("initctl")
         chkconfig_path = self.module.get_bin_path("chkconfig")
 
-        # Upstart and sysvinit
-        if initctl_path is not None and chkconfig_path is None:
+        # sysvinit
+        if service_path is not None and chkconfig_path is None:
             rc, stdout, stderr = self.module.run_command("%s --status-all 2>&1 | grep -E \"\\[ (\\+|\\-) \\]\"" % service_path, use_unsafe_shell=True)
             for line in stdout.split("\n"):
                 line_data = line.split()
@@ -72,6 +72,9 @@ class ServiceScanService(BaseService):
                 else:
                     service_state = "stopped"
                 services.append({"name": service_name, "state": service_state, "source": "sysv"})
+
+        # Upstart
+        if initctl_path is not None and chkconfig_path is None:
             p = re.compile('^\s?(?P<name>.*)\s(?P<goal>\w+)\/(?P<state>\w+)(\,\sprocess\s(?P<pid>[0-9]+))?\s*$')
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")

@@ -15,10 +15,5 @@ export default {
     ncyBreadcrumb: {
         parent: "inventories",
         label: "CREATE INVENTORY"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

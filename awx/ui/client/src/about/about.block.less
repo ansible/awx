@@ -2,7 +2,7 @@
 @import "awx/ui/client/src/shared/branding/colors.default.less";
 
 .About-cowsay--container{
-	width: 340px; 
+	width: 340px;
 	margin: 0 auto;
 }
 .About-cowsay--code{
@@ -23,10 +23,8 @@
 	padding-top: 0px;
 }
 .About-brand--redhat{
-	max-width: 420px;
-	margin: 0 auto;
-	margin-top: -50px;
-	margin-bottom: -30px;
+    float: left;
+    width: 112px;
 }
 .About-brand--ansible{
 	max-width: 120px;
@@ -36,7 +34,14 @@
 	position: absolute;
 	top: 15px;
 	right: 15px;
+    z-index: 10;
 }
 .About p{
 	color: @default-interface-txt;
+    margin: 0;
+    font-size: 12px;
+    padding-top: 10px;
+}
+.About-modal--footer {
+    clear: both;
 }
