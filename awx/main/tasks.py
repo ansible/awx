@@ -118,6 +118,10 @@ def run_label_cleanup(self):
     return labels_count
 
 @task(bind=True)
+def cleanup_authtokens(self):
+    AuthToken.objects.filter(expires__lt=now()).delete()
+
+@task(bind=True)
 def tower_periodic_scheduler(self):
     def get_last_run():
         if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
@@ -1689,13 +1693,6 @@ class RunSystemJob(BaseTask):
                     args.extend(['--older_than', str(json_vars['older_than'])])
                 if 'granularity' in json_vars:
                     args.extend(['--granularity', str(json_vars['granularity'])])
-            #     Keeping this around in case we want to break this out
-            #     if 'jobs' in json_vars and json_vars['jobs']:
-            #         args.extend(['--jobs'])
-            #     if 'project_updates' in json_vars and json_vars['project_updates']:
-            #         args.extend(['--project-updates'])
-            #     if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
-            #         args.extend(['--inventory-updates'])
         except Exception, e:
             logger.error("Failed to parse system job: " + str(e))
         return args

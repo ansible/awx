@@ -40,26 +40,9 @@ def create_system_job_templates(apps, schema_editor):
             modified=now_dt,
         )
 
-    sjt, created = SystemJobTemplate.objects.get_or_create(
-        job_type='cleanup_deleted',
-        defaults=dict(
-            name='Cleanup Deleted Data',
-            description='Remove deleted object history older than X days',
-            created=now_dt,
-            modified=now_dt,
-            polymorphic_ctype=sjt_ct,
-        ),
-    )
-    if created:
-        sjt.schedules.create(
-            name='Cleanup Deleted Data Schedule',
-            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO' % now_str,
-            description='Automatically Generated Schedule',
-            enabled=True,
-            extra_data={'days': '30'},
-            created=now_dt,
-            modified=now_dt,
-        )
+    existing_cd_jobs = SystemJobTemplate.objects.filter(job_type='cleanup_deleted')
+    Schedule.objects.filter(unified_job_template__in=existing_cd_jobs).delete()
+    existing_cd_jobs.delete()
 
     sjt, created = SystemJobTemplate.objects.get_or_create(
         job_type='cleanup_activitystream',
