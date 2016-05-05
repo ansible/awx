@@ -414,6 +414,7 @@ textarea.allowresize {
       color: @default-bg;
       font-weight: 600;
       border-bottom: none;
+      text-transform: uppercase;
   }
   .popover {
       z-index: 2000;
@@ -422,8 +423,11 @@ textarea.allowresize {
       background-color: @default-interface-txt;
       color: @default-bg; //white
   }
-  .popover.right>.arrow:after {
+  .popover.right>.arrow:after  {
       border-right-color: @default-interface-txt;
+  }
+  .popover.left>.arrow:after {
+      border-left-color: @default-interface-txt;
   }
   .popover pre {
       white-space: pre-wrap;

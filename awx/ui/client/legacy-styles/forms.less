@@ -161,13 +161,21 @@
 
 .Form-subForm {
     width: 100%;
-    border-left: 5px solid @default-border;
-    padding-left: 15px;
     margin-bottom: 15px;
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
+    position: relative;
+}
+
+.Form-subForm:before {
+    content: '';
+    left: -20px;
+    position: absolute;
+    width: 5px;
+    background-color: @default-border;
+    height: 100%;
 }
 
 .Form-subForm--title {

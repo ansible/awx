@@ -78,7 +78,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             },
             base_dir: {
                 label: 'Project Base Path',
-                type: 'textarea',
+                type: 'text',
                 //"class": 'col-lg-6',
                 showonly: true,
                 ngShow: "scm_type.value == 'manual' " ,
