@@ -14,6 +14,7 @@ def create_system_job_templates(apps, schema_editor):
     '''
 
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    Schedule = apps.get_model('main', 'Schedule')
     ContentType = apps.get_model('contenttypes', 'ContentType')
     sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
     now_dt = now()
