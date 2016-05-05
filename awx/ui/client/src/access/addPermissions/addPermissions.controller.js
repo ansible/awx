@@ -75,18 +75,19 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
             });
         } else {
             // selected, so add to the allSelected list
+            var getName = function(val) {
+                if (val.type === "user") {
+                    return (val.first_name &&
+                        val.last_name) ?
+                        val.first_name + " " +
+                        val.last_name :
+                        val.username;
+                } else {
+                    return val.name;
+                }
+            };
             scope.allSelected.push({
-                name: function() {
-                    if (val.type === "user") {
-                        return (val.first_name &&
-                            val.last_name) ?
-                            val.first_name + " " +
-                            val.last_name :
-                            val.username;
-                    } else {
-                        return val .name;
-                    }
-                },
+                name: getName(val),
                 type: val.type,
                 roles: [],
                 id: val.id

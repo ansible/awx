@@ -329,7 +329,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                   html += "</div>";
                               }
                               html += "<div class=\"List-actions\">";
-                              html += "<div class=\"list-actions\" ng-include=\"'" +
+                              html += "<div ng-include=\"'" +
                                   templateUrl('shared/list-generator/list-actions') +
                                   "'\">\n";
 

@@ -650,7 +650,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 }
 
                 if (addNew) {
-                    $(element).prepend("<option></option>");
                     config.tags = true;
                     config.tokenSeparators = [];
                 }

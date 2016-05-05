@@ -73,7 +73,7 @@ export default
 	 		return moment().add(days, 'days').calendar();
 	 	};
 	 	var init = function(){
-	 		$scope.fileName = "Please choose a file...";
+	 		$scope.fileName = "No file selected.";
 			$scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
 	 		Wait('start');
 	 		CheckLicense.get()

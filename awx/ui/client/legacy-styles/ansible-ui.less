@@ -104,9 +104,9 @@ a:focus {
 }
 /* Old style TB default button with grey background */
 .btn-grey {
-  color: #333;
-  background-color: #ccc;
-  border-color: #ccc;
+  color: @default-data-txt;
+  background-color: @d7grey;
+  border-color: @d7grey;
 }
 
 .btn-grey:hover {
@@ -146,7 +146,7 @@ a:focus {
 
 /* Bring primary (blue) buttons in line with link colors */
 .btn-primary {
-   background-color: @blue-link;
+   background-color: @default-link;
 }
 
 .btn-primary:hover {
@@ -217,7 +217,7 @@ i:active,
     height: 46px;
     padding-top: 10px;
     text-align: right;
-    border-top: 1px solid #A6C9E2;
+    border-top: 1px solid @default-border;
     margin-top: 5px;
     a {
         margin-right: 8px;
@@ -230,16 +230,16 @@ i:active,
     top: 0;
     left: 0;
     display: none;
-    border: 1px solid #e5e5e5;
+    border: 1px solid @default-border;
     border-radius: 4px;
-    box-shadow: 3px 3px 6px 0 #666;
+    box-shadow: 3px 3px 6px 0 @default-dark;
     padding: 0 10px 15px 8px;
     background-color: @white;
     z-index: 200;
 }
 
 #configure-schedules-title {
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid @default-border;
     padding-bottom: 8px;
     margin-bottom: 10px;
     margin-top: 0;
@@ -321,7 +321,7 @@ i:active,
 
 .success-badge {
   color: @default-bg;
-  background-color: #5cb85c;
+  background-color: @default-succ;
 }
 
 .bold-text .checkbox-inline {
@@ -345,7 +345,7 @@ textarea.allowresize {
   width: 138px;
   height: 50px;
   text-align:center;
-  color: #eee;
+  color: @d7grey;
   background-color: @black;
   border: 1px solid @grey;
   border-radius: 6px;
@@ -410,11 +410,24 @@ textarea.allowresize {
   .popover-title {
       padding-top: 5px;
       padding-bottom: 5px;
+      background-color: @default-interface-txt;
+      color: @default-bg;
+      font-weight: 600;
+      border-bottom: none;
+      text-transform: uppercase;
   }
   .popover {
       z-index: 2000;
       min-width: 200px;
       max-width: 325px;
+      background-color: @default-interface-txt;
+      color: @default-bg; //white
+  }
+  .popover.right>.arrow:after  {
+      border-right-color: @default-interface-txt;
+  }
+  .popover.left>.arrow:after {
+      border-left-color: @default-interface-txt;
   }
   .popover pre {
       white-space: pre-wrap;
@@ -442,7 +455,7 @@ textarea.allowresize {
 }
 
 hr {
-  border-color: #e3e3e3;
+  border-color: @default-border;
 }
 
 .help {
@@ -494,13 +507,13 @@ td.actions {
 }
 
 .btn .caret {
-  border-top-color: #696969;
+  border-top-color: @default-icon;
 }
 
 .btn-light {
-  color: #333;
-  background-color: #ddd;
-  border-color: #ddd;
+  color: @default-data-txt;
+  background-color: @d7grey;
+  border-color: @d7grey;
 }
 
 .refresh-grp {
@@ -517,9 +530,9 @@ td.actions {
 }
 
 .btn-light:hover {
-  color: #333;
-  background-color: #ccc;
-  border-color: #ccc;
+  color: @d7grey;
+  background-color: @default-icon;
+  border-color: @default-icon;
 }
 
 /* Make a div or any element behave like pre. Use in conjunction with .mono-space */
@@ -549,7 +562,7 @@ dd {
 
 #navbar-container, .main-menu {
   width: 100%;
-  background-color: @black;
+  background-color: @default-dark;
 }
 
 .text-justify {
@@ -568,7 +581,7 @@ dd {
 
 .help-link:hover,
 .ui-widget-content a.help-link:hover {
-  color: @black;
+  color: @default-icon;
   text-decoration: none;
 }
 
@@ -627,7 +640,7 @@ dd {
 
 /* Outline required fields in Red when there is an error */
   .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
-      border-color: rgba(255, 88, 80, 0.8);
+      border-color: @default-err;
       outline: 0;
       -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
               box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
@@ -635,7 +648,7 @@ dd {
 
   .form-control.ng-dirty.ng-invalid + .select2 .select2-selection,
   .form-control.ng-dirty.ng-invalid + .select2 .select2-selection:focus {
-      border-color: rgba(255, 88, 80, 0.8) !important;
+      border-color: @default-err !important;
       outline: 0 !important;
       box-shadow: none !important;
   }
@@ -737,7 +750,7 @@ legend {
           background-color: @default-bg;
           color: #428bca;
           border-color: none;
-          border: 1px solid #428bca;
+          border: 1px solid @default-link;
       }
   }
 
@@ -815,10 +828,10 @@ select.page-size {
     margin-bottom: 15px;
     font-size: 14px;
     font-weight: bold;
-    background-color: #f5f5f5;
-    border: 1px solid #d8d8d8;
+    background-color: @default-no-items-bord;
+    border: 1px solid @d7grey;
     border-radius: 6px;
-    box-shadow: 3px 3px 4px 0 #808080;
+    box-shadow: 3px 3px 4px 0 @default-icon;
 
     .breadcrumb {
       display: inline-block;
@@ -994,11 +1007,11 @@ input[type="checkbox"].checkbox-no-label {
 .table-summary thead > tr > td,
 .table-summary tbody > tr > td,
 .table-summary tfoot > tr > td {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid @d7grey;
 }
 
 .table-summary thead > tr > th {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid @d7grey;
 }
 
 /* Table without row borders */
@@ -1047,7 +1060,7 @@ input[type="checkbox"].checkbox-no-label {
   .active-failures-true a:active,
   .job-failed,
   .job-error {
-    color: #da4f49;
+    color: @default-err;
   }
 
   .icon-failures-true a:hover {
@@ -1056,7 +1069,7 @@ input[type="checkbox"].checkbox-no-label {
 
   .job-failures-true {
     padding-top: 5px;
-    color: #da4f49;
+    color: @default-err;
   }
 
   .job-event-status,
@@ -1285,11 +1298,11 @@ input[type="checkbox"].checkbox-no-label {
 /* end */
 
   .field-success {
-    color: #5bb75b;
+    color: @default-succ;
   }
 
   .field-success input {
-    border-color: #5bb75b;
+    border-color: @default-succ;
   }
 
   .field-failure {
@@ -1361,8 +1374,8 @@ input[type="checkbox"].checkbox-no-label {
 
       input[readonly],
       textarea[readonly] {
-          background-color: #FBFBFB;
-          border: 1px solid #E0E0E0;
+          background-color: @default-border;
+          border: 1px solid @default-icon;
       }
 
       .fa-external-link {
@@ -1376,8 +1389,8 @@ input[type="checkbox"].checkbox-no-label {
           color: @white;
       }
       .free-button:hover {
-          background-color: #E64F48;
-          border: 1px solid #E64F48;
+          background-color: @default-err-hov;
+          border: 1px solid @default-err-hov;
           color: @white;
       }
   }
@@ -1439,8 +1452,8 @@ input[type="checkbox"].checkbox-no-label {
 
   .active-row {
      background-color: @white;
-     border-bottom: 1px solid #ddd;
-     border-right: 1px solid #ddd;
+     border-bottom: 1px solid @default-tertiary-bg;
+     border-right: 1px solid @default-tertiary-bg;
   }
 
   .node-toggle, .node-no-toggle {
@@ -1564,7 +1577,7 @@ a.btn-disabled:hover {
 }
 
 .list-header .icon-sort {
-  color: #ccc;
+  color: @default-icon;
 }
 
 .list-header .icon-sort-down,
@@ -1603,7 +1616,7 @@ tr td button i {
   margin-top: 0;
   margin-bottom: 10px;
   font-weight: bold;
-  border-bottom: 1px solid #d8d8d8;
+  border-bottom: 1px solid @default-border;
 }
 
 .modal-backdrop,
@@ -1620,8 +1633,8 @@ tr td button i {
 
 .modal-header {
   padding: 15px 10px;
-  color: #2078be;
-  border-bottom: 1px solid #eee;
+  color: @default-link;
+  border-bottom: 1px solid @default-border;
   -webkit-border-top-right-radius: 3px;
      -moz-border-top-right-radius: 3px;
           border-top-right-radius: 3px;
@@ -1887,10 +1900,16 @@ tr td button i {
       padding-right: 15px;
   }
 
+  .list-actions {
+      margin-bottom: 20px;
+      text-align: left;
+  }
+
 }
 
 .nvtooltip {
     border-radius: 4px;
+    padding: 10px;
 }
 
 .nvtooltip td.value {
@@ -1902,7 +1921,7 @@ tr td button i {
 }
 
 .stdout-panel-body {
-    background-color: #e9e9e9;
+    background-color: @default-list-header-bg;
 }
 
 .job-stdout-panel {
@@ -2004,7 +2023,7 @@ tr td button i {
 
 .form-control {
     border-color: @d7grey;
-    background-color: #f6f6f6;
+    background-color: @default-no-items-bord;
     color: @default-data-txt;
     transition: border-color 0.3s;
     box-shadow: none;
@@ -2012,7 +2031,7 @@ tr td button i {
 
 .form-control + .select2 .select2-selection {
     border-color: @d7grey !important;
-    background-color: #f6f6f6 !important;
+    background-color: #fcfcfc !important;
     color: @default-data-txt !important;
     transition: border-color 0.3s !important;
     box-shadow: none !important;
@@ -2020,12 +2039,12 @@ tr td button i {
 
 .form-control:active, .form-control:focus {
     box-shadow: none;
-    border-color: #167ec4;
+    border-color: @default-link;
 }
 
 .form-control:active + .select2 .select2-selection, .form-control:focus + .select2 .select2-selection {
     box-shadow: none !important;
-    border-color: #167ec4 !important;
+    border-color: @default-link !important;
 }
 
 .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
@@ -2035,7 +2054,6 @@ tr td button i {
 .form-control.ng-dirty.ng-invalid + .select2 .select2-selection, .form-control.ng-dirty.ng-invalid:focus + .select2 .select2-selection {
     box-shadow: none !important;
 }
-
 
 .error {
     opacity: 1;
@@ -2050,10 +2068,6 @@ tr td button i {
     opacity: 0;
 }
 
-.list-actions button, .list-actions .checkbox-inline {
-    margin-top: 10px;
-}
-
 /* Overwrite select2 base styles for single/multiple selects so that match up with other form elements.  Also overwrite disabled styles. */
 .select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
     cursor: not-allowed !important;
@@ -2065,13 +2079,13 @@ tr td button i {
 
 .select2-container--default .select2-selection--single {
     background-color: @field-secondary-bg;
-    border: 1px solid #aaa;
+    border: 1px solid @d7grey;
     border-radius: 4px;
 }
 
 .select2-container--default .select2-selection--multiple {
     background-color: @field-secondary-bg;
-    border: 1px solid #aaa;
+    border: 1px solid @d7grey;
     border-radius: 4px;
     cursor: text;
 }
@@ -2091,7 +2105,7 @@ input[type=file]:focus, input[type=radio]:focus, input[type=checkbox]:focus {
 }
 
 .btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
-    border-color: #5CB85C;
+    border-color: @default-succ;
 }
 
 a {
@@ -2104,4 +2118,49 @@ a:hover {
 
 .form-control:active, .form-control:focus {
     border-color: @default-link;
+}
+
+.nv-axislabel {
+  font-weight: bold !important;
+  fill: @db-graph-axis-label !important;
+  font-family: 'Open Sans' !important;
+}
+
+.nv-axis text {
+   fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
+   font-family: 'Open Sans' !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    cursor: default;
+    float: left;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding-left: 0px;
+    border-left-width: 0px;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
+    padding-right: 10px;
+    border-right-width: 0px;
+    background-color: @default-link;
+    color: @default-bg;
+    border-radius: 5px;
+    line-height: 21px;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 8px !important;
+    padding: 0 6px;
+    color: @default-bg !important;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: @default-link;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background-color: @default-err;
 }

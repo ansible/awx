@@ -90,8 +90,10 @@
     font-weight: bold;
     border-radius: 50%;
     background-color: @default-list-header-bg;
-    padding: 2px 6px;
+    padding: 1px 8px;
     margin-right: 10px;
+    width: 23px;
+    height: 23px;
 }
 
 .AddPermissions-separator {
@@ -122,9 +124,7 @@
 }
 
 .AddPermissions-roleType {
-    border-radius: 5px;
     padding: 0px 6px;
-    border: 1px solid @d7grey;
     font-size: 10px;
     color: @default-interface-txt;
     text-transform: uppercase;
@@ -143,7 +143,7 @@
 
 .AddPermissions-roleRemove {
     border-radius: 50%;
-    padding: 5px 3px;
+    padding: 3px 4.5px;
     line-height: 11px;
     color: @default-icon;
     background-color: @default-tertiary-bg;
@@ -187,11 +187,15 @@
 
 .AddPermissions-keyPane {
     margin: 20px 0;
-    border-radius: 5px;
+    font-size: 12px;
+    width: 100%;
     padding: 15px;
-    padding-bottom: 0px;
-    border: 1px solid @d7grey;
-    color: @default-interface-txt;
+    padding-top: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid @login-notice-border;
+    background-color: @login-notice-bg;
+    color: @login-notice-text;
 }
 
 .AddPermissions-keyRow {

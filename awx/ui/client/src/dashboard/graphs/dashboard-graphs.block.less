@@ -28,6 +28,8 @@
     color: @default-interface-txt;
     white-space: nowrap;
     margin-right: auto;
+    margin-bottom: 20px;
+    margin-top: 5px;
 }
 
 .DashboardGraphs-graphSection {
@@ -70,21 +72,11 @@
     flex-direction: column;
 }
 
-.nv-axislabel {
-  font-weight: bold !important;
-  fill: @db-graph-axis-label !important;
-  font-family: 'Open Sans' !important;
-}
-
-.nv-axis text {
-   fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
-   font-family: 'Open Sans' !important;
-}
-
 .DashboardGraphs-graphToolbar {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    margin-right: 60px;
 }
 
 .DashboardGraphs-filterDropdownText,
@@ -128,20 +120,14 @@
     text-transform: uppercase;
 }
 
-.DashboardGraphs-periodDropdown{
+.DashboardGraphs-periodDropdown,
+.DashboardGraphs-jobTypeDropdown,
+.DashboardGraphs-statusDropdown {
     padding-top:5px;
 }
 
-.DashboardGraphs-jobTypeDropdown{
-    padding-top:5px;
-}
-
-.DashboardGraphs-filterDropdownItems--period {
-    margin-left: -42px;
-}
-
-.DashboardGraphs-filterDropdownItems--jobType {
-    margin-left: -84px;
+.DashboardGraphs-filterDropdownItems {
+    min-width: 0;
 }
 
 .DashboardGraphs-statusFilters{
@@ -177,4 +163,37 @@
 
 .DashboardGraphs-statusFilterIcon{
     padding-right: 5px;
+}
+
+.DashboardGraphs-filteringDropdowns {
+    display: inherit;
+}
+
+.DashboardGraphs-filterDropdownItems {
+    li > a {
+        color: @default-interface-txt;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    .DashboardGraphs-graphToolbar {
+        width: 100%;
+        margin-right: 0px;
+    }
+
+    .DashboardGraphs-filteringDropdowns {
+        float: left;
+        width: 100%;
+        margin-left: -10px;
+    }
+
+    .DashboardGraphs-filterLabel {
+        width: 50%;
+        float:left;
+    }
+
+    .DashboardGraphs-periodDropdown {
+        width: 50%;
+        float: left;
+    }
 }

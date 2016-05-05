@@ -35,7 +35,7 @@
     color: @btn-txt;
     background-color: @btn-bg;
     font-size: 12px;
-    border: 1px solid @btn-bord;
+    border: 1px solid @default-icon-hov;
     border-radius: 5px;
     margin-right: 15px;
     margin-top: 10px;
@@ -145,11 +145,32 @@
 }
 
 .DashboardList-actionButton--edit:hover {
-    background-color: #337AB7;
+    background-color: @default-link;
     color: @default-bg;
-    border: 1px solid #337AB7;
+    border: 1px solid @default-link;
 }
 
 .DashboardList-noJobs {
     color: @list-empty-txt;
+}
+
+@media only screen and (max-width: 360px) {
+    .DashboardList-headerText {
+        white-space: normal;
+        line-height: 22px;
+        padding-top: 10px;
+    }
+
+    .DashboardList-timeCell {
+        white-space: normal;
+    }
+}
+
+@media only screen and (max-width: 540px) {
+    .DashboardList-container {
+        th {
+            width: 25%;
+            white-space: nowrap;
+        }
+    }
 }

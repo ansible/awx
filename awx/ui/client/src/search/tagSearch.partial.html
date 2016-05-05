@@ -63,14 +63,14 @@
             <div class="TagSearch-flexContainer">
                 <div class="TagSearch-tagContainer"
                     ng-repeat="tag in currentSearchFilters track by $index">
+                    <div class="TagSearch-deleteContainer"
+                        ng-click="deleteTag(tag)">
+                        <i class="fa fa-times TagSearch-tagDelete"></i>
+                    </div>
                     <div class="TagSearch-tag TagSearch-tag--deletable"
                         <span class="TagSearch-name">
                             {{ tag.name }}
                         </span>
-                    </div>
-                    <div class="TagSearch-deleteContainer"
-                        ng-click="deleteTag(tag)">
-                        <i class="fa fa-times TagSearch-tagDelete"></i>
                     </div>
                 </div>
             </div>

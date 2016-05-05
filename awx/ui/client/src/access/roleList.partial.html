@@ -1,13 +1,13 @@
 <div class="RoleList-tagContainer"
     ng-repeat="role in roles">
-    <div class="RoleList-tag"
-        ng-class="{'RoleList-tag--deletable': role.explicit}">
-        <span class="RoleList-name">{{ role.name }}</span>
-    </div>
     <div class="RoleList-deleteContainer"
         ng-if="role.explicit"
         ng-click="deletePermission(permission.id, role.roleId, permission.username, role.name, role.resourceName)">
         <i ng-if="role.explicit"
             class="fa fa-times RoleList-tagDelete"></i>
+    </div>
+    <div class="RoleList-tag"
+        ng-class="{'RoleList-tag--deletable': role.explicit}">
+        <span class="RoleList-name">{{ role.name }}</span>
     </div>
 </div>

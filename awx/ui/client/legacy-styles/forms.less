@@ -129,13 +129,12 @@
 
 .Form-tab.is-selected {
     color: @btn-txt-sel;
-    background-color: @btn-bg-sel;
-    border-color: @btn-bord-sel;
+    background-color: @default-icon-hov;
+    border-color: @default-icon-hov;
 }
 
 .Form-tab--disabled {
     opacity: 0.4;
-    cursor: not-allowed !important;
 }
 
 .Form-tab--disabled:hover {
@@ -162,14 +161,21 @@
 
 .Form-subForm {
     width: 100%;
-    border-left: 5px solid @default-border;
-    margin-left: -20px;
-    padding-left: 15px;
     margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    position: relative;
+}
 
-    .Form-formGroup {
-        float: left;
-    }
+.Form-subForm:before {
+    content: '';
+    left: -20px;
+    position: absolute;
+    width: 5px;
+    background-color: @default-border;
+    height: 100%;
 }
 
 .Form-subForm--title {
@@ -273,7 +279,7 @@
 }
 
 .select2-container--default .select2-results__option[aria-selected=true]{
-    background-color: @field-border !important;
+    background-color: @default-white-button-bord !important;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow b{
@@ -464,7 +470,7 @@ input[type='radio']:checked:before {
 }
 
 .Form-formGroup--singleColumn {
-    width: 100%;
+    width: 100% !important;
     padding-right: 0px;
 }
 
@@ -474,10 +480,15 @@ input[type='radio']:checked:before {
     color: @default-interface-txt;
 }
 
+.Form-formGroup {
+    max-width: 33%;
+}
+
 @media only screen and (max-width: 650px) {
     .Form-formGroup {
         flex: 1 0 auto;
         margin-bottom: 25px;
+        max-width: 100%;
         width: 100%;
         padding-right: 50px;
     }
@@ -487,6 +498,7 @@ input[type='radio']:checked:before {
     .Form-formGroup {
         flex: 1 0 auto;
         margin-bottom: 25px;
+        max-width: 50%;
         width: 50%;
         padding-right: 50px;
     }

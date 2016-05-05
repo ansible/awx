@@ -479,7 +479,7 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
                     url: $scope.current_url
                 });
 
-                $state.go("^");
+                $state.go('projects.edit', {id: data.id}, {reload: true});
             })
             .error(function (data, status) {
                 Wait('stop');

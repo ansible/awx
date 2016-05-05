@@ -13,6 +13,13 @@ export function PortalModeJobsController($scope, $state, $rootScope, GetBasePath
 	defaultUrl = GetBasePath('jobs') + '?created_by=' + $rootScope.current_user.id,
 	pageSize = 12;
 
+	if ($rootScope.removeJobStatusChange) {
+		   $rootScope.removeJobStatusChange();
+	   }
+	   $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-portal', function() {
+		   $scope.search('portal_job'); //processEvent(event);
+	   });
+
 	$scope.iterator = list.iterator;
 	$scope.activeFilter = 'user';
 

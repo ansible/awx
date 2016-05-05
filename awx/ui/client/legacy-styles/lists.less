@@ -47,6 +47,10 @@ table, tbody {
     text-align: right;
 }
 
+.List-tableHeader:not([ng-click]) {
+    cursor: default !important;
+}
+
 .List-tableHeaderSort {
     color: @list-header-icon;
 }
@@ -181,15 +185,10 @@ table, tbody {
 .List-actionHolder {
     justify-content: flex-end;
     display: flex;
-    height: 34px;
-}
-
-.List-actions {
-    margin-top: -10px;
 }
 
 .List-auxAction + .List-actions {
-    margin-left: 10px;
+    margin-left: 20px;
 }
 
 .List-auxAction {
@@ -313,7 +312,7 @@ table, tbody {
     height: 200px;
     border-radius: 5px;
     border: 1px solid @list-no-items-bord;
-    background-color: @list-no-items-bg;
+    background-color: @default-no-items-bord;
     color: @list-no-items-txt;
     text-transform: uppercase;
 }

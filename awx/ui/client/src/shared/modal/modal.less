@@ -37,12 +37,14 @@
     height:20px;
     font-size: 20px;
     background-color:@default-bg;
-    color:@default-icon;
+    color:@default-icon-hov;
     line-height:1;
+    opacity: 1;
 }
 
 .Modal-exit:hover{
-    color:@default-icon-hov;
+    color: @default-icon;
+    opacity: 1;
 }
 
 .Modal-body {
@@ -93,6 +95,10 @@
 
 .Modal-errorButton:hover {
     background-color: @default-err-hov;
+    color: @btn-txt-sel;
+}
+
+.Modal-errorButton:focus {
     color: @btn-txt-sel;
 }
 

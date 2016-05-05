@@ -1783,7 +1783,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += `
 <div class=\"row\"
     ng-show=\"${collection.hideSearchAndActions ? false : true}\">
-    <div class=\"col-lg-8\"
+    <div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\"
         ng-show=\"${collection.iterator}Loading == true ||
             ${collection.iterator}_active_search == true || (
                 ${collection.iterator}Loading == false &&
@@ -1793,7 +1793,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
     >
         ${tagSearch}
     </div>
-    <div class=\"col-lg-4\">
+    <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\">
         <div class=\"list-actions\">
             ${actionButtons}
         </div>

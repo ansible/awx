@@ -55,7 +55,7 @@ export default
                     "default": "---",
                     awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
-                        "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                         '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
