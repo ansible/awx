@@ -58,7 +58,7 @@ JOB_CALLBACK_DEBUG = False
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.
-PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
+PROJECTS_ROOT = '/projects/'
 
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible
