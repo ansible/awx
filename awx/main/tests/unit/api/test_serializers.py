@@ -160,6 +160,7 @@ class TestJobTemplateSerializerValidation(object):
 
     good_extra_vars = ["{\"test\": \"keys\"}", "---\ntest: key"]
     bad_extra_vars = ["{\"test\": \"keys\"", "---\ntest: [2"]
+
     def test_validate_extra_vars(self):
         serializer = JobTemplateSerializer()
         for ev in self.good_extra_vars:
