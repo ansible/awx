@@ -2234,8 +2234,9 @@ class JobLaunchSerializer(BaseSerializer):
             except (ValueError, TypeError):
                 try:
                     extra_vars = yaml.safe_load(extra_vars)
-                except (yaml.YAMLError, TypeError, AttributeError):
-                    errors['extra_vars'] = 'Must be valid JSON or YAML'
+                    assert isinstance(extra_vars, dict)
+                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
