@@ -111,7 +111,6 @@ export default
                 Rest.setUrl(url);
                 Rest.post(params)
                 .success(function (data) {
-                    $rootScope.addedItem = data.id;
                     $state.go('notifications', {}, {reload: true});
                     Wait('stop');
                 })

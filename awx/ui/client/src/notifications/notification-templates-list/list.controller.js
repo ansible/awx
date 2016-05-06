@@ -192,7 +192,7 @@ export default
                                 msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                         });
                 };
-                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + name + '</div>';
+                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the notification template below?</div><div class="Prompt-bodyTarget">' + name + '</div>';
                 Prompt({
                     hdr: 'Delete',
                     body: bodyHtml,

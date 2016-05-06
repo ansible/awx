@@ -155,8 +155,7 @@ export default
                 Wait('start');
                 Rest.setUrl(url+ id+'/');
                 Rest.put(params)
-                .success(function (data) {
-                    $rootScope.addedItem = data.id;
+                .success(function () {
                     $state.go('notifications', {}, {reload: true});
                     Wait('stop');
                 })
