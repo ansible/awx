@@ -1,9 +1,9 @@
 <section id="htmlTemplate" class="Container">
     <div class="SetupMenu">
-        <a ui-sref="credentials" class="SetupItem">
-            <h4 class="SetupItem-title">Credentials</h4>
+        <a ui-sref="organizations" class="SetupItem">
+            <h4 class="SetupItem-title ">Organizations</h4>
             <p class="SetupItem-description">
-              Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or when syncing inventories or projects.
+            Group all of your content to manage permissions across departments in your company.
             </p>
         </a>
         <a ui-sref="users" class="SetupItem">
@@ -18,10 +18,10 @@
               Split up your organization to associate content and control permissions for groups.
             </p>
         </a>
-        <a ui-sref="organizations" class="SetupItem">
-            <h4 class="SetupItem-title ">Organizations</h4>
+        <a ui-sref="credentials" class="SetupItem">
+            <h4 class="SetupItem-title">Credentials</h4>
             <p class="SetupItem-description">
-            Group all of your content to manage permissions across departments in your company.
+              Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or when syncing inventories or projects.
             </p>
         </a>
         <a ui-sref="managementJobsList" class="SetupItem" ng-if="user_is_superuser">
