@@ -1634,15 +1634,23 @@ class CredentialSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_dict = super(CredentialSerializer, self).get_summary_fields(obj)
+        summary_dict['owners'] = []
 
-        qs = Organization.objects.filter(admin_role__children=obj.owner_role)
-        if qs.count() > 0:
-            org = qs[0]
-            summary_dict['organization'] = {
-                'id': org.id,
-                'name': org.name,
-                'description': org.description,
-            }
+        for user in obj.owner_role.members.all():
+            summary_dict['owners'].append({
+                'id': user.pk,
+                'name': user.username,
+                'description': ' '.join([user.first_name, user.last_name]),
+                'url': reverse('api:user_detail', args=(user.pk,)),
+            })
+
+        for parent in obj.owner_role.parents.exclude(object_id__isnull=True).all():
+            summary_dict['owners'].append({
+                'id': parent.content_object.pk,
+                'name': parent.content_object.name,
+                'description': parent.content_object.description,
+                'url': parent.content_object.get_absolute_url(),
+            })
 
         return summary_dict
 
