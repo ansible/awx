@@ -81,7 +81,7 @@ export default
 
                             master.notification_type = $scope.notification_type;
                             CreateSelect2({
-                                element: '#notification_template_notification_typex',
+                                element: '#notification_template_notification_type',
                                 multiple: false
                             });
                             NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {

@@ -66,12 +66,7 @@ export default function() {
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm'
             },
-            use_tls: {
-                label: 'Use TLS',
-                type: 'checkbox',
-                ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
-            },
+
             host: {
                 label: 'Host',
                 type: 'text',
@@ -116,12 +111,6 @@ export default function() {
                     reqExpression: "password_required" ,
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
-                subForm: 'typeSubForm'
-            },
-            use_ssl: {
-                labelBind: 'sslLabel',
-                type: 'checkbox',
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
                 subForm: 'typeSubForm'
             },
@@ -325,7 +314,8 @@ export default function() {
             },
             targets: {
                 label: 'Destination Channels or Users',
-                type: 'text',
+                type: 'textarea',
+                rows: 3,
                 awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
                             '<p>For example:<br>#support or support<br>\n @username or username<br>\n',
                 dataTitle: 'Destination Channels',
@@ -336,6 +326,18 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
+                subForm: 'typeSubForm'
+            },
+            use_tls: {
+                label: 'Use TLS',
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'email' ",
+                subForm: 'typeSubForm'
+            },
+            use_ssl: {
+                labelBind: 'sslLabel',
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
                 subForm: 'typeSubForm'
             },
 
