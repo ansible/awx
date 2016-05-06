@@ -110,7 +110,7 @@ export default
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post(params)
-                .success(function (data) {
+                .success(function () {
                     $state.go('notifications', {}, {reload: true});
                     Wait('stop');
                 })
