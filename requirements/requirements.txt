@@ -6,10 +6,8 @@ Babel==2.2.0
 billiard==3.3.0.16
 boto==2.39.0
 celery==3.1.10
-cffi==1.5.0
 cliff==1.15.0
 cmd2==0.6.8
-cryptography==0.9.3
 d2to1==0.2.11   # TODO: Still needed?
 defusedxml==0.4.1
 Django==1.8.10

@@ -6,7 +6,7 @@ Babel==2.2.0
 boto==2.34.0
 cliff==1.15.0
 cmd2==0.6.8
-cryptography==0.9.3
+cryptography==1.3.2
 debtcollector==1.2.0
 decorator==4.0.6
 dogpile.core==0.4.1
