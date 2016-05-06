@@ -8,11 +8,11 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'notifications.edit',
-    route: '/:notifier_id',
+    route: '/:notification_template_id',
     templateUrl: templateUrl('notifications/edit/edit'),
     controller: 'notificationsEditController',
     resolve: {
-        notifier:
+        notification_template:
         [   '$state',
             '$stateParams',
             '$q',
@@ -20,13 +20,13 @@ export default {
             'GetBasePath',
             'ProcessErrors',
             function($state, $stateParams, $q, rest, getBasePath, ProcessErrors) {
-                if ($stateParams.notifier) {
-                    return $q.when($stateParams.notifier);
+                if ($stateParams.notification_template) {
+                    return $q.when($stateParams.notification_template);
                 }
 
-                var notifierId = $stateParams.notifier_id;
+                var notificationTemplateId = $stateParams.notification_template_id;
 
-                var url = getBasePath('notifiers') + notifierId + '/';
+                var url = getBasePath('notification_templates') + notificationTemplateId + '/';
                 rest.setUrl(url);
                 return rest.get()
                     .then(function(data) {
@@ -43,6 +43,6 @@ export default {
     },
     ncyBreadcrumb: {
         parent: 'notifications',
-        label: 'Edit Notifier'
+        label: 'Edit Notification Template'
     }
 };

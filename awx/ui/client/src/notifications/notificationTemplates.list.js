@@ -8,9 +8,9 @@
 
 export default function(){
     return {
-        name:  'notifiers' ,
+        name:  'notification_templates' ,
         listTitle: 'Notification Templates',
-        iterator: 'notifier',
+        iterator: 'notification_template',
         index: false,
         hover: false,
 
@@ -24,10 +24,10 @@ export default function(){
                 iconOnly: true,
                 excludeModal: true,
                 icons: [{
-                    icon: "{{ 'icon-job-' + notifier.status }}",
+                    icon: "{{ 'icon-job-' + notification_template.status }}",
                     awToolTip: "Click for recent notifications",
                     awTipPlacement: "right",
-                    ngClick: "showSummary($event, notifier.id)",
+                    ngClick: "showSummary($event, notification_templates.id)",
                     ngClass: ""
                 }]
             },
@@ -35,7 +35,7 @@ export default function(){
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notifications/{{notifier.id}}'
+                linkTo: '/#/notifications/{{notification_template.id}}'
             },
             notification_type: {
                     label: 'Type',
@@ -60,7 +60,7 @@ export default function(){
 
             columnClass: 'col-md-2 col-sm-3 col-xs-3',
             test: {
-                ngClick: "testNotification(notification.id)",
+                ngClick: "testNotification(notification_template.id)",
                 icon: 'fa-bell-o',
                 label: 'Edit',
                 "class": 'btn-sm',
@@ -68,7 +68,7 @@ export default function(){
                 dataPlacement: 'top'
             },
             edit: {
-                ngClick: "editNotification(notification.id)",
+                ngClick: "editNotification(notification_template.id)",
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
@@ -76,7 +76,7 @@ export default function(){
                 dataPlacement: 'top'
             },
             "delete": {
-                ngClick: "deleteNotification(notifier.id, notifier.name)",
+                ngClick: "deleteNotification(notification_template.id, notification_template.name)",
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',

@@ -8,24 +8,24 @@ export default
     [   'Rest', 'Wait',
         'NotificationsFormObject', 'ProcessErrors', 'GetBasePath',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', 'notifier',
+        'LookUpInit', 'OrganizationList', 'notification_template',
         '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
         '$rootScope', 'NotificationsTypeChange',
         function(
             Rest, Wait,
             NotificationsFormObject, ProcessErrors, GetBasePath,
             GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, notifier,
+            LookUpInit, OrganizationList, notification_template,
             $scope, $state, GetChoices, CreateSelect2, Empty,
             $rootScope, NotificationsTypeChange
         ) {
             var generator = GenerateForm,
-                id = notifier.id,
+                id = notification_template.id,
                 form = NotificationsFormObject,
                 master = {},
-                url = GetBasePath('notifiers');
+                url = GetBasePath('notification_templates');
 
-            $scope.notifier = notifier;
+            $scope.notification_template = notification_template;
             generator.inject(form, {
                     mode: 'edit' ,
                     scope:$scope,
@@ -81,7 +81,7 @@ export default
 
                             master.notification_type = $scope.notification_type;
                             CreateSelect2({
-                                element: '#notifier_notification_type',
+                                element: '#notification_template_notification_typex',
                                 multiple: false
                             });
                             NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
@@ -115,7 +115,7 @@ export default
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
                         $scope[fld] = null;
-                        $scope.notifier_form[fld].$setPristine();
+                        $scope.notification_template_form[fld].$setPristine();
                     }
                 }
 
@@ -162,7 +162,7 @@ export default
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to add new notifier. POST returned status: ' + status });
+                        msg: 'Failed to add new notification template. POST returned status: ' + status });
                 });
             };
 

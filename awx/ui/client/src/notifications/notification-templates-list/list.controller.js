@@ -15,7 +15,7 @@ export default
             ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
             $compile, $filter) {
             var scope = $rootScope.$new(),
-                defaultUrl = GetBasePath('notifiers'),
+                defaultUrl = GetBasePath('notification_templates'),
                 list = NotificationTemplatesList,
                 view = GenerateList;
 
@@ -30,12 +30,12 @@ export default
             }
             scope.removePostRefresh = scope.$on('PostRefresh', function () {
                 Wait('stop');
-                if (scope.notifiers) {
-                    scope.notifiers.forEach(function(notifier, i) {
+                if (scope.notification_templates) {
+                    scope.notification_templates.forEach(function(notification_template, i) {
                         scope.notification_type_options.forEach(function(type) {
-                            if (type.value === notifier.notification_type) {
-                                scope.notifiers[i].notification_type = type.label;
-                                scope.notifiers[i].status = notifier.summary_fields.recent_notifications[0].status;
+                            if (type.value === notification_template.notification_type) {
+                                scope.notification_templates[i].notification_type = type.label;
+                                scope.notification_templates[i].status = notification_template.summary_fields.recent_notifications[0].status;
                             }
                         });
                     });
@@ -50,7 +50,7 @@ export default
 
                 SearchInit({
                     scope: scope,
-                    set: 'notifiers',
+                    set: 'notification_templates',
                     list: list,
                     url: defaultUrl
                 });
@@ -117,9 +117,9 @@ export default
                     var recent_notifications,
                     html, title = "Recent Notifications";
 
-                    scope.notifiers.forEach(function(notifier){
-                        if(notifier.id === id){
-                            recent_notifications = notifier.summary_fields.recent_notifications;
+                    scope.notification_templates.forEach(function(notification_template){
+                        if(notification_template.id === id){
+                            recent_notifications = notification_template.summary_fields.recent_notifications;
                         }
                     });
                     Wait('stop');
@@ -150,8 +150,8 @@ export default
             };
 
             scope.testNotification = function(){
-                var name = this.notifier.name;
-                Rest.setUrl(defaultUrl + this.notifier.id +'/test/');
+                var name = this.notification_template.name;
+                Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
                 Rest.post({})
                 .then(function () {
                     ngToast.success({
@@ -172,8 +172,8 @@ export default
 
             scope.editNotification = function(){
                 $state.transitionTo('notifications.edit',{
-                    notifier_id: this.notifier.id,
-                    notifier: this.notifier
+                    notification_template_id: this.notification_template.id,
+                    notification_template: this.notification_templates
                 });
             };
 

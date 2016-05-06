@@ -25,14 +25,14 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
             scope.relatednotificationsRemove();
         }
         scope.relatednotificationsRemove = scope.$on('relatednotifications', function () {
-                var columns = ['/notifiers_success/', '/notifiers_error/'];
+                var columns = ['/notification_templates_success/', '/notification_templates_error/'];
 
                 _.map(columns, function(column){
                     var notifier_url = url + id + column;
                     Rest.setUrl(notifier_url);
                     Rest.get()
                         .success( function(data, i, j, obj) {
-                            var type = (obj.url.indexOf('success')>0) ? "notifiers_success" : "notifiers_error";
+                            var type = (obj.url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
                             if (data.results) {
                                     _.forEach(data.results, function(result){
                                         _.forEach(scope.notifications, function(notification){

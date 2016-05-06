@@ -15,7 +15,7 @@ export default function() {
 
         addTitle: 'New Notification Template',
         editTitle: '{{ name }}',
-        name: 'notifier',
+        name: 'notification_template',
         showActions: true,
         subFormTitles: {
             typeSubForm: 'Type Details',

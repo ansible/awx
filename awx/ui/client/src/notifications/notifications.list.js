@@ -26,23 +26,23 @@ export default function(){
                 excludeModal: true,
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
-            notifiers_success: {
+            notification_templates_success: {
                 label: 'Successful',
-                flag: 'notifiers_success',
+                flag: 'notification_templates_success',
                 type: "toggle",
-                ngClick: "toggleNotification($event, notification.id, \"notifiers_success\")",
+                ngClick: "toggleNotification($event, notification.id, \"notification_templates_success\")",
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
                 searchable: false,
                 nosort: true,
             },
-            notifiers_error: {
+            notification_templates_error: {
                 label: 'Failed',
                 columnClass: 'NotifierList-lastColumn',
-                flag: 'notifiers_error',
+                flag: 'notification_templates_error',
                 type: "toggle",
-                ngClick: "toggleNotification($event, notification.id, \"notifiers_error\")",
+                ngClick: "toggleNotification($event, notification.id, \"notification_templates_error\")",
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
