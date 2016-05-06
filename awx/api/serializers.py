@@ -2266,6 +2266,15 @@ class JobLaunchSerializer(BaseSerializer):
         if (obj.inventory is None) and not attrs.get('inventory', None):
             errors['inventory'] = 'Job Template Inventory is missing or undefined.'
 
+        # Special prohibited cases for scan jobs
+        if 'job_type' in data and obj.ask_job_type_on_launch:
+            if ((obj.job_type==PERM_INVENTORY_SCAN and not data['job_type']==PERM_INVENTORY_SCAN) or
+                    (data.job_type==PERM_INVENTORY_SCAN and not obj['job_type']==PERM_INVENTORY_SCAN)):
+                errors['job_type'] = 'Can not override job_type to or from a scan job.'
+        if (obj.job_type==PERM_INVENTORY_SCAN and ('inventory' in data) and obj.ask_inventory_on_launch and
+                obj.inventory != data['inventory']):
+            errors['inventory'] = 'Inventory can not be changed at runtime for scan jobs.'
+
         if errors:
             raise serializers.ValidationError(errors)
 
