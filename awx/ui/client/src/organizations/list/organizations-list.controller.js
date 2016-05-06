@@ -122,21 +122,12 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                         return card;
                     });
                 }
-                $scope.hideListHeader = false;
             }
         });
 
         $scope.$on("ReloadOrganzationCards", function(e, id) {
             $scope.activeCard = id;
             getOrganization(id);
-        });
-
-        $scope.$on("HideOrgListHeader", function() {
-            $scope.hideListHeader = true;
-        });
-
-        $scope.$on("ShowOrgListHeader", function() {
-            $scope.hideListHeader = false;
         });
 
         getOrganization();

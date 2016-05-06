@@ -59,7 +59,6 @@ export default ['$scope', '$stateParams', '$state', 'Rest', 'UserList', 'Invento
                 list,
                 url,
                 generator = GenerateList;
-            $scope.$parent.hideListHeader = true;
             $scope.$parent.activeCard = parseInt($stateParams.organization_id);
             $scope.$parent.activeMode = mode;
 
