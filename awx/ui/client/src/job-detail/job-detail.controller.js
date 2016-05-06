@@ -13,7 +13,7 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile',
         '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
-        'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed',
+        'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed',
         'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'PlaybookRun',
         'LoadPlays', 'LoadTasks', 'HostsEdit',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
@@ -21,7 +21,7 @@ export default
         function(
             $location, $rootScope, $filter, $scope, $compile, $stateParams,
             $log, ClearScope, GetBasePath, Wait, ProcessErrors,
-            SelectPlay, SelectTask, Socket, GetElapsed,
+            SelectPlay, SelectTask, GetElapsed,
             JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
             PlaybookRun, LoadPlays, LoadTasks,
@@ -680,7 +680,7 @@ export default
                     // there's a bunch of white space at the bottom, let's use it
                     $('#plays-table-detail').height(80 + (height * 0.10));
                     $('#tasks-table-detail').height(120 + (height * 0.20));
-                    $('#hosts-table-detail').height(150 + (height * 0.70));
+                    $('#hosts-table-detail').height(150 + (height * 0.10));
                 }
                 scope.$emit('RefreshCompleted');
             };
@@ -737,7 +737,7 @@ export default
                 return true;
             };
 
-            scope.toggleLessEvents = function() {
+            scope.toggleLessEvents = function(state) {
                 if (!scope.lessEvents) {
                     $('#events-summary').slideUp(200);
                     scope.lessEvents = true;

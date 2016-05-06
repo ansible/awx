@@ -72,8 +72,7 @@
  		if (filter === 'ok'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				host_name: $stateParams.hostName,
- 				or__field__event: 'runner_on_ok',
- 				changed: false
+				event__startswith: 'runner_on_ok'
  				})
  				.success(function(res){
  					$scope.results = res.results;
@@ -93,7 +92,9 @@
  		if (filter === 'failed'){
   			return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				host_name: $stateParams.hostName,
- 				failed: true})
+ 				failed: true,
+				event__startswith: 'runner_on_failed'
+ 				})
  				.success(function(res){
  					$scope.results = res.results;
  					Wait('stop');

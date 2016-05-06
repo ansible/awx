@@ -53,13 +53,13 @@
             // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
             jobSocket.on('summary_complete', function(data) {
                 // discard socket msgs we don't care about in this context
-                if ($stateParams.id === data.unified_job_id){
+                if (parseInt($stateParams.id) === data.unified_job_id){
                     init();
                 }
             });
             // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
             jobSocket.on('status_changed', function(data) {
-                if ($stateParams.id === data.unified_job_id){
+                if (parseInt($stateParams.id) === data.unified_job_id){
                     $scope.status = data.status;
                 }
             });
@@ -78,11 +78,6 @@
                     return n !== 0 ? n + dict[n] + status : dict[n] + status;
                 }
             };
-            /*
-            _.forIn(count, function(value, key){
-                text[key] = grammar(value.length, key);
-            });
-            */
             return grammar(n, status);
         };
         $scope.getNextPage = function(){

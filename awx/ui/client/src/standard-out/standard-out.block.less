@@ -3,6 +3,11 @@
 
 /** @define StandardOut */
 
+.StandardOut-preContent{
+    font-size: 12px;
+    padding: 0 20px 0 20px;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
 .StandardOut-container {
     .OnePlusTwo-container;
 }
@@ -24,8 +29,8 @@
     min-height: 200px;
     background-color: @default-secondary-bg;
     border-radius: 5px;
-    height: ~"calc(100% - 74px)";
-    overflow: scroll;
+    max-height: 1600px;
+    overflow: auto;
 }
 
 .StandardOut-details {
@@ -81,7 +86,7 @@
     font-size: 16px;
     height: 30px;
     min-width: 30px;
-    color: @default-data-txt;
+    color: @list-action-icon;
     background-color: inherit;
     border: none;
     border-radius: 50%;

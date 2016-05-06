@@ -1,5 +1,6 @@
 
 <div id="hosts-summary-section" class="section">
+    <div class="JobDetail-instructions"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
     <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0">
         <div class="JobDetail-searchContainer form-group">
             <div class="search-name">
@@ -43,17 +44,17 @@
                         <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'ok'})" aw-tool-tip="{{ buildTooltip(host.ok - host.changed, 'ok') }}" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok - host.changed }}</span></a>
                         <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'changed'})"  aw-tool-tip="{{buildTooltip(host.changed, 'changed')}}" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
                         <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'skipped'})"  aw-tool-tip="{{buildTooltip(host.skipped, 'skipped')}}" data-placement="top" ng-hide="host.skipped == 0"><span class="badge skipped-hosts">{{ host.skipped }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{buildTooltip(host.dark, 'unreachable')}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
-                        <a ui-sref="jobDetail.host-events({hostName: host.name, filter: 'failed'})"  aw-tool-tip="{{ buildTooltip(host.failures, 'failed')}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'unreachable'})"  aw-tool-tip="{{buildTooltip(host.dark, 'unreachable')}}" data-placement="top" ng-hide="host.dark == 0"><span class="badge unreachable-hosts">{{ host.dark }}</span></a>
+                        <a ui-sref="jobDetail.host-events({hostName: host.host_name, filter: 'failed'})"  aw-tool-tip="{{ buildTooltip(host.failures, 'failed')}}" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failures }}</span></a>
                     </td>
                 </tr>
-                <tr ng-show="hosts.length === 0 && status === 'pending'">
-                    <td colspan="5" class="col-lg-12 HostSummary-loading">Waiting...</td>
+                <tr ng-show="status == 'pending'">
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Initiating job run.</td>
                 </tr>
-                <tr ng-show="hosts.length === 0 && status === 'running' ">
-                    <td colspan="5" class="col-lg-12 HostSummary-loading">Loading...</td>
+                <tr ng-show="status == 'running'">
+                    <td colspan="5" class="col-lg-12 HostSummary-loading">Job is running. Summary will be available on completion.</td>
                 </tr>
-                <tr ng-show="status === 'failed' ||  status === 'successful' && hosts.length === 0 ">
+                <tr ng-show="(status === 'failed' ||  status === 'successful') && hosts.length === 0 ">
                     <td colspan="2" class="col-lg-12 HostSummary-loading">No matching hosts</td>
                 </tr>
             </tbody>
@@ -65,7 +66,7 @@
     </div>
 
 </div><!-- section -->
-
+<div class="JobDetail-panelHeaderText">Host Status Summary</div>
 <div id="graph-section" class="JobDetail-graphSection">
     <svg></svg>
 </div>

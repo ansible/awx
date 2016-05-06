@@ -22,14 +22,14 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         // Open up a socket for events depending on the type of job
         function openSockets() {
             if ($state.current.name === 'jobDetail') {
-                       $log.debug("socket watching on job_events-" + job_id);
-                       $rootScope.event_socket.on("job_events-" + job_id, function() {
-                           $log.debug("socket fired on job_events-" + job_id);
-                           if (api_complete) {
-                               event_queue++;
-                           }
-                       });
-                   }
+                   $log.debug("socket watching on job_events-" + job_id);
+                   $rootScope.event_socket.on("job_events-" + job_id, function() {
+                       $log.debug("socket fired on job_events-" + job_id);
+                       if (api_complete) {
+                           event_queue++;
+                       }
+                   });
+            }
             if ($state.current.name === 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
                 $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
@@ -131,8 +131,6 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                         start: (data.range.start < 0) ? 0 : data.range.start,
                         end: data.range.end
                     });
-                    //console.log('loaded start: ' + data.range.start + ' end: ' + data.range.end);
-                    //console.log(data.content);
                     if ($scope.should_apply_live_events) {
                         // if user has not disabled live event view by scrolling upward, then scroll down to the new content
                         current_range = data.range;

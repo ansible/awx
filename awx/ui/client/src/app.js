@@ -670,15 +670,15 @@ var tower = angular.module('Tower', [
                             // accessing.
                             if ($state.is('jobs')) {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
-                            } else if ($state.is('jobDetail') ||
+                            } else if ($state.includes('jobDetail') ||
                                 $state.is('adHocJobStdout') ||
                                 $state.is('inventorySyncStdout') ||
                                 $state.is('managementJobStdout') ||
-                                $state.is('scmUpdateStdout')) {
+                                $state.is('scmUpdateStdout')){
 
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } if ($state.is('jobDetail')) {
+                            } if ($state.includes('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
                             } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
@@ -739,10 +739,19 @@ var tower = angular.module('Tower', [
                     }
 
                     // remove any lingering intervals
-                    if ($rootScope.jobDetailInterval) {
+                    // except on jobDetails.* states
+                    var jobDetailStates = [
+                        'jobDetail', 
+                        'jobDetail.host-summary', 
+                        'jobDetail.host-event.details',
+                        'jobDetail.host-event.json', 
+                        'jobDetail.host-events',
+                        'jobDetail.host-event.stdout' 
+                    ];
+                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
                         window.clearInterval($rootScope.jobDetailInterval);
                     }
-                    if ($rootScope.jobStdOutInterval) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 

@@ -171,6 +171,7 @@
 
                 <div id="job-detail-details">
                     <div id="play-section">
+                        <div class="JobDetail-instructions"><span class="badge">1</span> Please select from a play below to view its associated tasks.</div>
                         <div class="JobDetail-searchHeaderRow">
                             <div class="JobDetail-searchContainer form-group">
                                 <div class="search-name">
@@ -228,7 +229,8 @@
                     </div>
                     <!-- end of plays section of details-->
 
-                    <div id="task-section" class="section" >
+                    <div id="task-section" class="section JobDetail-tasks" >
+                        <div class="JobDetail-instructions"><span class="badge">2</span> Please select a task below to view its associated hosts</div>
                         <div class="JobDetail-searchHeaderRow">
                             <div class="JobDetail-searchContainer form-group">
                                 <div class="search-name">
@@ -312,6 +314,7 @@
                     <!--end of tasks section of details-->
 
                     <div id="task-hosts-section" class="section">
+                        <div class="JobDetail-instructions"><span class="badge">3</span> Please select a host below to view associated task details.</div>
                         <div class="JobDetail-searchHeaderRow">
                             <div class="JobDetail-searchContainer form-group">
                                 <div class="search-name">
@@ -368,19 +371,12 @@
             </div>
             <!--end of details-->
 
-
-        </div>
-        <!--end of job-detail-container (left side)-->
-
-        <!--beginning of stdout-->
-        <div class="JobDetail-rightSide">
-
             <!--beginning of events summary-->
             <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
                     <div class="JobDetail-panelHeader">
                         <div class="JobDetail-expandContainer">
                             <a class="JobDetail-panelHeaderText" ng-show="lessEvents" ui-sref="jobDetail.host-summary" ng-click="toggleLessEvents()">
-                                EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-left"></i>
+                                EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-right"></i>
                             </a>
                             <a class="JobDetail-panelHeaderText" ng-show="!lessEvents" ui-sref="jobDetail" ng-click="toggleLessEvents()">
                                 EVENT SUMMARY<i class="JobDetail-expandArrow fa fa-caret-down"></i>
@@ -396,6 +392,11 @@
             <!-- end of events summary-->
 
 
+        </div>
+        <!--end of job-detail-container (left side)-->
+
+        <!--beginning of stdout-->
+        <div class="JobDetail-rightSide">
             <div class="JobDetail-stdoutPanel Panel">
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
@@ -403,7 +404,7 @@
                         <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}" ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
-                        <a href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                        <a ng-show="job_status.status === ('failed' || 'successful')" href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
                             <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>

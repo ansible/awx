@@ -6,8 +6,8 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'event', 'CodeMirror',
-    function($stateParams, $scope, $state, Wait, JobDetailService, event, CodeMirror){
+    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent',
+    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent){
 
         $scope.processEventStatus = JobDetailService.processEventStatus;
         $scope.hostResults = [];
@@ -56,7 +56,7 @@
         };
 
         var init = function(){
-            $scope.event = event;
+            $scope.event = hostEvent;
             JobDetailService.getJobEventChildren($stateParams.taskId).success(function(res){
                 $scope.hostResults = res.results;
             });

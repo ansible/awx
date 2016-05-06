@@ -12,10 +12,10 @@ var hostEventModal = {
  	controller: 'HostEventController',
  	templateUrl: templateUrl('job-detail/host-event/host-event-modal'),
  	resolve: {
-        event: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
+        hostEvent: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
              return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				id: $stateParams.eventId
- 			}).success(function(res){ return res.results[0];});
+ 			}).then(function(res){ return res.data.results[0];});
          }]
  	},
  	onExit: function(){
