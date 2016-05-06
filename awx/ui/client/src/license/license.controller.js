@@ -6,9 +6,9 @@
 
 export default
     ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
-    'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
+    'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window', '$filter',
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
-        ProcessErrors, CheckLicense, moment, $window){
+        ProcessErrors, CheckLicense, moment, $window, $filter){
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -40,33 +40,36 @@ export default
             $window.open('https://www.ansible.com/license', '_blank');
         };
 
-        $scope.newLicense = {};
-        $scope.submit = function(){
-            Wait('start');
-            CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
-                .success(function(){
-                    reset();
-                    init();
-                    $scope.success = true;
-                    // for animation purposes
-                    var successTimeout = setTimeout(function(){
-                        $scope.success = false;
-                        clearTimeout(successTimeout);
-                    }, 4000);
-                    if($rootScope.licenseMissing === true){
-                        $rootScope.licenseMissing = false;
-                        $state.go('dashboard');
-                    }
-                    else{
-                        $rootScope.licenseMissing = false;
-                    }
-            });
-        };
-        var calcDaysRemaining = function(seconds){
-            // calculate the number of days remaining on the license
-            var duration = moment.duration(seconds, 'seconds');
-            return duration.days();
-        };
+		$scope.newLicense = {};
+		$scope.submit = function(){
+			Wait('start');
+			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
+				.success(function(){
+					reset();
+					init();
+					if($rootScope.licenseMissing === true){
+						$state.go('dashboard', {
+							licenseMissing: false
+						});
+					}
+					else{
+						$scope.success = true;
+						$rootScope.licenseMissing = false;
+						// for animation purposes
+						var successTimeout = setTimeout(function(){
+							$scope.success = false;
+							clearTimeout(successTimeout);
+						}, 4000);
+					}
+			});
+		};
+	 	var calcDaysRemaining = function(seconds){
+	 		// calculate the number of days remaining on the license
+	 		var duration = moment.duration(seconds, 'seconds').days();
+			duration = (duration!==1) ? $filter('number')(duration, 0) + ' days' : $filter('number')(duration, 0) + ' day';
+			return duration;
+	 	};
+
 
         var calcExpiresOn = function(days){
             // calculate the expiration date of the license
