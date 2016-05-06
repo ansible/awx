@@ -182,24 +182,24 @@ class BaseAccess(object):
             validation_info['grace_period_remaining'] = 99999999
 
         if check_expiration and validation_info.get('time_remaining', None) is None:
-            raise PermissionDenied("license is missing")
+            raise PermissionDenied("License is missing.")
         if check_expiration and validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied("license has expired")
+            raise PermissionDenied("License has expired.")
 
         free_instances = validation_info.get('free_instances', 0)
         available_instances = validation_info.get('available_instances', 0)
         if add_host and free_instances == 0:
-            raise PermissionDenied("license count of %s instances has been reached" % available_instances)
+            raise PermissionDenied("License count of %s instances has been reached." % available_instances)
         elif add_host and free_instances < 0:
-            raise PermissionDenied("license count of %s instances has been exceeded" % available_instances)
+            raise PermissionDenied("License count of %s instances has been exceeded." % available_instances)
         elif not add_host and free_instances < 0:
-            raise PermissionDenied("host count exceeds available instances")
+            raise PermissionDenied("Host count exceeds available instances.")
 
         if feature is not None:
             if "features" in validation_info and not validation_info["features"].get(feature, False):
-                raise LicenseForbids("Feature %s is not enabled in the active license" % feature)
+                raise LicenseForbids("Feature %s is not enabled in the active license." % feature)
             elif "features" not in validation_info:
-                raise LicenseForbids("Features not found in active license")
+                raise LicenseForbids("Features not found in active license.")
 
 
 class UserAccess(BaseAccess):
@@ -412,7 +412,7 @@ class HostAccess(BaseAccess):
         # Prevent moving a host to a different inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if obj and inventory_pk and obj.inventory.pk != inventory_pk:
-            raise PermissionDenied('Unable to change inventory on a host')
+            raise PermissionDenied('Unable to change inventory on a host.')
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
         return obj and self.user in obj.inventory.update_role
@@ -424,7 +424,7 @@ class HostAccess(BaseAccess):
             return False
         # Prevent assignments between different inventories.
         if obj.inventory != sub_obj.inventory:
-            raise ParseError('Cannot associate two items from different inventories')
+            raise ParseError('Cannot associate two items from different inventories.')
         return True
 
     def can_delete(self, obj):
@@ -458,7 +458,7 @@ class GroupAccess(BaseAccess):
         # Prevent moving a group to a different inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if obj and inventory_pk and obj.inventory.pk != inventory_pk:
-            raise PermissionDenied('Unable to change inventory on a group')
+            raise PermissionDenied('Unable to change inventory on a group.')
         # Checks for admin or change permission on inventory, controls whether
         # the user can attach subgroups or edit variable data.
         return obj and self.user in obj.inventory.update_role
@@ -470,7 +470,7 @@ class GroupAccess(BaseAccess):
             return False
         # Prevent assignments between different inventories.
         if obj.inventory != sub_obj.inventory:
-            raise ParseError('Cannot associate two items from different inventories')
+            raise ParseError('Cannot associate two items from different inventories.')
         # Prevent group from being assigned as its own (grand)child.
         if type(obj) == type(sub_obj):
             parent_pks = set(obj.all_parents.values_list('pk', flat=True))
@@ -635,7 +635,7 @@ class TeamAccess(BaseAccess):
         # Prevent moving a team to a different organization.
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
-            raise PermissionDenied('Unable to change organization on a team')
+            raise PermissionDenied('Unable to change organization on a team.')
         if self.user.is_superuser:
             return True
         return self.user in obj.admin_role
