@@ -1627,9 +1627,13 @@ class CredentialSerializer(BaseSerializer):
             access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
         ))
 
-        qs = Organization.objects.filter(admin_role__children=obj.owner_role)
-        if qs.count() > 0:
-            res.update(dict(organization=qs[0].get_absolute_url()))
+        parents = obj.owner_role.parents.exclude(object_id__isnull=True)
+        if parents.count() > 0:
+            res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url()})
+        elif obj.owner_role.members.count() > 0:
+            user = obj.owner_role.members.first()
+            res.update({'user': reverse('api:user_detail', args=(user.pk,))})
+
         return res
 
     def get_summary_fields(self, obj):
