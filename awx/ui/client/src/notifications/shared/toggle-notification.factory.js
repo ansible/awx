@@ -22,7 +22,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
             id = params.id,
             notifier_id = params.notifier.id,
             callback = params.callback,
-            column = params.column, // notifiers_success/notifiers_error
+            column = params.column, // notification_template_success/notification_template__error
             url = params.url+ id+ "/"+ column + '/';
 
         if(!notifier[column]){

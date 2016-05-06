@@ -19,7 +19,7 @@ export default
         ) {
             var generator = GenerateForm,
                 form = NotificationsFormObject,
-                url = GetBasePath('notifiers');
+                url = GetBasePath('notification_templates');
 
             generator.inject(form, {
                 mode: 'add' ,
@@ -40,7 +40,7 @@ export default
                     }
                 }
                 CreateSelect2({
-                    element: '#notifier_notification_type',
+                    element: '#notification_template_notification_type',
                     multiple: false
                 });
             });
@@ -66,7 +66,7 @@ export default
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
                         $scope[fld] = null;
-                        $scope.notifier_form[fld].$setPristine();
+                        $scope.notification_template_form[fld].$setPristine();
                     }
                 }
 

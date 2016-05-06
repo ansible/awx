@@ -18,6 +18,6 @@ export default {
     },
     ncyBreadcrumb: {
         parent: 'notifications',
-        label: 'Create Notifier'
+        label: 'Create Notification Template'
     }
 };

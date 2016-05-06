@@ -17,7 +17,7 @@ export default
             $compile, $filter, ToggleNotification, NotificationsListInit,
             $stateParams, management_job) {
             var scope = $rootScope.$new(),
-                url = GetBasePath('notifiers'),
+                url = GetBasePath('notification_templates'),
                 defaultUrl = GetBasePath('system_job_templates'),
                 list = NotificationsList,
                 view = GenerateList,

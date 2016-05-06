@@ -92,7 +92,7 @@ export default
                     },
                     notifications: {
                         iterator: 'notification',
-                        url: '/api/v1/notifiers/'
+                        url: '/api/v1/notification_templates/'
                     }
                 };
             }
