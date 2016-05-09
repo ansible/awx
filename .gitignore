@@ -25,7 +25,7 @@ awx/ui/build_test
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
-setup/test/roles/provision_docker
+**/provision_docker
 
 # Python & setuptools
 __pycache__
@@ -88,6 +88,9 @@ setup/tower_setup_conf.yml
 setup/setup.log
 setup/inventory
 tower-backup-*
+
+# Ansible
+**/*.retry
 
 # Other
 .tower_cycle
