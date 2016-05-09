@@ -24,10 +24,6 @@ export default
                 scope: scope
             });
 
-
-            if (scope.removePostRefresh) {
-                scope.removePostRefresh();
-            }
             scope.removePostRefresh = scope.$on('PostRefresh', function () {
                 Wait('stop');
                 if (scope.notification_templates) {
