@@ -79,9 +79,8 @@ export default
                     script: $scope.script
                 })
                     .success(function () {
-                        $state.transitionTo('inventoryScriptsList');
+                        $state.transitionTo('inventoryScripts');
                         Wait('stop');
-
                     })
                     .error(function (data, status) {
                         ProcessErrors($scope, data, status, form, { hdr: 'Error!',
