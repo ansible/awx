@@ -1631,15 +1631,18 @@ class CredentialSerializer(BaseSerializer):
 class CredentialSerializerCreate(CredentialSerializer):
 
     user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False, default=None, write_only=True,
+        queryset=User.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
         help_text='Write-only field used to add user to owner role. If provided, '
                   'do not give either team or organization. Only valid for creation.')
     team = serializers.PrimaryKeyRelatedField(
-        queryset=Team.objects.all(), required=False, default=None, write_only=True,
+        queryset=Team.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
         help_text='Write-only field used to add team to owner role. If provided, '
                   'do not give either user or organization. Only valid for creation.')
     organization = serializers.PrimaryKeyRelatedField(
-        queryset=Organization.objects.all(), required=False, default=None, write_only=True,
+        queryset=Organization.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
         help_text='Write-only field used to add organization to owner role. If provided, '
                   'do not give either team or team. Only valid for creation.')
 
