@@ -183,10 +183,11 @@ def main():
             if svcmod.incomplete_warning:
                 incomplete_warning = True
     if len(all_services) == 0:
-        module.fail_json(msg="Failed to find any services. Sometimes this is due to insufficient privileges.")
-    results = dict(ansible_facts=dict(services=all_services))
-    if incomplete_warning:
-        results['msg'] = "WARNING: Could not find status for all services. Sometimes this is due to insufficient privileges."
+        results = dict(skipped=True, msg="Failed to find any services. Sometimes this is due to insufficient privileges.")
+    else:
+        results = dict(ansible_facts=dict(services=all_services))
+        if incomplete_warning:
+            results['msg'] = "WARNING: Could not find status for all services. Sometimes this is due to insufficient privileges."
     module.exit_json(**results)
 
 main()
