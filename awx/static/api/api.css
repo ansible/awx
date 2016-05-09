@@ -18,13 +18,13 @@ body {
   position: relative;
 }
 body a {
-  color: #1678C4;
+  color: #337AB7;
 }
 body a:hover {
-  color: #4498DA;
+  color: #286090;
 }
 body code {
-  color: #FF5850;
+  color: #D9534F;
   background-color: #FFF5F5;
 }
 body pre code {
@@ -143,10 +143,10 @@ body .request-info .prettyprint .lit {
   color: #161B1F;
 }
 body .prettyprint .lit {
-  color: #1678C4;
+  color: #337AB7;
 }
 body .prettyprint .str {
-  color: #FF5850;
+  color: #D9534F;
 }
 
 body .well.tab-content {
@@ -250,8 +250,8 @@ body .tab-content .btn-primary:active:hover {
 }
 
 .btn-danger {
-  background-color: #FF5850;
-  border-color: #FF5850;
+  background-color: #D9534F;
+  border-color: #D9534F;
 }
 .btn-danger:hover,
 .btn-danger:hover,
@@ -265,8 +265,8 @@ body .tab-content .btn-primary:active:hover {
 .btn-danger:active.focus,
 .btn-danger:active:focus,
 .btn-danger:active:hover {
-  background-color: #FF1105;
-  border-color: #FF1105;
+  background-color: #F0AD4E;
+  border-color: #F0AD4E;
 }
 
 body .wrapper {
