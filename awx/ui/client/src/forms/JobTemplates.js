@@ -239,7 +239,7 @@ export default
                 variables: {
                     label: 'Extra Variables',
                     type: 'textarea',
-                    class: 'Form-textAreaLabel',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     rows: 6,
                     addRequired: false,
                     editRequired: false,

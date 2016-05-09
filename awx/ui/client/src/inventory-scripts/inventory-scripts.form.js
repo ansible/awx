@@ -47,6 +47,7 @@ export default function() {
                 label: 'Custom Script',
                 type: 'textarea',
                 hintText: "Drag and drop an inventory script on the field below",
+                class: 'Form-formGroup--fullWidth',
                 addRequired: true,
                 editRequired: true,
                 awDropFile: true,

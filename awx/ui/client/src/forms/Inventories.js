@@ -49,6 +49,7 @@ export default
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
+                    class: 'Form-formGroup--fullWidth',
                     addRequired: false,
                     editRequird: false,
                     rows: 6,

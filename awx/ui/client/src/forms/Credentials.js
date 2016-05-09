@@ -254,7 +254,7 @@ export default
                         reqExpression: 'key_required',
                         init: true
                     },
-                    class: 'Form-textAreaLabel',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     hintText: "{{ key_hint }}",
                     addRequired: false,
                     editRequired: false,

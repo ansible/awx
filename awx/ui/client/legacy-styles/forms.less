@@ -156,7 +156,12 @@
     flex: 1 0 auto;
     margin-bottom: 20px;
     width: 33%;
+    max-width: 33%;
     padding-right: 30px;
+}
+
+.Form-formGroup--fullWidth {
+    max-width: none;
 }
 
 .Form-subForm {
@@ -479,10 +484,6 @@ input[type='radio']:checked:before {
     margin-top: 5px;
     font-size: small;
     color: @default-interface-txt;
-}
-
-.Form-formGroup {
-    max-width: 33%;
 }
 
 @media only screen and (max-width: 650px) {
