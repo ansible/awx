@@ -563,36 +563,10 @@ class AuthTokenView(APIView):
             logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class OrganizationList(ListCreateAPIView):
-
-    model = Organization
-    serializer_class = OrganizationSerializer
-
-    def get_queryset(self):
-        qs = Organization.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
-        return qs
-
-    def create(self, request, *args, **kwargs):
-        """Create a new organzation.
-
-        If there is already an organization and the license of the Tower
-        instance does not permit multiple organizations, then raise
-        LicenseForbids.
-        """
-        # Sanity check: If the multiple organizations feature is disallowed
-        # by the license, then we are only willing to create this organization
-        # if no organizations exist in the system.
-        if (not feature_enabled('multiple_organizations') and
-                self.model.objects.exists()):
-            raise LicenseForbids('Your Tower license only permits a single '
-                                 'organization to exist.')
-
-        # Okay, create the organization as usual.
-        return super(OrganizationList, self).create(request, *args, **kwargs)
+class OrganizationCountsMixin(object):
 
     def get_serializer_context(self, *args, **kwargs):
-        full_context = super(OrganizationList, self).get_serializer_context(*args, **kwargs)
+        full_context = super(OrganizationCountsMixin, self).get_serializer_context(*args, **kwargs)
 
         if self.request is None:
             return full_context
@@ -669,6 +643,34 @@ class OrganizationList(ListCreateAPIView):
         full_context['related_field_counts'] = count_context
 
         return full_context
+
+class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
+
+    model = Organization
+    serializer_class = OrganizationSerializer
+
+    def get_queryset(self):
+        qs = Organization.accessible_objects(self.request.user, 'read_role')
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        """Create a new organzation.
+
+        If there is already an organization and the license of the Tower
+        instance does not permit multiple organizations, then raise
+        LicenseForbids.
+        """
+        # Sanity check: If the multiple organizations feature is disallowed
+        # by the license, then we are only willing to create this organization
+        # if no organizations exist in the system.
+        if (not feature_enabled('multiple_organizations') and
+                self.model.objects.exists()):
+            raise LicenseForbids('Your Tower license only permits a single '
+                                 'organization to exist.')
+
+        # Okay, create the organization as usual.
+        return super(OrganizationList, self).create(request, *args, **kwargs)
 
 class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1137,7 +1139,7 @@ class UserProjectsList(SubListAPIView):
         user_qs = Project.accessible_objects(parent, 'read_role')
         return my_qs & user_qs
 
-class UserOrganizationsList(SubListAPIView):
+class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -1151,7 +1153,7 @@ class UserOrganizationsList(SubListAPIView):
         user_qs = Organization.objects.filter(member_role__members=parent)
         return my_qs & user_qs
 
-class UserAdminOfOrganizationsList(SubListAPIView):
+class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
