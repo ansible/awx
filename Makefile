@@ -17,6 +17,7 @@ GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 VENV_BASE ?= /tower_devel/venv
 SCL_PREFIX ?=
+CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
 CLIENT_TEST_DIR ?= build_test
 
@@ -396,7 +397,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
 receiver:
