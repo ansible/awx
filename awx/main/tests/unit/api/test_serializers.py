@@ -120,11 +120,11 @@ class TestJobTemplateSerializerGetSummaryFields(GetSummaryFieldsMixin):
 @mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x,y: {})
 class TestJobSerializerGetRelated(GetRelatedMixin):
     @pytest.mark.parametrize("related_resource_name", [
-        'job_events', 
-        'job_plays', 
-        'job_tasks', 
-        'relaunch', 
-        'labels', 
+        'job_events',
+        'job_plays',
+        'job_tasks',
+        'relaunch',
+        'labels',
     ])
     def test_get_related(self, mocker, job, related_resource_name):
         self._test_get_related(JobSerializer, job, 'jobs', related_resource_name)
@@ -150,8 +150,8 @@ class TestJobOptionsSerializerGetSummaryFields(GetSummaryFieldsMixin):
         summary_labels = serializer._summary_field_labels(job_template)
 
         job_template.labels.all.order_by.assert_called_with('name')
-        assert len(summary_labels) == 10
-        assert summary_labels == [{'id': x.id, 'name': x.name} for x in labels[:10]]
+        assert len(summary_labels['results']) == 10
+        assert summary_labels['results'] == [{'id': x.id, 'name': x.name} for x in labels[:10]]
 
     def test_labels_exists(self, mocker, job_template):
         self._test_get_summary_fields(JobOptionsSerializer, job_template, 'labels')
