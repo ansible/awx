@@ -1055,7 +1055,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
-    parent_model = Project
+    parent_model = ProjectUpdate
     relationship = 'notifications'
 
 class ProjectAccessList(ResourceAccessList):
