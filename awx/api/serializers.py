@@ -1685,7 +1685,7 @@ class JobOptionsSerializer(BaseSerializer):
         return res
 
     def _summary_field_labels(self, obj):
-        return [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
+        return {'count': obj.labels.count(), 'results': [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]}
 
     def get_summary_fields(self, obj):
         res = super(JobOptionsSerializer, self).get_summary_fields(obj)
@@ -2383,7 +2383,6 @@ class NotificationSerializer(BaseSerializer):
             notification_template = reverse('api:notification_template_detail', args=(obj.notification_template.pk,)),
         ))
         return res
-
 
 class LabelSerializer(BaseSerializer):
 
