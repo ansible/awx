@@ -119,7 +119,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     // Go back to most recent navigation path
                     $location.path(lastPath());
                 } else {
-                    $location.url('/home?login=true');
+                    $location.url('/home');
                 }
             })
             .error(function () {

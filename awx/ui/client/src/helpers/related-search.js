@@ -167,6 +167,13 @@ export default
                             scope[iterator + 'ShowStartBtn'] = false;
                         }
 
+                        if(scope[iterator + 'SearchValue'] && scope[iterator + 'SearchValue'] !== '') {
+                            scope[iterator + '_active_search'] = true;
+                        }
+                        else {
+                            scope[iterator + '_active_search'] = false;
+                        }
+
                         if (iterator === 'host') {
                             if (scope.hostSearchField === 'has_active_failures') {
                                 if (scope.hostSearchSelectValue && scope.hostSearchSelectValue.value === 1) {
@@ -230,7 +237,6 @@ export default
                         url += (url.match(/\/$/)) ? '?' : '&';
                         url += scope[iterator + 'SearchParams'];
                         url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
-                        scope[iterator + '_active_search'] = true;
                         RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
                     };
 
