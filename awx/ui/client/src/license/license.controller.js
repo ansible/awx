@@ -6,9 +6,9 @@
 
 export default
     ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
-    'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window', '$filter',
+    'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
-        ProcessErrors, CheckLicense, moment, $window, $filter){
+        ProcessErrors, CheckLicense, moment, $window){
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -66,7 +66,7 @@ export default
 	 	var calcDaysRemaining = function(seconds){
 	 		// calculate the number of days remaining on the license
 	 		var duration = moment.duration(seconds, 'seconds').days();
-			duration = (duration!==1) ? $filter('number')(duration, 0) + ' days' : $filter('number')(duration, 0) + ' day';
+            duration = (duration!==1) ? `${duration} Days` : `${duration} Day`;
 			return duration;
 	 	};
 
