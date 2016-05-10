@@ -2229,6 +2229,7 @@ class JobTemplateSurveySpec(GenericAPIView):
         if len(obj.survey_spec["spec"]) < 1:
             return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
+        variable_set = set()
         for survey_item in obj.survey_spec["spec"]:
             if not isinstance(survey_item, dict):
                 return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
@@ -2238,6 +2239,10 @@ class JobTemplateSurveySpec(GenericAPIView):
                 return Response(dict(error="'question_name' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "variable" not in survey_item:
                 return Response(dict(error="'variable' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if survey_item['variable'] in variable_set:
+                return Response(dict(error="'variable' name '%s' duplicated in survey element %s" % (survey_item['variable'], str(idx))), status=status.HTTP_400_BAD_REQUEST)
+            else:
+                variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
                 return Response(dict(error="'required' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
