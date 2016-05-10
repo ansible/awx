@@ -17,6 +17,7 @@ export default
         well: true,
         listTitle: 'Jobs',
         searchSize: 'col-lg-8 col-md-8 col-sm-12 col-xs-12',
+        emptyListText: 'There are no jobs to display at this time',
 
         fields: {
             status: {
@@ -32,9 +33,8 @@ export default
                 searchLabel: 'Status'
             },
             name: {
-                key: true,
                 label: 'Name',
-                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
+                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 List-staticColumnAdjacent',
                 defaultSearchField: true,
                 linkTo: '/#/jobs/{{job.id}}'
             },
@@ -43,7 +43,7 @@ export default
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                nosort: true,
+                key: true,
                 columnClass: "col-lg-4 col-md-4 col-sm-3"
             }
         },
