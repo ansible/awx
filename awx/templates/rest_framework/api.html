@@ -36,7 +36,7 @@
           {% if user.is_authenticated %}
           <li><a href="{% url 'api:user_me_list' %}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Logged in as {{ user }}{% if user.get_full_name %} ({{ user.get_full_name }}){% endif %}"><span class="glyphicon glyphicon-user"></span> <span class="visible-xs-inline">Logged in as </span>{{ user }}{% if user.get_full_name %}<span class="visible-xs-inline"> ({{ user.get_full_name }})</span>{% endif %}</a></li>
           {% endif %}
-          <li><a href="//docs.ansible.com/ansible-tower/latest/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Ansible Tower API Guide"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline"> Ansible Tower API Guide</span></a></li>
+          <li><a href="//docs.ansible.com/ansible-tower/{{short_tower_version}}/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Ansible Tower API Guide"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline"> Ansible Tower API Guide</span></a></li>
           <li><a href="/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Back to Ansible Tower"><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="visible-xs-inline"> Back to Ansible Tower</span></a></li>
           <li class="hidden-xs"><a href="#" class="resize" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Resize"><span class="glyphicon glyphicon-resize-full"></span></a></li>
         </ul>
