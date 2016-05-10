@@ -23,7 +23,7 @@ export default
                 view = GenerateList,
                 id = $stateParams.management_id;
 
-            list.listTitle = `${management_job.name} | Notifications`;
+            list.listTitle = `${management_job.name} <div class="List-titleLockup"></div> Notifications`;
             view.inject( list, {
                 mode: 'edit',
                 cancelButton: true,

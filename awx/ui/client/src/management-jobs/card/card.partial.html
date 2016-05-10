@@ -16,16 +16,19 @@
 				<h3 class="MgmtCards-label"> {{ card.name }}</h3>
 				<div class="MgmtCards-actionItems">
 					<button class="MgmtCards-actionItem List-actionButton"
-						ng-click='goToNotifications(card, card.id)'>
-						<i class="MgmtCards-actionItemIcon fa fa-bell-o"></i>
-					</button>
-					<button class="MgmtCards-actionItem List-actionButton"
-						ng-click='chooseRunJob(card.id, card.name)'>
+						ng-click='chooseRunJob(card.id, card.name)'
+						data-placement="top" aw-tool-tip="Launch Management Job" data-original-title="" title="">
 						<i class="MgmtCards-actionItemIcon fa fa-rocket"></i>
 					</button>
 					<button class="MgmtCards-actionItem List-actionButton"
-						ng-click='configureSchedule(card.id)'>
+						ng-click='configureSchedule(card.id)'
+						data-placement="top" aw-tool-tip="Schedule Management Job" data-original-title="" title="">
 						<i class="MgmtCards-actionItemIcon fa fa-calendar"></i>
+					</button>
+					<button class="MgmtCards-actionItem List-actionButton"
+						ng-click='goToNotifications(card, card.id)'
+						data-placement="top" aw-tool-tip="Configure Notifications" data-original-title="" title="">
+						<i class="MgmtCards-actionItemIcon fa fa-bell-o"></i>
 					</button>
 				</div>
 			</div>

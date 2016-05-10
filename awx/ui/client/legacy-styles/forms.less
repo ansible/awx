@@ -51,8 +51,8 @@
 
 .Form-title--is_superuser{
     height:15px;
-    color: @btn-txt;
-    background-color: @btn-bg;
+    color: @default-interface-txt;
+    background-color: @default-list-header-bg;
     border-radius: 5px;
     border: 1px solid @btn-bord;
     font-size: 10px;
@@ -156,7 +156,17 @@
     flex: 1 0 auto;
     margin-bottom: 20px;
     width: 33%;
+    max-width: 33%;
     padding-right: 30px;
+}
+
+.Form-formGroup--fullWidth {
+    max-width: none;
+}
+
+.Form-formGroup--checkbox{
+    display: flex;
+    align-items: flex-end;
 }
 
 .Form-subForm {
@@ -211,12 +221,17 @@
     border:1px solid @field-border-sel;
 }
 
+.Form-monospace{
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace!important;
+}
+
 .ui-spinner{
     height: 30px;
     background-color: @field-secondary-bg;
     border-radius: 5px;
     border:1px solid @field-border;
     color: @field-input-text;
+    width:100%
 }
 
 .ui-spinner-input{
@@ -478,10 +493,6 @@ input[type='radio']:checked:before {
     margin-top: 5px;
     font-size: small;
     color: @default-interface-txt;
-}
-
-.Form-formGroup {
-    max-width: 33%;
 }
 
 @media only screen and (max-width: 650px) {

@@ -7,16 +7,14 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$location' , '$compile',  'CreateDialog',
-        'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'SchedulesList',
-        'Rest' , 'ProcessErrors', 'managementJobsListObject', '$rootScope',
-        '$state','$scope',
-        function( Wait, $location, $compile, CreateDialog,
-            GetBasePath, SearchInit, PaginateInit,
-            SchedulesList,
-            Rest, ProcessErrors, managementJobsListObject, $rootScope,
-            $state, $scope) {
+    [   'Wait', '$location' , '$compile',  'CreateDialog', 'GetBasePath' ,
+        'SearchInit' , 'PaginateInit', 'SchedulesList', 'Rest' ,
+        'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
+        '$scope', 'CreateSelect2',
+        function( Wait, $location, $compile, CreateDialog, GetBasePath,
+            SearchInit, PaginateInit, SchedulesList, Rest, ProcessErrors,
+            managementJobsListObject, $rootScope, $state, $scope,
+            CreateSelect2) {
 
                 var defaultUrl = GetBasePath('system_job_templates');
 
@@ -154,6 +152,14 @@ export default
                         // $('#configure-tower-dialog').dialog('close');
                         $('#prompt-for-days-facts').show();
                         $('#prompt-for-days-facts').dialog('open');
+                        CreateSelect2({
+                            element: '#keep_unit',
+                            multiple: false
+                        });
+                        CreateSelect2({
+                            element: '#granularity_keep_unit',
+                            multiple: false
+                        });
                         Wait('stop');
                     });
                 };
@@ -238,7 +244,7 @@ export default
                 };
 
                 $scope.chooseRunJob = function(id, name) {
-                    if(id === 4) {
+                    if(this.card.job_type === "cleanup_facts") {
                         // Run only for 'Cleanup Fact Details'
                         $scope.submitCleanupJob(id, name);
                     } else {

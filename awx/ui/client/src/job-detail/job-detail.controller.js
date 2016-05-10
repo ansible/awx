@@ -737,7 +737,7 @@ export default
                 return true;
             };
 
-            scope.toggleLessEvents = function(state) {
+            scope.toggleLessEvents = function() {
                 if (!scope.lessEvents) {
                     $('#events-summary').slideUp(200);
                     scope.lessEvents = true;

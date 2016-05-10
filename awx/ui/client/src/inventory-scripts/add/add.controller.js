@@ -49,7 +49,6 @@ export default
                     script: scope.script
                 })
                 .success(function (data) {
-                    $rootScope.addedItem = data.id;
                     $state.go('inventoryScripts', {}, {reload: true});
                     Wait('stop');
                 })

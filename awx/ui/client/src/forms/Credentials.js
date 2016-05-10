@@ -79,24 +79,7 @@ export default
                     dataTitle: 'Type',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    hasSubForm: true,
-                    // helpCollapse: [{
-                    //     hdr: 'Select a Credential Type',
-                    //     content: '<dl>\n' +
-                    //         '<dt>Machine</dt>\n' +
-                    //         '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
-                    //         'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
-                    //         'remote hosts.</dd>' +
-                    //         '<dt>Source Control</dt>\n' +
-                    //         '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
-                    //         'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                    //         'used on the Projects tab.</dd>\n' +
-                    //         '<dt>Others (Cloud Providers)</dt>\n' +
-                    //         '<dd>Access keys for authenticating to the specific ' +
-                    //         'cloud provider, usually used for inventory sync ' +
-                    //         'and deployment.</dd>\n' +
-                    //         '</dl>\n'
-                    // }]
+                    hasSubForm: true
                 },
                 access_key: {
                     label: 'Access Key',
@@ -254,7 +237,8 @@ export default
                         reqExpression: 'key_required',
                         init: true
                     },
-                    class: 'Form-textAreaLabel',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    elementClass: 'Form-monospace',
                     hintText: "{{ key_hint }}",
                     addRequired: false,
                     editRequired: false,

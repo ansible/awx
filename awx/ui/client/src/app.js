@@ -233,6 +233,7 @@ var tower = angular.module('Tower', [
                 url: '/home',
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
+                params: {licenseMissing: null},
                 data: {
                     activityStream: true
                 },
@@ -788,6 +789,10 @@ var tower = angular.module('Tower', [
                     // catch license expiration notifications immediately after user logs in, redirect
                     if (fromState.name === 'signIn'){
                         CheckLicense.notify();
+                    }
+
+                    if(fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')){
+                        $rootScope.licenseMissing = toParams.licenseMissing;
                     }
                     var list, id;
                     // broadcast event change if editing crud object
