@@ -194,6 +194,11 @@ export default
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
             function openSocket() {
                 $rootScope.event_socket.on("job_events-" + job_id, function(data) {
+                    // update elapsed time on each event received
+                    scope.job_status.elapsed = GetElapsed({
+                        start: scope.job.created,
+                        end: Date.now()
+                    });
                     if (api_complete && data.id > lastEventId) {
                         scope.waiting = false;
                         data.event = data.event_name;
