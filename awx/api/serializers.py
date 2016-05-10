@@ -1651,12 +1651,6 @@ class CredentialSerializerCreate(CredentialSerializer):
         fields = ('*', 'user', 'team', 'organization')
 
     def create(self, validated_data):
-        '''
-        Special cases are processed for creating a credential. Fields of
-        user, team, and organization are allowed, and if given, roles are
-        automatically created for these. This is only used for list-create
-        view.
-        '''
         # Remove the user, team, and organization processed in view
         for field in ['user', 'team', 'organization']:
             validated_data.pop(field, None)
