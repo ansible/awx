@@ -1002,5 +1002,3 @@ LOGGING = {
     }
 }
 
-STATSD_CLIENT = 'django_statsd.clients.null'
-STATSD_HOST = 'localhost'

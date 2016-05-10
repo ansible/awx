@@ -23,7 +23,6 @@ django-radius==1.0.0
 djangorestframework==3.3.2
 djangorestframework-yaml==1.0.2
 django-split-settings==0.1.1
-django-statsd-mozilla==0.3.16
 django-taggit==0.17.6
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
@@ -119,7 +118,6 @@ shade==1.4.0
 simplejson==3.8.1
 six==1.9.0
 slackclient==0.16
-statsd==3.2.1
 stevedore==1.10.0
 suds==0.4
 unicodecsv==0.14.1
