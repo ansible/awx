@@ -2480,6 +2480,18 @@ class JobTemplateAccessList(ResourceAccessList):
     resource_model = JobTemplate
     new_in_300 = True
 
+class JobTemplateRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = JobTemplate
+    new_in_300 = True
+
+    def get_queryset(self):
+        jt = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(JobTemplate)
+        return Role.objects.filter(content_type=content_type, object_id=jt.pk).all()
+
 class SystemJobTemplateList(ListAPIView):
 
     model = SystemJobTemplate

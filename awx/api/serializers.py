@@ -329,7 +329,6 @@ class BaseSerializer(serializers.ModelSerializer):
                     'id': role.id,
                     'name': role.name,
                     'description': role.description,
-                    'url': role.get_absolute_url(),
                 }
         if len(roles) > 0:
             summary_fields['roles'] = roles
@@ -512,6 +511,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['last_job'] = obj.last_job.get_absolute_url()
         if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url()
+        res['roles'] = reverse('api:job_template_roles_list', args=(obj.pk,))
+
         return res
 
     def get_types(self):
@@ -1510,7 +1511,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, role)}
+            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
             role = team_role.children.filter(id__in=permissive_role_ids)[0]
@@ -1528,7 +1529,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, team_role)}
+            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)}
 
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)

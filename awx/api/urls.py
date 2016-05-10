@@ -182,6 +182,7 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$',           'job_template_notification_templates_error_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$',         'job_template_notification_templates_success_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'job_template_access_list'),
+    url(r'^(?P<pk>[0-9]+)/roles/$',                     'job_template_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$',                    'job_template_label_list'),
 )
 
