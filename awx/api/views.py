@@ -1998,18 +1998,20 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     parent_model = InventorySource
     relationship = 'notification_templates_any'
 
-class InventorySourceNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        parent = self.get_parent_object()
+        if parent.source not in CLOUD_INVENTORY_SOURCES:
+            return Response(dict(msg="Notification Templates can only be assigned when source is one of {}"
+                                 .format(CLOUD_INVENTORY_SOURCES, parent.source)),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
 
-    model = NotificationTemplate
-    serializer_class = NotificationTemplateSerializer
-    parent_model = InventorySource
+class InventorySourceNotificationTemplatesErrorList(InventorySourceNotificationTemplatesAnyList):
+
     relationship = 'notification_templates_error'
 
-class InventorySourceNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificationTemplatesAnyList):
 
-    model = NotificationTemplate
-    serializer_class = NotificationTemplateSerializer
-    parent_model = InventorySource
     relationship = 'notification_templates_success'
 
 class InventorySourceHostsList(SubListAPIView):
