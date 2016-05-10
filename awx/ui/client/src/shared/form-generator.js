@@ -1780,61 +1780,61 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         actionButtons += ActionButton(collection
                             .actions[act]);
                     });
+                var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
 
                 html += `
-<div class=\"row\"
-    ng-show=\"${collection.hideSearchAndActions ? false : true}\">
-    <div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\"
-        ng-show=\"${collection.iterator}Loading == true ||
-            ${collection.iterator}_active_search == true || (
-                ${collection.iterator}Loading == false &&
-                ${collection.iterator}_active_search == false &&
-                ${collection.iterator}_total_rows > 0)\"
-        ng-hide=\"is_superuser && ${collection.hideOnSuperuser}\"
-    >
-        ${tagSearch}
-    </div>
-    <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\">
-        <div class=\"list-actions\">
-            ${actionButtons}
-        </div>
-    </div>
-</div>
+                    <div class=\"row\"
+                        ng-show=\"${collection.hideSearchAndActions ? false : true}\">
+                        <div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\"
+                            ng-show=\"${collection.iterator}Loading == true ||
+                                ${collection.iterator}_active_search == true || (
+                                    ${collection.iterator}Loading == false &&
+                                    ${collection.iterator}_active_search == false &&
+                                    ${collection.iterator}_total_rows > 0) &&
+                                    !(is_superuser && ${hideOnSuperuser})\">
+                            ${tagSearch}
+                        </div>
+                        <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\">
+                            <div class=\"list-actions\">
+                                ${actionButtons}
+                            </div>
+                        </div>
+                    </div>
                 `;
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
-                var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
+
                 html += `
-<div
-    class=\"row\"
-    ng-show=\" ${collection.iterator}Loading == false &&
-        ${collection.iterator}_active_search == true &&
-        ${itm}.length == 0 &&
-        !(is_superuser && ${collection.hideOnSuperuser})\">
-    <div class=\"col-lg-12 List-searchNoResults\">
-        No records matched your search.
-    </div>
-</div>
+                    <div
+                        class=\"row\"
+                        ng-show=\" ${collection.iterator}Loading == false &&
+                            ${collection.iterator}_active_search == true &&
+                            ${itm}.length == 0 &&
+                            !(is_superuser && ${collection.hideOnSuperuser})\">
+                        <div class=\"col-lg-12 List-searchNoResults\">
+                            No records matched your search.
+                        </div>
+                    </div>
                 `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                 html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
 
                 html += `
-<div class=\"List-noItems\" ng-show=\"is_superuser\">
-    System Administrators have access to all ${collection.iterator}s
-</div>
+                    <div class=\"List-noItems\" ng-show=\"is_superuser\">
+                        System Administrators have access to all ${collection.iterator}s
+                    </div>
                 `;
 
                 // Start the list
                 html += `
-<div class=\"list-wrapper\"
-    ng-show=\"(${collection.iterator}Loading == true ||
-        (${collection.iterator}Loading == false && ${itm}.length > 0)) &&
-        !(is_superuser && ${collection.hideOnSuperuser})\">
-    <table id=\"${itm}_table\" class=\"${collection.iterator} List-table\">
-        <thead>
-        <tr class=\"List-tableHeaderRow\">
+                <div class=\"list-wrapper\"
+                    ng-show=\"(${collection.iterator}Loading == true ||
+                        (${collection.iterator}Loading == false && ${itm}.length > 0)) &&
+                        !(is_superuser && ${collection.hideOnSuperuser})\">
+                    <table id=\"${itm}_table\" class=\"${collection.iterator} List-table\">
+                        <thead>
+                        <tr class=\"List-tableHeaderRow\">
                 `;
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
