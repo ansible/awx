@@ -65,7 +65,8 @@ export default
 		};
 	 	var calcDaysRemaining = function(seconds){
 	 		// calculate the number of days remaining on the license
-	 		var duration = moment.duration(seconds, 'seconds').days();
+			var duration = moment.duration(seconds, 'seconds').asDays();
+			duration = Math.floor(duration);
             duration = (duration!==1) ? `${duration} Days` : `${duration} Day`;
 			return duration;
 	 	};
