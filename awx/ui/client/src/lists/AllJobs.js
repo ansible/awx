@@ -21,7 +21,7 @@ export default
                 label: '',
                 searchLabel: 'Status',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
-                awToolTip: "{{ all_job.status_tip }}",
+                awToolTip: "Job {{ all_job.status }}. Click for details.",
                 awTipPlacement: "right",
                 dataTitle: "{{ all_job.status_popover_title }}",
                 icon: 'icon-job-{{ all_job.status }}',
@@ -41,7 +41,8 @@ export default
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ all_job.status_tip }}",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                noLink: true
             },
             name: {
                 label: 'Name',
