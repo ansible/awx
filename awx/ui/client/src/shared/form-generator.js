@@ -1499,11 +1499,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
-                            html += "<div id=\"" + itm + "_tab\" "+
-                                "class=\"Form-tab\" "+
-                                "ng-click=\"toggleFormTabs($event)\"" +
-                                "ng-class=\"{'is-selected': " + itm + "Selected }\">" + (collection.title || collection.editTitle) +
-                                "</div>\n";
+                            html += `<div id="${itm}_tab"`+
+                                `class="Form-tab"`+
+                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"` +
+                                `ng-class="{'is-selected': ${itm}Selected, 'Form-tab--disabled' : ${this.form.related[itm].disabled }}">${(collection.title || collection.editTitle)} </div>`;
                         }
                     }
                     else if(this.mode === "add"){
@@ -1517,7 +1516,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 "</div>\n";
                         }
                     }
-
                     html += "</div>";//tabHolder
                 }
 
