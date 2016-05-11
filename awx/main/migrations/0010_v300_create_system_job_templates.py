@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
+from django.db import migrations, models
 from django.utils.timezone import now
 
 from awx.api.license import feature_enabled
@@ -96,4 +96,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(create_system_job_templates, migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name='systemjob',
+            name='job_type',
+            field=models.CharField(default=b'', max_length=32, blank=True, choices=[(b'cleanup_jobs', 'Remove jobs older than a certain number of days'), (b'cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), (b'cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')]),
+        ),
+        migrations.AlterField(
+            model_name='systemjobtemplate',
+            name='job_type',
+            field=models.CharField(default=b'', max_length=32, blank=True, choices=[(b'cleanup_jobs', 'Remove jobs older than a certain number of days'), (b'cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), (b'cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')]),
+        ),
     ]

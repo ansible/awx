@@ -1169,7 +1169,6 @@ class SystemJobOptions(BaseModel):
     SYSTEM_JOB_TYPE = [
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('cleanup_deleted', _('Purge previously deleted items from the database')),
         ('cleanup_facts', _('Purge and/or reduce the granularity of system tracking data')),
     ]
 
