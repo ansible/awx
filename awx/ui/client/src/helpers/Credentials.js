@@ -39,7 +39,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
+                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -65,7 +65,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
+                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -222,8 +222,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
-         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
+.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
+         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -293,6 +293,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                          else {
                              ReturnToCaller(1);
                          }
+                         $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
+                         
                      })
                      .error(function (data, status) {
                          Wait('stop');
@@ -314,6 +316,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                          else {
                              ReturnToCaller(1);
                          }
+
                      })
                      .error(function (data, status) {
                          Wait('stop');

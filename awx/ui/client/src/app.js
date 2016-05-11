@@ -422,6 +422,10 @@ var tower = angular.module('Tower', [
                 controller: CredentialsEdit,
                 data: {
                     activityStreamId: 'credential_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "credentials",
+                    label: "EDIT CREDENTIAL"
                 }
             }).
 
@@ -742,12 +746,12 @@ var tower = angular.module('Tower', [
                     // remove any lingering intervals
                     // except on jobDetails.* states
                     var jobDetailStates = [
-                        'jobDetail', 
-                        'jobDetail.host-summary', 
+                        'jobDetail',
+                        'jobDetail.host-summary',
                         'jobDetail.host-event.details',
-                        'jobDetail.host-event.json', 
+                        'jobDetail.host-event.json',
                         'jobDetail.host-events',
-                        'jobDetail.host-event.stdout' 
+                        'jobDetail.host-event.stdout'
                     ];
                     if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
                         window.clearInterval($rootScope.jobDetailInterval);
