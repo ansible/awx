@@ -408,14 +408,13 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     assert 'summary_fields' in org
     assert 'roles' in org['summary_fields']
 
-    org_role_response = get(org['summary_fields']['roles']['admin_role']['url'], admin)
+    role_pk = org['summary_fields']['roles']['admin_role']['id']
+    role_url = reverse('api:role_detail', args=(role_pk,))
+    org_role_response = get(role_url, admin)
+
     assert org_role_response.status_code == 200
     role = org_role_response.data
     assert role['related']['organization'] == url
-
-
-
-
 
 @pytest.mark.django_db
 def test_ensure_permissions_is_present(organization, get, user):
