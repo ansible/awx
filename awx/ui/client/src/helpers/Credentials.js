@@ -75,7 +75,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
                  scope.hostPopOver = "<p>The host value</p>";
-
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -131,6 +130,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.password_required = true;
                              scope.hostLabel = "vCenter Host";
                              scope.passwordLabel = 'Password';
+                             scope.hostPopOver = "Enter the hostname or IP address which corresponds to your VMware vCenter.";
                          break;
                          case 'openstack':
                              scope.hostLabel = "Host (Authentication URL)";
@@ -152,6 +152,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = 'Password';
                             scope.host_required = true;
                             scope.hostLabel = "Satellite 6 Host";
+                            scope.hostPopOver = "Enter the hostname or IP address name which <br />" +
+                                "corresponds to your Red Hat Satellite 6 server.";
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
@@ -159,6 +161,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = 'Password';
                             scope.host_required = true;
                             scope.hostLabel = "CloudForms Host";
+                            scope.hostPopOver = "Enter the hostname or IP address for the virtual <br />" +
+                                " machine which is hosting the CloudForm appliance.";
                          break;
                          case 'net':
                             scope.username_required = true;
@@ -294,7 +298,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                              ReturnToCaller(1);
                          }
                          $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
-                         
+
                      })
                      .error(function (data, status) {
                          Wait('stop');
