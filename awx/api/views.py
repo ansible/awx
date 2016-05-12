@@ -799,6 +799,18 @@ class OrganizationAccessList(ResourceAccessList):
     resource_model = Organization
     new_in_300 = True
 
+class OrganizationRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Organization
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -1063,6 +1075,18 @@ class ProjectAccessList(ResourceAccessList):
     model = User # needs to be User for AccessLists's
     resource_model = Project
     new_in_300 = True
+
+class ProjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Project
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
 
 class UserList(ListCreateAPIView):
 
@@ -1359,6 +1383,18 @@ class CredentialAccessList(ResourceAccessList):
     resource_model = Credential
     new_in_300 = True
 
+class CredentialRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+
 class InventoryScriptList(ListCreateAPIView):
 
     model = CustomInventoryScript
@@ -1428,6 +1464,18 @@ class InventoryAccessList(ResourceAccessList):
     model = User # needs to be User for AccessLists's
     resource_model = Inventory
     new_in_300 = True
+
+class InventoryRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Inventory
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
 
 class InventoryJobTemplateList(SubListAPIView):
 
@@ -1763,6 +1811,18 @@ class GroupAccessList(ResourceAccessList):
     model = User # needs to be User for AccessLists's
     resource_model = Group
     new_in_300 = True
+
+class GroupRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Group
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
 
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
@@ -2488,9 +2548,9 @@ class JobTemplateRolesList(SubListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        jt = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(JobTemplate)
-        return Role.objects.filter(content_type=content_type, object_id=jt.pk).all()
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
 
 class SystemJobTemplateList(ListAPIView):
 

@@ -805,7 +805,8 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
-            access_list = reverse('api:organization_access_list',         args=(obj.pk,)),
+            roles = reverse('api:organization_roles_list', args=(obj.pk,)),
+            access_list = reverse('api:organization_access_list', args=(obj.pk,)),
         ))
         return res
 
@@ -890,6 +891,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list', args=(obj.pk,)),
+            roles = reverse('api:project_roles_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -993,6 +995,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
+            roles = reverse('api:inventory_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization:
@@ -1164,6 +1167,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:group_access_list',         args=(obj.pk,)),
+            roles = reverse('api:group_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory:
@@ -1625,7 +1629,8 @@ class CredentialSerializer(BaseSerializer):
         res = super(CredentialSerializer, self).get_related(obj)
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
-            access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
+            access_list = reverse('api:credential_access_list', args=(obj.pk,)),
+            roles = reverse('api:credential_roles_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)
