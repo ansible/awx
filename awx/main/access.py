@@ -813,6 +813,8 @@ class JobTemplateAccess(BaseAccess):
 
     def can_change(self, obj, data):
         data_for_change = data
+        if self.user not in obj.admin_role:
+            return False
         if data is not None:
             data_for_change = dict(data)
             for required_field in ('credential', 'cloud_credential', 'inventory', 'project'):
@@ -822,12 +824,7 @@ class JobTemplateAccess(BaseAccess):
         return self.can_read(obj) and self.can_add(data_for_change)
 
     def can_delete(self, obj):
-        add_obj = dict(credential=obj.credential.id if obj.credential is not None else None,
-                       cloud_credential=obj.cloud_credential.id if obj.cloud_credential is not None else None,
-                       inventory=obj.inventory.id if obj.inventory is not None else None,
-                       project=obj.project.id if obj.project is not None else None,
-                       job_type=obj.job_type)
-        return self.can_add(add_obj)
+        return self.user in obj.admin_role
 
 class JobAccess(BaseAccess):
 
