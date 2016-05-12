@@ -8,6 +8,7 @@ import json
 from django.utils.encoding import smart_text
 
 from awx.main.notifications.base import TowerBaseEmailBackend
+from awx.main.utils import get_awx_version
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
 
@@ -27,6 +28,8 @@ class WebhookBackend(TowerBaseEmailBackend):
 
     def send_messages(self, messages):
         sent_messages = 0
+        if 'User-Agent' not in self.headers:
+            self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
         for m in messages:
             r = requests.post("{}".format(m.recipients()[0]),
                               data=json.dumps(m.body),
