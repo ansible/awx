@@ -317,7 +317,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
-    $stateParams, $timeout, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
+    $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, OrganizationList, LookUpInit, Empty,
     OwnerChange, FormSave, Wait, $state, CreateSelect2, Authorization) {
@@ -669,7 +669,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 }
 
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', '$timeout', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
+    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'OrganizationList', 'LookUpInit', 'Empty', 'OwnerChange',
