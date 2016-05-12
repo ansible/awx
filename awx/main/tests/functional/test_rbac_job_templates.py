@@ -11,16 +11,19 @@ from django.apps import apps
 
 
 @pytest.mark.django_db
-def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, user):
+def test_job_template_migration_check(credential, deploy_jobtemplate, check_jobtemplate, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
 
+    credential.deprecated_user = joe
+    credential.save()
 
     check_jobtemplate.project.organization.deprecated_users.add(joe)
 
     Permission(user=joe, inventory=check_jobtemplate.inventory, permission_type='read').save()
     Permission(user=joe, inventory=check_jobtemplate.inventory,
                project=check_jobtemplate.project, permission_type='check').save()
+
 
     rbac.migrate_users(apps, None)
     rbac.migrate_organization(apps, None)
@@ -39,10 +42,12 @@ def test_job_template_migration_check(deploy_jobtemplate, check_jobtemplate, use
     assert joe not in deploy_jobtemplate.execute_role
 
 @pytest.mark.django_db
-def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, user):
+def test_job_template_migration_deploy(credential, deploy_jobtemplate, check_jobtemplate, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
 
+    credential.deprecated_user = joe
+    credential.save()
 
     deploy_jobtemplate.project.organization.deprecated_users.add(joe)
 
@@ -68,12 +73,15 @@ def test_job_template_migration_deploy(deploy_jobtemplate, check_jobtemplate, us
 
 
 @pytest.mark.django_db
-def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate, organization, team, user):
+def test_job_template_team_migration_check(credential, deploy_jobtemplate, check_jobtemplate, organization, team, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
     team.deprecated_users.add(joe)
     team.organization = organization
     team.save()
+
+    credential.deprecated_team = team
+    credential.save()
 
     check_jobtemplate.project.organization.deprecated_users.add(joe)
 
@@ -101,12 +109,15 @@ def test_job_template_team_migration_check(deploy_jobtemplate, check_jobtemplate
 
 
 @pytest.mark.django_db
-def test_job_template_team_deploy_migration(deploy_jobtemplate, check_jobtemplate, organization, team, user):
+def test_job_template_team_deploy_migration(credential, deploy_jobtemplate, check_jobtemplate, organization, team, user):
     admin = user('admin', is_superuser=True)
     joe = user('joe')
     team.deprecated_users.add(joe)
     team.organization = organization
     team.save()
+
+    credential.deprecated_team = team
+    credential.save()
 
     deploy_jobtemplate.project.organization.deprecated_users.add(joe)
 
