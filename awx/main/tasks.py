@@ -38,7 +38,7 @@ from celery import Task, task
 from django.conf import settings
 from django.db import transaction, DatabaseError
 from django.utils.timezone import now
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 
@@ -82,7 +82,7 @@ def send_notifications(notification_list, job_id=None):
         except Exception as e:
             logger.error("Send Notification Failed {}".format(e))
             notification.status = "failed"
-            notification.error = smart_text(e)
+            notification.error = smart_str(e)
         finally:
             notification.save()
         if job_id is not None:
@@ -211,7 +211,7 @@ def handle_work_success(self, result, task_actual):
     notification_body = instance.notification_data()
     notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
                                                                                task_actual['id'],
-                                                                               smart_text(instance_name),
+                                                                               smart_str(instance_name),
                                                                                notification_body['url'])
     notification_body['friendly_name'] = friendly_name
     send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
@@ -273,7 +273,7 @@ def handle_work_error(self, task_id, subtasks=None):
         notification_body = first_task.notification_data()
         notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
                                                                                 first_task_id,
-                                                                                smart_text(first_task_name),
+                                                                                smart_str(first_task_name),
                                                                                 notification_body['url'])
         notification_body['friendly_name'] = first_task_friendly_name
         send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
