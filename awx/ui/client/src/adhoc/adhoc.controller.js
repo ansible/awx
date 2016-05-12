@@ -23,7 +23,6 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
     this.privateFn = privateFn;
 
     var id = $stateParams.inventory_id,
-        urls = privateFn.setAvailableUrls(),
         hostPattern = $rootScope.hostPatterns || "all";
 
     // note: put any urls that the controller will use in here!!!!
@@ -34,6 +33,8 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
             machineCredentialUrl: GetBasePath('credentials') + '?kind=ssh'
         };
     };
+
+    var urls = privateFn.setAvailableUrls();
 
     // set the default options for the selects of the adhoc form
     privateFn.setFieldDefaults = function(verbosity_options, forks_default) {
