@@ -1,5 +1,6 @@
 
 from awx.fact.models import FactVersion
+from awx.fact.utils.dbtransform import KeyTransform
 from mongoengine.connection import ConnectionError
 from pymongo.errors import OperationFailure
 from django.conf import settings
@@ -36,10 +37,11 @@ def migrate_facts(apps, schema_editor):
 
     migrated_count = 0
     not_migrated_count = 0
+    transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
     for factver in FactVersion.objects.all():
-        fact_obj = factver.fact 
         try:
             host = Host.objects.only('id').get(inventory__id=factver.host.inventory_id, name=factver.host.hostname)
+            fact_obj = transform.replace_outgoing(factver.fact)
             Fact.objects.create(host_id=host.id, timestamp=fact_obj.timestamp, module=fact_obj.module, facts=fact_obj.fact).save()
             migrated_count += 1
         except Host.DoesNotExist:

@@ -11,12 +11,12 @@ class KeyTransform(SONManipulator):
 
     def replace_key(self, key):
         for (replace, replacement) in self.replace:
-                key = key.replace(replace, replacement)
+            key = key.replace(replace, replacement)
         return key
 
     def revert_key(self, key):
         for (replacement, replace) in self.replace:
-                key = key.replace(replace, replacement)
+            key = key.replace(replace, replacement)
         return key
 
     def replace_incoming(self, obj):
@@ -49,7 +49,10 @@ class KeyTransform(SONManipulator):
         return self.replace_incoming(son)
 
     def transform_outgoing(self, son, collection):
+        if not collection or collection.name != 'fact':
+            return son
         return self.replace_outgoing(son)
 
 def register_key_transform(db):
-    db.add_son_manipulator(KeyTransform([('.', '\uff0E'), ('$', '\uff04')]))
+    #db.add_son_manipulator(KeyTransform([('.', '\uff0E'), ('$', '\uff04')]))
+    pass
