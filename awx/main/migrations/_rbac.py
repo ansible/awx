@@ -8,7 +8,6 @@ from collections import defaultdict
 from awx.main.utils import getattrd
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
-import _old_access as old_access
 logger = logging.getLogger(__name__)
 
 def log_migration(wrapped):
@@ -385,33 +384,81 @@ def migrate_job_templates(apps, schema_editor):
     JobTemplate = apps.get_model('main', 'JobTemplate')
     Team = apps.get_model('main', 'Team')
     Permission = apps.get_model('main', 'Permission')
+    Credential = apps.get_model('main', 'Credential')
 
-    for jt in JobTemplate.objects.iterator():
-        permission = Permission.objects.filter(
+    jt_queryset = JobTemplate.objects.select_related('inventory', 'project', 'inventory__organization', 'execute_role')
+
+    for jt in jt_queryset.iterator():
+        jt_permission_qs = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,
-            permission_type__in=['create', 'check', 'run'] if jt.job_type == 'check' else ['create', 'run'],
         )
 
-        for team in Team.objects.iterator():
-            if permission.filter(team=team).exists():
+        inventory_permission_qs = Permission.objects.filter(
+            inventory=jt.inventory,
+            project__isnull=True,
+        )
+
+        team_create_permissions = set(
+            jt_permission_qs
+            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['create'])
+            .values_list('team__id', flat=True)
+        )
+        team_run_permissions = set(
+            jt_permission_qs
+            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['run'])
+            .values_list('team__id', flat=True)
+        )
+        user_create_permissions = set(
+            jt_permission_qs
+            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['run'])
+            .values_list('user__id', flat=True)
+        )
+        user_run_permissions = set(
+            jt_permission_qs
+            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['create'])
+            .values_list('user__id', flat=True)
+        )
+
+        team_inv_permissions = defaultdict(set)
+        user_inv_permissions = defaultdict(set)
+
+        for user_id, team_id, inventory_id in inventory_permission_qs.values_list('user_id', 'team_id', 'inventory_id'):
+            if user_id:
+                user_inv_permissions[user_id].add(inventory_id)
+            if team_id:
+                team_inv_permissions[team_id].add(inventory_id)
+
+
+        for team in Team.objects.filter(id__in=team_create_permissions).iterator():
+            if jt.inventory.id in team_inv_permissions[team.id] and \
+                ((not jt.credential and not jt.cloud_credential) or
+                    Credential.objects.filter(deprecated_team=team, jobtemplates=jt).exists()):
+                team.member_role.children.add(jt.admin_role)
+                logger.info(smart_text(u'transfering admin access on JobTemplate({}) to Team({})'.format(jt.name, team.name)))
+        for team in Team.objects.filter(id__in=team_run_permissions).iterator():
+            if jt.inventory.id in team_inv_permissions[team.id] and \
+               ((not jt.credential and not jt.cloud_credential) or
+                    Credential.objects.filter(deprecated_team=team, jobtemplates=jt).exists()):
                 team.member_role.children.add(jt.execute_role)
-                logger.info(smart_text(u'adding Team({}) access to JobTemplate({})'.format(team.name, jt.name)))
+                logger.info(smart_text(u'transfering execute access on JobTemplate({}) to Team({})'.format(jt.name, team.name)))
 
-        for user in User.objects.iterator():
-            if permission.filter(user=user).exists():
+        for user in User.objects.filter(id__in=user_create_permissions).iterator():
+            if (jt.inventory.id in user_inv_permissions[user.id] or
+                    any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
+               ((not jt.credential and not jt.cloud_credential) or
+                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
+                jt.admin_role.members.add(user)
+                logger.info(smart_text(u'transfering admin access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
+        for user in User.objects.filter(id__in=user_run_permissions).iterator():
+            if (jt.inventory.id in user_inv_permissions[user.id] or
+                    any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
+               ((not jt.credential and not jt.cloud_credential) or
+                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
                 jt.execute_role.members.add(user)
-                logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))
+                logger.info(smart_text(u'transfering execute access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
 
-            if jt.execute_role.ancestors.filter(members=user).exists(): # aka "user in jt.execute_role"
-                # If the job template is already accessible by the user, because they
-                # are a sytem, organization, or project admin, then don't add an explicit
-                # role entry for them
-                continue
 
-            if old_access.check_user_access(user, jt.__class__, 'start', jt, False):
-                jt.execute_role.members.add(user)
-                logger.info(smart_text(u'adding User({}) access to JobTemplate({})'.format(user.username, jt.name)))
 
 @log_migration
 def rebuild_role_hierarchy(apps, schema_editor):
