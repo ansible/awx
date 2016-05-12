@@ -152,6 +152,8 @@ def _discover_credentials(instances, cred, orgfunc):
         try:
             _update_credential_parents(orgfunc(instances[0]), cred)
         except AttributeError:
+            # JobTemplate.inventory can be NULL sometimes, eg when an inventory
+            # has been deleted. This protects against that.
             pass
     else:
         for pos, org in enumerate(orgs):
