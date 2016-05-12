@@ -1541,7 +1541,7 @@ class RunAdHocCommand(BaseTask):
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
-        env['ANSIBLE_SCP_IF_SSH'] = "True"
+        env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
