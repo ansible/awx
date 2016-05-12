@@ -418,6 +418,8 @@ export default
 
             related: {
                 permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
                     basePath: 'credentials/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',

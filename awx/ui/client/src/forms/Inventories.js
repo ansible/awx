@@ -79,6 +79,8 @@ export default
 
             related: {
                 scan_job_templates: {
+                    awToolTip: 'Please save before adding a scan job template',
+                    dataPlacement: 'top',
                     basePath: 'inventories/:id/scan_job_templates',
                     type: 'collection',
                     title: 'Scan Job Templates',
@@ -153,6 +155,8 @@ export default
                     }
                 },
                 permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
                     basePath: 'projects/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',

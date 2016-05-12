@@ -232,6 +232,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
 
         related: {
             permissions: {
+                awToolTip: 'Please save before assigning permissions',
+                dataPlacement: 'top',
                 basePath: 'projects/:id/access_list/',
                 type: 'collection',
                 title: 'Permissions',
@@ -264,7 +266,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     }
                 }
             },
-            "notifications": {
+            notifications: {
                 include: "NotificationsList"
             }
         },

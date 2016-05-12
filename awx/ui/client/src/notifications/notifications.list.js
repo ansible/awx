@@ -6,6 +6,9 @@
 
 export default function(){
     return {
+        // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
+        dataPlacement: 'top',
+        awToolTip: 'Please save before adding notifications',
         name:  'notifications' ,
         title: 'Notifications',
         iterator: 'notification',

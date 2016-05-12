@@ -1511,7 +1511,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
-                            html += "<div id=\"" + itm + "_tab\" "+
+                            html += "<div id=\"" + itm + "_tab\" "+ "aw-tool-tip=\"" + 
+                                collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " +
+                                "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
                                 "</div>\n";
                         }

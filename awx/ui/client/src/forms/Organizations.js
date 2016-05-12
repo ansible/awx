@@ -47,6 +47,8 @@ export default
 
             related: {
                 permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
                     type: 'collection',
                     title: 'Permissions',
                     iterator: 'permission',

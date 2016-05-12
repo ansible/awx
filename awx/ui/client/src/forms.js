@@ -17,8 +17,6 @@ import JobSummary from "./forms/JobSummary";
 import JobTemplates from "./forms/JobTemplates";
 import JobVarsPrompt from "./forms/JobVarsPrompt";
 import Jobs from "./forms/Jobs";
-import LicenseForm from "./forms/LicenseForm";
-import LicenseUpdate from "./forms/LicenseUpdate";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
@@ -42,8 +40,6 @@ export
         JobTemplates,
         JobVarsPrompt,
         Jobs,
-        LicenseForm,
-        LicenseUpdate,
         LogViewerOptions,
         LogViewerStatus,
         Organizations,

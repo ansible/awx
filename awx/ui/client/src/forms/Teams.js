@@ -60,6 +60,8 @@ export default
 
             related: {
                 access_list: {
+                    dataPlacement: 'top',
+                    awToolTip: 'Please save before adding users',
                     basePath: 'teams/:id/access_list/',
                     type: 'collection',
                     title: 'Users',
@@ -93,6 +95,8 @@ export default
                     }
                 },
                 roles: {
+                    dataPlacement: 'top',
+                    awToolTip: 'Please save before assigning permissions',
                     type: 'collection',
                     title: 'Permissions',
                     iterator: 'role',

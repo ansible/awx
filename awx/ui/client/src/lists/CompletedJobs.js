@@ -10,7 +10,9 @@
 export default
     angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
     .value( 'CompletedJobsList', {
-
+        // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
+        awToolTip: 'Please save and run a job to view',
+        dataPlacement: 'top',
         name: 'completed_jobs',
         basePath: 'job_templates/:id/jobs/?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
         iterator: 'completed_job',

@@ -334,6 +334,8 @@ export default
                     include: "CompletedJobsList"
                 },
                 permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
                     basePath: 'job_templates/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',
