@@ -838,9 +838,7 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
-        credential_ids = self.user.get_queryset(Credential)
         return qs.filter(
-            credential_id__in=credential_ids,
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
         )
 
