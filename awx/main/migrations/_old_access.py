@@ -686,7 +686,7 @@ class ProjectAccess(BaseAccess):
         qs = qs.select_related('modified_by', 'credential', 'current_job', 'last_job')
         if self.user.is_superuser:
             return qs
-        team_ids = set(Team.objects.filter(deprecated_users__in=[self.user]).values_list('id', flat=True))
+        team_ids = Team.objects.filter(deprecated_users__in=[self.user])
         qs = qs.filter(Q(created_by=self.user, deprecated_organizations__isnull=True) |
                        Q(deprecated_organizations__deprecated_admins__in=[self.user]) |
                        Q(deprecated_organizations__deprecated_users__in=[self.user]) |
@@ -694,17 +694,17 @@ class ProjectAccess(BaseAccess):
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
-        deploy_permissions_ids = set(Permission.objects.filter(
+        deploy_permissions = Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             permission_type__in=allowed_deploy,
-        ).values_list('id', flat=True))
-        check_permissions_ids = set(Permission.objects.filter(
+        )
+        check_permissions = Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             permission_type__in=allowed_check,
-        ).values_list('id', flat=True))
+        )
 
-        perm_deploy_qs = qs.filter(permissions__in=deploy_permissions_ids)
-        perm_check_qs = qs.filter(permissions__in=check_permissions_ids)
+        perm_deploy_qs = qs.filter(permissions__in=deploy_permissions)
+        perm_check_qs = qs.filter(permissions__in=check_permissions)
         return qs | perm_deploy_qs | perm_check_qs
 
     def can_add(self, data):
@@ -1047,8 +1047,10 @@ class JobTemplateAccess(BaseAccess):
                obj.job_type == PERM_INVENTORY_CHECK:
                 has_perm = True
 
-        dep_access = check_user_access(self.user, Inventory, 'read', obj.inventory) and check_user_access(self.user, Project, 'read', obj.project)
-        return dep_access and has_perm
+        return \
+            has_perm and \
+            check_user_access(self.user, Inventory, 'read', obj.inventory) and \
+            check_user_access(self.user, Project, 'read', obj.project)
 
     def can_change(self, obj, data):
         data_for_change = data
