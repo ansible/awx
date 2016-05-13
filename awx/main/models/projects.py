@@ -220,27 +220,26 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         default=0,
         blank=True,
     )
-    admin_role = ImplicitRoleField(
-        parent_role=[
-            'organization.admin_role',
-            'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-        ],
-    )
-    auditor_role = ImplicitRoleField(
-        parent_role=[
-            'organization.auditor_role',
-            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
-        ],
-    )
-    member_role = ImplicitRoleField(
+
+    admin_role = ImplicitRoleField(parent_role=[
+        'organization.admin_role',
+        'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ])
+
+    use_role = ImplicitRoleField(
         parent_role='admin_role',
     )
-    scm_update_role = ImplicitRoleField(
+
+    update_role = ImplicitRoleField(
         parent_role='admin_role',
     )
-    read_role = ImplicitRoleField(
-        parent_role=['member_role', 'auditor_role', 'scm_update_role'],
-    )
+
+    read_role = ImplicitRoleField(parent_role=[
+        'organization.auditor_role',
+        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'use_role',
+        'update_role',
+    ])
 
     @classmethod
     def _get_unified_job_class(cls):
