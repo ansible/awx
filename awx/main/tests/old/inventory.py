@@ -59,7 +59,7 @@ class InventoryTest(BaseTest):
 
         # create a permission here on the 'other' user so they have edit access on the org
         # we may add another permission type later.
-        self.inventory_b.auditor_role.members.add(self.other_django_user)
+        self.inventory_b.read_role.members.add(self.other_django_user)
 
     def tearDown(self):
         super(InventoryTest, self).tearDown()
@@ -267,14 +267,14 @@ class InventoryTest(BaseTest):
         temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
         temp_inv.groups.create(name='Delete Org Inventory Group')
 
-        temp_inv.auditor_role.members.add(self.other_django_user)
+        temp_inv.read_role.members.add(self.other_django_user)
 
         reverse('api:organization_detail', args=(temp_org.pk,))
         inventory_detail = reverse('api:inventory_detail', args=(temp_inv.pk,))
-        auditor_role_users_list = reverse('api:role_users_list', args=(temp_inv.auditor_role.pk,))
+        read_role_users_list = reverse('api:role_users_list', args=(temp_inv.read_role.pk,))
 
         self.get(inventory_detail, expect=200, auth=self.get_other_credentials())
-        self.post(auditor_role_users_list, data={'disassociate': True, "id": self.other_django_user.id}, expect=204, auth=self.get_super_credentials())
+        self.post(read_role_users_list, data={'disassociate': True, "id": self.other_django_user.id}, expect=204, auth=self.get_super_credentials())
         self.get(inventory_detail, expect=403, auth=self.get_other_credentials())
 
     def test_create_inventory_script(self):
@@ -1474,7 +1474,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # to see the inventory source and update view, but not start an update.
         user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
         with self.current_user(self.super_django_user):
-            self.post(user_roles_list_url, {"id": self.inventory.auditor_role.id}, expect=204)
+            self.post(user_roles_list_url, {"id": self.inventory.read_role.id}, expect=204)
         with self.current_user(self.other_django_user):
             self.get(inv_src_url, expect=200)
             response = self.get(inv_src_update_url, expect=200)

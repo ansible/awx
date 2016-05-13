@@ -491,7 +491,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # Explicitly give nobody user read permission on the inventory.
         nobody_roles_list_url = reverse('api:user_roles_list', args=(self.nobody_django_user.pk,))
         with self.current_user('admin'):
-            response = self.post(nobody_roles_list_url, {"id": self.inventory.auditor_role.id}, expect=204)
+            response = self.post(nobody_roles_list_url, {"id": self.inventory.read_role.id}, expect=204)
         with self.current_user('nobody'):
             self.run_test_ad_hoc_command(credential=other_cred.pk, expect=403)
         self.check_get_list(url, 'other', qs)
