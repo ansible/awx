@@ -5,6 +5,7 @@
 import logging
 import threading
 import contextlib
+import re
 
 # Django
 from django.db import models, transaction, connection
@@ -47,18 +48,18 @@ role_names = {
 }
 
 role_descriptions = {
-    'system_administrator' : '[TODO] System Administrator',
-    'system_auditor'       : '[TODO] System Auditor',
-    'adhoc_role'           : '[TODO] Ad Hoc',
-    'admin_role'           : '[TODO] Admin',
-    'auditor_role'         : '[TODO] Auditor',
-    'execute_role'         : '[TODO] Execute',
-    'member_role'          : '[TODO] Member',
-    'owner_role'           : '[TODO] Owner',
-    'read_role'            : '[TODO] Read',
-    'scm_update_role'      : '[TODO] SCM Update',
-    'update_role'          : '[TODO] Update',
-    'use_role'             : '[TODO] Use',
+    'system_administrator' : 'Can manage all aspects of the system',
+    'system_auditor'       : 'Can view all settings on the system',
+    'adhoc_role'           : 'May run ad hoc commands on an inventory or a group',
+    'admin_role'           : 'Can manage all aspects of the %s',
+    'auditor_role'         : 'Can view all settings for the %s',
+    'execute_role'         : 'May run the job template',
+    'member_role'          : 'User is a member of the %s',
+    'owner_role'           : 'Owns and can manage all aspects of this %s',
+    'read_role'            : 'May view settings for the %s',
+    'scm_update_role'      : 'May update the project from the configured source control management system',
+    'update_role'          : 'May update the inventory or group using the cloud source update system',
+    'use_role'             : 'Can use the %s in a job template',
 }
 
 
@@ -152,7 +153,13 @@ class Role(models.Model):
     @property
     def description(self):
         global role_descriptions
-        return role_descriptions[self.role_field]
+        description = role_descriptions[self.role_field]
+        if '%s' in description and self.content_type:
+            model = self.content_type.model_class()
+            model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
+            description = description % model_name
+
+        return description
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):
