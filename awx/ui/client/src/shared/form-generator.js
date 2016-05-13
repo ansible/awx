@@ -423,7 +423,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         scope[form.name + '_form'][fld].$setPristine();
                         scope[form.name + '_form'][fld].$setValidity('apiError', true);
                     }
-                    if (f.chkPass && scope[form.name + '_form'][fld]) {
+                    if (f.chkPass && scope[form.name + '_form'][fld] && $AnsibleConfig) {
                         if ($AnsibleConfig.password_length) {
                             scope[form.name + '_form'][fld].$setValidity('password_length', true);
                         }
@@ -786,6 +786,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
+
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode)) {
+
+
                     html += "<div class='form-group Form-formGroup ";
                     html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
                     html += (field['class']) ? (field['class']) : "";
@@ -998,7 +1002,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
                                 ".$error.awvalidurl'>\nPlease enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.\n</div>\n";
                         }
-                        if (field.chkPass) {
+                        if (field.chkPass && $AnsibleConfig) {
                             // password strength
                             if ($AnsibleConfig.password_length) {
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
@@ -1363,7 +1367,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
 
                     //lookup type fields
-                    if (field.type === 'lookup' && (field.excludeMode === undefined || field.excludeMode !== options.mode)) {
+                    if (field.type === 'lookup') {
 
                         html += label();
 
@@ -1445,6 +1449,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     html += "</div>\n";
                 }
+                }
                 return html;
             },
 
@@ -1511,7 +1516,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
-                            html += "<div id=\"" + itm + "_tab\" "+ "aw-tool-tip=\"" + 
+                            html += "<div id=\"" + itm + "_tab\" "+ "aw-tool-tip=\"" +
                                 collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " +
                                 "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
