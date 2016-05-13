@@ -72,7 +72,7 @@ def test_team_access_member(organization, team, user):
 def test_team_accessible_by(team, user, project):
     u = user('team_member', False)
 
-    team.member_role.children.add(project.member_role)
+    team.member_role.children.add(project.use_role)
     assert team in project.read_role
     assert u not in project.read_role
 
@@ -83,7 +83,7 @@ def test_team_accessible_by(team, user, project):
 def test_team_accessible_objects(team, user, project):
     u = user('team_member', False)
 
-    team.member_role.children.add(project.member_role)
+    team.member_role.children.add(project.use_role)
     assert len(Project.accessible_objects(team, 'read_role')) == 1
     assert not Project.accessible_objects(u, 'read_role')
 
