@@ -15,4 +15,4 @@ if [ -f /var/lib/awx/venv/tower/bin/activate ]; then
 fi
 
 # Run the requested Python command, using the interpreter from the path
-python "$@"
+exec python "$@"
