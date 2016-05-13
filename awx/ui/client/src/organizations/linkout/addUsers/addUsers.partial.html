@@ -1,0 +1,39 @@
+<div id="add-users-modal" class="AddUsers modal fade">
+    <div class="AddUsers-backDrop is-loggedOut"></div>
+    <div class="AddUsers-dialog">
+        <div class="AddUsers-content is-loggedOut">
+            <div class="AddUsers-header">
+                <div class="List-header">
+                    <div class="List-title">
+                        <div class="List-titleText ng-binding">{{ $parent.org_name }}<div class="List-titleLockup"></div>Add {{ addType }}
+                        </div>
+                    </div>
+                    <div class="Form-exitHolder">
+                        <button class="Form-exit" ng-click="closeModal()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="AddUsers-body">
+                <div class="AddUsers-inner" id="addUsersList">
+                </div>
+            </div>
+            <div class="AddUsers-footer">
+                <div class="buttons Form-buttons AddUsers-buttons">
+                    <button type="button"
+                        class="btn btn-sm Form-saveButton"
+                        ng-click="updateUsers()"
+                        ng-disabled="!selectedItems || !selectedItems.length">
+                        Save
+                    </button>
+                    <button type="button"
+                        class="btn btn-sm Form-cancelButton"
+                        ng-click="closeModal()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+   </div>
+</div>
