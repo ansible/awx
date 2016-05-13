@@ -53,7 +53,7 @@ class ResourceMixin(models.Model):
 
     def get_permissions(self, accessor):
         '''
-        Returns a dict (or None) of the roles a accessor has for a given resource.
+        Returns a string list of the roles a accessor has for a given resource.
         An accessor can be either a User, Role, or an arbitrary resource that
         contains one or more Roles associated with it.
         '''

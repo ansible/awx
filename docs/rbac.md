@@ -7,29 +7,26 @@ The intended audience of this document is the Ansible Tower developer.
 
 ### RBAC - System Basics
 
-There are four main concepts to be familiar with, Roles, Resources, Users, and Permissions.
-Users can be members of a role, which gives them access to any permissions bestowed upon
-that Role. In order to access a Resource, a Permission must be granted to a Role enabling
-all members of that Role to access the Resource.
+There are three main concepts to be familiar with, Roles, Resources, and Users.
+Users can be members of a role, which gives them certain access to any
+resources associated with that role, or any resources associated with "descendent"
+roles.
 
 For example, if I have an organization named "MyCompany" and I want to allow
 two people, "Alice", and "Bob", access to manage all the settings associated
-with that organization, I'd create a role (maybe called "MyCompany
-Administrator"), create a Permission to edit the organization "MyCompany" and
-assign it to the "MyCompany Administrator" role. I'd also add the two users
-"Alice" and "Bob" as members of the Role.
+with that organization, I'd make them both members of the organization's `admin_role`.
 
 It is often the case that you have many Roles in a system, and you want some
-roles to include all of the permissions of other roles. For example, you may
+roles to include all of the capabilities of other roles. For example, you may
 want a System Administrator to have access to everything that an Organization
 Administrator has access to, who has everything that a Project Administrator
 has access to, and so on. We refer to this concept as the 'Role Hierarchy', and
 is represented by allowing Roles to have "Parent Roles". Any permission that a
 Role has is implicitly granted to any parent roles (or parents of those
 parents, and so on). Of course Roles can have more than one parent, and
-permissions are implicitly granted to all parents. (Technically speaking, this
-forms a directional graph instead of a hierarchy, but the concept should remain
-intuitive.)
+capabilities are implicitly granted to all parents. (Technically speaking, this
+forms a directional acyclic graph instead of a strict hierarchy, but the
+concept should remain intuitive.)
 
 ![Example RBAC hierarchy](img/rbac_example.png?raw=true)
 
@@ -38,8 +35,10 @@ intuitive.)
 
 The RBAC system allows you to create and layer roles for controlling access to resources. Any Django Model can
 be made into a resource in the RBAC system by using the `ResourceMixin`. Once a model is accessible as a resource you can
-extend the model definition to have specific roles using the `ImplicitRoleField`. This role field allows you to
-configure the name of a role, any parents a role may have, and the permissions this role will grant to members.
+extend the model definition to have specific roles using the `ImplicitRoleField`. Within the declaration of
+this role field you can also specify any parents the role may have, and the RBAC system will take care of
+all the appropriate ancestral binding that takes place behind the scenes to ensure that the model you've declared
+is kept up to date as the relations in your model change.
 
 ### Roles
 
@@ -85,47 +84,32 @@ The `singleton` class method is a helper method on the `Role` model that helps i
 
 ##### `rebuild_role_ancestor_list(self)`
 
-`rebuild_role_ancestor_list` will rebuild the current role ancestory that is stored in the `ancestors` field of a `Role`. This is called for you by `save` and different Django signals.
+`rebuild_role_ancestor_list` will rebuild the current role ancestry that is stored in the `ancestors` field of a `Role`. This is called for you by `save` and different Django signals.
 
 ##### `is_ancestor_of(self, role)`
 
 `is_ancestor_of` returns if the given `role` is an ancestor of the current `Role` instance.
 
+##### `user in role`
 
-#### `RolePermission`
+You may use the `user in some_role` syntax to check and see if the specified
+user is a member of the given role, **or** a member of any ancestor role.
 
-`RolePermission` holds unique `role_permissions`. You interact with this model indirectly when declaring `ImplicitRoleField` fields. Generally you will not directly use this model unless you are extending the RBAC implementation itself.
 
 ### Fields
 
 #### `ImplicitRoleField`
 
-`ImplicitRoleField` fields are declared on your model. They provide the definition of grantable roles for accessing your resource. Configuring the role is done using some keyword arguments that are provided during declaration.
+`ImplicitRoleField` fields are declared on your model. They provide the definition of grantable roles for accessing your resource. You may (and should) use the `parent_role` parameter to specify any parent roles that should inherit privileges implied by the role.
 
-`parent_role` is the link to any parent roles you want considered when a user is requesting access to your resource. A `parent_role` can be declared as a single string, `parent.readonly`, or a list of many roles, `['parentA.readonly', 'parentB.readonly']`. It is important to note that a user does not need a parent role to access a resource if granted the role for that resource explicitly. Also a user will not have access to any parent resources by being granted a role for a child resource. We demonstrate this in the _Usage_ section of this document.
+`parent_role` is the link to any parent roles you want considered when a user
+is requesting access to your resource. A `parent_role` can be declared as a
+single string, `"parent.read_role"`, or a list of many roles,
+`['parentA.read_role', 'parentB.read_role']` which will make each listed role a parent. You can also use the syntax
+`[('parentA.read_role', 'parentB.read_role'), 'parentC.read_role']` to make
+`(parentA.read_role OR parentB.read_role) AND 'parentC.read_role` parents (so `parentB.read_role` will be added only if `parentA.read_role` was `None`).
+If any listed role can't be evaluated (for example if there are `None` components in the path), then they are simply ignored until the value of the field changes.
 
-`role_name` is the display name of the role. This is useful when generating reports or looking the results of queries.
-
-`permissions` can be used when the model that contains the
-`ImplicitRoleField` utilizs the `ResourceMixin`. When present, a
-`RolePermission` entry will be automatically created to grant the specified
-permissions on the resource to the role defined by the `ImplicitRoleField`.
-
-This field should be specified as a dictionary of permissions you wish to
-automatically grant.  Below is a list of available permissions. The special
-permission `all` is a shortcut for generating a dict with all of the explicit
-permissions listed below set to `True`. Note that permissions default to
-`False` if not explicitly provided.
-
-```python
-    # Available Permissions
-    {'create':True, 'read':True, 'write':True, 'update':True,
-     'delete':True, 'scm_update':True, 'use':True, 'execute':True}
-    # Special Permissions
-    {'all':True}
-    # Example: readonly
-    {'read':True}
-```
 
 ### Mixins
 
@@ -133,34 +117,24 @@ permissions listed below set to `True`. Note that permissions default to
 
 By mixing in the `ResourceMixin` to your model, you are turning your model in to a resource in the eyes of the RBAC implementation. Your model will gain the helper methods that aid in the checking the access a users roles provides them to your resource.
 
-##### `accessible_objects(cls, user, permissions)`
+##### `accessible_objects(cls, user, role_field)`
 
-`accessible_objects` is a class method to use instead of `Model.objects`. This method will restrict the query of objects to only the objects that a user has the given permissions for. Note that any permission fields that are left blank will default to `False`. `accessible_objects` will only filter out resources where the expected permission was `True` but was returned as `False`.
+`accessible_objects` is a class method to use instead of `Model.objects`. This method will restrict the query of objects to only those that the user has access to - specifically those objects which the user is a member of the specified role (either directly or indirectly).
 
 ```python
-    objects = Model.accessible_objects(user, {'write':True})
+    objects = MyModel.accessible_objects(user, 'admin_role')
     objects.filter(name__istartswith='december')
 ```
 
 ##### `get_permissions(self, user)`
 
-`get_permissions` is an instance method that will give you the permission dictionary for a given user. This permission dictionary will take in to account any parent roles the user is apart of.
+`get_permissions` is an instance method that will give you the list of role names that the user has access to for a given object.
 
 ```python
     >>> instance.get_permissions(admin)
-    {'create':True, 'read':True, 'write':True, 'update':True,
-     'delete':True, 'scm_update':True, 'execute':True, 'use':True}
+    ['admin_role', 'execute_role', 'read_role']
 ```
 
-
-##### `accessible_by(self, user, permissions)`
-
-`accessible_by` is an instance method that wraps the `get_permissions` method. Given a user and a dictionary of permissions this method will return `True` or `False` if a users roles give them a set of permissions that match the provided permissions dictionary. Note that any permission fields left blank will default to `False`. `accessible_by` will only return `False` in a case where the passed in permission is expected to be `True` but was returned as `False`.  
-
-```python
-    >>> instance.accessible_by(admin, {'use':True, 'read':True})
-    True
-```
 ## Usage
 
 After exploring the _Overview_ the usage of the RBAC implementation in your code should feel unobtrusive and natural.
@@ -182,11 +156,11 @@ Now that your model is a resource and has a `Role` defined, you can begin to acc
     # we've created some documents and a user
     >>> document = Document.objects.filter(pk=1)
     >>> user = User.objects.first()
-    >>> document.accessible_by(user, {'read': True})
+    >>> user in document.read_role
     False  # not accessible by default
     >>> document.readonly_role.memebers.add(user)
-    >>> document.accessible_by(user, {'read':True})
+    >>> user in document.read_role
     True   # now it is accessible
-    >>> document.accessible_by(user, {'read':True, 'write':True})
-    False  # my role does not have write permission
+    >>> user in document.admin_role
+    False  # my role does not have admin permission
 ```
