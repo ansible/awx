@@ -1385,6 +1385,10 @@ class CustomInventoryScriptAccess(BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role').all()
 
     @check_superuser
+    def can_admin(self, obj):
+        return self.user in obj.admin_role
+
+    @check_superuser
     def can_read(self, obj):
         return self.user in obj.read_role
 

@@ -219,7 +219,7 @@ def migrate_inventory(apps, schema_editor):
         if perm.permission_type == 'admin':
             return inventory.admin_role
         elif perm.permission_type == 'read':
-            return inventory.auditor_role
+            return inventory.read_role
         elif perm.permission_type == 'write':
             return inventory.update_role
         elif perm.permission_type == 'check' or perm.permission_type == 'run' or perm.permission_type == 'create':
@@ -320,22 +320,22 @@ def migrate_projects(apps, schema_editor):
             logger.warn(smart_text(u'adding Project({}) admin: {}'.format(project.name, project.created_by.username)))
 
         for team in project.deprecated_teams.all():
-            team.member_role.children.add(project.member_role)
+            team.member_role.children.add(project.use_role)
             logger.info(smart_text(u'adding Team({}) access for Project({})'.format(team.name, project.name)))
 
         if project.organization is not None:
             for user in project.organization.deprecated_users.all():
-                project.member_role.members.add(user)
+                project.use_role.members.add(user)
                 logger.info(smart_text(u'adding Organization({}) member access to Project({})'.format(project.organization.name, project.name)))
 
         for perm in Permission.objects.filter(project=project):
             # All perms at this level just imply a user or team can read
             if perm.team:
-                perm.team.member_role.children.add(project.member_role)
+                perm.team.member_role.children.add(project.use_role)
                 logger.info(smart_text(u'adding Team({}) access for Project({})'.format(perm.team.name, project.name)))
 
             if perm.user:
-                project.member_role.members.add(perm.user)
+                project.use_role.members.add(perm.user)
                 logger.info(smart_text(u'adding User({}) access for Project({})'.format(perm.user.username, project.name)))
 
 

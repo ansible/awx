@@ -42,7 +42,6 @@ role_names = {
     'member_role'          : 'Member',
     'owner_role'           : 'Owner',
     'read_role'            : 'Read',
-    'scm_update_role'      : 'SCM Update',
     'update_role'          : 'Update',
     'use_role'             : 'Use',
 }
@@ -57,8 +56,7 @@ role_descriptions = {
     'member_role'          : 'User is a member of the %s',
     'owner_role'           : 'Owns and can manage all aspects of this %s',
     'read_role'            : 'May view settings for the %s',
-    'scm_update_role'      : 'May update the project from the configured source control management system',
-    'update_role'          : 'May update the inventory or group using the cloud source update system',
+    'update_role'          : 'May update project or inventory or group using the configured source update system',
     'use_role'             : 'Can use the %s in a job template',
 }
 

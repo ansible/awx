@@ -71,7 +71,7 @@ class ScheduleTest(BaseTest):
         self.first_inventory_source.source = 'ec2'
         self.first_inventory_source.save()
 
-        self.first_inventory.auditor_role.members.add(self.other_django_user)
+        self.first_inventory.read_role.members.add(self.other_django_user)
 
         self.second_inventory = Inventory.objects.create(name='test_inventory_2', description='for org 0', organization=self.organizations[0])
         self.second_inventory.hosts.create(name='host_2')

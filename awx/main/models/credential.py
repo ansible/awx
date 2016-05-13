@@ -208,19 +208,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
     )
-    auditor_role = ImplicitRoleField(
-        parent_role=[
-            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
-        ],
-    )
     use_role = ImplicitRoleField(
         parent_role=['owner_role']
     )
-    read_role = ImplicitRoleField(
-        parent_role=[
-            'use_role', 'auditor_role', 'owner_role'
-        ],
-    )
+    read_role = ImplicitRoleField(parent_role=[
+        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'use_role',
+        'owner_role'
+    ])
 
     @property
     def needs_ssh_password(self):

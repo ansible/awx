@@ -99,24 +99,25 @@ class Inventory(CommonModel, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
     )
-    auditor_role = ImplicitRoleField(
-        parent_role='organization.auditor_role',
-    )
     update_role = ImplicitRoleField(
-        parent_role=['admin_role'],
+        parent_role='admin_role',
     )
     use_role = ImplicitRoleField(
-        parent_role=['admin_role'],
+        parent_role='admin_role',
     )
     adhoc_role = ImplicitRoleField(
-        parent_role=['admin_role'],
+        parent_role='admin_role',
     )
     execute_role = ImplicitRoleField(
         parent_role='adhoc_role',
     )
-    read_role = ImplicitRoleField(
-        parent_role=['auditor_role', 'execute_role', 'update_role', 'use_role', 'admin_role'],
-    )
+    read_role = ImplicitRoleField(parent_role=[
+        'organization.auditor_role',
+        'execute_role',
+        'update_role',
+        'use_role',
+        'admin_role',
+    ])
 
     def get_absolute_url(self):
         return reverse('api:inventory_detail', args=(self.pk,))
@@ -519,9 +520,6 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role=['inventory.admin_role', 'parents.admin_role'],
     )
-    auditor_role = ImplicitRoleField(
-        parent_role=['inventory.auditor_role', 'parents.auditor_role'],
-    )
     update_role = ImplicitRoleField(
         parent_role=['inventory.update_role', 'parents.update_role', 'admin_role'],
     )
@@ -531,9 +529,13 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     execute_role = ImplicitRoleField(
         parent_role=['inventory.execute_role', 'parents.execute_role', 'adhoc_role'],
     )
-    read_role = ImplicitRoleField(
-        parent_role=['execute_role', 'update_role', 'auditor_role', 'admin_role'],
-    )
+    read_role = ImplicitRoleField(parent_role=[
+        'inventory.read_role',
+        'parents.read_role',
+        'execute_role',
+        'update_role',
+        'admin_role'
+    ])
 
     def __unicode__(self):
         return self.name
@@ -1307,14 +1309,8 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
     )
-    member_role = ImplicitRoleField(
-        parent_role='organization.member_role',
-    )
-    auditor_role = ImplicitRoleField(
-        parent_role='organization.auditor_role',
-    )
     read_role = ImplicitRoleField(
-        parent_role=['auditor_role', 'member_role', 'admin_role'],
+        parent_role=['organization.auditor_role', 'organization.member_role', 'admin_role'],
     )
 
     def get_absolute_url(self):

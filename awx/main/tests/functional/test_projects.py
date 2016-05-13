@@ -74,9 +74,9 @@ def test_team_project_list(get, project_factory, team_factory, admin, alice, bob
     assert get(reverse('api:team_projects_list', args=(team1.pk,)), alice).data['count'] == 2
 
     # but if she does, then she should only see the shared project
-    team2.auditor_role.members.add(alice)
+    team2.read_role.members.add(alice)
     assert get(reverse('api:team_projects_list', args=(team2.pk,)), alice).data['count'] == 1
-    team2.auditor_role.members.remove(alice)
+    team2.read_role.members.remove(alice)
 
     # Test user endpoints first, very similar tests to test_user_project_list
     # but permissions are being derived from team membership instead.

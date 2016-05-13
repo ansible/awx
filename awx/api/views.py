@@ -818,7 +818,7 @@ class TeamList(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'organization')
+        qs = qs.select_related('admin_role', 'read_role', 'member_role', 'organization')
         return qs
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
@@ -865,7 +865,7 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        team_qs = Project.objects.filter(Q(member_role__parents=team.member_role) | Q(admin_role__parents=team.member_role)).distinct()
+        team_qs = Project.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role)).distinct()
         user_qs = Project.accessible_objects(self.request.user, 'read_role').distinct()
         return team_qs & user_qs
 
@@ -913,9 +913,8 @@ class ProjectList(ListCreateAPIView):
         projects_qs = projects_qs.select_related(
             'organization',
             'admin_role',
-            'auditor_role',
-            'member_role',
-            'scm_update_role',
+            'use_role',
+            'update_role',
         )
         return projects_qs
 
@@ -1422,7 +1421,7 @@ class InventoryList(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'update_role', 'execute_role')
+        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'execute_role')
         return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):

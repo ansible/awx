@@ -223,14 +223,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role=[('project.admin_role', 'inventory.admin_role')]
     )
-    auditor_role = ImplicitRoleField(
-        parent_role=[('project.auditor_role', 'inventory.auditor_role')]
-    )
     execute_role = ImplicitRoleField(
         parent_role=['admin_role'],
     )
     read_role = ImplicitRoleField(
-        parent_role=['execute_role', 'auditor_role', 'admin_role'],
+        parent_role=[('project.organization.auditor_role', 'inventory.organization.auditor_role'), 'execute_role', 'admin_role'],
     )
 
     @classmethod
