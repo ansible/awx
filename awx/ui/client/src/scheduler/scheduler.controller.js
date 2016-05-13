@@ -14,15 +14,19 @@
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait',
-    'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', '$q',
+    'Find', 'LoadSchedulesScope', 'GetChoices', '$q',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices,
+    GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices,
     $q) {
 
         ClearScope();
 
+        $scope.schedulerStartDT = 'test';
+
         var base, id, url,parentObject, title;
+        $scope.schedulerStartDT = 'test';
+
 
         base = $location.path().replace(/^\//, '').split('/')[0];
         if (base === 'management_jobs') {

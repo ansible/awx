@@ -20,41 +20,9 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('ShowSchedulerModal', ['$rootScope', function($rootScope) {
-            return function(params) {
-                // Set modal dimensions based on viewport width
-
-                var buttons,
-                    scope = params.scope;
-
-                buttons = [{
-                    "label": "Cancel",
-                    "onClick": function() {
-                        $(this).dialog('close');
-                    },
-                    "icon": "fa-times",
-                    "class": "btn btn-default",
-                    "id": "schedule-close-button"
-                },{
-                    "label": "Save",
-                    "onClick": function() {
-                        setTimeout(function(){
-                            scope.$apply(function(){
-                                scope.saveSchedule();
-                            });
-                        });
-                    },
-                    "icon": "fa-check",
-                    "class": "btn btn-primary",
-                    "id": "schedule-save-button"
-                }];
-                $rootScope.$broadcast("ScheduleFormCreated", scope);
-            };
-        }])
-
-        .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait',
-        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
-        function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors,
+        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest', 
+        'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
+        function(SchedulerInit, $rootScope, Wait, Rest, ProcessErrors,
             GetBasePath, SchedulePost, $state) {
             return function(params) {
                 var scope = params.scope,
@@ -155,7 +123,7 @@ export default
                     scope.$on("htmlDetailReady", function() {
                         scheduler.setRRule(schedule.rrule);
                         scheduler.setName(schedule.name);
-                        ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Edit Schedule' });
+                        $rootScope.$broadcast("ScheduleFormCreated", scope);
                     });
                     scope.showRRuleDetail = false;
                 });
@@ -172,7 +140,7 @@ export default
                     $state.go("^");
                 });
                 scope.saveSchedule = function() {
-                    schedule.extra_data = scope.serializedExtraVars;
+                    schedule.extra_data = scope.extraVars;
                     SchedulePost({
                         scope: scope,
                         url: url,
@@ -190,7 +158,8 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
-                        scope.serializedExtraVars = schedule.extra_data;
+                        scope.extraVars = data.extra_data === '' ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
+
                         if(schedule.extra_data.hasOwnProperty('granularity')){
                             scope.isFactCleanup = true;
                         }
@@ -207,10 +176,9 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$stateParams', 'SchedulerInit',
-            'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
-            'SchedulePost', '$state', 'Rest', 'ProcessErrors',
-        function($location, $stateParams, SchedulerInit, ShowSchedulerModal,
+        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams', 
+        'SchedulerInit', 'Wait', 'GetBasePath', 'Empty', 'SchedulePost', '$state', 'Rest', 'ProcessErrors',
+        function($location, $rootScope, $stateParams, SchedulerInit,
             Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
             ProcessErrors) {
             return function(params) {
@@ -286,11 +254,12 @@ export default
                 Wait('start');
                 $('#form-container').empty();
                 scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
+                scope.processSchedulerEndDt();
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
                 scheduler.clear();
                 scope.$on("htmlDetailReady", function() {
-                    ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Add Schedule' });
+                    $rootScope.$broadcast("ScheduleFormCreated", scope);
                 });
                 scope.showRRuleDetail = false;
 
@@ -356,12 +325,9 @@ export default
                         };
                         schedule.extra_data = JSON.stringify(extra_vars);
                     }
-                    else if (scope.serializedExtraVars){
-                        schedule.extra_data = scope.serializedExtraVars;
-                    }
                     else if(scope.extraVars){
-                        schedule.extra_data = ToJSON(scope.parseType,
-                            scope.extraVars, false);
+                        schedule.extra_data = scope.parseType === 'yaml' ? 
+                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;  
                     }
                     Rest.setUrl(url);
                     if (mode === 'add') {
@@ -398,34 +364,6 @@ export default
                 else {
                     return false;
                 }
-            };
-        }])
-
-        /**
-         * Inject the scheduler_dialog.html wherever needed
-         */
-        .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
-            return function(params) {
-
-                var scope = params.scope,
-                    element_id = params.element_id,
-                    callback = params.callback,
-                    url;
-
-                // Add the schedule_dialog.html partial
-                url = '/static/partials/schedule_dialog.html';
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        var e = angular.element(document.getElementById(element_id));
-                        e.append(data);
-                        $compile(e)(scope);
-                        scope.$emit(callback);
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-                    });
             };
         }])
 

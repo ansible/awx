@@ -13,7 +13,7 @@
 
                 <form class="form Form"
                     role="form"
-                    name="scheduler_form_new"
+                    name="scheduler_form"
                     novalidate>
 
                     <div class="form-group SchedulerForm-formGroup">
@@ -25,13 +25,13 @@
                             type="text"
                             class="form-control input-sm
                                 Form-textInput"
-                            ng-class="{'RepeatFrequencyOptions-nameBorderErrorFix': scheduler_form_new.$dirty && scheduler_form_new.schedulerName.$error.required}"
+                            ng-class="{'RepeatFrequencyOptions-nameBorderErrorFix': scheduler_form.$dirty && scheduler_form.schedulerName.$error.required}"
                             name="schedulerName"
                             id="schedulerName"
                             ng-model="schedulerName" required
                             placeholder="Schedule name">
                         <div class="error"
-                            ng-show="scheduler_form_new.$dirty && scheduler_form_new.schedulerName.$error.required">
+                            ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
                             A schedule name is required.
                         </div>
                     </div>
@@ -85,7 +85,7 @@
                         <div class="input-group SchedulerTime">
                             <input name="schedulerStartHour"
                                 id="schedulerStartHour"
-                                sch-spinner="scheduler_form_new"
+                                sch-spinner="scheduler_form"
                                 class="scheduler-time-spinner
                                     ScheduleTime-input SpinnerInput"
                                 ng-model="schedulerStartHour"
@@ -99,7 +99,7 @@
                             </span>
                             <input name="schedulerStartMinute"
                                 id="schedulerStartMinute"
-                                sch-spinner="scheduler_form_new"
+                                sch-spinner="scheduler_form"
                                 class="scheduler-time-spinner
                                     SchedulerTime-input SpinnerInput"
                                 ng-model="schedulerStartMinute"
@@ -113,7 +113,7 @@
                             </span>
                             <input name="schedulerStartSecond"
                                 id="schedulerStartSecond"
-                                sch-spinner="scheduler_form_new"
+                                sch-spinner="scheduler_form"
                                 class="scheduler-time-spinner
                                     SchedulerTime-input SpinnerInput"
                                 ng-model="schedulerStartSecond"
@@ -188,7 +188,7 @@
                             </label>
                             <input name="schedulerInterval"
                                 id="schedulerInterval"
-                                sch-spinner="scheduler_form_new"
+                                sch-spinner="scheduler_form"
                                 class="scheduler-spinner
                                     SpinnerInput"
                                 ng-model="$parent.schedulerInterval"
@@ -224,7 +224,7 @@
                             <input
                                 name="monthDay"
                                 id="monthDay"
-                                sch-spinner="scheduler_form_new"
+                                sch-spinner="scheduler_form"
                                 class="scheduler-spinner SpinnerInput"
                                 ng-model="$parent.monthDay"
                                 min="1" max="31"
@@ -301,7 +301,7 @@
                                 </select>
                                 <input name="yearlyMonthDay"
                                     id="yearlyMonthDay"
-                                    sch-spinner="scheduler_form_new"
+                                    sch-spinner="scheduler_form"
                                     class="scheduler-spinner
                                         SpinnerInput"
                                     ng-model="$parent.yearlyMonthDay"
@@ -459,8 +459,7 @@
                                     ng-options="e.name for e in endOptions"
                                     required
                                     class="MakeSelect2
-                                        form-control input-sm"
-                                    ng-change="schedulerEndChange()">
+                                        form-control input-sm">
                                 </select>
                             </div>
                         </div>
@@ -475,7 +474,7 @@
                                 <input
                                     ng-name="schedulerOccurrenceCount"
                                     ng-id="schedulerOccurrenceCount"
-                                    sch-spinner="scheduler_form_new"
+                                    sch-spinner="scheduler_form"
                                     class="scheduler-spinner
                                         SpinnerInput"
                                     ng-model="$parent.schedulerOccurrenceCount"
@@ -574,7 +573,7 @@
                 </form>
                 <div class="SchedulerFormDetail-container
                     SchedulerFormDetail-container--error"
-                    ng-show="!schedulerIsValid && scheduler_form_new.$dirty">
+                    ng-show="!schedulerIsValid && scheduler_form.$dirty">
                     <p class="SchedulerFormDetail-errorText">
                         The scheduler options are invalid or incomplete.
                     </p>

@@ -12,7 +12,7 @@
 
 
 export function ScheduleEditController($scope, $compile, $location, $stateParams, SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
+GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices) {
 
     ClearScope();
 
@@ -82,4 +82,4 @@ GetBasePath, Wait, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
 }
 
 ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Wait', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices'];
+    'GetBasePath', 'Wait', 'Find', 'LoadSchedulesScope', 'GetChoices'];

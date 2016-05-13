@@ -4,11 +4,26 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
+export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParamPass',
-    function($compile, $state, $stateParams, AddSchedule, Wait, $scope,
+    function($compile, $filter, $state, $stateParams, AddSchedule, Wait, $scope,
         $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass) {
+
+    $scope.processSchedulerEndDt = function(){
+        // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
+        var dt = new Date($scope.schedulerUTCTime);
+        // increment date by 1 day
+        dt.setDate(dt.getDate() + 1);
+        var month = $filter('schZeroPad')(dt.getMonth() + 1, 2),
+            day = $filter('schZeroPad')(dt.getDate(), 2);
+        $scope.$parent.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
+    };
+    
+    // initial end @ midnight values
+    $scope.schedulerEndHour = "00";
+    $scope.schedulerEndMinute = "00";
+    $scope.schedulerEndSecond = "00";
 
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
@@ -37,7 +52,10 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
             "yearlyOtherMonth",
             "schedulerEnd",
             "schedulerOccurrenceCount",
-            "schedulerEndDt"
+            "schedulerEndDt",
+            "schedulerEndHour",
+            "schedulerEndMinute",
+            "schedularEndSecond"
         ], function() {
             $scope.$emit("formUpdated");
         }, true);
@@ -72,20 +90,6 @@ export default ['$compile', '$state', '$stateParams', 'AddSchedule', 'Wait',
                 parse_variable: 'parseType',
                 field_id: 'SchedulerForm-extraVars'
             });
-        });
-        $scope.$watch('extraVars', function(){
-            if ($scope.parseType === 'yaml'){
-                try{
-                    $scope.serializedExtraVars = jsyaml.safeLoad($scope.extraVars);
-                }
-                catch(err){ return; }
-            }
-            else if ($scope.parseType === 'json'){
-                try{
-                    $scope.serializedExtraVars = JSON.parse($scope.extraVars);
-                }
-                catch(err){ return; }
-            }
         });
     }
     else if ($state.current.name === 'projectSchedules.add'){
