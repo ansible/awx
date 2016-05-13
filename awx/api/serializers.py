@@ -329,7 +329,6 @@ class BaseSerializer(serializers.ModelSerializer):
                     'id': role.id,
                     'name': role.name,
                     'description': role.description,
-                    'url': role.get_absolute_url(),
                 }
         if len(roles) > 0:
             summary_fields['roles'] = roles
@@ -512,6 +511,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['last_job'] = obj.last_job.get_absolute_url()
         if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url()
+        res['roles'] = reverse('api:job_template_roles_list', args=(obj.pk,))
+
         return res
 
     def get_types(self):
@@ -804,7 +805,8 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
-            access_list = reverse('api:organization_access_list',         args=(obj.pk,)),
+            roles = reverse('api:organization_roles_list', args=(obj.pk,)),
+            access_list = reverse('api:organization_access_list', args=(obj.pk,)),
         ))
         return res
 
@@ -889,6 +891,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list', args=(obj.pk,)),
+            roles = reverse('api:project_roles_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -992,6 +995,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
+            roles = reverse('api:inventory_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization:
@@ -1163,6 +1167,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:group_access_list',         args=(obj.pk,)),
+            roles = reverse('api:group_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory:
@@ -1510,7 +1515,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, role)}
+            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
             role = team_role.children.filter(id__in=permissive_role_ids)[0]
@@ -1528,7 +1533,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['related'] = reverse_gfk(role.content_object)
             except:
                 pass
-            return { 'role': role_dict, 'active_roles': get_roles_on_resource(obj, team_role)}
+            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)}
 
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
@@ -1624,7 +1629,8 @@ class CredentialSerializer(BaseSerializer):
         res = super(CredentialSerializer, self).get_related(obj)
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
-            access_list  = reverse('api:credential_access_list',      args=(obj.pk,)),
+            access_list = reverse('api:credential_access_list', args=(obj.pk,)),
+            roles = reverse('api:credential_roles_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)
