@@ -162,7 +162,10 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
             tags = relatedTags.concat(nonRelatedTags);
         }
 
-        return basePath + "?" +
+        var returnedUrl = basePath;
+        returnedUrl += (basePath.indexOf("?") > - 1) ? "&" : "?";
+
+        return returnedUrl +
             (tags || []).map(function (t) {
                 return t.url;
             }).join("&") + "&page_size=" + pageSize;
