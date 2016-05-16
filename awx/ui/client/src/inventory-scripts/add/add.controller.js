@@ -48,7 +48,7 @@ export default
                     organization: scope.organization,
                     script: scope.script
                 })
-                .success(function (data) {
+                .success(function () {
                     $state.go('inventoryScripts', {}, {reload: true});
                     Wait('stop');
                 })
