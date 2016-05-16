@@ -12,8 +12,7 @@ def mock_feature_enabled(feature, bypass_database=None):
     return True
 
 @pytest.fixture
-def activity_stream_entry(organization, rando):
-    rando.roles.add(organization.admin_role)
+def activity_stream_entry(organization, org_admin):
     return ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
 
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
@@ -70,9 +69,9 @@ def test_middleware_actor_added(monkeypatch, post, get, user):
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_rbac_stream_resource_roles(activity_stream_entry, organization, rando):
+def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_admin):
 
-    assert activity_stream_entry.user.first() == rando
+    assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
     assert activity_stream_entry.role.first() == organization.admin_role
     assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
@@ -80,9 +79,9 @@ def test_rbac_stream_resource_roles(activity_stream_entry, organization, rando):
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_rbac_stream_user_roles(activity_stream_entry, organization, rando):
+def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin):
 
-    assert activity_stream_entry.user.first() == rando
+    assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
     assert activity_stream_entry.role.first() == organization.admin_role
     assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
@@ -91,8 +90,8 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, rando):
 @pytest.mark.activity_stream_access
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
-def test_stream_access_cant_change(activity_stream_entry, organization, rando):
-    access = ActivityStreamAccess(rando)
+def test_stream_access_cant_change(activity_stream_entry, organization, org_admin):
+    access = ActivityStreamAccess(org_admin)
     # These should always return false because the activity stream can not be edited
     assert not access.can_add(activity_stream_entry)
     assert not access.can_change(activity_stream_entry, {'organization': None})
@@ -102,13 +101,33 @@ def test_stream_access_cant_change(activity_stream_entry, organization, rando):
 @pytest.mark.activity_stream_access
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
-def test_stream_queryset(activity_stream_entry, organization, rando, user_project):
-    # user_project and its owner has no relationship to the user rando
-    rando_access = ActivityStreamAccess(rando)
-    queryset = rando_access.get_queryset()
+def test_stream_queryset_hides_shows_items(
+        activity_stream_entry, organization, user, org_admin,
+        project, org_credential, inventory, label, deploy_jobtemplate,
+        notification_template, group, host, team):
+    # this user is not in any organizations and should not see any resource activity
+    no_access_user = user('no-access-user', False)
+    queryset = ActivityStreamAccess(no_access_user).get_queryset()
 
-    # Rando can see that he was appointed organization admin
-    assert queryset.filter(organization__pk=organization.pk, operation='associate')
+    assert not queryset.filter(project__pk=project.pk)
+    assert not queryset.filter(credential__pk=org_credential.pk)
+    assert not queryset.filter(inventory__pk=inventory.pk)
+    assert not queryset.filter(label__pk=label.pk)
+    assert not queryset.filter(job_template__pk=deploy_jobtemplate.pk)
+    assert not queryset.filter(group__pk=group.pk)
+    assert not queryset.filter(host__pk=host.pk)
+    assert not queryset.filter(team__pk=team.pk)
+    assert not queryset.filter(notification_template__pk=notification_template.pk)
 
-    # Rando can not see anything related to the project
-    assert not queryset.filter(project__pk=user_project.pk)
+    # Organization admin should be able to see most things in the ActivityStream
+    queryset = ActivityStreamAccess(org_admin).get_queryset()
+
+    assert queryset.filter(project__pk=project.pk, operation='create').count() == 1
+    assert queryset.filter(credential__pk=org_credential.pk, operation='create').count() == 1
+    assert queryset.filter(inventory__pk=inventory.pk, operation='create').count() == 1
+    assert queryset.filter(label__pk=label.pk, operation='create').count() == 1
+    assert queryset.filter(job_template__pk=deploy_jobtemplate.pk, operation='create').count() == 1
+    assert queryset.filter(group__pk=group.pk, operation='create').count() == 1
+    assert queryset.filter(host__pk=host.pk, operation='create').count() == 1
+    assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
+    assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1

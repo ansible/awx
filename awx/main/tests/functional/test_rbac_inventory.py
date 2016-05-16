@@ -170,11 +170,11 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert team.member_role.is_ancestor_of(inventory.execute_role)
 
 @pytest.mark.django_db
-def test_group_parent_admin(group, permissions, user):
+def test_group_parent_admin(group_factory, permissions, user):
     u = user('admin', False)
-    parent1 = group('parent-1')
-    parent2 = group('parent-2')
-    childA = group('child-1')
+    parent1 = group_factory('parent-1')
+    parent2 = group_factory('parent-2')
+    childA = group_factory('child-1')
 
     parent1.admin_role.members.add(u)
     assert u in parent1.admin_role
@@ -230,11 +230,11 @@ def test_access_auditor(organization, inventory, user):
 
 
 @pytest.mark.django_db
-def test_host_access(organization, inventory, user, group):
+def test_host_access(organization, inventory, user, group_factory):
     other_inventory = organization.inventories.create(name='other-inventory')
     inventory_admin = user('inventory_admin', False)
-    my_group = group('my-group')
-    not_my_group = group('not-my-group')
+    my_group = group_factory('my-group')
+    not_my_group = group_factory('not-my-group')
     group_admin = user('group_admin', False)
 
     inventory_admin_access = HostAccess(inventory_admin)
