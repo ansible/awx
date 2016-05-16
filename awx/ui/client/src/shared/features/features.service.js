@@ -6,12 +6,15 @@
 
 export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$http', '$q',
 function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
+    var license_info;
+
     return {
             getFeatures: function(){
                 var promise;
                 Rest.setUrl(GetBasePath('config'));
                 promise = Rest.get();
                 return promise.then(function (data) {
+                    license_info = data.data.license_info;
                     $rootScope.features = data.data.license_info.features;
                     return $rootScope.features;
                 }).catch(function (response) {
@@ -21,7 +24,6 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
                         response.status
                     });
                 });
-
             },
             get: function(){
                 if(_.isEmpty($rootScope.features)){
@@ -39,6 +41,9 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
                 else {
                     return false;
                 }
+            },
+            getLicenseInfo: function() {
+                return license_info;
             }
         };
 }];

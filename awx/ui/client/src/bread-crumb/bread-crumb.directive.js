@@ -8,6 +8,7 @@ export default
                 var streamConfig = {};
 
                 scope.showActivityStreamButton = false;
+                scope.loadingLicense = true;
 
                 scope.openActivityStream = function() {
 
@@ -39,12 +40,14 @@ export default
 
                         FeaturesService.get()
                         .then(function() {
+                            scope.loadingLicense = false;
                             if(FeaturesService.featureEnabled('activity_streams')) {
                                 scope.showActivityStreamButton = true;
                             }
                             else {
                                 scope.showActivityStreamButton = false;
                             }
+                            scope.licenseType = FeaturesService.getLicenseInfo()['license_type'];
                         })
                         .catch(function (response) {
                             ProcessErrors(null, response.data, response.status, null, {
