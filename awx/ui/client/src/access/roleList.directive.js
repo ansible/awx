@@ -11,23 +11,16 @@ export default
                     // auditor") which are pulled from two different
                     // places in summary fields, and creates a
                     // concatenated/sorted list
-                    scope.roles = []
+                    scope.access_list = []
                         .concat(scope.permission.summary_fields
                             .direct_access.map(function(i) {
-                                return {
-                                    name: i.role.name,
-                                    roleId: i.role.id,
-                                    resourceName: i.role.resource_name,
-                                    explicit: true
-                                };
+                                i.role.explicit = true;
+                                return i.role;
                         }))
                         .concat(scope.permission.summary_fields
                             .indirect_access.map(function(i) {
-                                return {
-                                    name: i.role.name,
-                                    roleId: i.role.id,
-                                    explicit: false
-                                };
+                                i.role.explicit = false;
+                                return i.role;
                         }))
                         .sort(function(a, b) {
                             if (a.name
