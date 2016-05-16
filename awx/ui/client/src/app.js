@@ -513,31 +513,48 @@ var tower = angular.module('Tower', [
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
             };
 
-            $rootScope.deletePermission = function (user, role, userName,
-                roleName, resourceName) {
-                    var action = function () {
-                        $('#prompt-modal').modal('hide');
-                        Wait('start');
-                        var url = GetBasePath("users") + user + "/roles/";
-                        Rest.setUrl(url);
-                        Rest.post({"disassociate": true, "id": role})
-                            .success(function () {
-                                Wait('stop');
-                                $rootScope.$broadcast("refreshList", "permission");
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Could not disacssociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
-                            });
-                    };
+            $rootScope.deletePermission = function (user, accessListEntry) {
+                let entry = accessListEntry;
 
+                let action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+
+                    let url;
+                    if (entry.team_id) {
+                        url = GetBasePath("teams") + entry.team_id + "/roles/";
+                    } else {
+                        url = GetBasePath("users") + user.id + "/roles/";
+                    }
+
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": entry.id})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "permission");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                if (accessListEntry.team_id) {
                     Prompt({
-                        hdr: 'Remove Role from ' + resourceName,
-                        body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + roleName + '</span> role associated with ' + userName + '.</div>',
-                        action: action,
+                        hdr: `Team access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${entry.team_name}</span>. This will affect all members of the team.</div>`,
+                            action: action,
+                        actionText: 'REMOVE TEAM ACCESS'
+                    });
+                } else {
+                    Prompt({
+                        hdr: `User access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
+                            action: action,
                         actionText: 'REMOVE'
                     });
-                };
+                }
+            };
 
             $rootScope.deletePermissionFromUser = function (userId, userName, roleName, roleType, url) {
                 var action = function () {
