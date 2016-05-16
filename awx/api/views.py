@@ -202,6 +202,7 @@ class ApiV1ConfigView(APIView):
 
         license_reader = TaskSerializer()
         license_data   = license_reader.from_database(show_key=request.user.is_superuser)
+        license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
 
         pendo_state = tower_settings.PENDO_TRACKING_STATE if tower_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
