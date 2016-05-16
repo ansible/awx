@@ -71,9 +71,9 @@ export default ['$compile', '$scope', '$stateParams', '$state', 'Rest', 'UserLis
             var listMode = (mode === 'admins') ? 'users' : mode;
 
             list = getList(mode);
-            list.listTitle = listTitle;
-
             url = getUrl(mode, data);
+            list.listTitle = listTitle;
+            list.basePath = url;
 
             $scope.orgRelatedUrls = data.related;
 
