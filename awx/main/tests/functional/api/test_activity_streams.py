@@ -97,3 +97,18 @@ def test_stream_access_cant_change(activity_stream_entry, organization, rando):
     assert not access.can_add(activity_stream_entry)
     assert not access.can_change(activity_stream_entry, {'organization': None})
     assert not access.can_delete(activity_stream_entry)
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+def test_stream_queryset(activity_stream_entry, organization, rando, user_project):
+    # user_project and its owner has no relationship to the user rando
+    rando_access = ActivityStreamAccess(rando)
+    queryset = rando_access.get_queryset()
+
+    # Rando can see that he was appointed organization admin
+    assert queryset.filter(organization__pk=organization.pk, operation='associate')
+
+    # Rando can not see anything related to the project
+    assert not queryset.filter(project__pk=user_project.pk)
