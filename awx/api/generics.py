@@ -508,4 +508,4 @@ class ResourceAccessList(ListAPIView):
         ancestors = set()
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
-        return User.objects.filter(roles__in=list(ancestors))
+        return User.objects.filter(roles__in=list(ancestors)).distinct()
