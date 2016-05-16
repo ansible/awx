@@ -8,7 +8,7 @@
         data-container="body"
         ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
         ng-if="showActivityStreamButton"
-        ng-hide= "licenseMissing"
+        ng-hide= "loadingLicense || licenseMissing || licenseType == 'basic'"
         ng-click="openActivityStream()">
         <i class="BreadCrumb-menuLinkImage icon-activity-stream"
             alt="Activity Stream">
@@ -21,7 +21,7 @@
         data-placement="left"
         data-trigger="hover"
         data-container="body"
-        ng-hide="licenseMissing"
+        ng-hide="loadingLicense || licenseMissing || licenseType == 'basic'"
         ng-if="!showActivityStreamButton">
         <i class="BreadCrumb-menuLinkImage fa fa-tachometer"
             alt="Dashboard">
