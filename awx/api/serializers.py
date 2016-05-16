@@ -1573,12 +1573,12 @@ class ResourceAccessListElementSerializer(UserSerializer):
                                     .exclude(id__in=indirect_team_roles)
 
         ret['summary_fields']['direct_access'] \
-            = [format_role_perm(r) for r in direct_access_roles] \
-            + [format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles]
+            = [format_role_perm(r) for r in direct_access_roles.distinct()] \
+            + [format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()]
 
         ret['summary_fields']['indirect_access'] \
-            = [format_role_perm(r) for r in indirect_access_roles] \
-            + [format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles]
+            = [format_role_perm(r) for r in indirect_access_roles.distinct()] \
+            + [format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()]
 
         return ret
 
