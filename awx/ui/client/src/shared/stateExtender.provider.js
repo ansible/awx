@@ -11,10 +11,17 @@ export default function($stateProvider) {
                     resolve.features = ['FeaturesService', function(FeaturesService) {
                             return FeaturesService.get();
                         }];
+                    // resolve.features = ['CheckLicense', 'Store', '$state',
+                    //     function(CheckLicense, Store, $state) {
+                    //         var license = Store('license');
+                    //         if(CheckLicense.valid(license)=== false){
+                    //             $state.go('license');
+                    //         }
+                    //     }];
                     return resolve;
                 }
             },
-            
+
             addState: function(state) {
                 var route = state.route || state.url,
                 resolve = this.getResolves(state);

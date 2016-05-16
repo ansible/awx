@@ -98,6 +98,7 @@ export default
                 $rootScope.license_tested = undefined;
                 $rootScope.userLoggedIn = false;
                 $rootScope.sessionExpired = false;
+                $rootScope.licenseMissing = true;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
@@ -127,7 +128,7 @@ export default
                 Store('license', license);
                 $rootScope.features = Store('license').features;
             },
-
+            
             licenseTested: function () {
                 var license, result;
                 if ($rootScope.license_tested !== undefined) {

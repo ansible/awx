@@ -4,26 +4,32 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$http', '$q',
-function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
+export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$http',
+    '$q', 'ConfigService',
+function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q,
+    ConfigService) {
     var license_info;
 
     return {
             getFeatures: function(){
-                var promise;
-                Rest.setUrl(GetBasePath('config'));
-                promise = Rest.get();
-                return promise.then(function (data) {
-                    license_info = data.data.license_info;
-                    $rootScope.features = data.data.license_info.features;
-                    return $rootScope.features;
-                }).catch(function (response) {
-                    ProcessErrors($rootScope, response.data, response.status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get license info. GET returned status: ' +
-                        response.status
-                    });
-                });
+                var config = ConfigService.get();
+                license_info = config.license_info;
+                $rootScope.features = config.license_info.features;
+                return $rootScope.features;
+                // var promise;
+                // Rest.setUrl(GetBasePath('config'));
+                // promise = Rest.get();
+                // return promise.then(function (data) {
+                //     license_info = data.data.license_info;
+                //     $rootScope.features = data.data.license_info.features;
+                //     return $rootScope.features;
+                // }).catch(function (response) {
+                //     ProcessErrors($rootScope, response.data, response.status, null, {
+                //         hdr: 'Error!',
+                //         msg: 'Failed to get license info. GET returned status: ' +
+                //         response.status
+                //     });
+                // });
             },
             get: function(){
                 if(_.isEmpty($rootScope.features)){
@@ -41,9 +47,6 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q) {
                 else {
                     return false;
                 }
-            },
-            getLicenseInfo: function() {
-                return license_info;
             }
         };
 }];

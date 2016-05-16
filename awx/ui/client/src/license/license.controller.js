@@ -74,23 +74,22 @@ export default
 
         var calcExpiresOn = function(days){
             // calculate the expiration date of the license
-            days = parseInt(days);
             return moment().add(days, 'days').calendar();
         };
         var init = function(){
             $scope.fileName = "No file selected.";
             $scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
             Wait('start');
-            CheckLicense.get()
-            .then(function(res){
-                $scope.license = res.data;
-                $scope.license.version = res.data.version.split('-')[0];
+            var license = CheckLicense.get();
+            //.then(function(res){
+                $scope.license = license;
+                $scope.license.version = license.version.split('-')[0];
                 $scope.time = {};
                 $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
                 $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
                 $scope.valid = CheckLicense.valid($scope.license.license_info);
                 Wait('stop');
-            });
+            // });
         };
         var reset = function(){
             document.getElementById('License-form').reset();

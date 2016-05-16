@@ -68,6 +68,7 @@ import './shared/directives';
 import './shared/filters';
 import './shared/Socket';
 import './shared/features/main';
+import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
@@ -109,6 +110,7 @@ var tower = angular.module('Tower', [
     JobTemplates.name,
     portalMode.name,
     search.name,
+    config.name,
     'ngToast',
     'templates',
     'Utilities',
@@ -514,10 +516,15 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state', 'GetBasePath',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log',
+        'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
+        'ClearScope', 'Socket', 'LoadConfig', 'Store',
+        'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
+        'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
+            $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+            LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
+            ProcessErrors, $state, GetBasePath, ConfigService) {
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
@@ -585,11 +592,11 @@ var tower = angular.module('Tower', [
                 Prompt({
                     hdr: `Remove role`,
                     body: `
-<div class="Prompt-bodyQuery">
-    Confirm  the removal of the ${roleType}
-        <span class="Prompt-emphasis"> ${roleName} </span>
-    role associated with ${userName}.
-</div>
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with ${userName}.
+                        </div>
                     `,
                     action: action,
                     actionText: 'REMOVE'
@@ -615,11 +622,11 @@ var tower = angular.module('Tower', [
                 Prompt({
                     hdr: `Remove role`,
                     body: `
-<div class="Prompt-bodyQuery">
-    Confirm  the removal of the ${roleType}
-        <span class="Prompt-emphasis"> ${roleName} </span>
-    role associated with the ${teamName} team.
-</div>
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with the ${teamName} team.
+                        </div>
                     `,
                     action: action,
                     actionText: 'REMOVE'
@@ -760,9 +767,7 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
-                    if (next.name !== 'signOut'){
-                        CheckLicense.notify();
-                    }
+
                     $rootScope.$broadcast("closePermissionsModal");
                     $rootScope.$broadcast("closeUsersModal");
                     // this line removes the query params attached to a route
@@ -813,15 +818,19 @@ var tower = angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
+                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test(event);
+                        }
                     }
                     activateTab();
                 });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
                     // catch license expiration notifications immediately after user logs in, redirect
-                    if (fromState.name === 'signIn'){
-                        CheckLicense.notify();
-                    }
+                    // if (fromState.name === 'signIn'){
+                    //     CheckLicense.notify();
+                    // }
 
                     if(fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')){
                         $rootScope.licenseMissing = toParams.licenseMissing;
@@ -868,8 +877,10 @@ var tower = angular.module('Tower', [
                         Timer.init().then(function(timer){
                             $rootScope.sessionTimer = timer;
                             $rootScope.$emit('OpenSocket');
-                            pendoService.issuePendoIdentity();
-                            CheckLicense.notify();
+                            ConfigService.getConfig().then(function(){
+                                pendoService.issuePendoIdentity();
+                                CheckLicense.test(event);
+                            });
                         });
                     }
                 }
@@ -904,7 +915,7 @@ var tower = angular.module('Tower', [
                 // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
-
+            $rootScope.licenseMissing = true;
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
             // this, set the last path to /portal for instances where portal is visited for the first time.
             $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;
