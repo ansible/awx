@@ -422,6 +422,19 @@ textarea.allowresize {
       max-width: 325px;
       background-color: @default-interface-txt;
       color: @default-bg; //white
+
+      code {
+          color: @default-data-txt;
+          background-color: @default-white-button-bord;
+          line-height: 18px;
+      }
+
+      a {
+          color: @default-warning;
+          &:hover {
+              color: @default-warning-hov;
+          }
+      }
   }
   .popover.right>.arrow:after  {
       border-right-color: @default-interface-txt;

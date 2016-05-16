@@ -17,10 +17,10 @@
             if (typeof value === 'object'){return false;}
             else {return true;}
         };
-
+        //var CodeMirror;
         var codeMirror = function(el, json){
             var container = $(el)[0];
-            var editor = CodeMirror.fromTextArea(container, {
+            var editor = codeMirror.fromTextArea(container, {
                 lineNumbers: true,
                 mode: {name: "javascript", json: true}
              });

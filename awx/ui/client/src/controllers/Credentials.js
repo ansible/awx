@@ -15,7 +15,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, GetChoices, Wait, $state) {
-
     ClearScope();
 
     Wait('start');
@@ -33,7 +32,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
     $scope.credentialLoading = true;
 
     url = GetBasePath(base) + ( (base === 'users') ? $stateParams.user_id + '/credentials/' : $stateParams.team_id + '/credentials/' );
-
     if (mode === 'select') {
         SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
     }
@@ -119,13 +117,15 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             actionText: 'DELETE'
         });
     };
+
+    $scope.$emit('choicesReadyCredential');
 }
 
 CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    '$state'
+    '$state',
 ];
 
 
@@ -320,10 +320,12 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, OrganizationList, LookUpInit, Empty,
-    OwnerChange, FormSave, Wait, $state, CreateSelect2) {
+    OwnerChange, FormSave, Wait, $state, CreateSelect2, Authorization) {
+    if (!$rootScope.current_user) {
+        Authorization.restoreUserInfo();
+    }
 
     ClearScope();
-
     var defaultUrl = GetBasePath('credentials'),
         generator = GenerateForm,
         form = CredentialForm,
@@ -331,7 +333,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         master = {},
         id = $stateParams.credential_id,
         relatedSets = {};
-
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
@@ -672,5 +673,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'OrganizationList', 'LookUpInit', 'Empty', 'OwnerChange',
-    'FormSave', 'Wait', '$state', 'CreateSelect2'
+    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization'
 ];

@@ -39,7 +39,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
+                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -65,7 +65,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
+                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -75,7 +75,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
                  scope.hostPopOver = "<p>The host value</p>";
-
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -131,6 +130,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.password_required = true;
                              scope.hostLabel = "vCenter Host";
                              scope.passwordLabel = 'Password';
+                             scope.hostPopOver = "Enter the hostname or IP address which corresponds to your VMware vCenter.";
                          break;
                          case 'openstack':
                              scope.hostLabel = "Host (Authentication URL)";
@@ -152,6 +152,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = 'Password';
                             scope.host_required = true;
                             scope.hostLabel = "Satellite 6 Host";
+                            scope.hostPopOver = "Enter the hostname or IP address name which <br />" +
+                                "corresponds to your Red Hat Satellite 6 server.";
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
@@ -159,6 +161,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = 'Password';
                             scope.host_required = true;
                             scope.hostLabel = "CloudForms Host";
+                            scope.hostPopOver = "Enter the hostname or IP address for the virtual <br />" +
+                                " machine which is hosting the CloudForm appliance.";
                          break;
                          case 'net':
                             scope.username_required = true;
@@ -222,8 +226,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
-         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
+.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
+         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -293,6 +297,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                          else {
                              ReturnToCaller(1);
                          }
+                         $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
+
                      })
                      .error(function (data, status) {
                          Wait('stop');
@@ -314,6 +320,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                          else {
                              ReturnToCaller(1);
                          }
+
                      })
                      .error(function (data, status) {
                          Wait('stop');
