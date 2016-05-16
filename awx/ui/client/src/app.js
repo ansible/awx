@@ -538,7 +538,7 @@ var tower = angular.module('Tower', [
                 if (accessListEntry.team_id) {
                     Prompt({
                         hdr: `Team access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access to from the team <span class="Prompt-emphasis">${entry.team_name}</span>. This will affect all members of the team.</div>`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${entry.team_name}</span>. This will affect all members of the team.</div>`,
                             action: action,
                         actionText: 'REMOVE TEAM ACCESS'
                     });
