@@ -31,7 +31,11 @@ export default ['GetBasePath', function(GetBasePath) {
         if (endPoint === 'inventories') {
             endPoint = 'inventory';
         }
-        return GetBasePath(endPoint);
+        if (endPoint.indexOf("/api/v1") > -1) {
+            return endPoint;
+        } else {
+            return GetBasePath(endPoint);
+        }
     };
 
     // inject the directive with the list and endpoint

@@ -737,6 +737,7 @@ var tower = angular.module('Tower', [
                         CheckLicense.notify();
                     }
                     $rootScope.$broadcast("closePermissionsModal");
+                    $rootScope.$broadcast("closeUsersModal");
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){

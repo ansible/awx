@@ -1,11 +1,14 @@
-export default ['$scope', '$stateParams', '$state', 'Rest', 'UserList', 'InventoryList', 'JobTemplateList', 'TeamList', 'ProjectList', 'generateList', 'SearchInit', 'PaginateInit', function($scope, $stateParams, $state, Rest, UserList, InventoryList, JobTemplateList, TeamList, ProjectList, GenerateList, SearchInit, PaginateInit) {
+export default ['$compile', '$scope', '$stateParams', '$state', 'Rest', 'UserList', 'InventoryList', 'JobTemplateList', 'TeamList', 'ProjectList', 'generateList', 'SearchInit', 'PaginateInit', function($compile, $scope, $stateParams, $state, Rest, UserList, InventoryList, JobTemplateList, TeamList, ProjectList, GenerateList, SearchInit, PaginateInit) {
 
     var getList = function(mode) {
         var list = {};
         if (mode === 'users') {
             list = _.cloneDeep(UserList);
             list.emptyListText = "Please add items to this list";
+            list.actions.add.label = "Add a user to the organization";
             list.actions.add.buttonContent = '&#43; ADD user';
+            list.actions.add.awToolTip = 'Add existing user to organization';
+            list.actions.add.ngClick = 'addUsers()';
         } else if (mode === 'inventories') {
             list = _.cloneDeep(InventoryList);
             list.emptyListText = "List is empty";
@@ -26,6 +29,8 @@ export default ['$scope', '$stateParams', '$state', 'Rest', 'UserList', 'Invento
             list = _.cloneDeep(UserList);
             list.emptyListText = "Please add items to this list";
             list.actions.add.buttonContent = '&#43; ADD administrator';
+            list.actions.add.awToolTip = 'Add existing user to organization as administrator';
+            list.actions.add.ngClick = 'addUsers()';
         }
         return list;
     };
@@ -61,18 +66,27 @@ export default ['$scope', '$stateParams', '$state', 'Rest', 'UserList', 'Invento
                 generator = GenerateList;
             $scope.$parent.activeCard = parseInt($stateParams.organization_id);
             $scope.$parent.activeMode = mode;
+            $scope.org_name = data.name;
+            $scope.org_id = data.id;
+            var listMode = (mode === 'admins') ? 'users' : mode;
 
             list = getList(mode);
-            list.listTitle = listTitle;
-
             url = getUrl(mode, data);
+            list.listTitle = listTitle;
+            list.basePath = url;
+
+            $scope.orgRelatedUrls = data.related;
 
             generator
                 .inject(list, { mode: 'edit', scope: $scope });
 
+            $scope.addUsers = function () {
+                $compile("<add-users class='AddUsers'></add-users>")($scope);
+            };
+
             SearchInit({
                 scope: $scope,
-                set: mode,
+                set: listMode,
                 list: list,
                 url: url
             });
