@@ -3,11 +3,18 @@ import pytest
 
 from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
+from awx.main.access import ActivityStreamAccess
+
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
 def mock_feature_enabled(feature, bypass_database=None):
     return True
+
+@pytest.fixture
+def activity_stream_entry(organization, rando):
+    rando.roles.add(organization.admin_role)
+    return ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
 
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
@@ -63,25 +70,30 @@ def test_middleware_actor_added(monkeypatch, post, get, user):
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_rbac_stream_resource_roles(mocker, organization, user):
-    member = user('test', False)
-    organization.admin_role.members.add(member)
+def test_rbac_stream_resource_roles(activity_stream_entry, organization, rando):
 
-    activity_stream = ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
-    assert activity_stream.user.first() == member
-    assert activity_stream.organization.first() == organization
-    assert activity_stream.role.first() == organization.admin_role
-    assert activity_stream.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.user.first() == rando
+    assert activity_stream_entry.organization.first() == organization
+    assert activity_stream_entry.role.first() == organization.admin_role
+    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
 
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_rbac_stream_user_roles(mocker, organization, user):
-    member = user('test', False)
-    member.roles.add(organization.admin_role)
+def test_rbac_stream_user_roles(activity_stream_entry, organization, rando):
 
-    activity_stream = ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
-    assert activity_stream.user.first() == member
-    assert activity_stream.organization.first() == organization
-    assert activity_stream.role.first() == organization.admin_role
-    assert activity_stream.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.user.first() == rando
+    assert activity_stream_entry.organization.first() == organization
+    assert activity_stream_entry.role.first() == organization.admin_role
+    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+def test_stream_access_cant_change(activity_stream_entry, organization, rando):
+    access = ActivityStreamAccess(rando)
+    # These should always return false because the activity stream can not be edited
+    assert not access.can_add(activity_stream_entry)
+    assert not access.can_change(activity_stream_entry, {'organization': None})
+    assert not access.can_delete(activity_stream_entry)
