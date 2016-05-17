@@ -14,12 +14,12 @@ logger = logging.getLogger('awx.main.notifications.hipchat_backend')
 class HipChatBackend(TowerBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
-                       "channels": {"label": "Destination Channels", "type": "list"},
+                       "rooms": {"label": "Destination Rooms", "type": "list"},
                        "color": {"label": "Notification Color", "type": "string"},
                        "api_url": {"label": "API Url (e.g: https://mycompany.hipchat.com)", "type": "string"},
-                       "notify": {"label": "Notify channel", "type": "bool"},
+                       "notify": {"label": "Notify room", "type": "bool"},
                        "message_from": {"label": "Label to be shown with notification", "type": "string"}}
-    recipient_parameter = "channels"
+    recipient_parameter = "rooms"
     sender_parameter = "message_from"
 
     def __init__(self, token, color, api_url, notify, fail_silently=False, **kwargs):
