@@ -20,7 +20,7 @@ export default
         'Empty', 'Prompt', 'ParseVariableString', 'ToJSON',
         'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
         'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
-        'PlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
+        'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification', 'NotificationsListInit', '$q',
         function(
             $filter, $scope, $rootScope, $compile,
@@ -30,7 +30,7 @@ export default
             GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
             Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
             JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
-            SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $state,
+            SchedulesList, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, NotificationsListInit, $q
         ) {
 
@@ -653,7 +653,7 @@ export default
                 }
                 else {
 
-                    PlaybookRun({
+                    InitiatePlaybookRun({
                         scope: $scope,
                         id: id
                     });

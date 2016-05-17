@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePath, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
+export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePath, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, InitiatePlaybookRun){
 
 
         var list = PortalJobTemplateList,
@@ -13,7 +13,7 @@ export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePat
         pageSize = 12;
 
         $scope.submitJob = function (id) {
-            PlaybookRun({ scope: $scope, id: id });
+            InitiatePlaybookRun({ scope: $scope, id: id });
         };
 
         var init = function(){
@@ -42,5 +42,5 @@ export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePat
         init();
     }
 
-PortalModeJobTemplatesController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
+PortalModeJobTemplatesController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'InitiatePlaybookRun'
 ];

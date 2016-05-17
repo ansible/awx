@@ -9,14 +9,14 @@ export default
         '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
         'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
         'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
-        'LookUpInit', 'PlaybookRun', 'Wait', '$compile',
+        'LookUpInit', 'InitiatePlaybookRun', 'Wait', '$compile',
         '$state',
 
         function(
             $scope, $rootScope, $location, $log,
             $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
             SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
-            GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun,
+            GetBasePath, JobTemplateForm, CredentialList, LookUpInit, InitiatePlaybookRun,
             Wait, $compile, $state
         ) {
 
@@ -95,7 +95,7 @@ export default
             };
 
             $scope.submitJob = function (id) {
-                PlaybookRun({ scope: $scope, id: id });
+                InitiatePlaybookRun({ scope: $scope, id: id });
             };
 
             $scope.scheduleJob = function (id) {

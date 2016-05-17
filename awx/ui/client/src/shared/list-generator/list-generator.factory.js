@@ -454,14 +454,14 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     // Change layout if a lookup list, place radio buttons before labels
                     if (options.mode === 'lookup') {
                       if(options.input_type==="radio"){ //added by JT so that lookup forms can be either radio inputs or check box inputs
-                          innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                          innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_" + list.iterator + "_{{" +
                           list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
-                          "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                          "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
                       else { // its assumed that options.input_type = checkbox
-                          innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                          innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_" + list.iterator + "_{{" +
                           list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
-                          "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                          "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
                     }
 
@@ -619,7 +619,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += buildSelectAll().prop('outerHTML');
                     }
                     else if (options.mode === 'lookup') {
-                        html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\"></th>";
+                        html += "<th class=\"List-tableHeader List-staticColumn--smallStatus col-lg-1 col-md-1 col-sm-2 col-xs-2\"></th>";
                     }
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&

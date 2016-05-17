@@ -46,7 +46,7 @@ export default
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
-                modalColumnClass: 'col-md-8',
+                modalColumnClass: 'col-md-11',
                 linkTo: '/#/inventories/{{inventory.id}}/manage'
             },
             organization: {
