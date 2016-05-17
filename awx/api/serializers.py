@@ -511,8 +511,6 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['last_job'] = obj.last_job.get_absolute_url()
         if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url()
-        res['roles'] = reverse('api:job_template_roles_list', args=(obj.pk,))
-
         return res
 
     def get_types(self):
@@ -1754,6 +1752,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
+            roles = reverse('api:job_template_roles_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
