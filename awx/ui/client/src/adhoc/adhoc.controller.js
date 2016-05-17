@@ -161,8 +161,6 @@ function adhocController($q, $scope, $rootScope, $location, $stateParams,
         privateFn.initializeFields(urls.machineCredentialUrl, urls.adhocUrl);
     };
 
-    var urls = privateFn.setAvailableUrls();
-
     privateFn.initializeForm(id, urls, hostPattern);
 
     $scope.formCancel = function(){
