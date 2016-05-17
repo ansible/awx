@@ -2506,9 +2506,9 @@ class JobTemplateCallback(GenericAPIView):
             data = dict(msg='Cannot start automatically, user input required!')
             # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        limit = ':&'.join(filter(None, [job_template.limit, host.name]))
+        limit = host.name
 
-        # NOTE: We limit this to one job waiting due to this: https://trello.com/c/yK36dGWp
+        # NOTE: We limit this to one job waiting per host per callblack to keep them from stacking crazily
         if Job.objects.filter(status__in=['pending', 'waiting', 'running'], job_template=job_template,
                               limit=limit).count() > 0:
             data = dict(msg='Host callback job already pending')
