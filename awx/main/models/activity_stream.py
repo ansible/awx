@@ -16,6 +16,7 @@ class ActivityStream(models.Model):
 
     class Meta:
         app_label = 'main'
+        ordering = ('pk',)
 
     OPERATION_CHOICES = [
         ('create', _('Entity Created')),
