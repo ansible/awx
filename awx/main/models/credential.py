@@ -329,12 +329,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def clean_ssh_key_unlock(self):
         if self.has_encrypted_ssh_key_data and not self.ssh_key_unlock:
             raise ValidationError('SSH key unlock must be set when SSH key '
-                                  'is encrypted')
+                                  'is encrypted.')
         return self.ssh_key_unlock
 
     def clean(self):
         if self.deprecated_user and self.deprecated_team:
-            raise ValidationError('Credential cannot be assigned to both a user and team')
+            raise ValidationError('Credential cannot be assigned to both a user and team.')
 
     def _password_field_allows_ask(self, field):
         return bool(self.kind == 'ssh' and field != 'ssh_key_data')
@@ -394,7 +394,7 @@ def validate_ssh_private_key(data):
         'cert_bin': '',     # Cert data as binary.
     }
     data = data.strip()
-    validation_error = ValidationError('Invalid private key')
+    validation_error = ValidationError('Invalid private key.')
 
     # Sanity check: We may potentially receive a full PEM certificate,
     # and we want to accept these.

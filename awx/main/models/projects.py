@@ -116,10 +116,10 @@ class ProjectOptions(models.Model):
             scm_url = update_scm_url(self.scm_type, scm_url,
                                      check_special_cases=False)
         except ValueError, e:
-            raise ValidationError((e.args or ('Invalid SCM URL',))[0])
+            raise ValidationError((e.args or ('Invalid SCM URL.',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
-            raise ValidationError('SCM URL is required')
+            raise ValidationError('SCM URL is required.')
         return unicode(self.scm_url or '')
 
     def clean_credential(self):
@@ -128,7 +128,7 @@ class ProjectOptions(models.Model):
         cred = self.credential
         if cred:
             if cred.kind != 'scm':
-                raise ValidationError('Credential kind must be "scm"')
+                raise ValidationError("Credential kind must be 'scm'.")
             try:
                 scm_url = update_scm_url(self.scm_type, self.scm_url,
                                          check_special_cases=False)
@@ -143,7 +143,7 @@ class ProjectOptions(models.Model):
                     update_scm_url(self.scm_type, self.scm_url, scm_username,
                                    scm_password)
                 except ValueError, e:
-                    raise ValidationError((e.args or ('Invalid credential',))[0])
+                    raise ValidationError((e.args or ('Invalid credential.',))[0])
             except ValueError:
                 pass
         return cred

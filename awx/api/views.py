@@ -856,7 +856,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg='Role "id" field is missing')
+            data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
@@ -1138,7 +1138,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg='Role "id" field is missing')
+            data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
@@ -1269,10 +1269,10 @@ class CredentialList(ListCreateAPIView):
             kwargs.pop(field, None)
 
         if not any([x in request.data for x in ['user', 'team', 'organization']]):
-            return Response({'detail': 'Missing user, team, or organization'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Missing 'user', 'team', or 'organization'."}, status=status.HTTP_400_BAD_REQUEST)
 
         if sum([1 if x in request.data else 0 for x in ['user', 'team', 'organization']]) != 1:
-            return Response({'detail': 'Expecting exactly one of user, team, or organization'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Expecting exactly one of 'user', 'team', or 'organization'."}, status=status.HTTP_400_BAD_REQUEST)
 
         if 'user' in request.data:
             user = User.objects.get(pk=request.data['user'])
@@ -1651,7 +1651,7 @@ class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
         fact_entry = Fact.get_host_fact(host_obj.id, module_spec, datetime_actual)
         if not fact_entry:
-            return Response({'detail': 'Fact not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Fact not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(self.serializer_class(instance=fact_entry).data)
 
 class GroupList(ListCreateAPIView):
@@ -1694,7 +1694,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         '''
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg='"id" is required to disassociate')
+            data = dict(msg="'id' is required to disassociate.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         parent = self.get_parent_object()
@@ -2070,7 +2070,7 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
         if parent.source not in CLOUD_INVENTORY_SOURCES:
-            return Response(dict(msg="Notification Templates can only be assigned when source is one of {}"
+            return Response(dict(msg="Notification Templates can only be assigned when source is one of {}."
                                  .format(CLOUD_INVENTORY_SOURCES, parent.source)),
                             status=status.HTTP_400_BAD_REQUEST)
         return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
@@ -2288,34 +2288,34 @@ class JobTemplateSurveySpec(GenericAPIView):
             obj.survey_spec = json.dumps(request.data)
         except ValueError:
             # TODO: Log
-            return Response(dict(error="Invalid JSON when parsing survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="Invalid JSON when parsing survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
-            return Response(dict(error="'name' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'name' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "description" not in obj.survey_spec:
-            return Response(dict(error="'description' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'description' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "spec" not in obj.survey_spec:
-            return Response(dict(error="'spec' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'spec' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if not isinstance(obj.survey_spec["spec"], list):
-            return Response(dict(error="'spec' must be a list of items"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'spec' must be a list of items."), status=status.HTTP_400_BAD_REQUEST)
         if len(obj.survey_spec["spec"]) < 1:
-            return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'spec' doesn't contain any items."), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
         variable_set = set()
         for survey_item in obj.survey_spec["spec"]:
             if not isinstance(survey_item, dict):
-                return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="Survey question %s is not a json object." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
-                return Response(dict(error="'type' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'type' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "question_name" not in survey_item:
-                return Response(dict(error="'question_name' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'question_name' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "variable" not in survey_item:
-                return Response(dict(error="'variable' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'variable' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if survey_item['variable'] in variable_set:
-                return Response(dict(error="'variable' name '%s' duplicated in survey element %s" % (survey_item['variable'], str(idx))), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'variable' '%s' duplicated in survey question %s." % (survey_item['variable'], str(idx))), status=status.HTTP_400_BAD_REQUEST)
             else:
                 variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
-                return Response(dict(error="'required' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'required' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
         obj.save()
         return Response()
@@ -2516,7 +2516,7 @@ class JobTemplateCallback(GenericAPIView):
         # NOTE: We limit this to one job waiting per host per callblack to keep them from stacking crazily
         if Job.objects.filter(status__in=['pending', 'waiting', 'running'], job_template=job_template,
                               limit=limit).count() > 0:
-            data = dict(msg='Host callback job already pending')
+            data = dict(msg='Host callback job already pending.')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Everything is fine; actually create the job.
@@ -2861,7 +2861,7 @@ class JobJobPlaysList(BaseJobEventsList):
         all_plays = []
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         # Put together a queryset for relevant job events.
@@ -2943,15 +2943,15 @@ class JobJobTasksList(BaseJobEventsList):
         # If there's no event ID specified, this will return a 404.
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         if 'event_id' not in request.query_params:
-            return ({'detail': '"event_id" not provided'}, -1, status.HTTP_400_BAD_REQUEST)
+            return ({"detail": "'event_id' not provided."}, -1, status.HTTP_400_BAD_REQUEST)
 
         parent_task = job.job_events.filter(pk=int(request.query_params.get('event_id', -1)))
         if not parent_task.exists():
-            return ({'detail': 'parent event not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Parent event not found.'}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
         # Some events correspond to a playbook or task starting up,
@@ -3624,7 +3624,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg='Role "id" field is missing')
+            data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
@@ -3647,7 +3647,7 @@ class RoleTeamsList(ListAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg='Role "id" field is missing')
+            data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
         role = Role.objects.get(pk=self.kwargs['pk'])

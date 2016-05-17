@@ -849,7 +849,7 @@ class ProjectOptionsSerializer(BaseSerializer):
         if scm_type:
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
-            errors['local_path'] = 'Invalid path choice'
+            errors['local_path'] = 'Invalid path choice.'
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1305,14 +1305,14 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
         if source == 'custom':
             if source_script is None or source_script == '':
-                errors['source_script'] = 'source_script must be provided'
+                errors['source_script'] = "If 'source' is 'custom', 'source_script' must be provided."
             else:
                 try:
                     if source_script.organization != self.instance.inventory.organization:
-                        errors['source_script'] = 'source_script does not belong to the same organization as the inventory.'
+                        errors['source_script'] = "The 'source_script' does not belong to the same organization as the inventory."
                 except Exception:
                     # TODO: Log
-                    errors['source_script'] = 'source_script doesn\'t exist.'
+                    errors['source_script'] = "'source_script' doesn't exist."
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1813,7 +1813,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             return value
         except yaml.YAMLError:
             pass
-        raise serializers.ValidationError('Must be valid JSON or YAML')
+        raise serializers.ValidationError('Must be valid JSON or YAML.')
 
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
@@ -1860,7 +1860,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             try:
                 job_template = JobTemplate.objects.get(pk=data['job_template'])
             except JobTemplate.DoesNotExist:
-                self._errors = {'job_template': 'Invalid job template'}
+                self._errors = {'job_template': 'Invalid job template.'}
                 return
             data.setdefault('name', job_template.name)
             data.setdefault('description', job_template.description)
@@ -2278,7 +2278,7 @@ class JobLaunchSerializer(BaseSerializer):
                     extra_vars = yaml.safe_load(extra_vars)
                     assert isinstance(extra_vars, dict)
                 except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary'
+                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary.'
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
@@ -2385,11 +2385,11 @@ class NotificationTemplateSerializer(BaseSerializer):
                 attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
         error_list = []
         if missing_fields:
-            error_list.append("Missing required fields for Notification Configuration: {}".format(missing_fields))
+            error_list.append("Missing required fields for Notification Configuration: {}.".format(missing_fields))
         if incorrect_type_fields:
             for type_field_error in incorrect_type_fields:
-                error_list.append("Configuration field '{}' incorrect type, expected {}".format(type_field_error[0],
-                                                                                                type_field_error[1]))
+                error_list.append("Configuration field '{}' incorrect type, expected {}.".format(type_field_error[0],
+                                                                                                 type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
         return attrs
@@ -2509,9 +2509,11 @@ class ActivityStreamSerializer(BaseSerializer):
             if key == 'changes':
                 field.help_text = 'A summary of the new and changed values when an object is created, updated, or deleted'
             if key == 'object1':
-                field.help_text = 'For create, update, and delete events this is the object type that was affected.  For associate and disassociate events this is the object type associated or disassociated with object2'
+                field.help_text = ('For create, update, and delete events this is the object type that was affected. '
+                                   'For associate and disassociate events this is the object type associated or disassociated with object2.')
             if key == 'object2':
-                field.help_text = 'Unpopulated for create, update, and delete events.  For associate and disassociate events this is the object type that object1 is being associated with'
+                field.help_text = ('Unpopulated for create, update, and delete events. For associate and disassociate '
+                                   'events this is the object type that object1 is being associated with.')
             if key == 'operation':
                 field.help_text = 'The action taken with respect to the given object(s).'
         return ret
@@ -2617,7 +2619,7 @@ class TowerSettingsSerializer(BaseSerializer):
 
     def to_internal_value(self, data):
         if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
-            self._errors = {'key': 'Key {0} is not a valid settings key'.format(data['key'])}
+            self._errors = {'key': 'Key {0} is not a valid settings key.'.format(data['key'])}
             return
         ret = super(TowerSettingsSerializer, self).to_internal_value(data)
         manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]

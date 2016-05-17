@@ -994,7 +994,7 @@ class InventorySourceOptions(BaseModel):
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
         elif self.source in CLOUD_PROVIDERS and self.source != 'ec2':
-            raise ValidationError('Credential is required for a cloud source')
+            raise ValidationError('Credential is required for a cloud source.')
         return cred
 
     def clean_source_regions(self):

@@ -61,7 +61,7 @@ def test_no_fact_found(hosts, get, user):
     response = get(url, user('admin', True))
 
     expected_response = {
-        "detail": "Fact not found"
+        "detail": "Fact not found."
     }
     assert 404 == response.status_code
     assert expected_response == response.data
