@@ -1027,6 +1027,7 @@ class ProjectUpdateView(RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectUpdateViewSerializer
+    permission_classes = (ProjectUpdatePermission,)
     new_in_13 = True
 
     def post(self, request, *args, **kwargs):

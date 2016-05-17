@@ -19,7 +19,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission']
+           'TaskPermission', 'ProjectUpdatePermission']
 
 class ModelAccessPermission(permissions.BasePermission):
     '''
@@ -190,3 +190,18 @@ class TaskPermission(ModelAccessPermission):
             return bool(not obj or obj.pk == unified_job.pk)
         else:
             return False
+
+class ProjectUpdatePermission(ModelAccessPermission):
+    '''
+    Permission check used by ProjectUpdateView to determine who can update projects
+    '''
+
+    def has_permission(self, request, view, obj=None):
+        if request.user.is_superuser:
+            return True
+
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        if project and request.user in project.update_role:
+            return True
+
+        return False
