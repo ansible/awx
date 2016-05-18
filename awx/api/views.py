@@ -727,6 +727,16 @@ class OrganizationUsersList(SubListCreateAttachDetachAPIView):
     parent_model = Organization
     relationship = 'member_role.members'
 
+    def post(self, request, *args, **kwargs):
+        ret = super(OrganizationUsersList, self).post( request, *args, **kwargs)
+        if request.data.get('is_system_auditor', False):
+            # This is a faux-field that just maps to checking the system
+            # auditor role member list.. unfortunately this means we can't
+            # set it on creation, and thus needs to be set here.
+            user = User.objects.get(id=ret.data['id'])
+            user.is_system_auditor = request.data['is_system_auditor']
+        return ret
+
 class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
 
     model = User
@@ -1096,6 +1106,16 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        ret = super(OrganizationUsersList, self).post( request, *args, **kwargs)
+        if request.data.get('is_system_auditor', False):
+            # This is a faux-field that just maps to checking the system
+            # auditor role member list.. unfortunately this means we can't
+            # set it on creation, and thus needs to be set here.
+            user = User.objects.get(id=ret.data['id'])
+            user.is_system_auditor = request.data['is_system_auditor']
+        return ret
 
 class UserMeList(ListAPIView):
 
