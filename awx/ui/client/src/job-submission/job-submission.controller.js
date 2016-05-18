@@ -174,6 +174,7 @@ export default
 
                     if($scope.ask_variables_on_launch) {
                         $scope.variables = (data.defaults && data.defaults.extra_vars) ? data.defaults.extra_vars : "---";
+                        $scope.other_prompt_data.parseType = 'yaml';
                         $scope.parseType = 'yaml';
                     }
 
@@ -258,7 +259,7 @@ export default
                 }
                 else if(step === "otherprompts") {
                     $scope.otherPromptsTabEnabled = true;
-                    if(!$scope.extra_vars_code_mirror_loaded) {
+                    if($scope.ask_variables_on_launch && !$scope.extra_vars_code_mirror_loaded) {
                         ParseTypeChange({
                             scope: $scope,
                             field_id: 'job_launch_variables'
@@ -512,6 +513,15 @@ export default
                 else {
                     launchJob();
                 }
+            };
+
+            $scope.updateParseType = function() {
+                // This is what the ParseTypeChange factory is expecting
+                // It shares the same scope with this directive and will
+                // pull the new value of parseType out to determine which
+                // direction to convert the extra vars
+                $scope.parseType = $scope.other_prompt_data.parseType;
+                $scope.parseTypeChange();
             };
 
         }
