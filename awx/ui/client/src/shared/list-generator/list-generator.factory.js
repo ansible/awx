@@ -323,11 +323,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                   html += "</button></div>\n";
                               }
                               html += "<div class=\"List-actionHolder\">";
-                              if(list.toolbarAuxAction) {
-                                  html += "<div class=\"List-auxAction\">";
-                                  html += list.toolbarAuxAction;
-                                  html += "</div>";
-                              }
                               html += "<div class=\"List-actions\">";
                               html += "<div ng-include=\"'" +
                                   templateUrl('shared/list-generator/list-actions') +
@@ -337,8 +332,13 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                   list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
                               }
 
-                              html += "</div>\n";
                               html += "</div>";
+                              if(list.toolbarAuxAction) {
+                                  html += "<div class=\"List-auxAction\">";
+                                  html += list.toolbarAuxAction;
+                                  html += "</div>";
+                              }
+                              html += "\n</div>";
                               html += "</div>";
                               html += "</div>";
                           }
