@@ -679,7 +679,7 @@ class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', write_only=True,
                                      help_text='Write-only field used to change the password.')
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
-    is_system_auditor = serializers.BooleanField()
+    is_system_auditor = serializers.BooleanField(default=False)
 
     class Meta:
         model = User
