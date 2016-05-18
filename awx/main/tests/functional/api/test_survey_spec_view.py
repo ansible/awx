@@ -12,7 +12,7 @@ def mock_feature_disabled(feature, bypass_database=None):
     return False
 
 def mock_check_license(self, add_host=False, feature=None, check_expiration=True):
-    raise LicenseForbids("Feature %s is not enabled in the active license" % feature)
+    raise LicenseForbids("Feature %s is not enabled in the active license." % feature)
 
 @pytest.fixture
 def survey_jobtemplate(project, inventory, credential):
@@ -42,7 +42,7 @@ def test_deny_enabling_survey(deploy_jobtemplate, patch, user):
     JT_url = reverse('api:job_template_detail', args=(deploy_jobtemplate.id,))
     response = patch(url=JT_url, data=dict(survey_enabled=True), user=user('admin', True))
     assert response.status_code == 402
-    assert response.data['detail'] == 'Feature surveys is not enabled in the active license'
+    assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
 
 @mock.patch('awx.main.access.BaseAccess.check_license', mock_check_license)
 @pytest.mark.django_db
@@ -61,7 +61,7 @@ def test_deny_creating_with_survey(machine_credential, project, inventory, post,
     response = post(url=JT_url, data=JT_data, user=user('admin', True))
 
     assert response.status_code == 402
-    assert response.data['detail'] == 'Feature surveys is not enabled in the active license'
+    assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
@@ -105,7 +105,7 @@ def test_survey_spec_non_dict_error(deploy_jobtemplate, post, user):
         user=user('admin', True))
 
     assert response.status_code == 400
-    assert response.data['error'] == "survey element 0 is not a json object"
+    assert response.data['error'] == "Survey question 0 is not a json object."
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
@@ -132,4 +132,4 @@ def test_survey_spec_dual_names_error(deploy_jobtemplate, post, user):
         user=user('admin', True))
 
     assert response.status_code == 400
-    assert response.data['error'] == "'variable' name 'submitter_email' duplicated in survey element 1"
+    assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."

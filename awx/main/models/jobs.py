@@ -244,11 +244,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
 
     def clean(self):
         if self.job_type == 'scan' and (self.inventory is None or self.ask_inventory_on_launch):
-            raise ValidationError('Scan jobs must be assigned a fixed inventory')
+            raise ValidationError({"inventory": ["Scan jobs must be assigned a fixed inventory.",]})
         if (not self.ask_inventory_on_launch) and self.inventory is None:
-            raise ValidationError('Job Template must either have an inventory or allow prompting for inventory')
+            raise ValidationError({"inventory": ["Job Template must provide 'inventory' or allow prompting for it.",]})
         if (not self.ask_credential_on_launch) and self.credential is None:
-            raise ValidationError('Job Template must either have a credential or allow prompting for credential')
+            raise ValidationError({"credential": ["Job Template must provide 'credential' or allow prompting for it.",]})
         return super(JobTemplate, self).clean()
 
     def create_job(self, **kwargs):
@@ -292,9 +292,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         if not self.survey_enabled:
             return errors
         if 'name' not in self.survey_spec:
-            errors.append("'name' missing from survey spec")
+            errors.append("'name' missing from survey spec.")
         if 'description' not in self.survey_spec:
-            errors.append("'description' missing from survey spec")
+            errors.append("'description' missing from survey spec.")
         for survey_element in self.survey_spec.get("spec", []):
             if survey_element['variable'] not in data and \
                survey_element['required']:
@@ -302,50 +302,50 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
+                        errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
                        data[survey_element['variable']] < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
+                        errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
                        data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != int:
-                        errors.append("Value %s for %s expected to be an integer" % (data[survey_element['variable']],
-                                                                                     survey_element['variable']))
+                        errors.append("Value %s for '%s' expected to be an integer." % (data[survey_element['variable']],
+                                                                                        survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
+                        errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
-                        errors.append("Value %s for %s expected to be a numeric type" % (data[survey_element['variable']],
-                                                                                         survey_element['variable']))
+                        errors.append("Value %s for '%s' expected to be a numeric type." % (data[survey_element['variable']],
+                                                                                            survey_element['variable']))
             elif survey_element['type'] == 'multiselect':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != list:
-                        errors.append("'%s' value is expected to be a list" % survey_element['variable'])
+                        errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                     else:
                         for val in data[survey_element['variable']]:
                             if val not in survey_element['choices']:
-                                errors.append("Value %s for %s expected to be one of %s" % (val, survey_element['variable'],
-                                                                                            survey_element['choices']))
+                                errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
+                                                                                               survey_element['choices']))
             elif survey_element['type'] == 'multiplechoice':
                 if survey_element['variable'] in data:
                     if data[survey_element['variable']] not in survey_element['choices']:
-                        errors.append("Value %s for %s expected to be one of %s" % (data[survey_element['variable']],
-                                                                                    survey_element['variable'],
-                                                                                    survey_element['choices']))
+                        errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
+                                                                                       survey_element['variable'],
+                                                                                       survey_element['choices']))
         return errors
 
     def _update_unified_job_kwargs(self, **kwargs):
