@@ -1256,9 +1256,14 @@ class UserAccessList(ResourceAccessList):
 class CredentialList(ListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = CredentialSerializerCreate
 
     def post(self, request, *args, **kwargs):
+
+        # Check the validity of POST data, including special fields
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         for field in [x for x in ['user', 'team', 'organization'] if x in request.data and request.data[x] in ('', None)]:
             request.data.pop(field)
             kwargs.pop(field, None)

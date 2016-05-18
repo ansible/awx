@@ -1588,18 +1588,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False, default=None, write_only=True,
-        help_text='Write-only field used to add user to owner role. If provided, '
-                  'do not give either team or organization. Only valid for creation.')
-    team = serializers.PrimaryKeyRelatedField(
-        queryset=Team.objects.all(), required=False, default=None, write_only=True,
-        help_text='Write-only field used to add team to owner role. If provided, '
-                  'do not give either user or organization. Only valid for creation.')
-    organization = serializers.PrimaryKeyRelatedField(
-        queryset=Organization.objects.all(), required=False, default=None, write_only=True,
-        help_text='Write-only field used to add organization to owner role. If provided, '
-                  'do not give either team or team. Only valid for creation.')
 
     class Meta:
         model = Credential
@@ -1608,14 +1596,7 @@ class CredentialSerializer(BaseSerializer):
                   'ssh_key_data', 'ssh_key_unlock',
                   'become_method', 'become_username', 'become_password',
                   'vault_password', 'subscription', 'tenant', 'secret', 'client',
-                  'authorize', 'authorize_password',
-                  'user', 'team', 'organization')
-
-    def create(self, validated_data):
-        # Remove the user, team, and organization processed in view
-        for field in ['user', 'team', 'organization']:
-            validated_data.pop(field, None)
-        return super(CredentialSerializer, self).create(validated_data)
+                  'authorize', 'authorize_password')
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)
@@ -1663,6 +1644,35 @@ class CredentialSerializer(BaseSerializer):
             })
 
         return summary_dict
+
+
+class CredentialSerializerCreate(CredentialSerializer):
+
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
+        help_text='Write-only field used to add user to owner role. If provided, '
+                  'do not give either team or organization. Only valid for creation.')
+    team = serializers.PrimaryKeyRelatedField(
+        queryset=Team.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
+        help_text='Write-only field used to add team to owner role. If provided, '
+                  'do not give either user or organization. Only valid for creation.')
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        required=False, default=None, write_only=True, allow_null=True,
+        help_text='Write-only field used to add organization to owner role. If provided, '
+                  'do not give either team or team. Only valid for creation.')
+
+    class Meta:
+        model = Credential
+        fields = ('*', 'user', 'team', 'organization')
+
+    def create(self, validated_data):
+        # Remove the user, team, and organization processed in view
+        for field in ['user', 'team', 'organization']:
+            validated_data.pop(field, None)
+        return super(CredentialSerializer, self).create(validated_data)
 
 
 class JobOptionsSerializer(BaseSerializer):

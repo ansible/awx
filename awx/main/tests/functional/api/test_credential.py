@@ -22,6 +22,16 @@ def test_create_user_credential_via_credentials_list(post, get, alice):
     assert response.data['count'] == 1
 
 @pytest.mark.django_db
+def test_credential_validation_error_with_bad_user(post, admin):
+    response = post(reverse('api:credential_list'), {
+        'user': 'asdf',
+        'name': 'Some name',
+        'username': 'someusername'
+    }, admin)
+    assert response.status_code == 400
+    assert response.data['user'][0] == 'Incorrect type. Expected pk value, received unicode.'
+
+@pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list(post, get, alice):
     response = post(reverse('api:user_credentials_list', args=(alice.pk,)), {
         'user': alice.pk,
