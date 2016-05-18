@@ -168,6 +168,11 @@ def machine_credential():
     return Credential.objects.create(name='machine-cred', kind='ssh', username='test_user', password='pas4word')
 
 @pytest.fixture
+def org_credential(organization, credential):
+    credential.owner_role.parents.add(organization.admin_role)
+    return credential
+
+@pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
 
@@ -233,7 +238,7 @@ def organizations(instance):
     return rf
 
 @pytest.fixture
-def group(inventory):
+def group_factory(inventory):
     def g(name):
         try:
             return Group.objects.get(name=name, inventory=inventory)
@@ -242,8 +247,8 @@ def group(inventory):
     return g
 
 @pytest.fixture
-def hosts(group):
-    group1 = group('group-1')
+def hosts(group_factory):
+    group1 = group_factory('group-1')
 
     def rf(host_count=1):
         hosts = []
@@ -255,6 +260,14 @@ def hosts(group):
             hosts.append(host)
         return hosts
     return rf
+
+@pytest.fixture
+def group(inventory):
+    return inventory.groups.create(name='single-group')
+
+@pytest.fixture
+def host(group, inventory):
+    return group.hosts.create(name='single-host', inventory=inventory)
 
 @pytest.fixture
 def permissions():
@@ -406,8 +419,8 @@ def options():
 
 
 @pytest.fixture
-def fact_scans(group, fact_ansible_json, fact_packages_json, fact_services_json):
-    group1 = group('group-1')
+def fact_scans(group_factory, fact_ansible_json, fact_packages_json, fact_services_json):
+    group1 = group_factory('group-1')
 
     def rf(fact_scans=1, timestamp_epoch=timezone.now()):
         facts_json = {}

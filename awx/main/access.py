@@ -1304,6 +1304,26 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
 
     def get_queryset(self):
+        '''
+        The full set is returned if the user is:
+         - System Administrator
+         - System Auditor
+        These users will be able to see orphaned activity stream items
+        (the related resource has been deleted), as well as the other
+        obscure cases listed here
+
+        Complex permissions omitted from the activity stream of a normal user:
+         - host access via group
+         - permissions (from prior versions)
+         - notifications via team admin access
+
+        Activity stream events that have been omitted from list for
+        normal users since 2.4:
+         - unified job templates
+         - unified jobs
+         - schedules
+         - custom inventory scripts
+        '''
         qs = self.model.objects.all()
         qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
@@ -1311,60 +1331,44 @@ class ActivityStreamAccess(BaseAccess):
                                  'permission', 'job_template', 'job')
         if self.user.is_superuser:
             return qs.all()
+        if self.user in Role.singleton('system_auditor'):
+            return qs.all()
 
+        inventory_set = Inventory.accessible_objects(self.user, 'read_role')
+        credential_set = Credential.accessible_objects(self.user, 'read_role')
+        organization_set = Organization.accessible_objects(self.user, 'read_role')
+        group_set = Group.accessible_objects(self.user, 'read_role')
+        project_set = Project.accessible_objects(self.user, 'read_role')
+        jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
+        team_set = Team.accessible_objects(self.user, 'read_role')
 
-        # All of these filters are noops and tests fail when we do qs =
-        # qs.filter for them, so we need to figure out what the intent was,
-        # fix this up, and add some tests to enforce the expected behavior
-        #  - anoek - 2016-03-31
-        '''
-        #Inventory filter
-        inventory_qs = self.user.get_queryset(Inventory)
-        qs.filter(inventory__in=inventory_qs)
+        ad_hoc_results = qs.filter(
+            ad_hoc_command__inventory__in=inventory_set,
+            ad_hoc_command__credential__in=credential_set
+        )
 
-        #Host filter
-        qs.filter(host__inventory__in=inventory_qs)
+        global_results = qs.filter(
+            Q(user__in=organization_set.values('member_role__members')) |
+            Q(user=self.user) |
+            Q(organization__in=organization_set) |
+            Q(inventory__in=inventory_set) |
+            Q(host__inventory__in=inventory_set) |
+            Q(group__in=group_set) |
+            Q(inventory_source__inventory__in=inventory_set) |
+            Q(inventory_update__inventory_source__inventory__in=inventory_set) |
+            Q(credential__in=credential_set) |
+            Q(team__in=team_set) |
+            Q(project__in=project_set) |
+            Q(project_update__project__in=project_set) |
+            Q(job_template__in=jt_set) |
+            Q(job__job_template__in=jt_set) |
+            Q(notification_template__organization__admin_role__members__in=[self.user]) |
+            Q(notification__notification_template__organization__admin_role__members__in=[self.user]) |
+            Q(label__organization__in=organization_set) |
+            Q(role__in=Role.visible_roles(self.user))
+        )
 
-        #Group filter
-        qs.filter(group__inventory__in=inventory_qs)
-
-        #Inventory Source Filter
-        qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
-                       Q(inventory_source__group__inventory__in=inventory_qs))
-
-        #Inventory Update Filter
-        qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
-                       Q(inventory_update__inventory_source__group__inventory__in=inventory_qs))
-
-        #Credential Update Filter
-        credential_qs = self.user.get_queryset(Credential)
-        qs.filter(credential__in=credential_qs)
-
-        #Team Filter
-        team_qs = self.user.get_queryset(Team)
-        qs.filter(team__in=team_qs)
-
-        #Project Filter
-        project_qs = self.user.get_queryset(Project)
-        qs.filter(project__in=project_qs)
-
-        #Project Update Filter
-        qs.filter(project_update__project__in=project_qs)
-
-        #Job Template Filter
-        jobtemplate_qs = self.user.get_queryset(JobTemplate)
-        qs.filter(job_template__in=jobtemplate_qs)
-
-        #Job Filter
-        job_qs = self.user.get_queryset(Job)
-        qs.filter(job__in=job_qs)
-
-        # Ad Hoc Command Filter
-        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
-        qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
-        '''
-
-        return qs.all()
+        return (ad_hoc_results | global_results).distinct()
 
     def can_add(self, data):
         return False
