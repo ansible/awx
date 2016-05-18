@@ -155,6 +155,7 @@ inventory_update_urls = patterns('awx.api.views',
 inventory_script_urls = patterns('awx.api.views',
     url(r'^$',                                          'inventory_script_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_script_detail'),
+    url(r'^(?P<pk>[0-9]+)/roles/$',                     'inventory_script_roles_list'),
 )
 
 credential_urls = patterns('awx.api.views',

@@ -1424,6 +1424,18 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
             inv_src.save()
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
 
+class InventoryScriptRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = CustomInventoryScript
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+
 class InventoryList(ListCreateAPIView):
 
     model = Inventory
