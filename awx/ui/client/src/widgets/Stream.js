@@ -154,7 +154,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         descr += ' to ';
                     }
                 }
-                descr_nolink += obj2 + ' ' + obj2_obj.name;
+                descr_nolink += (obj2_obj && obj2_obj.name) ? obj2 + ' ' + obj2_obj.name : obj2 + ' ';
                 if (activity.object_association === 'admins') {
                     if (activity.operation === 'disassociate') {
                         descr_nolink += ' from being an admin of ';
