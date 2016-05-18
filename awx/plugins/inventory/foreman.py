@@ -1,4 +1,7 @@
 #!/usr/bin/python
+#
+# NOTE FOR TOWER: change foreman_ to sattelite_ for the group prefix
+#
 # vim: set fileencoding=utf-8 :
 #
 # Copyright (C) 2016 Guido Günther <agx@sigxcpu.org>
@@ -205,7 +208,7 @@ class ForemanInventory(object):
             for group in ['hostgroup', 'location', 'organization']:
                 val = host.get('%s_name' % group)
                 if val:
-                    safe_key = self.to_safe('foreman_%s_%s' % (group, val.lower()))
+                    safe_key = self.to_safe('satellite_%s_%s' % (group, val.lower()))
                     self.push(self.inventory, safe_key, dns_name)
 
             params = self._resolve_params(host)
