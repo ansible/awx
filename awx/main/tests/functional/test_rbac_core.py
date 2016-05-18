@@ -4,8 +4,6 @@ from awx.main.models import (
     Role,
     Organization,
     Project,
-    JobTemplate,
-    Inventory,
 )
 
 
