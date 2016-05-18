@@ -10,6 +10,26 @@
  * @description This controller's the Users page
 */
 
+const user_type_options = [
+    {type: 'normal'              , label: 'Normal User'          },
+    {type: 'system_auditor'      , label: 'System Auditor'       },
+    {type: 'system_administrator', label: 'System Administrator' },
+];
+
+function user_type_sync($scope) {
+    return (type_option) => {
+        $scope.is_superuser = false;
+        $scope.is_system_auditor = false;
+        switch (type_option.type) {
+            case 'system_administrator':
+                $scope.is_superuser = true;
+            break;
+            case 'system_auditor':
+                $scope.is_system_auditor = true;
+            break;
+        }
+    };
+}
 
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
@@ -116,10 +136,13 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
 ];
 
 
+
+
+
 export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList,
-    ResetForm, Wait, $state) {
+    ResetForm, Wait, CreateSelect2, $state) {
 
     ClearScope();
 
@@ -137,6 +160,15 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     $scope.socialAuthUser = false;
 
     generator.reset();
+
+    $scope.user_type_options = user_type_options;
+    $scope.user_type = user_type_options[0]
+    $scope.$watch('user_type', user_type_sync($scope));
+
+    CreateSelect2({
+        element: '#user_user_type',
+        multiple: false
+    });
 
     // Configure the lookup dialog. If we're adding a user through the Organizations tab,
     // default the Organization value.
@@ -177,7 +209,8 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
                         data[fld] = $scope[fld];
                     }
                 }
-                data.is_superuser = data.is_superuser || false;
+                data.is_superuser = $scope.is_superuser;
+                data.is_system_auditor = $scope.is_system_auditor;
                 Wait('start');
                 Rest.post(data)
                     .success(function (data) {
@@ -215,14 +248,14 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
 UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
-    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait', '$state'
+    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait', 'CreateSelect2', '$state'
 ];
 
 
 export function UsersEdit($scope, $rootScope, $location,
     $stateParams, UserForm, GenerateForm, Rest, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ClearScope,
-    GetBasePath, ResetForm, Wait, $state) {
+    GetBasePath, ResetForm, Wait, CreateSelect2 ,$state) {
 
     ClearScope();
 
@@ -236,6 +269,10 @@ export function UsersEdit($scope, $rootScope, $location,
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
+
+    $scope.user_type_options = user_type_options;
+    $scope.user_type = user_type_options[0]
+    $scope.$watch('user_type', user_type_sync($scope));
 
     var setScopeFields = function(data){
         _(data)
@@ -278,6 +315,8 @@ export function UsersEdit($scope, $rootScope, $location,
              data[key] = $scope[key];
             }
         });
+        data.is_superuser = $scope.is_superuser;
+        data.is_system_auditor = $scope.is_system_auditor;
         return data;
     };
 
@@ -291,6 +330,24 @@ export function UsersEdit($scope, $rootScope, $location,
             $scope.not_ldap_user = !$scope.ldap_user;
             master.ldap_user = $scope.ldap_user;
             $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
+
+            $scope.user_type = $scope.user_type_options[0];
+            $scope.is_system_auditor = false;
+            $scope.is_superuser = false;
+            if (data.is_system_auditor) {
+                $scope.user_type = $scope.user_type_options[1];
+                $scope.is_system_auditor = true;
+            }
+            if (data.is_superuser) {
+                $scope.user_type = $scope.user_type_options[2];
+                $scope.is_superuser = true;
+            }
+
+            CreateSelect2({
+                element: '#user_user_type',
+                multiple: false
+            });
+
 
             setScopeFields(data);
             setScopeRelated(data, form.related);
@@ -353,5 +410,5 @@ export function UsersEdit($scope, $rootScope, $location,
 UsersEdit.$inject = ['$scope', '$rootScope', '$location',
     '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'ProcessErrors',
     'RelatedSearchInit', 'RelatedPaginateInit', 'ClearScope', 'GetBasePath',
-    'ResetForm', 'Wait', '$state'
+    'ResetForm', 'Wait', 'CreateSelect2', '$state'
 ];
