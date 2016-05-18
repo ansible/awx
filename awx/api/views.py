@@ -729,7 +729,7 @@ class OrganizationUsersList(SubListCreateAttachDetachAPIView):
 
     def post(self, request, *args, **kwargs):
         ret = super(OrganizationUsersList, self).post( request, *args, **kwargs)
-        if request.data.get('is_system_auditor', False):
+        if type(request.data) is dict and request.data.get('is_system_auditor', False):
             # This is a faux-field that just maps to checking the system
             # auditor role member list.. unfortunately this means we can't
             # set it on creation, and thus needs to be set here.
@@ -1109,7 +1109,7 @@ class UserList(ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
-        if request.data.get('is_system_auditor', False):
+        if type(request.data) is dict and request.data.get('is_system_auditor', False):
             # This is a faux-field that just maps to checking the system
             # auditor role member list.. unfortunately this means we can't
             # set it on creation, and thus needs to be set here.
