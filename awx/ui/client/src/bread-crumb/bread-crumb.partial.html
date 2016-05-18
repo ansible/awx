@@ -9,22 +9,9 @@
         ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
         ng-if="showActivityStreamButton"
         ng-hide= "loadingLicense || licenseMissing || licenseType == 'basic'"
-        ng-click="openActivityStream()">
+        ng-click="toggleActivityStream()">
         <i class="BreadCrumb-menuLinkImage icon-activity-stream"
             alt="Activity Stream">
         </i>
     </div>
-    <a class="BreadCrumb-menuLink"
-        id="bread_crumb_dashboard"
-        ui-sref="dashboard"
-        aw-tool-tip="View Dashboard"
-        data-placement="left"
-        data-trigger="hover"
-        data-container="body"
-        ng-hide="loadingLicense || licenseMissing || licenseType == 'basic'"
-        ng-if="!showActivityStreamButton">
-        <i class="BreadCrumb-menuLinkImage fa fa-tachometer"
-            alt="Dashboard">
-        </i>
-    </a>
 </div>
