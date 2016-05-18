@@ -1108,7 +1108,7 @@ class UserList(ListCreateAPIView):
     serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):
-        ret = super(OrganizationUsersList, self).post( request, *args, **kwargs)
+        ret = super(UserList, self).post( request, *args, **kwargs)
         if request.data.get('is_system_auditor', False):
             # This is a faux-field that just maps to checking the system
             # auditor role member list.. unfortunately this means we can't
