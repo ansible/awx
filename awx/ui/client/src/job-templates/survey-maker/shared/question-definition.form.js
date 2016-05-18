@@ -304,17 +304,17 @@ export default
         }
     },
     buttons: {
-        submit_question: {
-            ngClick: 'submitQuestion($event)',
-            ngDisabled: true,
-            'class': 'btn btn-sm Form-saveButton',
-            label: '{{editQuestionIndex === null ? "ADD" : "UPDATE"}}'
-        },
         question_cancel : {
             label: 'Cancel',
             'class' : 'btn btn-default Form-cancelButton',
             ngClick: 'generateAddQuestionForm()',
             ngDisabled: 'survey_question_form.$pristine'
+        },
+        submit_question: {
+            ngClick: 'submitQuestion($event)',
+            ngDisabled: true,
+            'class': 'btn btn-sm Form-saveButton',
+            label: '{{editQuestionIndex === null ? "ADD" : "UPDATE"}}'
         }
     }
 

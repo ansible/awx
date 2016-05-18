@@ -221,12 +221,12 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         },
 
         buttons: {
+            cancel: {
+                ngClick: 'formCancel()'
+            },
             save: {
                 ngClick: 'formSave()',
                 ngDisabled: true
-            },
-            cancel: {
-                ngClick: 'formCancel()'
             }
         },
 

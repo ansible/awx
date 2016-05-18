@@ -65,13 +65,13 @@ export default function(){
             }
         },
         buttons: {
+            cancel: {
+                ngClick: 'formCancel()'
+            },
             save: {
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: "host_form.$invalid"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-            },
-            cancel: {
-                ngClick: 'formCancel()'
-            }
+            }            
         }
     };
 }

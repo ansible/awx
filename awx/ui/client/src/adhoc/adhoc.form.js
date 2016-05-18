@@ -124,18 +124,18 @@ export default function() {
         },
 
         buttons: {
-            launch: {
-                label: 'Save',
-                ngClick: 'launchJob()',
-                ngDisabled: true,
-                'class': 'Form-buttonDefault Form-button'
-            },
             reset: {
                 ngClick: 'formReset()',
                 ngDisabled: true,
                 label: 'Reset',
                 'class': 'Form-buttonDefault Form-button'
-            }
+            },
+            launch: {
+                label: 'Save',
+                ngClick: 'launchJob()',
+                ngDisabled: true,
+                'class': 'Form-buttonDefault Form-button'
+            }            
         },
 
         related: {}

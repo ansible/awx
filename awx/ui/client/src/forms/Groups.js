@@ -295,12 +295,12 @@ export default
             },
 
             buttons: {
-                save: {
-                    ngClick: 'saveGroup()'
-                },
                 cancel: {
                     ngClick: 'formCancel()'
-                }
+                },
+                save: {
+                    ngClick: 'saveGroup()'
+                }                
             },
 
             related: {

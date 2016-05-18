@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:HostGroups
@@ -41,12 +41,12 @@ export default
             },
 
             buttons: { //for now always generates <button> tags
-                save: {
-                    ngClick: 'formSave()',
-                    ngDisabled: true
-                },
                 reset: {
                     ngClick: 'formReset()',
+                    ngDisabled: true
+                },
+                save: {
+                    ngClick: 'formSave()',
                     ngDisabled: true
                 }
             },

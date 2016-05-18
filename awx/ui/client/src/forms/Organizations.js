@@ -36,13 +36,13 @@ export default
             },
 
             buttons: { //for now always generates <button> tags
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true //Disable when $pristine or $invalid, optional
-                },
-                cancel: {
-                    ngClick: 'formCancel()'
-                }
+                }                
             },
 
             related: {

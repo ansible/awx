@@ -429,6 +429,10 @@ input[type='radio']:checked:before {
     height: 30px;
     display: flex;
     justify-content: flex-end;
+
+    button:last-of-type {
+        margin-left: 20px;
+    }
 }
 
 .Form-button{
@@ -443,7 +447,6 @@ input[type='radio']:checked:before {
 
 .Form-saveButton{
     background-color: @submit-button-bg;
-    margin-right: 20px;
     color: @submit-button-text;
     text-transform: uppercase;
     transition: background-color 0.2s;

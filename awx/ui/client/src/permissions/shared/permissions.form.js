@@ -131,12 +131,12 @@ export default function() {
         },
 
         buttons: {
-            save: {
-                ngClick: 'formSave()',
-                ngDisabled: true
-            },
             reset: {
                 ngClick: 'formReset()',
+                ngDisabled: true
+            },
+            save: {
+                ngClick: 'formSave()',
                 ngDisabled: true
             }
         },
