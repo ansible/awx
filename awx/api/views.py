@@ -813,7 +813,7 @@ class OrganizationRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class TeamList(ListCreateAPIView):
 
@@ -1090,7 +1090,7 @@ class ProjectRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class UserList(ListCreateAPIView):
 
@@ -1402,7 +1402,7 @@ class CredentialRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class InventoryScriptList(ListCreateAPIView):
 
@@ -1434,7 +1434,7 @@ class InventoryScriptRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class InventoryList(ListCreateAPIView):
 
@@ -1496,7 +1496,7 @@ class InventoryRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class InventoryJobTemplateList(SubListAPIView):
 
@@ -1843,7 +1843,7 @@ class GroupRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
@@ -2573,7 +2573,7 @@ class JobTemplateRolesList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk).all()
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class SystemJobTemplateList(ListAPIView):
 
