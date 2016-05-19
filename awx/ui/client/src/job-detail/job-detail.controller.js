@@ -435,7 +435,7 @@ export default
                             // if we are here, there are no plays and the job has failed, let the user know they may want to consult stdout
                             if ( (scope.job_status.status === 'failed' || scope.job_status.status === 'error') &&
                                 (!scope.job_status.explanation)) {
-                                scope.job_status.explanation = "<a href=\"/#/jobs/" + scope.job_id + "/stdout\" target=\"_blank\">View stdout for more detail <i class=\"fa fa-external-link\"></i></a>";
+                                scope.job_status.explanation = "See standard out for more details";
                             }
                         }
                         data.results.forEach(function(event, idx) {
