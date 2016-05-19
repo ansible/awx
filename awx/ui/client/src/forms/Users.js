@@ -93,6 +93,7 @@ export default
                     ngOptions: 'item as item.label for item in user_type_options track by item.type',
                     disableChooseOption: true,
                     ngModel: 'user_type',
+                    ngShow: 'current_user["is_superuser"]',
                 },
             },
 
