@@ -72,7 +72,10 @@ export default
                             scope.activityStreamActive = (toState.name === 'activityStream') ? true : false;
                             scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || toState.name === 'activityStream') ? true : false;
                             var licenseInfo = FeaturesService.getLicenseInfo();
-                            scope.licenseType = licenseInfo.license_type;
+                            scope.licenseType = licenseInfo ? licenseInfo.license_type : null;
+                            if (!licenseInfo) {
+                                console.warn("License info not loaded correctly");
+                            }
                         })
                         .catch(function (response) {
                             ProcessErrors(null, response.data, response.status, null, {
