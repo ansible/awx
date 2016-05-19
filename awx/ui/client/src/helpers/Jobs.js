@@ -561,11 +561,11 @@ export default
         };
     }])
 
-    .factory('RelaunchPlaybook', ['PlaybookRun', function(PlaybookRun) {
+    .factory('RelaunchPlaybook', ['InitiatePlaybookRun', function(InitiatePlaybookRun) {
         return function(params) {
             var scope = params.scope,
                 id = params.id;
-            PlaybookRun({ scope: scope, id: id });
+            InitiatePlaybookRun({ scope: scope, id: id });
         };
     }])
 

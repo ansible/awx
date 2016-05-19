@@ -15,7 +15,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
     PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
-    Prompt, PlaybookRun, CreateDialog, deleteJobTemplate, $state) {
+    Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state) {
 
     ClearScope();
 
@@ -153,7 +153,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     };
 
     $scope.launchScanJob = function(){
-        PlaybookRun({ scope: $scope, id: this.scan_job_template.id });
+        InitiatePlaybookRun({ scope: $scope, id: this.scan_job_template.id });
     };
 
     $scope.scheduleScanJob = function(){
@@ -327,6 +327,6 @@ export default ['$scope', '$rootScope', '$compile', '$location',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit',
     'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString',
     'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
-    'PlaybookRun', 'CreateDialog', 'deleteJobTemplate', '$state',
+    'InitiatePlaybookRun', 'CreateDialog', 'deleteJobTemplate', '$state',
     InventoriesEdit,
 ];
