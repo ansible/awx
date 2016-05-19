@@ -1261,6 +1261,9 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
+        res.update(dict(
+            roles = reverse('api:inventory_script_roles_list', args=(obj.pk,)),
+        ))
 
         if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
