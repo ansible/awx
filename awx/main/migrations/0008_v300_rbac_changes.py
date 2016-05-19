@@ -220,7 +220,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[(b'project.admin_role', b'inventory.admin_role')], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'project.organization.admin_role', b'inventory.organization.admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='jobtemplate',
@@ -230,7 +230,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[(b'project.organization.auditor_role', b'inventory.organization.auditor_role'), b'execute_role', b'admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'project.organization.auditor_role', b'inventory.organization.auditor_role', b'execute_role', b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='organization',
