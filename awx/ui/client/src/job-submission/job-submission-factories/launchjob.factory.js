@@ -32,7 +32,7 @@ export default
                     }
 
                     if(scope.ask_variables_on_launch){
-                        extra_vars = ToJSON(scope.parseType, scope.variables, false);
+                        extra_vars = ToJSON(scope.parseType, scope.jobLaunchVariables, false);
                         if(!Empty(extra_vars)){
                             $.each(extra_vars, function(key,value){
                                 job_launch_data.extra_vars[key] = value;

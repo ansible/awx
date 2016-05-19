@@ -6,8 +6,8 @@
 
 import jobSubmissionController from './job-submission.controller';
 
-export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2',
-    function(templateUrl, CreateDialog, Wait, CreateSelect2) {
+export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange',
+    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange) {
     return {
         scope: {
             submitJobId: '=',
@@ -33,6 +33,16 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2',
                         element: '#job_launch_job_type',
                         multiple: false
                     });
+
+                    if(scope.step === 'otherprompts' && scope.ask_variables_on_launch) {
+                        ParseTypeChange({
+                            scope: scope,
+                            variable: 'jobLaunchVariables',
+                            field_id: 'job_launch_variables'
+                        });
+
+                        scope.extra_vars_code_mirror_loaded = true;
+                    }
 
                 });
 

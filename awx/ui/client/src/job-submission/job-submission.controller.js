@@ -173,7 +173,7 @@ export default
                     }
 
                     if($scope.ask_variables_on_launch) {
-                        $scope.variables = (data.defaults && data.defaults.extra_vars) ? data.defaults.extra_vars : "---";
+                        $scope.jobLaunchVariables = (data.defaults && data.defaults.extra_vars) ? data.defaults.extra_vars : "---";
                         $scope.other_prompt_data.parseType = 'yaml';
                         $scope.parseType = 'yaml';
                     }
@@ -197,16 +197,16 @@ export default
                         var initiateModal = function() {
                             // Figure out which step the user needs to start on
                             if($scope.ask_inventory_on_launch) {
-                                $scope.setStep("inventory");
+                                $scope.setStep("inventory", true);
                             }
                             else if($scope.ask_credential_on_launch || $scope.password_needed) {
-                                $scope.setStep("credential");
+                                $scope.setStep("credential", true);
                             }
                             else if($scope.has_other_prompts) {
-                                $scope.setStep("otherprompts");
+                                $scope.setStep("otherprompts", true);
                             }
                             else if($scope.survey_enabled) {
-                                $scope.setStep("survey");
+                                $scope.setStep("survey", true);
                             }
 
                             $scope.openLaunchModal();
@@ -251,7 +251,7 @@ export default
                 });
             };
 
-            $scope.setStep = function(step) {
+            $scope.setStep = function(step, initialStep) {
                 $scope.step = step;
 
                 if(step === "credential") {
@@ -259,9 +259,11 @@ export default
                 }
                 else if(step === "otherprompts") {
                     $scope.otherPromptsTabEnabled = true;
-                    if($scope.ask_variables_on_launch && !$scope.extra_vars_code_mirror_loaded) {
+
+                    if(!initialStep && $scope.step === 'otherprompts' && $scope.ask_variables_on_launch && !$scope.extra_vars_code_mirror_loaded) {
                         ParseTypeChange({
                             scope: $scope,
+                            variable: 'jobLaunchVariables',
                             field_id: 'job_launch_variables'
                         });
 
