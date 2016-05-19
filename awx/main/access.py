@@ -730,6 +730,7 @@ class JobTemplateAccess(BaseAccess):
         return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
                                  'credential', 'cloud_credential', 'next_schedule').all()
 
+    @check_superuser
     def can_read(self, obj):
         return self.user in obj.read_role
 
