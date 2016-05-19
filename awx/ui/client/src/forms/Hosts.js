@@ -81,12 +81,12 @@ export default
             },
 
             buttons: {
-                save: {
-                    ngClick: 'formSave()',
-                    ngDisabled: true
-                },
                 cancel: {
                     ngClick: 'formCancel()',
+                    ngDisabled: true
+                },
+                save: {
+                    ngClick: 'formSave()',
                     ngDisabled: true
                 }
             },

@@ -145,6 +145,13 @@ export default ['Rest', 'ProcessErrors', 'generateList',
 
                 // Show pop-up
                 buttons = [{
+                    label: "Cancel",
+                    "class": "btn btn-default",
+                    "id": "lookup-cancel-button",
+                    onClick: function() {
+                        $('#LookupModal-dialog').dialog('close');
+                    }
+                }, {
                     label: "Save",
                     onClick: function() {
                         scope.selectAction();
@@ -152,13 +159,6 @@ export default ['Rest', 'ProcessErrors', 'generateList',
                     //icon: "fa-check",
                     "class": "btn btn-primary",
                     "id": "lookup-save-button"
-                }, {
-                    label: "Cancel",
-                    "class": "btn btn-default",
-                    "id": "lookup-cancel-button",
-                    onClick: function() {
-                        $('#LookupModal-dialog').dialog('close');
-                    }
                 }];
 
                 if (scope.removeModalReady) {

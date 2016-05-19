@@ -822,11 +822,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                            // Create the modal
                            $('#group-modal-dialog').dialog({
                                buttons: {
-                                   'Cancel': function() {
-                                       modal_scope.cancelModal();
-                                   },
                                    'Save': function () {
                                        modal_scope.saveGroup();
+                                   },
+                                   'Cancel': function() {
+                                       modal_scope.cancelModal();
                                    }
                                },
                                modal: true,

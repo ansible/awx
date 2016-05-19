@@ -110,6 +110,14 @@ export default
                         },
                         buttons: [
                             {
+                                "label": "Cancel",
+                                "onClick": function() {
+                                    $(this).dialog('close');
+                                },
+                                "class": "btn btn-default",
+                                "id": "prompt-for-days-facts-cancel"
+                            },
+                            {
                                 "label": "Launch",
                                 "onClick": function() {
                                     var extra_vars = {
@@ -134,15 +142,8 @@ export default
                                 },
                                 "class": "btn btn-primary",
                                 "id": "prompt-for-days-facts-launch",
-                            },
-                            {
-                                "label": "Cancel",
-                                "onClick": function() {
-                                    $(this).dialog('close');
-                                },
-                                "class": "btn btn-default",
-                                "id": "prompt-for-days-facts-cancel"
-                        }]
+                            }
+                            ]
                     });
 
                     if (scope.removePromptForDays) {
@@ -198,6 +199,15 @@ export default
                                 scope.prompt_for_days_form.$invalid = false;
                             },
                             buttons: [
+                                {
+                                    "label": "Cancel",
+                                    "onClick": function() {
+                                        $(this).dialog('close');
+
+                                    },
+                                    "class": "btn btn-default",
+                                    "id": "prompt-for-days-cancel"
+                                },
                             {
                                 "label": "Launch",
                                 "onClick": function() {
@@ -220,16 +230,8 @@ export default
                                 },
                                 "class": "btn btn-primary",
                                 "id": "prompt-for-days-launch"
-                            },
-                            {
-                                "label": "Cancel",
-                                "onClick": function() {
-                                    $(this).dialog('close');
-
-                                },
-                                "class": "btn btn-default",
-                                "id": "prompt-for-days-cancel"
-                            }]
+                            }
+                            ]
                         });
 
                         if (scope.removePromptForDays) {
