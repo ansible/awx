@@ -262,7 +262,13 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         label: 'Role',
                         type: 'role',
                         noSort: true,
-                        class: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
+                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                    },
+                    team_roles: {
+                        label: 'Team Roles',
+                        type: 'team_roles',
+                        noSort: true,
+                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                     }
                 }
             },
