@@ -720,24 +720,31 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(SubListCreateAttachDetachAPIView):
+
+class BaseUsersList(SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        ret = super(BaseUsersList, self).post( request, *args, **kwargs)
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
+        return ret
+
+class OrganizationUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'member_role.members'
 
-    def post(self, request, *args, **kwargs):
-        ret = super(OrganizationUsersList, self).post( request, *args, **kwargs)
-        if type(request.data) is dict and request.data.get('is_system_auditor', False):
-            # This is a faux-field that just maps to checking the system
-            # auditor role member list.. unfortunately this means we can't
-            # set it on creation, and thus needs to be set here.
-            user = User.objects.get(id=ret.data['id'])
-            user.is_system_auditor = request.data['is_system_auditor']
-        return ret
-
-class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
+class OrganizationAdminsList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
@@ -840,7 +847,7 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(SubListCreateAttachDetachAPIView):
+class TeamUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
@@ -1109,12 +1116,17 @@ class UserList(ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
-        if type(request.data) is dict and request.data.get('is_system_auditor', False):
-            # This is a faux-field that just maps to checking the system
-            # auditor role member list.. unfortunately this means we can't
-            # set it on creation, and thus needs to be set here.
-            user = User.objects.get(id=ret.data['id'])
-            user.is_system_auditor = request.data['is_system_auditor']
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
         return ret
 
 class UserMeList(ListAPIView):
