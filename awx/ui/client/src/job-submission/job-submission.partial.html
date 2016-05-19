@@ -1,0 +1,241 @@
+<div id="job-launch-modal" class="JobSubmission">
+    <div class="JobSubmission-container">
+        <div class="JobSubmission-header">
+            <div class="JobSubmission-title">
+                <div class="JobSubmission-titleText">LAUNCH JOB<div class="JobSubmission-titleLockup"></div>{{job_template_data.name}}</div>
+            </div>
+            <div class="JobSubmission-close">
+                <button class="JobSubmission-exit" ng-click="clearDialog()"><i class="fa fa-times-circle"></i></button>
+            </div>
+        </div>
+        <div class="JobSubmission-stepsContainer">
+            <div class="JobSubmission-steps">
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='inventory'}" ng-if="ask_inventory_on_launch" ng-click="setStep('inventory')">Inventory</div>
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='credential', 'JobSubmission-step--disabled': !credentialTabEnabled}" ng-if="ask_credential_on_launch || password_needed" ng-click="!credentialTabEnabled || setStep('credential')">Credential</div>
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='otherprompts', 'JobSubmission-step--disabled': !otherPromptsTabEnabled}" ng-if="has_other_prompts" ng-click="!otherPromptsTabEnabled || setStep('otherprompts')">Other Prompts</div>
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='survey', 'JobSubmission-step--disabled': !surveyTabEnabled}" ng-if="survey_enabled" ng-click="!surveyTabEnabled || setStep('survey')">Survey</div>
+            </div>
+        </div>
+        <div class="JobSubmission-formContainer">
+            <div ng-if="ask_inventory_on_launch" ng-show="step === 'inventory'" class="JobSubmission-form">
+                <div class="JobSubmission-selectedItemContainer">
+                    <div class="JobSubmission-selectedItem">
+                        <div class="JobSubmission-selectedItemInfo">
+                            <span class="JobSubmission-selectedItemLabel">SELECTED INVENTORY:</span>
+                            <span ng-show="selected_inventory" ng-bind="selected_inventory.name"></span>
+                            <span class="JobSubmission-selectedItemNone" ng-show="!selected_inventory">None selected</span>
+                        </div>
+                        <div class="JobSubmission-selectedItemRevert" ng-if="ask_inventory_on_launch && has_default_inventory">
+                            <button class="btn btn-xs JobSubmission-revertButton" ng-disabled="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()">REVERT TO DEFAULT</button>
+                        </div>
+                    </div>
+                    <div id="job-submission-inventory-lookup"></div>
+                </div>
+            </div>
+            <div ng-if="ask_credential_on_launch  || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
+                <div class="JobSubmission-selectedItemContainer">
+                    <div class="JobSubmission-selectedItem">
+                        <div class="JobSubmission-selectedItemInfo">
+                            <span class="JobSubmission-selectedItemLabel">SELECTED CREDENTIAL:</span>
+                            <span ng-show="selected_inventory" ng-bind="selected_credential.name"></span>
+                            <span class="JobSubmission-selectedItemNone" ng-show="!selected_credential">None selected</span>
+                        </div>
+                        <div class="JobSubmission-selectedItemRevert" ng-if="ask_credential_on_launch && has_default_credential">
+                            <button class="btn btn-xs JobSubmission-revertButton" ng-disabled="selected_credential.id === defaults.credential.id" ng-click="revertToDefaultCredential()">REVERT TO DEFAULT</button>
+                        </div>
+                    </div>
+                    <div id="job-submission-credential-lookup"></div>
+                    <div ng-show="ssh_password_required || ssh_key_unlock_required || become_password_required || vault_password_required">
+                        <div class="JobSubmission-instructions">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>
+                        <form name="forms.credentialpasswords" autocomplete="off" novalidate>
+                            <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_password_required">
+                                <label for="ssh_password">
+                                    <span class="Form-inputLabel prepend-asterisk"> Password</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-ssh-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-ssh-password')" data-original-title="" title="">Show</button>
+                                    </span>
+                                    <input id="job-submission-ssh-password" type="password" ng-model="passwords.ssh_password" ng-keydown="keydown($event)" name="ssh_password" class="password-field form-control input-sm Form-textInput" required>
+                                </div>
+                                <div class="error" ng-show="forms.credentialpasswords.ssh_password.$dirty && forms.credentialpasswords.ssh_password.$error.required">Please enter a password.</div>
+                                <div class="error api-error" ng-bind="ssh_password_api_error"></div>
+                            </div>
+                            <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_key_unlock_required">
+                                <label for="ssh_key_unlock">
+                                    <span class="Form-inputLabel prepend-asterisk"> Private Key Passphrase</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-ssh-key-unlock_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-ssh-key-unlock')" data-original-title="" title="">Show</button>
+                                    </span>
+                                    <input id="job-submission-ssh-key-unlock" type="password" ng-model="passwords.ssh_key_unlock" ng-keydown="keydown($event)" name="ssh_key_unlock" class="password-field form-control input-sm Form-textInput" required>
+                                </div>
+                                <div class="error" ng-show="forms.credentialpasswords.ssh_key_unlock.$dirty && forms.credentialpasswords.ssh_key_unlock.$error.required">Please enter a password.</div>
+                                <div class="error api-error" ng-bind="ssh_key_unlock_api_error"></div>
+                            </div>
+                            <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="become_password_required">
+                                <label for="become_password">
+                                    <span class="Form-inputLabel prepend-asterisk"> Privilege Escalation Password</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-become-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-become-password')" data-original-title="" title="">Show</button>
+                                    </span>
+                                    <input id="job-submission-become-password" type="password" ng-model="passwords.become_password" ng-keydown="keydown($event)" name="become_password" class="password-field form-control input-sm Form-textInput" required>
+                                </div>
+                                <div class="error" ng-show="forms.credentialpasswords.become_password.$dirty && forms.credentialpasswords.become_password.$error.required">Please enter a password.</div>
+                                <div class="error api-error" ng-bind="become_password_api_error"></div>
+                            </div>
+                            <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="vault_password_required">
+                                <label for="vault_password">
+                                    <span class="Form-inputLabel prepend-asterisk"> Vault Password</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-vault-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-vault-password')" data-original-title="" title="">Show</button>
+                                    </span>
+                                    <input id="job-submission-vault-password" type="password" ng-model="passwords.vault_password" ng-keydown="keydown($event)" name="vault_password" class="password-field form-control input-sm Form-textInput" required>
+                                </div>
+                                <div class="error" ng-show="forms.credentialpasswords.vault_password.$dirty && forms.credentialpasswords.vault_password.$error.required">Please enter a password.</div>
+                                <div class="error api-error" ng-bind="vault_password_api_error"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="has_other_prompts" ng-show="step === 'otherprompts'" class="JobSubmission-form">
+                <form name="forms.otherprompts" autocomplete="off" novalidate>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_variables_on_launch">
+                        <label for="variables">
+                            <span class="Form-inputLabel">Extra Variables</span>
+                            <a id="awp-variables" href="" aw-pop-over="<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br /><blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>YAML:<br /><blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>" data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+                                <i class="fa fa-question-circle"></i>
+                            </a>
+                            <div class="parse-selection" id="job_launch_variables_parse_type">
+                                <input type="radio" ng-model="other_prompt_data.parseType" value="yaml" ng-change="updateParseType()">
+                                <span class="parse-label">YAML</span>
+                                <input type="radio" ng-model="other_prompt_data.parseType" value="json" ng-change="updateParseType()">
+                                <span class="parse-label">JSON</span>
+                            </div>
+                        </label>
+                        <div>
+                            <textarea rows="6" ng-model="other_prompt_data.extra_vars" name="variables" class="form-control Form-textArea Form-textAreaLabel" id="job_launch_variables" aw-watch=""></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_job_type_on_launch">
+                        <label for="job_type">
+                            <span class="Form-inputLabel prepend-asterisk"> Job Type</span>
+                        </label>
+                        <div>
+                            <select ng-model="other_prompt_data.job_type" name="job_type" class="form-control Form-dropDown" id="job_launch_job_type" tabindex="-1" aria-hidden="true" required>
+                                <option value="" class="" selected="selected">Choose a job type</option>
+                                <option label="Run" value="run" selected="selected">Run</option>
+                                <option label="Check" value="check">Check</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_limit_on_launch">
+                        <label for="limit">
+                            <span class="Form-inputLabel">Limit</span>
+                        </label>
+                        <div>
+                            <input type="text" ng-model="other_prompt_data.limit" name="limit" class="form-control Form-textInput">
+                        </div>
+                    </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_tags_on_launch">
+                        <label for="tags">
+                            <span class="Form-inputLabel">Job Tags</span>
+                        </label>
+                        <div>
+                            <textarea rows="1" ng-model="other_prompt_data.job_tags" name="tags" class="form-control Form-textArea Form-textInput"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div ng-if="survey_enabled" ng-show="step === 'survey'" class="JobSubmission-form">
+                <form name="forms.survey" autocomplete="off" novalidate>
+                    <div ng-repeat="question in survey_questions" id="taker_'+question.index+'" class="form-group Form-formGroup Form-formGroup--singleColumn">
+                        <label ng-attr-for="{{question.variable}}">
+                            <span class="label-text Form-inputLabel" ng-class="{'prepend-asterisk': question.required===true}"> {{question.question_name}}</span>
+                        </label>
+
+                        <div class="survey_taker_description" ng-if="question.question_description">
+                            <i ng-bind="question.question_description"></i>
+                        </div>
+                        <div ng-if="question.type === 'text'">
+                            <input type="text" id="survey_question_{{$index}}" ng-model="question.model" name="survey_question_{{$index}}" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" ng-required="question.required">
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">Please enter an answer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength">Please enter an answer between {{question.minlength}} to {{question.maxlength}} characters long.</div>
+                        </div>
+                        <div ng-if="question.type === 'textarea'">
+                            <textarea id="survey_question_{{$index}}" name="survey_question_{{$index}}" ng-model="question.model" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control final Form-textArea" ng-required="question.required" rows="3"></textarea>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">Please enter an answer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength">Please enter an answer between {{question.minlength}} to {{question.maxlength}} characters long.</div>
+                        </div>
+                        <div ng-if="question.type === 'password'">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="survey_question_{{$index}}_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#survey_question_' + $index)" data-original-title="" title="">Show</button>
+                                </span>
+                                <input id="survey_question_{{$index}}" type="password" ng-model="question.model" name="survey_question_{{$index}}" ng-required="question.required" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" autocomplete="false">
+                            </div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">Please enter an answer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength">Please enter an answer between {{question.minlength}} to {{question.maxlength}} characters long.</div>
+                        </div>
+                        <div ng-if="question.type === 'integer'">
+                            <input type="number" id="survey_question_{{$index}}" ng-model="question.model" class="form-control Form-textInput" name="survey_question_{{$index}}" ng-required="question.required" integer aw-min="question.minValue" aw-max="question.maxValue"/>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">Please enter an answer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.number || forms.survey.survey_question_{{$index}}.$error.integer" >Please enter an answer that is a valid integer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.awMin || forms.survey.survey_question_{{$index}}.$error.awMax">Please enter an answer between {{question.minValue}} and {{question.maxValue}}.</div>
+                        </div>
+                        <div ng-if="question.type === 'float'">
+                            <input type="number" id="survey_question_{{$index}}" ng-model="question.model" class="form-control Form-textInput" name="survey_question_{{$index}}" ng-required="question.required" smart-float aw-min="question.minValue" aw-max="question.maxValue"/>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">Please enter an answer.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.number || forms.survey.survey_question_{{$index}}.$error.float">Please enter an answer that is a decimal number.</div>
+                            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.awMin || forms.survey.survey_question_{{$index}}.$error.awMax">Please enter an answer between {{question.minValue}} and {{question.maxValue}}.</div>
+                        </div>
+                        <div ng-if="question.type === 'multiplechoice'">
+                            <div class="survey_taker_input">
+                                <multiple-choice
+                                    multi-select="false"
+                                    question="question"
+                                    choices="question.choices"
+                                    ng-required="question.required"
+                                    ng-model="question.model">
+                                </multiple-choice>
+                            </div>
+                        </div>
+                        <div ng-if="question.type === 'multiselect'">
+                            <multiple-choice
+                                multi-select="true"
+                                question="question"
+                                choices="question.choices"
+                                ng-required="question.required"
+                                ng-model="question.model">
+                            </multiple-choice>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="JobSubmission-footerContainer">
+            <div class="JobSubmission-footerPreview">
+                <div class="JobSubmission-previewItem">
+                    <div class="JobSubmission-previewItemTitle">INVENTORY</div>
+                    <div ng-show="selected_inventory" ng-bind="selected_inventory.name"></div>
+                    <div class="JobSubmission-previewItemNone" ng-show="!selected_inventory">None selected</div>
+                </div>
+                <div class="JobSubmission-previewItem">
+                    <div class="JobSubmission-previewItemTitle">CREDENTIAL</div>
+                    <div ng-show="selected_credential" ng-bind="selected_credential.name"></div>
+                    <div class="JobSubmission-previewItemNone" ng-show="!selected_credential">None selected</div>
+                </div>
+            </div>
+            <div class="JobSubmission-footerButtons">
+                <button id="job-submission-close-button" class="btn btn-sm JobSubmission-defaultButton" ng-click="clearDialog()">CANCEL</button>
+                <button id="job-submission-action-button" class="btn btn-sm JobSubmission-actionButton" ng-click="takeAction()" ng-disabled="actionButtonDisabled()">{{getActionButtonText()}}</button>
+            </div>
+        </div>
+    </div>
+</div>

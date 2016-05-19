@@ -33,6 +33,7 @@ import organizations from './organizations/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
+import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import access from './access/main';
 
@@ -103,6 +104,7 @@ var tower = angular.module('Tower', [
     activityStream.name,
     footer.name,
     jobDetail.name,
+    jobSubmission.name,
     notifications.name,
     standardOut.name,
     access.name,

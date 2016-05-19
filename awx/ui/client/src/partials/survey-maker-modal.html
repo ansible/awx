@@ -14,8 +14,8 @@
                     <div class="Prompt-bodyTarget">{{survey_questions[questionToBeDeleted].question_name}}</div>
                 </div>
                 <div class="Modal-footer">
-                    <button ng-click="deleteMode === 'survey' ? deleteSurvey() : (deleteMode === 'question' ? deleteQuestion(questionToBeDeleted) : '')" class="btn Modal-footerButton ng-binding Modal-errorButton">DELETE</a>
                     <button ng-click="hideDeleteOverlay()" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
+                    <button ng-click="deleteMode === 'survey' ? deleteSurvey() : (deleteMode === 'question' ? deleteQuestion(questionToBeDeleted) : '')" class="btn Modal-footerButton ng-binding Modal-errorButton">DELETE</a>
                 </div>
             </div>
     </div>
@@ -81,9 +81,9 @@
                 </div>
                 <div class="SurveyMaker-panelFooter">
                     <div class="Form-buttons">
-                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null">SAVE</button>
-                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')">CANCEL</button>
                         <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists" ng-click="showDeleteOverlay('survey')">DELETE SURVEY</button>
+                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')">CANCEL</button>
+                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null">SAVE</button>
                     </div>
                 </div>
             </div>
