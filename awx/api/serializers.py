@@ -23,6 +23,7 @@ from django.db import models
 # from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
+from django.forms.models import model_to_dict
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -1783,19 +1784,27 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
-        if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
-            d['can_copy'] = request.user.can_access(JobTemplate, 'add',
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj,
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-        elif request is not None and request.user is not None and request.user.is_superuser:
-            d['can_copy'] = True
-            d['can_edit'] = True
-        else:
+
+        # Conditions that would create a validation error if coppied
+        validation_pass = True
+        if obj.inventory is None and not obj.ask_inventory_on_launch:
+            validation_pass = False
+        if obj.credential is None and not obj.ask_credential_on_launch:
+            validation_pass = False
+        if obj.project is None and not obj.job_type != PERM_INVENTORY_SCAN:
+            validation_pass = False
+
+        if request is None or request.user is None:
             d['can_copy'] = False
             d['can_edit'] = False
+        elif request.user.is_superuser:
+            d['can_copy'] = validation_pass
+            d['can_edit'] = True
+        else:
+            jt_data = model_to_dict(obj)
+            d['can_copy'] = validation_pass and request.user.can_access(JobTemplate, 'add', jt_data)
+            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, jt_data)
+
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
