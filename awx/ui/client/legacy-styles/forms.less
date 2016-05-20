@@ -9,6 +9,16 @@
 
 @import "awx/ui/client/src/shared/branding/colors.default.less";
 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
 .Form{
     display:flex;
     flex-wrap:wrap;
@@ -109,6 +119,7 @@
     text-transform: uppercase;
     text-align: center;
     white-space: nowrap;
+    .noselect;
 }
 
 .Form-tab:hover {
@@ -423,6 +434,7 @@ input[type='radio']:checked:before {
     font-size: small;
     padding-right:5px;
     width: 100%;
+    .noselect;
 }
 
 .Form-buttons{
@@ -504,6 +516,7 @@ input[type='radio']:checked:before {
     margin-top: 5px;
     font-size: small;
     color: @default-interface-txt;
+    .noselect;
 }
 
 @media only screen and (max-width: 650px) {
