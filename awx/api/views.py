@@ -1483,7 +1483,7 @@ class InventoryList(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'execute_role')
+        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role')
         return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
