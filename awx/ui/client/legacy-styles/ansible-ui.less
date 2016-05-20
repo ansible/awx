@@ -422,6 +422,7 @@ textarea.allowresize {
       max-width: 325px;
       background-color: @default-interface-txt;
       color: @default-bg; //white
+      text-align: left;
 
       code {
           color: @default-data-txt;
@@ -442,6 +443,12 @@ textarea.allowresize {
   .popover.left>.arrow:after {
       border-left-color: @default-interface-txt;
   }
+  .popover.bottom>.arrow:after {
+      border-bottom-color: @default-interface-txt;
+  }
+  .popover.top>.arrow:after {
+      border-top-color: @default-interface-txt;
+  }
   .popover pre {
       white-space: pre-wrap;
   }
@@ -457,10 +464,16 @@ textarea.allowresize {
           border-radius: 3px;
       }
   }
-  .tooltip {
-      z-index: 2050;
-      opacity: 1.0;
-  }
+
+.tooltip {
+  z-index: 2050;
+  opacity: 1.0;
+}
+
+.tooltip-inner {
+  padding: 10px;
+  text-align:left;
+}
 
 .alert {
     margin-top: 15px;
@@ -764,6 +777,16 @@ legend {
           color: #428bca;
           border-color: none;
           border: 1px solid @default-link;
+      }
+      .alert {
+          padding: 0;
+          border: none;
+          margin: 0;
+      }
+      .alert-danger {
+          background-color: @default-bg;
+          border: none;
+          color: @default-interface-txt;
       }
   }
 
@@ -1645,15 +1668,15 @@ tr td button i {
 /* overrides to TB modal */
 
 .modal-header {
-  padding: 15px 10px;
-  color: @default-link;
-  border-bottom: 1px solid @default-border;
-  -webkit-border-top-right-radius: 3px;
-     -moz-border-top-right-radius: 3px;
-          border-top-right-radius: 3px;
-  -webkit-border-top-left-radius: 3px;
-     -moz-border-top-left-radius: 3px;
-          border-top-left-radius: 3px;
+    color: @default-interface-txt;
+    margin: .1em 0;
+    white-space: nowrap;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    border: none;
+    padding: 12px 14px 0 12px;
 }
 
 .modal {
@@ -1672,13 +1695,18 @@ tr td button i {
 
 .modal-header h3 {
   margin: 0;
-  font-size: 22px;
-  font-weight: bold;
   text-rendering: optimizeLegibility;
+  font-size: 15px;
+    color: @default-interface-txt;
+    font-weight: bold;
+    line-height: normal;
+    font-family: 'Open Sans', helvetica;
+    text-transform: uppercase;
 }
 
 .modal-body {
-  padding-top: 30px;
+    padding: 20px 14px 7px 14px;
+    min-height: 120px;
 }
 
 #prompt-modal .modal-body {
@@ -1687,6 +1715,30 @@ tr td button i {
 
 .skinny-modal .modal-body {
   padding: 5px 10px 0 10px;
+}
+
+.modal-footer {
+    padding: .3em 1em .5em .4em;
+    border: none;
+
+    .btn.btn-primary {
+      text-transform: uppercase;
+      background-color: @default-succ;
+      border-color: @default-succ;
+      padding: 5px 15px;
+      margin: .5em .4em .5em 0;
+      cursor: pointer;
+
+      &:hover {
+        background-color: @default-succ-hov;
+        border-color: @default-succ-hov;
+      }
+
+      &:disabled {
+        background-color: @default-succ-disabled;
+        border-color: @default-succ-disabled;
+      }
+    }
 }
 
 /* form navigation */
