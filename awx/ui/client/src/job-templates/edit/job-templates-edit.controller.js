@@ -78,6 +78,10 @@ export default
 
             getPlaybooks = function (project) {
                 var url;
+                if ($scope.playbook) {
+                    $scope.playbook_options = [$scope.playbook];
+                }
+
                 if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
                     $scope.playbook_options = ['Default'];
                     $scope.playbook = 'Default';
@@ -103,10 +107,14 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error(function () {
+                        .error(function (ret,status_code) {
+                            if (status_code == 403) {
+                                /* user doesn't have access to see the project, no big deal. */
+                            } else {
+                                Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
+                                    ' project or make the playbooks available on the file system.', 'alert-info');
+                            }
                             Wait('stop');
-                            Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
-                                ' project or make the playbooks available on the file system.', 'alert-info');
                         });
                 }
                 else {
@@ -190,8 +198,12 @@ export default
                             }
                         })
                         .error(function (data, status) {
-                            ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
-                                '. GET returned status: ' + status });
+                            if (status == 403) {
+                                /* User doesn't have read access to the project, no problem. */
+                            } else {
+                                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
+                                    '. GET returned status: ' + status });
+                            }
                         });
                 }
             };
