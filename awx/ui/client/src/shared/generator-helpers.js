@@ -460,6 +460,15 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     </role-list>
 </td>
                 `;
+            } else if (field.type === 'team_roles') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <role-list class=\"RoleList\" team-role-list="true">
+    </role-list>
+</td>
+                `;
             } else if (field.type === 'labels') {
                 classList = (field.columnClass) ?
                     Attr(field, 'columnClass') : "";

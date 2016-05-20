@@ -4,7 +4,7 @@ export default
         function(templateUrl) {
             return {
                 restrict: 'E',
-                scope: false,
+                scope: true,
                 templateUrl: templateUrl('access/roleList'),
                 link: function(scope, element, attrs) {
                     // given a list of roles (things like "project
@@ -13,16 +13,19 @@ export default
                     // concatenated/sorted list
                     scope.access_list = []
                         .concat(scope.permission.summary_fields
-                            .direct_access.map(function(i) {
+                            .direct_access.map((i) => {
                                 i.role.explicit = true;
                                 return i.role;
                         }))
                         .concat(scope.permission.summary_fields
-                            .indirect_access.map(function(i) {
+                            .indirect_access.map((i) => {
                                 i.role.explicit = false;
                                 return i.role;
                         }))
-                        .sort(function(a, b) {
+                        .filter((role) => {
+                            return !!attrs.teamRoleList == !!role.team_id;
+                        })
+                        .sort((a, b) => {
                             if (a.name
                                 .toLowerCase() > b.name
                                     .toLowerCase()) {
