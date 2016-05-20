@@ -32,7 +32,7 @@ def test_inventory_admin_user(inventory, permissions, user):
     rbac.migrate_inventory(apps, None)
 
     assert u in inventory.admin_role
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 @pytest.mark.django_db
@@ -48,7 +48,7 @@ def test_inventory_auditor_user(inventory, permissions, user):
 
     assert u not in inventory.admin_role
     assert u in inventory.read_role
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 @pytest.mark.django_db
@@ -63,7 +63,7 @@ def test_inventory_updater_user(inventory, permissions, user):
     rbac.migrate_inventory(apps, None)
 
     assert u not in inventory.admin_role
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists()
 
 @pytest.mark.django_db
@@ -79,7 +79,7 @@ def test_inventory_executor_user(inventory, permissions, user):
 
     assert u not in inventory.admin_role
     assert u in inventory.read_role
-    assert inventory.execute_role.members.filter(id=u.id).exists()
+    assert inventory.use_role.members.filter(id=u.id).exists()
     assert inventory.update_role.members.filter(id=u.id).exists() is False
 
 
@@ -99,7 +99,7 @@ def test_inventory_admin_team(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.read_role.members.filter(id=u.id).exists() is False
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
     assert u in inventory.read_role
     assert u in inventory.admin_role
@@ -121,7 +121,7 @@ def test_inventory_auditor(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.read_role.members.filter(id=u.id).exists() is False
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
     assert u in inventory.read_role
     assert u not in inventory.admin_role
@@ -142,10 +142,10 @@ def test_inventory_updater(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.read_role.members.filter(id=u.id).exists() is False
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
     assert team.member_role.is_ancestor_of(inventory.update_role)
-    assert team.member_role.is_ancestor_of(inventory.execute_role) is False
+    assert team.member_role.is_ancestor_of(inventory.use_role) is False
 
 
 @pytest.mark.django_db
@@ -164,10 +164,10 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert team.member_role.members.count() == 1
     assert inventory.admin_role.members.filter(id=u.id).exists() is False
     assert inventory.read_role.members.filter(id=u.id).exists() is False
-    assert inventory.execute_role.members.filter(id=u.id).exists() is False
+    assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
     assert team.member_role.is_ancestor_of(inventory.update_role) is False
-    assert team.member_role.is_ancestor_of(inventory.execute_role)
+    assert team.member_role.is_ancestor_of(inventory.use_role)
 
 @pytest.mark.django_db
 def test_group_parent_admin(group_factory, permissions, user):

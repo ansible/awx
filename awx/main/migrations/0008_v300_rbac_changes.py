@@ -174,8 +174,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='group',
-            name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'inventory.execute_role', b'parents.execute_role', b'adhoc_role'], to='main.Role', null=b'True'),
+            name='use_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'inventory.use_role', b'parents.use_role', b'adhoc_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='group',
@@ -185,7 +185,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'inventory.read_role', b'parents.read_role', b'execute_role', b'update_role', b'admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'inventory.read_role', b'parents.read_role', b'use_role', b'update_role', b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -199,23 +199,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventory',
-            name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'adhoc_role', to='main.Role', null=b'True'),
-        ),
-        migrations.AddField(
-            model_name='inventory',
             name='update_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'admin_role', to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='inventory',
             name='use_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'admin_role', to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'adhoc_role', to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='inventory',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'organization.auditor_role', b'execute_role', b'update_role', b'use_role', b'admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'organization.auditor_role',  b'update_role', b'use_role', b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='jobtemplate',

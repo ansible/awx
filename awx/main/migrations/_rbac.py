@@ -238,7 +238,7 @@ def migrate_inventory(apps, schema_editor):
                 raise Exception(smart_text(u'Unhandled permission type for inventory: {}'.format( perm.permission_type)))
 
             if perm.run_ad_hoc_commands:
-                execrole = inventory.execute_role
+                execrole = inventory.use_role
 
             if perm.team:
                 if role:
