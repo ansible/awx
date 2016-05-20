@@ -772,7 +772,7 @@ class JobTemplateAccess(BaseAccess):
         # Check that the given inventory ID is valid.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = Inventory.objects.filter(id=inventory_pk)
-        if not inventory.exists():
+        if not inventory.exists() and not data.get('ask_inventory_on_launch', False):
             return False # Does this make sense?  Maybe should check read access
 
         project_pk = get_pk_from_dict(data, 'project')
