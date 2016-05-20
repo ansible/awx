@@ -87,21 +87,14 @@ export default
                     associated: 'password',
                     autocomplete: false
                 },
-                is_superuser: {
-                    label: 'Superuser <span style="text-transform:none;">(User has full system administration privileges)</span>',
-                    type: 'checkbox',
-                    trueValue: 'true',
-                    falseValue: 'false',
-                    "default": 'false',
-                    ngShow: "current_user['is_superuser'] == true",
-                    ngModel: 'is_superuser'
+                user_type: {
+                    label: 'User Type',
+                    type: 'select',
+                    ngOptions: 'item as item.label for item in user_type_options track by item.type',
+                    disableChooseOption: true,
+                    ngModel: 'user_type',
+                    ngShow: 'current_user["is_superuser"]',
                 },
-                ldap_user: {
-                    label: 'Created by LDAP',
-                    type: 'checkbox',
-                    readonly: true,
-                    awFeature: 'ldap'
-                }
             },
 
             buttons: {

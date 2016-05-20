@@ -720,14 +720,31 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(SubListCreateAttachDetachAPIView):
+
+class BaseUsersList(SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        ret = super(BaseUsersList, self).post( request, *args, **kwargs)
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
+        return ret
+
+class OrganizationUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'member_role.members'
 
-class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
+class OrganizationAdminsList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
@@ -830,7 +847,7 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(SubListCreateAttachDetachAPIView):
+class TeamUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
@@ -1097,6 +1114,21 @@ class UserList(ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
 
+    def post(self, request, *args, **kwargs):
+        ret = super(UserList, self).post( request, *args, **kwargs)
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
+        return ret
+
 class UserMeList(ListAPIView):
 
     model = User
@@ -1228,17 +1260,25 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         can_change = request.user.can_access(User, 'change', obj, request.data)
         can_admin = request.user.can_access(User, 'admin', obj, request.data)
+
+        su_only_edit_fields = ('is_superuser', 'is_system_auditor')
+        admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active')
+
+        fields_to_check = ()
+        if not request.user.is_superuser:
+            fields_to_check += su_only_edit_fields
+
         if can_change and not can_admin:
-            admin_only_edit_fields = ('last_name', 'first_name', 'username',
-                                      'is_active', 'is_superuser')
-            changed = {}
-            for field in admin_only_edit_fields:
-                left = getattr(obj, field, None)
-                right = request.data.get(field, None)
-                if left is not None and right is not None and left != right:
-                    changed[field] = (left, right)
-            if changed:
-                raise PermissionDenied('Cannot change %s.' % ', '.join(changed.keys()))
+            fields_to_check += admin_only_edit_fields
+
+        bad_changes = {}
+        for field in fields_to_check:
+            left = getattr(obj, field, None)
+            right = request.data.get(field, None)
+            if left is not None and right is not None and left != right:
+                bad_changes[field] = (left, right)
+        if bad_changes:
+            raise PermissionDenied('Cannot change %s.' % ', '.join(bad_changes.keys()))
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()

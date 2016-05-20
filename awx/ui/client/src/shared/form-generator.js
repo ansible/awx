@@ -918,6 +918,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<button class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
+                            html += "tabindex='-1' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
                             html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
                             html += ">\n" + field.showInputInnerHTML;
@@ -1100,7 +1101,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"Form-dropDownContainer\">\n";
                         html += "<select ";
-                        html += "ng-model=\"" + fld + '" ';
+                        html += "ng-model=\"" + (field.ngModel ? field.ngModel : fld) + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-dropDown";
                         html += "\" ";
@@ -1108,6 +1109,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
+                        html += (field.ngInit) ? this.attr(field, 'ngInit') : "";
                         html += buildId(field, fld, this.form);
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
@@ -1120,7 +1122,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += ">\n";
-                        if(!field.multiSelect){
+                        if(!field.multiSelect && !field.disableChooseOption){
                             html += "<option value=\"\">";
                                 // Add a custom default select 'value' (default text)
                             html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
@@ -1468,7 +1470,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                     if(this.form.name === "user"){
                         html+= "<span class=\"Form-title--is_superuser\" "+
-                            "ng-if=is_superuser>System Administrator</span>";
+                            "ng-show='is_superuser'>Admin</span>";
+                        html+= "<span class=\"Form-title--is_system_auditor\" "+
+                            "ng-show='is_system_auditor'>Auditor</span>";
+                        html+= "<span class=\"Form-title--is_ldap_user\" "+
+                            "ng-show='ldap_user'>LDAP</span>";
                     }
                     html += "</div>\n";
                     html += "<div class=\"Form-header--fields\">";

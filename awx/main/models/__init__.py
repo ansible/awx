@@ -55,6 +55,20 @@ def user_get_admin_of_organizations(user):
 User.add_to_class('organizations', user_get_organizations)
 User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
 
+@property
+def user_is_system_auditor(user):
+    return Role.singleton('system_auditor').members.filter(id=user.id).exists()
+
+@user_is_system_auditor.setter
+def user_is_system_auditor(user, tf):
+    if user.id:
+        if tf:
+            Role.singleton('system_auditor').members.add(user)
+        else:
+            Role.singleton('system_auditor').members.remove(user)
+
+User.add_to_class('is_system_auditor', user_is_system_auditor)
+
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
 
