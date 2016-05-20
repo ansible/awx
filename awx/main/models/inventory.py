@@ -102,18 +102,14 @@ class Inventory(CommonModel, ResourceMixin):
     update_role = ImplicitRoleField(
         parent_role='admin_role',
     )
-    use_role = ImplicitRoleField(
-        parent_role='admin_role',
-    )
     adhoc_role = ImplicitRoleField(
         parent_role='admin_role',
     )
-    execute_role = ImplicitRoleField(
+    use_role = ImplicitRoleField(
         parent_role='adhoc_role',
     )
     read_role = ImplicitRoleField(parent_role=[
         'organization.auditor_role',
-        'execute_role',
         'update_role',
         'use_role',
         'admin_role',
@@ -526,13 +522,13 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     adhoc_role = ImplicitRoleField(
         parent_role=['inventory.adhoc_role', 'parents.adhoc_role', 'admin_role'],
     )
-    execute_role = ImplicitRoleField(
-        parent_role=['inventory.execute_role', 'parents.execute_role', 'adhoc_role'],
+    use_role = ImplicitRoleField(
+        parent_role=['inventory.use_role', 'parents.use_role', 'adhoc_role'],
     )
     read_role = ImplicitRoleField(parent_role=[
         'inventory.read_role',
         'parents.read_role',
-        'execute_role',
+        'use_role',
         'update_role',
         'admin_role'
     ])
