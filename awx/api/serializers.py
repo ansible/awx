@@ -1522,22 +1522,23 @@ class ResourceAccessListElementSerializer(UserSerializer):
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
-            role = team_role.children.filter(id__in=permissive_role_ids)[0]
-
-            role_dict = {
-                'id': role.id,
-                'name': role.name,
-                'description': role.description,
-                'team_id': team_role.object_id,
-                'team_name': team_role.content_object.name
-            }
-            try:
-                role_dict['resource_name'] = role.content_object.name
-                role_dict['resource_type'] = role.content_type.name
-                role_dict['related'] = reverse_gfk(role.content_object)
-            except:
-                pass
-            return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)}
+            ret = []
+            for role in team_role.children.filter(id__in=permissive_role_ids).all():
+                role_dict = {
+                    'id': role.id,
+                    'name': role.name,
+                    'description': role.description,
+                    'team_id': team_role.object_id,
+                    'team_name': team_role.content_object.name
+                }
+                try:
+                    role_dict['resource_name'] = role.content_object.name
+                    role_dict['resource_type'] = role.content_type.name
+                    role_dict['related'] = reverse_gfk(role.content_object)
+                except:
+                    pass
+                ret.append({ 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
+            return ret
 
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
@@ -1578,11 +1579,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         ret['summary_fields']['direct_access'] \
             = [format_role_perm(r) for r in direct_access_roles.distinct()] \
-            + [format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()]
+            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x]
 
         ret['summary_fields']['indirect_access'] \
             = [format_role_perm(r) for r in indirect_access_roles.distinct()] \
-            + [format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()]
+            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
 
         return ret
 
