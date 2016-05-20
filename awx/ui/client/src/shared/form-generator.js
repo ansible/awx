@@ -1053,6 +1053,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += buildId(field, fld, this.form);
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
+                        html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
                         html += (field.ngRequired) ? "ng-required=\"" + field.ngRequired +"\"" : "";
