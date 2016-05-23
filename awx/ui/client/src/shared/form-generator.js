@@ -1675,6 +1675,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     button.label = 'Launch';
                                     button['class'] = 'btn-primary';
                                 }
+                                if (btn === 'add_survey') {
+                                    button.label = 'Add Survey';
+                                    button['class'] = 'Form-surveyButton';
+                                }
+                                if (btn === 'edit_survey') {
+                                    button.label = 'Edit Survey';
+                                    button['class'] = 'Form-surveyButton';
+                                }
 
                                 // Build button HTML
                                 html += "<button type=\"button\" ";

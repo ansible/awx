@@ -309,17 +309,18 @@ export default
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
-                },
-                survey: {
-                    type: 'custom',
-                    column: 2,
-                    ngHide: "job_type.value === 'scan'" ,
-                    control: '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
-                            '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
                 }
             },
 
             buttons: { //for now always generates <button> tags
+                add_survey: {
+                    ngClick: 'addSurvey()',
+                    ngShow: 'job_type.value !== "scan" && !survey_exists'
+                },
+                edit_survey: {
+                    ngClick: 'editSurvey()',
+                    ngShow: 'job_type.value !== "scan" && survey_exists'
+                },
                 cancel: {
                     ngClick: 'formCancel()'
                 },
