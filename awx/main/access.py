@@ -839,9 +839,22 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
-        return qs.filter(
+        qs_jt = qs.filter(
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
         )
+
+        admin_of_organizations_qs = self.user.admin_of_organizations
+        if not admin_of_organizations_qs.exists():
+            return qs_jt
+
+        qs_scan_orphan = qs.filter(
+            job_type=PERM_INVENTORY_SCAN,
+            inventory__organization__in=admin_of_organizations_qs
+        )
+        qs_orphan = qs.filter(
+            project__organization__in=admin_of_organizations_qs
+        ).exclude(job_type=PERM_INVENTORY_SCAN)
+        return (qs_jt | qs_orphan | qs_scan_orphan).distinct()
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
