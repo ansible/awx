@@ -38,6 +38,11 @@ from awx.main.models.organization import (
 
 from awx.main.models.notifications import NotificationTemplate
 
+from awx.main.tests.factories import (
+    create_organization,
+    create_job_template,
+)
+
 '''
 Disable all django model signals.
 '''
@@ -146,18 +151,6 @@ def instance(settings):
 @pytest.fixture
 def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
-
-@pytest.fixture
-def organization_factory(instance):
-    def factory(name):
-        try:
-            org = Organization.objects.get(name=name)
-        except Organization.DoesNotExist:
-            org = Organization.objects.create(name=name,
-                                              description="description for " + name,
-                                              )
-        return org
-    return factory
 
 @pytest.fixture
 def credential():
@@ -474,3 +467,11 @@ def job_template_labels(organization, job_template):
     job_template.labels.create(name="label-2", organization=organization)
 
     return job_template
+
+@pytest.fixture
+def job_template_factory():
+    return create_job_template
+
+@pytest.fixture
+def organization_factory():
+    return create_organization
