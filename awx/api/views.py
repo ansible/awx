@@ -2212,6 +2212,13 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
 
+    def post(self, request, *args, **kwargs):
+        ret = super(JobTemplateList, self).post(request, *args, **kwargs)
+        if ret.status_code == 201:
+            job_template = JobTemplate.objects.get(id=ret.data['id'])
+            job_template.admin_role.members.add(request.user)
+        return ret
+
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
