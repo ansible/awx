@@ -22,4 +22,4 @@ def test_job_template_factory(job_template_factory):
     assert jt_objects.project.name == 'proj1'
     assert jt_objects.inventory.name == 'inventory1'
     assert jt_objects.credential.name == 'cred1'
-    assert jt_objects.organization.name == 'org1'
+    assert jt_objects.inventory.organization.name == 'org1'
