@@ -773,7 +773,9 @@ class JobTemplateAccess(BaseAccess):
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = Inventory.objects.filter(id=inventory_pk)
         if not inventory.exists() and not data.get('ask_inventory_on_launch', False):
-            return False # Does this make sense?  Maybe should check read access
+            return False
+        if inventory.exists() and not self.user in inventory[0].use_role:
+            return False
 
         project_pk = get_pk_from_dict(data, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
@@ -786,10 +788,8 @@ class JobTemplateAccess(BaseAccess):
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         project = get_object_or_400(Project, pk=project_pk)
-        if self.user in project.admin_role:
-            return True
 
-        return self.user in project.admin_role and self.user in inventory.read_role
+        return self.user in project.use_role
 
     def can_start(self, obj, validate_license=True):
         # Check license.
