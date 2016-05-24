@@ -215,11 +215,11 @@ def migrate_inventory(apps, schema_editor):
     Inventory = apps.get_model('main', 'Inventory')
     Permission = apps.get_model('main', 'Permission')
 
-    def role_from_permission():
+    def role_from_permission(perm):
         if perm.permission_type == 'admin':
             return inventory.admin_role
         elif perm.permission_type == 'read':
-            return inventory.read_role
+            return inventory.use_role
         elif perm.permission_type == 'write':
             return inventory.update_role
         elif perm.permission_type == 'check' or perm.permission_type == 'run' or perm.permission_type == 'create':
@@ -233,7 +233,7 @@ def migrate_inventory(apps, schema_editor):
             role = None
             execrole = None
 
-            role = role_from_permission()
+            role = role_from_permission(perm)
             if role is None:
                 raise Exception(smart_text(u'Unhandled permission type for inventory: {}'.format( perm.permission_type)))
 
@@ -320,23 +320,29 @@ def migrate_projects(apps, schema_editor):
             logger.warn(smart_text(u'adding Project({}) admin: {}'.format(project.name, project.created_by.username)))
 
         for team in project.deprecated_teams.all():
-            team.member_role.children.add(project.use_role)
+            team.member_role.children.add(project.read_role)
             logger.info(smart_text(u'adding Team({}) access for Project({})'.format(team.name, project.name)))
 
-        if project.organization is not None:
-            for user in project.organization.deprecated_users.all():
-                project.use_role.members.add(user)
-                logger.info(smart_text(u'adding Organization({}) member access to Project({})'.format(project.organization.name, project.name)))
-
         for perm in Permission.objects.filter(project=project):
-            # All perms at this level just imply a user or team can read
+            if perm.permission_type == 'create':
+                role = project.use_role
+            else:
+                role = project.read_role
+
             if perm.team:
-                perm.team.member_role.children.add(project.use_role)
+                perm.team.member_role.children.add(role)
                 logger.info(smart_text(u'adding Team({}) access for Project({})'.format(perm.team.name, project.name)))
 
             if perm.user:
-                project.use_role.members.add(perm.user)
+                role.members.add(perm.user)
                 logger.info(smart_text(u'adding User({}) access for Project({})'.format(perm.user.username, project.name)))
+
+        if project.organization is not None:
+            for user in project.organization.deprecated_users.all():
+                if not (project.use_role.members.filter(pk=user.id).exists() or project.admin_role.members.filter(pk=user.id).exists()):
+                    project.read_role.members.add(user)
+                    logger.info(smart_text(u'adding Organization({}) member access to Project({})'.format(project.organization.name, project.name)))
+
 
 
 @log_migration
