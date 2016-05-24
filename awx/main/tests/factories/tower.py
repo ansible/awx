@@ -12,7 +12,6 @@ from awx.main.models import (
     Credential,
     Inventory,
     Label,
-    Role,
 )
 
 
