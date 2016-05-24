@@ -843,16 +843,17 @@ class JobAccess(BaseAccess):
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
         )
 
-        admin_of_organizations_qs = self.user.admin_of_organizations
-        if not admin_of_organizations_qs.exists():
+        org_access_qs = Organization.objects.filter(
+            Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+        if not org_access_qs.exists():
             return qs_jt
 
         qs_scan_orphan = qs.filter(
             job_type=PERM_INVENTORY_SCAN,
-            inventory__organization__in=admin_of_organizations_qs
+            inventory__organization__in=org_access_qs
         )
         qs_orphan = qs.filter(
-            project__organization__in=admin_of_organizations_qs
+            project__organization__in=org_access_qs
         ).exclude(job_type=PERM_INVENTORY_SCAN)
         return (qs_jt | qs_orphan | qs_scan_orphan).distinct()
 

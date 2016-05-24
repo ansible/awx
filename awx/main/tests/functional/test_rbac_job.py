@@ -28,3 +28,8 @@ def test_org_member_does_not_see_orphans(org_member, orphan_job, project):
 def test_org_admin_sees_orphans(org_admin, orphan_job):
     access = JobAccess(org_admin)
     assert access.can_read(orphan_job)
+
+@pytest.mark.django_db
+def test_org_auditor_sees_orphans(org_auditor, orphan_job):
+    access = JobAccess(org_auditor)
+    assert access.can_read(orphan_job)
