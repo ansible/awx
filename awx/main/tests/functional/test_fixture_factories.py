@@ -1,5 +1,46 @@
 import pytest
 
+
+def test_roles_exc_not_persisted(organization_factory):
+    with pytest.raises(RuntimeError) as exc:
+        organization_factory('test-org', roles=['test-org.admin_role:user1'], persisted=False)
+    assert 'persisted=False' in str(exc.value)
+
+
+@pytest.mark.django_db
+def test_roles_exc_bad_object(organization_factory):
+    with pytest.raises(KeyError):
+        organization_factory('test-org', roles=['test-project.admin_role:user'])
+
+
+@pytest.mark.django_db
+def test_roles_exc_not_unique(organization_factory):
+    with pytest.raises(KeyError) as exc:
+        organization_factory('test-org', projects=['foo'], teams=['foo'], roles=['foo.admin_role:user'])
+    assert 'must be unique' in str(exc.value)
+
+
+@pytest.mark.django_db
+def test_roles_exc_not_assignment(organization_factory):
+    with pytest.raises(RuntimeError) as exc:
+        organization_factory('test-org', projects=['foo'], roles=['foo.admin_role'])
+    assert 'provide an assignment' in str(exc.value)
+
+
+@pytest.mark.django_db
+def test_roles_exc_not_found(organization_factory):
+    with pytest.raises(RuntimeError) as exc:
+        organization_factory('test-org', users=['user'], projects=['foo'], roles=['foo.admin_role:user.bad_role'])
+    assert 'unable to find' in str(exc.value)
+
+
+@pytest.mark.django_db
+def test_roles_exc_not_user(organization_factory):
+    with pytest.raises(RuntimeError) as exc:
+        organization_factory('test-org', projects=['foo'], roles=['foo.admin_role:foo'])
+    assert 'unable to add non-user' in str(exc.value)
+
+
 @pytest.mark.django_db
 def test_org_factory_roles(organization_factory):
     objects = organization_factory('org_roles_test',
@@ -14,7 +55,7 @@ def test_org_factory_roles(organization_factory):
     assert objects.users.bar in objects.teams.team1.admin_role
     assert objects.users.foo in objects.projects.baz.admin_role
     assert objects.users.foo in objects.teams.team1.member_role
-    assert objects.teams.team2.admin_role in objects.teams.team1n.admin_role.parents.all()
+    assert objects.teams.team2.admin_role in objects.teams.team1.admin_role.parents.all()
 
 
 @pytest.mark.django_db

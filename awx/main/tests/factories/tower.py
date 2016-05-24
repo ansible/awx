@@ -107,6 +107,44 @@ def mk_job_template(name, **kwargs):
         jt.save()
     return jt
 
+def apply_roles(roles, objects, persisted):
+    if roles is None:
+        return None
+
+    if not persisted:
+        raise RuntimeError('roles can not be used when persisted=False')
+
+    all_objects = {}
+    for d in objects:
+        for k,v in d.iteritems():
+            if all_objects.get(k) is not None:
+                raise KeyError('object names must be unique when using roles {} key already exists with value {}'.format(k,v))
+            all_objects[k] = v
+
+    for role in roles:
+        obj_role, sep, member_role = role.partition(':')
+        if not member_role:
+            raise RuntimeError('you must provide an assignment role, got None')
+
+        obj_str, o_role_str = obj_role.split('.')
+        member_str, m_sep, m_role_str = member_role.partition('.')
+
+        obj = all_objects[obj_str]
+        obj_role = getattr(obj, o_role_str)
+
+        member = all_objects[member_str]
+        if m_role_str:
+            if hasattr(member, m_role_str):
+                member_role = getattr(member, m_role_str)
+                obj_role.parents.add(member_role)
+            else:
+                raise RuntimeError('unable to find {} role for {}'.format(m_role_str, member_str))
+        else:
+            if type(member) is User:
+                obj_role.members.add(member)
+            else:
+                raise RuntimeError('unable to add non-user {} for members list of {}'.format(member_str, obj_str))
+
 
 class _Mapped(object):
     def __init__(self, d):
@@ -151,6 +189,9 @@ def create_job_template(name, **kwargs):
                          inventory=inv, credential=cred,
                          job_type=job_type, persisted=persisted)
 
+    objects = [{o.name: o} for o in [org, proj, inv, cred]]
+    apply_roles(kwargs.get('roles'), objects, persisted)
+
     return Objects(job_template=jt,
                    project=proj,
                    inventory=inv,
@@ -158,17 +199,16 @@ def create_job_template(name, **kwargs):
                    job_type=job_type)
 
 def create_organization(name, **kwargs):
-    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels,roles")
-
-    org = mk_organization(name, '%s-desc'.format(name))
+    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels")
 
     superusers = {}
     users = {}
     teams = {}
     projects = {}
     labels = {}
-    roles = {}
     persisted = kwargs.get('persisted', True)
+
+    org = mk_organization(name, '%s-desc'.format(name), persisted=persisted)
 
     if 'teams' in kwargs:
         for t in kwargs['teams']:
@@ -217,47 +257,11 @@ def create_organization(name, **kwargs):
             else:
                 labels[l] = mk_label(l, org, persisted=persisted)
 
-    if 'roles' in kwargs:
-        # refactor this .. alot
-        if not persisted:
-            raise RuntimeError('roles can not be used when persisted=False')
-
-        all_objects = {}
-        for d in [superusers, users, teams, projects, labels]:
-            for k,v in d.iteritems():
-                if all_objects.get(k) is not None:
-                    raise KeyError('object names must be unique when using roles \
-                                   {} key already exists with value {}'.format(k,v))
-                all_objects[k] = v
-
-        for role in kwargs.get('roles'):
-            obj_role, sep, member_role = role.partition(':')
-            if not member_role:
-                raise RuntimeError('you must an assignment role, got None')
-
-            obj_str, o_role_str = obj_role.split('.')
-            member_str, m_sep, m_role_str = member_role.partition('.')
-
-            obj = all_objects[obj_str]
-            obj_role = getattr(obj, o_role_str)
-
-            member = all_objects[member_str]
-            if m_role_str:
-                if hasattr(member, m_role_str):
-                    member_role = getattr(member, m_role_str)
-                    obj_role.parents.add(member_role)
-                else:
-                    raise RuntimeError('unable to find {} role for {}'.format(m_role_str, member_str))
-            else:
-                if type(member) is User:
-                    obj_role.members.add(member)
-                else:
-                    raise RuntimeError('unable to add non-user {} for members list of {}'.format(member_str, obj_str))
-
+    apply_roles(kwargs.get('roles'), [superusers, users, teams, projects, labels], persisted)
     return Objects(organization=org,
                    superusers=_Mapped(superusers),
                    users=_Mapped(users),
                    teams=_Mapped(teams),
                    projects=_Mapped(projects),
-                   labels=_Mapped(labels),
-                   roles=_Mapped(roles))
+                   labels=_Mapped(labels))
+
