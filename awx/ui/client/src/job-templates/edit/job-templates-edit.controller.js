@@ -419,25 +419,48 @@ export default
             Rest.setUrl('api/v1/labels');
             Wait("start");
             Rest.get()
-                .success(function (data) {
-                    $scope.labelOptions = data.results
-                        .map((i) => ({label: i.name, value: i.id}));
-                    $scope.$emit("choicesReady");
+                .success(function () {
+                    var seeMoreResolve = $q.defer();
+
+                    var getNext = function(data, arr, resolve) {
+                        Rest.setUrl(data.next);
+                        Rest.get()
+                            .success(function (data) {
+                                if (data.next) {
+                                    getNext(data, arr.concat(data.results), resolve);
+                                } else {
+                                    resolve.resolve(arr.concat(data.results));
+                                }
+                            });
+                    };
+
                     Rest.setUrl(defaultUrl + $state.params.template_id +
                          "/labels");
                     Rest.get()
                         .success(function(data) {
-                            var opts = data.results
-                                .map(i => ({id: i.id + "",
-                                    test: i.name}));
-                            CreateSelect2({
-                                element:'#job_templates_labels',
-                                multiple: true,
-                                addNew: true,
-                                opts: opts
+                            if (data.next) {
+                                getNext(data, data.results, seeMoreResolve);
+                            } else {
+                                seeMoreResolve.resolve(data.results);
+                            }
+
+                            seeMoreResolve.promise.then(function (labels) {
+                                $scope.labelOptions = labels
+                                    .map((i) => ({label: i.name, value: i.id}));
+                                $scope.$emit("choicesReady");
+                                var opts = labels
+                                    .map(i => ({id: i.id + "",
+                                        test: i.name}));
+                                CreateSelect2({
+                                    element:'#job_templates_labels',
+                                    multiple: true,
+                                    addNew: true,
+                                    opts: opts
+                                });
+                                Wait("stop");
                             });
-                            Wait("stop");
                         });
+
                     CreateSelect2({
                         element:'#job_templates_verbosity',
                         multiple: false

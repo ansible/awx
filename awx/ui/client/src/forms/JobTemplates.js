@@ -224,41 +224,6 @@ export default
                         text: 'Prompt on launch'
                     }
                 },
-                labels: {
-                    label: 'Labels',
-                    type: 'select',
-                    ngOptions: 'label.label for label in labelOptions track by label.value',
-                    multiSelect: true,
-                    addRequired: false,
-                    editRequired: false,
-                    dataTitle: 'Labels',
-                    dataPlacement: 'right',
-                    awPopOver: 'You can add labels to a job template to aid in filtering',
-                    dataContainer: 'body'
-                },
-                variables: {
-                    label: 'Extra Variables',
-                    type: 'textarea',
-                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    rows: 6,
-                    addRequired: false,
-                    editRequired: false,
-                    "default": "---",
-                    column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
-                    dataTitle: 'Extra Variables',
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    subCheckbox: {
-                        variable: 'ask_variables_on_launch',
-                        text: 'Prompt on launch'
-                    }
-                },
                 become_enabled: {
                   label: 'Enable Privilege Escalation',
                   type: 'checkbox',
@@ -309,6 +274,49 @@ export default
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
+                },
+                survey: {
+                    type: 'custom',
+                    column: 2,
+                    ngHide: "job_type.value === 'scan'" ,
+                    control: '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
+                            '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
+                },
+                labels: {
+                    label: 'Labels',
+                    type: 'select',
+                    class: 'Form-formGroup--fullWidth',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    addRequired: false,
+                    editRequired: false,
+                    dataTitle: 'Labels',
+                    dataPlacement: 'right',
+                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    dataContainer: 'body'
+                },
+                variables: {
+                    label: 'Extra Variables',
+                    type: 'textarea',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    rows: 6,
+                    addRequired: false,
+                    editRequired: false,
+                    "default": "---",
+                    column: 2,
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
+                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    dataTitle: 'Extra Variables',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 }
             },
 

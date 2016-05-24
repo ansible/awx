@@ -1,10 +1,11 @@
-<div class="LabelList-tagContainer"
-    ng-repeat="label in labels">
-    <div class="LabelList-tag LabelList-tag--deletable">
-        <span class="LabelList-name">{{ label.name }}</span>
-    </div>
+<div class="LabelList-tagContainer" ng-repeat="label in labels">
     <div class="LabelList-deleteContainer"
         ng-click="deleteLabel(job_template.id, job_template.name, label.id, label.name)">
         <i class="fa fa-times LabelList-tagDelete"></i>
     </div>
+    <div class="LabelList-tag LabelList-tag--deletable">
+        <span class="LabelList-name">{{ label.name }}</span>
+    </div>
 </div>
+<div class="LabelList-seeMore" ng-show="count > 2 && seeMoreInactive"
+    ng-click="seeMore()">View More</div>
