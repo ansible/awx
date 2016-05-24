@@ -21,18 +21,47 @@ export default
         multiSelect: true,
 
         fields: {
+            sync_status: {
+                label: '',
+                nosort: true,
+                searchable: false,
+                mode: 'all',
+                iconOnly: true,
+                ngClick: 'viewUpdateStatus(group.id)',
+                awToolTip: "{{ group.status_tooltip }}",
+                dataTipWatch: "group.status_tooltip",
+                icon: "{{ 'fa icon-cloud-' + group.status_class }}",
+                ngClass: "group.status_class",
+                dataPlacement: "top",
+                columnClass: 'status-column List-staticColumn--smallStatus'
+            },
+            failed_hosts: {
+                label: '',
+                nosort: true,
+                searchable: false,
+                mode: 'all',
+                iconOnly: true,
+                awToolTip: "{{ group.hosts_status_tip }}",
+                dataPlacement: "top",
+                ngClick: "showFailedHosts(group)",
+                icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
+                columnClass: 'status-column List-staticColumn--smallStatus'
+            },
             name: {
                 label: 'Groups',
                 key: true,
                 ngClick: "groupSelect(group.id)",
-                columnClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
+                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
+                class: 'InventoryManage-breakWord'
             },
             total_groups: {
                 nosort: true,
                 label: '',
                 type: 'badgeCount',
                 ngHide: 'group.total_groups == 0',
+                noLink: true,
+                awToolTip: "{{group.name}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
+
             },
             source: {
                 label: 'Source',
@@ -100,8 +129,9 @@ export default
             },
             launch: {
                 mode: 'all',
-                ngShow: 'inventory.can_run_ad_hoc_commands',
-                ngClick: 'populateAdhocForm()',
+                // $scope.$parent is governed by InventoryManageController,
+                ngShow: '$parent.groupsSelected || $parent.hostsSelected',
+                ngClick: '$parent.setAdhocPattern()',
                 awToolTip: "Run a command on the selected inventory",
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: 'RUN COMMANDS'
@@ -116,7 +146,7 @@ export default
                 ngClick: "createGroup()",
                 awToolTip: "Create a new group",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD GROUP'
             }
         },
 
@@ -124,32 +154,16 @@ export default
 
             columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
 
-            sync_status: {
-                mode: 'all',
-                ngClick: "viewUpdateStatus(group.id)",
-                awToolTip: "{{ group.status_tooltip }}",
-                dataTipWatch: "group.status_tooltip",
-                iconClass: "{{ 'fa icon-cloud-' + group.status_class }}",
-                ngClass: "group.status_class",
-                dataPlacement: "top"
-            },
-            failed_hosts: {
-                mode: 'all',
-                awToolTip: "{{ group.hosts_status_tip }}",
-                dataPlacement: "top",
-                ngClick: "showHosts(group.id, group.group_id, group.show_failures)",
-                iconClass: "{{ 'fa icon-job-' + group.hosts_status_class }}"
-            },
             group_update: {
                 //label: 'Sync',
                 mode: 'all',
-                ngClick: 'updateGroup(group.id)',
+                ngClick: 'updateGroup(group)',
                 awToolTip: "{{ group.launch_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
                 ngShow: "group.status !== 'running' && group.status " +
                     "!== 'pending' && group.status !== 'updating'",
                 ngClass: "group.launch_class",
-                dataPlacement: "top"
+                dataPlacement: "top",
             },
             cancel: {
                 //label: 'Cancel',
@@ -159,11 +173,12 @@ export default
                 'class': 'red-txt',
                 ngShow: "group.status == 'running' || group.status == 'pending' " +
                     "|| group.status == 'updating'",
-                dataPlacement: "top"
+                dataPlacement: "top",
+                iconClass: "fa fa-minus-circle"
             },
             copy: {
                 mode: 'all',
-                ngClick: "copyGroup(group.id)",
+                ngClick: "copyMoveGroup(group.id)",
                 awToolTip: 'Copy or move group',
                 ngShow: "group.id > 0",
                 dataPlacement: "top"
@@ -186,7 +201,7 @@ export default
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
-                ngClick: "deleteGroup(group.id)",
+                ngClick: "deleteGroup(group)",
                 awToolTip: 'Delete group',
                 dataPlacement: "top"
             }

@@ -1,0 +1,19 @@
+<div class="Panel copyMove-panel">
+    <div class="Form-header">
+        <div class="Form-title ng-binding">{{item.name}}</div>
+    </div>
+    <div class="form-group copyMove-choices">
+        <label class="radio-inline">
+            <input type="radio" ng-model="submitMode" value="copy" class="ng-pristine ng-valid ng-touched"> Copy
+        </label>
+        <label class="radio-inline">
+            <input type="radio" ng-model="submitMode" value="move" class="ng-pristine ng-untouched ng-valid"> Move
+        </label>
+    </div>
+    <div id="copyMove-select"></div>
+    <div id="copyMove-list"></div>
+    <div class="copyMove-buttons">
+        <button type="button" class="pull-right btn btn-sm btn-default Form-cancelButton" ng-click="formCancel()">Cancel</button>
+        <button type="button" class="pull-right btn btn-sm Form-saveButton" ng-disabled="!selected" ng-click="formSave()">Save</button>
+    </div>
+</div>

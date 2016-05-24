@@ -439,6 +439,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     innerTable += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
                     innerTable += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                     innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
+                    innerTable += (list.trackBy) ? " track by " + list.trackBy : " track by $index";
                     innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                     innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                     innerTable += "\">\n";
@@ -459,7 +460,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                           "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
                       else { // its assumed that options.input_type = checkbox
-                          innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_" + list.iterator + "_{{" +
+                          innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                           list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                           "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
@@ -619,7 +620,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += buildSelectAll().prop('outerHTML');
                     }
                     else if (options.mode === 'lookup') {
-                        html += "<th class=\"List-tableHeader List-staticColumn--smallStatus col-lg-1 col-md-1 col-sm-2 col-xs-2\"></th>";
+                        html += "<th class=\"List-tableHeader  select-column List-staticColumn--smallStatus\"></th>";
                     }
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&

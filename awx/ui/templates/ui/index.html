@@ -40,7 +40,7 @@
     <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu></main-menu>
-  <bread-crumb></bread-crumb>
+  <bread-crumb ng-if="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-if="includesCurrentState('inventoryManage')"></div>
   <toast></toast>
 
     <div class="container-fluid" id="content-container">

@@ -96,7 +96,7 @@ export default
 
             edit: {
                 label: 'Edit',
-                ngClick: 'editInventory(inventory.id)', //'editInventoryProperties(inventory.id)',
+                ngClick: 'editInventory(inventory.id)',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
             },

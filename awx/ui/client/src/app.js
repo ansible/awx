@@ -47,7 +47,6 @@ import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
-import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
@@ -67,7 +66,6 @@ import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import './shared/InventoryTree';
 import './shared/Socket';
 import './shared/features/main';
 import './login/authenticationServices/pendo/ng-pendo';
@@ -99,7 +97,6 @@ var tower = angular.module('Tower', [
     dashboard.name,
     moment.name,
     templateUrl.name,
-    adhoc.name,
     login.name,
     activityStream.name,
     footer.name,
@@ -169,7 +166,6 @@ var tower = angular.module('Tower', [
     'StreamWidget',
     'JobsHelper',
     'InventoryGroupsHelpDefinition',
-    'InventoryTree',
     'CredentialsHelper',
     'StreamListDefinition',
     'HomeGroupListDefinition',
@@ -224,6 +220,7 @@ var tower = angular.module('Tower', [
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
             $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
+
             // $urlRouterProvider.otherwise("/home");
             $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");

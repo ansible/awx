@@ -277,10 +277,14 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html = "<td class=\"" + fld + "-column";
                 html += (field.columnClass) ? " " + field.columnClass : "";
                 html += "\">\n";
-                html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                if (!field.noLink){
+                    html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                    html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+                    html += ">";
+                }
+                html += "<span class=\"badge\"";
+                html += " aw-tool-tip=\"" + field.awToolTip + "\"";
                 html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
-                html += ">";
-                html += "<span class=\"badge";
                 html += (field['class']) ? " " + field['class'] : "";
                 html += (field.ngHide) ? "\" ng-hide=\"" + field.ngHide : "";
                 html += "\">";

@@ -61,18 +61,10 @@ export default
                     label: 'Source',
                     type: 'select',
                     ngOptions: 'source.label for source in source_type_options track by source.value',
-                    ngChange: 'sourceChange()',
+                    ngChange: 'sourceChange(source)',
                     addRequired: false,
-                    editRequired: false
-                },
-                source_path: {
-                    label: 'Script Path',
-                    ngShow: "source && source.value == 'file'",
-                    type: 'text',
-                    awRequiredWhen: {
-                        reqExpression: "sourcePathRequired",
-                        init: "false"
-                    }
+                    editRequired: false,
+                    ngModel: 'source'
                 },
                 credential: {
                     label: 'Cloud Credential',
@@ -147,7 +139,6 @@ export default
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
-                    labelClass: 'prepend-asterisk',
                     type: 'lookup',
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'inventory_script',
@@ -157,7 +148,8 @@ export default
                     editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
                 },
-                extra_vars: {
+                custom_variables: {
+                    id: 'custom_variables',
                     label: 'Environment Variables', //"{{vars_label}}" ,
                     ngShow: "source && source.value=='custom' ",
                     type: 'textarea',
@@ -176,9 +168,10 @@ export default
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataContainer: 'body'
                 },
-                source_vars: {
+                ec2_variables: {
+                    id: 'ec2_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
-                    ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
+                    ngShow: "source && source.value == 'ec2'",
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     addRequired: false,
@@ -200,11 +193,11 @@ export default
                         '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataContainer: 'body'
                 },
-                inventory_variables: {
+                vmware_variables: {
+                    id: 'vmware_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
 
-                    ngShow: "source && (source.value == 'vmware' || " +
-                                        "source.value == 'openstack')",
+                    ngShow: "source && source.value == 'vmware'",
                     type: 'textarea',
                     addRequired: false,
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -217,6 +210,32 @@ export default
                     awPopOver: "<p>Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables " +
                         "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/vmware.ini\" target=\"_blank\">" +
                         "view vmware.ini in the Ansible github repo.</a></p>" +
+                        "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                        '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                        '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                    dataContainer: 'body'
+                },
+                openstack_variables: {
+                    id: 'openstack_variables',
+                    label: 'Source Variables', //"{{vars_label}}" ,
+
+                    ngShow: "source && source.value == 'openstack'",
+                    type: 'textarea',
+                    addRequired: false,
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    editRequird: false,
+                    rows: 6,
+                    'default': '---',
+                    parseTypeName: 'envParseType',
+                    dataTitle: "Source Variables",
+                    dataPlacement: 'right',
+                    awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\" target=\"_blank\">" +
+                        "view openstack.yml in the Ansible github repo.</a></p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -295,12 +314,12 @@ export default
             },
 
             buttons: {
+                save: {
+                    ngClick: 'formSave()'
+                },
                 cancel: {
                     ngClick: 'formCancel()'
-                },
-                save: {
-                    ngClick: 'saveGroup()'
-                }                
+                }
             },
 
             related: {
