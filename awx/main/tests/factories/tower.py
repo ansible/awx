@@ -255,7 +255,7 @@ def create_organization(name, **kwargs):
             if type(l) is Label:
                 labels[l.name] = l
             else:
-                labels[l] = mk_label(l, org, persisted=persisted)
+                labels[l] = mk_label(l, organization=org, persisted=persisted)
 
     apply_roles(kwargs.get('roles'), [superusers, users, teams, projects, labels], persisted)
     return Objects(organization=org,
