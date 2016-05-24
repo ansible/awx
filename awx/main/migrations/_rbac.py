@@ -477,8 +477,6 @@ def rebuild_role_hierarchy(apps, schema_editor):
         start = time()
         roots = Role.objects \
                     .all() \
-                    .exclude(pk__in=Role.parents.through.objects.all()
-                                        .values_list('from_role_id', flat=True).distinct()) \
                     .values_list('id', flat=True)
         stop = time()
         logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
