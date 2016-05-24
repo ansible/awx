@@ -6,8 +6,8 @@
 
 export default
 	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
-		'Store', 'ConfigService',
-	function($state, $rootScope, Rest, GetBasePath, ProcessErrors, $q, Store,
+		'ConfigService',
+	function($state, $rootScope, Rest, GetBasePath, ProcessErrors, $q,
 		ConfigService){
 			return {
 				get: function() {
@@ -46,7 +46,7 @@ export default
 					 	return true;
 				},
 				test: function(event){
-					var //deferred = $q.defer(),
+					var deferred = $q.defer(),
 						license = this.get();
 					if(license === null || !$rootScope.license_tested){
 						if(this.valid(license) === false) {
@@ -55,11 +55,11 @@ export default
 								event.preventDefault();
 							}
 							$state.go('license');
-							// deferred.reject();
+							deferred.reject();
 						}
 						else {
 							$rootScope.licenseMissing = false;
-							// deferred.resolve();
+							deferred.resolve();
 						}
 					}
 					else if(this.valid(license) === false) {
@@ -68,14 +68,13 @@ export default
 						if(event){
 							event.preventDefault();
 						}
-						// deferred.reject(license);
+						deferred.reject(license);
 					}
 					else {
 						$rootScope.licenseMissing = false;
-						// deferred.resolve(license);
+						deferred.resolve(license);
 					}
-					return;
-					// return deferred.promise;
+					return deferred.promise;
 				}
 
 			};

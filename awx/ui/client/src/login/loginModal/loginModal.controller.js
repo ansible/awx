@@ -54,10 +54,12 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty', 'ClearScope', '$scope', 'pendoService',
-    function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty, ClearScope, scope, pendoService) {
+export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
+    '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
+    'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
+    function ($log, $cookieStore, $compile, $window, $rootScope, $location,
+        Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
+        scope, pendoService, ConfigService) {
 
     var lastPath, lastUser, sessionExpired, loginAgain;
 
@@ -110,9 +112,10 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         scope.removeAuthorizationGetLicense();
     }
     scope.removeAuthorizationGetLicense = scope.$on('AuthorizationGetLicense', function() {
-        Authorization.getLicense()
-            .success(function (data) {
-                Authorization.setLicense(data);
+        // Authorization.getLicense()
+        //     .success(function (data) {
+        //         Authorization.setLicense(data);
+        ConfigService.getConfig().then(function(){
                 pendoService.issuePendoIdentity();
                 Wait("stop");
                 if (lastPath() && lastUser()) {
@@ -122,7 +125,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     $location.url('/home');
                 }
             })
-            .error(function () {
+            .catch(function () {
                 Wait('stop');
                 Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });

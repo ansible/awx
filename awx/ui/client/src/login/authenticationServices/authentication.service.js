@@ -16,7 +16,9 @@
 
 export default
     ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
-    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store) {
+    '$injector',
+    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store,
+    $injector) {
         return {
             setToken: function (token, expires) {
                 // set the session cookie
@@ -61,10 +63,11 @@ export default
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
 
-                var x, scope = angular.element(document.getElementById('main-view')).scope();
+                var x,
+                ConfigService = $injector.get('ConfigService'),
+                scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 //$rootScope.$destroy();
-
 
                 if($cookieStore.get('lastPath')==='/portal'){
                     $cookieStore.put( 'lastPath', '/portal');
@@ -88,6 +91,7 @@ export default
                 if ($cookieStore.get('current_user')) {
                     $rootScope.lastUser = $cookieStore.get('current_user').id;
                 }
+                ConfigService.delete();
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('token');
@@ -125,10 +129,10 @@ export default
                 license.version = data.version;
                 license.ansible_version = data.ansible_version;
                 license.tested = false;
-                Store('license', license);
-                $rootScope.features = Store('license').features;
+
+                $rootScope.features = license.features;
             },
-            
+
             licenseTested: function () {
                 var license, result;
                 if ($rootScope.license_tested !== undefined) {

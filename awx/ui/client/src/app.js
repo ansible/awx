@@ -879,7 +879,14 @@ var tower = angular.module('Tower', [
                             $rootScope.$emit('OpenSocket');
                             ConfigService.getConfig().then(function(){
                                 pendoService.issuePendoIdentity();
-                                CheckLicense.test(event);
+                                CheckLicense.test().then(function(){
+                                    // $state.go(next);
+                                    return;
+                                })
+                                .catch(function(){
+                                    event.preventDefault();
+                                    $state.go('license');
+                                });
                             });
                         });
                     }

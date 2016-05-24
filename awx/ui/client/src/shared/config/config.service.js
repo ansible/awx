@@ -6,8 +6,8 @@
 
 
 export default
-   [ '$rootScope', '$pendolytics', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
-   function ($rootScope, $pendolytics, Rest, GetBasePath, ProcessErrors, $q) {
+   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope',
+   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope) {
        return {
             get: function(){
                 return this.config;
@@ -15,6 +15,10 @@ export default
 
             set: function(config){
                 this.config = config;
+            },
+
+            delete: function(){
+                delete(this.config);
             },
 
             getConfig: function () {
@@ -33,7 +37,7 @@ export default
                     promise.catch(function (response) {
                         ProcessErrors($rootScope, response.data, response.status, null, {
                             hdr: 'Error!',
-                            msg: 'Failed to get inventory name. GET returned status: ' +
+                            msg: 'Failed to get config. GET returned status: ' +
                             response.status });
                         deferred.reject('Could not resolve pendo config.');
                     });
