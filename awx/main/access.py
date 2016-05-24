@@ -774,7 +774,7 @@ class JobTemplateAccess(BaseAccess):
         inventory = Inventory.objects.filter(id=inventory_pk)
         if not inventory.exists() and not data.get('ask_inventory_on_launch', False):
             return False
-        if inventory.exists() and not self.user in inventory[0].use_role:
+        if inventory.exists() and self.user not in inventory[0].use_role:
             return False
 
         project_pk = get_pk_from_dict(data, 'project')
