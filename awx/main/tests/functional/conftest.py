@@ -278,7 +278,7 @@ def permissions():
 
 @pytest.fixture
 def post():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -290,12 +290,16 @@ def post():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def get():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -307,12 +311,16 @@ def get():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def put():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -324,12 +332,16 @@ def put():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def patch():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -341,12 +353,16 @@ def patch():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def delete():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -358,12 +374,16 @@ def delete():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def head():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -375,12 +395,16 @@ def head():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def options():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -392,6 +416,10 @@ def options():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
