@@ -409,7 +409,7 @@ def migrate_job_templates(apps, schema_editor):
 
         team_create_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['create'])
+            .filter(permission_type__in=['create'])
             .values_list('team__id', flat=True)
         )
         team_run_permissions = set(
@@ -419,12 +419,12 @@ def migrate_job_templates(apps, schema_editor):
         )
         user_create_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['run'])
+            .filter(permission_type__in=['create'])
             .values_list('user__id', flat=True)
         )
         user_run_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['create'])
+            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['run'])
             .values_list('user__id', flat=True)
         )
 
@@ -452,17 +452,20 @@ def migrate_job_templates(apps, schema_editor):
                 logger.info(smart_text(u'transfering execute access on JobTemplate({}) to Team({})'.format(jt.name, team.name)))
 
         for user in User.objects.filter(id__in=user_create_permissions).iterator():
+            cred = jt.credential or jt.cloud_credential
             if (jt.inventory.id in user_inv_permissions[user.id] or
                     any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
-               ((not jt.credential and not jt.cloud_credential) or
-                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
+                    (not cred or cred.deprecated_user == user or
+                        (cred.deprecated_team and cred.deprecated_team.deprecated_users.filter(pk=user.id).exists())):
                 jt.admin_role.members.add(user)
                 logger.info(smart_text(u'transfering admin access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
         for user in User.objects.filter(id__in=user_run_permissions).iterator():
+            cred = jt.credential or jt.cloud_credential
+
             if (jt.inventory.id in user_inv_permissions[user.id] or
                     any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
-               ((not jt.credential and not jt.cloud_credential) or
-                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
+                    (not cred or cred.deprecated_user == user or
+                        (cred.deprecated_team and cred.deprecated_team.deprecated_users.filter(pk=user.id).exists())):
                 jt.execute_role.members.add(user)
                 logger.info(smart_text(u'transfering execute access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
 
