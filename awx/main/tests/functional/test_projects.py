@@ -11,36 +11,32 @@ from awx.main.models import Project
 #
 
 @pytest.mark.django_db
-def test_user_project_list(get, project_factory, organization, admin, alice, bob):
+def test_user_project_list(get, organization_factory):
     'List of projects a user has access to, filtered by projects you can also see'
 
-    organization.member_role.members.add(alice, bob)
+    objects = organization_factory('org1',
+                                   projects=['alice project', 'bob project', 'shared project'],
+                                   superusers=['admin'],
+                                   users=['alice', 'bob'],
+                                   roles=['alice project.admin_role:alice',
+                                          'bob project.admin_role:bob',
+                                          'shared project.admin_role:bob',
+                                          'shared project.admin_role:alice'])
 
-    alice_project = project_factory('alice project')
-    alice_project.admin_role.members.add(alice)
-
-    bob_project = project_factory('bob project')
-    bob_project.admin_role.members.add(bob)
-
-    shared_project = project_factory('shared project')
-    shared_project.admin_role.members.add(alice)
-    shared_project.admin_role.members.add(bob)
-
-    # admins can see all projects
-    assert get(reverse('api:user_projects_list', args=(admin.pk,)), admin).data['count'] == 3
+    assert get(reverse('api:user_projects_list', args=(objects.superusers.admin.pk,)), objects.superusers.admin).data['count'] == 3
 
     # admins can see everyones projects
-    assert get(reverse('api:user_projects_list', args=(alice.pk,)), admin).data['count'] == 2
-    assert get(reverse('api:user_projects_list', args=(bob.pk,)), admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', args=(objects.users.alice.pk,)), objects.superusers.admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', args=(objects.users.bob.pk,)), objects.superusers.admin).data['count'] == 2
 
     # users can see their own projects
-    assert get(reverse('api:user_projects_list', args=(alice.pk,)), alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', args=(objects.users.alice.pk,)), objects.users.alice).data['count'] == 2
 
     # alice should only be able to see the shared project when looking at bobs projects
-    assert get(reverse('api:user_projects_list', args=(bob.pk,)), alice).data['count'] == 1
+    assert get(reverse('api:user_projects_list', args=(objects.users.bob.pk,)), objects.users.alice).data['count'] == 1
 
     # alice should see all projects they can see when viewing an admin
-    assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', args=(objects.superusers.admin.pk,)), objects.users.alice).data['count'] == 2
 
 
 def setup_test_team_project_list(project_factory, team_factory, admin, alice, bob):
