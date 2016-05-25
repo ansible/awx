@@ -15,7 +15,7 @@
     margin: 10px 0 10px 0;
 }
 .JobDetail{
-   .OnePlusOne-container(100%, @breakpoint-md); 
+   .OnePlusOne-container(100%, @breakpoint-md);
 }
 
 .JobDetail-leftSide{
@@ -152,7 +152,20 @@
     border: 1px solid @default-link;
     color: @default-bg;
 }
-
+.JobDetail .nvd3.nv-noData{
+    color: @default-interface-txt;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: 'Open Sans', sans-serif;
+}
+.JobDetail .nv-series{
+    padding-right: 30px;
+    display: block;
+}
+.JobDetail-instructions .badge{
+    background-color: @default-list-header-bg;
+    color: @default-interface-txt;
+}
 .JobDetail-tableToggle--left{
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -196,6 +209,8 @@
 }
 
 .JobDetail-stdoutActionButton--active{
+    display: none;
+    visibility: hidden;
     flex:none;
     width:0px;
     padding-right: 0px;
