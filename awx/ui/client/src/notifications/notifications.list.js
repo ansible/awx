@@ -14,6 +14,7 @@ export default function(){
         iterator: 'notification',
         index: false,
         hover: false,
+        emptyListText: 'No Notifications exist',
         basePath: 'notifications',
         fields: {
             name: {

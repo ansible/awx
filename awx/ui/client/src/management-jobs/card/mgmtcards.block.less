@@ -3,7 +3,8 @@
 
 .MgmtCards {
     display: flex;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
+    justify-content: space-between;
 }
 
 .MgmtCards-card {
@@ -11,15 +12,14 @@
     padding: 20px;
     border-radius: 5px;
     border: 1px solid @default-border;
-    display: flex;
-    flex-wrap: wrap;
     align-items: baseline;
     margin-top: 20px;
+    width: 32%;
 }
 
 .MgmtCards-card--selected {
     padding-left: 16px;
-    border-left: 5px solid #337AB7;
+    border-left: 5px solid @default-link;
 }
 
 .MgmtCards-card--promptElements{
@@ -44,7 +44,6 @@
     font-weight: bold;
     color: @default-interface-txt;
     margin-bottom: 25px;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -84,39 +83,6 @@
 
 .MgmtCards-linkBadge {
     margin-right: 10px;
-}
-
-@media (min-width: 1179px) {
-    .MgmtCards-card {
-        width: ~"calc(25% - 15px)";
-        margin-right: 20px;
-    }
-
-    .MgmtCards-card:nth-child(4n+4) {
-        margin-right: 0px;
-    }
-}
-
-@media (min-width: 901px) and (max-width: 1178px) {
-    .MgmtCards-card {
-        width: ~"calc(33% - 11px)";
-        margin-right: 20px;
-    }
-
-    .MgmtCards-card:nth-child(3n+3) {
-        margin-right: 0px;
-    }
-}
-
-@media (min-width: 616px) and (max-width: 900px) {
-    .MgmtCards-card {
-        width: ~"calc(50% - 10px)";
-        margin-right: 20px;
-    }
-
-    .MgmtCards-card:nth-child(2n+2) {
-        margin-right: 0px;
-    }
 }
 
 @media (max-width: 615px) {

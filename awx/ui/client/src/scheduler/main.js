@@ -37,19 +37,28 @@ export default
                 name: 'projectSchedules',
                 route: '/projects/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController'
+                controller: 'schedulerController',
+                ncyBreadcrumb: {
+                    label: 'PROJECT SCHEDULES'
+                }
             });
             $stateExtender.addState({
                 name: 'projectSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController'
+                controller: 'schedulerAddController',
+                ncyBreadcrumb: {
+                    label: 'PROJECT SCHEDULES ADD'
+                }
             });
             $stateExtender.addState({
                 name: 'projectSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController'
+                controller: 'schedulerEditController',
+                ncyBreadcrumb: {
+                    label: 'PROJECT SCHEDULES EDIT'
+                }
             });
             $stateExtender.addState({
                 name: 'inventoryManage.schedules',

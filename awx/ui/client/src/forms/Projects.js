@@ -174,7 +174,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Clean',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }, {
                     name: 'scm_delete_on_update',
                     label: 'Delete on Update',
@@ -186,7 +186,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Delete',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }, {
                     name: 'scm_update_on_launch',
                     label: 'Update on Launch',
@@ -197,7 +197,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Update',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }]
             },
             scm_update_cache_timeout: {
@@ -273,7 +273,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 }
             },
             notifications: {
-                include: "NotificationsList"
+                include: "NotificationsList",
             }
         },
 
