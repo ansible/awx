@@ -242,14 +242,43 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels',]
 
+    def resource_validation_data(self):
+        '''
+        Process consistency errors and need-for-launch related fields.
+        '''
+        resources_needed_to_start = []
+        validation_errors = {}
+
+        # Inventory and Credential related checks
+        if self.inventory is None:
+            resources_needed_to_start.append('inventory')
+            if not self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Job Template must provide 'inventory' or allow prompting for it.",]
+        if self.credential is None:
+            resources_needed_to_start.append('credential')
+            if not self.ask_credential_on_launch:
+                validation_errors['credential'] = ["Job Template must provide 'credential' or allow prompting for it.",]
+
+        # Job type dependent checks
+        if self.job_type == 'scan':
+            if self.inventory is None or self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Scan jobs must be assigned a fixed inventory.",]
+        elif self.project is None:
+            resources_needed_to_start.append('project')
+            validation_errors['project'] = ["Job types 'run' and 'check' must have assigned a project.",]
+
+        return (validation_errors, resources_needed_to_start)
+
     def clean(self):
-        if self.job_type == 'scan' and (self.inventory is None or self.ask_inventory_on_launch):
-            raise ValidationError({"inventory": ["Scan jobs must be assigned a fixed inventory.",]})
-        if (not self.ask_inventory_on_launch) and self.inventory is None:
-            raise ValidationError({"inventory": ["Job Template must provide 'inventory' or allow prompting for it.",]})
-        if (not self.ask_credential_on_launch) and self.credential is None:
-            raise ValidationError({"credential": ["Job Template must provide 'credential' or allow prompting for it.",]})
+        validation_errors, resources_needed_to_start = self.resource_validation_data()
+        if validation_errors:
+            raise ValidationError(validation_errors)
         return super(JobTemplate, self).clean()
+
+    @property
+    def resources_needed_to_start(self):
+        validation_errors, resources_needed_to_start = self.resource_validation_data()
+        return resources_needed_to_start
 
     def create_job(self, **kwargs):
         '''
@@ -265,9 +294,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start) and
-                    not len(self.variables_needed_to_start) and
-                    self.inventory)
+        return ((not self.resources_needed_to_start) and
+                (not self.passwords_needed_to_start) and
+                (not self.variables_needed_to_start))
 
     @property
     def variables_needed_to_start(self):
