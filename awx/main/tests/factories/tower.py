@@ -47,7 +47,8 @@ def build_role_objects(objects):
                 raise NotUnique(o.name, combined_objects)
             combined_objects[o.name] = o
         else:
-            raise RuntimeError('expected a list of dict or list of list, got a type {}'.format(type(o)))
+            if o is not None:
+                raise RuntimeError('expected a list of dict or list of list, got a type {}'.format(type(o)))
     return combined_objects
 
 def apply_roles(roles, objects, persisted):
@@ -244,7 +245,7 @@ def create_organization(name, **kwargs):
             else:
                 notification_templates[nt] = mk_notification_template(nt, organization=org, persisted=persisted)
 
-    role_objects = build_role_objects([superusers, users, teams, projects, labels, notification_templates])
+    role_objects = build_role_objects([org, superusers, users, teams, projects, labels, notification_templates])
     apply_roles(kwargs.get('roles'), role_objects, persisted)
     return Objects(organization=org,
                    superusers=_Mapped(superusers),
@@ -262,18 +263,18 @@ def create_notification_template(name, **kwargs):
 
     if 'organization' in kwargs:
         org = kwargs['organization']
-        organization = mk_organization(org, persisted=persisted)
+        organization = mk_organization(org, '{}-desc'.format(org), persisted=persisted)
 
     notification_template = mk_notification_template(name, organization=organization, persisted=persisted)
 
     teams = generate_teams(organization, persisted, teams=kwargs.get('teams'))
-    superusers = generate_users(org, teams, True, persisted, superusers=kwargs.get('superusers'))
-    users = generate_users(org, teams, False, persisted, users=kwargs.get('users'))
+    superusers = generate_users(organization, teams, True, persisted, superusers=kwargs.get('superusers'))
+    users = generate_users(organization, teams, False, persisted, users=kwargs.get('users'))
 
     role_objects = build_role_objects([organization, notification_template])
     apply_roles(kwargs.get('roles'), role_objects, persisted)
     return Objects(notification_template=notification_template,
                    organization=organization,
-                   users=users,
-                   superusers=superusers,
+                   users=_Mapped(users),
+                   superusers=_Mapped(superusers),
                    teams=teams)
