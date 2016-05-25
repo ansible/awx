@@ -41,6 +41,7 @@ from awx.main.models.notifications import NotificationTemplate
 from awx.main.tests.factories import (
     create_organization,
     create_job_template,
+    create_notification_template,
 )
 
 '''
@@ -276,21 +277,6 @@ def permissions():
     }
 
 @pytest.fixture
-def notification_template_factory(organization):
-    def n(name="test-notification_template"):
-        try:
-            notification_template = NotificationTemplate.objects.get(name=name)
-        except NotificationTemplate.DoesNotExist:
-            notification_template = NotificationTemplate(name=name,
-                                                         organization=organization,
-                                                         notification_type="webhook",
-                                                         notification_configuration=dict(url="http://localhost",
-                                                                                         headers={"Test": "Header"}))
-            notification_template.save()
-        return notification_template
-    return n
-
-@pytest.fixture
 def post():
     def rf(url, data, user=None, middleware=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
@@ -475,3 +461,8 @@ def job_template_factory():
 @pytest.fixture
 def organization_factory():
     return create_organization
+
+@pytest.fixture
+def notification_template_factory():
+    return create_notification_template
+

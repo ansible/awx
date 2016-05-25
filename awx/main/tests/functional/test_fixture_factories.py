@@ -1,5 +1,6 @@
 import pytest
 
+from awx.main.tests.factories import NotUnique
 
 def test_roles_exc_not_persisted(organization_factory):
     with pytest.raises(RuntimeError) as exc:
@@ -15,9 +16,9 @@ def test_roles_exc_bad_object(organization_factory):
 
 @pytest.mark.django_db
 def test_roles_exc_not_unique(organization_factory):
-    with pytest.raises(KeyError) as exc:
+    with pytest.raises(NotUnique) as exc:
         organization_factory('test-org', projects=['foo'], teams=['foo'], roles=['foo.admin_role:user'])
-    assert 'must be unique' in str(exc.value)
+    assert 'not a unique key' in str(exc.value)
 
 
 @pytest.mark.django_db
@@ -48,14 +49,14 @@ def test_org_factory_roles(organization_factory):
                                    users=['team1:foo', 'bar'],
                                    projects=['baz', 'bang'],
                                    roles=['team2.member_role:foo',
-                                          'team2.admin_role:bar',
+                                          'team1.admin_role:bar',
                                           'team1.admin_role:team2.admin_role',
                                           'baz.admin_role:foo'])
 
-    assert objects.users.bar in objects.teams.team1.admin_role
+    assert objects.users.bar in objects.teams.team2.admin_role
     assert objects.users.foo in objects.projects.baz.admin_role
     assert objects.users.foo in objects.teams.team1.member_role
-    assert objects.teams.team2.admin_role in objects.teams.team1.admin_role.parents.all()
+    assert objects.teams.team2.admin_role in objects.teams.team1.admin_role.children.all()
 
 
 @pytest.mark.django_db

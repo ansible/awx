@@ -1,125 +1,84 @@
 from collections import namedtuple
 
 from django.contrib.auth.models import User
-from django.conf import settings
 
 from awx.main.models import (
     Organization,
     Project,
     Team,
-    Instance,
-    JobTemplate,
+    NotificationTemplate,
     Credential,
     Inventory,
     Label,
 )
 
+from .fixtures import (
+    mk_organization,
+    mk_team,
+    mk_user,
+    mk_job_template,
+    mk_credential,
+    mk_inventory,
+    mk_project,
+    mk_label,
+    mk_notification_template,
+)
 
-def instance():
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
-
-
-def mk_organization(name, desc, persisted=True):
-    org = Organization(name=name, description=desc)
-    if persisted:
-        instance()
-        org.save()
-    return org
-
-
-def mk_label(name, **kwargs):
-    label = Label(name=name, description="%s-desc".format(name))
-    organization = kwargs.get('organization')
-    if organization is not None:
-        label.organization = organization
-    if kwargs.get('persisted', True):
-        label.save()
-    return label
+from .exc import NotUnique
 
 
-def mk_team(name, **kwargs):
-    team = Team(name=name)
-    organization = kwargs.get('organization')
-    if organization is not None:
-        team.organization = organization
-    if kwargs.get('persisted', True):
-        instance()
-        team.save()
-    return team
+def build_role_objects(objects):
+    '''build_role_objects assembles a dictionary of all possible objects by name.
+    It will raise an exception if any of the objects share a name due to the fact that
+    it is to be used with apply_roles, which expects unique object names.
 
-
-def mk_user(name, **kwargs):
-    user = User(username=name, is_superuser=kwargs.get('is_superuser', False))
-
-    if kwargs.get('persisted', True):
-        user.save()
-        organization = kwargs.get('organization')
-        if organization is not None:
-            organization.member_role.members.add(user)
-        team = kwargs.get('team')
-        if team is not None:
-            team.member_role.members.add(user)
-    return user
-
-
-def mk_project(name, **kwargs):
-    project = Project(name=name)
-    organization = kwargs.get('organization')
-    if organization is not None:
-        project.organization = organization
-    if kwargs.get('persisted', True):
-        project.save()
-    return project
-
-
-def mk_credential(name, **kwargs):
-    cred = Credential(name=name)
-    cred.cloud = kwargs.get('cloud', False)
-    cred.kind = kwargs.get('kind', 'ssh')
-    if kwargs.get('persisted', True):
-        cred.save()
-    return cred
-
-
-def mk_inventory(name, **kwargs):
-    inv = Inventory(name=name)
-    organization = kwargs.get('organization', None)
-    if organization is not None:
-        inv.organization = organization
-    if kwargs.get('persisted', True):
-        inv.save()
-    return inv
-
-def mk_job_template(name, **kwargs):
-    jt = JobTemplate(name=name, job_type=kwargs.get('job_type', 'run'))
-
-    jt.inventory = kwargs.get('inventory', None)
-    if jt.inventory is None:
-        jt.ask_inventory_on_launch = True
-
-    jt.credential = kwargs.get('credential', None)
-    if jt.credential is None:
-        jt.ask_credential_on_launch = True
-
-    jt.project = kwargs.get('project', None)
-
-    if kwargs.get('persisted', True):
-        jt.save()
-    return jt
+    roles share a common name e.g. admin_role, member_role. This ensures that the
+    roles short hand used for mapping Roles and Users in apply_roles will function as desired.
+    '''
+    combined_objects = {}
+    for o in objects:
+        if type(o) is dict:
+            for k,v in o.iteritems():
+                if combined_objects.get(k) is not None:
+                    raise NotUnique(k, combined_objects)
+                combined_objects[k] = v
+        elif hasattr(o, 'name'):
+            if combined_objects.get(o.name) is not None:
+                raise NotUnique(o.name, combined_objects)
+            combined_objects[o.name] = o
+        else:
+            raise RuntimeError('expected a list of dict or list of list, got a type {}'.format(type(o)))
+    return combined_objects
 
 def apply_roles(roles, objects, persisted):
+    '''apply_roles evaluates a list of Role relationships represented as strings.
+    The format of this string is 'role:[user|role]'. When a user is provided, they will be
+    made a member of the role on the LHS. When a role is provided that role will be added to
+    the children of the role on the LHS.
+
+    This function assumes that objects is a dictionary that contains a unique set of key to value
+    mappings for all possible "Role objects". See the example below:
+
+        Mapping Users
+        -------------
+        roles = ['org1.admin_role:user1', 'team1.admin_role:user1']
+        objects = {'org1': Organization, 'team1': Team, 'user1': User]
+
+        Mapping Roles
+        -------------
+        roles = ['org1.admin_role:team1.admin_role']
+        objects = {'org1': Organization, 'team1': Team}
+
+        Invalid Mapping
+        ---------------
+        roles = ['org1.admin_role:team1.admin_role']
+        objects = {'org1': Organization', 'user1': User} # Exception, no team1 entry
+    '''
     if roles is None:
         return None
 
     if not persisted:
         raise RuntimeError('roles can not be used when persisted=False')
-
-    all_objects = {}
-    for d in objects:
-        for k,v in d.iteritems():
-            if all_objects.get(k) is not None:
-                raise KeyError('object names must be unique when using roles {} key already exists with value {}'.format(k,v))
-            all_objects[k] = v
 
     for role in roles:
         obj_role, sep, member_role = role.partition(':')
@@ -129,14 +88,14 @@ def apply_roles(roles, objects, persisted):
         obj_str, o_role_str = obj_role.split('.')
         member_str, m_sep, m_role_str = member_role.partition('.')
 
-        obj = all_objects[obj_str]
+        obj = objects[obj_str]
         obj_role = getattr(obj, o_role_str)
 
-        member = all_objects[member_str]
+        member = objects[member_str]
         if m_role_str:
             if hasattr(member, m_role_str):
                 member_role = getattr(member, m_role_str)
-                obj_role.parents.add(member_role)
+                obj_role.children.add(member_role)
             else:
                 raise RuntimeError('unable to find {} role for {}'.format(m_role_str, member_str))
         else:
@@ -145,15 +104,67 @@ def apply_roles(roles, objects, persisted):
             else:
                 raise RuntimeError('unable to add non-user {} for members list of {}'.format(member_str, obj_str))
 
+def generate_users(organization, teams, superuser, persisted, **kwargs):
+    '''generate_users evaluates a mixed list of User objects and strings.
+    If a string is encountered a user with that username is created and added to the lookup dict.
+    If a User object is encountered the User.username is used as a key for the lookup dict.
+
+    A short hand for assigning a user to a team is available in the following format: "team_name:username".
+    If a string in that format is encounted an attempt to lookup the team by the key team_name from the teams
+    argumnent is made, a KeyError will be thrown if the team does not exist in the dict. The teams argument should
+    be a dict of {Team.name:Team}
+    '''
+    users = {}
+    key = 'superusers' if superuser else 'users'
+    if key in kwargs and kwargs.get(key) is not None:
+        for u in kwargs[key]:
+            if type(u) is User:
+                users[u.username] = u
+            else:
+                p1, sep, p2 = u.partition(':')
+                if p2:
+                    t = teams[p1]
+                    users[p2] = mk_user(p2, organization=organization, team=t, is_superuser=superuser, persisted=persisted)
+                else:
+                    users[p1] = mk_user(p1, organization=organization, team=None, is_superuser=superuser, persisted=persisted)
+    return users
+
+def generate_teams(organization, persisted, **kwargs):
+    '''generate_teams evalutes a mixed list of Team objects and strings.
+    If a string is encountered a team with that string name is created and added to the lookup dict.
+    If a Team object is encounted the Team.name is used as a key for the lookup dict.
+    '''
+    teams = {}
+    if 'teams' in kwargs and kwargs.get('teams') is not None:
+        for t in kwargs['teams']:
+            if type(t) is Team:
+                teams[t.name] = t
+            else:
+                teams[t] = mk_team(t, organization=organization, persisted=persisted)
+    return teams
+
 
 class _Mapped(object):
+    '''_Mapped is a helper class that replaces spaces and dashes
+    in the name of an object and assigns the object as an attribute
+
+         input: {'my org': Organization}
+         output: instance.my_org = Organization
+    '''
     def __init__(self, d):
         self.d = d
         for k,v in d.items():
+            k = k.replace(' ', '_')
+            k = k.replace('-', '_')
+
             setattr(self, k.replace(' ','_'), v)
 
     def all(self):
         return self.d.values()
+
+# create methods are intended to be called directly as needed
+# or encapsulated by specific factory fixtures in a conftest
+#
 
 def create_job_template(name, **kwargs):
     Objects = namedtuple("Objects", "job_template, inventory, project, credential, job_type")
@@ -189,8 +200,8 @@ def create_job_template(name, **kwargs):
                          inventory=inv, credential=cred,
                          job_type=job_type, persisted=persisted)
 
-    objects = [{o.name: o} for o in [org, proj, inv, cred]]
-    apply_roles(kwargs.get('roles'), objects, persisted)
+    role_objects = build_role_objects([org, proj, inv, cred])
+    apply_roles(kwargs.get('roles'), role_objects, persisted)
 
     return Objects(job_template=jt,
                    project=proj,
@@ -199,23 +210,14 @@ def create_job_template(name, **kwargs):
                    job_type=job_type)
 
 def create_organization(name, **kwargs):
-    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels")
+    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels,notification_templates")
 
-    superusers = {}
-    users = {}
-    teams = {}
     projects = {}
     labels = {}
+    notification_templates = {}
     persisted = kwargs.get('persisted', True)
 
     org = mk_organization(name, '%s-desc'.format(name), persisted=persisted)
-
-    if 'teams' in kwargs:
-        for t in kwargs['teams']:
-            if type(t) is Team:
-                teams[t.name] = t
-            else:
-                teams[t] = mk_team(t, organization=org, persisted=persisted)
 
     if 'projects' in kwargs:
         for p in kwargs['projects']:
@@ -224,31 +226,9 @@ def create_organization(name, **kwargs):
             else:
                 projects[p] = mk_project(p, organization=org, persisted=persisted)
 
-    if 'superusers' in kwargs:
-        # remove this duplication eventually
-        for u in kwargs['superusers']:
-            if type(u) is User:
-                users[u.username] = u
-            else:
-                p1, sep, p2 = u.partition(':')
-                if p2:
-                    t = teams[p1]
-                    superusers[p2] = mk_user(p2, organization=org, team=t, is_superuser=True, persisted=persisted)
-                else:
-                    superusers[p1] = mk_user(p1, organization=org, team=None, is_superuser=True, persisted=persisted)
-
-    if 'users' in kwargs:
-        # remove this duplication eventually
-        for u in kwargs['users']:
-            if type(u) is User:
-                users[u.username] = u
-            else:
-                p1, sep, p2 = u.partition(':')
-                if p2:
-                    t = teams[p1]
-                    users[p2] = mk_user(p2, organization=org, team=t, is_superuser=False, persisted=persisted)
-                else:
-                    users[p1] = mk_user(p1, organization=org, is_superuser=False, persisted=persisted)
+    teams = generate_teams(org, persisted, teams=kwargs.get('teams'))
+    superusers = generate_users(org, teams, True, persisted, superusers=kwargs.get('superusers'))
+    users = generate_users(org, teams, False, persisted, users=kwargs.get('users'))
 
     if 'labels' in kwargs:
         for l in kwargs['labels']:
@@ -257,11 +237,43 @@ def create_organization(name, **kwargs):
             else:
                 labels[l] = mk_label(l, organization=org, persisted=persisted)
 
-    apply_roles(kwargs.get('roles'), [superusers, users, teams, projects, labels], persisted)
+    if 'notification_templates' in kwargs:
+        for nt in kwargs['notification_templates']:
+            if type(nt) is NotificationTemplate:
+                notification_templates[nt.name] = nt
+            else:
+                notification_templates[nt] = mk_notification_template(nt, organization=org, persisted=persisted)
+
+    role_objects = build_role_objects([superusers, users, teams, projects, labels, notification_templates])
+    apply_roles(kwargs.get('roles'), role_objects, persisted)
     return Objects(organization=org,
                    superusers=_Mapped(superusers),
                    users=_Mapped(users),
                    teams=_Mapped(teams),
                    projects=_Mapped(projects),
-                   labels=_Mapped(labels))
+                   labels=_Mapped(labels),
+                   notification_templates=_Mapped(notification_templates))
 
+def create_notification_template(name, **kwargs):
+    Objects = namedtuple("Objects", "notification_template,organization,users,superusers,teams")
+
+    organization = None
+    persisted = kwargs.get('persisted', True)
+
+    if 'organization' in kwargs:
+        org = kwargs['organization']
+        organization = mk_organization(org, persisted=persisted)
+
+    notification_template = mk_notification_template(name, organization=organization, persisted=persisted)
+
+    teams = generate_teams(organization, persisted, teams=kwargs.get('teams'))
+    superusers = generate_users(org, teams, True, persisted, superusers=kwargs.get('superusers'))
+    users = generate_users(org, teams, False, persisted, users=kwargs.get('users'))
+
+    role_objects = build_role_objects([organization, notification_template])
+    apply_roles(kwargs.get('roles'), role_objects, persisted)
+    return Objects(notification_template=notification_template,
+                   organization=organization,
+                   users=users,
+                   superusers=superusers,
+                   teams=teams)
