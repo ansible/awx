@@ -87,7 +87,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         });
 
         function loadStdout() {
-            Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=-' + page_size);
+            Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=0&end_line=' + page_size);
             Rest.get()
                 .success(function(data) {
                     Wait('stop');
@@ -145,38 +145,17 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                 });
         }
 
-        $scope.stdOutScrollToTop = function() {
-            // scroll up or back in time toward the beginning of the file
-            var start, end, url;
-            if (loaded_sections.length > 0 && loaded_sections[0].start > 0) {
-                start = (loaded_sections[0].start - page_size > 0) ? loaded_sections[0].start - page_size : 0;
-                end = loaded_sections[0].start - 1;
-            }
-            else if (loaded_sections.length === 0) {
-                start = 0;
-                end = page_size;
-            }
-            if (start !== undefined  && end !== undefined) {
-                $('#stdoutMoreRowsTop').fadeIn();
-                url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + end;
+        // lrInfiniteScroll handler
+        // grabs the next stdout section
+        $scope.stdOutGetNextSection = function(){
+            if (current_range.absolute_end > current_range.end){
+                var url = $scope.stdoutEndpoint + '?format=json&start_line=' + current_range.end +
+                    '&end_line=' + (current_range.end + page_size);
                 Rest.setUrl(url);
                 Rest.get()
-                    .success( function(data) {
-                        //var currentPos = $('#pre-container').scrollTop();
-                        var newSH, oldSH = $('#pre-container').prop('scrollHeight'),
-                            st = $('#pre-container').scrollTop();
-
-                        $('#pre-container-content').prepend(data.content);
-
-                        newSH = $('#pre-container').prop('scrollHeight');
-                        $('#pre-container').scrollTop(newSH - oldSH + st);
-
-                        loaded_sections.unshift({
-                            start: (data.range.start < 0) ? 0 : data.range.start,
-                            end: data.range.end
-                        });
+                    .success(function(data){
+                        $('#pre-container-content').append(data.content);
                         current_range = data.range;
-                        $('#stdoutMoreRowsTop').fadeOut(400);
                     })
                     .error(function(data, status) {
                         ProcessErrors($scope, data, status, null, { hdr: 'Error!',

@@ -79,6 +79,7 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     //'ngAnimate',
+    'lrInfiniteScroll',
     'ngSanitize',
     'ngCookies',
     about.name,
