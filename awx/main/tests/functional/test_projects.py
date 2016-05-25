@@ -9,6 +9,19 @@ from awx.main.models import Project
 #
 # Project listing and visibility tests
 #
+@pytest.fixture
+def team_project_list(organization_factory):
+    objects = organization_factory('org-test',
+                                   superusers=['admin'],
+                                   users=['team1:alice', 'team2:bob'],
+                                   teams=['team1', 'team2'],
+                                   projects=['pteam1', 'pteam2', 'pshared'],
+                                   roles=['team1.member_role:pteam1.admin_role',
+                                          'team2.member_role:pteam2.admin_role',
+                                          'team1.member_role:pshared.admin_role',
+                                          'team2.member_role:pshared.admin_role'])
+    return objects
+
 
 @pytest.mark.django_db
 def test_user_project_list(get, organization_factory):
@@ -39,28 +52,12 @@ def test_user_project_list(get, organization_factory):
     assert get(reverse('api:user_projects_list', args=(objects.superusers.admin.pk,)), objects.users.alice).data['count'] == 2
 
 
-def setup_test_team_project_list(project_factory, team_factory, admin, alice, bob):
-    team1 = team_factory('team1')
-    team2 = team_factory('team2')
-
-    team1_project = project_factory('team1 project')
-    team1_project.admin_role.parents.add(team1.member_role)
-
-    team2_project = project_factory('team2 project')
-    team2_project.admin_role.parents.add(team2.member_role)
-
-    shared_project = project_factory('shared project')
-    shared_project.admin_role.parents.add(team1.member_role)
-    shared_project.admin_role.parents.add(team2.member_role)
-
-    team1.member_role.members.add(alice)
-    team2.member_role.members.add(bob)
-    return team1, team2
-
 @pytest.mark.django_db
-def test_team_project_list(get, project_factory, team_factory, admin, alice, bob):
-    'List of projects a team has access to, filtered by projects you can also see'
-    team1, team2 = setup_test_team_project_list(project_factory, team_factory, admin, alice, bob)
+def test_team_project_list(get, team_project_list):
+    objects = team_project_list
+
+    team1, team2 = objects.teams.team1, objects.teams.team2
+    alice, bob, admin = objects.users.alice, objects.users.bob, objects.superusers.admin
 
     # admins can see all projects on a team
     assert get(reverse('api:team_projects_list', args=(team1.pk,)), admin).data['count'] == 2
@@ -94,16 +91,10 @@ def test_team_project_list(get, project_factory, team_factory, admin, alice, bob
     assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
 
 @pytest.mark.django_db
-def test_team_project_list_fail1(get, project_factory, team_factory, admin, alice, bob):
-    # alice should not be able to see team2 projects because she doesn't have access to team2
-    team1, team2 = setup_test_team_project_list(project_factory, team_factory, admin, alice, bob)
-    res = get(reverse('api:team_projects_list', args=(team2.pk,)), alice)
+def test_team_project_list_fail1(get, team_project_list):
+    objects = team_project_list
+    res = get(reverse('api:team_projects_list', args=(objects.teams.team2.pk,)), objects.users.alice)
     assert res.status_code == 403
-
-@pytest.mark.django_db
-def test_team_project_list_fail2(get, project_factory, team_factory, admin, alice, bob):
-    team1, team2 = setup_test_team_project_list(project_factory, team_factory, admin, alice, bob)
-    # alice should not be able to see bob
 
 @pytest.mark.parametrize("u,expected_status_code", [
     ('rando', 403),
