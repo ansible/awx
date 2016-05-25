@@ -219,7 +219,7 @@ class FieldLookupBackend(BaseFilterBackend):
                     else:
                         q = Q(**{k:v})
                     queryset = queryset.filter(q)
-                queryset = queryset.filter(*args)
+                queryset = queryset.filter(*args).distinct()
             return queryset
         except (FieldError, FieldDoesNotExist, ValueError), e:
             raise ParseError(e.args[0])
