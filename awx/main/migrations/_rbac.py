@@ -215,7 +215,7 @@ def migrate_inventory(apps, schema_editor):
     Inventory = apps.get_model('main', 'Inventory')
     Permission = apps.get_model('main', 'Permission')
 
-    def role_from_permission():
+    def role_from_permission(perm):
         if perm.permission_type == 'admin':
             return inventory.admin_role
         elif perm.permission_type == 'read':
@@ -233,7 +233,7 @@ def migrate_inventory(apps, schema_editor):
             role = None
             execrole = None
 
-            role = role_from_permission()
+            role = role_from_permission(perm)
             if role is None:
                 raise Exception(smart_text(u'Unhandled permission type for inventory: {}'.format( perm.permission_type)))
 
@@ -320,23 +320,29 @@ def migrate_projects(apps, schema_editor):
             logger.warn(smart_text(u'adding Project({}) admin: {}'.format(project.name, project.created_by.username)))
 
         for team in project.deprecated_teams.all():
-            team.member_role.children.add(project.use_role)
+            team.member_role.children.add(project.read_role)
             logger.info(smart_text(u'adding Team({}) access for Project({})'.format(team.name, project.name)))
 
-        if project.organization is not None:
-            for user in project.organization.deprecated_users.all():
-                project.use_role.members.add(user)
-                logger.info(smart_text(u'adding Organization({}) member access to Project({})'.format(project.organization.name, project.name)))
-
         for perm in Permission.objects.filter(project=project):
-            # All perms at this level just imply a user or team can read
+            if perm.permission_type == 'create':
+                role = project.use_role
+            else:
+                role = project.read_role
+
             if perm.team:
-                perm.team.member_role.children.add(project.use_role)
+                perm.team.member_role.children.add(role)
                 logger.info(smart_text(u'adding Team({}) access for Project({})'.format(perm.team.name, project.name)))
 
             if perm.user:
-                project.use_role.members.add(perm.user)
+                role.members.add(perm.user)
                 logger.info(smart_text(u'adding User({}) access for Project({})'.format(perm.user.username, project.name)))
+
+        if project.organization is not None:
+            for user in project.organization.deprecated_users.all():
+                if not (project.use_role.members.filter(pk=user.id).exists() or project.admin_role.members.filter(pk=user.id).exists()):
+                    project.read_role.members.add(user)
+                    logger.info(smart_text(u'adding Organization({}) member access to Project({})'.format(project.organization.name, project.name)))
+
 
 
 @log_migration
@@ -403,7 +409,7 @@ def migrate_job_templates(apps, schema_editor):
 
         team_create_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['create'])
+            .filter(permission_type__in=['create'])
             .values_list('team__id', flat=True)
         )
         team_run_permissions = set(
@@ -413,12 +419,12 @@ def migrate_job_templates(apps, schema_editor):
         )
         user_create_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['create'] if jt.job_type == 'check' else ['run'])
+            .filter(permission_type__in=['create'])
             .values_list('user__id', flat=True)
         )
         user_run_permissions = set(
             jt_permission_qs
-            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['create'])
+            .filter(permission_type__in=['check', 'run'] if jt.job_type == 'check' else ['run'])
             .values_list('user__id', flat=True)
         )
 
@@ -446,17 +452,20 @@ def migrate_job_templates(apps, schema_editor):
                 logger.info(smart_text(u'transfering execute access on JobTemplate({}) to Team({})'.format(jt.name, team.name)))
 
         for user in User.objects.filter(id__in=user_create_permissions).iterator():
+            cred = jt.credential or jt.cloud_credential
             if (jt.inventory.id in user_inv_permissions[user.id] or
                     any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
-               ((not jt.credential and not jt.cloud_credential) or
-                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
+                    (not cred or cred.deprecated_user == user or
+                        (cred.deprecated_team and cred.deprecated_team.deprecated_users.filter(pk=user.id).exists())):
                 jt.admin_role.members.add(user)
                 logger.info(smart_text(u'transfering admin access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
         for user in User.objects.filter(id__in=user_run_permissions).iterator():
+            cred = jt.credential or jt.cloud_credential
+
             if (jt.inventory.id in user_inv_permissions[user.id] or
                     any([jt.inventory.id in team_inv_permissions[team.id] for team in user.deprecated_teams.all()])) and \
-               ((not jt.credential and not jt.cloud_credential) or
-                    Credential.objects.filter(Q(deprecated_user=user) | Q(deprecated_team__deprecated_users=user), jobtemplates=jt).exists()):
+                    (not cred or cred.deprecated_user == user or
+                        (cred.deprecated_team and cred.deprecated_team.deprecated_users.filter(pk=user.id).exists())):
                 jt.execute_role.members.add(user)
                 logger.info(smart_text(u'transfering execute access on JobTemplate({}) to User({})'.format(jt.name, user.username)))
 
@@ -468,8 +477,6 @@ def rebuild_role_hierarchy(apps, schema_editor):
         start = time()
         roots = Role.objects \
                     .all() \
-                    .exclude(pk__in=Role.parents.through.objects.all()
-                                        .values_list('from_role_id', flat=True).distinct()) \
                     .values_list('id', flat=True)
         stop = time()
         logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
