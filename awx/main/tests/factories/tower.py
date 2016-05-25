@@ -27,8 +27,8 @@ from .fixtures import (
 from .exc import NotUnique
 
 
-def build_role_objects(objects):
-    '''build_role_objects assembles a dictionary of all possible objects by name.
+def generate_role_objects(objects):
+    '''generate_role_objects assembles a dictionary of all possible objects by name.
     It will raise an exception if any of the objects share a name due to the fact that
     it is to be used with apply_roles, which expects unique object names.
 
@@ -201,7 +201,7 @@ def create_job_template(name, **kwargs):
                          inventory=inv, credential=cred,
                          job_type=job_type, persisted=persisted)
 
-    role_objects = build_role_objects([org, proj, inv, cred])
+    role_objects = generate_role_objects([org, proj, inv, cred])
     apply_roles(kwargs.get('roles'), role_objects, persisted)
 
     return Objects(job_template=jt,
@@ -245,7 +245,7 @@ def create_organization(name, **kwargs):
             else:
                 notification_templates[nt] = mk_notification_template(nt, organization=org, persisted=persisted)
 
-    role_objects = build_role_objects([org, superusers, users, teams, projects, labels, notification_templates])
+    role_objects = generate_role_objects([org, superusers, users, teams, projects, labels, notification_templates])
     apply_roles(kwargs.get('roles'), role_objects, persisted)
     return Objects(organization=org,
                    superusers=_Mapped(superusers),
@@ -271,7 +271,7 @@ def create_notification_template(name, **kwargs):
     superusers = generate_users(organization, teams, True, persisted, superusers=kwargs.get('superusers'))
     users = generate_users(organization, teams, False, persisted, users=kwargs.get('users'))
 
-    role_objects = build_role_objects([organization, notification_template])
+    role_objects = generate_role_objects([organization, notification_template])
     apply_roles(kwargs.get('roles'), role_objects, persisted)
     return Objects(notification_template=notification_template,
                    organization=organization,

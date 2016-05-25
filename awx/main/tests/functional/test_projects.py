@@ -1,7 +1,6 @@
 import mock # noqa
 import pytest
 
-from django.db import transaction
 from django.core.urlresolvers import reverse
 from awx.main.models import Project
 
@@ -70,12 +69,6 @@ def test_team_project_list(get, team_project_list):
     team2.read_role.members.add(alice)
     assert get(reverse('api:team_projects_list', args=(team2.pk,)), alice).data['count'] == 1
     team2.read_role.members.remove(alice)
-
-    # Test user endpoints first, very similar tests to test_user_project_list
-    # but permissions are being derived from team membership instead.
-    with transaction.atomic():
-        res = get(reverse('api:user_projects_list', args=(bob.pk,)), alice)
-        assert res.status_code == 403
 
     # admins can see all projects
     assert get(reverse('api:user_projects_list', args=(admin.pk,)), admin).data['count'] == 3
