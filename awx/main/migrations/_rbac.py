@@ -219,7 +219,7 @@ def migrate_inventory(apps, schema_editor):
         if perm.permission_type == 'admin':
             return inventory.admin_role
         elif perm.permission_type == 'read':
-            return inventory.use_role
+            return inventory.read_role
         elif perm.permission_type == 'write':
             return inventory.update_role
         elif perm.permission_type == 'check' or perm.permission_type == 'run' or perm.permission_type == 'create':
