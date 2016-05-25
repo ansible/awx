@@ -25,108 +25,100 @@ def mk_instance(persisted=True):
     return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
 
 
-def mk_organization(name, desc, persisted=True):
-    org = Organization(name=name, description=desc)
+def mk_organization(name, description=None, persisted=True):
+    description = description or '{}-description'.format(name)
+    org = Organization(name=name, description=description)
     if persisted:
-        mk_instance(True)
+        mk_instance(persisted)
         org.save()
     return org
 
 
-def mk_label(name, **kwargs):
-    label = Label(name=name, description="%s-desc".format(name))
-    organization = kwargs.get('organization')
+def mk_label(name, organization=None, description=None, persisted=True):
+    description = description or '{}-description'.format(name)
+    label = Label(name=name, description=description)
     if organization is not None:
         label.organization = organization
-    if kwargs.get('persisted', True):
+    if persisted:
         label.save()
     return label
 
 
-def mk_team(name, **kwargs):
+def mk_team(name, organization=None, persisted=True):
     team = Team(name=name)
-    organization = kwargs.get('organization')
     if organization is not None:
         team.organization = organization
-    if kwargs.get('persisted', True):
-        mk_instance(True)
+    if persisted:
+        mk_instance(persisted)
         team.save()
     return team
 
 
-def mk_user(name, **kwargs):
-    user = User(username=name, is_superuser=kwargs.get('is_superuser', False))
-
-    if kwargs.get('persisted', True):
+def mk_user(name, is_superuser=False, organization=None, team=None, persisted=True):
+    user = User(username=name, is_superuser=is_superuser)
+    if persisted:
         user.save()
-        organization = kwargs.get('organization')
         if organization is not None:
             organization.member_role.members.add(user)
-        team = kwargs.get('team')
         if team is not None:
             team.member_role.members.add(user)
     return user
 
 
-def mk_project(name, **kwargs):
-    project = Project(name=name)
-    organization = kwargs.get('organization')
+def mk_project(name, organization=None, description=None, persisted=True):
+    description = description or '{}-description'.format(name)
+    project = Project(name=name, description=description)
     if organization is not None:
         project.organization = organization
-    if kwargs.get('persisted', True):
+    if persisted:
         project.save()
     return project
 
 
-def mk_credential(name, **kwargs):
-    cred = Credential(name=name)
-    cred.cloud = kwargs.get('cloud', False)
-    cred.kind = kwargs.get('kind', 'ssh')
-    if kwargs.get('persisted', True):
+def mk_credential(name, cloud=False, kind='ssh', persisted=True):
+    cred = Credential(name=name, cloud=cloud, kind=kind)
+    if persisted:
         cred.save()
     return cred
 
 
-def mk_notification_template(name, **kwargs):
+def mk_notification_template(name, notification_type='webhook', configuration=None, organization=None, persisted=True):
     nt = NotificationTemplate(name=name)
-    nt.notification_type = kwargs.get('type', 'webhook')
+    nt.notification_type = notification_type
+    nt.notification_configuration = configuration or dict(url="http://localhost", headers={"Test": "Header"})
 
-    configuration = kwargs.get('configuration',
-                               dict(url="http://localhost", headers={"Test": "Header"}))
-    nt.notification_configuration = configuration
-
-    organization = kwargs.get('organization')
     if organization is not None:
         nt.organization = organization
-    if kwargs.get('persisted', True):
+    if persisted:
         nt.save()
     return nt
 
 
-def mk_inventory(name, **kwargs):
+def mk_inventory(name, organization=None, persisted=True):
     inv = Inventory(name=name)
-    organization = kwargs.get('organization', None)
     if organization is not None:
         inv.organization = organization
-    if kwargs.get('persisted', True):
+    if persisted:
         inv.save()
     return inv
 
 
-def mk_job_template(name, **kwargs):
-    jt = JobTemplate(name=name, job_type=kwargs.get('job_type', 'run'))
+def mk_job_template(name, job_type='run',
+                    organization=None, inventory=None,
+                    credential=None, persisted=True,
+                    project=None):
+    jt = JobTemplate(name=name, job_type=job_type)
 
-    jt.inventory = kwargs.get('inventory', None)
+    jt.inventory = inventory
     if jt.inventory is None:
         jt.ask_inventory_on_launch = True
 
-    jt.credential = kwargs.get('credential', None)
+    jt.credential = credential
     if jt.credential is None:
         jt.ask_credential_on_launch = True
 
-    jt.project = kwargs.get('project', None)
+    jt.project = project
 
-    if kwargs.get('persisted', True):
+    if persisted:
         jt.save()
     return jt
-
