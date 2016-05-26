@@ -85,12 +85,18 @@
     margin-right: 10px;
 }
 
-@media (max-width: 615px) {
+@media (max-width: 840px) {
     .MgmtCards-card {
         width: 100%;
         margin-right: 0px;
     }
 }
+
+@media (min-width: 840px) and (max-width: 1240px) {
+    .MgmtCards-card {
+        width: ~"calc(50% - 10px)";
+    }
+ }
 
 #prompt-for-days-facts, #prompt-for-days {
     overflow-x: hidden;
