@@ -784,7 +784,7 @@ export default
                 url, play;
 
             scope.tasks = [];
-
+            console.log(scope)
             if (scope.selectedPlay) {
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
                 url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
@@ -912,16 +912,25 @@ export default
                     scope.tasks[idx].taskActiveClass = '';
                 }
             });
-            params = {
-                parent: scope.selectedTask,
-                event__startswith: 'runner',
-                page_size: scope.hostResultsMaxRows,
-                order: 'host_name,counter',
-            };
-            JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                scope.hostResults = JobDetailService.processHostEvents(res.results);
+            if (scope.selectedTask !== null){
+                params = {
+                    parent: scope.selectedTask,
+                    event__startswith: 'runner',
+                    page_size: scope.hostResultsMaxRows,
+                    order: 'host_name,counter',
+                };
+                if (scope.search_host_status === 'failed'){
+                    params.failed = true;
+                }
+                JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                    scope.hostResults = JobDetailService.processHostEvents(res.results);
+                    scope.hostResultsLoading = false;
+                });
+            }
+            else{
+                scope.hostResults = [];
                 scope.hostResultsLoading = false;
-            });
+            }
         };
     }])
 
