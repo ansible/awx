@@ -107,7 +107,7 @@ def mk_job_template(name, job_type='run',
                     organization=None, inventory=None,
                     credential=None, persisted=True,
                     project=None):
-    jt = JobTemplate(name=name, job_type=job_type)
+    jt = JobTemplate(name=name, job_type=job_type, playbook='mocked')
 
     jt.inventory = inventory
     if jt.inventory is None:
