@@ -384,7 +384,7 @@ def activity_stream_associate(sender, instance, **kwargs):
             obj2 = kwargs['model']
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
-            if isinstance(obj2_actual, Role) and hasattr(obj2_actual, 'content_object'):
+            if isinstance(obj2_actual, Role) and obj2_actual.content_object is not None:
                 obj2_actual = obj2_actual.content_object
                 object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)
             else:
