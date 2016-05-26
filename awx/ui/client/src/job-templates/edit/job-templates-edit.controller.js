@@ -288,6 +288,7 @@ export default
                 jQuery.extend(true, CloudCredentialList, CredentialList);
                 CloudCredentialList.name = 'cloudcredentials';
                 CloudCredentialList.iterator = 'cloudcredential';
+                CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
                 LookUpInit({
                     url: GetBasePath('credentials') + '?cloud=true',
                     scope: $scope,
