@@ -979,7 +979,7 @@ export default
             job_detail_chart = nv.models.pieChart()
                 .margin({bottom: 15})
                 .x(function(d) {
-                    return d.label +': '+ Math.round((d.value/total)*100) + "%";
+                    return d.label +': '+ Math.floor((d.value/total)*100) + "%";
                 })
                 .y(function(d) { return d.value; })
                 .showLabels(false)
