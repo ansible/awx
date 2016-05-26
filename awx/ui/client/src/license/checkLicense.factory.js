@@ -33,20 +33,20 @@ export default
 				// Intended to for runtime or pre-state checks
 				// Returns false if invalid
 				valid: function(license) {
-					 	if (!license.valid_key){
-					 		return false;
-					 	}
-					 	else if (license.free_instances <= 0){
-					 		return false;
-					 	}
-					 	// notify if less than 15 days remaining
-					 	else if (license.time_remaining / 1000 / 60 / 60 / 24 > 15){
-					 		return false;
-					 	}
-					 	return true;
+					if (!license.valid_key){
+						return false;
+					}
+					else if (license.free_instances <= 0){
+						return false;
+					}
+					// notify if less than 15 days remaining
+					else if (license.time_remaining / 1000 / 60 / 60 / 24 > 15){
+						return false;
+					}
+					return true;
 				},
 				test: function(event){
-					var deferred = $q.defer(),
+					var //deferred = $q.defer(),
 						license = this.get();
 					if(license === null || !$rootScope.license_tested){
 						if(this.valid(license) === false) {
@@ -55,11 +55,11 @@ export default
 								event.preventDefault();
 							}
 							$state.go('license');
-							deferred.reject();
+							// deferred.reject();
 						}
 						else {
 							$rootScope.licenseMissing = false;
-							deferred.resolve();
+							// deferred.resolve();
 						}
 					}
 					else if(this.valid(license) === false) {
@@ -68,13 +68,13 @@ export default
 						if(event){
 							event.preventDefault();
 						}
-						deferred.reject(license);
+						// deferred.reject(license);
 					}
 					else {
 						$rootScope.licenseMissing = false;
-						deferred.resolve(license);
+						// deferred.resolve(license);
 					}
-					return deferred.promise;
+					return;// deferred.promise;
 				}
 
 			};

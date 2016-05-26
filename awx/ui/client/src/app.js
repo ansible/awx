@@ -214,8 +214,10 @@ var tower = angular.module('Tower', [
             timeout: 4000
         });
     }])
-    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider', '$urlMatcherFactoryProvider',
-        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider, $urlMatcherFactoryProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
+    '$urlMatcherFactoryProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider,
+        $urlMatcherFactoryProvider) {
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -246,7 +248,7 @@ var tower = angular.module('Tower', [
                     graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
                         return $q.all({
                             jobStatus: jobStatusGraphData.get("month", "all"),
-                            features: FeaturesService.get()
+                            // features: FeaturesService.get()
                         });
                     }]
                 }
@@ -521,10 +523,11 @@ var tower = angular.module('Tower', [
         'ClearScope', 'Socket', 'LoadConfig', 'Store',
         'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
         'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+        'FeaturesService',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
             $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
             LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
-            ProcessErrors, $state, GetBasePath, ConfigService) {
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService) {
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
@@ -879,14 +882,14 @@ var tower = angular.module('Tower', [
                             $rootScope.$emit('OpenSocket');
                             ConfigService.getConfig().then(function(){
                                 pendoService.issuePendoIdentity();
-                                CheckLicense.test().then(function(){
-                                    // $state.go(next);
-                                    return;
-                                })
-                                .catch(function(){
-                                    event.preventDefault();
-                                    $state.go('license');
-                                });
+                                CheckLicense.test();
+                                FeaturesService.get();
+                                if($location.$$path === "/home" && $state.current && $state.current.name === ""){
+                                    $state.go('dashboard');
+                                }
+                                else if($location.$$path === "/portal" && $state.current && $state.current.name === ""){
+                                    $state.go('portalMode');
+                                }
                             });
                         });
                     }

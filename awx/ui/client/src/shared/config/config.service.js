@@ -6,8 +6,8 @@
 
 
 export default
-   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope',
-   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope) {
+   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope', '$state',
+   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope, $state) {
        return {
             get: function(){
                 return this.config;
@@ -20,7 +20,7 @@ export default
             delete: function(){
                 delete(this.config);
             },
-
+            
             getConfig: function () {
                 var config = this.get(),
                 that = this,

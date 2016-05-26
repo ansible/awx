@@ -17,10 +17,5 @@ export default {
     },
     ncyBreadcrumb: {
         label: "INVENTORY EDIT"
-    },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
     }
 };

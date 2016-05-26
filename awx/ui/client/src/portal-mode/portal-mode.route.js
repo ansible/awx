@@ -10,11 +10,6 @@ export default {
     ncyBreadcrumb: {
         label: "MY VIEW"
     },
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
-    },
     views: {
         // the empty parent ui-view
         "" : {
