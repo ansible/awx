@@ -409,7 +409,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 # If the m2m is from the User side we need to
                 # set the content_object of the Role for our entry.
                 if type(instance) == User and role.content_object is not None:
-                    getattr(activity_entry, role.content_type.name).add(role.content_object)
+                    getattr(activity_entry, role.content_type.name.replace(' ', '_')).add(role.content_object)
 
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel
