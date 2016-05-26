@@ -17,7 +17,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
     Find, Empty, $state) {
 
     var list = InventoryList,
-        defaultUrl = GetBasePath('inventory'),
+        defaultUrl = GetBasePath('inventory') + ($stateParams.status === 'sync-failed' ? '?not__inventory_sources_with_failures=0' : ''),
         view = generateList,
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'inventories') ? 'edit' : 'select';
