@@ -103,7 +103,6 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
         'ask_job_type_on_launch':True,
         'ask_inventory_on_launch':True,
         'ask_credential_on_launch': True,
-        'survey_enabled':True,
     }, alice, expect=200)
     print(res.data)
     assert res.data['name'] == 'updated'
