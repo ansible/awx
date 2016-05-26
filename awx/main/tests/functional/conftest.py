@@ -38,6 +38,12 @@ from awx.main.models.organization import (
 
 from awx.main.models.notifications import NotificationTemplate
 
+from awx.main.tests.factories import (
+    create_organization,
+    create_job_template,
+    create_notification_template,
+)
+
 '''
 Disable all django model signals.
 '''
@@ -146,18 +152,6 @@ def instance(settings):
 @pytest.fixture
 def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
-
-@pytest.fixture
-def organization_factory(instance):
-    def factory(name):
-        try:
-            org = Organization.objects.get(name=name)
-        except Organization.DoesNotExist:
-            org = Organization.objects.create(name=name,
-                                              description="description for " + name,
-                                              )
-        return org
-    return factory
 
 @pytest.fixture
 def credential():
@@ -281,21 +275,6 @@ def permissions():
         'usage':{'read':False, 'create':False, 'write':False,
                  'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
-
-@pytest.fixture
-def notification_template_factory(organization):
-    def n(name="test-notification_template"):
-        try:
-            notification_template = NotificationTemplate.objects.get(name=name)
-        except NotificationTemplate.DoesNotExist:
-            notification_template = NotificationTemplate(name=name,
-                                                         organization=organization,
-                                                         notification_type="webhook",
-                                                         notification_configuration=dict(url="http://localhost",
-                                                                                         headers={"Test": "Header"}))
-            notification_template.save()
-        return notification_template
-    return n
 
 @pytest.fixture
 def post():
@@ -474,3 +453,16 @@ def job_template_labels(organization, job_template):
     job_template.labels.create(name="label-2", organization=organization)
 
     return job_template
+
+@pytest.fixture
+def job_template_factory():
+    return create_job_template
+
+@pytest.fixture
+def organization_factory():
+    return create_organization
+
+@pytest.fixture
+def notification_template_factory():
+    return create_notification_template
+
