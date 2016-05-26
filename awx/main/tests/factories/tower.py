@@ -211,14 +211,37 @@ def create_job_template(name, **kwargs):
                    job_type=job_type)
 
 def create_organization(name, **kwargs):
-    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels,notification_templates")
+    artifacts = [
+        "organization",
+        "teams",
+        "users",
+        "superusers",
+        "projects",
+        "labels",
+        "notification_templates",
+        "inventories",
+    ]
+
+    for k in kwargs.keys():
+        if k not in artifacts:
+            raise RuntimeError('{} is not a valid argument'.format(k))
+
+    Objects = namedtuple("Objects", ",".join(artifacts))
 
     projects = {}
+    inventories = {}
     labels = {}
     notification_templates = {}
     persisted = kwargs.get('persisted', True)
 
     org = mk_organization(name, '%s-desc'.format(name), persisted=persisted)
+
+    if 'inventories' in kwargs:
+        for i in kwargs['inventories']:
+            if type(i) is Inventory:
+                inventories[i.name] = i
+            else:
+                inventories[i] = mk_inventory(i, organization=org, persisted=persisted)
 
     if 'projects' in kwargs:
         for p in kwargs['projects']:
@@ -253,7 +276,8 @@ def create_organization(name, **kwargs):
                    teams=_Mapped(teams),
                    projects=_Mapped(projects),
                    labels=_Mapped(labels),
-                   notification_templates=_Mapped(notification_templates))
+                   notification_templates=_Mapped(notification_templates),
+                   inventories=_Mapped(inventories))
 
 def create_notification_template(name, **kwargs):
     Objects = namedtuple("Objects", "notification_template,organization,users,superusers,teams")

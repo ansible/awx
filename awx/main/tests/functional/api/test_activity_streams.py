@@ -131,3 +131,22 @@ def test_stream_queryset_hides_shows_items(
     assert queryset.filter(host__pk=host.pk, operation='create').count() == 1
     assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
     assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
+
+@pytest.mark.django_db
+def test_stream_user_direct_role_updates(get, post, organization_factory):
+    objects = organization_factory('test_org',
+                                   superusers=['admin'],
+                                   users=['test'],
+                                   inventories=['inv1'])
+
+    url = reverse('api:user_roles_list', args=(objects.users.test.pk,))
+    post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
+
+    activity_stream = ActivityStream.objects.filter(
+        inventory__pk=objects.inventories.inv1.pk,
+        user__pk=objects.users.test.pk).first()
+    url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
+    response = get(url, objects.users.test)
+
+    assert response.data['object1'] == 'user'
+    assert response.data['object2'] == 'inventory'
