@@ -379,11 +379,16 @@ def activity_stream_associate(sender, instance, **kwargs):
         obj1 = instance
         object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
+
         for entity_acted in kwargs['pk_set']:
             obj2 = kwargs['model']
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
-            object2 = camelcase_to_underscore(obj2.__name__)
+            if isinstance(obj2_actual, Role) and hasattr(obj2_actual, 'content_object'):
+                obj2_actual = obj2_actual.content_object
+                object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)
+            else:
+                object2 = camelcase_to_underscore(obj2.__name__)
             # Skip recording any inventory source, or system job template changes here.
             if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
                 continue
