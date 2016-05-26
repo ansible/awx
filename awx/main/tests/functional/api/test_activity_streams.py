@@ -133,6 +133,7 @@ def test_stream_queryset_hides_shows_items(
     assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 def test_stream_user_direct_role_updates(get, post, organization_factory):
     objects = organization_factory('test_org',
                                    superusers=['admin'],
@@ -144,7 +145,8 @@ def test_stream_user_direct_role_updates(get, post, organization_factory):
 
     activity_stream = ActivityStream.objects.filter(
         inventory__pk=objects.inventories.inv1.pk,
-        user__pk=objects.users.test.pk).first()
+        user__pk=objects.users.test.pk,
+        role__pk=objects.inventories.inv1.read_role.pk).first()
     url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
     response = get(url, objects.users.test)
 
