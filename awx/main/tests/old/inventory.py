@@ -1770,6 +1770,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertFalse(inventory_update.name.endswith(inventory_update.inventory_source.name), inventory_update.name)
 
     def test_update_from_rax(self):
+        self.skipTest('Skipping until we can resolve the CERTIFICATE_VERIFY_FAILED issue: #1706')
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
         source_password = getattr(settings, 'TEST_RACKSPACE_API_KEY', '')
         source_regions = getattr(settings, 'TEST_RACKSPACE_REGIONS', '')
