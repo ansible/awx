@@ -20,7 +20,7 @@ export default
             delete: function(){
                 delete(this.config);
             },
-            
+
             getConfig: function () {
                 var config = this.get(),
                 that = this,
