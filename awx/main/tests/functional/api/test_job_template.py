@@ -188,24 +188,23 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
     assert post_response.status_code == 403
 
 # Validation function tests
-# TODO: replace these JT creations with Wayne's new awesome factories
 
 @pytest.mark.django_db
-def test_missing_project_error(inventory, machine_credential):
-    obj = JobTemplate.objects.create(
-        job_type='run',
-        project=None,
-        inventory=inventory,
-        credential=machine_credential,
-        name='missing-project-jt'
-    )
+def test_missing_project_error(job_template_factory):
+    objects = job_template_factory(
+        'missing-project-jt',
+        organization='org1',
+        inventory='inventory1',
+        credential='cred1',
+        persisted=False)
+    obj = objects.job_template
     assert 'project' in obj.resources_needed_to_start
     validation_errors, resources_needed_to_start = obj.resource_validation_data()
     assert 'project' in validation_errors
 
 @pytest.mark.django_db
 def test_inventory_credential_contradictions(project):
-    obj = JobTemplate.objects.create(
+    obj = JobTemplate(
         job_type='run',
         project=project,
         inventory=None, ask_inventory_on_launch=False,
