@@ -11,13 +11,13 @@
 */
 
 export default
-    [   '$location', '$rootScope', '$filter', '$scope', '$compile', '$stateParams', '$log', 'ClearScope',
+    [   '$location', '$rootScope', '$filter', '$scope', '$compile', '$state', '$stateParams', '$log', 'ClearScope',
         'GetBasePath', 'Wait', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed', 'JobIsFinished',
         'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'InitiatePlaybookRun', 'LoadPlays', 'LoadTasks',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule',
         'ParseTypeChange', 'JobDetailService',
         function(
-            $location, $rootScope, $filter, $scope, $compile, $stateParams, $log, ClearScope,
+            $location, $rootScope, $filter, $scope, $compile, $state, $stateParams, $log, ClearScope,
             GetBasePath, Wait, ProcessErrors, SelectPlay, SelectTask, GetElapsed, JobIsFinished,
             SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, InitiatePlaybookRun, LoadPlays, LoadTasks,
             ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule,
@@ -160,8 +160,14 @@ export default
             scope.processing = false;
             scope.lessStatus = false;
             scope.lessDetail = false;
-            scope.lessEvents = true;
-
+            // pops the event summary panel open if we're in the host summary child state
+            //scope.lessEvents = ($state.current.name === 'jobDetail.host-summary' || $state.current.name === 'jobDetail.host-events') ? false : true;
+            if ($state.current.name === 'jobDetail.host-summary' ){
+                scope.lessEvents = false;
+            }
+            else{
+                scope.lessEvents = true;
+            }
             scope.jobData = {};
             scope.jobData.hostSummaries = {};
 

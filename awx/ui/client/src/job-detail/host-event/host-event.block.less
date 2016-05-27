@@ -2,6 +2,35 @@
 @import "awx/ui/client/src/shared/branding/colors.default.less";
 @import "awx/ui/client/src/shared/layouts/one-plus-two.less";
 
+@media screen and (min-width: 768px){
+	.HostEvent .modal-dialog{
+		width: 700px;
+	}
+}
+.HostEvent-controls button.HostEvent-close{
+    color: #FFFFFF;
+    text-transform: uppercase;
+    padding-left: 15px;
+    padding-right: 15px;
+ 	background-color: @default-link;
+ 	&:hover{
+ 		background-color: @default-link-hov;
+ 	}
+}
+.HostEvent-body{
+	margin-bottom: 10px;
+}
+.HostEvent-tab--selected{
+    background-color: #D7D7D7 !important;
+    border-color: #D7D7D7 !important;
+}
+.HostEvent-view--container{
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+}
 .HostEvent .modal-footer{
 	border: 0;
 	margin-top: 0px;
@@ -30,7 +59,8 @@
 }
 .HostEvent-title{
  	color: @default-interface-txt;
- 	font-weight: 600;	
+ 	font-weight: 600;
+ 	margin-bottom: 8px;
 }
 .HostEvent .modal-body{
     max-height: 500px;
@@ -43,10 +73,11 @@
 }
 .HostEvent-field{
 	margin-bottom: 8px;
+	flex: 0 1 12em;
 }
 .HostEvent-field--label{
-	.OnePlusTwo-left--detailsLabel;
-	width: 80px;
+	text-transform: uppercase;
+	flex: 0 1 80px;
 	margin-right: 20px;
 	font-size: 12px;
 	word-wrap: break-word;
@@ -55,21 +86,20 @@
 	.OnePlusTwo-left--detailsRow;
 }
 .HostEvent-field--content{
-	.OnePlusTwo-left--detailsContent;
+	flex: 0 1 13em;
 }
 .HostEvent-details--left, .HostEvent-details--right{
-	vertical-align:top;
-	width:265px;
-	display: inline-block;
+	flex: 1 1 47%;
 }
 .HostEvent-details--left{
-	margin-right: 10px;
+	margin-right: 40px;
 }
 .HostEvent-details--right{
 	.HostEvent-field--label{
-		width: auto;
+		flex: 0 1 25em;
 	}
 	.HostEvent-field--content{
-		text-align: right;
+		flex: 0 1 15em;
+		align-self: flex-end;
 	}
 }
