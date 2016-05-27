@@ -74,7 +74,7 @@ export default
                             var licenseInfo = FeaturesService.getLicenseInfo();
                             scope.licenseType = licenseInfo ? licenseInfo.license_type : null;
                             if (!licenseInfo) {
-                                console.warn("License info not loaded correctly");
+                                console.warn("License info not loaded correctly"); // jshint ignore:line
                             }
                         })
                         .catch(function (response) {

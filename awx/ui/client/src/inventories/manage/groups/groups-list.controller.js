@@ -80,7 +80,7 @@
                 group_id: id
             });
         };
-        $scope.showFailedHosts = function(x, y, z){
+        $scope.showFailedHosts = function() {
             $state.go('inventoryManage', {failed: true}, {reload: true});
         };
         $scope.scheduleGroup = function(id) {
@@ -91,7 +91,7 @@
             $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
             $scope.$parent.groupsSelectedItems = selection.selectedItems;
         });
-        $scope.$on('PostRefresh', () =>{
+        $scope.$on('PostRefresh', () => {
             $scope.groups.forEach( (group, index) => {
                 var group_status, hosts_status;
                 group_status = GetSyncStatusMsg({

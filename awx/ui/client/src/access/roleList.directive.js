@@ -23,7 +23,7 @@ export default
                                 return i.role;
                         }))
                         .filter((role) => {
-                            return !!attrs.teamRoleList == !!role.team_id;
+                            return Boolean(attrs.teamRoleList) === Boolean(role.team_id);
                         })
                         .sort((a, b) => {
                             if (a.name
