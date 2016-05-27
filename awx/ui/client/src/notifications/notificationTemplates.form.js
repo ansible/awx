@@ -243,8 +243,9 @@ export default function() {
                 subForm: 'typeSubForm'
             },
             api_url: {
-                label: 'API URL (e.g: https://mycompany.hiptchat.com)',
+                label: 'API URL',
                 type: 'text',
+                placeholder: 'https://mycompany.hipchat.com',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"

@@ -8,7 +8,7 @@ export default {
 	name: 'portalMode',
     url: '/portal',
     ncyBreadcrumb: {
-        label: "PORTAL MODE"
+        label: "MY VIEW"
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

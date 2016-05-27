@@ -246,7 +246,7 @@ export default
                     rows: 10,
                     awPopOver: "SSH key description",
                     awPopOverWatch:   "key_description",
-                    dataTitle: 'Help',
+                    dataTitle: 'Private Key',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: "credentialSubForm"

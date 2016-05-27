@@ -189,7 +189,7 @@
                         </div>
 
 
-                        <div id="plays-table-header" class="table-header">
+                        <div id="plays-table-header" class="table-header" ng-show="plays.length !== 0">
                             <table class="table table-condensed">
                                 <thead>
                                     <tr>
@@ -202,7 +202,7 @@
                         </div>
                         <div id="plays-table-detail" class="table-detail" lr-infinite-scroll="playsScrollDown"
                             scroll-threshold="10" time-threshold="500">
-                            <table class="table">
+                            <table class="table" ng-class="{'JobDetails-table--noResults': plays.length === 0}">
                                 <tbody>
                                     <tr class="List-tableRow cursor-pointer" ng-repeat="play in plays" ng-class-odd="'List-tableRow--oddRow'" ng-class-even="'List-tableRow--evenRow'" ng-class="play.playActiveClass" ng-click="selectPlay(play.id, $event)">
                                         <td class="List-tableCell col-lg-7 col-md-6 col-sm-6 col-xs-4 status-column" aw-tool-tip="{{ play.status_tip }}" data-tip-watch="play.status_tip" data-placement="top"><i class="JobDetail-statusIcon fa icon-job-{{ play.status }}"></i>{{ play.name }}</td>
@@ -248,7 +248,7 @@
                         </div>
 
                         <div class="table-header">
-                            <table id="tasks-table-header" class="table table-condensed">
+                            <table id="tasks-table-header" class="table table-condensed" ng-show="taskList.length !== 0">
                                 <thead>
                                     <tr>
                                         <th class="List-tableHeader col-lg-3 col-md-3 col-sm-6 col-xs-4">Tasks</th>
@@ -261,7 +261,7 @@
                         </div>
                         <div id="tasks-table-detail" class="table-detail" lr-infinite-scroll="tasksScrollDown"
                             scroll-threshold="10" time-threshold="500">
-                            <table class="table">
+                            <table class="table" ng-class="{'JobDetails-table--noResults': taskList.length === 0}">
                                 <tbody>
                                     <tr class="List-tableRow cursor-pointer" ng-class-odd="'List-tableRow--oddRow'" ng-class-even="'List-tableRow--evenRow'" ng-repeat="task in taskList = (tasks) track by $index" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
                                         <td class="List-tableCell col-lg-3 col-md-3 col-sm-6 col-xs-4 status-column" aw-tool-tip="{{ task.status_tip }}"
@@ -331,7 +331,7 @@
                                 </div>
                             </div>
                         <div class="table-header" id="hosts-table-header">
-                            <table class="table table-condensed">
+                            <table class="table table-condensed" ng-show="results.length !== 0">
                                 <thead>
                                     <tr>
                                         <th class="List-tableHeader col-lg-4 col-md-3 col-sm-3 col-xs-3">Hosts</th>
@@ -343,7 +343,7 @@
                         </div>
 
                         <div id="hosts-table-detail" class="table-detail" lr-infinite-scroll="hostResultsScrollDown" scroll-threshold="10" time-threshold="500">
-                            <table class="table">
+                            <table class="table" ng-class="{'JobDetails-table--noResults': results.length === 0}">
                                 <tbody>
                                     <tr class="List-tableRow cursor-pointer" ng-class-odd="'List-tableRow--oddRow'" ng-class-even="'List-tableRow--evenRow'" ng-repeat="result in results = (hostResults) track by $index">
                                         <td class="List-tableCell col-lg-4 col-md-3 col-sm-3 col-xs-3 status-column">
