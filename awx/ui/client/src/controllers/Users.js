@@ -162,7 +162,7 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0]
+    $scope.user_type = user_type_options[0];
     $scope.$watch('user_type', user_type_sync($scope));
 
     CreateSelect2({
@@ -271,7 +271,7 @@ export function UsersEdit($scope, $rootScope, $location,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0]
+    $scope.user_type = user_type_options[0];
     $scope.$watch('user_type', user_type_sync($scope));
 
     var setScopeFields = function(data){

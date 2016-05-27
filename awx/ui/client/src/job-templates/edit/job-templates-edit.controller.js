@@ -108,7 +108,7 @@ export default
                             }
                         })
                         .error(function (ret,status_code) {
-                            if (status_code == 403) {
+                            if (status_code === 403) {
                                 /* user doesn't have access to see the project, no big deal. */
                             } else {
                                 Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
@@ -198,7 +198,7 @@ export default
                             }
                         })
                         .error(function (data, status) {
-                            if (status == 403) {
+                            if (status === 403) {
                                 /* User doesn't have read access to the project, no problem. */
                             } else {
                                 ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +

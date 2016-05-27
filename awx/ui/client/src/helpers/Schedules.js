@@ -20,7 +20,7 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest', 
+        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest',
         'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
         function(SchedulerInit, $rootScope, Wait, Rest, ProcessErrors,
             GetBasePath, SchedulePost, $state) {
@@ -176,7 +176,7 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams', 
+        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams',
         'SchedulerInit', 'Wait', 'GetBasePath', 'Empty', 'SchedulePost', '$state', 'Rest', 'ProcessErrors',
         function($location, $rootScope, $stateParams, SchedulerInit,
             Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
@@ -295,8 +295,7 @@ export default
         }])
 
         .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait',
-            'ToJSON',
-            function(Rest, ProcessErrors, RRuleToAPI, Wait, ToJSON) {
+            function(Rest, ProcessErrors, RRuleToAPI, Wait) {
             return function(params) {
                 var scope = params.scope,
                     url = params.url,
@@ -326,8 +325,8 @@ export default
                         schedule.extra_data = JSON.stringify(extra_vars);
                     }
                     else if(scope.extraVars){
-                        schedule.extra_data = scope.parseType === 'yaml' ? 
-                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;  
+                        schedule.extra_data = scope.parseType === 'yaml' ?
+                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;
                     }
                     Rest.setUrl(url);
                     if (mode === 'add') {

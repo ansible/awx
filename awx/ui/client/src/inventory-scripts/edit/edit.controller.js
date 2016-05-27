@@ -61,7 +61,7 @@ export default
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                         }
                     }
-                    $scope.canEdit = data['script'] !== null;
+                    $scope.canEdit = data.script !== null;
                     if (!$scope.canEdit) {
                         $scope.script = "Script contents hidden";
                     }
