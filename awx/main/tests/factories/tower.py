@@ -27,6 +27,17 @@ from .fixtures import (
 from .exc import NotUnique
 
 
+def generate_objects(artifacts, kwargs):
+    '''generate_objects takes a list of artifacts that are supported by
+    a create function and compares it to the kwargs passed in to the create
+    function. If a kwarg is found that is not in the artifacts list a RuntimeError
+    is raised.
+    '''
+    for k in kwargs.keys():
+        if k not in artifacts:
+            raise RuntimeError('{} is not a valid argument'.format(k))
+    return namedtuple("Objects", ",".join(artifacts))
+
 def generate_role_objects(objects):
     '''generate_role_objects assembles a dictionary of all possible objects by name.
     It will raise an exception if any of the objects share a name due to the fact that
@@ -167,15 +178,19 @@ class _Mapped(object):
 # or encapsulated by specific factory fixtures in a conftest
 #
 
-def create_job_template(name, **kwargs):
-    Objects = namedtuple("Objects", "job_template, inventory, project, credential, job_type")
+def create_job_template(name, roles=None, persisted=True, **kwargs):
+    Objects = generate_objects(["job_template",
+                                "organization",
+                                "inventory",
+                                "project",
+                                "credential",
+                                "job_type",], kwargs)
 
     org = None
     proj = None
     inv = None
     cred = None
     job_type = kwargs.get('job_type', 'run')
-    persisted = kwargs.get('persisted', True)
 
     if 'organization' in kwargs:
         org = kwargs['organization']
@@ -202,23 +217,37 @@ def create_job_template(name, **kwargs):
                          job_type=job_type, persisted=persisted)
 
     role_objects = generate_role_objects([org, proj, inv, cred])
-    apply_roles(kwargs.get('roles'), role_objects, persisted)
+    apply_roles(roles, role_objects, persisted)
 
     return Objects(job_template=jt,
                    project=proj,
                    inventory=inv,
                    credential=cred,
-                   job_type=job_type)
+                   job_type=job_type,
+                   organization=org,)
 
-def create_organization(name, **kwargs):
-    Objects = namedtuple("Objects", "organization,teams,users,superusers,projects,labels,notification_templates")
+def create_organization(name, roles=None, persisted=True, **kwargs):
+    Objects = generate_objects(["organization",
+                                "teams", "users",
+                                "superusers",
+                                "projects",
+                                "labels",
+                                "notification_templates",
+                                "inventories",], kwargs)
 
     projects = {}
+    inventories = {}
     labels = {}
     notification_templates = {}
-    persisted = kwargs.get('persisted', True)
 
     org = mk_organization(name, '%s-desc'.format(name), persisted=persisted)
+
+    if 'inventories' in kwargs:
+        for i in kwargs['inventories']:
+            if type(i) is Inventory:
+                inventories[i.name] = i
+            else:
+                inventories[i] = mk_inventory(i, organization=org, persisted=persisted)
 
     if 'projects' in kwargs:
         for p in kwargs['projects']:
@@ -246,20 +275,24 @@ def create_organization(name, **kwargs):
                 notification_templates[nt] = mk_notification_template(nt, organization=org, persisted=persisted)
 
     role_objects = generate_role_objects([org, superusers, users, teams, projects, labels, notification_templates])
-    apply_roles(kwargs.get('roles'), role_objects, persisted)
+    apply_roles(roles, role_objects, persisted)
     return Objects(organization=org,
                    superusers=_Mapped(superusers),
                    users=_Mapped(users),
                    teams=_Mapped(teams),
                    projects=_Mapped(projects),
                    labels=_Mapped(labels),
-                   notification_templates=_Mapped(notification_templates))
+                   notification_templates=_Mapped(notification_templates),
+                   inventories=_Mapped(inventories))
 
-def create_notification_template(name, **kwargs):
-    Objects = namedtuple("Objects", "notification_template,organization,users,superusers,teams")
+def create_notification_template(name, roles=None, persisted=True, **kwargs):
+    Objects = generate_objects(["notification_template",
+                                "organization",
+                                "users",
+                                "superusers",
+                                "teams",], kwargs)
 
     organization = None
-    persisted = kwargs.get('persisted', True)
 
     if 'organization' in kwargs:
         org = kwargs['organization']
@@ -272,7 +305,7 @@ def create_notification_template(name, **kwargs):
     users = generate_users(organization, teams, False, persisted, users=kwargs.get('users'))
 
     role_objects = generate_role_objects([organization, notification_template])
-    apply_roles(kwargs.get('roles'), role_objects, persisted)
+    apply_roles(roles, role_objects, persisted)
     return Objects(notification_template=notification_template,
                    organization=organization,
                    users=_Mapped(users),
