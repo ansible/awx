@@ -820,14 +820,12 @@ class JobTemplateAccess(BaseAccess):
             data = dict(data)
 
             if self.changes_are_non_sensitive(obj, data):
-                if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
+                if 'job_type' in data and obj.job_type != data['job_type'] and data['job_type'] == PERM_INVENTORY_SCAN:
                     self.check_license(feature='system_tracking')
 
-                if 'survey_enabled' in data and data['survey_enabled']:
+                if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
                     self.check_license(feature='surveys')
-                print('Changes are non senstivie')
                 return True
-            print('Changes were senstivie')
 
             for required_field in ('credential', 'cloud_credential', 'inventory', 'project'):
                 required_obj = getattr(obj, required_field, None)
