@@ -5,14 +5,12 @@ from awx.main.models.projects import ProjectOptions
 
 from django.core.urlresolvers import reverse
 
-def decorators(func):
-    @property
-    def project_playbooks(self):
-        return ['mocked', 'othermocked']
+@property
+def project_playbooks(self):
+    return ['mocked.yml', 'alt-mocked.yml']
 
-    return pytest.mark.django_db(mock.patch.object(ProjectOptions, "playbooks", project_playbooks)(func))
-
-@decorators
+@pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 201),
@@ -34,10 +32,11 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         'project': project.id,
         'credential': machine_credential.id,
         'inventory': inventory.id,
-        'playbook': 'mocked',
+        'playbook': 'mocked.yml',
     }, alice, expect=expect)
 
-@decorators
+@pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 200),
@@ -62,10 +61,11 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
         'project': objs.project.id,
         'credential': objs.credential.id,
         'inventory': objs.inventory.id,
-        'playbook': 'othermocked',
+        'playbook': 'alt-mocked.yml',
     }, alice, expect=expect)
 
-@decorators
+@pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_edit_playbook(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     objs.job_template.admin_role.members.add(alice)
@@ -74,18 +74,21 @@ def test_edit_playbook(patch, job_template_factory, alice):
     objs.inventory.use_role.members.add(alice)
 
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'othermocked',
+        'playbook': 'alt-mocked.yml',
     }, alice, expect=200)
 
     objs.inventory.use_role.members.remove(alice)
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'mocked',
+        'playbook': 'mocked.yml',
     }, alice, expect=403)
 
-@decorators
+@pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_edit_nonsenstive(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     jt = objs.job_template
+    jt.playbook = 'mocked.yml'
+    jt.save()
     jt.admin_role.members.add(alice)
 
     res = patch(reverse('api:job_template_detail', args=(jt.id,)), {
