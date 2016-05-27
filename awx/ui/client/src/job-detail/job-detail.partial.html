@@ -404,7 +404,7 @@
                         <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}" ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
-                        <a ng-show="job_status.status == 'failed' || job_status.status == 'successful' || job_status.status == 'canceled'" href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                        <a ng-show="job_status.status === 'failed' || job_status.status === 'successful' || job_status.status === 'canceled'" href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
                             <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>
