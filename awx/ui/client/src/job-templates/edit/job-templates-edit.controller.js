@@ -155,7 +155,6 @@ export default
                     }
                 }
                 sync_playbook_select2();
-                //setTimeout(() => $("#playbook-select").trigger('change'), 1) // sync select2
             };
 
             $scope.toggleNotification = function(event, notifier_id, column) {
