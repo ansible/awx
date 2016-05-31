@@ -112,7 +112,9 @@ export default
                             // use $state.go with reload: true option to re-instantiate sockets in
                             $state.go('jobDetail', {id: job}, {reload: true});
                         }
-                        scope.clearDialog();
+                        if(scope.clearDialog) {
+                            scope.clearDialog();
+                        }
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
