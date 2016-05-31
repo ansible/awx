@@ -4,6 +4,7 @@ import mock
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.main.models.jobs import JobTemplate
+from awx.main.models.projects import ProjectOptions
 
 # Django
 from django.test.client import RequestFactory
@@ -11,16 +12,15 @@ from django.core.urlresolvers import reverse
 
 
 @pytest.fixture
-def jt_copy_edit(project):
-    return JobTemplate.objects.create(
-        job_type='run',
-        project=project,
-        playbook='hello_world.yml',
-        ask_inventory_on_launch=True,
-        ask_credential_on_launch=True,
-        name='copy-edit-job-template'
-    )
+def jt_copy_edit(job_template_factory, project):
+    objects = job_template_factory(
+        'copy-edit-job-template',
+        project=project)
+    return objects.job_template
 
+@property
+def project_playbooks(self):
+    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
 
 @pytest.mark.django_db
 def test_job_template_role_user(post, organization_factory, job_template_factory):
@@ -149,25 +149,20 @@ def test_proj_jt_admin_copy_edit(jt_copy_edit, rando):
 # Functional tests - create new JT with all returned fields, as the UI does
 
 @pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_org_admin_copy_edit_functional(jt_copy_edit, org_admin, get, post):
     get_response = get(reverse('api:job_template_detail', args=[jt_copy_edit.pk]), user=org_admin)
-
-    post_data = get_response.data
-    post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
-
     assert get_response.status_code == 200
     assert get_response.data['summary_fields']['can_copy']
 
-    with mock.patch(
-            'awx.main.models.projects.ProjectOptions.playbooks',
-            new_callable=mock.PropertyMock(return_value=['hello_world.yml'])):
-        post_response = post(reverse('api:job_template_list', args=[]), user=org_admin, data=post_data)
-
-    print '\n post_response: ' + str(post_response.data)
+    post_data = get_response.data
+    post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
+    post_response = post(reverse('api:job_template_list', args=[]), user=org_admin, data=post_data)
     assert post_response.status_code == 201
     assert post_response.data['name'] == 'copy-edit-job-template @ 12:19:47 pm'
 
 @pytest.mark.django_db
+@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
 
     # Grant random user JT admin access only
@@ -175,17 +170,10 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
     jt_copy_edit.save()
 
     get_response = get(reverse('api:job_template_detail', args=[jt_copy_edit.pk]), user=rando)
-
     assert get_response.status_code == 200
     assert not get_response.data['summary_fields']['can_copy']
 
     post_data = get_response.data
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
-
-    with mock.patch(
-            'awx.main.models.projects.ProjectOptions.playbooks',
-            new_callable=mock.PropertyMock(return_value=['hello_world.yml'])):
-        post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
-
-    print '\n post_response: ' + str(post_response.data)
+    post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
     assert post_response.status_code == 403
