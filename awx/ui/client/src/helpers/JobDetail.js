@@ -784,7 +784,6 @@ export default
                 url, play;
 
             scope.tasks = [];
-            console.log(scope)
             if (scope.selectedPlay) {
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
                 url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
