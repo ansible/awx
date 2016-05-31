@@ -41,7 +41,10 @@ def test_job_template_role_user(post, organization_factory, job_template_factory
 
 @pytest.mark.django_db
 def test_bad_data_copy_edit(admin_user, project):
-    "If a required resource (inventory here) was deleted, copying not allowed"
+    """
+    If a required resource (inventory here) was deleted, copying not allowed
+    because doing so would caues a validation error
+    """
 
     jt_res = JobTemplate.objects.create(
         job_type='run',
@@ -87,11 +90,11 @@ def test_org_admin_copy_edit(jt_copy_edit, org_admin):
     assert response['summary_fields']['can_edit']
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Waiting on issue 1981")
 def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_credential):
     """
-    Organization admins SHOULD NOT be able to copy JT without resource access
-    but they SHOULD be able to edit that job template
+    Organization admins without access to the 3 related resources:
+    SHOULD NOT be able to copy JT
+    SHOULD NOT be able to edit that job template
     """
 
     # Attach credential to JT that org admin can not use
@@ -105,7 +108,7 @@ def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_cr
     serializer.context['request'] = request
     response = serializer.to_representation(jt_copy_edit)
     assert not response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
+    assert not response['summary_fields']['can_edit']
 
 @pytest.mark.django_db
 def test_jt_admin_copy_edit(jt_copy_edit, rando):
@@ -186,33 +189,3 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
 
     print '\n post_response: ' + str(post_response.data)
     assert post_response.status_code == 403
-
-# Validation function tests
-
-@pytest.mark.django_db
-def test_missing_project_error(job_template_factory):
-    objects = job_template_factory(
-        'missing-project-jt',
-        organization='org1',
-        inventory='inventory1',
-        credential='cred1',
-        persisted=False)
-    obj = objects.job_template
-    assert 'project' in obj.resources_needed_to_start
-    validation_errors, resources_needed_to_start = obj.resource_validation_data()
-    assert 'project' in validation_errors
-
-@pytest.mark.django_db
-def test_inventory_credential_contradictions(project):
-    obj = JobTemplate(
-        job_type='run',
-        project=project,
-        inventory=None, ask_inventory_on_launch=False,
-        credential=None, ask_credential_on_launch=False,
-        name='missing-project-jt'
-    )
-    assert 'inventory' in obj.resources_needed_to_start
-    assert 'credential' in obj.resources_needed_to_start
-    validation_errors, resources_needed_to_start = obj.resource_validation_data()
-    assert 'inventory' in validation_errors
-    assert 'credential' in validation_errors
