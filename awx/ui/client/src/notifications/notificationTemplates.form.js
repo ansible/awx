@@ -141,7 +141,23 @@ export default function() {
                     reqExpression: "channel_required",
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'slack' || notification_type.value == 'hipchat'",
+                ngShow: "notification_type.value == 'slack'",
+                subForm: 'typeSubForm'
+            },
+            rooms: {
+                label: 'Destination Channels',
+                type: 'textarea',
+                rows: 3,
+                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
+                            '<p>For example:<br>engineering<br>\n #support<br>\n',
+                dataTitle: 'Destination Channels',
+                dataPlacement: 'right',
+                dataContainer: "body",
+                awRequiredWhen: {
+                    reqExpression: "room_required",
+                    init: "false"
+                },
+                ngShow: "notification_type.value == 'hipchat'",
                 subForm: 'typeSubForm'
             },
             token: {
@@ -265,11 +281,7 @@ export default function() {
             },
             notify: {
                 label: 'Notify Channel',
-                type: 'text',
-                awRequiredWhen: {
-                    reqExpression: "hipchat_required",
-                    init: "false"
-                },
+                type: 'checkbox',
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm'
             },
