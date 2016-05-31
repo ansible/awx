@@ -40,8 +40,8 @@ export default
                         case 'organization':
                             rtnTitle = 'ORGANIZATIONS';
                             break;
-                        case 'management_job':
-                            rtnTitle = 'MANAGEMENT JOBS';
+                        case 'job':
+                            rtnTitle = 'JOBS';
                             break;
                         case 'inventory_script':
                             rtnTitle = 'INVENTORY SCRIPTS';

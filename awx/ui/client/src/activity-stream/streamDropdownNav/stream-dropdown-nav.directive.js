@@ -21,7 +21,7 @@ export default ['templateUrl', function(templateUrl) {
                 {label: 'Inventories', value: 'inventory'},
                 {label: 'Inventory Scripts', value: 'inventory_script'},
                 {label: 'Job Templates', value: 'job_template'},
-                {label: 'Management Jobs', value: 'management_job'},
+                {label: 'Jobs', value: 'job'},
                 {label: 'Organizations', value: 'organization'},
                 {label: 'Projects', value: 'project'},
                 {label: 'Schedules', value: 'schedule'},

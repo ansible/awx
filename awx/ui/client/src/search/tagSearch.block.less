@@ -30,7 +30,6 @@
     white-space: nowrap;
     align-items: center;
     max-height: 400px;
-    width: 120px;
     cursor: pointer;
     text-transform: uppercase;
 }
@@ -40,8 +39,6 @@
 }
 
 .TagSearch-typeDropdownName {
-    width: 66px;
-    text-overflow: ellipsis;
     display: block;
     overflow: hidden;
 }
@@ -80,6 +77,7 @@
 .TagSearch-dropdownItem {
    padding: 5px 10px;
    cursor: pointer;
+   text-transform: capitalize;
 }
 
 .TagSearch-dropdownItem:hover {
@@ -92,13 +90,13 @@
 
 .TagSearch-searchTermContainer {
     flex: initial;
-    width: ~"calc(100% - 70px)";
+    width: ~"calc(100% - 50px)";
     border: 1px solid @d7grey;
     border-left: 0px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     display: flex;
-    background-color: @default-secondary-bg;
+    background-color: @default-bg;
 }
 
 .TagSearch-searchTermContainer.is-open {

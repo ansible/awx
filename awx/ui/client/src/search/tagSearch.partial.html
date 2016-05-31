@@ -8,14 +8,15 @@
                 <span class="TagSearch-typeDropdownName" ng-cloak>
                     {{ currentSearchType.label }}
                 </span>
-                <i class="TagSearch-selectDownIcon fa fa-angle-down"></i>
+                <i class="TagSearch-selectDownIcon fa fa-angle-down"
+                    ng-hide="searchTypes.length === 1"></i>
             </div>
             <div aw-click-off="showTypeDropdown" class="TagSearch-dropdownContainer
                 TagSearch-dropdownContainer--searchTypes"
                 ng-show="showTypeDropdown">
                 <div class="TagSearch-dropdownItem"
                     ng-repeat="type in searchTypes track by $index"
-                    ng-class="{'is-selected': (currentSearchType.value === type.value)}"
+                    ng-class="{'is-selected': (currentSearchType.id === type.id)}"
                     ng-click="setSearchType(type)">
                     {{ type.label }}
                 </div>

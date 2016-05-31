@@ -41,7 +41,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (type === 'select') {
             obj.typeOptions = typeOptions;
         }
-
+        
         return obj;
     };
 
@@ -53,6 +53,9 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
 
         var options = Object
             .keys(list)
+            .filter(function(fieldType) {
+                return list[fieldType].noSearch !== true;
+            })
             .map(function(key, id) {
                 return that.buildType(list[key], key, id);
         });

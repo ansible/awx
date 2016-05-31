@@ -19,6 +19,7 @@ export default [
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices,
     $q) {
+        var schedList = _.cloneDeep(SchedulesList);
 
         ClearScope();
 
@@ -51,16 +52,18 @@ export default [
         }
         $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
             url += "schedules/";
-            SchedulesList.well = true;
+            schedList.well = true;
 
             // include name of item in listTitle
-            SchedulesList.listTitle = title ? title : parentObject.name;
-            SchedulesList.listTitle = `${SchedulesList.listTitle}<div class='List-titleLockup'></div>Schedules`;
+            schedList.listTitle = title ? title : parentObject.name;
+            schedList.listTitle = `${schedList.listTitle}<div class='List-titleLockup'></div>Schedules`;
+
+            schedList.basePath = parentObject.url + "schedules";
 
             LoadSchedulesScope({
                 parent_scope: $scope,
                 scope: $scope,
-                list: SchedulesList,
+                list: schedList,
                 id: 'schedule-list-target',
                 url: url,
                 pageSize: 20
