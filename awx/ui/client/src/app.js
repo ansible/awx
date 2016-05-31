@@ -270,7 +270,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('projects', {
-                url: '/projects',
+                url: '/projects?{status}',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
                 data: {

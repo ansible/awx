@@ -49,7 +49,7 @@ export default
                                 label: "Inventories",
                             },
                             {
-                                url: "/#/inventories/?inventory_sources_with_failures",
+                                url: "/#/inventories?status=sync-failed",
                                 number: scope.data.inventories.inventory_failed,
                                 label: "Inventory Sync Failures",
                                 isFailureCount: true
@@ -60,7 +60,7 @@ export default
                                 label: "Projects"
                             },
                             {
-                                url: "/#/projects/?status=failed",
+                                url: "/#/projects?status=failed",
                                 number: scope.data.projects.failed,
                                 label: "Project Sync Failures",
                                 isFailureCount: true
