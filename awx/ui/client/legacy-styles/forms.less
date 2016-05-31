@@ -433,6 +433,10 @@ input[type='radio']:checked:before {
   outline:none;
 }
 
+.Form-inputLabelContainer {
+    width: 100%;
+    display: block !important;
+}
 .Form-inputLabel{
     text-transform: uppercase;
     color: @default-interface-txt;
@@ -440,6 +444,17 @@ input[type='radio']:checked:before {
     font-size: small;
     padding-right:5px;
     width: 100%;
+    .noselect;
+}
+
+.Form-labelAction {
+    text-transform: uppercase;
+    //color: @default-interface-txt;
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left:5px;
+    float: right;
+    margin-top: 3px;
     .noselect;
 }
 
