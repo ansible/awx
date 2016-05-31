@@ -437,9 +437,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 if ask_for_vars_dict[field]:
                     prompted_fields[field] = kwargs[field]
                 else:
-                    if field == 'extra_vars' and self.survey_enabled:
+                    if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
-                        survey_vars = [question['variable'] for question in self.survey_spec['spec']]
+                        survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
                         for key in kwargs[field]:
                             if key in survey_vars:
                                 prompted_fields[field][key] = kwargs[field][key]
