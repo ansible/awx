@@ -792,7 +792,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
-                    if((field.excludeMode === undefined || field.excludeMode !== options.mode)) {
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock') {
 
 
                     html += "<div class='form-group Form-formGroup ";
@@ -1617,7 +1617,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 currentSubForm = field.subForm;
                                 var subFormTitle = this.form.subFormTitles[field.subForm];
 
-                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined"> ';
+                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined || ' + field.hideSubForm + '"> ';
                                 html += '<span class="Form-subForm--title">'+ subFormTitle +'</span>';
                             }
                             else if (!field.subForm && currentSubForm !== undefined) {
