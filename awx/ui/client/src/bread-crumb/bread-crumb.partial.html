@@ -8,7 +8,7 @@
         data-container="body"
         ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
         ng-if="showActivityStreamButton"
-        ng-hide= "loadingLicense || licenseMissing || licenseType == 'basic'"
+        ng-hide= "loadingLicense || licenseMissing"
         ng-click="toggleActivityStream()">
         <i class="BreadCrumb-menuLinkImage icon-activity-stream"
             alt="Activity Stream">

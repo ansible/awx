@@ -57,9 +57,10 @@
 export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
     '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
     'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
+    'CheckLicense', 'FeaturesService',
     function ($log, $cookieStore, $compile, $window, $rootScope, $location,
         Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
-        scope, pendoService, ConfigService) {
+        scope, pendoService, ConfigService, CheckLicense, FeaturesService) {
 
     var lastPath, lastUser, sessionExpired, loginAgain;
 
@@ -116,7 +117,9 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
         //     .success(function (data) {
         //         Authorization.setLicense(data);
         ConfigService.getConfig().then(function(){
+                CheckLicense.test();
                 pendoService.issuePendoIdentity();
+                FeaturesService.get();
                 Wait("stop");
                 if (lastPath() && lastUser()) {
                     // Go back to most recent navigation path

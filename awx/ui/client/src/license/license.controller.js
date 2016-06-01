@@ -7,9 +7,10 @@
 export default
     ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
     'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService',
+    'ConfigService', 'FeaturesService', 'pendoService',
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
-        ProcessErrors, CheckLicense, moment, $window, ConfigService){
+        ProcessErrors, CheckLicense, moment, $window, ConfigService,
+        FeaturesService, pendoService){
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -47,15 +48,18 @@ export default
 			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
 				.success(function(){
 					reset();
-					init();
                     ConfigService.delete();
                     ConfigService.getConfig().then(function(){
+                        delete($rootScope.features);
+                        FeaturesService.get();
+                        pendoService.issuePendoIdentity();
                         if($rootScope.licenseMissing === true){
-    						$state.go('dashboard', {
+                            $state.go('dashboard', {
     							licenseMissing: false
     						});
     					}
     					else{
+                            init();
     						$scope.success = true;
     						$rootScope.licenseMissing = false;
     						// for animation purposes
@@ -65,7 +69,6 @@ export default
     						}, 4000);
     					}
                     });
-
 			});
 		};
 	 	var calcDaysRemaining = function(seconds){

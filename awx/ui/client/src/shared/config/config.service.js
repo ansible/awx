@@ -6,8 +6,8 @@
 
 
 export default
-   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope', '$state',
-   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope, $state) {
+   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope',
+   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope) {
        return {
             get: function(){
                 return this.config;

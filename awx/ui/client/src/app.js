@@ -245,10 +245,9 @@ var tower = angular.module('Tower', [
                     label: "DASHBOARD"
                 },
                 resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
+                    graphData: ['$q', 'jobStatusGraphData', function($q, jobStatusGraphData) {
                         return $q.all({
                             jobStatus: jobStatusGraphData.get("month", "all"),
-                            // features: FeaturesService.get()
                         });
                     }]
                 }
@@ -830,10 +829,6 @@ var tower = angular.module('Tower', [
                 });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
-                    // catch license expiration notifications immediately after user logs in, redirect
-                    // if (fromState.name === 'signIn'){
-                    //     CheckLicense.notify();
-                    // }
 
                     if(fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')){
                         $rootScope.licenseMissing = toParams.licenseMissing;

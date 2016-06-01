@@ -1702,6 +1702,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 if (button.ngClick) {
                                     html += this.attr(button, 'ngClick');
                                 }
+                                if (button.awFeature) {
+                                    html += this.attr(button, 'awFeature');
+                                }
                                 if (button.ngDisabled) {
                                     ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
                                     if (btn !== 'reset') {

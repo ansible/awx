@@ -16,10 +16,14 @@ function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q,
                 if(config){
                     license_info = config.license_info;
                     $rootScope.features = config.license_info.features;
+                    $rootScope.$emit('featuresLoaded');
                     return $rootScope.features;
                 }
-                return {};
+                else {
+                    return {};
+                }
             },
+
             get: function(){
                 if(_.isEmpty($rootScope.features)){
                     return this.getFeatures();
