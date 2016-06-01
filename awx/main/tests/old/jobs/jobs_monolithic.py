@@ -961,7 +961,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(jobs_qs.count(), 7)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
-        self.assertEqual(job.limit, ':&'.join([job_template.limit, host.name]))
+        self.assertEqual(job.limit, host.name)
         self.assertEqual(job.hosts.count(), 1)
         self.assertEqual(job.hosts.all()[0], host)
 

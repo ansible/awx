@@ -1766,7 +1766,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notification_templates_any = reverse('api:job_template_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:job_template_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:job_template_notification_templates_error_list', args=(obj.pk,)),
-            access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
+            access_list = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
             roles = reverse('api:job_template_roles_list', args=(obj.pk,)),

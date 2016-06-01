@@ -13,6 +13,12 @@
 .JobDetail-instructions{
     color: @default-interface-txt;
     margin: 10px 0 10px 0;
+
+    .badge {
+        background-color: @default-list-header-bg;
+        color: @default-interface-txt;
+        padding: 5px 7px;
+    }
 }
 .JobDetail{
    .OnePlusOne-container(100%, @breakpoint-md);
@@ -151,6 +157,10 @@
     background-color: @default-link;
     border: 1px solid @default-link;
     color: @default-bg;
+
+    &:hover {
+        background-color: @default-link-hov;
+    }
 }
 .JobDetail .nvd3.nv-noData{
     color: @default-interface-txt;
@@ -198,6 +208,12 @@
     margin-left: -5px;
 }
 
+.JobDetails-table--noResults {
+    tr > td {
+        border-top: none !important;
+    }
+}
+
 .JobDetail-statusIcon--results{
     padding-left: 0px;
     padding-right: 10px;
@@ -214,4 +230,8 @@
     flex:none;
     width:0px;
     padding-right: 0px;
+}
+
+.JobDetail-leftSide.JobDetail-stdoutActionButton--active {
+    margin-right: 0px;
 }

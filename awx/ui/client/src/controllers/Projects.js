@@ -22,7 +22,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Wait('start');
 
     var list = ProjectList,
-        defaultUrl = GetBasePath('projects'),
+        defaultUrl = GetBasePath('projects') + ($stateParams.status ? '?status=' + $stateParams.status : ''),
         view = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'projects') ? 'edit' : 'select',

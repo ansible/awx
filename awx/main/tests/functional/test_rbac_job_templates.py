@@ -7,7 +7,10 @@ from awx.main.access import (
 )
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
+from awx.main.models.jobs import JobTemplate
 from django.apps import apps
+
+from django.core.urlresolvers import reverse
 
 
 @pytest.mark.django_db
@@ -155,3 +158,26 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
     # THEN all access checks should pass
     assert access.can_read(deploy_jobtemplate)
     assert access.can_add({})
+
+@pytest.mark.django_db
+@pytest.mark.job_permissions
+def test_job_template_creator_access(project, rando, post):
+
+    project.admin_role.members.add(rando)
+    with mock.patch(
+            'awx.main.models.projects.ProjectOptions.playbooks',
+            new_callable=mock.PropertyMock(return_value=['helloworld.yml'])):
+        response = post(reverse('api:job_template_list', args=[]), dict(
+            name='newly-created-jt',
+            job_type='run',
+            ask_inventory_on_launch=True,
+            ask_credential_on_launch=True,
+            project=project.pk,
+            playbook='helloworld.yml'
+        ), rando)
+
+    assert response.status_code == 201
+    jt_pk = response.data['id']
+    jt_obj = JobTemplate.objects.get(pk=jt_pk)
+    # Creating a JT should place the creator in the admin role
+    assert rando in jt_obj.admin_role

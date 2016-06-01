@@ -178,7 +178,7 @@
 
 .Form-formGroup--checkbox{
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 
 .Form-subForm {
@@ -324,6 +324,12 @@
 
 .select2-dropdown{
     border:1px solid @field-border;
+
+}
+
+.select2-container--open .select2-dropdown--below {
+    margin-top: -1px;
+    border-top: 1px solid @field-border;
 }
 
 .Form-dropDown:focus{

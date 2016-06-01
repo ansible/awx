@@ -15,13 +15,13 @@
         multiSelectExtended: true,
         index: false,
         hover: true,
-
+        emptyListText : 'No Teams exist',
         fields: {
             name: {
                 key: true,
                 label: 'name'
             },
-        },
+        }
 
     };
 }

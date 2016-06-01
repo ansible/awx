@@ -33,8 +33,8 @@
         </table>
     </div>
 
-    <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="getNextPage" scroll-threshold="10" time-threshold="500" ng-hide="hosts.length == 0">
-        <table class="table">
+    <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="getNextPage" scroll-threshold="10" time-threshold="500">
+        <table class="table" ng-class="{'JobDetails-table--noResults': hosts.length === 0}">
             <tbody>
                 <tr class="List-tableRow" ng-repeat="host in hosts track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
                     <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">

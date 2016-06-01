@@ -8,7 +8,7 @@ import {ManageHostsAdd, ManageHostsEdit} from './hosts.route';
 
 export default
     angular.module('manageHosts', [])
-    	.run(['$stateExtender', '$state', function($stateExtender, $state){
+    	.run(['$stateExtender', function($stateExtender){
     		$stateExtender.addState(ManageHostsAdd);
     		$stateExtender.addState(ManageHostsEdit);
     	}]);

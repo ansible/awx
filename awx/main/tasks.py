@@ -441,7 +441,12 @@ class BaseTask(Task):
         if settings.ANSIBLE_USE_VENV:
             env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
             env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-            env['PYTHONPATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "lib/python2.7/site-packages/") + ":"
+            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+            for python_ver in ["python2.7", "python2.6"]:
+                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                    break
         if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env

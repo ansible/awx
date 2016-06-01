@@ -4,7 +4,7 @@ export default {
     name: 'setup',
     route: '/setup',
     ncyBreadcrumb: {
-        label: "SETUP"
+        label: "SETTINGS"
     },
     templateUrl: templateUrl('setup-menu/setup-menu')
 };

@@ -79,6 +79,7 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     //'ngAnimate',
+    'lrInfiniteScroll',
     'ngSanitize',
     'ngCookies',
     about.name,
@@ -269,7 +270,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('projects', {
-                url: '/projects',
+                url: '/projects?{status}',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
                 data: {
@@ -297,6 +298,10 @@ var tower = angular.module('Tower', [
                 controller: ProjectsEdit,
                 data: {
                     activityStreamId: 'id'
+                },
+                ncyBreadcrumb: {
+                    parent: 'projects',
+                    label: 'EDIT PROJECT'
                 }
             }).
             state('projectOrganizations', {
@@ -340,6 +345,10 @@ var tower = angular.module('Tower', [
                 controller: TeamsEdit,
                 data: {
                     activityStreamId: 'team_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "teams",
+                    label: "EDIT TEAM"
                 }
             }).
 
