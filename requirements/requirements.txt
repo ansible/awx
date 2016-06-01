@@ -5,7 +5,7 @@ appdirs==1.4.0
 azure==2.0.0rc2
 Babel==2.2.0
 billiard==3.3.0.16
-boto==2.39.0
+boto==2.40.0
 celery==3.1.10
 cliff==1.15.0
 cmd2==0.6.8

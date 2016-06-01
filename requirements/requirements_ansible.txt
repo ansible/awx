@@ -3,7 +3,7 @@ apache-libcloud==0.20.1
 appdirs==1.4.0
 azure==2.0.0rc2
 Babel==2.2.0
-boto==2.34.0
+boto==2.40.0
 cliff==1.15.0
 cmd2==0.6.8
 cryptography==1.3.2

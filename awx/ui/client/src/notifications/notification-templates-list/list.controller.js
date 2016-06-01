@@ -31,7 +31,8 @@ export default
                         scope.notification_type_options.forEach(function(type) {
                             if (type.value === notification_template.notification_type) {
                                 scope.notification_templates[i].notification_type = type.label;
-                                scope.notification_templates[i].status = notification_template.summary_fields.recent_notifications[0].status;
+                                var recent_notifications = notification_template.summary_fields.recent_notifications;
+                                scope.notification_templates[i].status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
                             }
                         });
                     });
