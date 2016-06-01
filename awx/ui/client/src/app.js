@@ -304,6 +304,7 @@ var tower = angular.module('Tower', [
                     label: 'EDIT PROJECT'
                 }
             }).
+
             state('projectOrganizations', {
                 url: '/projects/:project_id/organizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
@@ -315,6 +316,7 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd
             }).
+
             state('teams', {
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
