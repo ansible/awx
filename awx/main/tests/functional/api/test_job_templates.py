@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 
 @property
 def project_playbooks(self):
-    return ['mocked.yml', 'alt-mocked.yml']
+    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
 
 @pytest.mark.django_db
 @mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
@@ -87,8 +87,6 @@ def test_edit_playbook(patch, job_template_factory, alice):
 def test_edit_nonsenstive(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     jt = objs.job_template
-    jt.playbook = 'mocked.yml'
-    jt.save()
     jt.admin_role.members.add(alice)
 
     res = patch(reverse('api:job_template_detail', args=(jt.id,)), {
