@@ -310,10 +310,6 @@ export default
                 client:{
                     type: 'text',
                     label: 'Client ID',
-                    awRequiredWhen: {
-                        reqExpression: "azure_rm_required",
-                        init: false
-                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
@@ -322,20 +318,12 @@ export default
                     hasShowInputButton: true,
                     autocomplete: false,
                     label: 'Client Secret',
-                    awRequiredWhen: {
-                        reqExpression: "azure_rm_required",
-                        init: false
-                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
                 tenant: {
                     type: 'text',
                     label: 'Tenent ID',
-                    awRequiredWhen: {
-                        reqExpression: "azure_rm_required",
-                        init: false
-                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
