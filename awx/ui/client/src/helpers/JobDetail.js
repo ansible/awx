@@ -942,7 +942,7 @@ export default
                 graph_data.push({
                     label: 'OK',
                     value: count.ok.length,
-                    color: '#60D66F'
+                    color: '#5CB85C'
                 });
             }
             if (count.changed.length > 0) {
@@ -987,18 +987,19 @@ export default
             job_detail_chart = nv.models.pieChart()
                 .margin({bottom: 15})
                 .x(function(d) {
-                    return d.label +': '+ Math.round((d.value/total)*100) + "%";
+                    return d.label +': '+ Math.floor((d.value/total)*100) + "%";
                 })
                 .y(function(d) { return d.value; })
-                .showLabels(true)
-                .showLegend(false)
+                .showLabels(false)
+                .showLegend(true)
                 .growOnHover(false)
                 .labelThreshold(0.01)
                 .tooltipContent(function(x, y) {
                     return '<p>'+x+'</p>'+ '<p>' +  Math.floor(y.replace(',','')) + ' HOSTS ' +  '</p>';
                 })
                 .color(colors);
-
+            job_detail_chart.legend.rightAlign(false);
+            job_detail_chart.legend.margin({top: 5, right: 450, left:0, bottom: 0});
             d3.select(element.find('svg')[0])
                 .datum(dataset)
                 .transition().duration(350)
@@ -1008,19 +1009,15 @@ export default
                     "font-style": "normal",
                     "font-weight":400,
                     "src": "url(/static/assets/OpenSans-Regular.ttf)",
-                    "width": 500,
+                    "width": 600,
                     "height": 300,
+                    "color": '#848992'
                 });
-
-            d3.select(element.find(".nv-label text")[0])
-                .attr("class", "HostSummary-graph--successful")
+            d3.select(element.find(".nv-noData")[0])
                 .style({
-                    "font-family": 'Open Sans',
-                    "font-size": "16px",
-                    "text-transform" : "uppercase",
-                    "fill" : colors[0],
-                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
+                    "text-anchor": 'start'
                 });
+            /*
             d3.select(element.find(".nv-label text")[1])
                 .attr("class", "HostSummary-graph--changed")
                 .style({
@@ -1048,6 +1045,7 @@ export default
                     "fill" : colors[3],
                     "src": "url(/static/assets/OpenSans-Regular.ttf)"
                 });
+            */
                 return job_detail_chart;
         };
     }])

@@ -162,7 +162,20 @@
         background-color: @default-link-hov;
     }
 }
-
+.JobDetail .nvd3.nv-noData{
+    color: @default-interface-txt;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: 'Open Sans', sans-serif;
+}
+.JobDetail .nv-series{
+    padding-right: 30px;
+    display: block;
+}
+.JobDetail-instructions .badge{
+    background-color: @default-list-header-bg;
+    color: @default-interface-txt;
+}
 .JobDetail-tableToggle--left{
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -212,6 +225,8 @@
 }
 
 .JobDetail-stdoutActionButton--active{
+    display: none;
+    visibility: hidden;
     flex:none;
     width:0px;
     padding-right: 0px;
