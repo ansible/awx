@@ -177,7 +177,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   });
 
 
-                                  if(scope.project === "" && scope.playbook === ""){
+                                  if (scope.project === "" && scope.playbook === "") {
                                     scope.toggleScanInfo();
                                   }
 

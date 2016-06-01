@@ -8,7 +8,6 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
     function ($log, $rootScope, $scope, $state, $stateParams, ProcessErrors, Rest, Wait) {
 
         var api_complete = false,
-            stdout_url,
             current_range,
             loaded_sections = [],
             event_queue = 0,

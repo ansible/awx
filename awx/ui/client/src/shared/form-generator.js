@@ -714,13 +714,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 function label() {
                     var html = '';
                     if (field.label || field.labelBind) {
-                        html += "<label ";
-                        if (horizontal || field.labelClass) {
-                            html += "class=\"";
-                            html += (field.labelClass) ? field.labelClass : "";
-                            html += (horizontal) ? " " + getLabelWidth() : "";
-                            html += "\" ";
-                        }
+                        html += "<label class=\"";
+                        html += (field.labelClass) ? field.labelClass : "";
+                        html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
+                        html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
@@ -741,6 +738,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
                             html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
                             html += "</div>\n";
+                        }
+
+                        if (field.labelAction) {
+                            let action = field.labelAction;
+                            let href = action.href || "";
+                            let ngClick = action.ngClick || "";
+                            let cls = action["class"] || "";
+                            html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
                         html += "\n\t</label>\n";
                     }

@@ -76,6 +76,13 @@ export default
             $scope.playbook = null;
             generator.reset();
 
+            function sync_playbook_select2() {
+                CreateSelect2({
+                    element:'#playbook-select',
+                    multiple: false
+                });
+            }
+
             getPlaybooks = function (project) {
                 var url;
                 if ($scope.playbook) {
@@ -85,6 +92,7 @@ export default
                 if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
                     $scope.playbook_options = ['Default'];
                     $scope.playbook = 'Default';
+                    sync_playbook_select2();
                     Wait('stop');
                 }
                 else if (!Empty(project)) {
@@ -93,14 +101,14 @@ export default
                     Rest.setUrl(url);
                     Rest.get()
                         .success(function (data) {
-                            var i;
                             $scope.playbook_options = [];
-                            for (i = 0; i < data.length; i++) {
+                            for (var i = 0; i < data.length; i++) {
                                 $scope.playbook_options.push(data[i]);
                                 if (data[i] === $scope.playbook) {
                                     $scope.job_templates_form.playbook.$setValidity('required', true);
                                 }
                             }
+                            sync_playbook_select2();
                             if ($scope.playbook) {
                                 $scope.$emit('jobTemplateLoadFinished');
                             } else {
@@ -122,23 +130,31 @@ export default
                 }
             };
 
-            $scope.jobTypeChange = function(){
-              if($scope.job_type){
-                if($scope.job_type.value === 'scan'){
-                    // If the job_type is 'scan' then we don't want the user to be
-                    // able to prompt for job type or inventory
-                    $scope.ask_job_type_on_launch = false;
-                    $scope.ask_inventory_on_launch = false;
-                    $scope.toggleScanInfo();
-                  }
-                  else if($scope.project_name === "Default"){
-                    $scope.project_name = null;
-                    $scope.playbook_options = [];
-                    // $scope.playbook = 'null';
-                    $scope.job_templates_form.playbook.$setPristine();
-                  }
-
-              }
+            let last_non_scan_project_name = null;
+            let last_non_scan_playbook = "";
+            let last_non_scan_playbook_options = [];
+            $scope.jobTypeChange = function() {
+                if ($scope.job_type) {
+                    if ($scope.job_type.value === 'scan') {
+                        if ($scope.project_name !== "Default") {
+                            last_non_scan_project_name = $scope.project_name;
+                            last_non_scan_playbook = $scope.playbook;
+                            last_non_scan_playbook_options = $scope.playbook_options;
+                        }
+                        // If the job_type is 'scan' then we don't want the user to be
+                        // able to prompt for job type or inventory
+                        $scope.ask_job_type_on_launch = false;
+                        $scope.ask_inventory_on_launch = false;
+                        $scope.resetProjectToDefault();
+                    }
+                    else if ($scope.project_name === "Default") {
+                        $scope.project_name = last_non_scan_project_name;
+                        $scope.playbook_options = last_non_scan_playbook_options;
+                        $scope.playbook = last_non_scan_playbook;
+                        $scope.job_templates_form.playbook.$setPristine();
+                    }
+                }
+                sync_playbook_select2();
             };
 
             $scope.toggleNotification = function(event, notifier_id, column) {
@@ -159,14 +175,10 @@ export default
                 });
             };
 
-            $scope.toggleScanInfo = function() {
+            $scope.resetProjectToDefault = function() {
                 $scope.project_name = 'Default';
-                if($scope.project === null){
-                  getPlaybooks();
-                }
-                else {
-                  $scope.project = null;
-                }
+                $scope.project = null;
+                getPlaybooks();
             };
 
             // Detect and alert user to potential SCM status issues
