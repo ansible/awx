@@ -12,22 +12,21 @@
 			</div>
 			<div class="HostEvent-nav">
 				<!-- view navigation buttons -->
-				<button ui-sref="jobDetail.host-event.details" type="button" class="btn btn-sm btn-default" >Details</button>
-				<button ui-sref="jobDetail.host-event.json" type="button" class="btn btn-sm btn-default ">JSON</button>
-				<button ng-show="stdout" ui-sref="jobDetail.host-event.stdout" type="button" class="btn btn-sm btn-default ">Standard Out</button>
+				<button ui-sref="jobDetail.host-event.details" type="button" class="btn btn-sm btn-default" ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.details')}">Details</button>
+				<button ui-sref="jobDetail.host-event.json" type="button" class="btn btn-sm btn-default " ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.json')}">JSON</button>
 
 			</div>
 			<div class="HostEvent-body">
 			<!-- views -->
-			<div ui-view></div>
+			<div class="HostEvent-view--container" ui-view></div>
 			</div>
 
 			<!-- controls -->
 			<div class="HostEvent-controls">
-				<button ng-show="showPrev()" ng-click="goPrev()"
-				class="btn btn-sm btn-default">Prev</button>
-				<button ng-show="showNext()"ng-click="goNext()" class="btn btn-sm btn-default">Next</button>
-				<button ui-sref="jobDetail" class="btn btn-sm btn-default" ng-show="true" >Close</button>
+				<button ng-disabled="!showPrev()" ng-click="goPrev()"
+				class="btn btn-sm btn-default">Prev Host</button>
+				<button ng-disabled="!showNext()"ng-click="goNext()" class="btn btn-sm btn-default">Next Host</button>
+				<button ui-sref="jobDetail" class="btn btn-sm btn-default HostEvent-close" ng-show="true" >Close</button>
 			</div>
 		</div>
 		</div>

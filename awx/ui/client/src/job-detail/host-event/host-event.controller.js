@@ -17,15 +17,21 @@
             if (typeof value === 'object'){return false;}
             else {return true;}
         };
-        //var CodeMirror;
-        var codeMirror = function(el, json){
+        /*ignore jslint start*/
+        /* jshint ignore:start */
+        var initCodeMirror = function(el, json){
             var container = $(el)[0];
-            var editor = codeMirror.fromTextArea(container, {
+            var editor = CodeMirror.fromTextArea(container, {
                 lineNumbers: true,
                 mode: {name: "javascript", json: true}
-             });
+            });
             editor.setSize("100%", 300);
             editor.getDoc().setValue(JSON.stringify(json, null, 4));
+        };
+        /* jshint ignore:end */
+        /*ignore jslint end*/
+        $scope.isActiveState = function(name){
+            return $state.current.name === name;
         };
 
         $scope.getActiveHostIndex = function(){
@@ -61,19 +67,21 @@
                 $scope.hostResults = res.results;
             });
             $scope.json = JobDetailService.processJson($scope.event);
+            /* jshint ignore:start */
             if ($state.current.name === 'jobDetail.host-event.json'){
-                codeMirror('#HostEvent-json', $scope.json);
+                initCodeMirror('#HostEvent-json', $scope.json);
             }
             try {
                 $scope.stdout = JobDetailService
-                    .processJson($scope.event.event_data.res);
+                    .processJson($scope.event.event_data.res.stdout);
                 if ($state.current.name === 'jobDetail.host-event.stdout'){
-                codeMirror('#HostEvent-stdout', $scope.stdout);
+                initCodeMirror('#HostEvent-stdout', $scope.stdout);
                 }
             }
             catch(err){
-                $scope.sdout = null;
+                $scope.stdout = null;
             }
+            /* jshint ignore:end */
             $('#HostEvent').modal('show');
         };
         init();

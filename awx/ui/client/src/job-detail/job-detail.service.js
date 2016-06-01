@@ -41,8 +41,7 @@ export default
                 });
             }
             catch(err){result.event_data = undefined;}
-
-            return result;
+            return result === {} ? null : result;
         },
         // Return Ansible's passed-through response msg on a job_event
         processEventMsg: function(event){
