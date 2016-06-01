@@ -758,12 +758,41 @@ export default
                 }
             };
 
+            scope.filterTaskStatus = function() {
+                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
+                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+                    LoadTasks({
+                        scope: scope
+                    });
+                }
+            };
+
             scope.filterPlayStatus = function() {
                 scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
                     LoadPlays({
                         scope: scope
                     });
+                }
+            };
+
+            scope.filterHostStatus = function(){
+                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
+                if (!scope.liveEventProcessing || scope.pauseLiveEvents){
+                    if (scope.selectedTask !== null && scope.selectedPlay !== null){
+                        var params = {
+                            parent: scope.selectedTask,
+                            page_size: scope.hostResultsMaxRows,
+                            order: 'host_name,counter',
+                        };
+                        if (scope.search_host_status === 'failed'){
+                            params.failed = true;
+                        }
+                        JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                            scope.hostResults = JobDetailService.processHostEvents(res.results);
+                            scope.hostResultsLoading = false;
+                        });
+                    }
                 }
             };
 
