@@ -79,6 +79,7 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     //'ngAnimate',
+    'lrInfiniteScroll',
     'ngSanitize',
     'ngCookies',
     about.name,
@@ -269,7 +270,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('projects', {
-                url: '/projects',
+                url: '/projects?{status}',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
                 data: {
