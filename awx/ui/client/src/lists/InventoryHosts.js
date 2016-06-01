@@ -42,6 +42,7 @@ export default
             name: {
                 key: true,
                 label: 'Hosts',
+                searchLabel: 'Name',
                 ngClick: "editHost(host.id)",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',

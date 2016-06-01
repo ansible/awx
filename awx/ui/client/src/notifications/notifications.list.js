@@ -15,7 +15,7 @@ export default function(){
         index: false,
         hover: false,
         emptyListText: 'No Notifications exist',
-        basePath: 'notifications',
+        basePath: 'notification_templates',
         fields: {
             name: {
                 key: true,

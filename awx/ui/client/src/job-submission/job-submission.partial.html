@@ -26,7 +26,7 @@
                             <span class="JobSubmission-selectedItemNone" ng-show="!selected_inventory">None selected</span>
                         </div>
                         <div class="JobSubmission-selectedItemRevert" ng-if="ask_inventory_on_launch && has_default_inventory">
-                            <button class="btn btn-xs JobSubmission-revertButton" ng-disabled="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()">REVERT TO DEFAULT</button>
+                            <button class="btn btn-xs JobSubmission-revertButton" ng-hide="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()">REVERT TO DEFAULT</button>
                         </div>
                     </div>
                     <div id="job-submission-inventory-lookup"></div>
@@ -41,7 +41,7 @@
                             <span class="JobSubmission-selectedItemNone" ng-show="!selected_credential">None selected</span>
                         </div>
                         <div class="JobSubmission-selectedItemRevert" ng-if="ask_credential_on_launch && has_default_credential">
-                            <button class="btn btn-xs JobSubmission-revertButton" ng-disabled="selected_credential.id === defaults.credential.id" ng-click="revertToDefaultCredential()">REVERT TO DEFAULT</button>
+                            <button class="btn btn-xs JobSubmission-revertButton" ng-hide="selected_credential.id === defaults.credential.id" ng-click="revertToDefaultCredential()">REVERT TO DEFAULT</button>
                         </div>
                     </div>
                     <div id="job-submission-credential-lookup"></div>

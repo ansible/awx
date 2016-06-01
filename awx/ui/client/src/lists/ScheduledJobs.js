@@ -51,9 +51,9 @@ export default
                 searchable: true,
                 searchType: 'select',
                 searchOptions: [
-                    { value: 'inventory source', name: 'Inventory Sync' },
-                    { value: 'job template', name: 'Playbook Run' },
-                    { value: 'project', name: 'SCM Update' }
+                    { value: 'inventory source', label: 'Inventory Sync' },
+                    { value: 'job template', label: 'Playbook Run' },
+                    { value: 'project', label: 'SCM Update' }
                 ]
             },
             next_run: {

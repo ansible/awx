@@ -275,13 +275,6 @@ export default
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
                 },
-                survey: {
-                    type: 'custom',
-                    column: 2,
-                    ngHide: "job_type.value === 'scan'" ,
-                    control: '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
-                            '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
-                },
                 labels: {
                     label: 'Labels',
                     type: 'select',
@@ -373,13 +366,15 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
                         }
                     }
                 },

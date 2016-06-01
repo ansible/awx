@@ -21,7 +21,7 @@ export default function(){
                 basePath: 'unified_jobs',
                 label: '',
                 iconOnly: true,
-                searchable: true,
+                searchable: false,
                 searchType: 'select',
                 nosort: true,
                 searchOptions: [],

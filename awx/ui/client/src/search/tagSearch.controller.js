@@ -42,12 +42,17 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 .updateFilteredUrl($scope.endpoint, tags, pageSize);
 
             $scope.$parent[iterator + "_active_search"] = true;
-
             Refresh({
                 scope: listScope,
                 set: set,
                 iterator: iterator,
                 url: url
+            });
+
+            listScope.$on('PostRefresh', function() {
+                if (set === 'notifications') {
+                    $scope.$emit('relatednotifications');
+                }
             });
 
             $scope.currentSearchFilters = tags;
@@ -69,7 +74,7 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 .getCurrentTags($scope
                     .currentSearchFilters);
 
-            if (!tagSearchService.isDuplicate(tags, newTag)) {
+            if (!tagSearchService.isDuplicate(tags, newTag) && !!newTag.name) {
                 tags.push(newTag);
                 $scope.updateSearch(tags);
             }

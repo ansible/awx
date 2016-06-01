@@ -1819,7 +1819,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     !(is_superuser && ${hideOnSuperuser})\">
                             ${tagSearch}
                         </div>
-                        <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\">
+                        <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12 action_column\">
                             <div class=\"list-actions\">
                                 ${actionButtons}
                             </div>
@@ -1868,36 +1868,39 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
-                    html += "<th class=\"List-tableHeader list-header ";
-                    html += (collection.fields[fld].class) ? collection.fields[fld].class : "";
-                    html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
+                    if (!collection.fields[fld].searchOnly) {
 
-                    if (!collection.fields[fld].noSort) {
-                        html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
-                    } else {
-                        html += ">";
-                    }
+                        html += "<th class=\"List-tableHeader list-header ";
+                        html += (collection.fields[fld].columnClass) ? collection.fields[fld].columnClass : "";
+                        html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
 
-
-                    html += collection.fields[fld].label;
-
-                    if (!collection.fields[fld].noSort) {
-                        html += " <i class=\"";
-
-
-                        if (collection.fields[fld].key) {
-                            if (collection.fields[fld].desc) {
-                                html += "fa fa-sort-down";
-                            } else {
-                                html += "fa fa-sort-up";
-                            }
+                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
+                            html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
                         } else {
-                            html += "fa fa-sort";
+                            html += ">";
                         }
-                        html += "\"></i>";
-                    }
 
-                    html += "</a></th>\n";
+
+                        html += collection.fields[fld].label;
+
+                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
+                            html += " <i class=\"";
+
+
+                            if (collection.fields[fld].key) {
+                                if (collection.fields[fld].desc) {
+                                    html += "fa fa-sort-down";
+                                } else {
+                                    html += "fa fa-sort-up";
+                                }
+                            } else {
+                                html += "fa fa-sort";
+                            }
+                            html += "\"></i>";
+                        }
+
+                        html += "</a></th>\n";
+                    }
                 }
                 if (collection.fieldActions) {
                     html += "<th class=\"List-tableHeader List-tableHeader--actions\">Actions</th>\n";
@@ -1920,13 +1923,15 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 base = (collection.base) ? collection.base : itm;
                 base = base.replace(/^\//, '');
                 for (fld in collection.fields) {
-                    cnt++;
-                    html += Column({
-                        list: collection,
-                        fld: fld,
-                        options: options,
-                        base: base
-                    });
+                    if (!collection.fields[fld].searchOnly) {
+                        cnt++;
+                        html += Column({
+                            list: collection,
+                            fld: fld,
+                            options: options,
+                            base: base
+                        });
+                    }
                 }
 
                 // Row level actions
