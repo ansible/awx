@@ -29,9 +29,9 @@
     display: flex;
     white-space: nowrap;
     align-items: center;
-    max-height: 400px;
     cursor: pointer;
     text-transform: uppercase;
+    position: relative;
 }
 
 .TagSearch-typeDropdown.is-open {
@@ -49,7 +49,7 @@
 
 .TagSearch-dropdownContainer {
     position: absolute;
-    left: 15px;
+    left: -1px;
     top: 34px;
     font-size: 14px;
     border-radius: 5px;
@@ -65,13 +65,12 @@
 }
 
 .TagSearch-dropdownContainer--searchTypes {
-    min-width: 96px;
+    min-width: ~"calc(100% + 1px)";
 }
 
 .TagSearch-dropdownContainer--typeOptions {
-    right: 15px;
-    left: initial;
-    width: ~"calc(100% - 123px)";
+    right: -1px;
+    left: -1px;
 }
 
 .TagSearch-dropdownItem {
@@ -97,6 +96,7 @@
     border-bottom-right-radius: 5px;
     display: flex;
     background-color: @default-bg;
+    position: relative;
 }
 
 .TagSearch-searchTermContainer.is-open {
