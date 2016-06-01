@@ -74,7 +74,7 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 .getCurrentTags($scope
                     .currentSearchFilters);
 
-            if (!tagSearchService.isDuplicate(tags, newTag)) {
+            if (!tagSearchService.isDuplicate(tags, newTag) && !!newTag.name) {
                 tags.push(newTag);
                 $scope.updateSearch(tags);
             }
