@@ -41,7 +41,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (type === 'select') {
             obj.typeOptions = typeOptions;
         }
-        
+
         return obj;
     };
 
@@ -180,6 +180,9 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (tag.type === "text") {
             tag.url = tag.value + "__icontains=" + textVal;
             tag.name = textVal;
+        } else if (selectVal.value.indexOf("=") > 0) {
+            tag.url = selectVal.value;
+            tag.name = selectVal.label;
         } else {
             tag.url = tag.value + "=" + selectVal.value;
             tag.name = selectVal.label;

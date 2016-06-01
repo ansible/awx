@@ -95,11 +95,15 @@ export default
             },
             has_external_source: {
                 label: 'Has external source?',
-                searchType: 'in',
-                searchValue: 'ec2,rax,vmware,azure,gce,openstack',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'source'
+                searchType: 'select',
+                searchOptions: [{
+                    label: 'Yes',
+                    value: 'inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
+                }, {
+                    label: 'No',
+                    value: 'not__inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
+                }],
+                searchOnly: true
             },
             has_active_failures: {
                 label: 'Has failed hosts?',
