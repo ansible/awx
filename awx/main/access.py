@@ -877,6 +877,16 @@ class JobTemplateAccess(BaseAccess):
         return self.user in obj.admin_role
 
 class JobAccess(BaseAccess):
+    '''
+    I can see jobs when:
+     - I am a superuser.
+     - I can see its job template
+     - I am an admin or auditor of the organization which contains its inventory
+     - I am an admin or auditor of the organization which contains its project
+    I can delete jobs when:
+     - I am an admin of the organization which contains its inventory
+     - I am an admin of the organization which contains its project
+    '''
 
     model = Job
 
@@ -888,9 +898,19 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
-        return qs.filter(
+        qs_jt = qs.filter(
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
         )
+
+        org_access_qs = Organization.objects.filter(
+            Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+        if not org_access_qs.exists():
+            return qs_jt
+
+        return qs.filter(
+            Q(job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')) |
+            Q(inventory__organization__in=org_access_qs) |
+            Q(project__organization__in=org_access_qs)).distinct()
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
@@ -920,7 +940,11 @@ class JobAccess(BaseAccess):
 
     @check_superuser
     def can_delete(self, obj):
-        return self.user in obj.inventory.admin_role
+        if obj.inventory is not None and self.user in obj.inventory.organization.admin_role:
+            return True
+        if obj.project is not None and self.user in obj.project.organization.admin_role:
+            return True
+        return False
 
     def can_start(self, obj):
         self.check_license()

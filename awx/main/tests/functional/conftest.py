@@ -216,6 +216,13 @@ def org_admin(user, organization):
     return ret
 
 @pytest.fixture
+def org_auditor(user, organization):
+    ret = user('org-auditor', False)
+    organization.auditor_role.members.add(ret)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
 def org_member(user, organization):
     ret = user('org-member', False)
     organization.member_role.members.add(ret)
