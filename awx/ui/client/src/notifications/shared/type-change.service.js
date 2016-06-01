@@ -21,6 +21,7 @@ function () {
             obj.port_required = false;
             obj.password_required = false;
             obj.channel_required = false;
+            obj.room_required = false;
             switch (type) {
                 case 'email':
                     obj.portLabel = ' Port';
