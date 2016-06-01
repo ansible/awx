@@ -68,7 +68,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             },
             missing_path_alert: {
                 type: 'alertblock',
-                //"class": 'alert-info',
                 ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.  ' +
                     'Either that directory is empty, or all of the contents are already assigned to other projects.  ' +
@@ -87,7 +86,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Base Path',
                 dataContainer: 'body',
-                dataPlacement: 'right',
+                dataPlacement: 'right'
             },
             local_path: {
                 label: 'Playbook Directory',
@@ -120,7 +119,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 awPopOver: "set in controllers/projects",
                 dataTitle: 'SCM URL',
                 dataContainer: 'body',
-                dataPlacement: 'right',
+                dataPlacement: 'right'
             },
             scm_branch: {
                 labelBind: "scmBranchLabel",
