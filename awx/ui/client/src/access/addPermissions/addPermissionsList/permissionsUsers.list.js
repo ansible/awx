@@ -16,6 +16,7 @@
         multiSelectExtended: true,
         index: false,
         hover: true,
+        emptyListText : 'No Users exist',
 
         fields: {
             first_name: {

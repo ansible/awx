@@ -39,7 +39,7 @@ function () {
                 case 'hipchat':
                     obj.tokenLabel = ' Token';
                     obj.hipchat_required = true;
-                    obj.channel_required = true;
+                    obj.room_required = true;
                     obj.token_required = true;
                     break;
                 case 'twilio':

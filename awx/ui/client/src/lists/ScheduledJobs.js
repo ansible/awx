@@ -15,6 +15,7 @@ export default
         index: true,
         hover: true,
         well: false,
+        emptyListText: 'No schedules exist',
 
         fields: {
             status: {

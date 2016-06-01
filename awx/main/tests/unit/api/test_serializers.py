@@ -9,9 +9,14 @@ from awx.main.models import Label, Job
 #DRF
 from rest_framework import serializers
 
+def mock_JT_resource_data():
+    return ({}, [])
+
 @pytest.fixture
 def job_template(mocker):
-    return mocker.MagicMock(pk=5)
+    mock_jt = mocker.MagicMock(pk=5)
+    mock_jt.resource_validation_data = mock_JT_resource_data
+    return mock_jt
 
 @pytest.fixture
 def job(mocker, job_template):

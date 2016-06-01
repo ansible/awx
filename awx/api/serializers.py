@@ -23,6 +23,7 @@ from django.db import models
 # from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
+from django.forms.models import model_to_dict
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -1766,7 +1767,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notification_templates_any = reverse('api:job_template_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:job_template_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:job_template_notification_templates_error_list', args=(obj.pk,)),
-            access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
+            access_list = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
             roles = reverse('api:job_template_roles_list', args=(obj.pk,)),
@@ -1783,19 +1784,21 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
-        if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
-            d['can_copy'] = request.user.can_access(JobTemplate, 'add',
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj,
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-        elif request is not None and request.user is not None and request.user.is_superuser:
-            d['can_copy'] = True
-            d['can_edit'] = True
-        else:
+
+        # Check for conditions that would create a validation error if coppied
+        validation_errors, resources_needed_to_start = obj.resource_validation_data()
+
+        if request is None or request.user is None:
             d['can_copy'] = False
             d['can_edit'] = False
+        elif request.user.is_superuser:
+            d['can_copy'] = not validation_errors
+            d['can_edit'] = True
+        else:
+            jt_data = model_to_dict(obj)
+            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', jt_data)
+            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, jt_data)
+
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
@@ -2259,12 +2262,14 @@ class JobLaunchSerializer(BaseSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
+        for field in obj.resources_needed_to_start:
+            if not (field in attrs and obj._ask_for_vars_dict().get(field, False)):
+                errors[field] = "Job Template '%s' is missing or undefined." % field
+
         if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
             credential = obj.credential
         else:
             credential = attrs.get('credential', None)
-        if not credential:
-            errors['credential'] = 'Credential not provided'
 
         # fill passwords dict with request data passwords
         if credential and credential.passwords_needed:
@@ -2294,11 +2299,6 @@ class JobLaunchSerializer(BaseSerializer):
             validation_errors = obj.survey_variable_validation(extra_vars)
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
-
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
-            errors['project'] = 'Job Template Project is missing or undefined.'
-        if (obj.inventory is None) and not attrs.get('inventory', None):
-            errors['inventory'] = 'Job Template Inventory is missing or undefined.'
 
         # Special prohibited cases for scan jobs
         if 'job_type' in data and obj.ask_job_type_on_launch:

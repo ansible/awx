@@ -1,3 +1,4 @@
+<div ui-view></div>
 <div class="tab-pane Panel" id="management_jobs">
 	<div class="List-title">
 	    <div class="List-titleText">
@@ -7,7 +8,6 @@
 	        {{ mgmtCards.length }}
 	    </span>
 	</div>
-	<div ui-view></div>
 	<div class="MgmtCards">
 		<div class="MgmtCards-card"
 			ng-repeat="card in mgmtCards track by card.id">

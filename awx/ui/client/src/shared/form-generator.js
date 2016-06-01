@@ -714,13 +714,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 function label() {
                     var html = '';
                     if (field.label || field.labelBind) {
-                        html += "<label ";
-                        if (horizontal || field.labelClass) {
-                            html += "class=\"";
-                            html += (field.labelClass) ? field.labelClass : "";
-                            html += (horizontal) ? " " + getLabelWidth() : "";
-                            html += "\" ";
-                        }
+                        html += "<label class=\"";
+                        html += (field.labelClass) ? field.labelClass : "";
+                        html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
+                        html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
@@ -741,6 +738,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
                             html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
                             html += "</div>\n";
+                        }
+
+                        if (field.labelAction) {
+                            let action = field.labelAction;
+                            let href = action.href || "";
+                            let ngClick = action.ngClick || "";
+                            let cls = action["class"] || "";
+                            html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
                         html += "\n\t</label>\n";
                     }
@@ -787,7 +792,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
-                    if((field.excludeMode === undefined || field.excludeMode !== options.mode)) {
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock') {
 
 
                     html += "<div class='form-group Form-formGroup ";
@@ -1612,7 +1617,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 currentSubForm = field.subForm;
                                 var subFormTitle = this.form.subFormTitles[field.subForm];
 
-                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined"> ';
+                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined || ' + field.hideSubForm + '"> ';
                                 html += '<span class="Form-subForm--title">'+ subFormTitle +'</span>';
                             }
                             else if (!field.subForm && currentSubForm !== undefined) {
@@ -1838,7 +1843,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
+                // Allow for the suppression of the empty list text to avoid duplication between form generator and list generator
+                    var emptyListText = (collection.emptyListText) ? collection.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                    html += '<div ng-hide="is_superuser">';
+                    html += "<div class=\"List-noItems\" ng-hide=\"is_superuser\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">" + emptyListText + "</div>";
+                    html += '</div>';
+                //}
 
                 html += `
                     <div class=\"List-noItems\" ng-show=\"is_superuser\">

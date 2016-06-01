@@ -138,7 +138,6 @@ export default
                     iterator: 'team',
                     open: false,
                     index: false,
-
                     actions: {},
 
                     fields: {

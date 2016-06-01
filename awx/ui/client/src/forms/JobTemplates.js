@@ -81,6 +81,11 @@ export default
                 },
                 project: {
                     label: 'Project',
+                    labelAction: {
+                        label: 'RESET',
+                        ngClick: 'resetProjectToDefault()',
+                        'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
+                    },
                     type: 'lookup',
                     sourceModel: 'project',
                     sourceField: 'name',
@@ -99,6 +104,7 @@ export default
                     label: 'Playbook',
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
+                    ngDisabled: "job_type.value === 'scan' && project_name === 'Default'",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
@@ -109,12 +115,6 @@ export default
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                },
-                default_scan: {
-                  type: 'custom',
-                  column: 1,
-                  ngShow: 'job_type.value === "scan" && project_name !== "Default"',
-                  control: '<a href="" ng-click="toggleScanInfo()">Reset to default project and playbook</a>'
                 },
                 credential: {
                     label: 'Machine Credential',
@@ -204,7 +204,7 @@ export default
                 },
                 job_tags: {
                     label: 'Job Tags',
-                    type: 'textarea',
+                    type: 'text',
                     rows: 1,
                     addRequired: false,
                     editRequired: false,

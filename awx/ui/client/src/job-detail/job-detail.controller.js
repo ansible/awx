@@ -673,21 +673,9 @@ export default
 
                 scope.lessStatus = false; // close the view more status option
 
-                // Detail table height adjusting. First, put page height back to 'normal'.
-                $('#plays-table-detail').height(80);
-                //$('#plays-table-detail').mCustomScrollbar("update");
-                // $('#tasks-table-detail').height(120);
-                //$('#tasks-table-detail').mCustomScrollbar("update");
-                $('#hosts-table-detail').height(150);
-                //$('#hosts-table-detail').mCustomScrollbar("update");
+
                 height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
                     $('#job-detail-container').outerHeight() - 20;
-                if (height > 15) {
-                    // there's a bunch of white space at the bottom, let's use it
-                    $('#plays-table-detail').height(80 + (height * 0.10));
-                    $('#tasks-table-detail').height(120 + (height * 0.20));
-                    $('#hosts-table-detail').height(150 + (height * 0.10));
-                }
                 scope.$emit('RefreshCompleted');
             };
 
@@ -776,12 +764,41 @@ export default
                 }
             };
 
+            scope.filterTaskStatus = function() {
+                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
+                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+                    LoadTasks({
+                        scope: scope
+                    });
+                }
+            };
+
             scope.filterPlayStatus = function() {
                 scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
                     LoadPlays({
                         scope: scope
                     });
+                }
+            };
+
+            scope.filterHostStatus = function(){
+                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
+                if (!scope.liveEventProcessing || scope.pauseLiveEvents){
+                    if (scope.selectedTask !== null && scope.selectedPlay !== null){
+                        var params = {
+                            parent: scope.selectedTask,
+                            page_size: scope.hostResultsMaxRows,
+                            order: 'host_name,counter',
+                        };
+                        if (scope.search_host_status === 'failed'){
+                            params.failed = true;
+                        }
+                        JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                            scope.hostResults = JobDetailService.processHostEvents(res.results);
+                            scope.hostResultsLoading = false;
+                        });
+                    }
                 }
             };
 

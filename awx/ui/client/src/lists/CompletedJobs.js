@@ -20,6 +20,7 @@ export default
         index: false,
         hover: true,
         well: false,
+        emptyListText: 'No completed jobs',
 
         fields: {
             status: {

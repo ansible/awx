@@ -178,7 +178,14 @@
 
 .Form-formGroup--checkbox{
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
+}
+
+.Form-textUneditable {
+    .Form-textInput {
+        border: none;
+        padding: 0;
+    }
 }
 
 .Form-subForm {
@@ -324,6 +331,12 @@
 
 .select2-dropdown{
     border:1px solid @field-border;
+
+}
+
+.select2-container--open .select2-dropdown--below {
+    margin-top: -1px;
+    border-top: 1px solid @field-border;
 }
 
 .Form-dropDown:focus{
@@ -427,6 +440,10 @@ input[type='radio']:checked:before {
   outline:none;
 }
 
+.Form-inputLabelContainer {
+    width: 100%;
+    display: block !important;
+}
 .Form-inputLabel{
     text-transform: uppercase;
     color: @default-interface-txt;
@@ -434,6 +451,16 @@ input[type='radio']:checked:before {
     font-size: small;
     padding-right:5px;
     width: 100%;
+    .noselect;
+}
+
+.Form-labelAction {
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left:5px;
+    float: right;
+    margin-top: 3px;
     .noselect;
 }
 
