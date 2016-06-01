@@ -40,7 +40,6 @@ export default
                         // attached to the $rootScope.
                         var features = FeaturesService.get();
                         if(features){
-
                             scope.loadingLicense = false;
                             scope.activityStreamActive = (toState.name === 'activityStream') ? true : false;
                             scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || toState.name ==='activityStream') ? true : false;

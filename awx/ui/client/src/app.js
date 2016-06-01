@@ -754,7 +754,7 @@ var tower = angular.module('Tower', [
                         control_socket.on("limit_reached", function(data) {
                             $log.debug(data.reason);
                             $rootScope.sessionTimer.expireSession('session_limit');
-                            $location.url('/login');
+                            $state.go('signOut');
                         });
                     }
                     openSocket();
