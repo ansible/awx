@@ -2369,12 +2369,13 @@ class NotificationTemplateSerializer(BaseSerializer):
         return d
 
     def validate(self, attrs):
+        from awx.api.views import NotificationTemplateDetail
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         incorrect_type_fields = []
         if 'notification_configuration' not in attrs:
             return attrs
-        if self.context['view'].kwargs:
+        if self.context['view'].kwargs and isinstance(self.context['view'], NotificationTemplateDetail):
             object_actual = self.context['view'].get_object()
         else:
             object_actual = None
