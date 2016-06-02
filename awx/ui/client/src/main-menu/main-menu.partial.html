@@ -3,9 +3,9 @@
     <a id="main_menu_logo"
         href="/#/"
         class="MainMenu-logo ng-cloak"
-        ng-hide="licenseMissing"
-        ng-class="{'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-loggedOut' : !$root.current_user.username, 'MainMenu-logoImage--licenseMissing': licenseMissing}">
         <img class="MainMenu-logoImage"
+            ng-class="{'MainMenu-logoImage--licenseMissing': licenseMissing}"
             ng-src="/static/assets/tower-logo-header.svg">
     </a>
 
@@ -182,13 +182,16 @@
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--right"
         id="main_menu_logout_link"
         ng-href="/#/logout"
-        ng-class="{'is-currentRoute' : isCurrentState('logout'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('logout'),
+            'is-loggedOut' : !$root.current_user.username,
+            'MainMenu-item--licenseMissing' : licenseMissing}"
         aw-tool-tip="Log Out"
         data-placement="bottom"
         data-trigger="hover"
         data-container="body"
         data-tooltip_inner_class="tooltip-inner--logOut">
         <i class="MainMenu-itemImage fa fa-power-off"
+        ng-class="{'MainMenu-itemImage--licenseMissing' : licenseMissing}"
             alt="Log Out">
         </i>
     </a>

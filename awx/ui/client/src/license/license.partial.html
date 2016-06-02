@@ -74,6 +74,7 @@
 		<div class="Panel">
 			<div class="License-titleText">{{title}}</div>
 			<div class="License-body">
+				<div class="License-helperText" ng-if="licenseMissing">Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
 				<div class="AddPermissions-directions" ng-if="licenseMissing">
 					<span class="AddPermissions-directionNumber">
 						1

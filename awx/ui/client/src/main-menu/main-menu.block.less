@@ -18,7 +18,7 @@
 }
 
 .MainMenu--licenseMissing{
-    justify-content: flex-end;
+    justify-content: space-between;
 }
 
 .MainMenu-logo,
@@ -33,6 +33,11 @@
     height: 30px;
     width: 93px;
     margin: 20px;
+}
+
+.MainMenu-logoImage--licenseMissing:hover{
+    cursor:default;
+    background-color: @default-bg!important;
 }
 
 .MainMenu-item {
@@ -190,6 +195,27 @@
 
     .MainMenu-item--notMobile {
         display: none;
+    }
+
+    .MainMenu-item--licenseMissing{
+        justify-content: space-between!important;
+        display:flex!important;
+        align-items: center!important;
+        flex: initial!important;
+        padding-top:0px;
+    }
+
+    // .MainMenu-item--licenseMissing:hover{
+    //     padding-top:5px;
+    //     border-bottom: 5px solid @menu-link-btm-hov;
+    //     border-left: 0px;
+    //     padding-left: 21px;
+    //     padding-right: 21px;
+    //     margin-right: -1px;
+    // }
+
+    .MainMenu-itemImage--licenseMissing{
+        font-size: 20px!important;
     }
 
     .MainMenu {
