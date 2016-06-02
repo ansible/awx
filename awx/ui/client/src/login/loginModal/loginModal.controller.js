@@ -113,9 +113,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
         scope.removeAuthorizationGetLicense();
     }
     scope.removeAuthorizationGetLicense = scope.$on('AuthorizationGetLicense', function() {
-        // Authorization.getLicense()
-        //     .success(function (data) {
-        //         Authorization.setLicense(data);
         ConfigService.getConfig().then(function(){
                 CheckLicense.test();
                 pendoService.issuePendoIdentity();

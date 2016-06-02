@@ -112,27 +112,6 @@ export default
                 }
             },
 
-            getLicense: function () {
-                //check in here first to see if license is already obtained, if we do have it, then rootScope.license
-                return $http({
-                    method: 'GET',
-                    url: GetBasePath('config'),
-                    headers: {
-                        'Authorization': 'Token ' + this.getToken()
-                    }
-                });
-            },
-
-            setLicense: function (data) {
-                var license = data.license_info;
-                license.analytics_status = data.analytics_status;
-                license.version = data.version;
-                license.ansible_version = data.ansible_version;
-                license.tested = false;
-
-                $rootScope.features = license.features;
-            },
-
             licenseTested: function () {
                 var license, result;
                 if ($rootScope.license_tested !== undefined) {
