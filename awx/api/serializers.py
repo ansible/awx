@@ -680,13 +680,14 @@ class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', write_only=True,
                                      help_text='Write-only field used to change the password.')
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
+    external_account = serializers.SerializerMethodField(help_text='Set if the account is managed by an external service')
     is_system_auditor = serializers.BooleanField(default=False)
 
     class Meta:
         model = User
         fields = ('*', '-name', '-description', '-modified',
                   '-summary_fields', 'username', 'first_name', 'last_name',
-                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn')
+                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
@@ -720,12 +721,32 @@ class UserSerializer(BaseSerializer):
                 getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
                 getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
             new_password = None
+        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
+            new_password = None
         if new_password:
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
+
+    def get_external_account(self, obj):
+        account_type = None
+        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+            try:
+                if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
+                    account_type = "ldap"
+            except AttributeError:
+                pass
+        if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
+            account_type = "social"
+        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
+            account_type = "radius"
+        return account_type
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
