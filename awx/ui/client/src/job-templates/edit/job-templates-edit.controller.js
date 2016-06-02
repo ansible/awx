@@ -399,6 +399,15 @@ export default
             });
 
             // setup verbosity options lookup
+            function sync_verbosity_select2() {
+                CreateSelect2({
+                    element:'#job_templates_verbosity',
+                    multiple: false
+                });
+            }
+            $scope.$watch('verbosity', sync_verbosity_select2);
+            sync_verbosity_select2();
+
             GetChoices({
                 scope: $scope,
                 url: defaultUrl,
@@ -460,11 +469,6 @@ export default
                                 Wait("stop");
                             });
                         });
-
-                    CreateSelect2({
-                        element:'#job_templates_verbosity',
-                        multiple: false
-                    });
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, {
