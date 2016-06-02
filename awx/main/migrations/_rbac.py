@@ -292,10 +292,13 @@ def migrate_projects(apps, schema_editor):
                 else:
                     new_prj = Project.objects.create(
                         created                   = project.created,
+                        modified                  = project.modified,
+                        polymorphic_ctype_id      = project.polymorphic_ctype_id,
                         description               = project.description,
                         name                      = smart_text(u'{} - {}'.format(org.name, original_project_name)),
                         old_pk                    = project.old_pk,
                         created_by_id             = project.created_by_id,
+                        modified_by_id            = project.modified_by_id,
                         scm_type                  = project.scm_type,
                         scm_url                   = project.scm_url,
                         scm_branch                = project.scm_branch,
@@ -307,11 +310,31 @@ def migrate_projects(apps, schema_editor):
                         credential                = project.credential,
                         organization              = org
                     )
+                    if project.scm_type == "":
+                        new_prj.local_path = project.local_path
+                        new_prj.save()
+                    for team in project.deprecated_teams.iterator():
+                        new_prj.deprecated_teams.add(team)
                     logger.warning(smart_text(u'cloning Project({}) onto {} as Project({})'.format(original_project_name, org, new_prj)))
-                    job_templates = JobTemplate.objects.filter(inventory__organization=org).all()
+                    job_templates = JobTemplate.objects.filter(project=project, inventory__organization=org).all()
                     for jt in job_templates:
                         jt.project = new_prj
                         jt.save()
+                    for perm in Permission.objects.filter(project=project):
+                        Permission.objects.create(
+                            created                   = perm.created,
+                            modified                  = perm.modified,
+                            created_by                = perm.created_by,
+                            modified_by               = perm.modified_by,
+                            description               = perm.description,
+                            name                      = perm.name,
+                            user                      = perm.user,
+                            team                      = perm.team,
+                            project                   = new_prj,
+                            inventory                 = perm.inventory,
+                            permission_type           = perm.permission_type,
+                            run_ad_hoc_commands       = perm.run_ad_hoc_commands,
+                        )
 
     # Migrate permissions
     for project in Project.objects.iterator():
