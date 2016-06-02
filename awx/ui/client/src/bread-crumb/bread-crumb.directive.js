@@ -52,22 +52,15 @@ export default
                     }
                 });
 
-                $rootScope.$on('featuresLoaded', function(){
-                    FeaturesService.get()
-                    .then(function() {
+                // scope.$on('featuresLoaded', function(){
+                $rootScope.featuresConfigured.promise.then(function(features){
+                    // var features = FeaturesService.get();
+                    if(features){
                         scope.loadingLicense = false;
                         scope.activityStreamActive = ($state.name === 'activityStream') ? true : false;
-                        scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || $state.name === 'activityStream') ? true : false;
-                    })
-                    .catch(function (response) {
-                        ProcessErrors(null, response.data, response.status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get feature info. GET returned status: ' +
-                            response.status
-                        });
-                    });
+                        scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || $state.name ==='activityStream') ? true : false;
+                    }
                 });
-
             }
         };
     }];

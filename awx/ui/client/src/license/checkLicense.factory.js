@@ -29,9 +29,7 @@ export default
 	                        msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
 	                    });
 				},
-				// Checks current license validity
-				// Intended to for runtime or pre-state checks
-				// Returns false if invalid
+
 				valid: function(license) {
 					if (!license.valid_key){
 						return false;
@@ -45,6 +43,7 @@ export default
 					}
 					return true;
 				},
+				
 				test: function(event){
 					var //deferred = $q.defer(),
 						license = this.get();
