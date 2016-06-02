@@ -1,5 +1,5 @@
 export default
-    [   'templateUrl', '$state', 'FeaturesService', 'ProcessErrors', 'Store', 'Empty', function(templateUrl, $state, FeaturesService, ProcessErrors, Store, Empty) {
+    [   'templateUrl', '$state', 'FeaturesService', 'ProcessErrors', 'Store', 'Empty', '$log', function(templateUrl, $state, FeaturesService, ProcessErrors, Store, Empty, $log) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -75,6 +75,7 @@ export default
                             scope.licenseType = licenseInfo ? licenseInfo.license_type : null;
                             if (!licenseInfo) {
                                 console.warn("License info not loaded correctly"); // jshint ignore:line
+                                $log.error("License info not loaded correctly");
                             }
                         })
                         .catch(function (response) {

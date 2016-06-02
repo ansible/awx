@@ -224,41 +224,6 @@ export default
                         text: 'Prompt on launch'
                     }
                 },
-                labels: {
-                    label: 'Labels',
-                    type: 'select',
-                    ngOptions: 'label.label for label in labelOptions track by label.value',
-                    multiSelect: true,
-                    addRequired: false,
-                    editRequired: false,
-                    dataTitle: 'Labels',
-                    dataPlacement: 'right',
-                    awPopOver: 'You can add labels to a job template to aid in filtering',
-                    dataContainer: 'body'
-                },
-                variables: {
-                    label: 'Extra Variables',
-                    type: 'textarea',
-                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    rows: 6,
-                    addRequired: false,
-                    editRequired: false,
-                    "default": "---",
-                    column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
-                    dataTitle: 'Extra Variables',
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    subCheckbox: {
-                        variable: 'ask_variables_on_launch',
-                        text: 'Prompt on launch'
-                    }
-                },
                 become_enabled: {
                   label: 'Enable Privilege Escalation',
                   type: 'checkbox',
@@ -309,6 +274,42 @@ export default
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
+                },
+                labels: {
+                    label: 'Labels',
+                    type: 'select',
+                    class: 'Form-formGroup--fullWidth',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    addRequired: false,
+                    editRequired: false,
+                    dataTitle: 'Labels',
+                    dataPlacement: 'right',
+                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    dataContainer: 'body'
+                },
+                variables: {
+                    label: 'Extra Variables',
+                    type: 'textarea',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    rows: 6,
+                    addRequired: false,
+                    editRequired: false,
+                    "default": "---",
+                    column: 2,
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
+                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    dataTitle: 'Extra Variables',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 }
             },
 
@@ -365,13 +366,15 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
                         }
                     }
                 },

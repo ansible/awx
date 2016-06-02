@@ -272,7 +272,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight) {
         return function (params) {
 
-            var list = StreamList,
+            var list = _.cloneDeep(StreamList),
                 defaultUrl = GetBasePath('activity_stream'),
                 view = GenerateList,
                 parent_scope = params.scope,
@@ -292,10 +292,108 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     }
                     else {
                         // We just have a type
-                        defaultUrl += '?or__object1=' + $state.params.target + '&or__object2=' + $state.params.target;
+                        if ($state.params.target === 'inventory_script') {
+                            defaultUrl += '?or__object1=custom_inventory_script&or__object2=custom_inventory_script';
+                        } else if ($state.params.target === 'management_job') {
+                            defaultUrl += '?or__object1=job&or__object2=job';
+                        } else {
+                            defaultUrl += '?or__object1=' + $state.params.target + '&or__object2=' + $state.params.target;
+                        }
                     }
                 }
             }
+
+            if ($state.params.target === 'credential') {
+                list.fields.customSearchField = {
+                    label: 'Credential',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'credential',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'host') {
+                list.fields.customSearchField = {
+                    label: 'Host',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'host',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'inventory') {
+                list.fields.customSearchField = {
+                    label: 'Inventory',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'inventory',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'inventory_script') {
+                list.fields.customSearchField = {
+                    label: 'Inventory Script',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'custom_inventory_script',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'job_template') {
+                list.fields.customSearchField = {
+                    label: 'Job Template',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'job_template',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'job') {
+                list.fields.customSearchField = {
+                    label: 'Job',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'job',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'organization') {
+                list.fields.customSearchField = {
+                    label: 'Organization',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'organization',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'project') {
+                list.fields.customSearchField = {
+                    label: 'Project',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'project',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'schedule') {
+                list.fields.customSearchField = {
+                    label: 'Schedule',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'schedule',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'team') {
+                list.fields.customSearchField = {
+                    label: 'Team',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'team',
+                    sourceField: 'name'
+                };
+            } else if ($state.params.target === 'user') {
+                list.fields.customSearchField = {
+                    label: 'User',
+                    searchType: 'text',
+                    searchOnly: 'true',
+                    sourceModel: 'user',
+                    sourceField: 'username'
+                };
+            }
+
+            list.basePath = defaultUrl;
 
             // Generate the list
             view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });

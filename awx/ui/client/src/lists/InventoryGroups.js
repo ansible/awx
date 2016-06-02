@@ -52,7 +52,8 @@ export default
                 key: true,
                 ngClick: "groupSelect(group.id)",
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
-                class: 'InventoryManage-breakWord'
+                class: 'InventoryManage-breakWord',
+                searchLabel: 'name'
             },
             total_groups: {
                 nosort: true,
@@ -61,31 +62,31 @@ export default
                 ngHide: 'group.total_groups == 0',
                 noLink: true,
                 awToolTip: "{{group.name}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
-
+                searchable: false,
             },
             source: {
                 label: 'Source',
                 searchType: 'select',
                 searchOptions: [{
-                    name: "Amazon Web Services",
+                    label: "Amazon Web Services",
                     value: "ec2"
                 }, {
-                    name: "none",
+                    label: "none",
                     value: ""
                 }, {
-                    name: "Rackspace",
+                    label: "Rackspace",
                     value: "rax"
                 },{
-                    name: "VMware",
+                    label: "VMware",
                     value: "vmware"
                 },{
-                    name: "Google Compute Engine",
+                    label: "Google Compute Engine",
                     value: "gce"
                 },{
-                    name: "Microsoft Azure",
+                    label: "Microsoft Azure",
                     value: "azure"
                 },{
-                    name: "OpenStack",
+                    label: "OpenStack",
                     value: "openstack"
                 }],
                 sourceModel: 'inventory_source',
@@ -94,11 +95,15 @@ export default
             },
             has_external_source: {
                 label: 'Has external source?',
-                searchType: 'in',
-                searchValue: 'ec2,rax,vmware,azure,gce,openstack',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'source'
+                searchType: 'select',
+                searchOptions: [{
+                    label: 'Yes',
+                    value: 'inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
+                }, {
+                    label: 'No',
+                    value: 'not__inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
+                }],
+                searchOnly: true
             },
             has_active_failures: {
                 label: 'Has failed hosts?',
