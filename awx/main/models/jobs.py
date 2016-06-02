@@ -229,6 +229,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     read_role = ImplicitRoleField(
         parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
     )
+    allow_simultaneous = models.BooleanField(
+        default=False,
+    )
+
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -580,6 +584,8 @@ class Job(UnifiedJob, JobOptions):
             if obj.job_template is not None and obj.inventory is not None:
                 if obj.job_template == self.job_template and \
                    obj.inventory == self.inventory:
+                    if self.job_template.allow_simultaneous:
+                        return False
                     if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
                        obj.limit != self.limit:
                         return False
