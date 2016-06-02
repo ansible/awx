@@ -62,7 +62,7 @@ export default
                     now = new Date().getTime()/1000,
                     diff = stime-now;
 
-                if(diff < 61){
+                if(diff < 60){
                     return diff;
                 }
                 else {
