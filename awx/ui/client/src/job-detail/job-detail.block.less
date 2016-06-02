@@ -30,6 +30,12 @@
 
 .JobDetail-rightSide{
     .OnePlusOne-panel--right(100%, @breakpoint-md);
+    @media (min-width: @breakpoint-md) {
+        max-width: 50%;
+    }
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
 }
 .JobDetail-panelHeader{
     display: flex;
