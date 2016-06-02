@@ -814,7 +814,7 @@ class JobTemplateAccess(BaseAccess):
 
     def can_change(self, obj, data):
         data_for_change = data
-        if self.user not in obj.admin_role:
+        if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
         if data is not None:
             data = dict(data)
@@ -873,6 +873,7 @@ class JobTemplateAccess(BaseAccess):
 
         return True
 
+    @check_superuser
     def can_delete(self, obj):
         return self.user in obj.admin_role
 

@@ -1,6 +1,7 @@
 import pytest
 
 from awx.main.tests.factories import NotUnique
+from awx.main.tests.factories.utils import generate_survey_spec
 
 def test_roles_exc_not_persisted(organization_factory):
     with pytest.raises(RuntimeError) as exc:
@@ -83,3 +84,20 @@ def test_job_template_factory(job_template_factory):
     assert jt_objects.inventory.name == 'inventory1'
     assert jt_objects.credential.name == 'cred1'
     assert jt_objects.inventory.organization.name == 'org1'
+
+def test_survey_spec_generator_simple():
+    survey_spec = generate_survey_spec('survey_variable')
+    assert 'name' in survey_spec
+    assert 'spec' in survey_spec
+    assert type(survey_spec['spec']) is list
+    assert type(survey_spec['spec'][0]) is dict
+    assert survey_spec['spec'][0]['type'] == 'integer'
+
+def test_survey_spec_generator_mixed():
+    survey_spec = generate_survey_spec(
+        [{'variable': 'question1', 'type': 'integer', 'max': 87},
+         {'variable': 'question2', 'type': 'str'},
+         'some_variable'])
+    assert len(survey_spec['spec']) == 3
+    assert [spec_item['type'] for spec_item in survey_spec['spec']] == ['integer', 'str', 'integer']
+    assert survey_spec['spec'][0]['max'] == 87
