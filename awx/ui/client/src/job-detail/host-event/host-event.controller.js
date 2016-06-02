@@ -18,17 +18,15 @@
             else {return true;}
         };
         /*ignore jslint start*/
-        /* jshint ignore:start */
         var initCodeMirror = function(el, json){
             var container = $(el)[0];
-            var editor = CodeMirror.fromTextArea(container, {
+            var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
                 lineNumbers: true,
                 mode: {name: "javascript", json: true}
             });
             editor.setSize("100%", 300);
             editor.getDoc().setValue(JSON.stringify(json, null, 4));
         };
-        /* jshint ignore:end */
         /*ignore jslint end*/
         $scope.isActiveState = function(name){
             return $state.current.name === name;
