@@ -5,46 +5,22 @@
  *************************************************/
 
 export default ['$stateParams', '$scope', '$rootScope', '$location',
-    '$log', '$compile', 'Rest', 'PaginateWidget', 'PaginateInit',
+    '$log', '$compile', 'Rest', 'PaginateInit',
     'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state',
+    '$state', 'generateList',
     function($stateParams, $scope, $rootScope, $location,
-        $log, $compile, Rest, PaginateWidget, PaginateInit,
+        $log, $compile, Rest, PaginateInit,
         SearchInit, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait,
-        $state) {
+        $state, generateList) {
 
         ClearScope();
 
         var defaultUrl = GetBasePath('organizations'),
             list = OrganizationList,
-            pageSize = $scope.orgCount;
-
-        PaginateInit({
-            scope: $scope,
-            list: list,
-            url: defaultUrl,
-            pageSize: pageSize,
-        });
-        SearchInit({
-            scope: $scope,
-            list: list,
-            url: defaultUrl,
-        });
-
-        $scope.list = list;
-
-        $scope.search(list.iterator);
-
-        $scope.PaginateWidget = PaginateWidget({
-            iterator: list.iterator,
-            set: 'organizations'
-        });
-
-        var paginationContainer = $('#pagination-container');
-        paginationContainer.html($scope.PaginateWidget);
-        $compile(paginationContainer.contents())($scope);
+            pageSize = 24,
+            view = generateList;
 
         var parseCardData = function(cards) {
             return cards.map(function(card) {
@@ -96,23 +72,6 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             });
         };
 
-        var getOrganization = function(id) {
-            Rest.setUrl(defaultUrl);
-            Rest.get()
-                .success(function(data) {
-                    data.results.activeCard = id;
-                    $scope.orgCount = data.count;
-                    $scope.orgCards = parseCardData(data.results);
-                    Wait("stop");
-                })
-                .error(function(data, status) {
-                    ProcessErrors($scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
-                    });
-                });
-        };
-
         $scope.$on("ReloadOrgListView", function() {
             if ($state.$current.self.name === "organizations") {
                 delete $scope.activeCard;
@@ -125,14 +84,10 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             }
         });
 
-        $scope.$on("ReloadOrganzationCards", function(e, id) {
-            $scope.activeCard = id;
-            getOrganization(id);
+
+        $scope.$watchCollection('organizations', function(value){
+            $scope.orgCards = parseCardData(value);
         });
-
-        getOrganization();
-
-        $rootScope.flashMessage = null;
 
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
@@ -183,5 +138,50 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 actionText: 'DELETE'
             });
         };
+        var init = function(){
+            // Pagination depends on html appended by list generator
+            view.inject(list, {
+                id: 'organizations-list',
+                scope: $scope,
+                mode: 'edit'
+            });
+            // grab the pagination elements, move, destroy list generator elements
+            $('#organization-pagination').appendTo('#OrgCards');
+            $('tag-search').appendTo('.OrgCards-search');
+            $('#organizations-list').remove();
+
+            PaginateInit({
+                scope: $scope,
+                list: list,
+                url: defaultUrl,
+                pageSize: pageSize,
+            });
+            SearchInit({
+                scope: $scope,
+                list: list,
+                url: defaultUrl,
+                set: 'organizations'
+            });
+
+            $scope.list = list;
+            $rootScope.flashMessage = null;
+
+            $scope.search(list.iterator);
+            var getOrgCount = function() {
+                Rest.setUrl(defaultUrl);
+                Rest.get()
+                    .success(function(data) {
+                        $scope.orgCount = data.count;
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
+                        });
+                    });
+            };
+            getOrgCount();
+        };
+        init();
     }
 ];
