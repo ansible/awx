@@ -55,7 +55,7 @@ export default [
             schedList.well = true;
 
             // include name of item in listTitle
-            let escaped_title =  $("<span>").text(title ? title : parentObject.name)[0].innerHTML
+            let escaped_title =  $("<span>").text(title ? title : parentObject.name)[0].innerHTML;
             schedList.listTitle = `${escaped_title}<div class='List-titleLockup'></div>Schedules`;
 
             schedList.basePath = parentObject.url + "schedules";
