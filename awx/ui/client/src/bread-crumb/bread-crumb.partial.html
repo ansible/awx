@@ -1,5 +1,5 @@
 <div id="bread_crumb" class="BreadCrumb" ng-class="{'is-loggedOut' : !$root.current_user.username}">
-    <div ng-if="!licenseMissing" ncy-breadcrumb></div>
+    <div ng-hide="licenseMissing" ncy-breadcrumb></div>
     <div class="BreadCrumb-menuLink"
         id="bread_crumb_activity_stream"
         aw-tool-tip="View Activity Stream"
@@ -8,7 +8,7 @@
         data-container="body"
         ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
         ng-if="showActivityStreamButton"
-        ng-hide= "loadingLicense || licenseMissing || licenseType == 'basic'"
+        ng-hide= "loadingLicense || licenseMissing"
         ng-click="toggleActivityStream()">
         <i class="BreadCrumb-menuLinkImage icon-activity-stream"
             alt="Activity Stream">

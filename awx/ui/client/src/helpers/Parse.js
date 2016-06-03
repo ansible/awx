@@ -16,7 +16,8 @@
 
 export default
     angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
-        .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', function (Alert, AngularCodeMirror) {
+        .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', '$rootScope',
+        function (Alert, AngularCodeMirror, $rootScope) {
             return function (params) {
 
                 var scope = params.scope,
@@ -45,16 +46,18 @@ export default
 
                 function createField(onChange, onReady) {
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
-                    scope.codeMirror = AngularCodeMirror();
-                    scope.codeMirror.addModes($AnsibleConfig.variable_edit_modes);
-                    scope.codeMirror.showTextArea({
-                        scope: scope,
-                        model: fld,
-                        element: field_id,
-                        lineNumbers: true,
-                        mode: scope[pfld],
-                        onReady: onReady,
-                        onChange: onChange
+                    $rootScope.loginConfig.promise.then(function () {
+                        scope.codeMirror = AngularCodeMirror();
+                        scope.codeMirror.addModes($AnsibleConfig.variable_edit_modes);
+                        scope.codeMirror.showTextArea({
+                            scope: scope,
+                            model: fld,
+                            element: field_id,
+                            lineNumbers: true,
+                            mode: scope[pfld],
+                            onReady: onReady,
+                            onChange: onChange
+                        });
                     });
                 }
 

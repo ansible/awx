@@ -316,7 +316,8 @@ export default
             buttons: { //for now always generates <button> tags
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists'
+                    ngShow: 'job_type.value !== "scan" && !survey_exists',
+                    awFeature: 'surveys'
                 },
                 edit_survey: {
                     ngClick: 'editSurvey()',
