@@ -207,6 +207,11 @@ export default
                     }
                     UpdateDOM({ scope: scope });
                 });
+                // Unbind $rootScope socket event binding(s) so that they don't get triggered
+                // in another instance of this controller
+                scope.$on('$destroy', function() {
+                    $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
+                });
             }
             openSocket();
 
