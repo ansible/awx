@@ -921,7 +921,7 @@ var tower = angular.module('Tower', [
                 $rootScope.loginConfig = $q.defer();
             }
             if (!$rootScope.featuresConfigured) {
-                // create a promise that will resolve state $AnsibleConfig is loaded
+                // create a promise that will resolve when features are loaded
                 $rootScope.featuresConfigured = $q.defer();
             }
             $rootScope.licenseMissing = true;
