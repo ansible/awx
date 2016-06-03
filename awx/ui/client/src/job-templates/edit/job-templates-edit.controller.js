@@ -83,6 +83,13 @@ export default
                 });
             }
 
+            function sync_verbosity_select2() {
+                CreateSelect2({
+                    element:'#job_templates_verbosity',
+                    multiple: false
+                });
+            }
+
             getPlaybooks = function (project) {
                 var url;
                 if ($scope.playbook) {
@@ -243,6 +250,8 @@ export default
                 }
             });
 
+            // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
+            $scope.$watch('verbosity', sync_verbosity_select2);
 
 
             // Turn off 'Wait' after both cloud credential and playbook list come back
@@ -406,6 +415,7 @@ export default
                 variable: 'verbosity_options',
                 callback: 'choicesReady'
             });
+            sync_verbosity_select2();
 
             // setup job type options lookup
             GetChoices({
@@ -460,11 +470,6 @@ export default
                                 Wait("stop");
                             });
                         });
-
-                    CreateSelect2({
-                        element:'#job_templates_verbosity',
-                        multiple: false
-                    });
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, {
