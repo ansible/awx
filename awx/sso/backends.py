@@ -6,6 +6,7 @@ import logging
 
 # Django
 from django.dispatch import receiver
+from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 
 # django-auth-ldap
@@ -103,6 +104,18 @@ class RADIUSBackend(BaseRADIUSBackend):
             logger.error("Unable to get_user, license does not support RADIUS authentication")
             return None
         return super(RADIUSBackend, self).get_user(user_id)
+
+    def get_django_user(self, username, password=None):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = User(username=username)
+
+        if password is not None:
+            user.set_unusable_password()
+            user.save()
+
+        return user
 
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
