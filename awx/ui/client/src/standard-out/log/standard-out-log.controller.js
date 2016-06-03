@@ -45,7 +45,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                 // Unbind $rootScope socket event binding(s) so that they don't get triggered
                 // in another instance of this controller
                 $scope.$on('$destroy', function() {
-                    $rootScope.event_socket.removeAllListeners("ad_hoc_command_events-" + job_id);
+                    $rootScope.adhoc_event_socket.removeAllListeners("ad_hoc_command_events-" + job_id);
                 });
             }
         }
