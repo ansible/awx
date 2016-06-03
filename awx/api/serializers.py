@@ -332,7 +332,7 @@ class BaseSerializer(serializers.ModelSerializer):
                     'description': role.description,
                 }
         if len(roles) > 0:
-            summary_fields['roles'] = roles
+            summary_fields['object_roles'] = roles
         return summary_fields
 
     def get_created(self, obj):
@@ -769,6 +769,7 @@ class UserSerializer(BaseSerializer):
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
             roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
+            object_roles           = reverse('api:user_object_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
             access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
         ))
@@ -826,7 +827,7 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
-            roles = reverse('api:organization_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:organization_object_roles_list', args=(obj.pk,)),
             access_list = reverse('api:organization_access_list', args=(obj.pk,)),
         ))
         return res
@@ -912,7 +913,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list', args=(obj.pk,)),
-            roles = reverse('api:project_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:project_object_roles_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -1016,7 +1017,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
-            roles = reverse('api:inventory_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:inventory_object_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization:
@@ -1188,7 +1189,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:group_access_list',         args=(obj.pk,)),
-            roles = reverse('api:group_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:group_object_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory:
@@ -1287,7 +1288,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
-            roles = reverse('api:inventory_script_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:inventory_script_object_roles_list', args=(obj.pk,)),
         ))
 
         if obj.organization:
@@ -1456,6 +1457,7 @@ class TeamSerializer(BaseSerializer):
             users        = reverse('api:team_users_list',       args=(obj.pk,)),
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
             roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
+            object_roles        = reverse('api:team_object_roles_list',       args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
             access_list  = reverse('api:team_access_list',      args=(obj.pk,)),
         ))
@@ -1638,7 +1640,7 @@ class CredentialSerializer(BaseSerializer):
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list = reverse('api:credential_access_list', args=(obj.pk,)),
-            roles = reverse('api:credential_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:credential_object_roles_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)
@@ -1791,7 +1793,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             access_list = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
-            roles = reverse('api:job_template_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:job_template_object_roles_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))

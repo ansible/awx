@@ -820,7 +820,7 @@ class OrganizationAccessList(ResourceAccessList):
     resource_model = Organization
     new_in_300 = True
 
-class OrganizationRolesList(SubListAPIView):
+class OrganizationObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -876,6 +876,18 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(TeamRolesList, self).post(request, *args, **kwargs)
+
+class TeamObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Team
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class TeamProjectsList(SubListAPIView):
 
@@ -1097,7 +1109,7 @@ class ProjectAccessList(ResourceAccessList):
     resource_model = Project
     new_in_300 = True
 
-class ProjectRolesList(SubListAPIView):
+class ProjectObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1182,6 +1194,17 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         # We hide roles that shouldn't be seen in our queryset
         return True
 
+class UserObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = User
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class UserProjectsList(SubListAPIView):
@@ -1432,7 +1455,7 @@ class CredentialAccessList(ResourceAccessList):
     resource_model = Credential
     new_in_300 = True
 
-class CredentialRolesList(SubListAPIView):
+class CredentialObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1464,7 +1487,7 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
             inv_src.save()
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
 
-class InventoryScriptRolesList(SubListAPIView):
+class InventoryScriptObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1526,7 +1549,7 @@ class InventoryAccessList(ResourceAccessList):
     resource_model = Inventory
     new_in_300 = True
 
-class InventoryRolesList(SubListAPIView):
+class InventoryObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1873,7 +1896,7 @@ class GroupAccessList(ResourceAccessList):
     resource_model = Group
     new_in_300 = True
 
-class GroupRolesList(SubListAPIView):
+class GroupObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -2610,7 +2633,7 @@ class JobTemplateAccessList(ResourceAccessList):
     resource_model = JobTemplate
     new_in_300 = True
 
-class JobTemplateRolesList(SubListAPIView):
+class JobTemplateObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
