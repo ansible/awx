@@ -26,7 +26,6 @@
                      $scope.org_id = data.id;
 
                      list = _.cloneDeep(UserList);
-                     list.emptyListText = "Please add items to this list";
                      delete list.actions.add;
                      list.searchRowActions = {
                          add: {

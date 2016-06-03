@@ -27,7 +27,6 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
                     var listMode = 'users';
 
                     list = _.cloneDeep(UserList);
-                    list.emptyListText = "Please add items to this list";
                     delete list.actions.add;
                     list.searchRowActions = {
                         add: {
