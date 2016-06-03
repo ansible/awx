@@ -30,25 +30,25 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
 
     // array for all possible roles for the object
     scope.roles = Object
-        .keys(scope.object.summary_fields.roles)
+        .keys(scope.object.summary_fields.object_roles)
         .map(function(key) {
             return {
                 value: scope.object.summary_fields
-                    .roles[key].id,
+                    .object_roles[key].id,
                 label: scope.object.summary_fields
-                    .roles[key].name };
+                    .object_roles[key].name };
         });
 
     // TODO: get working with api
     // array w roles and descriptions for key
     scope.roleKey = Object
-        .keys(scope.object.summary_fields.roles)
+        .keys(scope.object.summary_fields.object_roles)
         .map(function(key) {
             return {
                 name: scope.object.summary_fields
-                    .roles[key].name,
+                    .object_roles[key].name,
                 description: scope.object.summary_fields
-                    .roles[key].description };
+                    .object_roles[key].description };
         });
 
     scope.showKeyPane = false;
