@@ -1,10 +1,16 @@
 <div class="tab-pane" id="jobs-stdout">
     <div ng-cloak id="htmlTemplate">
-    <div class="StandardOut-container" ng-class="{'fullscreen': stdoutFullScreen}">
+    <div class="StandardOut-container">
         <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
-                    RESULTS
+                    <div class="StandardOut-panelHeaderText">
+                        RESULTS
+                    </div>
+                    <div class="StandardOut-actions">
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job_status.status == 'running' || job_status.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job_status.status == 'running' || job_status.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                    </div>
                 </div>
                 <div class="StandardOut-details">
 
