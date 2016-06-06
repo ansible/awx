@@ -1212,7 +1212,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
 class GroupTreeSerializer(GroupSerializer):
 
-    children = serializers.SerializerMethodField('get_children')
+    children = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
