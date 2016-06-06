@@ -13,7 +13,6 @@ export default function(){
         iterator: 'notification_template',
         index: false,
         hover: false,
-        emptyListText: 'No notifications exist',
 
         fields: {
             status: {
