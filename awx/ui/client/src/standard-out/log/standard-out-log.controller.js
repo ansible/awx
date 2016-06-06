@@ -94,7 +94,18 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
             }
         });
 
+        // stdoutText optionall gets passed through in the directive declaration.
+        $scope.$watch('stdoutText', function(newVal, oldVal) {
+            if(newVal && newVal !== oldVal) {
+                $('#pre-container-content').html(newVal);
+            }
+        });
+
         function loadStdout() {
+            if (!$scope.stdoutEndpoint) {
+                return
+            }
+
             Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=0&end_line=' + page_size);
             Rest.get()
                 .success(function(data) {
@@ -123,6 +134,10 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         }
 
         function getNextSection() {
+            if (!$scope.stdoutEndpoint) {
+                return
+            }
+
             // get the next range of data from the API
             var start = loaded_sections[loaded_sections.length - 1].end, url;
             url = $scope.stdoutEndpoint + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
