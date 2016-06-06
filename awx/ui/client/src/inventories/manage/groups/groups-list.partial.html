@@ -1,4 +1,4 @@
-<div id="groups-list" class="Panel"></div>        
+<div id="groups-list" class="Panel"></div>
 <div class="modal fade GroupDelete" id="group-delete-modal" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content Modal-content">
@@ -14,7 +14,7 @@
                         <p class="Prompt-bodyQuery">Deleting group <em>{{ toDelete.name }}</em>.
                         <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts > 0"> This group contains {{ toDelete.total_groups }} groups and {{ toDelete.total_hosts }} hosts. </span>
                         <span ng-show="toDelete.total_groups == 0 && toDelete.total_hosts > 0"> This group contains {{ toDelete.total_hosts }} hosts. </span>
-                        <span ng-show="groupsCopunt > 0 && toDelete.total_hosts == 0"> This group contains {{ toDelete.total_groups }} groups. </span>
+                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts == 0"> This group contains {{ toDelete.total_groups }} groups. </span>
                         Delete or promote the group's children?</p>
                         <div style="margin: 15px auto;">
 
@@ -64,8 +64,8 @@
                 <div class="GroupDelete-help--container">
                     <a href="" id="awp-promote" href="" aw-pop-over="<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the group being deleted. If a group or host is associated with other groups, it will still exist within those groups. Otherwise, the associated groups and hosts will no longer appear in the inventory.</dd>\n<dt style='margin-top: 5px;'>Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted root level. Note: groups already associated with other groups cannot be promoted.</dd></dl>\n" aw-tool-tip="Click for help"  data-placement="right" data-container="body" data-title="Help" class="help-link"><i class="fa fa-question-circle"></i> Click for help</a>
                 </div>
-                  <a href="" ng-class="promptActionBtnClass" ng-click="confirmDelete()" id="prompt_action_btn" class="btn Modal-footerButton Modal-errorButton">DELETE</a>
                   <a href="#" data-target="#group-delete-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
+                  <a href="" ng-class="promptActionBtnClass" ng-click="confirmDelete()" id="prompt_action_btn" class="btn Modal-footerButton Modal-errorButton">DELETE</a>
               </div>
             </div>
         </div>

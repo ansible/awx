@@ -25,20 +25,34 @@
         $scope.deleteGroup = function(group){
             $scope.toDelete = {};
             angular.extend($scope.toDelete, group);
+            if($scope.toDelete.total_groups === 0 && $scope.toDelete.total_hosts === 0) {
+                // This group doesn't have any child groups or hosts - the user is just trying to delete
+                // the group
+                $scope.deleteOption = "delete";
+            }
             $('#group-delete-modal').modal('show');
         };
         $scope.confirmDelete = function(){
+
+            // Bind an even listener for the modal closing.  Trying to $state.go() before the modal closes
+            // will mean that these two things are running async and the modal may not finish closing before
+            // the state finishes transitioning.
+            $('#group-delete-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                // Remove the event handler so that we don't end up with multiple bindings
+                $('#group-delete-modal').off('hidden.bs.modal');
+                // Reload the inventory manage page and show that the group has been removed
+                $state.go('inventoryManage', null, {reload: true});
+            });
+
             switch($scope.deleteOption){
                 case 'promote':
                     GroupManageService.promote($scope.toDelete.id, $stateParams.inventory_id)
                         .then(() => {
-                            $state.go('inventoryManage', null, {reload: true});
                             $('#group-delete-modal').modal('hide');
                         });
                     break;
                 case 'delete':
                     GroupManageService.delete($scope.toDelete.id).then(() => {
-                        $state.go('inventoryManage', null, {reload: true});
                         $('#group-delete-modal').modal('hide');
                     });
             }
