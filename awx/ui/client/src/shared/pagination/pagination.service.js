@@ -12,11 +12,16 @@ export default ['$http', '$q', function($http, $q) {
                 return $http.get(url + "?id=" + id)
                     .then(function (data) {
                         var queryValue, queryType;
-                        if (data.data.results[0].type === "user") {
-                            queryValue = data.data.results[0].username;
-                            queryType = "username";
+                        if (data.data.results.length) {
+                            if (data.data.results[0].type === "user") {
+                                queryValue = data.data.results[0].username;
+                                queryType = "username";
+                            } else {
+                                queryValue = data.data.results[0].name;
+                                queryType = "name";
+                            }
                         } else {
-                            queryValue = data.data.results[0].name;
+                            queryValue = "";
                             queryType = "name";
                         }
                         // get how many results are less than or equal to
@@ -26,7 +31,7 @@ export default ['$http', '$q', function($http, $q) {
                                 // divide by the page size to get what
                                 // page the data should be on
                                 var count = data.data.count;
-                                return Math.ceil(count/parseInt(pageSize));
+                                return Math.max(1, Math.ceil(count/parseInt(pageSize)));
                             });
                     });
             } else {
