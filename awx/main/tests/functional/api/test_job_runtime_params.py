@@ -5,7 +5,6 @@ from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import Job, JobTemplate
-from awx.main.tests.factories.utils import generate_survey_spec
 
 from django.core.urlresolvers import reverse
 
@@ -278,10 +277,10 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_unprompted_vars_with_survey(mocker, job_template_prompts, post, admin_user):
+def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(False)
     job_template.survey_enabled = True
-    job_template.survey_spec = generate_survey_spec('survey_var')
+    job_template.survey_spec = survey_spec_factory('survey_var')
     job_template.save()
 
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
