@@ -18,7 +18,6 @@ include tools/scripts/request_tower_configuration.sh
 include tools/scripts/request_tower_configuration.ps1
 include tools/scripts/ansible-tower-service
 include tools/scripts/tower-python
-include tools/munin_monitors/*
 include tools/sosreport/*
 include COPYING
 include Makefile
