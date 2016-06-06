@@ -635,14 +635,12 @@ class Job(UnifiedJob, JobOptions):
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate, ProjectUpdate
-        if self.inventory is None or self.project is None:
-            return []
-        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter(update_on_launch=True)
         project_found = False
         inventory_sources_found = []
         dependencies = []
         for obj in active_tasks:
-            if type(obj) == ProjectUpdate:
+            if type(obj) == ProjectUpdate and self.project is not None:
                 if obj.project == self.project:
                     project_found = True
             if type(obj) == InventoryUpdate:
@@ -660,7 +658,7 @@ class Job(UnifiedJob, JobOptions):
             for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
                 if source not in inventory_sources_found:
                     inventory_sources_found.append(source)
-        if not project_found and self.project.needs_update_on_launch:
+        if not project_found and self.project is not None and self.project.needs_update_on_launch:
             dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
