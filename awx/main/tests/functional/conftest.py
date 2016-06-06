@@ -42,6 +42,7 @@ from awx.main.tests.factories import (
     create_organization,
     create_job_template,
     create_notification_template,
+    create_survey_spec,
 )
 
 '''
@@ -500,4 +501,8 @@ def organization_factory():
 @pytest.fixture
 def notification_template_factory():
     return create_notification_template
+
+@pytest.fixture
+def survey_spec_factory():
+    return create_survey_spec
 

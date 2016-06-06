@@ -106,7 +106,7 @@ def mk_inventory(name, organization=None, persisted=True):
 def mk_job_template(name, job_type='run',
                     organization=None, inventory=None,
                     credential=None, persisted=True,
-                    project=None):
+                    project=None, spec=None):
     jt = JobTemplate(name=name, job_type=job_type, playbook='mocked')
 
     jt.inventory = inventory
@@ -118,6 +118,10 @@ def mk_job_template(name, job_type='run',
         jt.ask_credential_on_launch = True
 
     jt.project = project
+
+    jt.survey_spec = spec
+    if jt.survey_spec is not None:
+        jt.survey_enabled = True
 
     if persisted:
         jt.save()

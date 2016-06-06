@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 from django.contrib.auth.models import User
 
 from awx.main.models import (
@@ -10,6 +8,12 @@ from awx.main.models import (
     Credential,
     Inventory,
     Label,
+)
+
+from .objects import (
+    generate_objects,
+    generate_role_objects,
+    _Mapped,
 )
 
 from .fixtures import (
@@ -24,43 +28,6 @@ from .fixtures import (
     mk_notification_template,
 )
 
-from .exc import NotUnique
-
-
-def generate_objects(artifacts, kwargs):
-    '''generate_objects takes a list of artifacts that are supported by
-    a create function and compares it to the kwargs passed in to the create
-    function. If a kwarg is found that is not in the artifacts list a RuntimeError
-    is raised.
-    '''
-    for k in kwargs.keys():
-        if k not in artifacts:
-            raise RuntimeError('{} is not a valid argument'.format(k))
-    return namedtuple("Objects", ",".join(artifacts))
-
-def generate_role_objects(objects):
-    '''generate_role_objects assembles a dictionary of all possible objects by name.
-    It will raise an exception if any of the objects share a name due to the fact that
-    it is to be used with apply_roles, which expects unique object names.
-
-    roles share a common name e.g. admin_role, member_role. This ensures that the
-    roles short hand used for mapping Roles and Users in apply_roles will function as desired.
-    '''
-    combined_objects = {}
-    for o in objects:
-        if type(o) is dict:
-            for k,v in o.iteritems():
-                if combined_objects.get(k) is not None:
-                    raise NotUnique(k, combined_objects)
-                combined_objects[k] = v
-        elif hasattr(o, 'name'):
-            if combined_objects.get(o.name) is not None:
-                raise NotUnique(o.name, combined_objects)
-            combined_objects[o.name] = o
-        else:
-            if o is not None:
-                raise RuntimeError('expected a list of dict or list of list, got a type {}'.format(type(o)))
-    return combined_objects
 
 def apply_roles(roles, objects, persisted):
     '''apply_roles evaluates a list of Role relationships represented as strings.
@@ -155,24 +122,51 @@ def generate_teams(organization, persisted, **kwargs):
                 teams[t] = mk_team(t, organization=organization, persisted=persisted)
     return teams
 
-
-class _Mapped(object):
-    '''_Mapped is a helper class that replaces spaces and dashes
-    in the name of an object and assigns the object as an attribute
-
-         input: {'my org': Organization}
-         output: instance.my_org = Organization
+def create_survey_spec(variables=None, default_type='integer', required=True):
     '''
-    def __init__(self, d):
-        self.d = d
-        for k,v in d.items():
-            k = k.replace(' ', '_')
-            k = k.replace('-', '_')
+    Returns a valid survey spec for a job template, based on the input
+    argument specifying variable name(s)
+    '''
+    if isinstance(variables, list):
+        name = "%s survey" % variables[0]
+        description = "A survey that starts with %s." % variables[0]
+        vars_list = variables
+    else:
+        name = "%s survey" % variables
+        description = "A survey about %s." % variables
+        vars_list = [variables]
 
-            setattr(self, k.replace(' ','_'), v)
+    spec = []
+    index = 0
+    for var in vars_list:
+        spec_item = {}
+        spec_item['index'] = index
+        index += 1
+        spec_item['required'] = required
+        spec_item['choices'] = ''
+        spec_item['type'] = default_type
+        if isinstance(var, dict):
+            spec_item.update(var)
+            var_name = spec_item.get('variable', 'variable')
+        else:
+            var_name = var
+        spec_item.setdefault('variable', var_name)
+        spec_item.setdefault('question_name', "Enter a value for %s." % var_name)
+        spec_item.setdefault('question_description', "A question about %s." % var_name)
+        if spec_item['type'] == 'integer':
+            spec_item.setdefault('default', 0)
+            spec_item.setdefault('max', spec_item['default'] + 100)
+            spec_item.setdefault('min', spec_item['default'] - 100)
+        else:
+            spec_item.setdefault('default', '')
+        spec.append(spec_item)
 
-    def all(self):
-        return self.d.values()
+    survey_spec = {}
+    survey_spec['spec'] = spec
+    survey_spec['name'] = name
+    survey_spec['description'] = description
+    return survey_spec
+
 
 # create methods are intended to be called directly as needed
 # or encapsulated by specific factory fixtures in a conftest
@@ -184,12 +178,14 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
                                 "inventory",
                                 "project",
                                 "credential",
-                                "job_type",], kwargs)
+                                "job_type",
+                                "survey",], kwargs)
 
     org = None
     proj = None
     inv = None
     cred = None
+    spec = None
     job_type = kwargs.get('job_type', 'run')
 
     if 'organization' in kwargs:
@@ -212,9 +208,13 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
         if type(inv) is not Inventory:
             inv = mk_inventory(inv, organization=org, persisted=persisted)
 
+    if 'survey' in kwargs:
+        spec = create_survey_spec(kwargs['survey'])
+
     jt = mk_job_template(name, project=proj,
                          inventory=inv, credential=cred,
-                         job_type=job_type, persisted=persisted)
+                         job_type=job_type, spec=spec,
+                         persisted=persisted)
 
     role_objects = generate_role_objects([org, proj, inv, cred])
     apply_roles(roles, role_objects, persisted)
@@ -224,7 +224,8 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
                    inventory=inv,
                    credential=cred,
                    job_type=job_type,
-                   organization=org,)
+                   organization=org,
+                   survey=spec,)
 
 def create_organization(name, roles=None, persisted=True, **kwargs):
     Objects = generate_objects(["organization",

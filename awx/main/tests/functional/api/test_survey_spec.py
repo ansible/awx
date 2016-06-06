@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 
 from awx.main.models.jobs import JobTemplate, Job
 from awx.api.license import LicenseForbids
-from awx.main.tests.factories.utils import generate_survey_spec
 from awx.main.access import JobTemplateAccess
 
 
@@ -17,12 +16,8 @@ def mock_no_surveys(self, add_host=False, feature=None, check_expiration=True):
 
 @pytest.fixture
 def job_template_with_survey(job_template_factory):
-    objects = job_template_factory('jt', project='prj')
-    obj = objects.job_template
-    obj.survey_enabled = True
-    obj.survey_spec = generate_survey_spec('submitter_email')
-    obj.save()
-    return obj
+    objects = job_template_factory('jt', project='prj', survey='submitted_email')
+    return objects.job_template
 
 # Survey license-based denial tests
 @mock.patch('awx.api.views.feature_enabled', lambda feature: False)
@@ -78,8 +73,8 @@ def test_survey_spec_view_allowed(deploy_jobtemplate, get, admin_user):
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
 @pytest.mark.survey
-def test_survey_spec_sucessful_creation(job_template, post, admin_user):
-    survey_input_data = generate_survey_spec('new_question')
+def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post, admin_user):
+    survey_input_data = survey_spec_factory('new_question')
     post(url=reverse('api:job_template_survey_spec', args=(job_template.id,)),
          data=survey_input_data, user=admin_user, expect=200)
     updated_jt = JobTemplate.objects.get(pk=job_template.pk)
@@ -100,10 +95,10 @@ def test_survey_spec_non_dict_error(deploy_jobtemplate, post, admin_user):
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
 @pytest.mark.survey
-def test_survey_spec_dual_names_error(deploy_jobtemplate, post, user):
+def test_survey_spec_dual_names_error(survey_spec_factory, deploy_jobtemplate, post, user):
     response = post(
         url=reverse('api:job_template_survey_spec', args=(deploy_jobtemplate.id,)),
-        data=generate_survey_spec(['submitter_email', 'submitter_email']),
+        data=survey_spec_factory(['submitter_email', 'submitter_email']),
         user=user('admin', True), expect=400)
     assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."
 
@@ -130,10 +125,9 @@ def test_delete_survey_access_without_license(job_template_with_survey, admin_us
 def test_job_start_allowed_with_survey_spec(job_template_factory, admin_user):
     """After user downgrades survey license and disables survey on the JT,
     check that jobs still launch even if the survey_spec data persists."""
-    objects = job_template_factory('jt', project='prj')
+    objects = job_template_factory('jt', project='prj', survey='submitter_email')
     obj = objects.job_template
     obj.survey_enabled = False
-    obj.survey_spec = generate_survey_spec('submitter_email')
     obj.save()
     access = JobTemplateAccess(admin_user)
     assert access.can_start(job_template_with_survey, {})
@@ -180,12 +174,12 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
 @mock.patch('awx.api.serializers.JobSerializer.to_representation', lambda self, obj: {})
 @pytest.mark.django_db
 @pytest.mark.survey
-def test_launch_with_non_empty_survey_spec_no_license(job_template_factory, post, admin_user):
+def test_launch_with_non_empty_survey_spec_no_license(survey_spec_factory, job_template_factory, post, admin_user):
     """Assure jobs can still be launched from JTs with a survey_spec
     when the survey is diabled."""
     objects = job_template_factory('jt', organization='org1', project='prj',
                                    inventory='inv', credential='cred')
     obj = objects.job_template
-    obj.survey_spec = generate_survey_spec('survey_var')
+    obj.survey_spec = survey_spec_factory('survey_var')
     obj.save()
     post(reverse('api:job_template_launch', args=[obj.pk]), {}, admin_user, expect=201)
