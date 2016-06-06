@@ -23,6 +23,7 @@ list of survey items.
 Within each survey item `type` must be one of:
 
 * text: For survey questions expecting a textual answer
+* password: For survey questions expecting a password or other sensitive information
 * integer: For survey questions expecting a whole number answer
 * float: For survey questions expecting a decimal number
 * multiplechoice: For survey questions where one option from a list is required
