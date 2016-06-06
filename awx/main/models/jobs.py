@@ -680,7 +680,7 @@ class Job(UnifiedJob, JobOptions):
                                           processed=h.processed,
                                           skipped=h.skipped)
         data.update(dict(inventory=self.inventory.name,
-                         project=self.project.name,
+                         project=self.project.name if self.project else None,
                          playbook=self.playbook,
                          credential=self.credential.name,
                          limit=self.limit,
