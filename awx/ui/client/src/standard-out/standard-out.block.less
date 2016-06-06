@@ -15,6 +15,12 @@ standard-out-log {
 }
 .StandardOut-container {
     .OnePlusTwo-container;
+
+    &.fullscreen {
+        .StandardOut-rightPanel {
+            max-width: 100%;
+        }
+    }
 }
 
 .StandardOut-leftPanel {
@@ -31,6 +37,10 @@ standard-out-log {
     .Panel {
         display: flex;
         flex-direction: column;
+    }
+
+    .StandardOut-consoleOutput {
+        height: auto;
     }
 }
 
