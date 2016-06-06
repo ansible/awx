@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName, ParseTypeChange, ParseVariableString) {
 
     ClearScope();
 
@@ -42,6 +42,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
     $scope.parseType = 'yaml';
 
 
+
     function getJobDetails() {
 
         // Go out and get the job details based on the job type.  jobType gets defined
@@ -68,6 +69,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                 $scope.limit = data.limit;
                 $scope.verbosity = data.verbosity;
                 $scope.job_tags = data.job_tags;
+                if (data.extra_vars) {
+                    $scope.variables = ParseVariableString(data.extra_vars);
+                }
+
 
                 // If we have a source then we have to go get the source choices from the server
                 if (!Empty(data.source)) {
@@ -140,6 +145,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                     });
                 }
 
+                if (data.extra_vars) {
+                    ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
+                }
+
                 // If the job isn't running we want to clear out the interval that goes out and checks for stdout updates.
                 // This interval is defined in the standard out log directive controller.
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
@@ -170,4 +179,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName', 'ParseTypeChange', 'ParseVariableString'];
