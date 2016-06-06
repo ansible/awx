@@ -10,8 +10,9 @@
  * @description This controller's for the standard out page that can be displayed when a job runs
 */
 
-
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName, ParseTypeChange, ParseVariableString) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
+    ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
 
     ClearScope();
 
@@ -164,6 +165,17 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
     }
 
+    if ($scope.removeDeleteFinished) {
+        $scope.removeDeleteFinished();
+    }
+    $scope.removeDeleteFinished = $scope.$on('DeleteFinished', function(e, action) {
+        Wait('stop');
+        if (action !== 'cancel') {
+            Wait('stop');
+            $state.go('jobs');
+        }
+    });
+
     // TODO: this is currently not used but is necessary for cases where sockets
     // are not available and a manual refresh trigger is needed.
     $scope.refresh = function(){
@@ -175,8 +187,35 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
 
+    $scope.deleteJob = function() {
+        DeleteJob({
+            scope: $scope,
+            id: $scope.job.id,
+            job: $scope.job,
+            callback: 'DeleteFinished'
+        });
+    };
+
+    $scope.relaunchJob = function() {
+        var typeId, job = $scope.job;
+        if (job.type === 'inventory_update') {
+            typeId = job.inventory_source;
+        }
+        else if (job.type === 'project_update') {
+            typeId = job.project;
+        }
+        else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
+            typeId = job.id;
+        }
+        RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
+    };
+
+
     getJobDetails();
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName', 'ParseTypeChange', 'ParseVariableString'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
+    '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
+    'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];
