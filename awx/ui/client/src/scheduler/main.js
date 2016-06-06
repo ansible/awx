@@ -19,19 +19,31 @@ export default
                 name: 'jobTemplateSchedules',
                 route: '/job_templates/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController'
+                controller: 'schedulerController',
+                ncyBreadcrumb: {
+                    parent: 'jobTemplates.edit',
+                    label: 'SCHEDULES'
+                }
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController'
+                controller: 'schedulerAddController',
+                ncyBreadcrumb: {
+                    parent: 'jobTemplateSchedules',
+                    label: 'CREATE SCHEDULE'
+                }
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController'
+                controller: 'schedulerEditController',
+                ncyBreadcrumb: {
+                    parent: 'jobTemplateSchedules',
+                    label: '{{schedule_obj.name}}'
+                }
             });
             $stateExtender.addState({
                 name: 'projectSchedules',
@@ -39,7 +51,8 @@ export default
                 templateUrl: templateUrl("scheduler/scheduler"),
                 controller: 'schedulerController',
                 ncyBreadcrumb: {
-                    label: 'PROJECT SCHEDULES'
+                    parent: 'projects.edit',
+                    label: 'SCHEDULES'
                 }
             });
             $stateExtender.addState({
@@ -48,7 +61,8 @@ export default
                 templateUrl: templateUrl("scheduler/schedulerForm"),
                 controller: 'schedulerAddController',
                 ncyBreadcrumb: {
-                    label: 'PROJECT SCHEDULES ADD'
+                    parent: 'projectSchedules',
+                    label: 'CREATE SCHEDULE'
                 }
             });
             $stateExtender.addState({
@@ -57,7 +71,8 @@ export default
                 templateUrl: templateUrl("scheduler/schedulerForm"),
                 controller: 'schedulerEditController',
                 ncyBreadcrumb: {
-                    label: 'PROJECT SCHEDULES EDIT'
+                    parent: 'projectSchedules',
+                    label: '{{schedule_obj.name}}'
                 }
             });
             $stateExtender.addState({

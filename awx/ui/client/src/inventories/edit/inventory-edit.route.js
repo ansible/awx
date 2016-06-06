@@ -16,6 +16,7 @@ export default {
         activityStreamId: 'inventory_id'
     },
     ncyBreadcrumb: {
-        label: "INVENTORY EDIT"
+        parent: 'inventories',
+        label: "{{inventory_obj.name}}"
     }
 };

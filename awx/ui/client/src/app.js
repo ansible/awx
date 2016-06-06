@@ -304,7 +304,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: 'projects',
-                    label: 'EDIT PROJECT'
+                    label: '{{name}}'
                 }
             }).
 
@@ -353,7 +353,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: "teams",
-                    label: "EDIT TEAM"
+                    label: "{{team_obj.name}}"
                 }
             }).
 
@@ -438,7 +438,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: "credentials",
-                    label: "EDIT CREDENTIAL"
+                    label: "{{credential_obj.name}}"
                 }
             }).
 
@@ -472,6 +472,10 @@ var tower = angular.module('Tower', [
                 controller: UsersEdit,
                 data: {
                     activityStreamId: 'user_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "users",
+                    label: "{{user_obj.username}}"
                 }
             }).
 

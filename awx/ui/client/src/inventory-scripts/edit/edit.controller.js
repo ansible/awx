@@ -65,6 +65,7 @@ export default
                     if (!$scope.canEdit) {
                         $scope.script = "Script contents hidden";
                     }
+                    $scope.inventory_script_obj = data;
                     Wait('stop');
                 })
                 .error(function (data, status) {

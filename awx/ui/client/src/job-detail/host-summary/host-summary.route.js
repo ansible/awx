@@ -14,5 +14,8 @@ export default {
             controller: 'HostSummaryController',
             templateUrl: templateUrl('job-detail/host-summary/host-summary'),
         }
+    },
+    ncyBreadcrumb: {
+        skip: true // Never display this state in breadcrumb.
     }
 };

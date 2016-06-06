@@ -41,7 +41,7 @@ export default
                 form = JobTemplateForm(),
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
-                id = $stateParams.template_id,
+                id = $stateParams.id,
                 relatedSets = {},
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
@@ -444,7 +444,7 @@ export default
                             });
                     };
 
-                    Rest.setUrl(defaultUrl + $state.params.template_id +
+                    Rest.setUrl(defaultUrl + $state.params.id +
                          "/labels");
                     Rest.get()
                         .success(function(data) {
@@ -634,7 +634,7 @@ export default
                         .filter("[data-select2-tag=true]")
                         .map((i, val) => ({name: $(val).text()}));
 
-                    Rest.setUrl(defaultUrl + $state.params.template_id);
+                    Rest.setUrl(defaultUrl + $state.params.id);
                     Rest.put(data)
                         .success(function (data) {
                             $scope.$emit('templateSaveSuccess', data);
@@ -653,7 +653,7 @@ export default
             $scope.formCancel = function () {
                 // the form was just copied in the previous state, it's safe to destroy on cancel
                 if ($state.params.copied){
-                    var defaultUrl = GetBasePath('job_templates') + $state.params.template_id;
+                    var defaultUrl = GetBasePath('job_templates') + $state.params.id;
                     Rest.setUrl(defaultUrl);
                     Rest.destroy()
                         .success(function(){
@@ -672,7 +672,7 @@ export default
             // Related set: Add button
             $scope.add = function (set) {
                 $rootScope.flashMessage = null;
-                $location.path('/' + base + '/' + $stateParams.template_id + '/' + set);
+                $location.path('/' + base + '/' + $stateParams.id + '/' + set);
             };
 
             // Related set: Edit button

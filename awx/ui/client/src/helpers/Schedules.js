@@ -167,6 +167,8 @@ export default
                             scope.cleanupJob = true;
                         }
 
+                        scope.schedule_obj = data;
+
                         scope.$emit('ScheduleFound');
                     })
                     .error(function(data,status){
@@ -188,10 +190,7 @@ export default
                     url,
                     scheduler;
 
-                if (!Empty($stateParams.template_id)) {
-                    url = GetBasePath(base) + $stateParams.template_id + '/schedules/';
-                }
-                else if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
+                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
                 else if(base === "inventory"){

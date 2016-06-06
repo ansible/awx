@@ -334,7 +334,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {template_id: id}, {reload: true});
+                $state.go('jobTemplates.edit', {id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
