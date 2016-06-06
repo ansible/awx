@@ -273,12 +273,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
 
         return (validation_errors, resources_needed_to_start)
 
-    def clean(self):
-        validation_errors, resources_needed_to_start = self.resource_validation_data()
-        if validation_errors:
-            raise ValidationError(validation_errors)
-        return super(JobTemplate, self).clean()
-
     @property
     def resources_needed_to_start(self):
         validation_errors, resources_needed_to_start = self.resource_validation_data()

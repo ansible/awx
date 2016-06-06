@@ -2,14 +2,13 @@ import pytest
 import mock
 
 # AWX
-from awx.api.serializers import JobTemplateSerializer
+from awx.api.serializers import JobTemplateSerializer, JobLaunchSerializer
 from awx.main.models.jobs import JobTemplate
 from awx.main.models.projects import ProjectOptions
 
 # Django
 from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
-
 
 @pytest.fixture
 def jt_copy_edit(job_template_factory, project):
@@ -177,3 +176,58 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
     post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
     assert post_response.status_code == 403
+
+@pytest.mark.django_db
+def test_scan_jt_no_inventory(job_template_factory):
+    # A user should be able to create a scan job without a project, but an inventory is required
+    objects = job_template_factory('jt',
+                                   credential='c',
+                                   job_type="scan",
+                                   project='p',
+                                   inventory='i',
+                                   organization='o')
+    serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
+                                             "project": None, "inventory": objects.inventory.pk})
+    assert serializer.is_valid()
+    serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
+                                             "project": None, "inventory": None})
+    assert not serializer.is_valid()
+    assert "inventory" in serializer.errors
+    serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
+                                             "project": None, "inventory": None,
+                                             "ask_inventory_on_launch": True})
+    assert not serializer.is_valid()
+    assert "inventory" in serializer.errors
+
+    # A user shouldn't be able to launch a scan job template which is missing an inventory
+    obj_jt = objects.job_template
+    obj_jt.inventory = None
+    serializer = JobLaunchSerializer(instance=obj_jt,
+                                     context={'obj': obj_jt,
+                                              "data": {}},
+                                     data={})
+    assert not serializer.is_valid()
+    assert 'inventory' in serializer.errors
+
+@pytest.mark.django_db
+def test_scan_jt_surveys(inventory):
+    serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
+                                             "project": None, "inventory": inventory.pk,
+                                             "survey_enabled": True})
+    assert not serializer.is_valid()
+    assert "survey_enabled" in serializer.errors
+
+@pytest.mark.django_db
+def test_jt_without_project(inventory):
+    data = dict(name="Test", job_type="run",
+                inventory=inventory.pk, project=None)
+    serializer = JobTemplateSerializer(data=data)
+    assert not serializer.is_valid()
+    assert "project" in serializer.errors
+    data["job_type"] = "check"
+    serializer = JobTemplateSerializer(data=data)
+    assert not serializer.is_valid()
+    assert "project" in serializer.errors
+    data["job_type"] = "scan"
+    serializer = JobTemplateSerializer(data=data)
+    assert serializer.is_valid()
