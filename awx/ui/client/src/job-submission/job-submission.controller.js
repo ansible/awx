@@ -187,8 +187,11 @@ export default
                         updateRequiredPasswords();
                     }
 
-                    if($scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts) {
-                        // The job can be launched without any user input
+                    if( (isRelaunch && !$scope.password_needed) || (!isRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                        // The job can be launched if
+                        // a) It's a relaunch and no passwords are needed
+                        // or
+                        // b) It's not a relaunch and there's not any prompting/surveys
                         launchJob();
                         Wait('stop');
                     }
