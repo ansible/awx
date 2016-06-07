@@ -282,7 +282,7 @@ export default
                 '<span class="input-group-btn">'+
                 '<button class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">Show</button>'+
                 '</span>'+
-                '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput ng-pristine ng-valid-api-error ng-invalid" autocomplete="false">'+
+                '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput" autocomplete="false">'+
                 '</div>'+
                 '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
                 '<div class="error ng-hide" id="survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
