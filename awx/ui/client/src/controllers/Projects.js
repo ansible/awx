@@ -725,6 +725,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 }
 
                 $scope.project_obj = data;
+                $scope.name = data.name;
                 $scope.$emit('projectLoaded');
             })
             .error(function (data, status) {

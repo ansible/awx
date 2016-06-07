@@ -104,6 +104,7 @@ export default [
                 Rest.get()
                     .success(function(data) {
                         parentObject = data;
+                        $scope.name = data.name;
                         $scope.$emit('ParentLoaded');
                     })
                     .error(function(data, status) {

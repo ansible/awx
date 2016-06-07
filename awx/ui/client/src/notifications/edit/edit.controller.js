@@ -87,6 +87,7 @@ export default
                             NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                                 $scope[field[0]] = field[1];
                             });
+                            $scope.notification_obj = data;
                             Wait('stop');
                         })
                         .error(function (data, status) {

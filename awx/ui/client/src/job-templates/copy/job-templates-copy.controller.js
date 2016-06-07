@@ -19,7 +19,7 @@
  					jobTemplateCopyService.set(res)
             .success(function(res){
               Wait('stop');
-              $state.go('jobTemplates.edit', {template_id: res.id, copied: true}, {reload: true});
+              $state.go('jobTemplates.edit', {id: res.id, copied: true}, {reload: true});
             });
  				})
   			.error(function(res, status){

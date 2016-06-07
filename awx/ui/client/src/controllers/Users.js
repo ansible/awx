@@ -343,6 +343,8 @@ export function UsersEdit($scope, $rootScope, $location,
                 $scope.is_superuser = true;
             }
 
+            $scope.user_obj = data;
+
             CreateSelect2({
                 element: '#user_user_type',
                 multiple: false

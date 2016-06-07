@@ -20,5 +20,8 @@ export default {
             templateUrl: templateUrl('inventories/manage/adhoc/adhoc'),
             controller: 'adhocController'
         }
+    },
+    ncyBreadcrumb: {
+        label: "RUN COMMAND"
     }
 };
