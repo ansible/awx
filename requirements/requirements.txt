@@ -104,7 +104,6 @@ git+https://github.com/matburt/python-social-auth.git@master#egg=python-social-a
 python-swiftclient==2.7.0
 python-troveclient==1.4.0
 pytz==2015.7
-pywinrm==0.1.1
 PyYAML==3.11
 pyzmq==14.5.0
 rackspace-auth-openstack==1.3
