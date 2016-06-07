@@ -7,7 +7,6 @@ import os
 import datetime
 import glob
 import sys
-import shutil
 from setuptools import setup
 
 from awx import __version__
