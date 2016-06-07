@@ -1828,11 +1828,13 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
     def validate(self, attrs):
         survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
         job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or None)
+        project = attrs.get('project', self.instance and self.instance.project or None)
 
         if job_type == "scan":
-            if attrs['inventory'] is None or attrs.get('ask_inventory_on_launch', False):
+            if inventory is None or attrs.get('ask_inventory_on_launch', False):
                 raise serializers.ValidationError({'inventory': 'Scan jobs must be assigned a fixed inventory.'})
-        elif attrs['project'] is None:
+        elif project is None:
             raise serializers.ValidationError({'project': "Job types 'run' and 'check' must have assigned a project."})
 
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
