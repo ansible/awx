@@ -112,6 +112,9 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
             Rest.destroy()
                 .success(function () {
                     $scope.search(list.iterator);
+                    if (new RegExp('/' + id + '$').test($location.$$url)) {
+                        $state.transitionTo($state.current.name.replace(/[.][a-zA-Z]+$/, "")); /* go to the list view */
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',

@@ -98,6 +98,9 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
                     $scope.search(list.iterator);
+                    if (new RegExp('/' + id + '$').test($location.$$url)) {
+                        $state.transitionTo($state.current.name.replace(/[.][a-zA-Z]+$/, "")); /* go to the list view */
+                    }
                 })
                 .error(function (data, status) {
                     Wait('stop');
