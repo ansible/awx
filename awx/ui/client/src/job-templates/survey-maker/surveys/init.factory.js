@@ -204,16 +204,16 @@ export default
                 scope.default_textarea = "";
                 scope.default_password = "" ;
                 scope.choices = "";
-                scope.text_min = "";
-                scope.text_max = "" ;
-                scope.textarea_min = "";
-                scope.textarea_max = "" ;
-                scope.password_min = "" ;
-                scope.password_max = "" ;
-                scope.int_min = "";
-                scope.int_max = "";
-                scope.float_min = "";
-                scope.float_max = "";
+                scope.text_min = 0;
+                scope.text_max = 1024 ;
+                scope.textarea_min = 0;
+                scope.textarea_max = 4096;
+                scope.password_min = 0;
+                scope.password_max = 32;
+                scope.int_min = 0;
+                scope.int_max = 100;
+                scope.float_min = 0.0;
+                scope.float_max = 100.0;
             }
 
             // Sets all of our scope variables used for adding/editing a question back to a clean state
