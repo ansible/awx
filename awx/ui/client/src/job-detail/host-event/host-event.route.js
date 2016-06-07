@@ -17,6 +17,9 @@ var hostEventModal = {
              return JobDetailService.getRelatedJobEvents($stateParams.id, {
  				id: $stateParams.eventId
  			}).then(function(res){ return res.data.results[0];});
+         }],
+         hostResults: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams){
+         	return JobDetailService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
          }]
  	},
  	onExit: function() {
@@ -40,7 +43,22 @@ var hostEventModal = {
   	name: 'jobDetail.host-event.json',
  	url: '/json',
  	controller: 'HostEventController',
- 	templateUrl: templateUrl('job-detail/host-event/host-event-json')
+ 	templateUrl: templateUrl('job-detail/host-event/host-event-codemirror')
  };
 
- export {hostEventDetails, hostEventJson, hostEventModal};
+ var hostEventStdout = {
+  	name: 'jobDetail.host-event.stdout',
+ 	url: '/stdout',
+ 	controller: 'HostEventController',
+ 	templateUrl: templateUrl('job-detail/host-event/host-event-codemirror')
+ };
+
+  var hostEventStderr = {
+  	name: 'jobDetail.host-event.stderr',
+ 	url: '/stderr',
+ 	controller: 'HostEventController',
+ 	templateUrl: templateUrl('job-detail/host-event/host-event-codemirror')
+ };
+
+
+ export {hostEventDetails, hostEventJson, hostEventModal, hostEventStdout, hostEventStderr};

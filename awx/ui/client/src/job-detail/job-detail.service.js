@@ -8,40 +8,24 @@ export default
         },
 
         // the the API passes through Ansible's event_data response
-        // we need to massage away the verbose and redundant properties
+        // we need to massage away the verbose & redundant stdout/stderr properties
         processJson: function(data){
-            // a deep copy
-            var result = $.extend(true, {}, data);
             // configure fields to ignore
             var ignored = [
+            'type',
             'event_data',
             'related',
             'summary_fields',
             'url',
             'ansible_facts',
             ];
-
             // remove ignored properties
-            Object.keys(result).forEach(function(key){
-                if (ignored.indexOf(key) > -1) {
-                    delete result[key];
+            var result = _.chain(data).cloneDeep().forEach(function(value, key, collection){
+                if (ignored.indexOf(key) > -1){
+                    delete collection[key];
                 }
-            });
-
-            // flatten Ansible's passed-through response
-            try{
-                result.event_data = {};
-                Object.keys(data.event_data.res).forEach(function(key){
-                    if (ignored.indexOf(key) > -1) {
-                        return;
-                    }
-                    else{
-                        result.event_data[key] = data.event_data.res[key];
-                    }
-                });
-            }
-            catch(err){result.event_data = undefined;}
-            return result === {} ? null : result;
+            }).value();
+            return result;
         },
         // Return Ansible's passed-through response msg on a job_event
         processEventMsg: function(event){
