@@ -28,14 +28,14 @@
                     <div class="StandardOut-detailsRow" ng-show="job.started">
                         <div class="StandardOut-detailsLabel">STARTED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                            {{ job.started | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
                         <div class="StandardOut-detailsLabel">FINISHED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                            {{ job.finished | longDate }}
                         </div>
                     </div>
 
