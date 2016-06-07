@@ -1846,12 +1846,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                // Allow for the suppression of the empty list text to avoid duplication between form generator and list generator
-                    var emptyListText = (collection.emptyListText) ? collection.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
-                    html += '<div ng-hide="is_superuser">';
-                    html += "<div class=\"List-noItems\" ng-hide=\"is_superuser\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">" + emptyListText + "</div>";
-                    html += '</div>';
-                //}
+                var emptyListText = (collection.emptyListText) ? collection.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                html += '<div ng-hide="is_superuser">';
+                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">" + emptyListText + "</div>";
+                html += '</div>';
 
                 html += `
                     <div class=\"List-noItems\" ng-show=\"is_superuser\">
