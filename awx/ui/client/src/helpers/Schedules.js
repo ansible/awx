@@ -429,8 +429,8 @@ export default
          * })
          *
          */
-        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find', '$location', '$state',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find, $location, $state) {
+        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find', '$location',
+        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find, $location) {
             return function(params) {
 
                 var scope = params.scope,
@@ -457,7 +457,7 @@ export default
                             $('#prompt-modal').modal('hide');
                             scope.$emit(callback, id);
                             if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $location.url($location.url().replace(/[/][0-9]+$/, "")) // go to list view
+                                $location.url($location.url().replace(/[/][0-9]+$/, "")); // go to list view
                             }
                         })
                         .error(function (data, status) {
