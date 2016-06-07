@@ -103,7 +103,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         function loadStdout() {
             if (!$scope.stdoutEndpoint) {
-                return
+                return;
             }
 
             Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=0&end_line=' + page_size);
@@ -135,7 +135,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         function getNextSection() {
             if (!$scope.stdoutEndpoint) {
-                return
+                return;
             }
 
             // get the next range of data from the API
