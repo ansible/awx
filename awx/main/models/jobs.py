@@ -26,7 +26,7 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner
+from awx.main.redact import PlainTextCleaner, REPLACE_STR
 from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -702,6 +702,21 @@ class Job(UnifiedJob, JobOptions):
         evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
+
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
+            try:
+                extra_vars = json.loads(self.extra_vars)
+                for key in self.job_template.survey_password_variables():
+                    if key in extra_vars:
+                        extra_vars[key] = REPLACE_STR
+                return json.dumps(extra_vars)
+            except ValueError:
+                pass
+        return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.

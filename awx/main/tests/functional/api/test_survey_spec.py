@@ -1,9 +1,11 @@
 import mock
 import pytest
+import json
 
 from django.core.urlresolvers import reverse
 
 from awx.main.models.jobs import JobTemplate, Job
+from awx.main.models.activity_stream import ActivityStream
 from awx.api.license import LicenseForbids
 from awx.main.access import JobTemplateAccess
 
@@ -33,7 +35,7 @@ def test_survey_spec_view_denied(job_template_with_survey, get, admin_user):
 @pytest.mark.django_db
 @pytest.mark.survey
 def test_deny_enabling_survey(deploy_jobtemplate, patch, admin_user):
-    response = patch(url=reverse('api:job_template_detail', args=(deploy_jobtemplate.id,)),
+    response = patch(url=deploy_jobtemplate.get_absolute_url(),
                      data=dict(survey_enabled=True), user=admin_user, expect=402)
     assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
 
@@ -63,6 +65,7 @@ def test_deny_creating_with_survey(project, post, admin_user):
         user=admin_user, expect=402)
     assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
 
+# Test normal operations with survey license work
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -80,6 +83,7 @@ def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post,
     updated_jt = JobTemplate.objects.get(pk=job_template.pk)
     assert updated_jt.survey_spec == survey_input_data
 
+# Tests related to survey content validation
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -102,6 +106,7 @@ def test_survey_spec_dual_names_error(survey_spec_factory, deploy_jobtemplate, p
         user=user('admin', True), expect=400)
     assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."
 
+# Test actions that should be allowed with non-survey license
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -165,8 +170,9 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
     obj = objects.job_template
     obj.survey_enabled = True
     obj.save()
-    post(reverse('api:job_template_launch', args=[obj.pk]),
-         dict(extra_vars=dict(survey_var=7)), admin_user, expect=201)
+    response = post(reverse('api:job_template_launch', args=[obj.pk]),
+                    dict(extra_vars=dict(survey_var=7)), admin_user, expect=201)
+    assert 'survey_var' in response.data['ignored_fields']['extra_vars']
 
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job',
@@ -174,12 +180,21 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
 @mock.patch('awx.api.serializers.JobSerializer.to_representation', lambda self, obj: {})
 @pytest.mark.django_db
 @pytest.mark.survey
-def test_launch_with_non_empty_survey_spec_no_license(survey_spec_factory, job_template_factory, post, admin_user):
+def test_launch_with_non_empty_survey_spec_no_license(job_template_factory, post, admin_user):
     """Assure jobs can still be launched from JTs with a survey_spec
     when the survey is diabled."""
     objects = job_template_factory('jt', organization='org1', project='prj',
-                                   inventory='inv', credential='cred')
+                                   inventory='inv', credential='cred',
+                                   survey='survey_var')
     obj = objects.job_template
-    obj.survey_spec = survey_spec_factory('survey_var')
+    obj.survey_enabled = False
     obj.save()
     post(reverse('api:job_template_launch', args=[obj.pk]), {}, admin_user, expect=201)
+
+@pytest.mark.django_db
+@pytest.mark.survey
+def test_redact_survey_passwords_in_activity_stream(job_with_secret_key):
+    AS_record = ActivityStream.objects.filter(object1='job').all()[0]
+    changes_dict = json.loads(AS_record.changes)
+    extra_vars = json.loads(changes_dict['extra_vars'])
+    assert extra_vars['secret_key'] == '$encrypted$'

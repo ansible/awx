@@ -185,6 +185,16 @@ def notification_template(organization):
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
                                                                                headers={"Test": "Header"}))
+
+@pytest.fixture
+def job_with_secret_key(job_template_factory):
+    "Returns a job from a Job Template with secret_key as password question"
+    objects = job_template_factory(
+        'jt', organization='org1', survey=[{'variable': 'secret_key', 'type': 'password'}])
+    job = objects.job_template.jobs.create(
+        job_type="run", extra_vars=json.dumps({'secret_key': '6kQngg3h8lgiSTvIEb21'}))
+    return job
+
 @pytest.fixture
 def admin(user):
     return user('admin', True)
