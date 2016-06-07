@@ -88,24 +88,6 @@ export default
                     }
                 }
 
-                if (scope.removeDialogReady) {
-                    scope.removeDialogReady();
-                }
-                scope.removeDialogReady = scope.$on('DialogReady', function() {
-                    $('#scheduler-modal-dialog').dialog('open');
-                    $('#schedulerName').focus();
-                    setTimeout(function() {
-                        scope.$apply(function() {
-                            scheduler.setRRule(schedule.rrule);
-                            scheduler.setName(schedule.name);
-                            if(scope.isFactCleanup || scope.cleanupJob){
-                                setGranularity();
-                            }
-
-                        });
-                    }, 300);
-                });
-
                 if (scope.removeScheduleFound) {
                     scope.removeScheduleFound();
                 }
@@ -126,6 +108,12 @@ export default
                         $rootScope.$broadcast("ScheduleFormCreated", scope);
                     });
                     scope.showRRuleDetail = false;
+
+                    scheduler.setRRule(schedule.rrule);
+                    scheduler.setName(schedule.name);
+                    if(scope.isFactCleanup || scope.cleanupJob){
+                        setGranularity();
+                    }
                 });
 
 
