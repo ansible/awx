@@ -770,7 +770,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<div class=\"";
                     html += (options.modal || options.id) ? "col-lg-12" : "col-lg-8 col-lg-offset-2";
                     html += "\">\n";
-                    html += "<div class=\"alert";
+                    html += "<div class=\"Form-alertblock";
                     html += (field.closeable === undefined || field.closeable === true) ? " alert-dismissable" : "";
                     html += "\" ";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
@@ -1943,6 +1943,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     for (act in collection.fieldActions) {
                         fAction = collection.fieldActions[act];
                         html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                        html += (fAction.awToolTip) ? 'aw-tool-tip="' + fAction.awToolTip + '"' : '';
+                        html += (fAction.dataPlacement) ? 'data-placement="' + fAction.dataPlacement + '"' : '';
                         html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                         html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
                         html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
@@ -1950,6 +1952,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += " class=\"List-actionButton ";
                         html += (act === 'delete') ? "List-actionButton--delete" : "";
                         html += "\"";
+
                         html += ">";
                         if (fAction.iconClass) {
                             html += "<i class=\"" + fAction.iconClass + "\"></i>";

@@ -123,13 +123,17 @@ standard-out-log {
 }
 
 .StandardOut-actionButton:hover {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
 }
 
 .StandardOut-actionButton--active {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
+
+    &:hover {
+        background-color: @default-link-hov;
+    }
 }
 
 .StandardOut-actionButton + a {

@@ -204,7 +204,7 @@ export default
                 },
                 job_tags: {
                     label: 'Job Tags',
-                    type: 'text',
+                    type: 'textarea',
                     rows: 1,
                     addRequired: false,
                     editRequired: false,
