@@ -328,20 +328,20 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 errors.append("'%s' value missing" % survey_element['variable'])
             elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > survey_element['max']:
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] < survey_element['min']:
+                       data[survey_element['variable']] < int(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] > survey_element['max']:
+                       data[survey_element['variable']] > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != int:
@@ -349,10 +349,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                                                                                         survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < survey_element['min']:
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < float(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > survey_element['max']:
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > float(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
