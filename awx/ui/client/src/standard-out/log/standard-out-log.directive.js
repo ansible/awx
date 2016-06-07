@@ -10,6 +10,7 @@ export default [ 'templateUrl',
     return {
         scope: {
             stdoutEndpoint: '=',
+            stdoutText: '=',
             jobId: '='
         },
         templateUrl: templateUrl('standard-out/log/standard-out-log'),
