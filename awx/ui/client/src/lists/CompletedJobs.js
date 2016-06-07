@@ -73,8 +73,7 @@ export default
                 ngBind: 'completed_job.type_label',
                 link: false,
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                columnShow: "showJobType",
-                searchOnly: true,
+                searchable: true,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
             },
