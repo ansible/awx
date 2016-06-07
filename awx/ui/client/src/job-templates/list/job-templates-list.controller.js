@@ -66,7 +66,7 @@ export default
             };
 
             $scope.editJobTemplate = function (id) {
-                $state.transitionTo('jobTemplates.edit', {template_id: id});
+                $state.transitionTo('jobTemplates.edit', {id: id});
             };
 
             $scope.deleteJobTemplate = function (id, name) {

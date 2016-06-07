@@ -72,7 +72,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
         };
 
         $scope.editJobTemplate = function (id) {
-            $state.transitionTo('jobTemplates.edit', {template_id: id});
+            $state.transitionTo('jobTemplates.edit', {id: id});
         };
 
         $scope.submitJob = function (id) {
