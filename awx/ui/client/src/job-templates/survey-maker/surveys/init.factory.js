@@ -204,11 +204,11 @@ export default
                 scope.default_textarea = "";
                 scope.default_password = "" ;
                 scope.choices = "";
-                scope.text_min = 1;
+                scope.text_min = 0;
                 scope.text_max = 1024 ;
-                scope.textarea_min = 1;
+                scope.textarea_min = 0;
                 scope.textarea_max = 4096;
-                scope.password_min = 1;
+                scope.password_min = 0;
                 scope.password_max = 32;
                 scope.int_min = 0;
                 scope.int_max = 100;
