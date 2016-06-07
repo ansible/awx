@@ -423,6 +423,24 @@ class BaseTask(Task):
             '': '',
         }
 
+    def add_ansible_venv(self, env):
+        if settings.ANSIBLE_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+            for python_ver in ["python2.7", "python2.6"]:
+                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                    break
+        return env
+
+    def add_tower_venv(self, env):
+        if settings.TOWER_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
+            env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
+        return env
+
     def build_env(self, instance, **kwargs):
         '''
         Build environment dictionary for ansible-playbook.
@@ -438,15 +456,8 @@ class BaseTask(Task):
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         # Update PYTHONPATH to use local site-packages.
-        if settings.ANSIBLE_USE_VENV:
-            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
-            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-            for python_ver in ["python2.7", "python2.6"]:
-                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
-                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
-                    break
+        # NOTE:
+        # Derived class should call add_ansible_venv() or add_tower_venv()
         if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
@@ -761,6 +772,7 @@ class RunJob(BaseTask):
             plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
+        env = self.add_ansible_venv(env)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1031,6 +1043,7 @@ class RunProjectUpdate(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
+        env = self.add_ansible_venv(env)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
@@ -1331,9 +1344,7 @@ class RunInventoryUpdate(BaseTask):
         """
         env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         **kwargs)
-        if settings.TOWER_USE_VENV:
-            env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
-            env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
+        env = self.add_tower_venv(env)
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
@@ -1536,6 +1547,7 @@ class RunAdHocCommand(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, **kwargs)
+        env = self.add_ansible_venv(env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
@@ -1691,6 +1703,12 @@ class RunSystemJob(BaseTask):
         except Exception, e:
             logger.error("Failed to parse system job: " + str(e))
         return args
+
+    def build_env(self, instance, **kwargs):
+        env = super(RunSystemJob, self).build_env(inventory_update,
+                                                  **kwargs)
+        env = self.add_tower_venv(env)
+        return env
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
