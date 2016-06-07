@@ -1,5 +1,4 @@
-sudo: required
-dist: trusty
+sudo: false
 language: python
 python:
     - '2.7'
@@ -17,24 +16,8 @@ after_success:
 addons:
     apt:
         packages:
-            # - libssl-dev
-            # - libxmlsec1
-            # - libxmlsec1-dev
-            # - libxmlsec1-openssl
-            # - libxslt1-dev
-            # - pkg-config
-            # - swig
-            # The following were used when manually testing on an ubuntu trusty container
-            - make
-            - git
             - swig
-            - python-tz
-            - python-dev
-            - libpq-dev
             - libxmlsec1-dev
-            - libsasl2-dev
-            - libldap2-dev
+            - postgresql-9.5
             - libssl-dev
-            - libffi-dev
-            - libevent-dev
-            - python-all-dev
+
