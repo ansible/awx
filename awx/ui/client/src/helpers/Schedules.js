@@ -253,7 +253,21 @@ export default
                 Wait('start');
                 $('#form-container').empty();
                 scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-                scope.processSchedulerEndDt();
+                if(scope.schedulerUTCTime) {
+                    // The UTC time is already set
+                    scope.processSchedulerEndDt();
+                }
+                else {
+                    // We need to wait for it to be set by angular-scheduler because the folling function depends
+                    // on it
+                    var schedulerUTCTimeWatcher = scope.$watch('schedulerUTCTime', function(newVal) {
+                        if(newVal) {
+                            // Remove the watcher
+                            schedulerUTCTimeWatcher();
+                            scope.processSchedulerEndDt();
+                        }
+                    });
+                }
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
                 scheduler.clear();
