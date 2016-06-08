@@ -48,10 +48,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
-                    'the project is created you can add additional organizations.</p><p>Only super users and organization administrators are allowed ' +
-                    'to make changes to projects. Associating one or more organizations to a project determins which organizations admins have ' +
-                    'access to modify the project.',
                 dataTitle: 'Organization',
                 dataContainer: 'body',
                 dataPlacement: 'right'
