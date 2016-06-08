@@ -323,7 +323,7 @@ export default
                 },
                 tenant: {
                     type: 'text',
-                    label: 'Tenent ID',
+                    label: 'Tenant ID',
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
