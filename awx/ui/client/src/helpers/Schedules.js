@@ -526,14 +526,27 @@ export default
                 };
 
                 scope.editSchedule = function(id) {
-                    var base = $state.current.name.split(".")[0];
-                    $state.go(base + ".edit", {schedule_id: id});
+                    if ($state.includes('inventoryManage')){
+                        $state.go('inventoryManage.schedules.edit', {schedule_id: id});
+                    }
+                    else{
+                        var base = $state.current.name.split(".")[0];
+                        $state.go(base + ".edit", {schedule_id: id});
+                    }
                 };
 
                 scope.addSchedule = function() {
-                    var base = $state.current.name.split(".")[0];
-                    ParamPass.set(scope.schedule_url);
-                    $state.go(base + ".add");
+                    if ($state.includes('inventoryManage')){
+                        scope.schedule_url = parent_scope.current_url.split('?')[0];
+                        scope.base = 'inventory';
+                        ParamPass.set(scope.base, scope.schedule_url);
+                        $state.go('inventoryManage.schedules.add');
+                    }
+                    else{
+                        var base = $state.current.name.split(".")[0];
+                        ParamPass.set(scope.schedule_url);
+                        $state.go(base + ".add");
+                    }
                 };
 
                 scope.refreshSchedules = function() {
