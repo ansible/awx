@@ -167,7 +167,7 @@
                 <div class="form-group
                     RepeatFrequencyOptions-everyGroup
                     RepeatFrequencyOptions-formGroup"
-                    ng-if="schedulerShowInterval">
+                    ng-show="schedulerShowInterval">
                     <label class="Form-inputLabel
                         RepeatFrequencyOptions-everyLabel">
                         <span class="red-text">*</span>
@@ -178,7 +178,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner
                             SpinnerInput"
-                        ng-model="$parent.schedulerInterval"
+                        ng-model="schedulerInterval"
                         min="1"
                         max="999"
                         ng-change="resetError('scheduler_interval_error')"
@@ -585,7 +585,7 @@
             <label class="SchedulerFormDetail-label">
                 Schedule Description
             </label>
-            <div class="SchedulerFormDetail-nlp">
+            <div class="SchedulerFormDetail-nlp" ng-hide="rrule_nlp_description == 'Natural language description not available' ">
                 {{ rrule_nlp_description }}
             </div>
             <div class="SchedulerFormDetail-occurrenceHeader">

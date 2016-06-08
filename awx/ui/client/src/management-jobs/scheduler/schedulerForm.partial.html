@@ -180,7 +180,7 @@
                         <div class="form-group
                             RepeatFrequencyOptions-everyGroup
                             RepeatFrequencyOptions-formGroup"
-                            ng-if="schedulerShowInterval">
+                            ng-show="schedulerShowInterval">
                             <label class="Form-inputLabel
                                 RepeatFrequencyOptions-everyLabel">
                                 <span class="red-text">*</span>
@@ -191,7 +191,7 @@
                                 sch-spinner="scheduler_form"
                                 class="scheduler-spinner
                                     SpinnerInput"
-                                ng-model="$parent.schedulerInterval"
+                                ng-model="schedulerInterval"
                                 min="1"
                                 max="999"
                                 ng-change="resetError('scheduler_interval_error')"
@@ -568,7 +568,7 @@
                         <div class="col-md-6 inputSpacer">
                             <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm"></select>
                         </div>
-                    </div> 
+                    </div>
                 <!-- end management job fields     -->
                 </form>
                 <div class="SchedulerFormDetail-container
@@ -583,7 +583,7 @@
                     <label class="SchedulerFormDetail-label">
                         Description
                     </label>
-                    <div class="SchedulerFormDetail-nlp">
+                    <div class="SchedulerFormDetail-nlp" ng-hide="rrule_nlp_description == 'Natural language description not available' ">
                         {{ rrule_nlp_description }}
                     </div>
                     <div class="SchedulerFormDetail-occurrenceHeader">
