@@ -11,8 +11,8 @@ install:
     - pip install tox
 script:
     - tox
-after_success:
-    - TOXENV=coveralls tox
+# after_success:
+#     - TOXENV=coveralls tox
 addons:
     apt:
         packages:
@@ -20,4 +20,8 @@ addons:
             - libxmlsec1-dev
             - postgresql-9.5
             - libssl-dev
-
+cache:
+    pip: true
+    directories:
+        - node_modules
+        - .tox
