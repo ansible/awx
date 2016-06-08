@@ -1,5 +1,4 @@
 import pytest
-import json
 
 
 def test_missing_project_error(job_template_factory):
@@ -39,11 +38,3 @@ def test_inventory_credential_contradictions(job_template_factory):
 def test_survey_password_list(job_with_secret_key_unit):
     """Verify that survey_password_variables method gives a list of survey passwords"""
     assert job_with_secret_key_unit.job_template.survey_password_variables() == ['secret_key', 'SSN']
-
-@pytest.mark.survey
-def test_job_redacted_extra_vars(job_with_secret_key_unit):
-    """Verify that this method redacts vars marked as passwords in a survey"""
-    assert json.loads(job_with_secret_key_unit.display_extra_vars()) == {
-        'submitter_email': 'foobar@redhat.com',
-        'secret_key': '$encrypted$',
-        'SSN': '$encrypted$'}

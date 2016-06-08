@@ -147,8 +147,7 @@ class TestJobSerializerGetRelated(GetRelatedMixin):
         assert related['job_template'] == '/api/v1/%s/%d/' % ('job_templates', job.job_template.pk)
 
 @mock.patch('awx.api.serializers.BaseSerializer.to_representation', lambda self,obj: {
-    'extra_vars': obj.extra_vars
-})
+    'extra_vars': obj.extra_vars})
 class TestJobSerializerSubstitution():
 
     def test_survey_password_hide(self, mocker):
