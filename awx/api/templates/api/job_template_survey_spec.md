@@ -3,7 +3,7 @@ POST requests to this resource should include the full specification for a Job T
 Here is an example survey specification:
 
     {
-        "name": "Simple Surveny",
+        "name": "Simple Survey",
         "description": "Description of the simple survey",
         "spec": [
             {
