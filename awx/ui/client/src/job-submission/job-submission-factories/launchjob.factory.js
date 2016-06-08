@@ -107,10 +107,32 @@ export default
                     Rest.post(job_launch_data)
                     .success(function(data) {
                         Wait('stop');
-                        var job = data.job || data.system_job;
+                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command,
+                        key = Object.keys(data);
                         if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
-                            $state.go('jobDetail', {id: job}, {reload: true});
+
+                            var goToJobDetails = function(state) {
+                                $state.go(state, {id: job}, {reload:true});
+                            };
+
+                            switch(key[0]) {
+                                case 'job':
+                                    goToJobDetails('jobDetail');
+                                    break;
+                                case 'ad_hoc_command':
+                                    goToJobDetails('adHocJobStdout');
+                                    break;
+                                case 'system_job':
+                                    goToJobDetails('managementJobStdout');
+                                    break;
+                                case 'project_update':
+                                    goToJobDetails('scmUpdateStdout');
+                                    break;
+                                case 'inventory_update':
+                                    goToJobDetails('inventorySyncStdout');
+                                    break;
+                            }
                         }
                         if(scope.clearDialog) {
                             scope.clearDialog();
