@@ -126,7 +126,7 @@ export default
 
                 function processValue(value, i , field){
                     if(field.type === 'textarea'){
-                        if (field.name == 'headers') {
+                        if (field.name === 'headers') {
                             $scope[i] = JSON.parse($scope[i]);
                         } else {
                             $scope[i] = $scope[i].toString().split('\n');

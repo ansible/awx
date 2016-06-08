@@ -59,7 +59,7 @@ export default
                                     master[fld] = data.notification_configuration[fld];
 
                                     if(form.fields[fld].type === 'textarea'){
-                                        if (form.fields[fld].name == 'headers') {
+                                        if (form.fields[fld].name === 'headers') {
                                             $scope[fld] = JSON.stringify($scope[fld], null, 2);
                                         } else {
                                             $scope[fld] = $scope[fld].toString().replace(',' , '\n');
@@ -189,7 +189,7 @@ export default
 
                 function processValue(value, i , field){
                     if(field.type === 'textarea'){
-                        if (field.name == 'headers') {
+                        if (field.name === 'headers') {
                             $scope[i] = JSON.parse($scope[i]);
                         } else {
                             $scope[i] = $scope[i].toString().split('\n');
