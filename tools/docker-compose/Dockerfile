@@ -7,8 +7,6 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update && apt-get install -y software-properties-common python-software-properties curl
 RUN add-apt-repository -y ppa:chris-lea/redis-server; add-apt-repository -y ppa:chris-lea/zeromq; add-apt-repository -y ppa:chris-lea/node.js; add-apt-repository -y ppa:ansible/ansible; add-apt-repository -y ppa:jal233/proot;
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
-# TODO: I don't think we need this next line, it's the mongo package key
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 RUN curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" | tee /etc/apt/sources.list.d/postgres-9.4.list
 RUN apt-get update && apt-get install -y openssh-server ansible mg vim tmux git mercurial subversion python-dev python-psycopg2 make postgresql-client libpq-dev nodejs python-psutil libxml2-dev libxslt-dev lib32z1-dev libsasl2-dev libldap2-dev libffi-dev libzmq-dev proot python-pip libxmlsec1-dev swig redis-server libgss-dev libkrb5-dev && apt-get autoremove --purge -y && rm -rf /var/lib/apt/lists/*
