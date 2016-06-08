@@ -1659,6 +1659,7 @@ class CredentialSerializer(BaseSerializer):
         for user in obj.owner_role.members.all():
             summary_dict['owners'].append({
                 'id': user.pk,
+                'type': 'user',
                 'name': user.username,
                 'description': ' '.join([user.first_name, user.last_name]),
                 'url': reverse('api:user_detail', args=(user.pk,)),
@@ -1667,6 +1668,7 @@ class CredentialSerializer(BaseSerializer):
         for parent in obj.owner_role.parents.exclude(object_id__isnull=True).all():
             summary_dict['owners'].append({
                 'id': parent.content_object.pk,
+                'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
                 'name': parent.content_object.name,
                 'description': parent.content_object.description,
                 'url': parent.content_object.get_absolute_url(),
