@@ -324,7 +324,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
                 .success(function () {
                     $scope.search(list.iterator);
                     if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.transitionTo($state.current.name.replace(/[.][a-zA-Z]+$/, "")); /* go to the list view */
+                        $state.go('^');
                     }
                 })
                 .error(function (data, status) {
