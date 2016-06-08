@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name help.function:InventoryGroups
@@ -53,7 +53,7 @@ angular.module('InventoryGroupsHelpDefinition', [])
                     maxWidth: 187,
                     maxHeight: 175
                 },
-                box: "To import a cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
+                box: "To import a cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-refresh\"></i>."
             }, {
                 intro: "Add subgroups:",
                 img: {

@@ -90,7 +90,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                          // do nothing
                      } else if (Empty(group.status) || group.status === "never updated") {
                          Alert('No Status Available', 'An inventory sync has not been performed for the selected group. Start the process by ' +
-                               'clicking the <i class="fa fa-exchange"></i> button.', 'alert-info', null, null, null, null, true);
+                               'clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
                      } else {
                          Wait('start');
                          Rest.setUrl(group.related.inventory_source);
@@ -174,7 +174,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                      case 'never updated':
                          stat = 'never';
                      stat_class = 'na';
-                     status_tip = 'Sync not performed. Click <i class="fa fa-exchange"></i> to start it now.';
+                     status_tip = 'Sync not performed. Click <i class="fa fa-refresh"></i> to start it now.';
                      break;
                      case 'none':
                          case 'ok':
