@@ -20,7 +20,7 @@
             var params, source;
             // group fields
             var group = {
-                variables: $scope.variables === ('---' || '{}') ? null : $scope.variables,
+                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: $scope.inventory,
@@ -233,7 +233,7 @@
             if (inventorySourceData.source !== 'custom'){
                 LookUpInit({
                     scope: $scope,
-                    url: GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : 'kind=' + (inventorySourceData.source)),
+                    url: GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : '?kind=' + (inventorySourceData.source)),
                     form: form,
                     list: CredentialList,
                     field: 'credential',

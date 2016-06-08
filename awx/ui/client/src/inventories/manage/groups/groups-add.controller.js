@@ -19,7 +19,7 @@
             var params, source;
             // group fields
             var group = {
-                variables: $scope.variables === ('---' || '{}') ? null : $scope.variables,
+                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: inventoryData.id
@@ -28,7 +28,7 @@
                 // inventory_source fields
                 params = {
                     instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === ('---' || '{}') ? null : $scope[$scope.source.value + '_variables'],
+                    source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'],
                     source_script: $scope.inventory_script,
                     source: $scope.source.value,
                     credential: $scope.credential,
@@ -82,7 +82,7 @@
             }
         };
         $scope.sourceChange = function(source){
-            source = source.value === 'azure_rm' ? 'azure' : source.value;
+            source = source.value;
             if (source === 'custom'){
                 LookUpInit({
                     scope: $scope,
