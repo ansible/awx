@@ -297,11 +297,19 @@ export default function() {
             },
             headers: {
                 label: 'HTTP Headers',
-                type: 'text',
+                type: 'textarea',
+                rows: 5,
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
+                awPopOver: '<p>Specify HTTP Headers in JSON format</p>'
+                         + '<p>For example:<br><pre>\n'
+                         + '{\n'
+                         + '  "X-Auth-Token": "828jf0",\n'
+                         + '  "X-Ansible": "Is great!"\n'
+                         + '}\n'
+                         + '</pre></p>',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm'
             },
