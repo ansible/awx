@@ -38,13 +38,6 @@ from awx.main.models.organization import (
 
 from awx.main.models.notifications import NotificationTemplate
 
-from awx.main.tests.factories import (
-    create_organization,
-    create_job_template,
-    create_notification_template,
-    create_survey_spec,
-)
-
 '''
 Disable all django model signals.
 '''
@@ -489,20 +482,4 @@ def job_template_labels(organization, job_template):
     job_template.labels.create(name="label-2", organization=organization)
 
     return job_template
-
-@pytest.fixture
-def job_template_factory():
-    return create_job_template
-
-@pytest.fixture
-def organization_factory():
-    return create_organization
-
-@pytest.fixture
-def notification_template_factory():
-    return create_notification_template
-
-@pytest.fixture
-def survey_spec_factory():
-    return create_survey_spec
 
