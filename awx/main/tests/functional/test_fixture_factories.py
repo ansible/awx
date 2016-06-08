@@ -77,7 +77,8 @@ def test_org_factory(organization_factory):
 def test_job_template_factory(job_template_factory):
     jt_objects = job_template_factory('testJT', organization='org1',
                                       project='proj1', inventory='inventory1',
-                                      credential='cred1', survey='test-survey')
+                                      credential='cred1', survey='test-survey',
+                                      jobs=[1])
     assert jt_objects.job_template.name == 'testJT'
     assert jt_objects.project.name == 'proj1'
     assert jt_objects.inventory.name == 'inventory1'
@@ -85,6 +86,7 @@ def test_job_template_factory(job_template_factory):
     assert jt_objects.inventory.organization.name == 'org1'
     assert jt_objects.job_template.survey_enabled is True
     assert jt_objects.job_template.survey_spec is not None
+    assert 'test-survey' in jt_objects.jobs[1].extra_vars
 
 def test_survey_spec_generator_simple(survey_spec_factory):
     survey_spec = survey_spec_factory('survey_variable')

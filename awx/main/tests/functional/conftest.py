@@ -187,13 +187,8 @@ def notification_template(organization):
                                                                                headers={"Test": "Header"}))
 
 @pytest.fixture
-def job_with_secret_key(job_template_factory):
-    "Returns a job from a Job Template with secret_key as password question"
-    objects = job_template_factory(
-        'jt', organization='org1', survey=[{'variable': 'secret_key', 'type': 'password'}])
-    job = objects.job_template.jobs.create(
-        job_type="run", extra_vars=json.dumps({'secret_key': '6kQngg3h8lgiSTvIEb21'}))
-    return job
+def job_with_secret_key(job_with_secret_key_factory):
+    return job_with_secret_key_factory(persisted=True)
 
 @pytest.fixture
 def admin(user):

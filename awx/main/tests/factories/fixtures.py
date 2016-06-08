@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 
 from awx.main.models import (
@@ -6,6 +8,7 @@ from awx.main.models import (
     Team,
     Instance,
     JobTemplate,
+    Job,
     NotificationTemplate,
     Credential,
     Inventory,
@@ -103,11 +106,30 @@ def mk_inventory(name, organization=None, persisted=True):
     return inv
 
 
+def mk_job(job_type='run', status='new', job_template=None, inventory=None,
+           credential=None, project=None, extra_vars={},
+           persisted=True):
+    job = Job(job_type=job_type, status=status, extra_vars=json.dumps(extra_vars))
+
+    job.job_template = job_template
+    job.inventory = inventory
+    job.credential = credential
+    job.project = project
+
+    if persisted:
+        job.save()
+    return job
+
+
 def mk_job_template(name, job_type='run',
                     organization=None, inventory=None,
-                    credential=None, persisted=True,
+                    credential=None, persisted=True, extra_vars='',
                     project=None, spec=None):
-    jt = JobTemplate(name=name, job_type=job_type, playbook='mocked')
+    if extra_vars:
+        extra_vars = json.dumps(extra_vars)
+
+    jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars,
+                     playbook='mocked')
 
     jt.inventory = inventory
     if jt.inventory is None:
