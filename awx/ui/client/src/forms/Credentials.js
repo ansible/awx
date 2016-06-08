@@ -49,8 +49,8 @@ export default
                     sourceModel: 'organization',
                     sourceField: 'name',
                     ngClick: 'lookUpOrganization()',
-                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  organization admins and system administrators can assign an organization so that roles can be assigned to users and teams in that organization.</p>",
-                    dataTitle: 'Required ',
+                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>",
+                    dataTitle: 'Organization ',
                     dataPlacement: 'bottom',
                     dataContainer: "body"
                 },
