@@ -482,7 +482,15 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     </labels-list>
 </td>
                     `;
-            } else if (field.type === 'badgeCount') {
+            } else if (field.type === 'owners') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <owner-list></owner-list>
+</td>
+                `;
+            }else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
                 html = Badge(field);
