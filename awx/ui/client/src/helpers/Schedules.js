@@ -258,7 +258,7 @@ export default
                     scope.processSchedulerEndDt();
                 }
                 else {
-                    // We need to wait for it to be set by angular-scheduler because the folling function depends
+                    // We need to wait for it to be set by angular-scheduler because the following function depends
                     // on it
                     var schedulerUTCTimeWatcher = scope.$watch('schedulerUTCTime', function(newVal) {
                         if(newVal) {
