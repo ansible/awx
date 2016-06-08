@@ -317,7 +317,9 @@ export default
                 add_survey: {
                     ngClick: 'addSurvey()',
                     ngShow: 'job_type.value !== "scan" && !survey_exists',
-                    awFeature: 'surveys'
+                    awFeature: 'surveys',
+                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job',
+                    dataPlacement: 'top'
                 },
                 edit_survey: {
                     ngClick: 'editSurvey()',

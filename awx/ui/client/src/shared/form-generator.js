@@ -1718,6 +1718,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                         //html += "\" ";
                                     }
                                 }
+                                if(button.awToolTip) {
+                                    html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                                }
                                 html += ">";
                                 html += " " + button.label + "</button>\n";
                             }
