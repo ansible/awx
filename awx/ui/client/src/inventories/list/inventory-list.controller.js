@@ -323,6 +323,9 @@ function InventoriesList($scope, $rootScope, $location, $log,
             Rest.destroy()
                 .success(function () {
                     $scope.search(list.iterator);
+                    if (new RegExp('/' + id + '$').test($location.$$url)) {
+                        $state.go('^');
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, null, { hdr: 'Error!',

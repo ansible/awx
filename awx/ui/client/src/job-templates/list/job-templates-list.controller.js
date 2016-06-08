@@ -78,6 +78,9 @@ export default
                     Rest.destroy()
                         .success(function () {
                             $scope.search(list.iterator);
+                            if (new RegExp('/' + id + '$').test($location.$$url)) {
+                                $state.go('^');
+                            }
                         })
                         .error(function (data) {
                             Wait('stop');
