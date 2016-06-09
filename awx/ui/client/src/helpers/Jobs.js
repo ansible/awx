@@ -156,7 +156,7 @@ export default
             };
         }
     ])
-    
+
     .factory('JobsListUpdate', ['Rest', function(Rest) {
         return function(params) {
             var scope = params.scope,
@@ -343,9 +343,12 @@ export default
                                 scope.search(scope.iterator);
                             }
                         })
-                        .error(function() {
+                        .error(function(obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
+                            if (status == 403) {
+                                Alert('Error', obj.detail);
+                            }
                             // Ignore the error. The job most likely already finished.
                             // ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             //    ' failed. POST returned status: ' + status });
@@ -361,9 +364,12 @@ export default
                                 scope.search(scope.iterator);
                             }
                         })
-                        .error(function () {
+                        .error(function (obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
+                            if (status == 403) {
+                                Alert('Error', obj.detail);
+                            }
                             // Ignore the error. The job most likely already finished.
                             //ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             //    ' failed. DELETE returned status: ' + status });
