@@ -187,13 +187,13 @@ export default
                 var scope = params.scope,
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
-                    url,
+                    url = params.url || null,
                     scheduler;
 
-                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
+                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
-                else if(base === "inventory"){
+                else if(base === "inventories"){
                     if (!params.url){
                         url = GetBasePath('groups') + $stateParams.id + '/';
                         Rest.setUrl(url);
@@ -272,7 +272,6 @@ export default
                     }
                     $state.go("^");
                 });
-
                 scope.saveSchedule = function() {
                     SchedulePost({
                         scope: scope,
@@ -541,8 +540,7 @@ export default
                 scope.addSchedule = function() {
                     if ($state.includes('inventoryManage')){
                         scope.schedule_url = parent_scope.current_url.split('?')[0];
-                        scope.base = 'inventory';
-                        ParamPass.set(scope.base, scope.schedule_url);
+                        ParamPass.set(scope.schedule_url);
                         $state.go('inventoryManage.schedules.add');
                     }
                     else{
