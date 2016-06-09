@@ -123,17 +123,17 @@ export default function() {
             },
         },
         buttons: {
-            launch: {
-                label: 'Save',
-                ngClick: 'launchJob()',
-                ngDisabled: true,
-                'class': 'btn btn-sm List-buttonSubmit'
-            },
             reset: {
                 ngClick: 'formReset()',
                 ngDisabled: true,
                 label: 'Reset',
                 'class': 'btn btn-sm Form-cancelButton'
+            },
+            launch: {
+                label: 'Save',
+                ngClick: 'launchJob()',
+                ngDisabled: true,
+                'class': 'btn btn-sm List-buttonSubmit'
             }
         },
 

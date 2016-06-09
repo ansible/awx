@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 
 
@@ -15,7 +15,8 @@ export default
         iterator: 'group',
         selectTitle: 'Copy Groups',
         index: false,
-        well: false,        
+        well: false,
+        emptyListText: 'PLEASE CREATE ADDITIONAL GROUPS / HOSTS TO PERFORM THIS ACTION',
         fields: {
             name: {
                 key: true,

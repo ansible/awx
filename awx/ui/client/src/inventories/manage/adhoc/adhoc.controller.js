@@ -10,7 +10,7 @@
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
 function adhocController($q, $scope, $location, $stateParams,
-    $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, adhocForm,
+    $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
     KindChange, LookUpInit, CredentialList, Empty, Wait) {
 
@@ -68,6 +68,17 @@ function adhocController($q, $scope, $location, $stateParams,
             if (formReadyPromise === 2) {
                 privateFn.setFieldDefaults($scope.adhoc_verbosity_options,
                     $scope.forks_field.default);
+
+                CreateSelect2({
+                    element: '#adhoc_module_name',
+                    multiple: false
+                });
+
+                CreateSelect2({
+                    element: '#adhoc_verbosity',
+                    multiple: false
+                });
+
                 Wait('stop');
             }
         }
@@ -295,7 +306,7 @@ function adhocController($q, $scope, $location, $stateParams,
 }
 
 export default ['$q', '$scope', '$location', '$stateParams',
-    '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'adhocForm',
-    'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
+    '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
+     'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',
     adhocController];
