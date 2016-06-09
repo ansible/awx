@@ -346,7 +346,7 @@ export default
                         .error(function(obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
-                            if (status == 403) {
+                            if (status === 403) {
                                 Alert('Error', obj.detail);
                             }
                             // Ignore the error. The job most likely already finished.
@@ -367,7 +367,7 @@ export default
                         .error(function (obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
-                            if (status == 403) {
+                            if (status === 403) {
                                 Alert('Error', obj.detail);
                             }
                             // Ignore the error. The job most likely already finished.
