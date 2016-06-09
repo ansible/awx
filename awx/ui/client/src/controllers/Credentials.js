@@ -178,32 +178,39 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 
     $scope.canShareCredential = false;
 
-    if ($rootScope.current_user.is_superuser) {
-        $scope.canShareCredential = true;
-    } else {
-        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
-        Rest.get()
-            .success(function(data) {
-                $scope.canShareCredential = (data.count) ? true : false;
-            }).error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+    $rootScope.$watch('current_user', function(){
+        try {
+            if ($rootScope.current_user.is_superuser) {
+                $scope.canShareCredential = true;
+            } else {
+                Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+                Rest.get()
+                    .success(function(data) {
+                        $scope.canShareCredential = (data.count) ? true : false;
+                    }).error(function (data, status) {
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+                    });
+            }
+
+
+            var orgUrl = ($rootScope.current_user.is_superuser) ?
+                GetBasePath("organizations") :
+                $rootScope.current_user.url + "admin_of_organizations?";
+
+            // Create LookUpInit for organizations
+            LookUpInit({
+                scope: $scope,
+                url: orgUrl,
+                form: form,
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio',
+                autopopulateLookup: false
             });
-    }
-
-
-    var orgUrl = ($rootScope.current_user.is_superuser) ?
-        GetBasePath("organizations") :
-        $rootScope.current_user.url + "admin_of_organizations?";
-
-    // Create LookUpInit for organizations
-    LookUpInit({
-        scope: $scope,
-        url: orgUrl,
-        form: form,
-        list: OrganizationList,
-        field: 'organization',
-        input_type: 'radio',
-        autopopulateLookup: false
+        }
+        catch(err){
+            // $rootScope.current_user isn't available because a call to the config endpoint hasn't finished resolving yet
+        }
     });
 
     if (!Empty($stateParams.user_id)) {
