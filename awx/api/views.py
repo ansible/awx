@@ -1383,7 +1383,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
             raise PermissionDenied()
 
         content_type = ContentType.objects.get_for_model(self.model)
-        teams = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type).exclude(object_id__isnull=True)]
+        teams = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type)]
 
         return self.model.objects.filter(pk__in=teams)
 
@@ -1400,7 +1400,7 @@ class CredentialOwnerOrganizationsList(SubListAPIView):
             raise PermissionDenied()
 
         content_type = ContentType.objects.get_for_model(self.model)
-        orgs = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type).exclude(object_id__isnull=True)]
+        orgs = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type)]
 
         return self.model.objects.filter(pk__in=orgs)
 
