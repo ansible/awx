@@ -7,6 +7,7 @@ from awx.main.models import (
     NotificationTemplate,
     Credential,
     Inventory,
+    Job,
     Label,
 )
 
@@ -21,6 +22,7 @@ from .fixtures import (
     mk_team,
     mk_user,
     mk_job_template,
+    mk_job,
     mk_credential,
     mk_inventory,
     mk_project,
@@ -173,7 +175,7 @@ def create_survey_spec(variables=None, default_type='integer', required=True):
 #
 
 def create_job_template(name, roles=None, persisted=True, **kwargs):
-    Objects = generate_objects(["job_template",
+    Objects = generate_objects(["job_template", "jobs",
                                 "organization",
                                 "inventory",
                                 "project",
@@ -186,7 +188,9 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
     inv = None
     cred = None
     spec = None
+    jobs = {}
     job_type = kwargs.get('job_type', 'run')
+    extra_vars = kwargs.get('extra_vars', '')
 
     if 'organization' in kwargs:
         org = kwargs['organization']
@@ -213,13 +217,27 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
 
     jt = mk_job_template(name, project=proj,
                          inventory=inv, credential=cred,
-                         job_type=job_type, spec=spec,
+                         job_type=job_type, spec=spec, extra_vars=extra_vars,
                          persisted=persisted)
+
+    if 'jobs' in kwargs:
+        for i in kwargs['jobs']:
+            if type(i) is Job:
+                jobs[i.pk] = i
+            else:
+                # Fill in default survey answers
+                job_extra_vars = {}
+                for question in spec['spec']:
+                    job_extra_vars[question['variable']] = question['default']
+                jobs[i] = mk_job(job_template=jt, project=proj, inventory=inv, credential=cred,
+                                 extra_vars=job_extra_vars,
+                                 job_type=job_type, persisted=persisted)
 
     role_objects = generate_role_objects([org, proj, inv, cred])
     apply_roles(roles, role_objects, persisted)
 
     return Objects(job_template=jt,
+                   jobs=jobs,
                    project=proj,
                    inventory=inv,
                    credential=cred,

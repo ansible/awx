@@ -40,7 +40,6 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
-from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
@@ -1936,17 +1935,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return ret
         if 'job_template' in ret and not obj.job_template:
             ret['job_template'] = None
-
-        if obj.job_template and obj.job_template.survey_enabled:
-            if 'extra_vars' in ret:
-                try:
-                    extra_vars = json.loads(ret['extra_vars'])
-                    for key in obj.job_template.survey_password_variables():
-                        if key in extra_vars:
-                            extra_vars[key] = REPLACE_STR
-                    ret['extra_vars'] = json.dumps(extra_vars)
-                except ValueError:
-                    pass
+        if obj.job_template and obj.job_template.survey_enabled and 'extra_vars' in ret:
+            ret['extra_vars'] = obj.display_extra_vars()
         return ret
 
 

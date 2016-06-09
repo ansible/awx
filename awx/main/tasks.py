@@ -932,7 +932,10 @@ class RunJob(BaseTask):
                 'tower_user_name': job.created_by.username,
             })
         if job.extra_vars_dict:
-            extra_vars.update(job.extra_vars_dict)
+            if kwargs.get('display', False) and job.job_template and job.job_template.survey_enabled:
+                extra_vars.update(json.loads(job.display_extra_vars()))
+            else:
+                extra_vars.update(job.extra_vars_dict)
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
@@ -941,6 +944,9 @@ class RunJob(BaseTask):
         else:
             args.append(job.playbook)
         return args
+
+    def build_safe_args(self, job, **kwargs):
+        return self.build_args(job, display=True, **kwargs)
 
     def build_cwd(self, job, **kwargs):
         if job.project is None and job.job_type == PERM_INVENTORY_SCAN:

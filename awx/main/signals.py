@@ -318,10 +318,15 @@ def activity_stream_create(sender, instance, created, **kwargs):
             return
         # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
+        changes = model_to_dict(instance, model_serializer_mapping)
+        # Special case where Job survey password variables need to be hidden
+        if type(instance) == Job:
+            if 'extra_vars' in changes:
+                changes['extra_vars'] = instance.display_extra_vars()
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
+            changes=json.dumps(changes))
         activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since

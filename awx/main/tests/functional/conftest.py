@@ -185,6 +185,11 @@ def notification_template(organization):
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
                                                                                headers={"Test": "Header"}))
+
+@pytest.fixture
+def job_with_secret_key(job_with_secret_key_factory):
+    return job_with_secret_key_factory(persisted=True)
+
 @pytest.fixture
 def admin(user):
     return user('admin', True)

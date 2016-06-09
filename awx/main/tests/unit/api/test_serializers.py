@@ -1,6 +1,7 @@
 # Python
 import pytest
 import mock
+import json
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer, JobSerializer, JobOptionsSerializer
@@ -144,6 +145,21 @@ class TestJobSerializerGetRelated(GetRelatedMixin):
         related = self._mock_and_run(JobSerializer, job)
         assert 'job_template' in related
         assert related['job_template'] == '/api/v1/%s/%d/' % ('job_templates', job.job_template.pk)
+
+@mock.patch('awx.api.serializers.BaseSerializer.to_representation', lambda self,obj: {
+    'extra_vars': obj.extra_vars})
+class TestJobSerializerSubstitution():
+
+    def test_survey_password_hide(self, mocker):
+        job = mocker.MagicMock(**{
+            'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}',
+            'extra_vars.return_value': '{\"secret_key\": \"my_password\"}'})
+        serializer = JobSerializer(job)
+        rep = serializer.to_representation(job)
+        extra_vars = json.loads(rep['extra_vars'])
+        assert extra_vars['secret_key'] == '$encrypted$'
+        job.display_extra_vars.assert_called_once_with()
+        assert 'my_password' not in extra_vars
 
 @mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', lambda x,y: {})
 class TestJobOptionsSerializerGetSummaryFields(GetSummaryFieldsMixin):
