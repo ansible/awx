@@ -249,6 +249,7 @@ export default
                     label: 'Update Options',
                     type: 'checkbox_group',
                     ngShow: "source && (source.value !== 'manual' && source.value !== null)",
+                    class: 'Form-checkbox--stacked',
 
                     fields: [{
                         name: 'overwrite',
