@@ -237,7 +237,7 @@ export default
                 list = params.list,
                 id = params.id,
                 url = params.url,
-                pageSize = params.pageSize || 5,
+                pageSize = params.pageSize || 10,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 search_params = params.searchParams,
                 spinner = (params.spinner === undefined) ? true : params.spinner, key;

@@ -653,7 +653,7 @@ export default
                     id = params.id,
                     url = params.url,
                     searchSize = params.searchSize,
-                    pageSize = params.pageSize || 5,
+                    pageSize = params.pageSize || 10,
                     spinner = (params.spinner === undefined) ? true : params.spinner;
 
 
