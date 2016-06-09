@@ -229,9 +229,9 @@ body .btn {
 }
 
 body .tab-content .btn-primary {
-  background-color: #3CB878;
+  background-color: #5cb85c;
   color: #FFFFFF;
-  border: 1px solid #3CB878;
+  border: 1px solid #5cb85c;
 }
 body .tab-content .btn-primary:hover,
 body .tab-content .btn-primary.focus,
@@ -244,9 +244,9 @@ body .tab-content .btn-primary.active:hover,
 body .tab-content .btn-primary:active.focus,
 body .tab-content .btn-primary:active:focus,
 body .tab-content .btn-primary:active:hover {
-  background-color: #60D66F;
+  background-color: #449d44;
   color: #FFFFFF;
-  border: 1px solid #60D66F;
+  border: 1px solid #449d44;
 }
 
 .btn-danger {
@@ -265,8 +265,8 @@ body .tab-content .btn-primary:active:hover {
 .btn-danger:active.focus,
 .btn-danger:active:focus,
 .btn-danger:active:hover {
-  background-color: #F0AD4E;
-  border-color: #F0AD4E;
+  background-color: #c9302c;
+  border-color: #c9302c;
 }
 
 body .wrapper {
