@@ -100,7 +100,7 @@ python-novaclient==3.2.0
 python-openid==2.2.5
 python-openstackclient==2.0.0
 python-radius==1.0
-python-saml==2.1.4
+python-saml==2.1.8
 git+https://github.com/matburt/python-social-auth.git@master#egg=python-social-auth
 python-swiftclient==2.7.0
 python-troveclient==1.4.0
