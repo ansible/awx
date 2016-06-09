@@ -1612,8 +1612,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
         return ret
 
 
-
-
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
@@ -1641,6 +1639,9 @@ class CredentialSerializer(BaseSerializer):
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list = reverse('api:credential_access_list', args=(obj.pk,)),
             object_roles = reverse('api:credential_object_roles_list', args=(obj.pk,)),
+            owner_users = reverse('api:credential_owner_users_list', args=(obj.pk,)),
+            owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
+            owner_organizations = reverse('api:credential_owner_organizations_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)

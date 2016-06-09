@@ -1362,6 +1362,49 @@ class CredentialList(ListCreateAPIView):
 
         return ret
 
+
+class CredentialOwnerUsersList(SubListAPIView):
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Credential
+    relationship = 'owner_role.members'
+    new_in_300 = True
+
+
+class CredentialOwnerTeamsList(SubListAPIView):
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Credential, 'read', None):
+            raise PermissionDenied()
+
+        content_type = ContentType.objects.get_for_model(self.model)
+        teams = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type).exclude(object_id__isnull=True)]
+
+        return self.model.objects.filter(pk__in=teams)
+
+
+class CredentialOwnerOrganizationsList(SubListAPIView):
+    model = Organization
+    serializer_class = OrganizationSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Credential, 'read', None):
+            raise PermissionDenied()
+
+        content_type = ContentType.objects.get_for_model(self.model)
+        orgs = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type).exclude(object_id__isnull=True)]
+
+        return self.model.objects.filter(pk__in=orgs)
+
+
 class UserCredentialsList(CredentialList):
 
     model = Credential
