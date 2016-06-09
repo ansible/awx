@@ -107,8 +107,7 @@ export default
                     Rest.post(job_launch_data)
                     .success(function(data) {
                         Wait('stop');
-                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command,
-                        key = Object.keys(data);
+                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
                         if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
@@ -116,22 +115,20 @@ export default
                                 $state.go(state, {id: job}, {reload:true});
                             };
 
-                            switch(key[0]) {
-                                case 'job':
-                                    goToJobDetails('jobDetail');
-                                    break;
-                                case 'ad_hoc_command':
-                                    goToJobDetails('adHocJobStdout');
-                                    break;
-                                case 'system_job':
-                                    goToJobDetails('managementJobStdout');
-                                    break;
-                                case 'project_update':
-                                    goToJobDetails('scmUpdateStdout');
-                                    break;
-                                case 'inventory_update':
-                                    goToJobDetails('inventorySyncStdout');
-                                    break;
+                            if(_.has(data, 'job')) {
+                                goToJobDetails('jobDetail');
+                            }
+                            else if(_.has(data, 'ad_hoc_command')) {
+                                goToJobDetails('adHocJobStdout');
+                            }
+                            else if(_.has(data, 'system_job')) {
+                                goToJobDetails('managementJobStdout');
+                            }
+                            else if(_.has(data, 'project_update')) {
+                                goToJobDetails('scmUpdateStdout');
+                            }
+                            else if(_.has(data, 'inventory_update')) {
+                                goToJobDetails('inventorySyncStdout');
                             }
                         }
                         if(scope.clearDialog) {
