@@ -1,5 +1,5 @@
 export default
-	['$scope', '$state', 'CheckLicense', function($scope, $state, CheckLicense){
+	['$scope', '$state', 'ConfigService', function($scope, $state, ConfigService){
 		var processVersion = function(version){
 					// prettify version & calculate padding
 					// e,g 3.0.0-0.git201602191743/ -> 3.0.0
@@ -16,10 +16,10 @@ export default
 		            return paddedStr;
 		};
 		var init = function(){
-			CheckLicense.get()
-				.then(function(res){
-					$scope.subscription = res.data.license_info.subscription_name;
-					$scope.version = processVersion(res.data.version);
+			ConfigService.getConfig()
+				.then(function(config){
+					$scope.subscription = config.license_info.subscription_name;
+					$scope.version = processVersion(config.version);
 					$('#about-modal').modal('show');
 				});
 		};

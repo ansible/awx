@@ -64,6 +64,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
 
     var lastPath, lastUser, sessionExpired, loginAgain;
 
+    $rootScope.configReady = true;
     loginAgain = function() {
         setTimeout(function() {
             $location.path('/logout');

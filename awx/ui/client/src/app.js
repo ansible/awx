@@ -872,6 +872,7 @@ var tower = angular.module('Tower', [
                     // User not authenticated, redirect to login page
                     $rootScope.sessionExpired = false;
                     $cookieStore.put('sessionExpired', false);
+                    $rootScope.configReady = true;
                     $location.path('/login');
                 } else {
                     // If browser refresh, set the user_is_superuser value
