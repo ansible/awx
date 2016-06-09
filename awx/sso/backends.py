@@ -176,7 +176,7 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
+def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
     '''
     Hepler function to update m2m relationship based on LDAP group membership.
     '''
@@ -220,7 +220,7 @@ def on_populate_user(sender, **kwargs):
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
         org, created = Organization.objects.get_or_create(name=org_name)
-        remove = bool(org_opts.get('remove', False))
+        remove = bool(org_opts.get('remove', True))
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
         _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
@@ -238,7 +238,7 @@ def on_populate_user(sender, **kwargs):
         org, created = Organization.objects.get_or_create(name=team_opts['organization'])
         team, created = Team.objects.get_or_create(name=team_name, organization=org)
         users_opts = team_opts.get('users', None)
-        remove = bool(team_opts.get('remove', False))
+        remove = bool(team_opts.get('remove', True))
         _update_m2m_from_groups(user, ldap_user, team.member_role.users, users_opts,
                                 remove)
 
