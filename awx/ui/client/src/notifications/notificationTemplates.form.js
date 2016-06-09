@@ -299,6 +299,7 @@ export default function() {
                 label: 'HTTP Headers',
                 type: 'textarea',
                 rows: 5,
+                'class': 'Form-formGroup--fullWidth',
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
