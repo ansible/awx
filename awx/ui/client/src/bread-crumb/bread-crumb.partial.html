@@ -2,7 +2,8 @@
     <div ng-hide="licenseMissing" ncy-breadcrumb></div>
     <div class="BreadCrumb-menuLink"
         id="bread_crumb_activity_stream"
-        aw-tool-tip="View Activity Stream"
+        aw-tool-tip="{{activityStreamTooltip}}"
+        data-tip-watch="activityStreamTooltip"
         data-placement="left"
         data-trigger="hover"
         data-container="body"
