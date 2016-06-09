@@ -179,7 +179,7 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
                                 "organization",
                                 "inventory",
                                 "project",
-                                "credential",
+                                "credential", "cloud_credential", "network_credential",
                                 "job_type",
                                 "survey",], kwargs)
 
@@ -187,6 +187,8 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
     proj = None
     inv = None
     cred = None
+    cloud_cred = None
+    net_cred = None
     spec = None
     jobs = {}
     job_type = kwargs.get('job_type', 'run')
@@ -201,6 +203,16 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
         cred = kwargs['credential']
         if type(cred) is not Credential:
             cred = mk_credential(cred, persisted=persisted)
+
+    if 'cloud_credential' in kwargs:
+        cloud_cred = kwargs['cloud_credential']
+        if type(cloud_cred) is not Credential:
+            cloud_cred = mk_credential(cloud_cred, kind='aws', persisted=persisted)
+
+    if 'network_credential' in kwargs:
+        net_cred = kwargs['network_credential']
+        if type(net_cred) is not Credential:
+            net_cred = mk_credential(net_cred, kind='net', persisted=persisted)
 
     if 'project' in kwargs:
         proj = kwargs['project']
@@ -240,7 +252,7 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
                    jobs=jobs,
                    project=proj,
                    inventory=inv,
-                   credential=cred,
+                   credential=cred, cloud_credential=cloud_cred, network_credential=net_cred,
                    job_type=job_type,
                    organization=org,
                    survey=spec,)

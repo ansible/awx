@@ -78,11 +78,15 @@ def test_job_template_factory(job_template_factory):
     jt_objects = job_template_factory('testJT', organization='org1',
                                       project='proj1', inventory='inventory1',
                                       credential='cred1', survey='test-survey',
+                                      cloud_credential='aws1',
+                                      network_credential='juniper1',
                                       jobs=[1])
     assert jt_objects.job_template.name == 'testJT'
     assert jt_objects.project.name == 'proj1'
     assert jt_objects.inventory.name == 'inventory1'
     assert jt_objects.credential.name == 'cred1'
+    assert jt_objects.cloud_credential.name == 'aws1'
+    assert jt_objects.network_credential.name == 'juniper1'
     assert jt_objects.inventory.organization.name == 'org1'
     assert jt_objects.job_template.survey_enabled is True
     assert jt_objects.job_template.survey_spec is not None
