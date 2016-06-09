@@ -323,6 +323,7 @@ export default
                 },
                 edit_survey: {
                     ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
                     ngShow: 'job_type.value !== "scan" && survey_exists'
                 },
                 cancel: {

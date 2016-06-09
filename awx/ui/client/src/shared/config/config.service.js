@@ -6,8 +6,8 @@
 
 
 export default
-   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope',
-   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope) {
+   ['GetBasePath', 'ProcessErrors', '$q', 'Rest', '$rootScope', 'Wait',
+   function (GetBasePath, ProcessErrors, $q, Rest, $rootScope, Wait) {
        return {
             get: function(){
                 return this.config;
@@ -28,9 +28,12 @@ export default
                 if(_.isEmpty(config)){
                     var url = GetBasePath('config');
                     Rest.setUrl(url);
+                    Wait('start');
                     var promise = Rest.get();
                     promise.then(function (response) {
                         var config = response.data;
+                        $rootScope.configReady = true;
+                        Wait('stop');
                         that.set(config);
                         deferred.resolve(response.data);
                     });
