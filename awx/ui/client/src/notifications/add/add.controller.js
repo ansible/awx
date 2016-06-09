@@ -9,13 +9,13 @@ export default
         'NotificationsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit', 'LookUpInit',
         'OrganizationList', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-        'NotificationsTypeChange',
+        'NotificationsTypeChange', 'ParseTypeChange',
         function(
             $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
             NotificationsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit, LookUpInit,
             OrganizationList, $scope, $state, CreateSelect2, GetChoices,
-            NotificationsTypeChange
+            NotificationsTypeChange, ParseTypeChange
         ) {
             var generator = GenerateForm,
                 form = NotificationsFormObject,
@@ -45,6 +45,7 @@ export default
                 });
             });
 
+
             LookUpInit({
                     url: GetBasePath('organization'),
                     scope: $scope,
@@ -62,6 +63,28 @@ export default
                 callback: 'choicesReady'
             });
 
+            $scope.$watch('headers', function validate_headers(str) {
+                try {
+                    let headers = JSON.parse(str);
+                    if (_.isObject(headers) && !_.isArray(headers)) {
+                        let valid = true;
+                        for (let k in headers) {
+                            if (_.isObject(headers[k])) {
+                                valid = false;
+                            }
+                            if (headers[k] === null) {
+                                valid = false;
+                            }
+                        }
+                        $scope.notification_template_form.headers.$setValidity('json', valid);
+                        return;
+                    }
+                } catch (err) {
+                }
+
+                $scope.notification_template_form.headers.$setValidity('json', false);
+            });
+
             $scope.typeChange = function () {
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
@@ -72,6 +95,18 @@ export default
 
                 NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                     $scope[field[0]] = field[1];
+                });
+
+
+                $scope.parse_type = 'json';
+                if (!$scope.headers) {
+                    $scope.headers = "{\n}";
+                }
+                ParseTypeChange({
+                    scope: $scope,
+                    parse_variable: 'parse_type',
+                    variable: 'headers',
+                    field_id: 'notification_template_headers'
                 });
             };
 
@@ -91,7 +126,11 @@ export default
 
                 function processValue(value, i , field){
                     if(field.type === 'textarea'){
-                        $scope[i] = $scope[i].toString().split('\n');
+                        if (field.name === 'headers') {
+                            $scope[i] = JSON.parse($scope[i]);
+                        } else {
+                            $scope[i] = $scope[i].toString().split('\n');
+                        }
                     }
                     if(field.type === 'checkbox'){
                         $scope[i] = Boolean($scope[i]);
@@ -100,7 +139,6 @@ export default
                         $scope[i] = Number($scope[i]);
                     }
                     return $scope[i];
-
                 }
 
                 params.notification_configuration = _.object(Object.keys(form.fields)
