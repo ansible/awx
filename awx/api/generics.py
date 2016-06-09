@@ -360,6 +360,13 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
 
+    def get_description_context(self):
+        d = super(SubListCreateAttachDetachAPIView, self).get_description_context()
+        d.update({
+            "has_attach": True,
+        })
+        return d
+
     def attach(self, request, *args, **kwargs):
         created = False
         parent = self.get_parent_object()

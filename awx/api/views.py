@@ -2453,7 +2453,6 @@ class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachL
     serializer_class = LabelSerializer
     parent_model = JobTemplate
     relationship = 'labels'
-    parent_key = 'job_template'
 
 class JobTemplateCallback(GenericAPIView):
 
