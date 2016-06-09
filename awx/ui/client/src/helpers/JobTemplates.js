@@ -76,6 +76,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               Rest.setUrl(defaultUrl + id);
                               Rest.get()
                               .success(function (data) {
+                                  scope.job_template_obj = data;
                                   scope.name = data.name;
                                   var fld, i;
                                   for (fld in form.fields) {
