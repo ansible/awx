@@ -126,7 +126,7 @@ def _update_credential_parents(org, cred):
     cred.organization = org
     cred.save()
 
-def _discover_credentials(apps, instances, cred, orgfunc):
+def _discover_credentials(instances, cred, orgfunc):
     '''_discover_credentials will find shared credentials across
     organizations. If a shared credential is found, it will duplicate
     the credential, ensure the proper role permissions are added to the new
@@ -139,8 +139,6 @@ def _discover_credentials(apps, instances, cred, orgfunc):
     orgfunc is a function that when called with an instance from instances
     will produce an Organization object.
     '''
-    Credential = apps.get_model('main', "Credential")
-
     orgs = defaultdict(list)
     for inst in instances:
         try:
@@ -163,38 +161,16 @@ def _discover_credentials(apps, instances, cred, orgfunc):
                 _update_credential_parents(org, cred)
             else:
                 # Create a new credential
-                new_cred = Credential.objects.create(
-                    kind = cred.kind,
-                    cloud = cred.cloud,
-                    host = cred.host,
-                    username = cred.username,
-                    password = cred.password,
-                    security_token = cred.security_token,
-                    project = cred.project,
-                    domain = cred.domain,
-                    ssh_key_data = cred.ssh_key_data,
-                    ssh_key_unlock = cred.ssh_key_unlock,
-                    become_method = cred.become_method,
-                    become_username = cred.become_username,
-                    become_password = cred.become_password,
-                    vault_password = cred.vault_password,
-                    authorize = cred.authorize,
-                    authorize_password = cred.authorize_password,
-                    client = cred.client,
-                    secret = cred.secret,
-                    subscription = cred.subscription,
-                    tenant = cred.tenant,
-                    created = cred.created,
-                    modified = cred.modified,
-                    created_by_id = cred.created_by_id,
-                    modified_by_id = cred.modified_by_id,
-                )
+                cred.pk = None
+                cred.save()
+
+                cred.owner_role, cred.use_role, cred.organization = None, None, None
 
                 for i in orgs[org]:
-                    i.credential = new_cred
+                    i.credential = cred
                     i.save()
 
-                _update_credential_parents(org, new_cred)
+                _update_credential_parents(org, cred)
 
 @log_migration
 def migrate_credential(apps, schema_editor):
@@ -210,7 +186,7 @@ def migrate_credential(apps, schema_editor):
             if len(results) == 1:
                 _update_credential_parents(results[0].inventory.organization, cred)
             else:
-                _discover_credentials(apps, results, cred, attrfunc('inventory.organization'))
+                _discover_credentials(results, cred, attrfunc('inventory.organization'))
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at organization level".format(cred.name, cred.kind, cred.host)))
 
         projs = Project.objects.filter(credential=cred).all()
