@@ -158,14 +158,13 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
 
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
-    team_type = ContentType.objects.get_for_model(Team)
     # Only if we are associating/disassociating
     if kwargs['action'] in ['pre_add', 'pre_remove']:
         # Only if this isn't for the User.admin_role
         if hasattr(instance, 'content_type'):
             if instance.content_type in [None, user_type]:
                 return
-            elif instance.content_type == team_type:
+            elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
             else:
                 role = instance
