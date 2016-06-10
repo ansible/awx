@@ -34,7 +34,7 @@
                         HostManageService.associateGroup(host, $scope.selected.id).then(() => {
                             HostManageService.disassociateGroup(host, _.last($stateParams.group))
                             .then(() => $state.go('^', null, {reload: true}));
-                        });                        
+                        });
                     }
                     break;
             }

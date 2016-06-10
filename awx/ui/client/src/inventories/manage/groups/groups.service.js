@@ -34,7 +34,7 @@ export default
                 return Rest.post(group)
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));  
+                    .finally(Wait('stop'));
             },
             put: function(group){
                 Wait('start');
@@ -43,7 +43,7 @@ export default
                 return Rest.put(group)
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));  
+                    .finally(Wait('stop'));
             },
             delete: function(id){
                 Wait('start');
@@ -52,7 +52,7 @@ export default
                 return Rest.destroy()
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));                        
+                    .finally(Wait('stop'));
             },
             getCredential: function(id){
                 Wait('start');
@@ -60,8 +60,8 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .success(this.success.bind(this))
-                    .error(this.error.bind(this)) 
-                    .finally(Wait('stop'));   
+                    .error(this.error.bind(this))
+                    .finally(Wait('stop'));
             },
             getInventorySource: function(params){
                 Wait('start');
@@ -70,7 +70,7 @@ export default
                 return Rest.get()
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));  
+                    .finally(Wait('stop'));
             },
             putInventorySource: function(params, url){
                 Wait('start');
@@ -79,9 +79,9 @@ export default
                 return Rest.put(params)
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));    
+                    .finally(Wait('stop'));
             },
-            // these relationship setters could be consolidated, but verbosity makes the operation feel more clear @ controller level            
+            // these relationship setters could be consolidated, but verbosity makes the operation feel more clear @ controller level
             associateGroup: function(group, target){
                 Wait('start');
                 this.url = GetBasePath('groups') + target + '/children/';
@@ -89,7 +89,7 @@ export default
                 return Rest.post(group)
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));   
+                    .finally(Wait('stop'));
             },
             disassociateGroup: function(group, parent){
                 Wait('start');
@@ -98,7 +98,7 @@ export default
                 return Rest.post({id: group, disassociate: 1})
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));                      
+                    .finally(Wait('stop'));
             },
             promote: function(group, inventory){
                 Wait('start');
@@ -107,7 +107,7 @@ export default
                 return Rest.post({id: group, disassociate: 1})
                     .success(this.success.bind(this))
                     .error(this.error.bind(this))
-                    .finally(Wait('stop'));  
-            }            
+                    .finally(Wait('stop'));
+            }
         };
     }];
