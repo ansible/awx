@@ -61,10 +61,8 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
     function ($log, $cookieStore, $compile, $window, $rootScope, $location,
         Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
         scope, pendoService, ConfigService, CheckLicense, FeaturesService) {
-
     var lastPath, lastUser, sessionExpired, loginAgain;
 
-    $rootScope.configReady = true;
     loginAgain = function() {
         setTimeout(function() {
             $location.path('/logout');
@@ -74,6 +72,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
     scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
     scope.login_username = '';
     scope.login_password = '';
+
 
     lastPath = function () {
         return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
@@ -103,12 +102,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
         scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
     });
-
-    // Reset the login form
-    //scope.loginForm.login_username.$setPristine();
-    //scope.loginForm.login_password.$setPristine();
-    //$rootScope.userLoggedIn = false; //hide the logout link. if you got here, you're logged out.
-    //$cookieStore.put('userLoggedIn', false); //gets set back to true by Authorization.setToken().
 
     if (scope.removeAuthorizationGetLicense) {
         scope.removeAuthorizationGetLicense();

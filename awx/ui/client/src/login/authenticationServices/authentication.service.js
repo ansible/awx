@@ -16,9 +16,9 @@
 
 export default
     ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
-    '$injector',
+    '$injector', '$q',
     function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store,
-    $injector) {
+    $injector, $q) {
         return {
             setToken: function (token, expires) {
                 // set the session cookie
@@ -63,10 +63,13 @@ export default
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
 
-                var x,
+                var x, deferred = $q.defer(),
                 ConfigService = $injector.get('ConfigService'),
                 scope = angular.element(document.getElementById('main-view')).scope();
-                scope.$destroy();
+
+                if(scope){
+                    scope.$destroy();
+                }
                 //$rootScope.$destroy();
 
                 if($cookieStore.get('lastPath')==='/portal'){
@@ -101,7 +104,7 @@ export default
                 $rootScope.current_user = {};
                 $rootScope.license_tested = undefined;
                 $rootScope.userLoggedIn = false;
-                // $rootScope.sessionExpired = false;
+                $rootScope.sessionExpired = false;
                 $rootScope.licenseMissing = true;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
@@ -110,6 +113,8 @@ export default
                 if ($rootScope.sessionTimer) {
                     $rootScope.sessionTimer.clearTimers();
                 }
+                deferred.resolve();
+                return deferred.promise;
             },
 
             licenseTested: function () {

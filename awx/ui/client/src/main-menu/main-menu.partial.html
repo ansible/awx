@@ -3,14 +3,14 @@
     <a id="main_menu_logo"
         href="/#/"
         class="MainMenu-logo ng-cloak"
-        ng-class="{'is-loggedOut' : !$root.current_user.username, 'MainMenu-logoImage--licenseMissing': licenseMissing}">
+        ng-class="{'is-loggedOut' : !current_user.username, 'MainMenu-logoImage--licenseMissing': licenseMissing}">
         <img class="MainMenu-logoImage"
             ng-class="{'MainMenu-logoImage--licenseMissing': licenseMissing}"
             ng-src="/static/assets/tower-logo-header.svg">
     </a>
 
     <!-- Mobile menu items -->
-    <span id="main_menu_mobile_items" class="MainMenu-mobileItems" ng-class="{'is-hiddenOnMobile': isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}">
+    <span id="main_menu_mobile_items" class="MainMenu-mobileItems" ng-class="{'is-hiddenOnMobile': isHiddenOnMobile, 'is-loggedOut' : !current_user.username}">
         <a class="MainMenu-item"
             id="main_menu_projects_mobile_link"
             href="/#/projects"
@@ -90,7 +90,7 @@
         id="main_menu_projects_link"
         href="/#/projects"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('projects'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('projects'), 'is-loggedOut' : !current_user.username}">
         <span class="MainMenu-itemText">
             PROJECTS
         </span>
@@ -99,7 +99,7 @@
         id="main_menu_inventories_link"
         href="/#/inventories"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !current_user.username}">
         <span class="MainMenu-itemText">
             INVENTORIES
         </span>
@@ -108,7 +108,7 @@
         id="main_menu_job_templates_link"
         href="/#/job_templates"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !current_user.username}">
         <span class="MainMenu-itemText">
             JOB TEMPLATES
         </span>
@@ -117,7 +117,7 @@
         id="main_menu_jobs_link"
         href="/#/jobs"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('jobs'), 'is-loggedOut' : !$root.current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('jobs'), 'is-loggedOut' : !current_user.username}">
         <span class="MainMenu-itemText">
             JOBS
         </span>
@@ -126,7 +126,7 @@
         id="main_menu_current_user_link"
         ng-href="/#/users/{{ $root.current_user.id }}"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('users.edit'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('users.edit'), 'is-loggedOut' : !current_user.username}"
         aw-tool-tip="{{currentUserTip}}"
         aw-tip-watch="currentUserTip"
         data-placement="bottom"
@@ -143,7 +143,7 @@
         id="main_menu_setup_link"
         ng-href="/#/setup"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('setup'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('setup'), 'is-loggedOut' : !current_user.username}"
         aw-tool-tip="Settings"
         data-placement="bottom"
         data-trigger="hover"
@@ -156,7 +156,7 @@
         id="main_menu_portal_link"
         ng-href="/#/portal"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('portalMode'), 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-currentRoute' : isCurrentState('portalMode'), 'is-loggedOut' : !current_user.username}"
         aw-tool-tip="My View"
         data-placement="bottom"
         data-trigger="hover"
@@ -169,7 +169,7 @@
         id="main_menu_docs_link"
         ng-href="http://docs.ansible.com/ansible-tower/"
         ng-hide="licenseMissing"
-        ng-class="{'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-loggedOut' : !current_user.username}"
         aw-tool-tip="View Documentation"
         data-placement="bottom"
         data-trigger="hover"
@@ -183,7 +183,7 @@
         id="main_menu_logout_link"
         ng-href="/#/logout"
         ng-class="{'is-currentRoute' : isCurrentState('logout'),
-            'is-loggedOut' : !$root.current_user.username,
+            'is-loggedOut' : !current_user.username,
             'MainMenu-item--licenseMissing' : licenseMissing}"
         aw-tool-tip="Log Out"
         data-placement="bottom"
@@ -205,7 +205,7 @@
         data-placement="bottom"
         data-trigger="hover"
         data-container="body"
-        ng-class="{'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-loggedOut' : !current_user.username}"
         ng-hide="licenseMissing"
         ng-if="socketStatus && socketStatus !== 'ok'">
         <i class="fa MainMenu-socketImage"
@@ -218,7 +218,7 @@
         id="main_menu_mobile_toggle_button"
         class="MainMenu-toggle"
         ng-hide="licenseMissing"
-        ng-class="{'is-active': !isHiddenOnMobile, 'is-loggedOut' : !$root.current_user.username}"
+        ng-class="{'is-active': !isHiddenOnMobile, 'is-loggedOut' : !current_user.username}"
         ng-click="toggleMenu()">
         <i class="fa fa-bars MainMenu-toggleImage"></i>
     </button>
