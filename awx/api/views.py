@@ -2497,6 +2497,18 @@ class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachL
     parent_model = JobTemplate
     relationship = 'labels'
 
+    def post(self, request, *args, **kwargs):
+        # If a label already exists in the database, attach it instead of erroring out
+        # that it already exists
+        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
+            existing = Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
+            if existing.exists():
+                existing = existing[0]
+                request.data['id'] = existing.id
+                del request.data['name']
+                del request.data['organization']
+        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
+
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
@@ -3812,7 +3824,6 @@ class RoleChildrenList(SubListAPIView):
         # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
         return role.children.all()
-
 
 
 
