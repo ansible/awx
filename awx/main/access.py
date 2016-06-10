@@ -586,9 +586,7 @@ class CredentialAccess(BaseAccess):
         if organization_pk:
             organization_obj = get_object_or_400(Organization, pk=organization_pk)
             return check_user_access(self.user, Organization, 'change', organization_obj, None)
-
         return False
-
 
     @check_superuser
     def can_use(self, obj):
@@ -596,9 +594,13 @@ class CredentialAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if self.user in obj.owner_role:
-            return True
-        return self.can_add(data)
+        if data is not None:
+            keys = data.keys()
+            if 'user' in keys or 'team' in keys or 'organization' in keys:
+                if not self.can_add(data):
+                    return False
+
+        return self.user in obj.owner_role
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
