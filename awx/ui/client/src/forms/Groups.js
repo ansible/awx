@@ -134,6 +134,7 @@ export default
                         "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
                         "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
                         "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                        "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body'
                 },
