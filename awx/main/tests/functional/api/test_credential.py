@@ -147,8 +147,7 @@ def test_credential_detail(post, get, organization, org_admin):
     response = get(reverse('api:credential_detail', args=(response.data['id'],)), org_admin)
     assert response.status_code == 200
     summary_fields = response.data['summary_fields']
-    assert 'owners' in summary_fields
-    assert summary_fields['owners'][0]['id'] == organization.id
+    assert 'organization' in summary_fields
     related_fields = response.data['related']
     assert 'organization' in related_fields
 
