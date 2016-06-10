@@ -1475,6 +1475,10 @@ class CustomInventoryScriptAccess(BaseAccess):
         return self.user in obj.admin_role
 
     @check_superuser
+    def can_change(self, obj, data):
+        return self.can_admin(obj)
+
+    @check_superuser
     def can_read(self, obj):
         return self.user in obj.read_role
 
