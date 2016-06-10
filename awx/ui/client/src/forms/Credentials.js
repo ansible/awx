@@ -67,14 +67,18 @@ export default
                             '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
                             'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
                             'remote hosts.</dd>' +
+                            '<dt>Network</dt>\n' +
+                            '<dd>Authentication for network device access. This can include SSH keys, usernames, passwords, ' +
+                            'and authorize information. Network credentials are used when submitting jobs to run playbooks against ' +
+                            'network devices.</dd>' +
                             '<dt>Source Control</dt>\n' +
                             '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
                             'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                            'used on the Projects tab.</dd>\n' +
+                            'used by Projects.</dd>\n' +
                             '<dt>Others (Cloud Providers)</dt>\n' +
-                            '<dd>Access keys for authenticating to the specific ' +
-                            'cloud provider, usually used for inventory sync ' +
-                            'and deployment.</dd>\n' +
+                            '<dd>Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
+                            'provider. These are used for dynamic inventory sources and for cloud provisioning and deployment ' +
+                            'in playbook runs.</dd>\n' +
                             '</dl>\n',
                     dataTitle: 'Type',
                     dataPlacement: 'right',
