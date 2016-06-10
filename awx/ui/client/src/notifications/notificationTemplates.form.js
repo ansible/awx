@@ -274,6 +274,8 @@ export default function() {
             color: {
                 label: 'Notification Color',
                 type: 'text',
+                awPopOver: '<p>Color can be one of <code>yellow</code>, <code>green</code>, <code>red</code>, ' +
+                           '<code>purple</code>, <code>gray</code>, or <code>random</code>.\n',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
