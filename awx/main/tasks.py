@@ -1712,7 +1712,7 @@ class RunSystemJob(BaseTask):
         return args
 
     def build_env(self, instance, **kwargs):
-        env = super(RunSystemJob, self).build_env(inventory_update,
+        env = super(RunSystemJob, self).build_env(instance,
                                                   **kwargs)
         env = self.add_tower_venv(env)
         return env
