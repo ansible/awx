@@ -185,6 +185,8 @@ export default function() {
             from_number: {
                 label: 'Source Phone Number',
                 type: 'text',
+                awPopOver: '<p>Number associated with the "Messaging Service" in Twilio.</p>'+
+                            '<p>This must be of the form <code>+18005550199</code>.</p>',
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
@@ -197,8 +199,8 @@ export default function() {
                 type: 'textarea',
                 rows: 3,
                 awPopOver: '<p>Type an option on each line.</p>'+
-                            '<p>For example:<br>alias1@email.com<br>\n alias2@email.com<br>\n',
-                dataTitle: 'Destination Channels',
+                            '<p>For example:<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
+                dataTitle: 'Destination SMS Number',
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
