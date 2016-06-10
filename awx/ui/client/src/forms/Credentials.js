@@ -239,7 +239,6 @@ export default
                     },
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     elementClass: 'Form-monospace',
-                    hintText: "{{ key_hint }}",
                     addRequired: false,
                     editRequired: false,
                     awDropFile: true,

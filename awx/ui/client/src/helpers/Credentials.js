@@ -39,7 +39,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -65,7 +64,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
-                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -101,7 +99,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.key_required = true;
                              scope.project_required = true;
                              scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
-                             scope.key_hint= "drag and drop a private key file on the field below";
                              scope.projectLabel = "Project";
                              scope.project_required = false;
                              scope.projectPopOver = "<p>The Project ID is the " +
@@ -114,7 +111,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.subscription_required = true;
                              scope.key_required = true;
                              scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
-                             scope.key_hint= "drag and drop a management certificate file on the field below";
                          break;
                          case 'azure_rm':
                              scope.usernameLabel = "Username";
