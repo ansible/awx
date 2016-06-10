@@ -46,8 +46,9 @@ export default
                     editRequired: true,
                     column: 1,
                     awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
-                        " syntax, test environment setup and report problems.</p>",
+                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
+                        " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature.</p>",
                     dataTitle: 'Job Type',
                     dataPlacement: 'right',
                     dataContainer: "body",
