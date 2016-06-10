@@ -991,7 +991,7 @@ class ProjectTeamsList(ListAPIView):
         project_ct = ContentType.objects.get_for_model(Project)
         team_ct = ContentType.objects.get_for_model(self.model)
         all_roles = Role.objects.filter(Q(descendents__content_type=project_ct) & Q(descendents__object_id=p.pk), content_type=team_ct)
-        return self.model.objects.filter(pk__in=[t.content_object.pk for t in all_roles])
+        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
 
 class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
