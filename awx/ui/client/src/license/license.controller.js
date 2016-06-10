@@ -82,8 +82,10 @@ export default
 
         var calcExpiresOn = function(days){
             // calculate the expiration date of the license
+            days = parseInt(days);
             return moment().add(days, 'days').calendar();
         };
+
         var init = function(){
             $scope.fileName = "No file selected.";
             $scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
