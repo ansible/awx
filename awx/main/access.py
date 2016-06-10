@@ -600,6 +600,10 @@ class CredentialAccess(BaseAccess):
                 if not self.can_add(data):
                     return False
 
+        if obj.organization:
+            if self.user in obj.organization.admin_role:
+                return True
+
         return self.user in obj.owner_role
 
     def can_delete(self, obj):

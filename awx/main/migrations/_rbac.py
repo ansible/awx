@@ -123,7 +123,7 @@ def attrfunc(attr_path):
     return attr
 
 def _update_credential_parents(org, cred):
-    org.admin_role.children.add(cred.owner_role)
+    cred.organization = org
     cred.save()
 
 def _discover_credentials(instances, cred, orgfunc):
@@ -164,13 +164,12 @@ def _discover_credentials(instances, cred, orgfunc):
                 cred.pk = None
                 cred.save()
 
-                # Unlink the old information from the new credential
-                cred.owner_role, cred.use_role = None, None
-                cred.save()
+                cred.owner_role, cred.use_role, cred.organization = None, None, None
 
                 for i in orgs[org]:
                     i.credential = cred
                     i.save()
+
                 _update_credential_parents(org, cred)
 
 @log_migration
