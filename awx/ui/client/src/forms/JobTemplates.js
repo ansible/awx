@@ -231,7 +231,7 @@ export default
                   addRequired: false,
                   editRequird: false,
                   column: 2,
-                  awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible-playbook</code> command. </p>",
+                  awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
                   dataPlacement: 'right',
                   dataTitle: 'Become Privilege Escalation',
                   dataContainer: "body"
@@ -298,8 +298,8 @@ export default
                     editRequired: false,
                     "default": "---",
                     column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
+                        "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
