@@ -533,6 +533,16 @@ export default
                     if ($state.includes('inventoryManage')){
                         $state.go('inventoryManage.schedules.edit', {schedule_id: id});
                     }
+                    else if ($state.current.name === 'jobs'){
+                        // id === schedule object in this case
+                        var stateDictionary = {
+                            // type: stateName
+                            job: 'jobTemplateSchedules.edit',
+                            system_job: 'managementJobSchedules.edit',
+                            project_update: 'projectSchedules.edit',
+                        };
+                        $state.go(stateDictionary[id.type], {schedule_id: id.id, id: id.summary_fields.unified_job_template.id});
+                    }
                     else{
                         var base = $state.current.name.split(".")[0];
                         $state.go(base + ".edit", {schedule_id: id});

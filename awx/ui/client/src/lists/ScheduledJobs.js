@@ -33,7 +33,7 @@ export default
                 columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
-                ngClick: "editSchedule(schedule.id)",
+                ngClick: "editSchedule(schedule)",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataPlacement: "top",
                 defaultSearchField: true
@@ -72,7 +72,7 @@ export default
             columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
             "edit": {
                 mode: "all",
-                ngClick: "editSchedule(schedule.id)",
+                ngClick: "editSchedule(schedule)",
                 awToolTip: "Edit the schedule",
                 dataPlacement: "top"
             },
