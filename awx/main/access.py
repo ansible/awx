@@ -270,6 +270,12 @@ class UserAccess(BaseAccess):
             return True
         return False
 
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if relationship == 'roles':
+            role_access = RoleAccess(self.user)
+            return role_access.can_attach(sub_obj, obj, 'members', data, skip_sub_obj_read_check=False)
+        return super(UserAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=False)
+
 
 class OrganizationAccess(BaseAccess):
     '''
