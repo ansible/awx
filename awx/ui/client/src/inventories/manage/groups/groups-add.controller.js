@@ -28,7 +28,7 @@
                 // inventory_source fields
                 params = {
                     instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'],
+                    source_vars: $scope[$scope.source.value + '_variables'] === null ? null : $scope[$scope.source.value + '_variables'],
                     source_script: $scope.inventory_script,
                     source: $scope.source.value,
                     credential: $scope.credential,
