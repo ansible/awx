@@ -979,12 +979,19 @@ class ProjectPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectTeamsList(SubListCreateAttachDetachAPIView):
+class ProjectTeamsList(ListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    parent_model = Project
-    relationship = 'teams'
+
+    def get_queryset(self):
+        p = get_object_or_404(Project, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Project, 'read', p):
+            raise PermissionDenied()
+        project_ct = ContentType.objects.get_for_model(Project)
+        team_ct = ContentType.objects.get_for_model(self.model)
+        all_roles = Role.objects.filter(Q(descendents__content_type=project_ct) & Q(descendents__object_id=p.pk), content_type=team_ct)
+        return self.model.objects.filter(pk__in=[t.content_object.pk for t in all_roles])
 
 class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
