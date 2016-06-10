@@ -286,7 +286,7 @@ export default
                     editRequired: false,
                     dataTitle: 'Labels',
                     dataPlacement: 'right',
-                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
                     dataContainer: 'body'
                 },
                 variables: {
