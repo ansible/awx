@@ -1619,7 +1619,7 @@ class CredentialSerializer(BaseSerializer):
         model = Credential
         fields = ('*', 'kind', 'cloud', 'host', 'username',
                   'password', 'security_token', 'project', 'domain',
-                  'ssh_key_data', 'ssh_key_unlock',
+                  'ssh_key_data', 'ssh_key_unlock', 'organization',
                   'become_method', 'become_username', 'become_password',
                   'vault_password', 'subscription', 'tenant', 'secret', 'client',
                   'authorize', 'authorize_password')
@@ -1634,13 +1634,16 @@ class CredentialSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
+
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list = reverse('api:credential_access_list', args=(obj.pk,)),
             object_roles = reverse('api:credential_object_roles_list', args=(obj.pk,)),
             owner_users = reverse('api:credential_owner_users_list', args=(obj.pk,)),
             owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
-            owner_organizations = reverse('api:credential_owner_organizations_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)

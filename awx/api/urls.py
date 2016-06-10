@@ -168,7 +168,7 @@ credential_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'credential_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/owner/users/$',               'credential_owner_users_list'),
     url(r'^(?P<pk>[0-9]+)/owner/teams/$',               'credential_owner_teams_list'),
-    url(r'^(?P<pk>[0-9]+)/owner/organizations/$',       'credential_owner_organizations_list'),
+    url(r'^(?P<pk>[0-9]+)/organization/$',               'credential_owner_teams_list'),
     # See also credentials resources on users/teams.
 )
 
