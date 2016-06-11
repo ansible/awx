@@ -3786,6 +3786,11 @@ class RoleTeamsList(ListAPIView):
         # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
         role = Role.objects.get(pk=self.kwargs['pk'])
         team = Team.objects.get(pk=sub_id)
+        from awx.main.access import RoleAccess
+        access = RoleAccess(request.user)
+        if access.can_attach(role, team, 'members', {"id": role.pk}, skip_sub_obj_read_check=False):
+            raise PermissionDenied()
+            
         if request.data.get('disassociate', None):
             team.member_role.children.remove(role)
         else:
