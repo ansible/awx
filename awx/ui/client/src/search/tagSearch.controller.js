@@ -36,10 +36,12 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             var iterator = $scope.iterator;
             var pageSize = $scope
                 .$parent[iterator + "_page_size"];
+            var searchParams = $scope
+                .$parent[iterator + "SearchParams"];
             var set = $scope.set;
             var listScope = $scope.$parent;
             var url = tagSearchService
-                .updateFilteredUrl($scope.endpoint, tags, pageSize);
+                .updateFilteredUrl($scope.endpoint, tags, pageSize, searchParams);
 
             $scope.$parent[iterator + "_active_search"] = true;
             Refresh({
