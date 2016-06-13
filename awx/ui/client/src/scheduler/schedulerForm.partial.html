@@ -666,14 +666,14 @@
     </div>
             <div class="buttons Form-buttons">
                 <button type="button"
+                    class="btn btn-sm Form-cancelButton"
+                    id="project_cancel_btn"
+                    ng-click="formCancel()">Cancel</button>
+                <button type="button"
                     class="btn btn-sm Form-saveButton"
                     id="project_save_btn"
                     ng-click="saveSchedule()"
                     ng-disabled="!schedulerIsValid"> Save</button>
-                <button type="button"
-                    class="btn btn-sm Form-cancelButton"
-                    id="project_cancel_btn"
-                    ng-click="formCancel()">Cancel</button>
             </div>
     </div>
 </div>
