@@ -148,18 +148,6 @@ def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
 
 @pytest.fixture
-def organization_factory(instance):
-    def factory(name):
-        try:
-            org = Organization.objects.get(name=name)
-        except Organization.DoesNotExist:
-            org = Organization.objects.create(name=name,
-                                              description="description for " + name,
-                                              )
-        return org
-    return factory
-
-@pytest.fixture
 def credential():
     return Credential.objects.create(kind='aws', name='test-cred')
 
@@ -197,6 +185,11 @@ def notification_template(organization):
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
                                                                                headers={"Test": "Header"}))
+
+@pytest.fixture
+def job_with_secret_key(job_with_secret_key_factory):
+    return job_with_secret_key_factory(persisted=True)
+
 @pytest.fixture
 def admin(user):
     return user('admin', True)
@@ -218,6 +211,13 @@ def rando(user):
 def org_admin(user, organization):
     ret = user('org-admin', False)
     organization.admin_role.members.add(ret)
+    organization.member_role.members.add(ret)
+    return ret
+
+@pytest.fixture
+def org_auditor(user, organization):
+    ret = user('org-auditor', False)
+    organization.auditor_role.members.add(ret)
     organization.member_role.members.add(ret)
     return ret
 
@@ -283,23 +283,8 @@ def permissions():
     }
 
 @pytest.fixture
-def notification_template_factory(organization):
-    def n(name="test-notification_template"):
-        try:
-            notification_template = NotificationTemplate.objects.get(name=name)
-        except NotificationTemplate.DoesNotExist:
-            notification_template = NotificationTemplate(name=name,
-                                                         organization=organization,
-                                                         notification_type="webhook",
-                                                         notification_configuration=dict(url="http://localhost",
-                                                                                         headers={"Test": "Header"}))
-            notification_template.save()
-        return notification_template
-    return n
-
-@pytest.fixture
 def post():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -311,12 +296,16 @@ def post():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def get():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -328,12 +317,16 @@ def get():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def put():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -345,12 +338,16 @@ def put():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def patch():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -362,12 +359,16 @@ def patch():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def delete():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -379,12 +380,16 @@ def delete():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def head():
-    def rf(url, user=None, middleware=None, **kwargs):
+    def rf(url, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -396,12 +401,16 @@ def head():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
 @pytest.fixture
 def options():
-    def rf(url, data, user=None, middleware=None, **kwargs):
+    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
@@ -413,6 +422,10 @@ def options():
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
+        if expect:
+            if response.status_code != expect:
+                print(response.data)
+            assert response.status_code == expect
         return response
     return rf
 
@@ -474,3 +487,4 @@ def job_template_labels(organization, job_template):
     job_template.labels.create(name="label-2", organization=organization)
 
     return job_template
+

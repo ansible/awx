@@ -10,6 +10,9 @@ export default
                 scope.isCurrentState = function(name){
                     return $state.current.name === name;
                 };
+                scope.includesCurrentState = function(name){
+                    return $state.includes(name);
+                };
 
                 // set up the user tooltip
                 $rootScope.$on('current_user', function(user) {

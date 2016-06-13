@@ -10,8 +10,9 @@
  * @description This controller's for the standard out page that can be displayed when a job runs
 */
 
-
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
+    ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
 
     ClearScope();
 
@@ -42,6 +43,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
     $scope.parseType = 'yaml';
 
 
+
     function getJobDetails() {
 
         // Go out and get the job details based on the job type.  jobType gets defined
@@ -68,6 +70,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                 $scope.limit = data.limit;
                 $scope.verbosity = data.verbosity;
                 $scope.job_tags = data.job_tags;
+                if (data.extra_vars) {
+                    $scope.variables = ParseVariableString(data.extra_vars);
+                }
+
 
                 // If we have a source then we have to go get the source choices from the server
                 if (!Empty(data.source)) {
@@ -140,6 +146,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                     });
                 }
 
+                if (data.extra_vars) {
+                    ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
+                }
+
                 // If the job isn't running we want to clear out the interval that goes out and checks for stdout updates.
                 // This interval is defined in the standard out log directive controller.
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
@@ -155,6 +165,17 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
     }
 
+    if ($scope.removeDeleteFinished) {
+        $scope.removeDeleteFinished();
+    }
+    $scope.removeDeleteFinished = $scope.$on('DeleteFinished', function(e, action) {
+        Wait('stop');
+        if (action !== 'cancel') {
+            Wait('stop');
+            $state.go('jobs');
+        }
+    });
+
     // TODO: this is currently not used but is necessary for cases where sockets
     // are not available and a manual refresh trigger is needed.
     $scope.refresh = function(){
@@ -166,8 +187,35 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
 
+    $scope.deleteJob = function() {
+        DeleteJob({
+            scope: $scope,
+            id: $scope.job.id,
+            job: $scope.job,
+            callback: 'DeleteFinished'
+        });
+    };
+
+    $scope.relaunchJob = function() {
+        var typeId, job = $scope.job;
+        if (job.type === 'inventory_update') {
+            typeId = job.inventory_source;
+        }
+        else if (job.type === 'project_update') {
+            typeId = job.project;
+        }
+        else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
+            typeId = job.id;
+        }
+        RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
+    };
+
+
     getJobDetails();
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
+    '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
+    'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];

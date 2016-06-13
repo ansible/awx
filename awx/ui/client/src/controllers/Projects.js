@@ -22,7 +22,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Wait('start');
 
     var list = ProjectList,
-        defaultUrl = GetBasePath('projects'),
+        defaultUrl = GetBasePath('projects') + ($stateParams.status ? '?status=' + $stateParams.status : ''),
         view = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'projects') ? 'edit' : 'select',
@@ -247,6 +247,9 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             Rest.destroy()
                 .success(function () {
                     $scope.search(list.iterator);
+                    if (new RegExp('/' + id + '$').test($location.$$url)) {
+                        $state.go('^');
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -495,6 +498,35 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         }
+
+        // Dynamically update popover values
+        if($scope.scm_type.value) {
+            switch ($scope.scm_type.value) {
+                case 'git':
+                    $scope.urlPopover = '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                        '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
+                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
+                        'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
+                        'SSH. GIT read only protocol (git://) does not use username or password information.';
+                break;
+                case 'svn':
+                    $scope.urlPopover = '<p>Example URLs for Subversion SCM include:</p>' +
+                        '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
+                        '<li>svn+ssh://servername.example.com/path</li></ul>';
+                    break;
+                case 'hg':
+                    $scope.urlPopover = '<p>Example URLs for Mercurial SCM include:</p>' +
+                        '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
+                        '<li>ssh://server.example.com/path</li></ul>' +
+                        '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
+                        'Do not put the username and key in the URL. ' +
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.';
+                    break;
+                default:
+                    $scope.urlPopover = '<p> URL popover text';
+            }
+        }
+
     };
 
     $scope.formCancel = function () {
@@ -696,6 +728,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 }
 
                 $scope.project_obj = data;
+                $scope.name = data.name;
                 $scope.$emit('projectLoaded');
             })
             .error(function (data, status) {

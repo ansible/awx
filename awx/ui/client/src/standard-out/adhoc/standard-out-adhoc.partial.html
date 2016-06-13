@@ -1,10 +1,17 @@
 <div class="tab-pane" id="jobs-stdout">
     <div ng-cloak id="htmlTemplate">
-    <div class="StandardOut-container">
+    <div class="StandardOut-container" ng-class="{'fullscreen': stdoutFullScreen}">
         <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
-                    RESULTS
+                    <div class="StandardOut-panelHeaderText">
+                        RESULTS
+                    </div>
+                    <div class="StandardOut-actions">
+                        <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                    </div>
                 </div>
                 <div class="StandardOut-details">
 
@@ -24,14 +31,14 @@
                     <div class="StandardOut-detailsRow" ng-show="job.started">
                         <div class="StandardOut-detailsLabel">STARTED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                            {{ job.started | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
                         <div class="StandardOut-detailsLabel">FINISHED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                            {{ job.finished | longDate }}
                         </div>
                     </div>
 

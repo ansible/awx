@@ -258,7 +258,9 @@ virtualenv_ansible:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/ansible; \
+			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
+			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.1; \
 		fi; \
 	fi
 
@@ -268,17 +270,17 @@ virtualenv_tower:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/tower; \
+			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
+			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
+			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.1; \
 		fi; \
 	fi
 
 requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install -U pip==8.1.1; \
 		$(VENV_BASE)/ansible/bin/pip install -r requirements/requirements_ansible.txt ;\
 	else \
-		pip install -U pip==8.1.1; \
 		pip install -r requirements/requirements_ansible.txt ; \
 	fi
 
@@ -286,10 +288,8 @@ requirements_ansible: virtualenv_ansible
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -U pip==8.1.1; \
 		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements.txt ;\
 	else \
-		pip install -U pip==8.1.1; \
 		pip install -r requirements/requirements.txt ; \
 	fi
 

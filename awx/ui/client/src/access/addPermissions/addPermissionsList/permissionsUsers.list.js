@@ -7,7 +7,7 @@
 
  export default function() {
     return {
-
+        searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         name: 'users',
         iterator: 'user',
         title: false,
@@ -16,6 +16,7 @@
         multiSelectExtended: true,
         index: false,
         hover: true,
+        emptyListText : 'No Users exist',
 
         fields: {
             first_name: {

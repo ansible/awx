@@ -18,11 +18,12 @@
                 ng-class-even="'List-tableRow--evenRow'"
                 ng-repeat = "job in jobs">
               <td class="DashboardList-nameCell">
-                    <i class="fa
-                      DashboardList-status"
-                      ng-class="{'DashboardList-status--success icon-job-successful': isSuccessful(job.status),
-                          'DashboardList-status--failed icon-job-successful': !isSuccessful(job.status)}">
-                    </i>
+                    <a href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="Job successful. Click for details." aw-tip-placement="right">
+                        <i class="fa DashboardList-status DashboardList-status--success icon-job-successful"></i>
+                    </a>
+                    <a href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="Job failed. Click for details." aw-tip-placement="right">
+                        <i class="fa DashboardList-status DashboardList-status--failed icon-job-successful"></i>
+                    </a>
                     <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
                         {{ job.name }}
                     </a>

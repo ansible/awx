@@ -39,7 +39,14 @@ export default
                 searchOptions: [], // will be set by Options call to credentials resource
                 excludeModal: true,
                 nosort: true,
-                columnClass: 'col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-md-2 hidden-sm hidden-xs'
+            },
+            owners: {
+                label: 'Owners',
+                type: 'owners',
+                nosort: true,
+                excludeModal: true,
+                columnClass: 'col-md-2 hidden-sm hidden-xs'
             }
         },
 
@@ -55,7 +62,7 @@ export default
 
         fieldActions: {
 
-            columnClass: 'col-md-3 col-sm-3 col-xs-3',
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
 
             edit: {
                 ngClick: "editCredential(credential.id)",

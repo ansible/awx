@@ -129,7 +129,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 icon = "fa-trash-o";
                 break;
             case 'group_update':
-                icon = 'fa-exchange';
+                icon = 'fa-refresh';
                 break;
             case 'scm_update':
                 icon = 'fa-cloud-download';
@@ -277,10 +277,14 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html = "<td class=\"" + fld + "-column";
                 html += (field.columnClass) ? " " + field.columnClass : "";
                 html += "\">\n";
-                html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                if (!field.noLink){
+                    html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                    html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+                    html += ">";
+                }
+                html += "<span class=\"badge\"";
+                html += " aw-tool-tip=\"" + field.awToolTip + "\"";
                 html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
-                html += ">";
-                html += "<span class=\"badge";
                 html += (field['class']) ? " " + field['class'] : "";
                 html += (field.ngHide) ? "\" ng-hide=\"" + field.ngHide : "";
                 html += "\">";
@@ -478,7 +482,15 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     </labels-list>
 </td>
                     `;
-            } else if (field.type === 'badgeCount') {
+            } else if (field.type === 'owners') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <owner-list></owner-list>
+</td>
+                `;
+            }else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
                 html = Badge(field);

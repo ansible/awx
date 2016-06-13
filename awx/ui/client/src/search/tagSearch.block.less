@@ -29,11 +29,9 @@
     display: flex;
     white-space: nowrap;
     align-items: center;
-    max-height: 400px;
-    width: 120px;
-	overflow-y: scroll;
     cursor: pointer;
     text-transform: uppercase;
+    position: relative;
 }
 
 .TagSearch-typeDropdown.is-open {
@@ -41,8 +39,6 @@
 }
 
 .TagSearch-typeDropdownName {
-    width: 66px;
-    text-overflow: ellipsis;
     display: block;
     overflow: hidden;
 }
@@ -53,34 +49,35 @@
 
 .TagSearch-dropdownContainer {
     position: absolute;
-    left: 15px;
+    left: -1px;
     top: 34px;
     font-size: 14px;
     border-radius: 5px;
     border: 1px solid @d7grey;
     background: white;
     padding: 5px 0;
+    border-top: 0px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     z-index: 50000;
     max-height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
     box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.1);
 }
 
 .TagSearch-dropdownContainer--searchTypes {
-    min-width: 96px;
+    min-width: ~"calc(100% + 1px)";
 }
 
 .TagSearch-dropdownContainer--typeOptions {
-    right: 15px;
-    left: initial;
-    width: ~"calc(100% - 123px)";
+    right: -1px;
+    left: -1px;
 }
 
 .TagSearch-dropdownItem {
    padding: 5px 10px;
    cursor: pointer;
+   text-transform: capitalize;
 }
 
 .TagSearch-dropdownItem:hover {
@@ -93,13 +90,14 @@
 
 .TagSearch-searchTermContainer {
     flex: initial;
-    width: ~"calc(100% - 70px)";
+    width: ~"calc(100% - 50px)";
     border: 1px solid @d7grey;
     border-left: 0px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     display: flex;
-    background-color: @default-secondary-bg;
+    background-color: @default-bg;
+    position: relative;
 }
 
 .TagSearch-searchTermContainer.is-open {

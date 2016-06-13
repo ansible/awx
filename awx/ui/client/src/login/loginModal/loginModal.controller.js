@@ -43,8 +43,8 @@
  * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
  * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v1/me
  * - Store user information in the session cookie by calling Authorization.setUser().
- * - Get the Tower license by calling Authorization.getLicense() - sends a GET request to /api/vi/config
- * - Stores the license object in local storage by calling Authorization.setLicense(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false.
+ * - Get the Tower license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
+ * - Stores the license object in memory by calling CheckLicense.test(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
  *
  * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, Tower (in app.js) calls
  * Timer.isExpired(). This verifies the UI does not think the session is expired, and if not, moves the expiration time into the future. The number of
@@ -54,13 +54,17 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty', 'ClearScope', '$scope', 'pendoService',
-    function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty, ClearScope, scope, pendoService) {
+export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
+    '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
+    'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
+    'CheckLicense', 'FeaturesService',
+    function ($log, $cookieStore, $compile, $window, $rootScope, $location,
+        Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
+        scope, pendoService, ConfigService, CheckLicense, FeaturesService) {
 
     var lastPath, lastUser, sessionExpired, loginAgain;
 
+    $rootScope.configReady = true;
     loginAgain = function() {
         setTimeout(function() {
             $location.path('/logout');
@@ -110,10 +114,10 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         scope.removeAuthorizationGetLicense();
     }
     scope.removeAuthorizationGetLicense = scope.$on('AuthorizationGetLicense', function() {
-        Authorization.getLicense()
-            .success(function (data) {
-                Authorization.setLicense(data);
+        ConfigService.getConfig().then(function(){
+                CheckLicense.test();
                 pendoService.issuePendoIdentity();
+                FeaturesService.get();
                 Wait("stop");
                 if (lastPath() && lastUser()) {
                     // Go back to most recent navigation path
@@ -122,7 +126,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     $location.url('/home');
                 }
             })
-            .error(function () {
+            .catch(function () {
                 Wait('stop');
                 Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });

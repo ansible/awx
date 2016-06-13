@@ -820,7 +820,7 @@ class OrganizationAccessList(ResourceAccessList):
     resource_model = Organization
     new_in_300 = True
 
-class OrganizationRolesList(SubListAPIView):
+class OrganizationObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -876,6 +876,18 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(TeamRolesList, self).post(request, *args, **kwargs)
+
+class TeamObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Team
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class TeamProjectsList(SubListAPIView):
 
@@ -967,12 +979,19 @@ class ProjectPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectTeamsList(SubListCreateAttachDetachAPIView):
+class ProjectTeamsList(ListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    parent_model = Project
-    relationship = 'teams'
+
+    def get_queryset(self):
+        p = get_object_or_404(Project, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Project, 'read', p):
+            raise PermissionDenied()
+        project_ct = ContentType.objects.get_for_model(Project)
+        team_ct = ContentType.objects.get_for_model(self.model)
+        all_roles = Role.objects.filter(Q(descendents__content_type=project_ct) & Q(descendents__object_id=p.pk), content_type=team_ct)
+        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
 
 class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
@@ -1097,7 +1116,7 @@ class ProjectAccessList(ResourceAccessList):
     resource_model = Project
     new_in_300 = True
 
-class ProjectRolesList(SubListAPIView):
+class ProjectObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1182,6 +1201,17 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         # We hide roles that shouldn't be seen in our queryset
         return True
 
+class UserObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = User
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class UserProjectsList(SubListAPIView):
@@ -1335,9 +1365,36 @@ class CredentialList(ListCreateAPIView):
         if 'team' in request.data:
             credential.owner_role.parents.add(team.member_role)
         if 'organization' in request.data:
-            credential.owner_role.parents.add(organization.admin_role)
+            credential.organization = organization
+            credential.save()
 
         return ret
+
+
+class CredentialOwnerUsersList(SubListAPIView):
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Credential
+    relationship = 'owner_role.members'
+    new_in_300 = True
+
+
+class CredentialOwnerTeamsList(SubListAPIView):
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Credential, 'read', None):
+            raise PermissionDenied()
+
+        content_type = ContentType.objects.get_for_model(self.model)
+        teams = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type)]
+
+        return self.model.objects.filter(pk__in=teams)
+
 
 class UserCredentialsList(CredentialList):
 
@@ -1432,7 +1489,7 @@ class CredentialAccessList(ResourceAccessList):
     resource_model = Credential
     new_in_300 = True
 
-class CredentialRolesList(SubListAPIView):
+class CredentialObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1464,7 +1521,7 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
             inv_src.save()
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
 
-class InventoryScriptRolesList(SubListAPIView):
+class InventoryScriptObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1526,7 +1583,7 @@ class InventoryAccessList(ResourceAccessList):
     resource_model = Inventory
     new_in_300 = True
 
-class InventoryRolesList(SubListAPIView):
+class InventoryObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -1873,7 +1930,7 @@ class GroupAccessList(ResourceAccessList):
     resource_model = Group
     new_in_300 = True
 
-class GroupRolesList(SubListAPIView):
+class GroupObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -2212,6 +2269,13 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
 
+    def post(self, request, *args, **kwargs):
+        ret = super(JobTemplateList, self).post(request, *args, **kwargs)
+        if ret.status_code == 201:
+            job_template = JobTemplate.objects.get(id=ret.data['id'])
+            job_template.admin_role.members.add(request.user)
+        return ret
+
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
@@ -2318,8 +2382,6 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        # Sanity check: Are surveys available on this license?
-        # If not, do not allow them to be used.
         if not feature_enabled('surveys'):
             raise LicenseForbids('Your license does not allow '
                                  'adding surveys.')
@@ -2425,7 +2487,18 @@ class JobTemplateLabelList(SubListCreateAttachDetachAPIView, DeleteLastUnattachL
     serializer_class = LabelSerializer
     parent_model = JobTemplate
     relationship = 'labels'
-    parent_key = 'job_template'
+
+    def post(self, request, *args, **kwargs):
+        # If a label already exists in the database, attach it instead of erroring out
+        # that it already exists
+        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
+            existing = Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
+            if existing.exists():
+                existing = existing[0]
+                request.data['id'] = existing.id
+                del request.data['name']
+                del request.data['organization']
+        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -2603,7 +2676,7 @@ class JobTemplateAccessList(ResourceAccessList):
     resource_model = JobTemplate
     new_in_300 = True
 
-class JobTemplateRolesList(SubListAPIView):
+class JobTemplateObjectRolesList(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -3742,7 +3815,6 @@ class RoleChildrenList(SubListAPIView):
         # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
         return role.children.all()
-
 
 
 

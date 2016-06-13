@@ -18,7 +18,9 @@
                 </button>
             </div>
         </div>
-        <div class="OrgCards">
+        <div class="OrgCards-search">
+        </div>
+        <div class="OrgCards" id="OrgCards">
             <div class="OrgCards-card"
                 ng-class="{'OrgCards-card--selected': activeCard === card.id || card.isActiveCard }"
                 ng-repeat="card in orgCards track by card.id">
@@ -57,7 +59,6 @@
                 </div>
             </div>
         </div>
-        <div id="pagination-container" ng-hide="organization_num_pages < 2">
-        </div>
+        <div id='organizations-list'></div>
     </div>
 </div>

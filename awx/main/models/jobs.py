@@ -26,7 +26,7 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner
+from awx.main.redact import PlainTextCleaner, REPLACE_STR
 from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -229,6 +229,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     read_role = ImplicitRoleField(
         parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
     )
+    allow_simultaneous = models.BooleanField(
+        default=False,
+    )
+
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -242,14 +246,37 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels',]
 
-    def clean(self):
-        if self.job_type == 'scan' and (self.inventory is None or self.ask_inventory_on_launch):
-            raise ValidationError({"inventory": ["Scan jobs must be assigned a fixed inventory.",]})
-        if (not self.ask_inventory_on_launch) and self.inventory is None:
-            raise ValidationError({"inventory": ["Job Template must provide 'inventory' or allow prompting for it.",]})
-        if (not self.ask_credential_on_launch) and self.credential is None:
-            raise ValidationError({"credential": ["Job Template must provide 'credential' or allow prompting for it.",]})
-        return super(JobTemplate, self).clean()
+    def resource_validation_data(self):
+        '''
+        Process consistency errors and need-for-launch related fields.
+        '''
+        resources_needed_to_start = []
+        validation_errors = {}
+
+        # Inventory and Credential related checks
+        if self.inventory is None:
+            resources_needed_to_start.append('inventory')
+            if not self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Job Template must provide 'inventory' or allow prompting for it.",]
+        if self.credential is None:
+            resources_needed_to_start.append('credential')
+            if not self.ask_credential_on_launch:
+                validation_errors['credential'] = ["Job Template must provide 'credential' or allow prompting for it.",]
+
+        # Job type dependent checks
+        if self.job_type == 'scan':
+            if self.inventory is None or self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Scan jobs must be assigned a fixed inventory.",]
+        elif self.project is None:
+            resources_needed_to_start.append('project')
+            validation_errors['project'] = ["Job types 'run' and 'check' must have assigned a project.",]
+
+        return (validation_errors, resources_needed_to_start)
+
+    @property
+    def resources_needed_to_start(self):
+        validation_errors, resources_needed_to_start = self.resource_validation_data()
+        return resources_needed_to_start
 
     def create_job(self, **kwargs):
         '''
@@ -265,9 +292,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start) and
-                    not len(self.variables_needed_to_start) and
-                    self.inventory)
+        return (not self.resources_needed_to_start and
+                not self.passwords_needed_to_start and
+                not self.variables_needed_to_start)
 
     @property
     def variables_needed_to_start(self):
@@ -301,20 +328,20 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 errors.append("'%s' value missing" % survey_element['variable'])
             elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > survey_element['max']:
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] < survey_element['min']:
+                       data[survey_element['variable']] < int(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] > survey_element['max']:
+                       data[survey_element['variable']] > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != int:
@@ -322,10 +349,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                                                                                         survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < survey_element['min']:
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < float(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > survey_element['max']:
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > float(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
@@ -408,9 +435,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 if ask_for_vars_dict[field]:
                     prompted_fields[field] = kwargs[field]
                 else:
-                    if field == 'extra_vars' and self.survey_enabled:
+                    if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
-                        survey_vars = [question['variable'] for question in self.survey_spec['spec']]
+                        survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
                         for key in kwargs[field]:
                             if key in survey_vars:
                                 prompted_fields[field][key] = kwargs[field][key]
@@ -551,6 +578,8 @@ class Job(UnifiedJob, JobOptions):
             if obj.job_template is not None and obj.inventory is not None:
                 if obj.job_template == self.job_template and \
                    obj.inventory == self.inventory:
+                    if self.job_template.allow_simultaneous:
+                        return False
                     if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
                        obj.limit != self.limit:
                         return False
@@ -606,14 +635,12 @@ class Job(UnifiedJob, JobOptions):
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate, ProjectUpdate
-        if self.inventory is None or self.project is None:
-            return []
-        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter(update_on_launch=True)
         project_found = False
         inventory_sources_found = []
         dependencies = []
         for obj in active_tasks:
-            if type(obj) == ProjectUpdate:
+            if type(obj) == ProjectUpdate and self.project is not None:
                 if obj.project == self.project:
                     project_found = True
             if type(obj) == InventoryUpdate:
@@ -631,7 +658,7 @@ class Job(UnifiedJob, JobOptions):
             for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
                 if source not in inventory_sources_found:
                     inventory_sources_found.append(source)
-        if not project_found and self.project.needs_update_on_launch:
+        if not project_found and self.project is not None and self.project.needs_update_on_launch:
             dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
@@ -651,7 +678,7 @@ class Job(UnifiedJob, JobOptions):
                                           processed=h.processed,
                                           skipped=h.skipped)
         data.update(dict(inventory=self.inventory.name,
-                         project=self.project.name,
+                         project=self.project.name if self.project else None,
                          playbook=self.playbook,
                          credential=self.credential.name,
                          limit=self.limit,
@@ -675,6 +702,21 @@ class Job(UnifiedJob, JobOptions):
         evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
+
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
+            try:
+                extra_vars = json.loads(self.extra_vars)
+                for key in self.job_template.survey_password_variables():
+                    if key in extra_vars:
+                        extra_vars[key] = REPLACE_STR
+                return json.dumps(extra_vars)
+            except ValueError:
+                pass
+        return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.

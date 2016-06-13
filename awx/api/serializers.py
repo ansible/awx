@@ -23,6 +23,7 @@ from django.db import models
 # from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
+from django.forms.models import model_to_dict
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -39,7 +40,6 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
-from awx.main.redact import REPLACE_STR
 from awx.main.conf import tower_settings
 
 from awx.api.license import feature_enabled
@@ -331,7 +331,7 @@ class BaseSerializer(serializers.ModelSerializer):
                     'description': role.description,
                 }
         if len(roles) > 0:
-            summary_fields['roles'] = roles
+            summary_fields['object_roles'] = roles
         return summary_fields
 
     def get_created(self, obj):
@@ -679,13 +679,14 @@ class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', write_only=True,
                                      help_text='Write-only field used to change the password.')
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
+    external_account = serializers.SerializerMethodField(help_text='Set if the account is managed by an external service')
     is_system_auditor = serializers.BooleanField(default=False)
 
     class Meta:
         model = User
         fields = ('*', '-name', '-description', '-modified',
                   '-summary_fields', 'username', 'first_name', 'last_name',
-                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn')
+                  'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
@@ -719,12 +720,32 @@ class UserSerializer(BaseSerializer):
                 getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
                 getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
             new_password = None
+        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
+            new_password = None
         if new_password:
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
+
+    def get_external_account(self, obj):
+        account_type = None
+        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+            try:
+                if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
+                    account_type = "ldap"
+            except AttributeError:
+                pass
+        if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
+                getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
+            account_type = "social"
+        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
+            account_type = "radius"
+        return account_type
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
@@ -747,6 +768,7 @@ class UserSerializer(BaseSerializer):
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
             roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
+            object_roles           = reverse('api:user_object_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
             access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
         ))
@@ -804,7 +826,7 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
-            roles = reverse('api:organization_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:organization_object_roles_list', args=(obj.pk,)),
             access_list = reverse('api:organization_access_list', args=(obj.pk,)),
         ))
         return res
@@ -890,7 +912,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:project_access_list', args=(obj.pk,)),
-            roles = reverse('api:project_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:project_object_roles_list', args=(obj.pk,)),
         ))
         if obj.organization:
             res['organization'] = reverse('api:organization_detail',
@@ -994,7 +1016,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
-            roles = reverse('api:inventory_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:inventory_object_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
         ))
         if obj.organization:
@@ -1166,7 +1188,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
             ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
             access_list = reverse('api:group_access_list',         args=(obj.pk,)),
-            roles = reverse('api:group_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:group_object_roles_list', args=(obj.pk,)),
             #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
         ))
         if obj.inventory:
@@ -1189,7 +1211,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
 class GroupTreeSerializer(GroupSerializer):
 
-    children = serializers.SerializerMethodField('get_children')
+    children = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
@@ -1265,7 +1287,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
-            roles = reverse('api:inventory_script_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:inventory_script_object_roles_list', args=(obj.pk,)),
         ))
 
         if obj.organization:
@@ -1434,6 +1456,7 @@ class TeamSerializer(BaseSerializer):
             users        = reverse('api:team_users_list',       args=(obj.pk,)),
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
             roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
+            object_roles        = reverse('api:team_object_roles_list',       args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
             access_list  = reverse('api:team_access_list',      args=(obj.pk,)),
         ))
@@ -1588,8 +1611,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
         return ret
 
 
-
-
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some fields filtered based on user accessing
@@ -1598,7 +1619,7 @@ class CredentialSerializer(BaseSerializer):
         model = Credential
         fields = ('*', 'kind', 'cloud', 'host', 'username',
                   'password', 'security_token', 'project', 'domain',
-                  'ssh_key_data', 'ssh_key_unlock',
+                  'ssh_key_data', 'ssh_key_unlock', 'organization',
                   'become_method', 'become_username', 'become_password',
                   'vault_password', 'subscription', 'tenant', 'secret', 'client',
                   'authorize', 'authorize_password')
@@ -1613,10 +1634,16 @@ class CredentialSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
+
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
             access_list = reverse('api:credential_access_list', args=(obj.pk,)),
-            roles = reverse('api:credential_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:credential_object_roles_list', args=(obj.pk,)),
+            owner_users = reverse('api:credential_owner_users_list', args=(obj.pk,)),
+            owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
         ))
 
         parents = obj.owner_role.parents.exclude(object_id__isnull=True)
@@ -1635,6 +1662,7 @@ class CredentialSerializer(BaseSerializer):
         for user in obj.owner_role.members.all():
             summary_dict['owners'].append({
                 'id': user.pk,
+                'type': 'user',
                 'name': user.username,
                 'description': ' '.join([user.first_name, user.last_name]),
                 'url': reverse('api:user_detail', args=(user.pk,)),
@@ -1643,6 +1671,7 @@ class CredentialSerializer(BaseSerializer):
         for parent in obj.owner_role.parents.exclude(object_id__isnull=True).all():
             summary_dict['owners'].append({
                 'id': parent.content_object.pk,
+                'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
                 'name': parent.content_object.name,
                 'description': parent.content_object.description,
                 'url': parent.content_object.get_absolute_url(),
@@ -1754,7 +1783,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
                   'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled')
+                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'allow_simultaneous')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -1766,10 +1795,10 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             notification_templates_any = reverse('api:job_template_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:job_template_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:job_template_notification_templates_error_list', args=(obj.pk,)),
-            access_list  = reverse('api:job_template_access_list',      args=(obj.pk,)),
+            access_list = reverse('api:job_template_access_list',      args=(obj.pk,)),
             survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
             labels = reverse('api:job_template_label_list', args=(obj.pk,)),
-            roles = reverse('api:job_template_roles_list', args=(obj.pk,)),
+            object_roles = reverse('api:job_template_object_roles_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1783,25 +1812,36 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
-        if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
-            d['can_copy'] = request.user.can_access(JobTemplate, 'add',
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj,
-                                                    {'inventory': obj.inventory.pk,
-                                                     'project': obj.project.pk})
-        elif request is not None and request.user is not None and request.user.is_superuser:
-            d['can_copy'] = True
-            d['can_edit'] = True
-        else:
+
+        # Check for conditions that would create a validation error if coppied
+        validation_errors, resources_needed_to_start = obj.resource_validation_data()
+
+        if request is None or request.user is None:
             d['can_copy'] = False
             d['can_edit'] = False
+        elif request.user.is_superuser:
+            d['can_copy'] = not validation_errors
+            d['can_edit'] = True
+        else:
+            jt_data = model_to_dict(obj)
+            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', jt_data)
+            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, jt_data)
+
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
     def validate(self, attrs):
         survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
         job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or None)
+        project = attrs.get('project', self.instance and self.instance.project or None)
+
+        if job_type == "scan":
+            if inventory is None or attrs.get('ask_inventory_on_launch', False):
+                raise serializers.ValidationError({'inventory': 'Scan jobs must be assigned a fixed inventory.'})
+        elif project is None:
+            raise serializers.ValidationError({'project': "Job types 'run' and 'check' must have assigned a project."})
+
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
             raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs.'})
 
@@ -1899,17 +1939,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return ret
         if 'job_template' in ret and not obj.job_template:
             ret['job_template'] = None
-
-        if obj.job_template and obj.job_template.survey_enabled:
-            if 'extra_vars' in ret:
-                try:
-                    extra_vars = json.loads(ret['extra_vars'])
-                    for key in obj.job_template.survey_password_variables():
-                        if key in extra_vars:
-                            extra_vars[key] = REPLACE_STR
-                    ret['extra_vars'] = json.dumps(extra_vars)
-                except ValueError:
-                    pass
+        if obj.job_template and obj.job_template.survey_enabled and 'extra_vars' in ret:
+            ret['extra_vars'] = obj.display_extra_vars()
         return ret
 
 
@@ -2259,12 +2290,14 @@ class JobLaunchSerializer(BaseSerializer):
         obj = self.context.get('obj')
         data = self.context.get('data')
 
+        for field in obj.resources_needed_to_start:
+            if not (field in attrs and obj._ask_for_vars_dict().get(field, False)):
+                errors[field] = "Job Template '%s' is missing or undefined." % field
+
         if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
             credential = obj.credential
         else:
             credential = attrs.get('credential', None)
-        if not credential:
-            errors['credential'] = 'Credential not provided'
 
         # fill passwords dict with request data passwords
         if credential and credential.passwords_needed:
@@ -2294,11 +2327,6 @@ class JobLaunchSerializer(BaseSerializer):
             validation_errors = obj.survey_variable_validation(extra_vars)
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
-
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None):
-            errors['project'] = 'Job Template Project is missing or undefined.'
-        if (obj.inventory is None) and not attrs.get('inventory', None):
-            errors['inventory'] = 'Job Template Inventory is missing or undefined.'
 
         # Special prohibited cases for scan jobs
         if 'job_type' in data and obj.ask_job_type_on_launch:
@@ -2369,12 +2397,13 @@ class NotificationTemplateSerializer(BaseSerializer):
         return d
 
     def validate(self, attrs):
+        from awx.api.views import NotificationTemplateDetail
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         incorrect_type_fields = []
         if 'notification_configuration' not in attrs:
             return attrs
-        if self.context['view'].kwargs:
+        if self.context['view'].kwargs and isinstance(self.context['view'], NotificationTemplateDetail):
             object_actual = self.context['view'].get_object()
         else:
             object_actual = None

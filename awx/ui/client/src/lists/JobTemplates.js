@@ -31,7 +31,7 @@ export default
             },
             smart_status: {
               label: 'Activity',
-              columnClass: 'List-tableCell col-lg-3 col-md-4 hidden-sm hidden-xs',
+              columnClass: 'List-tableCell col-lg-2 col-md-2 hidden-sm hidden-xs',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
@@ -41,7 +41,7 @@ export default
                 label: 'Labels',
                 type: 'labels',
                 nosort: true,
-                columnClass: 'List-tableCell col-lg-3 col-md-3 hidden-sm hidden-xs',
+                columnClass: 'List-tableCell col-lg-4 col-md-4 hidden-sm hidden-xs',
                 searchType: 'related',
                 sourceModel: 'labels',
                 sourceField: 'name'

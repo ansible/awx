@@ -14,7 +14,8 @@ export default function(){
         iterator: 'notification',
         index: false,
         hover: false,
-        basePath: 'notifications',
+        emptyListText: "This list is populated by notification templates added from the&nbsp;<a ui-sref='notifications.add'>Notifications</a>&nbsp;section",
+        basePath: 'notification_templates',
         fields: {
             name: {
                 key: true,

@@ -72,6 +72,7 @@
             jQuery.extend(true, CloudCredentialList, CredentialList);
             CloudCredentialList.name = 'cloudcredentials';
             CloudCredentialList.iterator = 'cloudcredential';
+            CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
 
             SurveyControllerInit({
                 scope: $scope,
@@ -196,12 +197,20 @@
                     });
                 });
 
+            function sync_playbook_select2() {
+                CreateSelect2({
+                    element:'#playbook-select',
+                    multiple: false
+                });
+            }
+
             // Update playbook select whenever project value changes
             selectPlaybook = function (oldValue, newValue) {
                 var url;
                 if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
                     $scope.playbook_options = ['Default'];
                     $scope.playbook = 'Default';
+                    sync_playbook_select2();
                     Wait('stop');
                 }
                 else if (oldValue !== newValue) {
@@ -216,6 +225,7 @@
                                     opts.push(data[i]);
                                 }
                                 $scope.playbook_options = opts;
+                                sync_playbook_select2();
                                 Wait('stop');
                             })
                             .error(function (data, status) {
@@ -226,32 +236,37 @@
                 }
             };
 
-            $scope.jobTypeChange = function(){
-              if($scope.job_type){
-                if($scope.job_type.value === 'scan'){
-                    // If the job_type is 'scan' then we don't want the user to be
-                    // able to prompt for job type or inventory
-                    $scope.ask_job_type_on_launch = false;
-                    $scope.ask_inventory_on_launch = false;
-                    $scope.toggleScanInfo();
-                  }
-                  else if($scope.project_name === "Default"){
-                    $scope.project_name = null;
-                    $scope.playbook_options = [];
-                    // $scope.playbook = 'null';
-                    $scope.job_templates_form.playbook.$setPristine();
-                  }
-              }
+            let last_non_scan_project_name = null;
+            let last_non_scan_playbook = "";
+            let last_non_scan_playbook_options = [];
+            $scope.jobTypeChange = function() {
+                if ($scope.job_type) {
+                    if ($scope.job_type.value === 'scan') {
+                        if ($scope.project_name !== "Default") {
+                            last_non_scan_project_name = $scope.project_name;
+                            last_non_scan_playbook = $scope.playbook;
+                            last_non_scan_playbook_options = $scope.playbook_options;
+                        }
+                        // If the job_type is 'scan' then we don't want the user to be
+                        // able to prompt for job type or inventory
+                        $scope.ask_job_type_on_launch = false;
+                        $scope.ask_inventory_on_launch = false;
+                        $scope.resetProjectToDefault();
+                    }
+                    else if ($scope.project_name === "Default") {
+                        $scope.project_name = last_non_scan_project_name;
+                        $scope.playbook_options = last_non_scan_playbook_options;
+                        $scope.playbook = last_non_scan_playbook;
+                        $scope.job_templates_form.playbook.$setPristine();
+                    }
+                }
+                sync_playbook_select2();
             };
 
-            $scope.toggleScanInfo = function() {
+            $scope.resetProjectToDefault = function() {
                 $scope.project_name = 'Default';
-                if($scope.project === null){
-                  selectPlaybook();
-                }
-                else {
-                  $scope.project = null;
-                }
+                $scope.project = null;
+                selectPlaybook('force_load');
             };
 
             // Detect and alert user to potential SCM status issues
@@ -319,7 +334,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {template_id: id}, {reload: true});
+                $state.go('jobTemplates.edit', {id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {

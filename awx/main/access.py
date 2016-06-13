@@ -588,15 +588,22 @@ class CredentialAccess(BaseAccess):
             return check_user_access(self.user, Organization, 'change', organization_obj, None)
         return False
 
-
     @check_superuser
     def can_use(self, obj):
         return self.user in obj.use_role
 
     @check_superuser
     def can_change(self, obj, data):
-        if not self.can_add(data):
-            return False
+        if data is not None:
+            keys = data.keys()
+            if 'user' in keys or 'team' in keys or 'organization' in keys:
+                if not self.can_add(data):
+                    return False
+
+        if obj.organization:
+            if self.user in obj.organization.admin_role:
+                return True
+
         return self.user in obj.owner_role
 
     def can_delete(self, obj):
@@ -773,7 +780,9 @@ class JobTemplateAccess(BaseAccess):
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = Inventory.objects.filter(id=inventory_pk)
         if not inventory.exists() and not data.get('ask_inventory_on_launch', False):
-            return False # Does this make sense?  Maybe should check read access
+            return False
+        if inventory.exists() and self.user not in inventory[0].use_role:
+            return False
 
         project_pk = get_pk_from_dict(data, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
@@ -786,10 +795,8 @@ class JobTemplateAccess(BaseAccess):
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         project = get_object_or_400(Project, pk=project_pk)
-        if self.user in project.admin_role:
-            return True
 
-        return self.user in project.admin_role and self.user in inventory.read_role
+        return self.user in project.use_role
 
     def can_start(self, obj, validate_license=True):
         # Check license.
@@ -814,20 +821,80 @@ class JobTemplateAccess(BaseAccess):
 
     def can_change(self, obj, data):
         data_for_change = data
-        if self.user not in obj.admin_role:
+        if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
         if data is not None:
-            data_for_change = dict(data)
+            data = dict(data)
+
+            if self.changes_are_non_sensitive(obj, data):
+                if 'job_type' in data and obj.job_type != data['job_type'] and data['job_type'] == PERM_INVENTORY_SCAN:
+                    self.check_license(feature='system_tracking')
+
+                if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+                    self.check_license(feature='surveys')
+                return True
+
             for required_field in ('credential', 'cloud_credential', 'inventory', 'project'):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
         return self.can_read(obj) and self.can_add(data_for_change)
 
+    def changes_are_non_sensitive(self, obj, data):
+        '''
+        Returne true if the changes being made are considered nonsensitive, and
+        thus can be made by a job template administrator which may not have access
+        to the any inventory, project, or credentials associated with the template.
+        '''
+        # We are white listing fields that can
+        field_whitelist = [
+            'name', 'description', 'forks', 'limit', 'verbosity', 'extra_vars',
+            'job_tags', 'force_handlers', 'skip_tags', 'ask_variables_on_launch',
+            'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
+            'ask_credential_on_launch', 'survey_enabled'
+        ]
+
+        for k, v in data.items():
+            if hasattr(obj, k) and getattr(obj, k) != v:
+                if k not in field_whitelist:
+                    return False
+        return True
+
+    def can_update_sensitive_fields(self, obj, data):
+        project_id = data.get('project', obj.project.id if obj.project else None)
+        inventory_id = data.get('inventory', obj.inventory.id if obj.inventory else None)
+        credential_id = data.get('credential', obj.credential.id if obj.credential else None)
+        cloud_credential_id = data.get('cloud_credential', obj.cloud_credential.id if obj.cloud_credential else None)
+        network_credential_id = data.get('network_credential', obj.network_credential.id if obj.network_credential else None)
+
+        if project_id and self.user not in Project.objects.get(pk=project_id).use_role:
+            return False
+        if inventory_id and self.user not in Inventory.objects.get(pk=inventory_id).use_role:
+            return False
+        if credential_id and self.user not in Credential.objects.get(pk=credential_id).use_role:
+            return False
+        if cloud_credential_id and self.user not in Credential.objects.get(pk=cloud_credential_id).use_role:
+            return False
+        if network_credential_id and self.user not in Credential.objects.get(pk=network_credential_id).use_role:
+            return False
+
+        return True
+
+    @check_superuser
     def can_delete(self, obj):
         return self.user in obj.admin_role
 
 class JobAccess(BaseAccess):
+    '''
+    I can see jobs when:
+     - I am a superuser.
+     - I can see its job template
+     - I am an admin or auditor of the organization which contains its inventory
+     - I am an admin or auditor of the organization which contains its project
+    I can delete jobs when:
+     - I am an admin of the organization which contains its inventory
+     - I am an admin of the organization which contains its project
+    '''
 
     model = Job
 
@@ -839,9 +906,19 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
-        return qs.filter(
+        qs_jt = qs.filter(
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
         )
+
+        org_access_qs = Organization.objects.filter(
+            Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+        if not org_access_qs.exists():
+            return qs_jt
+
+        return qs.filter(
+            Q(job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')) |
+            Q(inventory__organization__in=org_access_qs) |
+            Q(project__organization__in=org_access_qs)).distinct()
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
@@ -871,7 +948,11 @@ class JobAccess(BaseAccess):
 
     @check_superuser
     def can_delete(self, obj):
-        return self.user in obj.inventory.admin_role
+        if obj.inventory is not None and self.user in obj.inventory.organization.admin_role:
+            return True
+        if obj.project is not None and self.user in obj.project.organization.admin_role:
+            return True
+        return False
 
     def can_start(self, obj):
         self.check_license()
@@ -1392,6 +1473,10 @@ class CustomInventoryScriptAccess(BaseAccess):
     @check_superuser
     def can_admin(self, obj):
         return self.user in obj.admin_role
+
+    @check_superuser
+    def can_change(self, obj, data):
+        return self.can_admin(obj)
 
     @check_superuser
     def can_read(self, obj):

@@ -857,7 +857,7 @@ class Command(NoArgsCommand):
                 del_pks = del_host_pks[offset:(offset + self._batch_size)]
                 for db_host in db_hosts.filter(pk__in=del_pks):
                     group_host_count += 1
-                    if db_host not in db_group.hosts:
+                    if db_host not in db_group.hosts.all():
                         continue
                     db_group.hosts.remove(db_host)
                     self.logger.info('Host "%s" removed from group "%s"',

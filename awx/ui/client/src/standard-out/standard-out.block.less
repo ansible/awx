@@ -3,6 +3,11 @@
 
 /** @define StandardOut */
 
+standard-out-log {
+    flex: 5;
+    display: flex;
+}
+
 .StandardOut-preContent{
     font-size: 12px;
     padding: 0 20px 0 20px;
@@ -10,6 +15,12 @@
 }
 .StandardOut-container {
     .OnePlusTwo-container;
+
+    &.fullscreen {
+        .StandardOut-rightPanel {
+            max-width: 100%;
+        }
+    }
 }
 
 .StandardOut-leftPanel {
@@ -18,6 +29,19 @@
 
 .StandardOut-rightPanel {
     .OnePlusTwo-right--panel(590px);
+
+    @media (min-width: 900px) {
+        max-width: 50%;
+    }
+
+    .Panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .StandardOut-consoleOutput {
+        height: 493px;
+    }
 }
 
 .StandardOut-panelHeader {
@@ -26,11 +50,17 @@
 
 .StandardOut-consoleOutput {
     margin-top: 25px;
-    min-height: 200px;
     background-color: @default-secondary-bg;
     border-radius: 5px;
-    max-height: 1600px;
+    min-height: 300px;
+    max-height: 100vh;
+    height: ~"calc(100vh - 245px)";
+    width: 100%;
+
     overflow: auto;
+    #pre-container {
+        overflow: visible !important;
+    }
 }
 
 .StandardOut-details {
@@ -93,13 +123,17 @@
 }
 
 .StandardOut-actionButton:hover {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
 }
 
 .StandardOut-actionButton--active {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
+
+    &:hover {
+        background-color: @default-link-hov;
+    }
 }
 
 .StandardOut-actionButton + a {

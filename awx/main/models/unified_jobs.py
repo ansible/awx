@@ -754,8 +754,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     name=self.name,
                     url=self.get_ui_url(),
                     created_by=smart_text(self.created_by),
-                    started=self.started.isoformat(),
-                    finished=self.finished.isoformat(),
+                    started=self.started.isoformat() if self.started is not None else None,
+                    finished=self.finished.isoformat() if self.finished is not None else None,
                     status=self.status,
                     traceback=self.result_traceback)
 

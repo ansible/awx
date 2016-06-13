@@ -58,6 +58,7 @@
 .SurveyMaker-content {
     display: flex;
     margin-top: 25px;
+    min-height: 560px;
 }
 .SurveyMaker-questionPanel {
     display: flex;
@@ -102,6 +103,7 @@
     text-transform: uppercase;
     padding-left:15px;
     padding-right: 15px;
+    margin-right: 20px;
 }
 .SurveyMaker-deleteButton:hover {
     background-color: @default-err-hov;
@@ -208,4 +210,12 @@
 }
 .SurveyMaker-previewDescription {
     margin-bottom: 5px;
+}
+
+.SurveyMaker-questionPanel {
+    #survey_question_default_password {
+        button {
+            height: 30px; /* show/hide button should match our input height */
+        }
+    }
 }

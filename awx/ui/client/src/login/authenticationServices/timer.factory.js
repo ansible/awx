@@ -23,9 +23,9 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'CreateDialog', 'Authorization',
-        'Store', '$interval', '$location', '$q',
+        'Store', '$interval', '$state', '$q',
     function ($rootScope, $cookieStore, CreateDialog, Authorization,
-        Store, $interval, $location, $q) {
+        Store, $interval, $state, $q) {
         return {
 
             sessionTime: null,
@@ -62,7 +62,7 @@ export default
                     now = new Date().getTime()/1000,
                     diff = stime-now;
 
-                if(diff < 61){
+                if(diff < 60){
                     return diff;
                 }
                 else {
@@ -157,13 +157,13 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                         that.expireSession('idle');
-                        $location.url('/login');
+                        $state.go('signOut');
                     }
                     if(Store('sessionTime') &&
                         Store('sessionTime')[$rootScope.current_user.id] &&
                         Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
                             that.expireSession();
-                            $location.url('/login');
+                            $state.go('signOut');
 
                     }
 

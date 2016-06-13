@@ -13,9 +13,21 @@
 .JobDetail-instructions{
     color: @default-interface-txt;
     margin: 10px 0 10px 0;
+
+    .badge {
+        background-color: @default-list-header-bg;
+        color: @default-interface-txt;
+        padding: 5px 7px;
+    }
 }
 .JobDetail{
-   .OnePlusOne-container(100%, @breakpoint-md); 
+   .OnePlusOne-container(100%, @breakpoint-md);
+
+    &.fullscreen {
+        .JobDetail-rightSide {
+            max-width: 100%;
+        }
+    }
 }
 
 .JobDetail-leftSide{
@@ -24,6 +36,12 @@
 
 .JobDetail-rightSide{
     .OnePlusOne-panel--right(100%, @breakpoint-md);
+    @media (min-width: @breakpoint-md) {
+        max-width: 50%;
+    }
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
 }
 .JobDetail-panelHeader{
     display: flex;
@@ -151,8 +169,25 @@
     background-color: @default-link;
     border: 1px solid @default-link;
     color: @default-bg;
-}
 
+    &:hover {
+        background-color: @default-link-hov;
+    }
+}
+.JobDetail .nvd3.nv-noData{
+    color: @default-interface-txt;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: 'Open Sans', sans-serif;
+}
+.JobDetail .nv-series{
+    padding-right: 30px;
+    display: block;
+}
+.JobDetail-instructions .badge{
+    background-color: @default-list-header-bg;
+    color: @default-interface-txt;
+}
 .JobDetail-tableToggle--left{
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -185,6 +220,12 @@
     margin-left: -5px;
 }
 
+.JobDetails-table--noResults {
+    tr > td {
+        border-top: none !important;
+    }
+}
+
 .JobDetail-statusIcon--results{
     padding-left: 0px;
     padding-right: 10px;
@@ -196,7 +237,13 @@
 }
 
 .JobDetail-stdoutActionButton--active{
+    display: none;
+    visibility: hidden;
     flex:none;
     width:0px;
     padding-right: 0px;
+}
+
+.JobDetail-leftSide.JobDetail-stdoutActionButton--active {
+    margin-right: 0px;
 }
