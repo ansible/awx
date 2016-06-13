@@ -16,7 +16,7 @@
                     <div class="TagSearch-dropdownItem"
                         ng-repeat="type in searchTypes track by $index"
                         ng-class="{'is-selected': (currentSearchType.id === type.id)}"
-                        ng-click="setSearchType(type)">
+                        ng-click="setSearchType($event, type)">
                         {{ type.label }}
                     </div>
                 </div>
