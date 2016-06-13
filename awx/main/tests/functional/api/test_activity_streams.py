@@ -13,7 +13,7 @@ def mock_feature_enabled(feature, bypass_database=None):
 
 @pytest.fixture
 def activity_stream_entry(organization, org_admin):
-    return ActivityStream.objects.filter(organization__pk=organization.pk, operation='associate').first()
+    return ActivityStream.objects.filter(organization__pk=organization.pk, user=org_admin, operation='associate').first()
 
 @pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)

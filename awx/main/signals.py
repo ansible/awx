@@ -164,7 +164,10 @@ def rbac_activity_stream(instance, sender, **kwargs):
         if hasattr(instance, 'content_type'):
             if instance.content_type in [None, user_type]:
                 return
-            role = instance
+            elif sender.__name__ == 'Role_parents':
+                role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+            else:
+                role = instance
             instance = instance.content_object
         else:
             role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
@@ -192,6 +195,7 @@ post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
