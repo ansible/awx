@@ -30,4 +30,3 @@ def test_role_access_attach(rando, inventory):
     inventory.read_role.members.add(rando)
     access = RoleAccess(rando)
     assert not access.can_attach(inventory.admin_role, rando, 'members', None)
-

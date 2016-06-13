@@ -660,8 +660,9 @@ class TeamAccess(BaseAccess):
         return self.can_change(obj, None)
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        "Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment."
-        if relationship == 'member_role.children':
+        """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
+        of a resource role to the team."""
+        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
             role_access = RoleAccess(self.user)
             return role_access.can_attach(sub_obj, obj, 'member_role.parents',
                                           *args, **kwargs)
@@ -669,7 +670,7 @@ class TeamAccess(BaseAccess):
                                                   *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if relationship == 'member_role.children':
+        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
             role_access = RoleAccess(self.user)
             return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
                                             *args, **kwargs)

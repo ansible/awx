@@ -15,7 +15,6 @@ def test_user_role_view_access(rando, inventory, mocker, post):
     mock_access.can_attach.assert_called_once_with(
         inventory.admin_role, rando, 'members', data,
         skip_sub_obj_read_check=False)
-    assert rando not in inventory.admin_role
 
 @pytest.mark.django_db
 def test_team_role_view_access(rando, team, inventory, mocker, post):
@@ -30,7 +29,6 @@ def test_team_role_view_access(rando, team, inventory, mocker, post):
     mock_access.can_attach.assert_called_once_with(
         inventory.admin_role, team, 'member_role.parents', data,
         skip_sub_obj_read_check=False)
-    assert team not in inventory.admin_role
 
 @pytest.mark.django_db
 def test_role_team_view_access(rando, team, inventory, mocker, post):
@@ -45,4 +43,3 @@ def test_role_team_view_access(rando, team, inventory, mocker, post):
     mock_access.assert_called_once_with(
         inventory.admin_role, team, 'member_role.parents', data,
         skip_sub_obj_read_check=False)
-    assert team not in inventory.admin_role
