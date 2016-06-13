@@ -46,8 +46,9 @@ export default
                     editRequired: true,
                     column: 1,
                     awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
-                        " syntax, test environment setup and report problems.</p>",
+                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
+                        " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature.</p>",
                     dataTitle: 'Job Type',
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -230,7 +231,7 @@ export default
                   addRequired: false,
                   editRequird: false,
                   column: 2,
-                  awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible-playbook</code> command. </p>",
+                  awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
                   dataPlacement: 'right',
                   dataTitle: 'Become Privilege Escalation',
                   dataContainer: "body"
@@ -285,7 +286,7 @@ export default
                     editRequired: false,
                     dataTitle: 'Labels',
                     dataPlacement: 'right',
-                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
                     dataContainer: 'body'
                 },
                 variables: {
@@ -297,8 +298,8 @@ export default
                     editRequired: false,
                     "default": "---",
                     column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
+                        "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +

@@ -134,6 +134,7 @@ export default
                         "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
                         "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
                         "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                        "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body'
                 },
@@ -161,11 +162,14 @@ export default
                     parseTypeName: 'envParseType',
                     dataTitle: "Environment Variables",
                     dataPlacement: 'right',
-                    awPopOver:  "<p>Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver:  "<p>Provide environment variables to pass to the custom inventory script.</p>" +
+                        "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                        '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                        '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataContainer: 'body'
                 },
                 ec2_variables: {
