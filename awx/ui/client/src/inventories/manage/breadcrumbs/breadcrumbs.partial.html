@@ -1,7 +1,10 @@
 <div class="BreadCrumb InventoryManageBreadCrumbs">
 	<ol class="BreadCrumb-list">
 		<li class="BreadCrumb-item"><a ui-sref="inventories">Inventories</a></li>
-		<li href class="BreadCrumb-item"><a href ng-click="goToInventory()">Manage {{inventory.name}}</a></li>
+		<li href class="BreadCrumb-item">
+			<a href ng-if="!isRootState() || groups.length > 0" ng-click="goToInventory()">{{inventory.name}}</a>
+			<span ng-if="isRootState() && groups.length === 0">{{inventory.name}}</span>
+		</li>
 		<!-- inside inventoryManage list view (last item is not clickable) -->
 		<span ng-if="isRootState()">
             <li class="BreadCrumb-item"></li>

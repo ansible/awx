@@ -11,7 +11,7 @@ var ManageHostsEdit = {
     name: 'inventoryManage.editHost',
     route: '/edit-host?host_id',
     ncyBreadcrumb: {
-        label: "EDIT {{host.name}}",
+        label: "{{host.name}}",
     },
     data: {
         mode: 'edit'
@@ -35,7 +35,7 @@ var ManageHostsAdd = {
     route: '/add-host',
     // use a query string to break regex search
     ncyBreadcrumb: {
-        label: "ADD HOST"
+        label: "CREATE HOST"
     },
     data: {
         mode: 'add'
