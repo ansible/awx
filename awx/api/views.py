@@ -3783,21 +3783,21 @@ class RoleTeamsList(ListAPIView):
         if not sub_id:
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
+
         role = Role.objects.get(pk=self.kwargs['pk'])
         team = Team.objects.get(pk=sub_id)
-        from awx.main.access import RoleAccess
-        access = RoleAccess(request.user)
-        if access.can_attach(role, team, 'members', {"id": role.pk}, skip_sub_obj_read_check=False):
+        action = 'attach'
+        if request.data.get('disassociate', None):
+            action = 'unattach'
+        if not request.user.can_access(self.parent_model, action, role, team,
+                                       self.relationship, request.data,
+                                       skip_sub_obj_read_check=False):
             raise PermissionDenied()
-            
         if request.data.get('disassociate', None):
             team.member_role.children.remove(role)
         else:
             team.member_role.children.add(role)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # XXX attach/detach needs to ensure we have the appropriate perms
 
 
 class RoleParentsList(SubListAPIView):
