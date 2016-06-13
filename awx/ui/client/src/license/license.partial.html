@@ -7,8 +7,8 @@
 				<div class="License-field">
 					<div class="License-field--label">License</div>
 					<div class="License-field--content">
-					<span ng-show='valid'><i class="fa fa-circle License-greenText"></i>Valid</span>
-					<span ng-show='invalid'><i class="fa fa-circle License-redText"></i>Invalid</span>
+					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i>Valid License</span>
+					<span class="License-redText" ng-show='!compliant'><i class="fa fa-circle License-redText"></i>Invalid License</span>
 					</div>
 				</div>
 				<div class="License-field">
@@ -43,7 +43,8 @@
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">Time Remaining</div>
-					<div class="License-field--content">
+					<div class="License-field--content"
+						ng-class="{'License-redText': time.remaining=='0 Days'}">
 					{{time.remaining}}
 					</div>
 				</div>
