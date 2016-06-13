@@ -3778,10 +3778,10 @@ class RoleTeamsList(ListAPIView):
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
-        # Forbid implicit role creation here
+        # Forbid implicit team creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg="Team 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         role = Role.objects.get(pk=self.kwargs['pk'])
