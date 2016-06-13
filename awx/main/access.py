@@ -761,28 +761,35 @@ class JobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        # If a credential is provided, the user should have read access to it.
+        # If a credential is provided, the user should have use access to it.
         credential_pk = get_pk_from_dict(data, 'credential')
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
-            if self.user not in credential.read_role:
+            if self.user not in credential.use_role:
                 return False
 
-        # If a cloud credential is provided, the user should have read access.
+        # If a cloud credential is provided, the user should have use access.
         cloud_credential_pk = get_pk_from_dict(data, 'cloud_credential')
         if cloud_credential_pk:
             cloud_credential = get_object_or_400(Credential,
                                                  pk=cloud_credential_pk)
-            if self.user not in cloud_credential.read_role:
+            if self.user not in cloud_credential.use_role:
                 return False
 
-        # Check that the given inventory ID is valid.
+        # If a network credential is provided, the user should have use access.
+        network_credential_pk = get_pk_from_dict(data, 'network_credential')
+        if network_credential_pk:
+            network_credential = get_object_or_400(Credential,
+                                                   pk=network_credential_pk)
+            if self.user not in network_credential.use_role:
+                return False
+
+        # If an inventory is provided, the user should have use access.
         inventory_pk = get_pk_from_dict(data, 'inventory')
-        inventory = Inventory.objects.filter(id=inventory_pk)
-        if not inventory.exists() and not data.get('ask_inventory_on_launch', False):
-            return False
-        if inventory.exists() and self.user not in inventory[0].use_role:
-            return False
+        if inventory_pk:
+            inventory = get_object_or_400(Inventory, pk=inventory_pk)
+            if self.user not in inventory.use_role:
+                return False
 
         project_pk = get_pk_from_dict(data, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
@@ -842,7 +849,7 @@ class JobTemplateAccess(BaseAccess):
 
     def changes_are_non_sensitive(self, obj, data):
         '''
-        Returne true if the changes being made are considered nonsensitive, and
+        Return true if the changes being made are considered nonsensitive, and
         thus can be made by a job template administrator which may not have access
         to the any inventory, project, or credentials associated with the template.
         '''
