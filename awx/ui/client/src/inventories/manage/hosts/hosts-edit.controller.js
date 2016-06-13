@@ -25,7 +25,7 @@
                 enabled: $scope.host.enabled
             };
             HostManageService.put(host).then(function(){
-                $state.go('^', null, {reload: true});
+                $state.go($state.current, null, {reload: true});
             });
         };
         var init = function(){

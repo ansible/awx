@@ -52,14 +52,14 @@
                 // no inventory source set, just create a new group
                 // '' is the value supplied for Manual source type
                 case null || '':
-                    GroupManageService.put(group).then(() => $state.go('^', null, {reload: true}));
+                    GroupManageService.put(group).then(() => $state.go($state.current, null, {reload: true}));
                     break;
                 // create a new group and create/associate an inventory source
                 // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'foreman' || 'cloudforms' || 'openstack' || 'custom'
                 default:
                     GroupManageService.put(group)
                         .then(() => GroupManageService.putInventorySource(params, groupData.related.inventory_source))
-                        .then(() => $state.go('^', null, {reload: true}));
+                        .then(() => $state.go($state.current, null, {reload: true}));
                     break;
             }
         };

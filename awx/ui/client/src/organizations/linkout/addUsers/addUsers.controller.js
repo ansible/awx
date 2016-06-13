@@ -65,7 +65,6 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
             $q.all(requests)
                 .then(function () {
                     Wait('stop');
-                    $scope.$emit('ReloadOrganzationCards', $scope.$parent.org_id);
                     $scope.$parent.search('user');
                     $scope.closeModal();
                 }, function (error) {

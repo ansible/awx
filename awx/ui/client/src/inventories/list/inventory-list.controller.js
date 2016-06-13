@@ -322,9 +322,10 @@ function InventoriesList($scope, $rootScope, $location, $log,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
-                    if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.go('^');
+                    if (parseInt($state.params.inventory_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
                     }
                 })
                 .error(function (data, status) {

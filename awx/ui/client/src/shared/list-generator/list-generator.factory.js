@@ -172,8 +172,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     // respond to changes to the edit indicator from
                     // the stateChangeStart event in app.js
                     this.scope.$on("EditIndicatorChange", function(e, list, id) {
-                        e.targetScope.listBeingEdited = list;
-                        e.targetScope.rowBeingEdited = id;
+                        if (list === "organizations") {
+                            e.targetScope.activeCard = parseInt(id);
+                        } else {
+                            e.targetScope.listBeingEdited = list;
+                            e.targetScope.rowBeingEdited = id;
+                        }
                     });
 
                     this.scope.$on("RemoveIndicator", function(e) {
@@ -364,6 +368,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     html += (list.searchRowActions) ? "<div class='row'><div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\">" : "";
+                    if (list.searchRowActions && !list.searchSize) {
+                        list.searchSize = 'col-lg-7 col-md-12 col-sm-12 col-xs-12';
+                    }
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         var tagSearch = getSearchHtml
                             .inject(getSearchHtml.getList(list),

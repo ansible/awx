@@ -93,6 +93,7 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
             };
 
             $scope.formCancel = function(){
+                $scope.$emit("ReloadOrgListView");
                 $state.go('organizations');
             };
 

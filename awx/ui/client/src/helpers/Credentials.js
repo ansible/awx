@@ -307,14 +307,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                      Rest.put(data)
                      .success(function () {
                          Wait('stop');
-                         var base = $location.path().replace(/^\//, '').split('/')[0];
-                             if (base === 'credentials') {
-                             ReturnToCaller();
-                         }
-                         else {
-                             ReturnToCaller(1);
-                         }
-
+                         $state.go($state.current, {}, {reload: true});
                      })
                      .error(function (data, status) {
                          Wait('stop');

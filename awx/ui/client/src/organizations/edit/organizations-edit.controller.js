@@ -27,9 +27,9 @@ export default ['$scope', '$rootScope', '$compile', '$location',
 
         $scope.$parent.activeMode = 'edit';
 
-        $scope.$emit("HideOrgListHeader");
+        $scope.$parent.activeCard = parseInt(id);
 
-        $scope.$emit("ReloadOrganzationCards", id);
+        $scope.$emit("HideOrgListHeader");
 
         $scope.organization_id = id;
 
@@ -116,12 +116,11 @@ export default ['$scope', '$rootScope', '$compile', '$location',
             }
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(params)
-                .success(function (data) {
+                .success(function () {
                     Wait('stop');
                     $scope.organization_name = $scope.name;
                     master = params;
-                    $rootScope.flashMessage = "Your changes were successfully saved!";
-                    $scope.$emit("ReloadOrganzationCards", data.id);
+                    $state.go($state.current, {}, {reload: true});
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, OrganizationForm, { hdr: 'Error!',
@@ -130,26 +129,22 @@ export default ['$scope', '$rootScope', '$compile', '$location',
         };
 
         $scope.formCancel = function () {
-            $scope.$emit("ReloadOrganzationCards");
-            $scope.$emit("ShowOrgListHeader");
             $state.transitionTo('organizations');
+            $scope.$emit("ShowOrgListHeader");
         };
 
         // Related set: Add button
         $scope.add = function (set) {
-            $rootScope.flashMessage = null;
             $location.path('/' + base + '/' + $stateParams.organization_id + '/' + set);
         };
 
         // Related set: Edit button
         $scope.edit = function (set, id) {
-            $rootScope.flashMessage = null;
             $location.path('/' + set + '/' + id);
         };
 
         // Related set: Delete button
         $scope['delete'] = function (set, itm_id, name, title) {
-            $rootScope.flashMessage = null;
 
             var action = function () {
                 Wait('start');

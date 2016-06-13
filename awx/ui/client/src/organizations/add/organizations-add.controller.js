@@ -41,13 +41,8 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                 })
                 .success(function(data) {
                     Wait('stop');
-                    $scope.$emit("ReloadOrganzationCards", data.id);
-                    if (base === 'organizations') {
-                        $rootScope.flashMessage = "New organization successfully created!";
-                        $location.path('/organizations/' + data.id);
-                    } else {
-                        ReturnToCaller(1);
-                    }
+                    $rootScope.$broadcast("EditIndicatorChange", "organizations", data.id);
+                    $state.go('organizations.edit', {organization_id: data.id}, {reload: true});
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, form, {
@@ -58,7 +53,6 @@ export default ['$scope', '$rootScope', '$compile', '$location',
         };
 
         $scope.formCancel = function() {
-            $scope.$emit("ReloadOrganzationCards");
             $scope.$emit("ShowOrgListHeader");
             $state.transitionTo('organizations');
         };

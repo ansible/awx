@@ -111,9 +111,10 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
-                    if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.go('^');
+                    if (parseInt($state.params.user_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
                     }
                 })
                 .error(function (data, status) {
@@ -391,7 +392,7 @@ export function UsersEdit($scope, $rootScope, $location,
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function(){
-                $state.go('users', null, {reload: true});
+                $state.go($state.current, null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +

@@ -27,9 +27,6 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 var val = {}, url = '/#/organizations/' + card.id + '/';
                 val.name = card.name;
                 val.id = card.id;
-                if (card.id + "" === cards.activeCard) {
-                    val.isActiveCard = true;
-                }
                 val.description = card.description || undefined;
                 val.links = [];
                 val.links.push({
@@ -73,14 +70,9 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         };
 
         $scope.$on("ReloadOrgListView", function() {
-            if ($state.$current.self.name === "organizations") {
-                delete $scope.activeCard;
-                if ($scope.orgCards) {
-                    $scope.orgCards = $scope.orgCards.map(function(card) {
-                        delete card.isActiveCard;
-                        return card;
-                    });
-                }
+            if ($state.$current.self.name === "organizations" ||
+                $state.$current.self.name === "organizations.add") {
+                $scope.activeCard = null;
             }
         });
 
@@ -118,10 +110,19 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success(function() {
-                        if ($state.current.name !== "organzations") {
-                            $state.transitionTo("organizations");
+                        Wait('stop');
+                        if ($state.current.name !== "organizations") {
+                            if ($state.current
+                                .name === 'organizations.edit' &&
+                                id === parseInt($state.params
+                                    .organization_id)) {
+                                $state.go("organizations", {}, {reload: true});
+                            } else {
+                                $state.go($state.current, {}, {reload: true});
+                            }
+                        } else {
+                            $state.go($state.current, {}, {reload: true});
                         }
-                        $scope.$emit("ReloadOrganzationCards");
                     })
                     .error(function(data, status) {
                         ProcessErrors($scope, data, status, null, {

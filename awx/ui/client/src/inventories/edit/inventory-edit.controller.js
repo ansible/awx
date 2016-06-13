@@ -132,7 +132,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
       Rest.put(data)
           .success(function () {
               Wait('stop');
-              $location.path('/inventories/');
+              $state.go($state.current, {}, {reload: true});
           })
           .error(function (data, status) {
               ProcessErrors($scope, data, status, form, { hdr: 'Error!',
