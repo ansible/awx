@@ -75,6 +75,9 @@ export default
 	 		// calculate the number of days remaining on the license
 			var duration = moment.duration(seconds, 'seconds').asDays();
 			duration = Math.floor(duration);
+            if(duration < 0 ){
+                duration = 0;
+            }
             duration = (duration!==1) ? `${duration} Days` : `${duration} Day`;
 			return duration;
 	 	};
@@ -97,6 +100,7 @@ export default
                 $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
                 $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
                 $scope.valid = CheckLicense.valid($scope.license.license_info);
+                $scope.compliant = $scope.license.license_info.compliant;
                 Wait('stop');
             });
         };
