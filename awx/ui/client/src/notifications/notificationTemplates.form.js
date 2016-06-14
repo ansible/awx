@@ -315,6 +315,7 @@ export default function() {
                            '  "X-Ansible": "Is great!"\n' +
                            '}\n' +
                            '</pre></p>',
+                dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm'
             },
