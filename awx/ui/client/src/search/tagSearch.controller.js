@@ -19,9 +19,10 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         };
 
         // sets the search type dropdown and hides it
-        $scope.setSearchType = function(type) {
+        $scope.setSearchType = function($event, type) {
             $scope.currentSearchType = type;
             $scope.showTypeDropdown = false;
+            $event.stopPropagation();
         };
 
         // if the current search type uses a list instead
