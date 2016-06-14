@@ -841,7 +841,7 @@ class JobTemplateAccess(BaseAccess):
                     self.check_license(feature='surveys')
                 return True
 
-            for required_field in ('credential', 'cloud_credential', 'inventory', 'project'):
+            for required_field in ('credential', 'cloud_credential', 'network_credential', 'inventory', 'project'):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
@@ -863,7 +863,7 @@ class JobTemplateAccess(BaseAccess):
 
         for k, v in data.items():
             if hasattr(obj, k) and getattr(obj, k) != v:
-                if k not in field_whitelist:
+                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None):
                     return False
         return True
 
