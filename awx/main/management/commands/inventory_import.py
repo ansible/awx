@@ -362,7 +362,19 @@ class ExecutableJsonLoader(BaseLoader):
                     raise RuntimeError("proot is not installed but is configured for use")
                 kwargs = {'proot_temp_dir': self.source_dir} # TODO: Remove proot dir
                 cmd = wrap_args_with_proot(cmd, self.source_dir, **kwargs)
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # Use ansible venv if it's available and setup to use
+            env = dict(os.environ.items())
+            if settings.ANSIBLE_USE_VENV:
+                env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+                env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+                venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+                env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+                for python_ver in ["python2.7", "python2.6"]:
+                    if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                        env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                        break
+
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             stdout, stderr = proc.communicate()
             if proc.returncode != 0:
                 raise RuntimeError('%r failed (rc=%d) with output: %s' % (cmd, proc.returncode, stderr))
