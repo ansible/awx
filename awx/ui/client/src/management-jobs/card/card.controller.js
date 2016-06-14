@@ -35,6 +35,11 @@ export default
                     parent_scope = scope;
                 scope.cleanupJob = true;
 
+                // This handles the case where the user refreshes the management job notifications page.
+                if($state.current.name === 'managementJobsList.notifications') {
+                    $scope.activeCard = parseInt($state.params.management_id);
+                    $scope.cardAction = "notifications";
+                }
 
                  // Cancel
                 scope.cancelConfigure = function () {
@@ -263,5 +268,23 @@ export default
                 parent_scope.refreshJobs = function(){
                     scope.search(SchedulesList.iterator);
                 };
+
+                var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+                     if(toState.name === "managementJobsList") {
+                         // We are on the management job list view - nothing needs to be highlighted
+                         delete $scope.activeCard;
+                         delete $scope.cardAction;
+                     }
+                     else if(toState.name === "managementJobsList.notifications") {
+                         // We are on the notifications view - update the active card and the action
+                         $scope.activeCard = parseInt(toParams.management_id);
+                         $scope.cardAction = "notifications";
+                     }
+                });
+
+                // Remove the listener when the scope is destroyed to avoid a memory leak
+                $scope.$on('$destroy', function() {
+                    cleanUpStateChangeListener();
+                });
         }
     ];
