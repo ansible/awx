@@ -195,8 +195,17 @@ class ProjectUpdatePermission(ModelAccessPermission):
     '''
     Permission check used by ProjectUpdateView to determine who can update projects
     '''
+    def check_get_permission(self, request, view, obj=None):
+        if request.user.is_superuser:
+            return True
 
-    def has_permission(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        if project and request.user in project.read_role:
+            return True
+
+        return False
+
+    def check_post_permission(self, request, view, obj=None):
         if request.user.is_superuser:
             return True
 
