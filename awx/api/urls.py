@@ -38,7 +38,6 @@ user_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/projects/$',                  'user_projects_list'),
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'user_credentials_list'),
     url(r'^(?P<pk>[0-9]+)/roles/$',                     'user_roles_list'),
-    url(r'^(?P<pk>[0-9]+)/object_roles/$',              'user_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'user_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'user_access_list'),
 
