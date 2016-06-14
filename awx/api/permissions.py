@@ -203,6 +203,8 @@ class ProjectUpdatePermission(ModelAccessPermission):
         if project and request.user in project.read_role:
             return True
 
+        return False
+
     def check_post_permission(self, request, view, obj=None):
         if request.user.is_superuser:
             return True
