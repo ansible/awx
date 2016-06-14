@@ -443,6 +443,11 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
         input_type: "radio"
     });
 
+    CreateSelect2({
+        element: '#local-path-select',
+        multiple: false
+    });
+
     // Save
     $scope.formSave = function () {
         var i, fld, url, data={};

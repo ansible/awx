@@ -20,6 +20,7 @@ export default
             "finished, click the blue <em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking ",
         index: false,
         hover: true,
+        emptyListText: 'No Credentials Have Been Created',
 
         fields: {
             name: {

@@ -5,6 +5,7 @@
     display: flex;
     flex-wrap: wrap;
     width: 100%;
+    justify-content: space-between;
 }
 
 .OrgCards-search tag-search{
@@ -32,6 +33,7 @@
     flex-wrap: wrap;
     align-items: baseline;
     margin-top: 20px;
+    width: 32%
 }
 
 .OrgCards-card--selected {
@@ -95,42 +97,15 @@
     margin-right: 10px;
 }
 
-@media (min-width: 1179px) {
-    .OrgCards-card {
-        width: ~"calc(25% - 15px)";
-        margin-right: 20px;
-    }
-
-    .OrgCards-card:nth-child(4n+4) {
-        margin-right: 0px;
-    }
-}
-
-@media (min-width: 901px) and (max-width: 1178px) {
-    .OrgCards-card {
-        width: ~"calc(33% - 11px)";
-        margin-right: 20px;
-    }
-
-    .OrgCards-card:nth-child(3n+3) {
-        margin-right: 0px;
-    }
-}
-
-@media (min-width: 616px) and (max-width: 900px) {
-    .OrgCards-card {
-        width: ~"calc(50% - 10px)";
-        margin-right: 20px;
-    }
-
-    .OrgCards-card:nth-child(2n+2) {
-        margin-right: 0px;
-    }
-}
-
-@media (max-width: 615px) {
+@media (max-width: 840px) {
     .OrgCards-card {
         width: 100%;
         margin-right: 0px;
     }
 }
+
+@media (min-width: 840px) and (max-width: 1240px) {
+    .OrgCards-card {
+        width: ~"calc(50% - 10px)";
+    }
+ }

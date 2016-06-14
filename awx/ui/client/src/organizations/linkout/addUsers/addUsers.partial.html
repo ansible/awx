@@ -22,15 +22,15 @@
             <div class="AddUsers-footer">
                 <div class="buttons Form-buttons AddUsers-buttons">
                     <button type="button"
+                        class="btn btn-sm Form-cancelButton"
+                        ng-click="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updateUsers()"
                         ng-disabled="!selectedItems || !selectedItems.length">
                         Save
-                    </button>
-                    <button type="button"
-                        class="btn btn-sm Form-cancelButton"
-                        ng-click="closeModal()">
-                        Cancel
                     </button>
                 </div>
             </div>
