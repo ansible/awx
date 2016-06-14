@@ -77,7 +77,7 @@ export default
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
-                            if (parseInt($state.params.template_id) === id) {
+                            if (parseInt($state.params.id) === id) {
                                 $state.go("^", null, {reload: true});
                             } else {
                                 $scope.search(list.iterator);
