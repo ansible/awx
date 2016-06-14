@@ -1,3 +1,4 @@
+
 export default
     function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location) {
 
@@ -125,7 +126,9 @@ export default
                                 goToJobDetails('managementJobStdout');
                             }
                             else if(_.has(data, 'project_update')) {
-                                goToJobDetails('scmUpdateStdout');
+                                if($state.current.name !== 'projects') {
+                                    goToJobDetails('scmUpdateStdout');
+                                }
                             }
                             else if(_.has(data, 'inventory_update')) {
                                 goToJobDetails('inventorySyncStdout');
