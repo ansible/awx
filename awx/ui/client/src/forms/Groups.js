@@ -319,11 +319,11 @@ export default
             },
 
             buttons: {
-                save: {
-                    ngClick: 'formSave()'
-                },
                 cancel: {
                     ngClick: 'formCancel()'
+                },
+                save: {
+                    ngClick: 'formSave()'
                 }
             },
 
