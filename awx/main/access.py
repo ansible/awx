@@ -270,6 +270,19 @@ class UserAccess(BaseAccess):
             return True
         return False
 
+    def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        "Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment."
+        if relationship == 'roles':
+            role_access = RoleAccess(self.user)
+            return role_access.can_attach(sub_obj, obj, 'members', *args, **kwargs)
+        return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == 'roles':
+            role_access = RoleAccess(self.user)
+            return role_access.can_unattach(sub_obj, obj, 'members', *args, **kwargs)
+        return super(UserAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+
 
 class OrganizationAccess(BaseAccess):
     '''
@@ -649,6 +662,24 @@ class TeamAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
+
+    def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
+        of a resource role to the team."""
+        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
+            role_access = RoleAccess(self.user)
+            return role_access.can_attach(sub_obj, obj, 'member_role.parents',
+                                          *args, **kwargs)
+        return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
+                                                  *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
+            role_access = RoleAccess(self.user)
+            return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
+                                            *args, **kwargs)
+        return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
+                                                    *args, **kwargs)
 
 class ProjectAccess(BaseAccess):
     '''

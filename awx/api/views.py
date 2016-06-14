@@ -3769,21 +3769,26 @@ class RoleTeamsList(ListAPIView):
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
-        # Forbid implicit role creation here
+        # Forbid implicit team creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg="Team 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        # XXX: Need to pull in can_attach and can_unattach kinda code from SubListCreateAttachDetachAPIView
+
         role = Role.objects.get(pk=self.kwargs['pk'])
         team = Team.objects.get(pk=sub_id)
+        action = 'attach'
+        if request.data.get('disassociate', None):
+            action = 'unattach'
+        if not request.user.can_access(self.parent_model, action, role, team,
+                                       self.relationship, request.data,
+                                       skip_sub_obj_read_check=False):
+            raise PermissionDenied()
         if request.data.get('disassociate', None):
             team.member_role.children.remove(role)
         else:
             team.member_role.children.add(role)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # XXX attach/detach needs to ensure we have the appropriate perms
 
 
 class RoleParentsList(SubListAPIView):
