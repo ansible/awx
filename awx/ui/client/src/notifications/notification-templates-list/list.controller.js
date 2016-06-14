@@ -1,4 +1,4 @@
-/*************************************************
+ /*************************************************
  * Copyright (c) 2015 Ansible, Inc.
  *
  * All Rights Reserved
@@ -150,11 +150,33 @@ export default
                 var name = this.notification_template.name;
                 Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
                 Rest.post({})
-                .then(function () {
-                    ngToast.success({
-                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Succeeded.`,
-                     });
+                    .then(function (data) {
+                        if(data && data.data && data.data.notification){
+                            Wait('start');
+                            setTimeout(function(){
+                                console.log('in set timeout');
+                                var id = data.data.notification,
+                                url = GetBasePath('notifications') + id;
+                                Rest.setUrl(url);
+                                Rest.get()
+                                .then(function (res) {
+                                    Wait('stop');
+                                    if(res && res.data && res.data.status && res.data.status === "successful"){
+                                        ngToast.success({
+                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Succeeded.`,
+                                            dismissOnTimeout: false
+                                        });
+                                    }
+                                    else if(res && res.data && res.data.status && res.data.status === "failed"){
+                                        ngToast.danger({
+                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
+                                            dismissOnTimeout: false
+                                        });
+                                    }
+                                });
+                            } , 5000);
 
+                    }
                 })
                 .catch(function () {
                     ngToast.danger({
