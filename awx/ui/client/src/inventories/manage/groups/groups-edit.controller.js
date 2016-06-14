@@ -113,8 +113,9 @@
                 });
             }
             // reset fields
-            $scope.source_region_choices = $scope[source + '_regions'];
-            $scope.cloudCredentialRequired = source !== 'manual' && source !== 'custom' ? true : false;
+            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
+            $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
+            $scope.cloudCredentialRequired = source.value !== 'manual' && source.value !== 'custom' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
@@ -141,8 +142,17 @@
         var initRegionData = function(){
             var source = $scope.source.value === 'azure_rm' ? 'azure' : $scope.source.value;
             var regions = inventorySourceData.source_regions.split(',');
+            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = $scope[source + '_regions'];
-            $scope.source_regions = _.map(regions, (region) => _.find($scope[source+'_regions'], {value: region}));
+
+            // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
+            if (source === 'azure'){
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source+'_regions'], (o) => o.value.toLowerCase() === region));
+            }
+            // all other regions are 1-1
+            else{
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source+'_regions'], (o) => o.value === region));
+            }
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             if (source ==='ec2'){
                 var group_by = inventorySourceData.group_by.split(',');

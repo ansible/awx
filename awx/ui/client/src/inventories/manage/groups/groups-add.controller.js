@@ -116,7 +116,8 @@
             }
             // reset fields
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
-            $scope.source_region_choices = $scope[source + '_regions'];
+            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
+            $scope.source_region_choices = source === 'azure_rm' ? $scope.azure_regions : $scope[source + '_regions'];
             $scope.cloudCredentialRequired = source !== 'manual' && source !== 'custom' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
