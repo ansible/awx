@@ -153,8 +153,10 @@ export default
                     .then(function (data) {
                         if(data && data.data && data.data.notification){
                             Wait('start');
+                            // Using a setTimeout here to wait for the
+                            // notification to be processed and for a status
+                            // to be returned from the API.
                             setTimeout(function(){
-                                console.log('in set timeout');
                                 var id = data.data.notification,
                                 url = GetBasePath('notifications') + id;
                                 Rest.setUrl(url);
@@ -163,19 +165,24 @@ export default
                                     Wait('stop');
                                     if(res && res.data && res.data.status && res.data.status === "successful"){
                                         ngToast.success({
-                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Succeeded.`,
-                                            dismissOnTimeout: false
+                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
                                         });
                                     }
                                     else if(res && res.data && res.data.status && res.data.status === "failed"){
                                         ngToast.danger({
-                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
-                                            dismissOnTimeout: false
+                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
                                         });
+                                    }
+                                    else {
+                                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                            msg: 'Call to ' + url + ' failed. Notification returned status: ' + status });
                                     }
                                 });
                             } , 5000);
-
+                    }
+                    else {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to notifcatin templates failed. Notification returned status: ' + status });
                     }
                 })
                 .catch(function () {
