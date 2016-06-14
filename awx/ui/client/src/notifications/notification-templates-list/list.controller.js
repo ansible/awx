@@ -170,7 +170,7 @@ export default
                                     }
                                     else if(res && res.data && res.data.status && res.data.status === "failed"){
                                         ngToast.danger({
-                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
+                                            content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
                                         });
                                     }
                                     else {
