@@ -244,7 +244,6 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
-            console.log($state);
             Rest.destroy()
                 .success(function () {
                     if (parseInt($state.params.id) === id) {
