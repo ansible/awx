@@ -768,7 +768,6 @@ class UserSerializer(BaseSerializer):
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
             roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
-            object_roles           = reverse('api:user_object_roles_list',               args=(obj.pk,)),
             activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
             access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
         ))
