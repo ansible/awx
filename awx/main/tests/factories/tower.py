@@ -229,6 +229,7 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
 
     jt = mk_job_template(name, project=proj,
                          inventory=inv, credential=cred,
+                         network_credential=net_cred, cloud_credential=cloud_cred,
                          job_type=job_type, spec=spec, extra_vars=extra_vars,
                          persisted=persisted)
 

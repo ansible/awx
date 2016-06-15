@@ -123,7 +123,8 @@ def mk_job(job_type='run', status='new', job_template=None, inventory=None,
 
 def mk_job_template(name, job_type='run',
                     organization=None, inventory=None,
-                    credential=None, persisted=True, extra_vars='',
+                    credential=None, network_credential=None,
+                    cloud_credential=None, persisted=True, extra_vars='',
                     project=None, spec=None):
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
@@ -138,6 +139,9 @@ def mk_job_template(name, job_type='run',
     jt.credential = credential
     if jt.credential is None:
         jt.ask_credential_on_launch = True
+
+    jt.network_credential = network_credential
+    jt.cloud_credential = cloud_credential
 
     jt.project = project
 
