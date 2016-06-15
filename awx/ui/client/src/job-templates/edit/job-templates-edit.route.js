@@ -15,7 +15,6 @@ export default {
         activityStreamId: 'id'
     },
     params: {
-        copied: null
     },
     ncyBreadcrumb: {
         parent: 'jobTemplates',
