@@ -33,6 +33,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
+from celery.signals import celeryd_init, worker_ready
 
 # Django
 from django.conf import settings
@@ -66,6 +67,17 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 logger = logging.getLogger('awx.main.tasks')
+
+@celeryd_init.connect
+def celery_startup(conf=None, **kwargs):
+    # Re-init all schedules
+    # NOTE: Rework this during the Rampart work
+    logger.info("Syncing Tower Schedules")
+    for sch in Schedule.objects.all():
+        try:
+            sch.update_computed_fields()
+        except Exception, e:
+            logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 @task()
 def send_notifications(notification_list, job_id=None):
