@@ -17,7 +17,7 @@
 export default
     angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
         .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', '$rootScope',
-        function (Alert, AngularCodeMirror, $rootScope) {
+        function (Alert, AngularCodeMirror) {
             return function (params) {
 
                 var scope = params.scope,
