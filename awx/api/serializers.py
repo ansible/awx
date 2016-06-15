@@ -2290,7 +2290,7 @@ class JobLaunchSerializer(BaseSerializer):
         data = self.context.get('data')
 
         for field in obj.resources_needed_to_start:
-            if not (field in attrs and obj._ask_for_vars_dict().get(field, False)):
+            if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
                 errors[field] = "Job Template '%s' is missing or undefined." % field
 
         if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):

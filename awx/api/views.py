@@ -2325,12 +2325,12 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
         if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
-            new_credential = Credential.objects.get(pk=prompted_fields['credential'])
+            new_credential = get_object_or_400(Credential, pk=get_pk_from_dict(prompted_fields, 'credential'))
             if request.user not in new_credential.use_role:
                 raise PermissionDenied()
 
         if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
-            new_inventory = Inventory.objects.get(pk=prompted_fields['inventory'])
+            new_inventory = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, 'inventory'))
             if request.user not in new_inventory.use_role:
                 raise PermissionDenied()
 
