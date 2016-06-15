@@ -651,7 +651,6 @@ export default
             };
 
             $scope.formCancel = function () {
-                // the form was just copied in the previous state, it's safe to destroy on cancel
                 $state.go('jobTemplates');
             };
 
