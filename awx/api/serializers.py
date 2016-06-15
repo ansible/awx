@@ -1701,11 +1701,51 @@ class CredentialSerializerCreate(CredentialSerializer):
         model = Credential
         fields = ('*', 'user', 'team', 'organization')
 
+    def validate(self, attrs):
+        owner_fields = set()
+        for field in ('user', 'team', 'organization'):
+            if field in attrs:
+                if attrs[field]:
+                    owner_fields.add(field)
+                else:
+                    attrs.pop(field)
+        if not owner_fields:
+            raise serializers.ValidationError({"detail": "Missing 'user', 'team', or 'organization'."})
+        elif len(owner_fields) > 1:
+            raise serializers.ValidationError({"detail": "Expecting exactly one of 'user', 'team', or 'organization'."})
+
+        return super(CredentialSerializerCreate, self).validate(attrs)
+
     def create(self, validated_data):
-        # Remove the user, team, and organization processed in view
-        for field in ['user', 'team', 'organization']:
-            validated_data.pop(field, None)
-        return super(CredentialSerializer, self).create(validated_data)
+        user = validated_data.pop('user', None)
+        team = validated_data.pop('team', None)
+        credential = super(CredentialSerializer, self).create(validated_data)
+        if user:
+            credential.owner_role.members.add(user)
+        if team:
+            credential.owner_role.parents.add(team.member_role)
+        return credential
+
+
+class UserCredentialSerializerCreate(CredentialSerializerCreate):
+
+    class Meta:
+        model = Credential
+        fields = ('*', '-team', '-organization')
+
+
+class TeamCredentialSerializerCreate(CredentialSerializerCreate):
+
+    class Meta:
+        model = Credential
+        fields = ('*', '-user', '-organization')
+
+
+class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
+
+    class Meta:
+        model = Credential
+        fields = ('*', '-user', '-team')
 
 
 class JobOptionsSerializer(BaseSerializer):
@@ -2731,4 +2771,3 @@ class FactSerializer(BaseFactSerializer):
         res = super(FactSerializer, self).get_related(obj)
         res['host'] = obj.host.get_absolute_url()
         return res
-

@@ -9,6 +9,7 @@ import time
 # Django
 from django.conf import settings
 from django.db import connection
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
@@ -328,10 +329,11 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
 
         # Make a copy of the data provided (since it's readonly) in order to
         # inject additional data.
-        if hasattr(request.data, 'dict'):
-            data = request.data.dict()
+        if hasattr(request.data, 'copy'):
+            data = request.data.copy()
         else:
-            data = request.data
+            data = QueryDict('')
+            data.update(request.data)
 
         # add the parent key to the post data using the pk from the URL
         parent_key = getattr(self, 'parent_key', None)

@@ -1313,55 +1313,15 @@ class UserAccessList(ResourceAccessList):
     resource_model = User
     new_in_300 = True
 
+
 class CredentialList(ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
 
-    def post(self, request, *args, **kwargs):
-
-        # Check the validity of POST data, including special fields
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        for field in [x for x in ['user', 'team', 'organization'] if x in request.data and request.data[x] in ('', None)]:
-            request.data.pop(field)
-            kwargs.pop(field, None)
-
-        if not any([x in request.data for x in ['user', 'team', 'organization']]):
-            return Response({"detail": "Missing 'user', 'team', or 'organization'."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if sum([1 if x in request.data else 0 for x in ['user', 'team', 'organization']]) != 1:
-            return Response({"detail": "Expecting exactly one of 'user', 'team', or 'organization'."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if 'user' in request.data:
-            user = User.objects.get(pk=request.data['user'])
-            can_add_params = {'user': user.id}
-        if 'team' in request.data:
-            team = Team.objects.get(pk=request.data['team'])
-            can_add_params = {'team': team.id}
-        if 'organization' in request.data:
-            organization = Organization.objects.get(pk=request.data['organization'])
-            can_add_params = {'organization': organization.id}
-
-        if not self.request.user.can_access(Credential, 'add', can_add_params):
-            raise PermissionDenied()
-
-        ret = super(CredentialList, self).post(request, *args, **kwargs)
-        credential = Credential.objects.get(id=ret.data['id'])
-
-        if 'user' in request.data:
-            credential.owner_role.members.add(user)
-        if 'team' in request.data:
-            credential.owner_role.parents.add(team.member_role)
-        if 'organization' in request.data:
-            credential.organization = organization
-            credential.save()
-
-        return ret
-
 
 class CredentialOwnerUsersList(SubListAPIView):
+
     model = User
     serializer_class = UserSerializer
     parent_model = Credential
@@ -1370,6 +1330,7 @@ class CredentialOwnerUsersList(SubListAPIView):
 
 
 class CredentialOwnerTeamsList(SubListAPIView):
+
     model = Team
     serializer_class = TeamSerializer
     parent_model = Credential
@@ -1386,53 +1347,48 @@ class CredentialOwnerTeamsList(SubListAPIView):
         return self.model.objects.filter(pk__in=teams)
 
 
-class UserCredentialsList(CredentialList):
+class UserCredentialsList(SubListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = UserCredentialSerializerCreate
+    parent_model = User
+    parent_key = 'user'
 
     def get_queryset(self):
-        user = get_object_or_404(User,pk=self.kwargs['pk'])
-        if not self.request.user.can_access(User, 'read', user):
-            raise PermissionDenied()
+        user = self.get_parent_object()
+        self.check_parent_access(user)
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
         user_creds = Credential.accessible_objects(user, 'read_role')
         return user_creds & visible_creds
 
-    def post(self, request, *args, **kwargs):
-        request.data['user'] = self.kwargs['pk']
-        # The following post takes care of ensuring the current user can add a cred to this user
-        return super(UserCredentialsList, self).post(request, args, kwargs)
 
-class TeamCredentialsList(CredentialList):
+class TeamCredentialsList(SubListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = TeamCredentialSerializerCreate
+    parent_model = Team
+    parent_key = 'team'
 
     def get_queryset(self):
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(Team, 'read', team):
-            raise PermissionDenied()
+        team = self.get_parent_object()
+        self.check_parent_access(team)
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
         team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
         return team_creds & visible_creds
 
-    def post(self, request, *args, **kwargs):
-        request.data['team'] = self.kwargs['pk']
-        # The following post takes care of ensuring the current user can add a cred to this user
-        return super(TeamCredentialsList, self).post(request, args, kwargs)
 
-class OrganizationCredentialList(CredentialList):
+class OrganizationCredentialList(SubListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = OrganizationCredentialSerializerCreate
+    parent_model = Organization
+    parent_key = 'organization'
 
     def get_queryset(self):
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.can_access(Organization, 'read', organization):
-            raise PermissionDenied()
+        organization = self.get_parent_object()
+        self.check_parent_access(organization)
 
         user_visible = Credential.accessible_objects(self.request.user, 'read_role').all()
         org_set = Credential.accessible_objects(organization.admin_role, 'read_role').all()
@@ -1441,13 +1397,6 @@ class OrganizationCredentialList(CredentialList):
             return org_set
 
         return org_set & user_visible
-
-    def post(self, request, *args, **kwargs):
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        request.data['organization'] = organization.id
-        # The following post takes care of ensuring the current user can add a cred to this user
-        return super(OrganizationCredentialList, self).post(request, args, kwargs)
-
 
 
 class CredentialDetail(RetrieveUpdateDestroyAPIView):
