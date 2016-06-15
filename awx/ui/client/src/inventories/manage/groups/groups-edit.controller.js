@@ -55,7 +55,7 @@
                     GroupManageService.put(group).then(() => $state.go('^', null, {reload: true}));
                     break;
                 // create a new group and create/associate an inventory source
-                // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'foreman' || 'cloudforms' || 'openstack' || 'custom'
+                // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
                 default:
                     GroupManageService.put(group)
                         .then(() => GroupManageService.putInventorySource(params, groupData.related.inventory_source))
@@ -260,7 +260,7 @@
                     input_type: "radio"
                 });
             }
-            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'foreman' || 'cloudforms' || 'openstack' || 'custom'
+            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
             else{
                 $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
                 LookUpInit({

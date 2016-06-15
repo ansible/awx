@@ -61,7 +61,7 @@
                     });
                     break;
                 // create a new group and create/associate an inventory source
-                // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'foreman' || 'cloudforms' || 'openstack' || 'custom'
+                // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
                 default:
                     GroupManageService.post(group)
                         // associate to group
@@ -103,7 +103,7 @@
                     input_type: "radio"
                 });
             }
-            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'foreman' || 'cloudforms' || 'openstack' || 'custom'
+            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
             else{
                 LookUpInit({
                     scope: $scope,

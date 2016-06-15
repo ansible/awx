@@ -728,7 +728,7 @@ class InventorySourceOptions(BaseModel):
         ('azure', _('Microsoft Azure Classic (deprecated)')),
         ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
-        ('foreman', _('Red Hat Satellite 6')),
+        ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
@@ -964,7 +964,7 @@ class InventorySourceOptions(BaseModel):
         return [('all', 'All')]
 
     @classmethod
-    def get_foreman_region_choices(self):
+    def get_satellite6_region_choices(self):
         """Red Hat Satellite 6 region choices (not implemented)"""
         return [('all', 'All')]
 

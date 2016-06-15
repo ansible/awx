@@ -1275,7 +1275,7 @@ class RunInventoryUpdate(BaseTask):
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
-        elif inventory_update.source == 'foreman':
+        elif inventory_update.source == 'satellite6':
             section = 'foreman'
             cp.add_section(section)
 
@@ -1406,7 +1406,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_ZONE'] = inventory_update.source_regions
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
-        elif inventory_update.source == 'foreman':
+        elif inventory_update.source == 'satellite6':
             env['FOREMAN_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'cloudforms':
             env['CLOUDFORMS_INI_PATH'] = cloud_credential

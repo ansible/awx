@@ -38,7 +38,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ('aws', _('Amazon Web Services')),
         ('rax', _('Rackspace')),
         ('vmware', _('VMware vCenter')),
-        ('foreman', _('Red Hat Satellite 6')),
+        ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure Classic (deprecated)')),

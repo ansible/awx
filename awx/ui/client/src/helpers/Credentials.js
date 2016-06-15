@@ -140,7 +140,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.hostPopOver = "<p>The host to authenticate with." +
                                  "<br />For example, https://openstack.business.com/v2.0/";
                          break;
-                         case 'foreman':
+                         case 'satellite6':
                             scope.username_required = true;
                             scope.password_required = true;
                             scope.passwordLabel = 'Password';

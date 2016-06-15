@@ -31,7 +31,7 @@ def create_system_job_templates(apps, schema_editor):
         ),
     )
     if created:
-        sjt.schedules.create(
+        sched = Schedule(
             name='Cleanup Job Schedule',
             rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU' % now_str,
             description='Automatically Generated Schedule',
@@ -40,6 +40,8 @@ def create_system_job_templates(apps, schema_editor):
             created=now_dt,
             modified=now_dt,
         )
+        sched.unified_job_template = sjt
+        sched.save()
 
     existing_cd_jobs = SystemJobTemplate.objects.filter(job_type='cleanup_deleted')
     Schedule.objects.filter(unified_job_template__in=existing_cd_jobs).delete()
@@ -56,7 +58,7 @@ def create_system_job_templates(apps, schema_editor):
         ),
     )
     if created:
-        sjt.schedules.create(
+        sched = Schedule(
             name='Cleanup Activity Schedule',
             rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU' % now_str,
             description='Automatically Generated Schedule',
@@ -65,6 +67,8 @@ def create_system_job_templates(apps, schema_editor):
             created=now_dt,
             modified=now_dt,
         )
+        sched.unified_job_template = sjt
+        sched.save()
 
     sjt, created = SystemJobTemplate.objects.get_or_create(
         job_type='cleanup_facts',
@@ -77,7 +81,7 @@ def create_system_job_templates(apps, schema_editor):
         ),
     )
     if created and feature_enabled('system_tracking', bypass_database=True):
-        sjt.schedules.create(
+        sched = Schedule(
             name='Cleanup Fact Schedule',
             rrule='DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1' % now_str,
             description='Automatically Generated Schedule',
@@ -86,7 +90,8 @@ def create_system_job_templates(apps, schema_editor):
             created=now_dt,
             modified=now_dt,
         )
-
+        sched.unified_job_template = sjt
+        sched.save()
 
 class Migration(migrations.Migration):
 

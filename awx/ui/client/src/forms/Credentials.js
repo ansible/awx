@@ -133,7 +133,7 @@ export default
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'foreman' || kind.value === 'cloudforms'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'satellite6' || kind.value === 'cloudforms'",
                     awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
@@ -206,7 +206,7 @@ export default
                 "password": {
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'|| kind.value == 'foreman'|| kind.value == 'cloudforms'|| kind.value == 'net' || kind.value == 'azure_rm'",
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'|| kind.value == 'satellite6'|| kind.value == 'cloudforms'|| kind.value == 'net' || kind.value == 'azure_rm'",
                     clear: false,
                     autocomplete: false,
                     hasShowInputButton: true,
