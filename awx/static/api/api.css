@@ -36,7 +36,9 @@ body .navbar {
   background-color: #FFFFFF;
   border-color: #E8E8E8;
 }
-body .navbar > .container .navbar-brand, .navbar {
+body .navbar > .container .navbar-brand,
+body .navbar > .container-fluid .navbar-brand,
+.navbar {
   color: #707070;
   padding: 0;
   margin-left: 0px;
