@@ -16,7 +16,7 @@ export default
             managementJobsListObject, $rootScope, $state, $scope,
             CreateSelect2) {
 
-                var defaultUrl = GetBasePath('system_job_templates');
+                var defaultUrl = GetBasePath('system_job_templates') + "?order_by=name";
 
                 var getManagementJobs = function(){
                     Rest.setUrl(defaultUrl);
