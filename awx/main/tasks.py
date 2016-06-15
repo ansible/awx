@@ -33,7 +33,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_ready
+from celery.signals import celeryd_init
 
 # Django
 from django.conf import settings
