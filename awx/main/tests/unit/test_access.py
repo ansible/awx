@@ -9,7 +9,7 @@ from awx.main.access import (
     check_superuser,
     JobTemplateAccess,
 )
-from awx.main.models import Credential, Inventory, Project, Role
+from awx.main.models import Credential, Inventory, Project, Role, Organization
 
 
 @pytest.fixture
@@ -27,6 +27,10 @@ def job_template_with_ids(job_template_factory):
         persisted=False)
     return jt_objects.job_template
 
+@pytest.fixture
+def user_unit():
+    return User(username='rando', password='raginrando', email='rando@redhat.com')
+
 def test_superuser(mocker):
     user = mocker.MagicMock(spec=User, id=1, is_superuser=True)
     access = BaseAccess(user)
@@ -41,24 +45,22 @@ def test_not_superuser(mocker):
     can_add = check_superuser(BaseAccess.can_add)
     assert can_add(access, None) is False
 
-def test_jt_existing_values_are_nonsensitive(job_template_with_ids):
+def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     """Assure that permission checks are not required if submitted data is
     identical to what the job template already has."""
 
     data = model_to_dict(job_template_with_ids)
-    rando = User(username='rando', password='raginrando', email='rando@redhat.com')
-    access = JobTemplateAccess(rando)
+    access = JobTemplateAccess(user_unit)
 
     assert access.changes_are_non_sensitive(job_template_with_ids, data)
 
-def test_change_jt_sensitive_data(job_template_with_ids, mocker):
+def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     """Assure that can_add is called with all ForeignKeys."""
 
     job_template_with_ids.admin_role = Role()
 
     data = {'inventory': job_template_with_ids.inventory.id + 1}
-    rando = User(username='rando', password='raginrando', email='rando@redhat.com')
-    access = JobTemplateAccess(rando)
+    access = JobTemplateAccess(user_unit)
 
     mock_add = mock.MagicMock(return_value=False)
     with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
@@ -73,4 +75,38 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker):
         'cloud_credential': job_template_with_ids.cloud_credential.id,
         'network_credential': job_template_with_ids.network_credential.id
     })
+
+def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
+    "Assure that permissions to add scan jobs work correctly"
+
+    access = JobTemplateAccess(user_unit)
+    project = job_template_with_ids.project
+    inventory = job_template_with_ids.inventory
+    project.use_role = Role()
+    inventory.use_role = Role()
+    organization = Organization(name='test-org')
+    inventory.organization = organization
+    organization.admin_role = Role()
+
+    def mock_get_object(Class, **kwargs):
+        if Class == Project:
+            return project
+        elif Class == Inventory:
+            return inventory
+        else:
+            raise Exception('Item requested has not been mocked')
+
+    with mock.patch.object(JobTemplateAccess, 'check_license', return_value=None):
+        with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
+            with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
+                assert access.can_add({
+                    'project': project.pk,
+                    'inventory': inventory.pk,
+                    'job_type': 'scan'
+                })
+
+def test_jt_can_add_bad_data(user_unit):
+    "Assure that no server errors are returned if we call JT can_add with bad data"
+    access = JobTemplateAccess(user_unit)
+    assert not access.can_add({'asdf': 'asdf'})
 
