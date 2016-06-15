@@ -158,10 +158,11 @@ export default
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: 'Permissions',
+                    title: 'Granted permissions',
                     iterator: 'permission',
                     open: false,
                     index: false,
+                    emptyListText: 'No permissions have been granted',
                     fields: {
                         name: {
                             label: 'Name',

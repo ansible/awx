@@ -108,12 +108,12 @@ export default
                     awToolTip: 'Please save before assigning permissions',
                     basePath: 'teams/:id/roles/',
                     type: 'collection',
-                    title: 'Permissions',
+                    title: 'Granted Permissions',
                     iterator: 'role',
                     open: false,
                     index: false,
                     actions: {},
-
+                    emptyListText: 'No permissions have been granted',
                     fields: {
                         name: {
                             label: 'Name',
