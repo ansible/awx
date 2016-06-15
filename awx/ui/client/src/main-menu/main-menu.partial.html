@@ -206,6 +206,7 @@
         data-trigger="hover"
         data-container="body"
         ng-class="{'is-loggedOut' : !$root.current_user.username}"
+        ng-hide="licenseMissing"
         ng-if="socketStatus && socketStatus !== 'ok'">
         <i class="fa MainMenu-socketImage"
             ng-class="socketIconClass">
