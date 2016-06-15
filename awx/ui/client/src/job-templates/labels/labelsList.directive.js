@@ -15,12 +15,6 @@ export default
                 link: function(scope, element, attrs) {
                     scope.seeMoreInactive = true;
 
-                    scope.labels = scope.
-                        job_template.summary_fields.labels.results;
-
-                    scope.count = scope.
-                        job_template.summary_fields.labels.count;
-
                     var getNext = function(data, arr, resolve) {
                         Rest.setUrl(data.next);
                         Rest.get()
@@ -75,6 +69,13 @@ export default
                             actionText: 'REMOVE'
                         });
                     };
+
+                    scope.$watch("job_template.summary_fields.labels.results", function() {
+                        // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
+                        // array will get set initially and then never be updated as labels are removed
+                        scope.labels = scope.job_template.summary_fields.labels.results;
+                        scope.count = scope.job_template.summary_fields.labels.count;
+                    });
                 }
             };
         }
