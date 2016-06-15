@@ -45,6 +45,7 @@ export default
                     'default': '---',
                     dataTitle: 'Group Variables',
                     dataPlacement: 'right',
+                    parseTypeName: 'parseType',
                     awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the " +
                         "radio button to toggle between the two.</p>" +
@@ -158,7 +159,7 @@ export default
                     addRequired: false,
                     editRequired: false,
                     rows: 6,
-                    'default': null,
+                    'default': '---',
                     parseTypeName: 'envParseType',
                     dataTitle: "Environment Variables",
                     dataPlacement: 'right',
@@ -181,7 +182,7 @@ export default
                     addRequired: false,
                     editRequird: false,
                     rows: 6,
-                    'default': null,
+                    'default': '---',
                     parseTypeName: 'envParseType',
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',
@@ -207,7 +208,7 @@ export default
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     editRequird: false,
                     rows: 6,
-                    'default': null,
+                    'default': '---',
                     parseTypeName: 'envParseType',
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',
@@ -233,7 +234,7 @@ export default
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     editRequird: false,
                     rows: 6,
-                    'default': null,
+                    'default': '---',
                     parseTypeName: 'envParseType',
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',

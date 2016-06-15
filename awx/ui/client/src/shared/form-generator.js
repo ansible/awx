@@ -729,14 +729,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
                         // Variable editing
-                        if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
+                        if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars') {
                             html += "<div class=\"parse-selection\" id=\"" + form.name + "_" + fld + "_parse_type\">" +
                                 "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
+                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange('" + ((field.parseTypeName) ? field.parseTypeName : 'parseType') + "', '" + fld + "'" + ")\"> <span class=\"parse-label\">YAML</span>\n";
                             html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
+                            html += "\" value=\"json\" ng-change=\"parseTypeChange('" + ((field.parseTypeName) ? field.parseTypeName : 'parseType')+ "', '" + fld + "'" + ")\"> <span class=\"parse-label\">JSON</span>\n";
                             html += "</div>\n";
                         }
 

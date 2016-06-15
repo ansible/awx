@@ -28,7 +28,7 @@
                 // inventory_source fields
                 params = {
                     instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === null ? null : $scope[$scope.source.value + '_variables'],
+                    source_vars: $scope[$scope.source.value + '_variables'] === '---' ||  $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'],
                     source_script: $scope.inventory_script,
                     source: $scope.source.value,
                     credential: $scope.credential,
@@ -112,6 +112,14 @@
                     list: CredentialList,
                     field: 'credential',
                     input_type: "radio"
+                });
+            }
+            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack'){
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: source + '_variables',
+                    variable: source + '_variables',
+                    parse_variable: 'envParseType'
                 });
             }
             // reset fields
@@ -203,7 +211,7 @@
         });
         var init = function(){
             $scope.parseType = 'yaml';
-            $scope.variables = '---';
+            $scope.envParseType = 'yaml';
             generator.inject(form, {mode: 'add', related: false, id: 'Inventory-groupManage--panel', scope: $scope});
             ParseTypeChange({
                 scope: $scope,

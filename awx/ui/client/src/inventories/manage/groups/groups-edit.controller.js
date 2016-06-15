@@ -5,10 +5,10 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ToggleNotification',
+    ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ToggleNotification', 'ParseVariableString',
     'ParseTypeChange', 'GenerateForm', 'LookUpInit', 'RelatedSearchInit', 'RelatedPaginateInit', 'NotificationsListInit',
     'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
-    function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ToggleNotification,
+    function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ToggleNotification, ParseVariableString,
         ParseTypeChange, GenerateForm, LookUpInit, RelatedSearchInit, RelatedPaginateInit, NotificationsListInit,
         GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData){
         var generator = GenerateForm,
@@ -41,7 +41,7 @@
                     group_by: _.map($scope.group_by, 'value').join(','),
                     source_regions: _.map($scope.source_regions, 'value').join(','),
                     instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === '' ? null : $scope[$scope.source.value + '_variables']
+                    source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables']
                 };
                 source = $scope.source.value;
             }
@@ -112,6 +112,16 @@
                     input_type: "radio"
                 });
             }
+            if (source.value === 'ec2' || source.value === 'custom' ||
+                source.value === 'vmware' || source.value === 'openstack'){
+                $scope[source.value + '_variables'] = $scope[source.value + '_variables'] === null ? '---' : $scope[source.value + '_variables'];
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: source.value + '_variables',
+                    variable: source.value + '_variables',
+                    parse_variable: 'envParseType',
+                });
+            }
             // reset fields
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
@@ -122,6 +132,7 @@
             $scope.credential_name = null;
             initRegionSelect();
         };
+
         var initRegionSelect = function(){
             CreateSelect2({
                 element: '#group_source_regions',
@@ -138,6 +149,19 @@
                 element: '#group_source',
                 multiple: false
             });
+            // After the source is set, conditional fields will be visible
+            // CodeMirror is buggy if you instantiate it in a not-visible element
+            // So we initialize it here instead of the init() routine
+            if(inventorySourceData.source === 'ec2' || inventorySourceData.source === 'openstack' ||
+             inventorySourceData.source ===  'custom' || inventorySourceData.source ===  'vmware'){
+                $scope[inventorySourceData.source + '_variables'] = inventorySourceData.source_vars === null || inventorySourceData.source_vars === '' ? '---' : ParseVariableString(inventorySourceData.source_vars);
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: inventorySourceData.source + '_variables',
+                    variable: inventorySourceData.source + '_variables',
+                    parse_variable: 'envParseType',
+                });
+            }
         };
         var initRegionData = function(){
             var source = $scope.source.value === 'azure_rm' ? 'azure' : $scope.source.value;
@@ -230,15 +254,11 @@
                 {instance_filters: inventorySourceData.instance_filters},
                 {inventory_script: inventorySourceData.source_script}
                 );
-            if(inventorySourceData.source === ('ec2' || 'openstack' || 'custom' || 'vmware')){
-                $scope[inventorySourceData.source + '_variables'] = inventorySourceData.source_vars;
-            }
             if (inventorySourceData.credential){
                 GroupManageService.getCredential(inventorySourceData.credential).then(res => $scope.credential_name = res.data.name);
             }
             $scope = angular.extend($scope, groupData);
-            $scope.variables = $scope.variables === (null || '') ? '---' : $scope.variables;
-            $scope.parseType = 'yaml';
+
             // instantiate lookup fields
             if (inventorySourceData.source !== 'custom'){
                 LookUpInit({
@@ -272,11 +292,17 @@
                     input_type: "radio"
                 });
             }
+            // init codemirror(s)
+            $scope.variables = $scope.variables === null || $scope.variables  === '' ? '---' : ParseVariableString($scope.variables);
+            $scope.parseType = 'yaml';
+            $scope.envParseType = 'yaml';
+
             ParseTypeChange({
                 scope: $scope,
                 field_id: 'group_variables',
                 variable: 'variables',
             });
+
             NotificationsListInit({
                 scope: $scope,
                 url: GetBasePath('inventory_sources'),
