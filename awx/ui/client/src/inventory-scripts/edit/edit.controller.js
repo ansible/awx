@@ -84,7 +84,7 @@ export default
                     script: $scope.script
                 })
                     .success(function () {
-                        $state.transitionTo('inventoryScripts');
+                        $state.go($state.current, null, {reload: true});
                         Wait('stop');
                     })
                     .error(function (data, status) {

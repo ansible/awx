@@ -8,12 +8,12 @@ export default
     [   '$rootScope','Wait', 'generateList', 'NotificationTemplatesList',
         'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' ,
         'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
-        'ngToast', '$compile', '$filter', '$location',
+        'ngToast', '$compile', '$filter',
         function(
             $rootScope,Wait, GenerateList, NotificationTemplatesList,
             GetBasePath, SearchInit, PaginateInit, Rest,
             ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
-            $compile, $filter, $location) {
+            $compile, $filter) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('notification_templates'),
                 list = NotificationTemplatesList,
@@ -211,9 +211,10 @@ export default
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
-                            scope.search(list.iterator);
-                            if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $state.go('^');
+                            if (parseInt($state.params.notification_template_id) === id) {
+                                $state.go("^", null, {reload: true});
+                            } else {
+                                scope.search(list.iterator);
                             }
                         })
                         .error(function (data, status) {

@@ -336,6 +336,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
             };
 
             $scope.formCancel = function(){
+                $scope.$parent.activeCard = null;
                 $state.go('organizations');
             };
 

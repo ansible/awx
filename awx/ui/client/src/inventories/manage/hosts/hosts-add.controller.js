@@ -29,11 +29,11 @@
                 // assign the host to current group if not at the root level
                 if ($stateParams.group){
                     HostManageService.associateGroup(res.data, _.last($stateParams.group)).then(function(){
-                        $state.go('inventoryManage', null, {reload: true});
+                        $state.go('inventoryManage.editHost', {host_id: res.data.id}, {reload: true});
                     });
                 }
                 else{
-                    $state.go('inventoryManage', null, {reload: true});
+                    $state.go('inventoryManage.editHost', {host_id: res.data.id}, {reload: true});
                 }
             });
         };

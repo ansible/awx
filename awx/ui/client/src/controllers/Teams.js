@@ -97,9 +97,10 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
                 .success(function () {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
-                    $scope.search(list.iterator);
-                    if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.go('^');
+                    if (parseInt($state.params.team_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
                     }
                 })
                 .error(function (data, status) {
@@ -297,7 +298,7 @@ export function TeamsEdit($scope, $rootScope, $location,
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function(){
-                $state.go('teams', null, {reload: true});
+                $state.go($state.current, null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +

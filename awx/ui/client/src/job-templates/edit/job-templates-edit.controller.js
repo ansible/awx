@@ -480,7 +480,7 @@ export default
                 });
 
             function saveCompleted() {
-                $state.go('jobTemplates', null, {reload: true});
+                $state.go($state.current, {}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {

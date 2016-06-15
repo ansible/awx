@@ -246,9 +246,10 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
-                    if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.go('^');
+                    if (parseInt($state.params.id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
                     }
                 })
                 .error(function (data, status) {
@@ -802,13 +803,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         Rest.put(params)
             .success(function() {
                 Wait('stop');
-                /*$scope.scm_update_tooltip = "Start an SCM update";
-                $scope.scm_type_class = "";
-                if (Empty($scope.scm_type)) {
-                    $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
-                    $scope.scm_type_class = "btn-disabled";
-                }*/
-                ReturnToCaller();
+                $state.go($state.current, {}, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });

@@ -7,11 +7,11 @@
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
         'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', '$state', '$location',
+        'Rest' , 'ProcessErrors', 'Prompt', '$state',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, $state, $location
+            Rest, ProcessErrors, Prompt, $state
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -58,9 +58,10 @@ export default
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
-                            scope.search(list.iterator);
-                            if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $state.go('^');
+                            if (parseInt($state.params.inventory_script_id) === id) {
+                                $state.go("^", null, {reload: true});
+                            } else {
+                                scope.search(list.iterator);
                             }
                         })
                         .error(function (data, status) {

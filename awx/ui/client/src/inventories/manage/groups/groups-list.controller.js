@@ -48,12 +48,26 @@
                 case 'promote':
                     GroupManageService.promote($scope.toDelete.id, $stateParams.inventory_id)
                         .then(() => {
+                            if (parseInt($state.params.group_id) === $scope.toDelete.id) {
+                                $state.go("inventoryManage", null, {reload: true});
+                            } else {
+                                $state.go($state.current, null, {reload: true});
+                            }
                             $('#group-delete-modal').modal('hide');
+                            $('body').removeClass('modal-open');
+                            $('.modal-backdrop').remove();
                         });
                     break;
-                case 'delete':
+                default:
                     GroupManageService.delete($scope.toDelete.id).then(() => {
+                        if (parseInt($state.params.group_id) === $scope.toDelete.id) {
+                            $state.go("inventoryManage", null, {reload: true});
+                        } else {
+                            $state.go($state.current, null, {reload: true});
+                        }
                         $('#group-delete-modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
                     });
             }
         };

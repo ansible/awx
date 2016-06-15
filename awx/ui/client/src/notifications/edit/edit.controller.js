@@ -212,7 +212,7 @@ export default
                 Rest.setUrl(url+ id+'/');
                 Rest.put(params)
                 .success(function () {
-                    $state.go('notifications', {}, {reload: true});
+                    $state.go($state.current, null, {reload: true});
                     Wait('stop');
                 })
                 .error(function (data, status) {

@@ -24,7 +24,11 @@
                 Wait('start');
                 HostManageService.delete(id).then(() => {
                     $('#prompt-modal').modal('hide');
-                    $state.go($state.current.name, null, {reload: true});
+                    if (parseInt($state.params.host_id) === id) {
+                        $state.go("inventoryManage", null, {reload: true});
+                    } else {
+                        $state.go($state.current.name, null, {reload: true});
+                    }
                     Wait('stop');
                 });
             };

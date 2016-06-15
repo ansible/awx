@@ -92,6 +92,7 @@
              };
 
              $scope.formCancel = function(){
+                 $scope.$parent.activeCard = null;
                  $state.go('organizations');
              };
 
