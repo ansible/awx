@@ -15,11 +15,9 @@ export default {
         function($rootScope, Authorization) {
             $rootScope.configReady = true;
             if (Authorization.isUserLoggedIn()) {
-                Authorization.logout().then(function(){
-                    $(".LoginModal-dialog").remove();
-
-                });
+                Authorization.logout();
             }
+            $(".LoginModal-dialog").remove();
         }]
     },
     ncyBreadcrumb: {

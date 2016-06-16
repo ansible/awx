@@ -10,11 +10,8 @@ export default {
     name: 'signOut',
     route: '/logout',
     controller: ['Authorization', '$state', function(Authorization, $state) {
-        Authorization.logout().then(function(){
-            $state.go('signIn');
-            
-        });
-
+        Authorization.logout();
+        $state.go('signIn');
     }],
     ncyBreadcrumb: {
         skip: true

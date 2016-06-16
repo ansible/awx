@@ -63,14 +63,13 @@ export default
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
 
-                var x, deferred = $q.defer(),
+                var x,
                 ConfigService = $injector.get('ConfigService'),
                 scope = angular.element(document.getElementById('main-view')).scope();
 
                 if(scope){
                     scope.$destroy();
                 }
-                //$rootScope.$destroy();
 
                 if($cookieStore.get('lastPath')==='/portal'){
                     $cookieStore.put( 'lastPath', '/portal');
@@ -113,8 +112,6 @@ export default
                 if ($rootScope.sessionTimer) {
                     $rootScope.sessionTimer.clearTimers();
                 }
-                deferred.resolve();
-                return deferred.promise;
             },
 
             licenseTested: function () {
