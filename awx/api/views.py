@@ -898,10 +898,13 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        team_qs = Project.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role)).distinct()
-        user_qs = Project.accessible_objects(self.request.user, 'read_role').distinct()
-        return team_qs & user_qs
-
+        model_ct = ContentType.objects.get_for_model(self.model)
+        parent_ct = ContentType.objects.get_for_model(self.parent_model)
+        proj_roles = Role.objects.filter(
+            Q(ancestors__content_type=parent_ct) & Q(ancestors__object_id=team.pk),
+            content_type=model_ct
+        )
+        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in proj_roles])
 
 class TeamActivityStreamList(SubListAPIView):
 
