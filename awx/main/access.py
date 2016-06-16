@@ -354,15 +354,7 @@ class InventoryAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        # Verify that the user has access to the new organization if moving an
-        # inventory to a new organization.
-        org_pk = get_pk_from_dict(data, 'organization')
-        if obj and org_pk and obj.organization.pk != org_pk:
-            org = get_object_or_400(Organization, pk=org_pk)
-            if self.user not in org.admin_role:
-                return False
-        # Otherwise, just check for write permission.
-        return self.user in obj.update_role
+        return self.can_admin(obj, data)
 
     @check_superuser
     def can_admin(self, obj, data):
