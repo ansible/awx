@@ -820,7 +820,7 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
             env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
-            env['CLOUD_VERIFY_SSL'] = str(True)
+            env['CLOUD_VERIFY_SSL'] = str(False)
         elif cloud_cred and cloud_cred.kind == 'gce':
             env['GCE_EMAIL'] = cloud_cred.username
             env['GCE_PROJECT'] = cloud_cred.project
@@ -1390,6 +1390,7 @@ class RunInventoryUpdate(BaseTask):
             env['RAX_CREDS_FILE'] = cloud_credential
             env['RAX_REGION'] = inventory_update.source_regions or 'all'
             env['RAX_CACHE_MAX_AGE'] = "0"
+            env['CLOUD_VERIFY_SSL'] = str(False)
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
