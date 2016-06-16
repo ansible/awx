@@ -76,6 +76,7 @@ def celery_startup(conf=None, **kwargs):
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
+            sch.save()
         except Exception, e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
