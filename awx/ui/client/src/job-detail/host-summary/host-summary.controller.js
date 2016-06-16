@@ -35,7 +35,7 @@
         };
         var init = function(){
             Wait('start');
-            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
+            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size, order_by: 'host_name'})
             .success(function(res){
                 $scope.hosts = res.results;
                 $scope.next = res.next;
@@ -114,7 +114,8 @@
             var getAll = function(){
                 Wait('start');
                 JobDetailService.getJobHostSummaries($stateParams.id, {
-                    page_size: page_size
+                    page_size: page_size,
+                    order_by: 'host_name'
                 }).success(function(res){
                     Wait('stop');
                     $scope.hosts = res.results;
@@ -125,7 +126,8 @@
                 Wait('start');
                 JobDetailService.getJobHostSummaries($stateParams.id, {
                     page_size: page_size,
-                    failed: true
+                    failed: true,
+                    order_by: 'host_name'
                 }).success(function(res){
                     Wait('stop');
                     $scope.hosts = res.results;
