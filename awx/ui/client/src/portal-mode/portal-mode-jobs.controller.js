@@ -63,6 +63,10 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
         init();
     };
 
+    $scope.refresh = function(){
+        $scope.search(list.iterator);
+    };
+
     init();
 }
 
