@@ -1519,7 +1519,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += `<div id="${itm}_tab"`+
                                 `class="Form-tab"`+
                                 `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"` +
-                                `ng-class="{'is-selected': ${itm}Selected, 'Form-tab--disabled' : ${this.form.related[itm].disabled }}">${(collection.title || collection.editTitle)} </div>`;
+                                `ng-class="{'is-selected': ${itm}Selected ` ;
+                            if(this.form.related[itm].disabled){
+                                html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
+                            }
+                            html +=  `}">${(collection.title || collection.editTitle)}</div>`;
                         }
                     }
                     else if(this.mode === "add"){

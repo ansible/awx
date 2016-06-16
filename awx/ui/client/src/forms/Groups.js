@@ -350,9 +350,9 @@ export default
 
                 for (itm in GroupFormObject.related) {
                     if (GroupFormObject.related[itm].include === "NotificationsList") {
-                        GroupFormObject.related[itm] = NotificationsList;
+                        GroupFormObject.related[itm] = angular.copy(NotificationsList);
                         GroupFormObject.related[itm].generateList = true;
-                        GroupFormObject.related[itm].disabled = "source === undefined";
+                        GroupFormObject.related[itm].disabled = "source === undefined || source.value === ''";
                     }
                 }
                 return GroupFormObject;
