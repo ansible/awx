@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 import awx.main.fields
 
 
@@ -21,5 +21,10 @@ class Migration(migrations.Migration):
             model_name='team',
             name='member_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'admin_role', to='main.Role', null=b'True'),
+        ),
+        migrations.AlterField(
+            model_name='team',
+            name='read_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'organization.auditor_role', b'member_role'], to='main.Role', null=b'True'),
         ),
     ]
