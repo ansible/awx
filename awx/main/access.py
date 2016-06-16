@@ -816,17 +816,22 @@ class JobTemplateAccess(BaseAccess):
 
         project_pk = get_pk_from_dict(data, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            org = inventory[0].organization
-            accessible = self.user in org.admin_role
+            if inventory_pk and inventory.organization:
+                org = inventory.organization
+                accessible = self.user in org.admin_role
+            else:
+                accessible = False
             if not project_pk and accessible:
                 return True
             elif not accessible:
                 return False
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
-        project = get_object_or_400(Project, pk=project_pk)
-
-        return self.user in project.use_role
+        if project_pk:
+            project = get_object_or_400(Project, pk=project_pk)
+            return self.user in project.use_role
+        else:
+            return False
 
     def can_start(self, obj, validate_license=True):
         # Check license.
