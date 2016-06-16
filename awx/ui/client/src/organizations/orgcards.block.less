@@ -5,7 +5,8 @@
     display: flex;
     flex-wrap: wrap;
     width: 100%;
-    justify-content: space-between;
+    width: ~"calc(100% + 20px)";
+    margin: 0px -10px;
 }
 
 .OrgCards-search tag-search{
@@ -38,7 +39,9 @@
     flex-wrap: wrap;
     align-items: baseline;
     margin-top: 20px;
-    width: 32%
+    width: ~"calc(33.333% - 20px)";
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .OrgCards-card--selected {
@@ -104,13 +107,12 @@
 
 @media (max-width: 840px) {
     .OrgCards-card {
-        width: 100%;
-        margin-right: 0px;
+        width: ~"calc(100% - 20px)";
     }
 }
 
 @media (min-width: 840px) and (max-width: 1240px) {
     .OrgCards-card {
-        width: ~"calc(50% - 10px)";
+        width: ~"calc(50% - 20px)";
     }
  }
