@@ -38,8 +38,8 @@ export default
                 defaultSearchField: true,
                 linkTo: '/#/jobs/{{job.id}}'
             },
-            started: {
-                label: 'Started',
+            finished: {
+                label: 'Finished',
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
