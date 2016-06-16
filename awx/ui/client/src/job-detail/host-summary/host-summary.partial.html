@@ -1,13 +1,13 @@
 
 <div id="hosts-summary-section" class="section">
-    <div class="JobDetail-instructions" ng-hide="hosts.length == 0"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
-    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0">
+    <div class="JobDetail-instructions" ng-hide="hosts.length == 0 && !searchTerm"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
+    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0 && !searchTerm">
         <div class="JobDetail-searchContainer form-group">
             <div class="search-name">
                 <form ng-submit="search()">
                 <input type="text" class="JobDetail-searchInput form-control List-searchInput" id="search_host_summary_name" ng-model="searchTerm" placeholder="Host Name" />
-                    <a class="List-searchInputIcon search-icon" ng-click="search()"><i class="fa fa-search"></i></a>
-
+                    <a class="List-searchInputIcon search-icon" ng-click="search()" ng-show="!searchActive"><i class="fa fa-search"></i></a>
+                    <a class="List-searchInputIcon search-icon" ng-show="searchActive" ng-click="clearSearch()"><i class="fa fa-times"></i></a>
                 </form>
             </div>
         </div>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="table-header" ng-hide="hosts.length == 0">
+    <div class="table-header" ng-hide="hosts.length == 0 && !searchTerm">
         <table class="table table-condensed">
             <thead>
                 <tr>

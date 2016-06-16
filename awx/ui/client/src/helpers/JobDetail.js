@@ -1017,36 +1017,7 @@ export default
                 .style({
                     "text-anchor": 'start'
                 });
-            /*
-            d3.select(element.find(".nv-label text")[1])
-                .attr("class", "HostSummary-graph--changed")
-                .style({
-                    "font-family": 'Open Sans',
-                    "font-size": "16px",
-                    "text-transform" : "uppercase",
-                    "fill" : colors[1],
-                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
-                });
-            d3.select(element.find(".nv-label text")[2])
-                .attr("class", "HostSummary-graph--failed")
-                .style({
-                    "font-family": 'Open Sans',
-                    "font-size": "16px",
-                    "text-transform" : "uppercase",
-                    "fill" : colors[2],
-                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
-                });
-            d3.select(element.find(".nv-label text")[3])
-                .attr("class", "HostSummary-graph--unreachable")
-                .style({
-                    "font-family": 'Open Sans',
-                    "font-size": "16px",
-                    "text-transform" : "uppercase",
-                    "fill" : colors[3],
-                    "src": "url(/static/assets/OpenSans-Regular.ttf)"
-                });
-            */
-                return job_detail_chart;
+            return job_detail_chart;
         };
     }])
 

@@ -738,11 +738,11 @@ export default
 
             scope.toggleLessEvents = function() {
                 if (!scope.lessEvents) {
-                    $('#events-summary').slideUp(200);
+                    $('#events-summary').slideUp(0);
                     scope.lessEvents = true;
                 }
                 else {
-                    $('#events-summary').slideDown(200);
+                    $('#events-summary').slideDown(0);
                     scope.lessEvents = false;
                 }
             };
