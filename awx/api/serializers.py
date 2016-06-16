@@ -1699,7 +1699,7 @@ class CredentialSerializerCreate(CredentialSerializer):
 
     class Meta:
         model = Credential
-        fields = ('*', 'user', 'team', 'organization')
+        fields = ('*', 'user', 'team')
 
     def validate(self, attrs):
         owner_fields = set()
@@ -1719,7 +1719,7 @@ class CredentialSerializerCreate(CredentialSerializer):
     def create(self, validated_data):
         user = validated_data.pop('user', None)
         team = validated_data.pop('team', None)
-        credential = super(CredentialSerializer, self).create(validated_data)
+        credential = super(CredentialSerializerCreate, self).create(validated_data)
         if user:
             credential.owner_role.members.add(user)
         if team:
