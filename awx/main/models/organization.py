@@ -104,7 +104,9 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
     )
-    member_role = ImplicitRoleField()
+    member_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
     read_role = ImplicitRoleField(
         parent_role=['admin_role', 'organization.auditor_role', 'member_role'],
     )

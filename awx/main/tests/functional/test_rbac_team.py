@@ -90,3 +90,10 @@ def test_team_accessible_objects(team, user, project):
     team.member_role.members.add(u)
     assert len(Project.accessible_objects(u, 'read_role')) == 1
 
+@pytest.mark.django_db
+def test_team_admin_member_access(team, user, project):
+    u = user('team_admin', False)
+    team.member_role.children.add(project.use_role)
+    team.admin_role.members.add(u)
+
+    assert len(Project.accessible_objects(u, 'use_role')) == 1
