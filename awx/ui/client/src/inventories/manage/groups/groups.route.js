@@ -11,7 +11,7 @@ var ManageGroupsEdit = {
     name: 'inventoryManage.editGroup',
     route: '/edit-group?group_id',
     ncyBreadcrumb: {
-        label: "{{group.name}}"
+        label: "{{name}}"
     },
     data: {
         mode: 'edit'
