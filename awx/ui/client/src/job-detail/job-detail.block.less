@@ -21,7 +21,7 @@
     }
 }
 .JobDetail{
-   .OnePlusOne-container(100%, @breakpoint-md);
+    .OnePlusOne-container(100%, @breakpoint-md);
 
     &.fullscreen {
         .JobDetail-rightSide {
@@ -36,9 +36,6 @@
 
 .JobDetail-rightSide{
     .OnePlusOne-panel--right(100%, @breakpoint-md);
-    @media (min-width: @breakpoint-md) {
-        max-width: 50%;
-    }
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
     }
@@ -131,8 +128,9 @@
 .JobDetail-resultRowText{
     width: 40%;
     flex: 1 0 auto;
-    padding:0px;
+    padding:0px 29px;
     text-transform: none;
+    word-wrap: break-word;
 }
 
 .JobDetail-searchHeaderRow{
