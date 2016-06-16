@@ -820,7 +820,7 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
             env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
-            env['CLOUD_VERIFY_SSL'] = str(True)
+            env['CLOUD_VERIFY_SSL'] = str(False)
         elif cloud_cred and cloud_cred.kind == 'gce':
             env['GCE_EMAIL'] = cloud_cred.username
             env['GCE_PROJECT'] = cloud_cred.project
