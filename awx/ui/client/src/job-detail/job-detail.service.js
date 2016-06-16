@@ -122,7 +122,7 @@ export default
         },
         getJobEventChildren: function(id){
             var url = GetBasePath('job_events');
-            url = url + id + '/children/';
+            url = url + id + '/children/?order_by=host_name';
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){
