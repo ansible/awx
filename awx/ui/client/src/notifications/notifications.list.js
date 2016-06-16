@@ -31,7 +31,7 @@ export default function(){
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             notification_templates_success: {
-                label: 'Successful',
+                label: 'Success',
                 flag: 'notification_templates_success',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_success\")",
@@ -42,7 +42,7 @@ export default function(){
                 nosort: true,
             },
             notification_templates_error: {
-                label: 'Failed',
+                label: 'Failure',
                 columnClass: 'NotifierList-lastColumn',
                 flag: 'notification_templates_error',
                 type: "toggle",
