@@ -66,8 +66,10 @@ export default
                 var x,
                 ConfigService = $injector.get('ConfigService'),
                 scope = angular.element(document.getElementById('main-view')).scope();
-                scope.$destroy();
-                //$rootScope.$destroy();
+
+                if(scope){
+                    scope.$destroy();
+                }
 
                 if($cookieStore.get('lastPath')==='/portal'){
                     $cookieStore.put( 'lastPath', '/portal');
@@ -101,7 +103,7 @@ export default
                 $rootScope.current_user = {};
                 $rootScope.license_tested = undefined;
                 $rootScope.userLoggedIn = false;
-                // $rootScope.sessionExpired = false;
+                $rootScope.sessionExpired = false;
                 $rootScope.licenseMissing = true;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;

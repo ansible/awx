@@ -10,12 +10,16 @@ export default {
     name: 'signIn',
     route: '/login',
     templateUrl: templateUrl('login/loginBackDrop'),
-    controller: ['$rootScope', 'Authorization', function($rootScope, Authorization) {
-        if (Authorization.isUserLoggedIn()) {
-            Authorization.logout();
-        }
-        $(".LoginModal-dialog").remove();
-    }],
+    resolve: {
+        obj: ['$rootScope', 'Authorization',
+        function($rootScope, Authorization) {
+            $rootScope.configReady = true;
+            if (Authorization.isUserLoggedIn()) {
+                Authorization.logout();
+            }
+            $(".LoginModal-dialog").remove();
+        }]
+    },
     ncyBreadcrumb: {
         skip: true
     }

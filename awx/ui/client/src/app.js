@@ -870,11 +870,17 @@ var tower = angular.module('Tower', [
 
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
-                    $rootScope.sessionExpired = false;
-                    $cookieStore.put('sessionExpired', false);
-                    $rootScope.configReady = true;
                     $location.path('/login');
                 } else {
+                    var lastUser = $cookieStore.get('current_user'),
+                        timestammp = Store('sessionTime');
+                    if(lastUser && lastUser.id && timestammp && timestammp[lastUser.id]){
+                        var stime = timestammp[lastUser.id].time,
+                            now = new Date().getTime();
+                        if ((stime - now) <= 0) {
+                            $location.path('/login');
+                        }
+                    }
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
