@@ -59,15 +59,6 @@ export default
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
             },
-            finished: {
-                label: 'Finished',
-                noLink: true,
-                searchable: false,
-                filter: "longDate",
-                columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
-                key: true,
-                desc: true
-            },
             type: {
                 label: 'Type',
                 ngBind: 'completed_job.type_label',
@@ -76,6 +67,15 @@ export default
                 searchable: true,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
+            },
+            finished: {
+                label: 'Finished',
+                noLink: true,
+                searchable: false,
+                filter: "longDate",
+                columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
+                key: true,
+                desc: true
             },
             failed: {
                 label: 'Job failed?',
