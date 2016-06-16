@@ -282,7 +282,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
                     html += ">";
                 }
-                html += "<span class=\"badge\"";
+                html += "<span class=\"badge List-titleBadge\"";
                 html += " aw-tool-tip=\"" + field.awToolTip + "\"";
                 html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
                 html += (field['class']) ? " " + field['class'] : "";
