@@ -11,7 +11,7 @@ var ManageGroupsEdit = {
     name: 'inventoryManage.editGroup',
     route: '/edit-group?group_id',
     ncyBreadcrumb: {
-        label: "EDIT {{group.name}}"
+        label: "{{name}}"
     },
     data: {
         mode: 'edit'
@@ -36,7 +36,7 @@ var ManageGroupsAdd = {
     route: '/add-group',
     // use a query string to break regex search
     ncyBreadcrumb: {
-        label: "ADD GROUP"
+        label: "CREATE GROUP"
     },
     data: {
         mode: 'add'
