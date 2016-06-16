@@ -651,22 +651,7 @@ export default
             };
 
             $scope.formCancel = function () {
-                // the form was just copied in the previous state, it's safe to destroy on cancel
-                if ($state.params.copied){
-                    var defaultUrl = GetBasePath('job_templates') + $state.params.id;
-                    Rest.setUrl(defaultUrl);
-                    Rest.destroy()
-                        .success(function(){
-                            $state.go('jobTemplates', null, {reload: true, notify:true});
-                        })
-                        .error(function(res, status){
-                            ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
-                            msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
-                        });
-                }
-                else {
-                    $state.go('jobTemplates');
-                }
+                $state.go('jobTemplates');
             };
 
             // Related set: Add button
