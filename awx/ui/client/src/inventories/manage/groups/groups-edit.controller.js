@@ -260,7 +260,7 @@
             $scope = angular.extend($scope, groupData);
 
             // instantiate lookup fields
-            if (inventorySourceData.source !== 'custom'){
+            if (inventorySourceData.source !== 'custom' && inventorySourceData.source !== 'ec2'){
                 LookUpInit({
                     scope: $scope,
                     url: GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : '?kind=' + (inventorySourceData.source)),
