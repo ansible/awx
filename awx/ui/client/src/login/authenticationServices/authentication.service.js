@@ -16,9 +16,9 @@
 
 export default
     ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
-    '$injector', '$q',
+    '$injector',
     function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store,
-    $injector, $q) {
+    $injector) {
         return {
             setToken: function (token, expires) {
                 // set the session cookie
