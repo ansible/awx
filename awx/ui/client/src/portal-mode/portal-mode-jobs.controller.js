@@ -46,7 +46,7 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
         });
         $scope.search (list.iterator);
         // hack to default to descending sort order
-        $scope.sort('job','started');
+        $scope.sort('job','finished');
 
     };
 
