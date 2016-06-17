@@ -21,7 +21,7 @@ export default function(){
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notifications/{{notifier.id}}',
+                linkTo: '/#/notification_templates/{{notifier.id}}',
             },
             notification_type: {
                 label: 'Type',
