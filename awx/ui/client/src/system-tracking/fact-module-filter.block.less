@@ -18,7 +18,7 @@
     &-module {
 
         background-color: @enabled-item-background;
-        border-color: @enabled-item-border;
+        border-color: @default-icon-hov;
         color: @default-interface-txt;
 
         @media screen and (max-width: 750px) {
@@ -31,6 +31,10 @@
             color: @enabled-item-text;
             box-shadow: none;
             z-index: 2;
+        }
+
+        &:hover {
+            border-color: @default-icon-hov;
         }
     }
 
