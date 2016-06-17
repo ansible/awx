@@ -513,8 +513,19 @@
                     data.survey_enabled = ($scope.survey_enabled &&
                         $scope.survey_exists) ? $scope.survey_enabled : false;
 
+                    // The idea here is that we want to find the new option elements that also have a label that exists in the dom
+                    $("#job_templates_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
+                        $("#job_templates_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
+                            if($(option).text() === $(label).attr('title')) {
+                                // Mark that the option has a label present so that we can filter by that down below
+                                $(option).attr('data-label-is-present', true);
+                            }
+                        });
+                    });
+
                     $scope.newLabels = $("#job_templates_labels > option")
                         .filter("[data-select2-tag=true]")
+                        .filter("[data-label-is-present=true]")
                         .map((i, val) => ({name: $(val).text()}));
 
                     Rest.setUrl(defaultUrl);
