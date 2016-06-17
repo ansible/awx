@@ -9,7 +9,12 @@ export default
                 var streamConfig = {};
 
                 scope.showActivityStreamButton = false;
+                scope.showRefreshButton = false;
                 scope.loadingLicense = true;
+
+                scope.refresh = function() {
+                    $state.go($state.current, {}, {reload: true});
+                };
 
                 scope.toggleActivityStream = function() {
 
@@ -79,6 +84,8 @@ export default
                         scope.showActivityStreamButton = false;
 
                     }
+
+                    scope.showRefreshButton = (streamConfig && streamConfig.refreshButton) ? true : false;
                 });
 
                 // scope.$on('featuresLoaded', function(){

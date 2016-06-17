@@ -241,7 +241,8 @@ var tower = angular.module('Tower', [
                 controller: Home,
                 params: {licenseMissing: null},
                 data: {
-                    activityStream: true
+                    activityStream: true,
+                    refreshButton: true
                 },
                 ncyBreadcrumb: {
                     label: "DASHBOARD"
