@@ -34,8 +34,6 @@ export default
                 ]
             },
             id: {
-                key: true,
-                desc: true,
                 label: 'ID',
                 ngClick:"viewJobDetails(all_job)",
                 searchType: 'int',
