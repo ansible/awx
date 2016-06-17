@@ -164,11 +164,13 @@ export default
                                 .then(function (res) {
                                     Wait('stop');
                                     if(res && res.data && res.data.status && res.data.status === "successful"){
+                                        scope.search(list.iterator);
                                         ngToast.success({
                                             content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
                                         });
                                     }
                                     else if(res && res.data && res.data.status && res.data.status === "failed"){
+                                        scope.search(list.iterator);
                                         ngToast.danger({
                                             content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
                                         });
