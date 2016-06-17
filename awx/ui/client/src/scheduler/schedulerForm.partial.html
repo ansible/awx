@@ -87,6 +87,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             ScheduleTime-input SpinnerInput"
+                        aw-spinner="schedulerStartHour"
                         ng-model="schedulerStartHour"
                         placeholder="HH24"
                         aw-min="0" min="0" aw-max="23"
@@ -101,6 +102,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartMinute"
                         ng-model="schedulerStartMinute"
                         placeholder="MM"
                         min="0" max="59" data-zero-pad="2"
@@ -115,6 +117,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartSecond"
                         ng-model="schedulerStartSecond"
                         placeholder="SS"
                         min="0" max="59" data-zero-pad="2"
@@ -178,6 +181,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner
                             SpinnerInput"
+                        aw-spinner="schedulerInterval"
                         ng-model="schedulerInterval"
                         min="1"
                         max="999"
@@ -213,6 +217,7 @@
                         id="monthDay"
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner SpinnerInput"
+                        aw-spinner="$parent.monthDay"
                         ng-model="$parent.monthDay"
                         min="1" max="31"
                         ng-change="resetError('scheduler_monthDay_error')" >
@@ -291,6 +296,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-spinner
                                 SpinnerInput"
+                            aw-spinner="$parent.yearlyMonthDay"
                             ng-model="$parent.yearlyMonthDay"
                             min="1" max="31"
                             ng-change="resetError('scheduler_yearlyMonthDay_error')"
@@ -464,6 +470,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-spinner
                                 SpinnerInput"
+                            aw-spinner="$parent.schedulerOccurrenceCount"
                             ng-model="$parent.schedulerOccurrenceCount"
                             min="1" max="999"
                             on-change="resetError('scheduler_occurrenceCount_error')"
@@ -529,6 +536,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 ScheduleTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndHour"
                             ng-model="$parent.schedulerEndHour"
                             placeholder="HH24"
                             aw-min="0" min="0" aw-max="23"
@@ -543,6 +551,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndMinute"
                             ng-model="$parent.schedulerEndMinute"
                             placeholder="MM"
                             min="0" max="59" data-zero-pad="2"
@@ -557,6 +566,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndSecond"
                             ng-model="$parent.schedulerEndSecond"
                             placeholder="SS"
                             min="0" max="59" data-zero-pad="2"
