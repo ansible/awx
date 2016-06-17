@@ -144,8 +144,8 @@
 
 .Form-tab.is-selected {
     color: @btn-txt-sel;
-    background-color: @default-icon-hov;
-    border-color: @default-icon-hov;
+    background-color: @default-icon;
+    border-color: @default-icon;
 }
 
 .Form-tab--disabled {
@@ -594,4 +594,17 @@ input[type='radio']:checked:before {
 .action_column {
     float: right;
     margin-bottom: 20px;
+}
+
+.alert-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100px;
+    border-radius: 5px;
+    border: 1px solid @default-no-items-bord;
+    background-color: @default-no-items-bord;
+    color: @default-icon;
+    text-transform: uppercase;
 }
