@@ -22,6 +22,7 @@ RUN dpkg -i dumb-init_*.deb
 RUN rm -rf /dumb-init_*.deb
 ADD ansible-tower.egg-link /tmp/ansible-tower.egg-link
 ADD tower-manage /usr/local/bin/tower-manage
+ADD awx-manage /usr/local/bin/awx-manage
 ADD ansible_tower.egg-info /tmp/ansible_tower.egg-info
 RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_development.sh
 
