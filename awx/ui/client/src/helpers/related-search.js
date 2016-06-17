@@ -237,6 +237,9 @@ export default
                         url += (url.match(/\/$/)) ? '?' : '&';
                         url += scope[iterator + 'SearchParams'];
                         url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
+                        if (scope[iterator + 'SearchFilters']){
+                            url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                        }
                         RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
                     };
 

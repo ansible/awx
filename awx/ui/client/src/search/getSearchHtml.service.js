@@ -43,7 +43,8 @@ export default ['GetBasePath', function(GetBasePath) {
         return "<tag-search list='" + list +
             "' endpoint='" + endpoint +
             "' set='" + set +
-            "' iterator='" + iterator + "'></tag-search>";
+            "' iterator='" + iterator +
+            "' current-search-filters='" + iterator + "SearchFilters' ></tag-search>";
     };
 
     return this;

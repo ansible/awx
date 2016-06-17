@@ -10,7 +10,8 @@ export default
                   list: '@',
                   endpoint: '@',
                   set: '@',
-                  iterator: '@'
+                  iterator: '@',
+                  currentSearchFilters: '='
                 },
                 controller: tagSearchController,
                 templateUrl: templateUrl('search/tagSearch'),
