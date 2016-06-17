@@ -743,8 +743,10 @@ class Job(UnifiedJob, JobOptions):
 
     def copy(self):
         presets = {}
-        for kw in self.job_template._get_unified_job_field_names():
+        for kw in JobTemplate._get_unified_job_field_names():
             presets[kw] = getattr(self, kw)
+        if not self.job_template:
+            self.job_template = JobTemplate(name='temporary')
         return self.job_template.create_unified_job(**presets)
 
     # Job Credential required
