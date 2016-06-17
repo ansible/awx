@@ -62,7 +62,7 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         };
 
         // triggers a refilter of the list with the newTag
-        $scope.addTag = function(type) {
+        $scope.addTag = function($event, type) {
             var newTag = tagSearchService
                 .getTag($scope.currentSearchType,
                     $scope.newSearchTag,
@@ -81,6 +81,7 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 tags.push(newTag);
                 $scope.updateSearch(tags);
             }
+            $event.stopPropagation();
         };
 
         // triggers a refilter of the list without the oldTag

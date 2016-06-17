@@ -29,7 +29,7 @@
                     placeholder="Search">
                 <div class="TagSearch-searchButton"
                     ng-disabled="!newSearchTag"
-                    ng-click="addTag()"
+                    ng-click="addTag($event)"
                     ng-show="currentSearchType.type === 'text'">
                     <i class="fa fa-search"></i>
                 </div>
@@ -50,7 +50,7 @@
                             currentSearchType.type === 'select'">
                         <div class="TagSearch-dropdownItem"
                             ng-repeat="type in currentSearchType.typeOptions track by $index"
-                            ng-click="addTag(type)">
+                            ng-click="addTag($event, type)">
                             {{ type.label }}
                         </div>
                     </div>
