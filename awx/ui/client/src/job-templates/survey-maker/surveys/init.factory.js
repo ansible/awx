@@ -352,31 +352,31 @@ export default
 
                     //set the data.min depending on which type of question
                     if (scope.type.type === 'text') {
-                        data.min = scope.text_min;
+                        data.min = parseInt(scope.text_min);
                     } else if (scope.type.type === 'textarea') {
-                        data.min = scope.textarea_min;
+                        data.min = parseInt(scope.textarea_min);
                     } else if (scope.type.type === 'password') {
-                        data.min = scope.password_min;
+                        data.min = parseInt(scope.password_min);
                     } else if (scope.type.type === 'float') {
-                        data.min = scope.float_min;
+                        data.min = parseFloat(scope.float_min);
                     } else if (scope.type.type === 'integer') {
-                        data.min = scope.int_min;
+                        data.min = parseInt(scope.int_min);
                     } else {
-                        data.min = "";
+                        data.min = null;
                     }
                     // set hte data max depending on which type
                     if (scope.type.type === 'text') {
-                        data.max = scope.text_max;
+                        data.max = parseInt(scope.text_max);
                     } else if (scope.type.type === 'textarea') {
-                        data.max = scope.textarea_max;
+                        data.max = parseInt(scope.textarea_max);
                     } else if (scope.type.type === 'password') {
-                        data.max = scope.password_max;
+                        data.max = parseInt(scope.password_max);
                     } else if (scope.type.type === 'float') {
-                        data.max = scope.float_max;
+                        data.max = parseFloat(scope.float_max);
                     } else if (scope.type.type === 'integer') {
-                        data.max = scope.int_max;
+                        data.max = parseInt(scope.int_max);
                     } else {
-                        data.max = "";
+                        data.max = null;
                     }
 
                     //set the data.default depending on which type
