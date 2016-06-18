@@ -109,7 +109,6 @@ export default
             }
 
             scope.showSummary = function(event, id) {
-                Wait('start');
                 setTimeout(function(){
                     if (!Empty(id)) {
                         var recent_notifications,
@@ -120,7 +119,6 @@ export default
                                 recent_notifications = notification_template.summary_fields.recent_notifications;
                             }
                         });
-                        Wait('stop');
                         if (recent_notifications.length > 0) {
                             html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                             html += "<thead>\n";
