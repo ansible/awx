@@ -302,7 +302,9 @@ export default
                         url += connect + scope[iterator + 'ExtraParms'];
                     }
                     url = url.replace(/\&\&/g, '&').replace(/\?\&/,'?');
-
+                    if (scope[iterator + 'SearchFilters']){
+                        url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
                     if (calcOnly) {
                         scope.$emit('searchParamsReady', url);
                     }
