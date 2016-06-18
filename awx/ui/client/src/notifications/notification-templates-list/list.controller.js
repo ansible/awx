@@ -109,41 +109,43 @@ export default
             }
 
             scope.showSummary = function(event, id) {
+                Wait('start');
+                setTimeout(function(){
+                    if (!Empty(id)) {
+                        var recent_notifications,
+                        html, title = "Recent Notifications";
 
-                if (!Empty(id)) {
-                    var recent_notifications,
-                    html, title = "Recent Notifications";
-
-                    scope.notification_templates.forEach(function(notification_template){
-                        if(notification_template.id === id){
-                            recent_notifications = notification_template.summary_fields.recent_notifications;
-                        }
-                    });
-                    Wait('stop');
-                    if (recent_notifications.length > 0) {
-                        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-                        html += "<thead>\n";
-                        html += "<tr>";
-                        html += "<th>Status</th>";
-                        html += "<th>Time</th>";
-                        html += "</tr>\n";
-                        html += "</thead>\n";
-                        html += "<tbody>\n";
-
-                        recent_notifications.forEach(function(row) {
-                            html += "<tr>\n";
-                            html += "<td><i class=\"fa icon-job-" + row.status + "\"></i></td>\n";
-                            html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
-                            html += "</tr>\n";
+                        scope.notification_templates.forEach(function(notification_template){
+                            if(notification_template.id === id){
+                                recent_notifications = notification_template.summary_fields.recent_notifications;
+                            }
                         });
-                        html += "</tbody>\n";
-                        html += "</table>\n";
+                        Wait('stop');
+                        if (recent_notifications.length > 0) {
+                            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+                            html += "<thead>\n";
+                            html += "<tr>";
+                            html += "<th>Status</th>";
+                            html += "<th>Time</th>";
+                            html += "</tr>\n";
+                            html += "</thead>\n";
+                            html += "<tbody>\n";
+
+                            recent_notifications.forEach(function(row) {
+                                html += "<tr>\n";
+                                html += "<td><i class=\"fa icon-job-" + row.status + "\"></i></td>\n";
+                                html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
+                                html += "</tr>\n";
+                            });
+                            html += "</tbody>\n";
+                            html += "</table>\n";
+                        }
+                        else {
+                            html = "<p>No recent notifications.</p>\n";
+                        }
+                        attachElem(event, html, title);
                     }
-                    else {
-                        html = "<p>No recent notifications.</p>\n";
-                    }
-                    attachElem(event, html, title);
-                }
+                }, 100);
             };
 
             scope.testNotification = function(){

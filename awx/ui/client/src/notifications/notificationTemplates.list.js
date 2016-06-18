@@ -27,7 +27,7 @@ export default function(){
                     icon: "{{ 'icon-job-' + notification_template.status }}",
                     awToolTip: "Click for recent notifications",
                     awTipPlacement: "right",
-                    ngClick: "showSummary($event, notification_templates.id)",
+                    ngClick: "showSummary($event, notification_template.id)",
                     ngClass: ""
                 }]
             },
