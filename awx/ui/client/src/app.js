@@ -21,7 +21,7 @@ import './lists';
 import './widgets';
 import './help';
 import './filters';
-import {Home, HomeGroups} from './controllers/Home';
+import {Home} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
@@ -173,7 +173,6 @@ var tower = angular.module('Tower', [
     'InventoryGroupsHelpDefinition',
     'CredentialsHelper',
     'StreamListDefinition',
-    'HomeGroupListDefinition',
     'ActivityDetailDefinition',
     'VariablesHelper',
     'SchedulesListDefinition',
@@ -253,16 +252,6 @@ var tower = angular.module('Tower', [
                             jobStatus: jobStatusGraphData.get("month", "all"),
                         });
                     }]
-                }
-            }).
-
-            state('dashboardGroups', {
-                url: '/home/groups?id&name&has_active_failures&status&source&has_external_source&inventory_source__id',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups,
-                ncyBreadcrumb: {
-                    parent: 'dashboard',
-                    label: "GROUPS"
                 }
             }).
 

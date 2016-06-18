@@ -47,10 +47,12 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
 .factory('BuildUrl', [
     function () {
-        return function (obj) {
+        return function (obj, inventory) {
             var url = '/#/';
             switch (obj.base) {
                 case 'group':
+                    url += 'inventories/' + inventory.id + '/manage?group=' + obj.id;
+                    break;
                 case 'host':
                     url += 'home/' + obj.base + 's/?id=' + obj.id;
                     break;
@@ -175,7 +177,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 // user to a unknown location.
                 obj1_obj.name = $filter('sanitize')(obj1_obj.name);
                 obj1_obj.name = $sce.getTrustedHtml(obj1_obj.name);
-                descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj) + "\" >" + obj1_obj.name + '</a>';
+                descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj, obj2_obj) + "\" >" + obj1_obj.name + '</a>';
                 descr_nolink += obj1 + ' ' + obj1_obj.name;
             } else if (obj1) {
                 name = '';
