@@ -36,7 +36,8 @@
             Create and edit scripts to dynamically load hosts from any source.
             </p>
         </a>
-        <a ui-sref="notifications" class="SetupItem">
+        <a ui-sref="notifications" class="SetupItem"
+            ng-if="orgAdmin">
             <h4 class="SetupItem-title">Notifications</h4>
             <p class="SetupItem-description">
             Create templates for sending notifications with Email, HipChat, Slack, and SMS.
