@@ -508,7 +508,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     html: true,
                     title: attrs.awToolTip,
                     container: 'body',
-                    trigger: 'hover focus',
+                    trigger: 'hover',
                     template: template
                 });
 
