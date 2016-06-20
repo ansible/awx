@@ -18,12 +18,12 @@ export default {
                     $rootScope.orgAdmin = true;
                 } else {
                     Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
-                    Rest.get()
-                        .success(function(data) {
-                            $rootScope.orgAdmin = (data.count) ? true : false;
-                        }).error(function (data, status) {
-                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
-                        });
+                    return Rest.get().then(function(data){
+                        $rootScope.orgAdmin = (data.data.count) ? true : false;
+                    })
+                    .catch(function (data, status) {
+                        ProcessErrors($rootScope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+                    });
                 }
             }
             else{
