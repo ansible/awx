@@ -189,20 +189,6 @@ export default
                     }
                     return true;
                 });
-                //Set the name link
-                if (item.type === "inventory_update") {
-                    Rest.setUrl(item.related.inventory_source);
-                    Rest.get()
-                        .success(function(data) {
-                            itm.nameHref = "/home/groups?id=" + data.group;
-                        });
-                }
-                else if (item.type === "project_update") {
-                    itm.nameHref = "/projects/" + item.project;
-                }
-                else if (item.type === "job") {
-                    itm.nameHref = "";
-                }
 
                 if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
                     itm.status_tip = itm.status_label + '. Click for details.';
