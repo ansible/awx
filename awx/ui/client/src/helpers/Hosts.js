@@ -114,9 +114,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                         job = jobs[j];
                         html += "<tr>\n";
 
-                        html += "<td><a href=\"#/jobs/" + job.id + "\" " +
-                            "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
-                            ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
+                        // SmartStatus-tooltips are named --success whereas icon-job uses successful
+                        var iconStatus = (job.status === 'successful') ? 'success' : 'failed';
+
+                        html += "<td><a href=\"#/jobs/" + job.id + "\"><i class=\"fa DashboardList-status SmartStatus-tooltip--" + iconStatus + " icon-job-" +
                             job.status + "\"></i></a></td>\n";
 
                         html += "<td>" + ($filter('longDate')(job.finished)).replace(/ /,'<br />') + "</td>\n";
