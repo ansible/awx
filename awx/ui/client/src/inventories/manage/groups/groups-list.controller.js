@@ -112,7 +112,11 @@
             $state.go('inventoryManage', {failed: true}, {reload: true});
         };
         $scope.scheduleGroup = function(id) {
-            $state.go('inventoryManage.schedules', {id: id});
+            // Add this group's id to the array of group id's so that it gets
+            // added to the breadcrumb trail
+            var groupsArr = $stateParams.group ? $stateParams.group : [];
+            groupsArr.push(id);
+            $state.go('inventoryManage.schedules', {id: id, group: groupsArr}, {reload: true});
         };
         // $scope.$parent governed by InventoryManageController, for unified multiSelect options
         $scope.$on('multiSelectList.selectionChanged', (event, selection) => {

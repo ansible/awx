@@ -17,7 +17,7 @@
 		<span ng-if="!isRootState()">
 			<li class="BreadCrumb-item"></li>
 			<li ng-repeat="group in groups track by $index" class="BreadCrumb-item">
-				<a href ng-click="goToGroup($index)">{{group.name}}</a>
+				<a href ng-click="goToGroup($index+1)">{{group.name}}</a>
 			</li>
 			<li class="BreadCrumb-item"></li>
 		</span>
