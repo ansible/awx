@@ -8,12 +8,14 @@ import controller from './scheduler.controller';
 import addController from './schedulerAdd.controller';
 import editController from './schedulerEdit.controller';
 import {templateUrl} from '../shared/template-url/template-url.factory';
+import schedulerDatePicker from './schedulerDatePicker.directive';
 
 export default
     angular.module('scheduler', [])
         .controller('schedulerController', controller)
         .controller('schedulerAddController', addController)
         .controller('schedulerEditController', editController)
+        .directive('schedulerDatePicker', schedulerDatePicker)
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState({
                 name: 'jobTemplateSchedules',

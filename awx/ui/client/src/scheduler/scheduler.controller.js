@@ -23,11 +23,7 @@ export default [
 
         ClearScope();
 
-        $scope.schedulerStartDT = 'test';
-
         var base, id, url,parentObject, title;
-        $scope.schedulerStartDT = 'test';
-
 
         base = $location.path().replace(/^\//, '').split('/')[0];
         if (base === 'management_jobs') {

@@ -1,13 +1,13 @@
 /***************************************************************************
  * angular-scheruler.js
- * 
+ *
  * Copyright (c) 2014 Ansible, Inc.
  *
  * Maintainers:
  *
  * Chris Houseknecht
  *   @chouseknecht
- *   chouse@ansible.com 
+ *   chouse@ansible.com
  *
  */
 
@@ -23,7 +23,7 @@ angular.module('underscore',[])
 
 
 angular.module('AngularScheduler', ['underscore'])
-    
+
     .constant('AngularScheduler.partials', '/lib/')
     .constant('AngularScheduler.useTimezone', false)
     .constant('AngularScheduler.showUTCField', false)
@@ -95,6 +95,11 @@ angular.module('AngularScheduler', ['underscore'])
                     callback();
                 }
             };
+
+            // change the utc time with the new start date
+            scope.$watch('schedulerStartDt', function() {
+                scope.scheduleTimeChange(scope.processSchedulerEndDt);
+            });
 
             scope.resetError = function(variable) {
                 scope[variable] = false;
@@ -193,24 +198,24 @@ angular.module('AngularScheduler', ['underscore'])
             }
 
             return CreateObject(scope, requireFutureStartTime);
-            
+
         };
     }])
-    
+
     /**
        Return an AngularScheduler object we can use to get the RRule result from user input, check if
-       user input is valid, reset the form, etc. All the things we need to access and manipulate the 
-       scheduler widget 
+       user input is valid, reset the form, etc. All the things we need to access and manipulate the
+       scheduler widget
      */
     .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'InjectDetail', 'SetDefaults', '$timezones', 'SetRule', 'InRange',
     function(useTimezone, $filter, GetRule, Inject, InjectDetail, SetDefaults, $timezones, SetRule, InRange) {
         return function(scope, requireFutureST) {
             var fn = function() {
-                
+
                 this.scope = scope;
                 this.useTimezone = useTimezone;
                 this.requireFutureStartTime = requireFutureST;
-                
+
                 // Evaluate user intput and build options for passing to rrule
                 this.getOptions = function() {
                     var options = {};
@@ -223,9 +228,9 @@ angular.module('AngularScheduler', ['underscore'])
                     if (this.scope.schedulerEnd.value === 'on') {
                         options.endDate = scope.schedulerEndDt.replace(/(\d{2})\/(\d{2})\/(\d{4})/, function(match, p1, p2, p3) {
                                     return p3 + '-' + p1 + '-' + p2;
-                                }) + 'T' + 
-                                $filter('schZeroPad')(this.scope.schedulerEndHour,2) + ':' + 
-                                $filter('schZeroPad')(this.scope.schedulerEndMinute,2) + ':' + 
+                                }) + 'T' +
+                                $filter('schZeroPad')(this.scope.schedulerEndHour,2) + ':' +
+                                $filter('schZeroPad')(this.scope.schedulerEndMinute,2) + ':' +
                                 $filter('schZeroPad')(this.scope.schedulerEndSecond,2)+ 'Z';
                     }
                     if (this.scope.schedulerFrequency.value === 'weekly') {
@@ -264,7 +269,7 @@ angular.module('AngularScheduler', ['underscore'])
                     this.scope.scheduler_occurrenceCount_error = false;
                     this.scope.scheduler_monthDay_error = false;
                     this.scope.scheduler_yearlyMonthDay_error = false;
-                    
+
                     if (this.scope.scheduler_form && this.scope.scheduler_form.schedulerEndDt) {
                         this.scope.scheduler_form.schedulerEndDt.$setValidity('custom-error', true);
                         this.scope.scheduler_form.schedulerEndDt.$setPristine();
@@ -319,7 +324,7 @@ angular.module('AngularScheduler', ['underscore'])
                         this.scope.scheduler_occurrenceCount_error = true;
                         validity = false;
                     }
-                    
+
                     if (this.scope.schedulerFrequency.value === 'weekly' && this.scope.weekDays.length === 0) {
                         this.scope.scheduler_weekDays_error = true;
                         validity = false;
@@ -367,7 +372,7 @@ angular.module('AngularScheduler', ['underscore'])
                                         $filter('schZeroPad')(now.getHours(),2) + ':' +
                                         $filter('schZeroPad')(now.getMinutes(),2) + ':' +
                                         $filter('schZeroPad')(now.getSeconds(),2) + '.000Z';
-                                    adjNow = $timezones.toUTC(dateStr, this.scope.schedulerTimeZone.name);   //Adjust to the selected TZ 
+                                    adjNow = $timezones.toUTC(dateStr, this.scope.schedulerTimeZone.name);   //Adjust to the selected TZ
                                     timeNow = adjNow.getTime();
                                 }
                                 else {
@@ -434,7 +439,7 @@ angular.module('AngularScheduler', ['underscore'])
                     this.scope.schedulerName = name;
                 };
 
-                // Read in the HTML partial, compile and inject it into the DOM. 
+                // Read in the HTML partial, compile and inject it into the DOM.
                 // Pass in the target element's id attribute value or an angular.element()
                 // object.
                 this.inject = function(element, showButtons) {
@@ -491,7 +496,7 @@ angular.module('AngularScheduler', ['underscore'])
 
     .factory('Inject', ['AngularScheduler.partials', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
         return function(params) {
-            
+
             var scope = params.scope,
                 target = params.target,
                 buttons = params.buttons;
@@ -521,7 +526,7 @@ angular.module('AngularScheduler', ['underscore'])
 
     .factory('InjectDetail', ['AngularScheduler.partials', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
         return function(params) {
-            
+
             var scope = params.scope,
                 target = params.target,
                 showRRule = params.showRRule;
@@ -551,11 +556,11 @@ angular.module('AngularScheduler', ['underscore'])
     .factory('GetRule', ['$log', function($log) {
         return function(params) {
             // Convert user inputs to an rrule. Returns rrule object using https://github.com/jkbr/rrule
-            // **list of 'valid values' found below in LoadLookupValues 
-            
+            // **list of 'valid values' found below in LoadLookupValues
+
             var startDate = params.startDate,  // date object or string in yyyy-MM-ddTHH:mm:ss.sssZ format
                 frequency = params.frequency,  // string, optional, valid value from frequencyOptions
-                interval = params.interval,    // integer, optional 
+                interval = params.interval,    // integer, optional
                 occurrenceCount = params.occurrenceCount,  //integer, optional
                 endDate = params.endDate,      // date object or string in yyyy-MM-dd format, optional
                                                // ignored if occurrenceCount provided
@@ -564,7 +569,7 @@ angular.module('AngularScheduler', ['underscore'])
                 weekDays = params.weekDays,     // integer, optional, valid value from weekdays
                 setOccurrence = params.setOccurrence, // integer, optional, valid value from occurrences
                 options = {}, i;
-            
+
             if (angular.isDate(startDate)) {
                 options.dtstart = startDate;
             }
@@ -580,7 +585,7 @@ angular.module('AngularScheduler', ['underscore'])
             if (frequency && frequency !== 'none') {
                 options.freq = RRule[frequency.toUpperCase()];
                 options.interval = interval;
-                
+
                 if (weekDays && typeof weekDays === 'string') {
                     options.byweekday = RRule[weekDays.toUpperCase()];
                 }
@@ -636,7 +641,7 @@ angular.module('AngularScheduler', ['underscore'])
         return function(rule, scope) {
             var set, result = '', i,
                 setStartDate = false;
-            
+
             // Search the set of RRule keys for a particular key, returning its value
             function getValue(set, key) {
                 var pair = _.find(set, function(x) {
@@ -837,7 +842,7 @@ angular.module('AngularScheduler', ['underscore'])
                     }
                 }
             }
- 
+
             function isValid() {
                 // Check what was put into scope vars, and see if anything is
                 // missing or not quite right.
@@ -923,7 +928,7 @@ angular.module('AngularScheduler', ['underscore'])
 
     .factory('LoadLookupValues', [ function() {
         return function(scope) {
-        
+
             scope.frequencyOptions = [
                 { name: 'None (run once)', value: 'none', intervalLabel: '' },
                 { name: 'Minute', value: 'minutely', intervalLabel: 'minutes' },
@@ -978,7 +983,7 @@ angular.module('AngularScheduler', ['underscore'])
 
         };
     }])
-   
+
     // $filter('schZeroPad')(n, pad) -- or -- {{ n | afZeroPad:pad }}
     .filter('schZeroPad', [ function() {
         return function (n, pad) {
@@ -1034,7 +1039,7 @@ angular.module('AngularScheduler', ['underscore'])
         };
     }])
 
-     // Custom directives 
+     // Custom directives
     .directive('schSpinner', ['$filter', function($filter) {
         return {
             require: 'ngModel',
@@ -1072,7 +1077,7 @@ angular.module('AngularScheduler', ['underscore'])
                         }
                     }
                 });
-                
+
                 $(element).on("click", function () {
                     $(element).select();
                 });
