@@ -25,3 +25,7 @@ cache:
     directories:
         - node_modules
         - .tox
+services:
+    - mongodb
+    # Enable when we stop using sqlite for API tests
+    # - postgresql
