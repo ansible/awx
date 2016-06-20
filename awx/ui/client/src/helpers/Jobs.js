@@ -157,7 +157,7 @@ export default
         }
     ])
 
-    .factory('JobsListUpdate', ['Rest', function(Rest) {
+    .factory('JobsListUpdate', [function() {
         return function(params) {
             var scope = params.scope,
                 parent_scope = params.parent_scope,
