@@ -107,7 +107,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     LookUpName({
                         scope: $scope,
                         scope_var: 'credential',
-                        url: GetBasePath('credentials') + data.credential + '/'
+                        url: GetBasePath('credentials') + data.credential + '/',
+                        ignore_403: true
                     });
                 }
 
@@ -131,7 +132,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     LookUpName({
                         scope: $scope,
                         scope_var: 'cloud_credential',
-                        url: GetBasePath('credentials') + data.cloud_credential + '/'
+                        url: GetBasePath('credentials') + data.cloud_credential + '/',
+                        ignore_403: true
                     });
                 }
 
