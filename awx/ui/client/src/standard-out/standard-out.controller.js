@@ -42,8 +42,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
     $scope.parseType = 'yaml';
 
-
-
     function getJobDetails() {
 
         // Go out and get the job details based on the job type.  jobType gets defined
@@ -73,7 +71,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 if (data.extra_vars) {
                     $scope.variables = ParseVariableString(data.extra_vars);
                 }
-
 
                 // If we have a source then we have to go get the source choices from the server
                 if (!Empty(data.source)) {
@@ -150,6 +147,47 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
                 }
 
+                if ($scope.job.type === 'inventory_update' && !$scope.inv_manage_group_link) {
+
+                    var groupWatcher = $scope.$watch('group', function(group){
+                        if(group) {
+                            // The group's been set by the LookUpName call on inventory_source
+                            var ancestorGroupIds = [];
+
+                            // Remove the watcher
+                            groupWatcher();
+
+                            // Function that we'll call recursively to go out and get a groups parent(s)
+                            var getGroupParent = function(groupId) {
+                                Rest.setUrl(GetBasePath('base') + 'groups/?children__id=' + groupId);
+                                Rest.get()
+                                    .success(function(data) {
+                                        if(data.results && data.results.length > 0) {
+                                            ancestorGroupIds.push(data.results[0].id);
+                                            // Go get this groups first parent
+                                            getGroupParent(data.results[0].id);
+                                        }
+                                        else {
+                                            // We've run out of ancestors to traverse - lets build a link (note that $scope.inventory is
+                                            // set in the lookup-name factory just like $scope.group)
+                                            $scope.inv_manage_group_link = '/#/inventories/' + $scope.inventory + '/manage';
+                                            for(var i=ancestorGroupIds.length; i > 0; i--) {
+                                                $scope.inv_manage_group_link += (i === ancestorGroupIds.length ? '?' : '&') + 'group=' + ancestorGroupIds[i-1];
+                                            }
+                                        }
+                                    })
+                                    .error(function(data, status) {
+                                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                            msg: 'Failed to retrieve group parent(s): ' + groupId + '. GET returned: ' + status });
+                                    });
+                            };
+
+                            // Trigger the recursive chain of parent group gathering
+                            getGroupParent(group);
+                        }
+                    });
+                }
+
                 // If the job isn't running we want to clear out the interval that goes out and checks for stdout updates.
                 // This interval is defined in the standard out log directive controller.
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
@@ -209,7 +247,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
         }
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
     };
-
 
     getJobDetails();
 
