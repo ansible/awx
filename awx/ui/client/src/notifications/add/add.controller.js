@@ -88,8 +88,19 @@ export default
             $scope.typeChange = function () {
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
-                        $scope[fld] = null;
-                        $scope.notification_template_form[fld].$setPristine();
+                        if(form.fields[fld].type === 'checkbox_group' && form.fields[fld].fields) {
+                            // Need to loop across the groups fields to null them out
+                            for(var i=0; i<form.fields[fld].fields.length; i++) {
+                                // Pull the name out of the object (array of objects)
+                                var subFldName = form.fields[fld].fields[i].name;
+                                $scope[subFldName] = null;
+                                $scope.notification_template_form[subFldName].$setPristine();
+                            }
+                        }
+                        else {
+                            $scope[fld] = null;
+                            $scope.notification_template_form[fld].$setPristine();
+                        }
                     }
                 }
 
@@ -144,6 +155,14 @@ export default
                 params.notification_configuration = _.object(Object.keys(form.fields)
                     .filter(i => (form.fields[i].ngShow &&  form.fields[i].ngShow.indexOf(v) > -1))
                     .map(i => [i, processValue($scope[i], i , form.fields[i])]));
+
+                delete params.notification_configuration.checkbox_group;
+
+                for(var j = 0; j < form.fields.checkbox_group.fields.length; j++) {
+                    if(form.fields.checkbox_group.fields[j].ngShow && form.fields.checkbox_group.fields[j].ngShow.indexOf(v) > -1) {
+                        params.notification_configuration[form.fields.checkbox_group.fields[j].name] = Boolean($scope[form.fields.checkbox_group.fields[j].name]);
+                    }
+                }
 
                 Wait('start');
                 Rest.setUrl(url);

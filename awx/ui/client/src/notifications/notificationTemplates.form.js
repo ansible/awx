@@ -355,19 +355,31 @@ export default function() {
                 ngShow: "notification_type.value == 'irc' ",
                 subForm: 'typeSubForm'
             },
-            use_tls: {
-                label: 'Use TLS',
-                type: 'checkbox',
-                ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
-            },
             use_ssl: {
-                labelBind: 'sslLabel',
+                label: 'SSL Connection',
                 type: 'checkbox',
-                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
+                ngShow: "notification_type.value == 'irc'",
                 subForm: 'typeSubForm'
             },
-
+            checkbox_group: {
+                label: 'Options',
+                type: 'checkbox_group',
+                subForm: 'typeSubForm',
+                ngShow: "notification_type.value == 'email'",
+                fields: [{
+                    name: 'use_tls',
+                    label: 'Use TLS',
+                    type: 'checkbox',
+                    ngShow: "notification_type.value == 'email' ",
+                    labelClass: 'checkbox-options stack-inline'
+                }, {
+                    name: 'use_ssl',
+                    label: 'Use SSL',
+                    type: 'checkbox',
+                    ngShow: "notification_type.value == 'email'",
+                    labelClass: 'checkbox-options stack-inline'
+                }]
+            }
         },
 
         buttons: { //for now always generates <button> tags

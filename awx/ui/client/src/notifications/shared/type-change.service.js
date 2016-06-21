@@ -25,7 +25,6 @@ function () {
             switch (type) {
                 case 'email':
                     obj.portLabel = ' Port';
-                    obj.sslLabel = ' Use SSL';
                     obj.passwordLabel = ' Password';
                     obj.email_required = true;
                     obj.port_required = true;
@@ -56,7 +55,6 @@ function () {
                     break;
                 case 'irc':
                     obj.portLabel = ' IRC Server Port';
-                    obj.sslLabel = ' SSL Connection';
                     obj.passwordLabel = ' IRC Server Password';
                     obj.irc_required = true;
                     obj.password_required = true;
