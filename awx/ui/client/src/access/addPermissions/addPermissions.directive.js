@@ -16,7 +16,6 @@ export default
                 controller: addPermissionsController,
                 templateUrl: templateUrl('access/addPermissions/addPermissions'),
                 link: function(scope, element, attrs, ctrl) {
-                    console.info(attrs);
                     scope.withoutTeamPermissions = attrs.withoutTeamPermissions;
                     scope.toggleFormTabs('users');
 
