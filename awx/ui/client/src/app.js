@@ -530,6 +530,9 @@ var tower = angular.module('Tower', [
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
             };
+            $rootScope.addPermissionWithoutTeamTab = function (scope) {
+                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
+            };
 
             $rootScope.deletePermission = function (user, accessListEntry) {
                 let entry = accessListEntry;

@@ -23,10 +23,15 @@
                     <span class="AddPermissions-directionNumber">
                         1
                     </span>
-                    Please select Users / Teams from the lists below.
+                    <div ng-hide='withoutTeamPermissions'>
+                        Please select Users / Teams from the lists below.
+                    </div>
+                    <div ng-show='withoutTeamPermissions'>
+                        Please select Users from the list below.
+                    </div>
                 </div>
 
-                <div class="Form-tabHolder">
+                <div class="Form-tabHolder" ng-hide='withoutTeamPermissions'>
                     <div id="users_tab" class="Form-tab"
                         ng-click="toggleFormTabs('users')"
                         ng-class="{'is-selected': usersSelected }">

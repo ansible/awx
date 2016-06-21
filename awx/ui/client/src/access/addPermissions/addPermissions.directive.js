@@ -16,6 +16,8 @@ export default
                 controller: addPermissionsController,
                 templateUrl: templateUrl('access/addPermissions/addPermissions'),
                 link: function(scope, element, attrs, ctrl) {
+                    console.info(attrs);
+                    scope.withoutTeamPermissions = attrs.withoutTeamPermissions;
                     scope.toggleFormTabs('users');
 
                     $("body").addClass("is-modalOpen");
@@ -23,6 +25,7 @@ export default
                     $("body").append(element);
 
                     Wait('start');
+
 
                     scope.$broadcast("linkLists");
 
