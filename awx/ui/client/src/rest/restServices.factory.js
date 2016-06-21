@@ -62,7 +62,8 @@ export default
                 headers: {},
 
                 setUrl: function (url) {
-                    this.url = url;
+                    // Ensure that a trailing slash is present at the end of the url (before query params, etc)
+                    this.url = url.replace(/\/?(\?|#|$)/, '/$1');
                 },
                 checkExpired: function () {
                     return ($rootScope.sessionTimer) ? $rootScope.sessionTimer.isExpired() : false;
