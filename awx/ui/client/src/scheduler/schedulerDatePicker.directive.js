@@ -20,12 +20,6 @@ export default
                 },
                 templateUrl: templateUrl('system-tracking/date-picker/date-picker'),
                 link: function(scope, element, attrs) {
-                    var lang = window.navigator.languages ?
-                                window.navigator.languages[0] :
-                                (window.navigator.language || window.navigator.userLanguage);
-
-                    moment.locale(lang);
-
                     // We need to make sure this _never_ recurses, which sometimes happens
                     // with two-way binding.
                     var mustUpdateValue = true;
