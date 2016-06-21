@@ -26,6 +26,9 @@
                      }
                  })
                  .error(function(data, status) {
+                     if (status === 403 && params.ignore_403) {
+                         return;
+                     }
                      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                          msg: 'Failed to retrieve ' + url + '. GET returned: ' + status });
                  });
