@@ -14,8 +14,8 @@ export default
         $scope.inventory = inventoryData;
         $scope.state = $state;
         // slices the group stack at $index to supply new group params to $state.go()
-        $scope.goToGroup = function($index){
-            var group = $stateParams.group.slice(0, $index);
+        $scope.goToGroup = function(index){
+            var group = $stateParams.group.slice(0, index);
             $state.go('inventoryManage', {group: group}, {reload: true});
         };
         $scope.isRootState = function(){
