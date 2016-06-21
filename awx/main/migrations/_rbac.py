@@ -162,9 +162,10 @@ def _discover_credentials(instances, cred, orgfunc):
             else:
                 # Create a new credential
                 cred.pk = None
+                cred.organization = None
                 cred.save()
 
-                cred.owner_role, cred.use_role, cred.organization = None, None, None
+                cred.owner_role, cred.use_role = None, None
 
                 for i in orgs[org]:
                     i.credential = cred
