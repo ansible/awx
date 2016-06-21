@@ -133,7 +133,7 @@ export default function() {
                 label: 'Save',
                 ngClick: 'launchJob()',
                 ngDisabled: true,
-                'class': 'btn btn-sm List-buttonSubmit'
+                'class': 'btn btn-sm List-buttonSubmit launchButton'
             }
         },
 

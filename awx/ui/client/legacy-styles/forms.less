@@ -187,7 +187,7 @@
 
 .Form-formGroup--checkbox{
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
 }
 
 .Form-checkbox--stacked {
@@ -510,7 +510,7 @@ input[type='radio']:checked:before {
     border-color: @default-border;
 }
 
-.Form-saveButton{
+.Form-saveButton, .Form-launchButton{
     background-color: @submit-button-bg;
     color: @submit-button-text;
     text-transform: uppercase;
@@ -519,11 +519,11 @@ input[type='radio']:checked:before {
     padding-right: 15px;
 }
 
-.Form-saveButton:disabled{
+.Form-saveButton:disabled, .Form-launchButton:disabled{
     background-color: @submit-button-bg-dis;
 }
 
-.Form-saveButton:hover{
+.Form-saveButton:hover, .Form-launchButton:hover{
     background-color: @submit-button-bg-hov;
     color: @submit-button-text;
 }

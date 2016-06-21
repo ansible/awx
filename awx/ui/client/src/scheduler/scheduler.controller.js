@@ -14,11 +14,11 @@
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait',
-    'Find', 'LoadSchedulesScope', 'GetChoices', '$q',
+    'Find', 'LoadSchedulesScope', 'GetChoices', '$q', '$state',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices,
-    $q) {
+    $q, $state) {
         var schedList = _.cloneDeep(SchedulesList);
 
         ClearScope();
@@ -66,7 +66,8 @@ export default [
                 list: schedList,
                 id: 'schedule-list-target',
                 url: url,
-                pageSize: 20
+                pageSize: 20,
+                cancelButton: true,
             });
         });
 
@@ -116,6 +117,10 @@ export default [
 
         $scope.refreshJobs = function() {
             $scope.search(SchedulesList.iterator);
+        };
+
+        $scope.formCancel = function() {
+            $state.go('^', {}, {reload: true});
         };
 
         Wait('start');

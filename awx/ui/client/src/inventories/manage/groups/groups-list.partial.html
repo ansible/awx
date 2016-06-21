@@ -3,12 +3,22 @@
     <div class="modal-dialog">
         <div class="modal-content Modal-content">
             <div class="Modal-header">
-                  <div class="Modal-title ng-binding">Delete Group</div>
+                  <div class="Modal-title ng-binding">
+                      Delete Group
+                      <a href="" id="awp-promote" href=""
+                          aw-pop-over="<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the group being deleted. If a group or host is associated with other groups, it will still exist within those groups. Otherwise, the associated groups and hosts will no longer appear in the inventory.</dd>\n<dt style='margin-top: 5px;'>Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted root level. Note: groups already associated with other groups cannot be promoted.</dd></dl>\n" aw-tool-tip="Click for help"
+                          data-placement="right"
+                          data-container="body"
+                          data-title="Delete Group"
+                          class="help-link">
+                          <i class="fa fa-question-circle"></i>
+                      </a>
+                  </div>
                   <div class="Modal-exitHolder">
                       <button class="close Modal-exit" data-target="#group-delete-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
                   </div>
             </div>
-            <div class="modal-body">
+            <div class="Modal-body">
                 <div ng-show="toDelete.total_groups > 0 || toDelete.total_hosts > 0">
                     <div>
                         <p class="Prompt-bodyQuery">Deleting group <em>{{ toDelete.name }}</em>.
@@ -61,9 +71,6 @@
                     <div class="Prompt-bodyTarget">{{ toDelete.name }}</div>
                 </div>
                 <div class="Modal-footer">
-                <div class="GroupDelete-help--container">
-                    <a href="" id="awp-promote" href="" aw-pop-over="<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the group being deleted. If a group or host is associated with other groups, it will still exist within those groups. Otherwise, the associated groups and hosts will no longer appear in the inventory.</dd>\n<dt style='margin-top: 5px;'>Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted root level. Note: groups already associated with other groups cannot be promoted.</dd></dl>\n" aw-tool-tip="Click for help"  data-placement="right" data-container="body" data-title="Help" class="help-link"><i class="fa fa-question-circle"></i> Click for help</a>
-                </div>
                   <a href="#" data-target="#group-delete-modal" data-dismiss="modal" id="prompt_cancel_btn_groups_list" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
                   <a href="" ng-class="promptActionBtnClass" ng-click="confirmDelete()" id="prompt_action_btn_groups_list" class="btn Modal-footerButton Modal-errorButton">DELETE</a>
               </div>
