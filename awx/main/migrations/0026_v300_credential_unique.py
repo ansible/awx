@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
-
+from awx.main.migrations import _rbac as rbac
+from django.db import migrations
+import awx.main.fields
 
 class Migration(migrations.Migration):
 
@@ -15,4 +16,10 @@ class Migration(migrations.Migration):
             name='credential',
             unique_together=set([('organization', 'name', 'kind')]),
         ),
+        migrations.AlterField(
+            model_name='credential',
+            name='read_role',
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_auditor', b'use_role', b'owner_role', b'organization.auditor_role'], to='main.Role', null=b'True'),
+        ),
+        migrations.RunPython(rbac.rebuild_role_hierarchy),
     ]
