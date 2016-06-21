@@ -226,7 +226,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'use_role',
-        'owner_role'
+        'owner_role',
+        'organization.auditor_role',
     ])
 
     @property
