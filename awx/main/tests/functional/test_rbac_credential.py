@@ -65,6 +65,17 @@ def test_credential_access_superuser():
     assert access.can_delete(credential)
 
 @pytest.mark.django_db
+def test_credential_access_auditor(credential, organization_factory):
+    objects = organization_factory("org_cred_auditor",
+                                   users=["user1"],
+                                   roles=['org_cred_auditor.auditor_role:user1'])
+    credential.organization = objects.organization
+    credential.save()
+
+    access = CredentialAccess(objects.users.user1)
+    assert access.can_read(credential)
+
+@pytest.mark.django_db
 def test_credential_access_admin(user, team, credential):
     u = user('org-admin', False)
     team.organization.admin_role.members.add(u)
