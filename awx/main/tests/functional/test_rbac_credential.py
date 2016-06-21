@@ -19,6 +19,19 @@ def test_credential_migration_user(credential, user, permissions):
     assert u in credential.owner_role
 
 @pytest.mark.django_db
+def test_two_teams_same_cred_name(organization_factory):
+    objects = organization_factory("test",
+                                   teams=["team1", "team2"])
+
+    cred1 = Credential.objects.create(name="test", kind="net", deprecated_team=objects.teams.team1)
+    cred2 = Credential.objects.create(name="test", kind="net", deprecated_team=objects.teams.team2)
+
+    rbac.migrate_credential(apps, None)
+
+    assert objects.teams.team1.member_role in cred1.owner_role.parents.all()
+    assert objects.teams.team2.member_role in cred2.owner_role.parents.all()
+
+@pytest.mark.django_db
 def test_credential_use_role(credential, user, permissions):
     u = user('user', False)
     credential.use_role.members.add(u)
@@ -63,6 +76,17 @@ def test_credential_access_superuser():
     assert access.can_add(None)
     assert access.can_change(credential, None)
     assert access.can_delete(credential)
+
+@pytest.mark.django_db
+def test_credential_access_auditor(credential, organization_factory):
+    objects = organization_factory("org_cred_auditor",
+                                   users=["user1"],
+                                   roles=['org_cred_auditor.auditor_role:user1'])
+    credential.organization = objects.organization
+    credential.save()
+
+    access = CredentialAccess(objects.users.user1)
+    assert access.can_read(credential)
 
 @pytest.mark.django_db
 def test_credential_access_admin(user, team, credential):

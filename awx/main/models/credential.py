@@ -61,6 +61,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     class Meta:
         app_label = 'main'
         ordering = ('kind', 'name')
+        unique_together = (('organization', 'name', 'kind'),)
 
     deprecated_user = models.ForeignKey(
         'auth.User',
@@ -224,8 +225,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     )
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'organization.auditor_role',
         'use_role',
-        'owner_role'
+        'owner_role',
     ])
 
     @property
