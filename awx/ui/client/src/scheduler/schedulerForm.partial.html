@@ -42,26 +42,9 @@
                         (mm/dd/yyyy)
                     </span>
                 </label>
-                <div class="input-group Form-inputGroup">
-                    <input type="text"
-                        class="form-control input-sm
-                            Form-textInput"
-                        name="schedulerStartDt"
-                        id="schedulerStartDt"
-                        ng-model="schedulerStartDt"
-                        sch-date-picker
-                        placeholder="mm/dd/yyyy"
-                        required
-                        ng-change="scheduleTimeChange(processSchedulerEndDt)" >
-                        <span class="input-group-btn">
-                            <button
-                                class="btn btn-default btn-sm
-                                    Form-inputButton Form-lookupButton"
-                                type="button"
-                                ng-click="showCalendar('schedulerStartDt')">
-                                <i class="fa fa-calendar"></i>
-                            </button>
-                        </span>
+                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                    <scheduler-date-picker date="schedulerStartDt">
+                    </scheduler-date-picker>
                 </div>
                 <div class="error"
                     ng-show="scheduler_form_schedulerStartDt_error"
@@ -490,26 +473,9 @@
                             (mm/dd/yyyy)
                         </span>
                     </label>
-                    <div class="input-group Form-inputGroup">
-                        <input type="text"
-                            name="schedulerEndDt"
-                            id="schedulerEndDt"
-                            class="form-control input-sm
-                                Form-textInput"
-                            ng-model="$parent.schedulerEndDt"
-                            sch-date-picker
-                            data-min-today="true"
-                            placeholder="mm/dd/yyyy"
-                            ng-change="$parent.resetError('scheduler_endDt_error')">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default btn-sm
-                                Form-inputButton Form-lookupButton"
-                                type="button"
-                                ng-click="showCalendar('schedulerEndDt')"
-                            >
-                                <i class="fa fa-calendar"></i>
-                            </button>
-                        </span>
+                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                        <scheduler-date-picker date="$parent.schedulerEndDt">
+                        </scheduler-date-picker>
                     </div>
                     <div class="error"
                         ng-show="$parent.scheduler_endDt_error">
