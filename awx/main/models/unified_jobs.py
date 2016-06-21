@@ -309,7 +309,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         kwargs.pop('%s_id' % parent_field_name, None)
         create_kwargs = {}
         m2m_fields = {}
-        create_kwargs[parent_field_name] = self
+        if self.pk:
+            create_kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
             # Foreign keys can be specified as field_name or field_name_id.
             id_field_name = '%s_id' % field_name

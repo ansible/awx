@@ -35,3 +35,11 @@ def test_job_blocking_allow_simul(get, post, job_template, inventory):
     job_template.allow_simultaneous = False
     assert j1.is_blocked_by(j2)
     assert j2.is_blocked_by(j1)
+
+@pytest.mark.django_db
+def test_orphan_unified_job_creation(instance, inventory):
+    job = Job.objects.create(job_template=None, inventory=inventory, name='hi world')
+    job2 = job.copy()
+    assert job2.job_template is None
+    assert job2.inventory == inventory
+    assert job2.name == 'hi world'
