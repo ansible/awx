@@ -16,7 +16,7 @@
                 <div class="StandardOut-details">
 
                     <div class="StandardOut-detailsRow" ng-show="project_name">
-                        <div class="StandardOut-detailsLabel">NAME</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">NAME</div>
                         <div class="StandardOut-detailsContent">
                             <a ui-sref="projects.edit({id: job.project})">
                                 {{ project_name }}
@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="StandardOut-detailsRow">
-                        <div class="StandardOut-detailsLabel">STATUS</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">STATUS</div>
                         <div class="StandardOut-detailsContent">
                             <i class="fa icon-job-{{ job.status }}"></i>
                             <span class="StandardOut-statusText StandardOut--capitalize">{{ job.status }}</span>
@@ -33,35 +33,35 @@
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.started">
-                        <div class="StandardOut-detailsLabel">STARTED</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">STARTED</div>
                         <div class="StandardOut-detailsContent">
                             {{ job.started | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
-                        <div class="StandardOut-detailsLabel">FINISHED</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">FINISHED</div>
                         <div class="StandardOut-detailsContent">
                             {{ job.finished | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
-                        <div class="StandardOut-detailsLabel">ELAPSED</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">ELAPSED</div>
                         <div class="StandardOut-detailsContent">
                             {{ job.elapsed }} seconds
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.launch_type">
-                        <div class="StandardOut-detailsLabel">LAUNCH TYPE</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">LAUNCH TYPE</div>
                         <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.launch_type }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="project_name">
-                        <div class="StandardOut-detailsLabel">PROJECT</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">PROJECT</div>
                         <div class="StandardOut-detailsContent">
                             <a ui-sref="projects.edit({id: job.project})">
                                 {{ project_name }}
@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="credential_name">
-                        <div class="StandardOut-detailsLabel">CREDENTIAL</div>
+                        <div class="StandardOut-detailsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3">CREDENTIAL</div>
                         <div class="StandardOut-detailsContent">
                             <a ui-sref="credentials.edit({credential_id: credential})">
                                 {{ credential_name }}
