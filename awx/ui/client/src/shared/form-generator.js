@@ -1793,7 +1793,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     form = params.form,
                     itm = params.related,
                     collection = form.related[itm],
-                    act, fld, cnt, base, fAction;
+                    act, fld, cnt, base, fAction, width;
 
                 if (collection.instructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
@@ -1817,10 +1817,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     });
                 var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
 
+                if(actionButtons.length === 0 ){
+                    // The search bar should be full width if there are no
+                    // action buttons
+                    width = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+                }
+                else {
+                    width = "col-lg-8 col-md-8 col-sm-8 col-xs-12";
+                }
                 html += `
                     <div class=\"row\"
                         ng-show=\"${collection.hideSearchAndActions ? false : true}\">
-                        <div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\"
+                        <div class=\"${width}\"
                             ng-show=\"${collection.iterator}Loading == true ||
                                 ${collection.iterator}_active_search == true || (
                                     ${collection.iterator}Loading == false &&
@@ -1828,14 +1836,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     ${collection.iterator}_total_rows > 0) &&
                                     !(is_superuser && ${hideOnSuperuser})\">
                             ${tagSearch}
+                        </div>`;
+
+                if(actionButtons.length>0){
+                    html += `<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12 action_column\">
+                        <div class=\"list-actions\">
+                            ${actionButtons}
                         </div>
-                        <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12 action_column\">
-                            <div class=\"list-actions\">
-                                ${actionButtons}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                    </div>`;
+                }
+                html += "</div>";
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
 
