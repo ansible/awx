@@ -198,17 +198,17 @@ export default
                             var msg;
                             switch (data.status) {
                             case 'failed':
-                                msg = "The selected project has a <em>failed</em> status. Review the project's SCM settings" +
-                                    " and run an update before adding it to a template.";
+                                msg = "<div>The selected project has a <em>failed</em> status. Review the project's SCM settings" +
+                                    " and run an update before adding it to a template.</div>";
                                 break;
                             case 'never updated':
-                                msg = 'The selected project has a <em>never updated</em> status. You will need to run a successful' +
+                                msg = '<div>The selected project has a <em>never updated</em> status. You will need to run a successful' +
                                     ' update in order to selected a playbook. Without a valid playbook you will not be able ' +
-                                    ' to save this template.';
+                                    ' to save this template.</div>';
                                 break;
                             case 'missing':
-                                msg = 'The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
-                                    ' the directory exists and file permissions are set correctly.';
+                                msg = '<div>The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
+                                    ' the directory exists and file permissions are set correctly.</div>';
                                 break;
                             }
                             Wait('stop');
