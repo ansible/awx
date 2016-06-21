@@ -36,8 +36,7 @@ export default
                     ngClass: "inventory.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
-                    awToolTip: "{{ inventory.hostsTip }}",
-                    awTipPlacement: "right",
+                    awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
                     ngClass: ""
                 }]
