@@ -35,6 +35,10 @@ def migrate_facts(apps, schema_editor):
         # TODO: This means the database was up but something happened when we tried to query it
         return (0, 0)
 
+    # Migration already happened
+    if Fact.objects.all().count() > 0:
+        return (migrated_count, not_migrated_count)
+
     migrated_count = 0
     not_migrated_count = 0
     transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
@@ -49,5 +53,4 @@ def migrate_facts(apps, schema_editor):
             # This isn't a hard error. Just something the user would want to know.
             not_migrated_count += 1
 
-    drop_system_tracking_db()
     return (migrated_count, not_migrated_count)
