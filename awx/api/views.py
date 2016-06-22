@@ -879,7 +879,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         role = Role.objects.get(pk=sub_id)
         content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == content_type:
-            data = dict(msg="You cannot assign Organization roles and child roles for Teams.")
+            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
@@ -3724,7 +3724,7 @@ class RoleTeamsList(ListAPIView):
         role = Role.objects.get(pk=self.kwargs['pk'])
         content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == content_type:
-            data = dict(msg="You cannot assign Organization roles and child roles for Teams.")
+            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         team = Team.objects.get(pk=sub_id)
