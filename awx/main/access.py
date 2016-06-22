@@ -545,7 +545,12 @@ class InventoryUpdateAccess(BaseAccess):
         return qs.filter(inventory_source__in=inventory_sources_qs)
 
     def can_cancel(self, obj):
-        return self.can_change(obj, {}) and obj.can_cancel
+        if not obj.can_cancel:
+            return False
+        if self.user.is_superuser or self.user == obj.created_by:
+            return True
+        # Inventory cascade deletes to inventory update, descends from org admin
+        return self.user in obj.inventory_source.inventory.admin_role
 
 class CredentialAccess(BaseAccess):
     '''
@@ -732,7 +737,12 @@ class ProjectUpdateAccess(BaseAccess):
 
     @check_superuser
     def can_cancel(self, obj):
-        return self.can_change(obj, {}) and obj.can_cancel
+        if not obj.can_cancel:
+            return False
+        if self.user == obj.created_by:
+            return True
+        # Project updates cascade delete with project, admin role descends from org admin
+        return self.user in obj.project.admin_role
 
     @check_superuser
     def can_delete(self, obj):
@@ -1011,7 +1021,12 @@ class JobAccess(BaseAccess):
         return inventory_access and credential_access and (org_access or project_access)
 
     def can_cancel(self, obj):
-        return self.can_read(obj) and obj.can_cancel
+        if not obj.can_cancel:
+            return False
+        # Delete access allows org admins to stop running jobs
+        if self.user == obj.created_by or self.can_delete(obj):
+            return True
+        return obj.job_template is not None and self.user in obj.job_template.admin_role
 
 class SystemJobTemplateAccess(BaseAccess):
     '''
@@ -1079,8 +1094,9 @@ class AdHocCommandAccess(BaseAccess):
     def can_change(self, obj, data):
         return False
 
+    @check_superuser
     def can_delete(self, obj):
-        return self.can_read(obj)
+        return obj.inventory is not None and self.user in obj.inventory.organization.admin_role
 
     def can_start(self, obj):
         return self.can_add({
@@ -1089,7 +1105,11 @@ class AdHocCommandAccess(BaseAccess):
         })
 
     def can_cancel(self, obj):
-        return self.can_read(obj) and obj.can_cancel
+        if not obj.can_cancel:
+            return False
+        if self.user == obj.created_by:
+            return True
+        return obj.inventory is not None and self.user in obj.inventory.admin_role
 
 class AdHocCommandEventAccess(BaseAccess):
     '''
