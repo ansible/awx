@@ -206,7 +206,7 @@ export default
                 job_tags: {
                     label: 'Job Tags',
                     type: 'textarea',
-                    rows: 1,
+                    rows: 5,
                     addRequired: false,
                     editRequired: false,
                     'elementClass': 'Form-textInput',
