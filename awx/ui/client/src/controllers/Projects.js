@@ -711,6 +711,12 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                     element: '#project_scm_type',
                     multiple: false
                 });
+
+                CreateSelect2({
+                    element: '#local-path-select',
+                    multiple: false
+                });
+                
                 $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
 
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
