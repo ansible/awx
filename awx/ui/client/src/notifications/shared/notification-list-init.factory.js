@@ -15,11 +15,16 @@
  */
 
 export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
-    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices) {
+    '$state',
+    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state) {
     return function(params) {
         var scope = params.scope,
             url = params.url,
             id = params.id;
+
+        scope.addNotificationTemplate = function(){
+            $state.go('notifications.add');
+        }
 
         if (scope.relatednotificationsRemove) {
             scope.relatednotificationsRemove();
