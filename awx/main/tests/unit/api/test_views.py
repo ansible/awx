@@ -4,6 +4,8 @@ import pytest
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
 
+from django.contrib.contenttypes.models import ContentType
+
 from awx.api.views import (
     ApiV1RootView,
     TeamRolesList,
@@ -11,6 +13,7 @@ from awx.api.views import (
 
 from awx.main.models import (
     User,
+    Role,
 )
 
 @pytest.fixture
@@ -64,10 +67,11 @@ def test_team_roles_list_post_org_roles(url):
     with mock.patch('awx.api.views.Role.objects.get', create=True) as role_get, \
             mock.patch('awx.api.views.ContentType.objects.get_for_model', create=True) as ct_get:
 
-        role_mock = mock.MagicMock()
-        role_mock.content_type = 1
+        role_mock = mock.MagicMock(spec=Role)
+        content_type_mock = mock.MagicMock(spec=ContentType)
+        role_mock.content_type = content_type_mock
         role_get.return_value = role_mock
-        ct_get.return_value = 1
+        ct_get.return_value = content_type_mock
 
         factory = APIRequestFactory()
         view = TeamRolesList.as_view()
