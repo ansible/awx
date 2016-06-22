@@ -24,7 +24,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
 
         scope.addNotificationTemplate = function(){
             $state.go('notifications.add');
-        }
+        };
 
         if (scope.relatednotificationsRemove) {
             scope.relatednotificationsRemove();
