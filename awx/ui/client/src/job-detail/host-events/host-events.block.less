@@ -7,18 +7,20 @@
 .HostEvents .modal-footer{
 	border: 0;
 	margin-top: 0px;
-	padding-top: 5px;
+	padding: 0px 20px 20px 20px;
 }
 button.HostEvents-close{
 	width: 70px;
-    color: #FFFFFF;
+    color: #FFFFFF!important;
     text-transform: uppercase;
     padding-left: 15px;
     padding-right: 15px;
  	background-color: @default-link;
- 	&:hover{
- 		background-color: @default-link-hov;
- 	}
+	border-color: @default-link;
+	&:hover{
+  		background-color: @default-link-hov;
+ 		border-color: @default-link-hov;
+  	}
 }
 .HostEvents-status--ok{
 	color: @green;

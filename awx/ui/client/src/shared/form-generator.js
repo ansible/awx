@@ -682,7 +682,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<label class=\"";
                         html += (field.inline === undefined || field.inline === true) ? "checkbox-inline" : "";
                         html += (field.labelClass) ? " " + field.labelClass : "";
-                        html += "\">";
+                        html += "\"";
+                        html += (field.ngShow) ? " ng-show=\"" +field.ngShow + "\" " : "";
+                        html += ">";
                     }
 
                     html += "<input type=\"checkbox\" ";
