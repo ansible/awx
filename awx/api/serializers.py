@@ -2617,7 +2617,7 @@ class ActivityStreamSerializer(BaseSerializer):
         for fk, _ in SUMMARIZABLE_FK_FIELDS.items():
             if not hasattr(obj, fk):
                 continue
-            allm2m = getattr(obj, fk).all()
+            allm2m = getattr(obj, fk).distinct()
             if allm2m.count() > 0:
                 rel[fk] = []
                 for thisItem in allm2m:
@@ -2632,7 +2632,7 @@ class ActivityStreamSerializer(BaseSerializer):
             try:
                 if not hasattr(obj, fk):
                     continue
-                allm2m = getattr(obj, fk).all()
+                allm2m = getattr(obj, fk).distinct()
                 if allm2m.count() > 0:
                     summary_fields[fk] = []
                     for thisItem in allm2m:
