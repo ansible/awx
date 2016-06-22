@@ -1507,6 +1507,12 @@ class CustomInventoryScriptAccess(BaseAccess):
         return self.model.accessible_objects(self.user, 'read_role').all()
 
     @check_superuser
+    def can_add(self, data):
+        org_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=org_pk)
+        return self.user in org.admin_role
+
+    @check_superuser
     def can_admin(self, obj):
         return self.user in obj.admin_role
 

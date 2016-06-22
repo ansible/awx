@@ -12,6 +12,7 @@ from django.apps import apps
 @pytest.mark.django_db
 def test_custom_inv_script_access(organization, user):
     u = user('user', False)
+    ou = user('oadm', False)
 
     custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test')
     custom_inv.organization = organization
@@ -20,6 +21,9 @@ def test_custom_inv_script_access(organization, user):
 
     organization.member_role.members.add(u)
     assert u in custom_inv.read_role
+
+    organization.admin_role.members.add(ou)
+    assert ou in custom_inv.admin_role
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
