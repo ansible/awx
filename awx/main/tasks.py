@@ -269,7 +269,8 @@ def handle_work_error(self, task_id, subtasks=None):
                 friendly_name = "System Job"
             else:
                 # Unknown task type
-                break
+                logger.warn("Unknown task type: {}".format(each_task['type']))
+                continue
             if first_task is None:
                 first_task = instance
                 first_task_id = instance.id

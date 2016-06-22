@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-import pprint
+import json
 
 from django.utils.encoding import smart_text
 from django.core.mail.backends.base import BaseEmailBackend
@@ -16,5 +16,5 @@ class TowerBaseEmailBackend(BaseEmailBackend):
                                                                                                             body['id'],
                                                                                                             body['status'],
                                                                                                             body['url']))
-            body_actual += pprint.pformat(body, indent=4)
+            body_actual += json.dumps(body, indent=4)
         return body_actual
