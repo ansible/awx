@@ -3,7 +3,7 @@
         <div class="TagSearch-bar">
             <div class="TagSearch-typeDropdown"
                 ng-click="toggleTypeDropdown()"
-                ng-class="{'is-open': showTypeDropdown}"
+                ng-class="{'is-open': showTypeDropdown, 'is-single': searchTypes.length === 1}"
                 ng-cloak>
                 <span class="TagSearch-typeDropdownName" ng-cloak>
                     {{ currentSearchType.label }}
