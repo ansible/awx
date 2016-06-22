@@ -547,6 +547,10 @@ class InventoryUpdateAccess(BaseAccess):
     def can_cancel(self, obj):
         return self.can_change(obj, {}) and obj.can_cancel
 
+    @check_superuser
+    def can_delete(self, obj):
+        return self.user in obj.inventory_source.inventory.admin_role
+
 class CredentialAccess(BaseAccess):
     '''
     I can see credentials when:

@@ -6,7 +6,11 @@ from awx.main.models import (
     Host,
     CustomInventoryScript,
 )
-from awx.main.access import InventoryAccess, HostAccess
+from awx.main.access import (
+    InventoryAccess,
+    HostAccess,
+    InventoryUpdateAccess
+)
 from django.apps import apps
 
 @pytest.mark.django_db
@@ -231,6 +235,10 @@ def test_access_auditor(organization, inventory, user):
     assert not access.can_delete(inventory)
     assert not access.can_run_ad_hoc_commands(inventory)
 
+@pytest.mark.django_db
+def test_inventory_update_org_admin(inventory_update, org_admin):
+    access = InventoryUpdateAccess(org_admin)
+    assert access.can_delete(inventory_update)
 
 
 @pytest.mark.django_db
