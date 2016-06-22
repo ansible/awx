@@ -22,6 +22,11 @@ export default
                 route: '/job_templates/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
                 controller: 'schedulerController',
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'job_template',
+                    activityStreamId: 'id'
+                },
                 ncyBreadcrumb: {
                     parent: 'jobTemplates.edit',
                     label: 'SCHEDULES'
@@ -52,6 +57,11 @@ export default
                 route: '/projects/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
                 controller: 'schedulerController',
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'project',
+                    activityStreamId: 'id'
+                },
                 ncyBreadcrumb: {
                     parent: 'projects.edit',
                     label: 'SCHEDULES'
