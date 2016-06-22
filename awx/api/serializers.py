@@ -1279,7 +1279,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         if obj is None:
             return ret
         request = self.context.get('request', None)
-        if request is not None and request.user is not None and not request.user.is_superuser:
+        if not request.user in obj.admin_role:
             ret['script'] = None
         return ret
 
