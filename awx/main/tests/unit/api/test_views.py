@@ -64,8 +64,8 @@ class TestApiV1RootView:
 
 @pytest.mark.parametrize("url", ["/team/1/roles", "/role/1/teams"])
 def test_team_roles_list_post_org_roles(url):
-    with mock.patch('awx.api.views.Role.objects.get', create=True) as role_get, \
-            mock.patch('awx.api.views.ContentType.objects.get_for_model', create=True) as ct_get:
+    with mock.patch('awx.api.views.Role.objects.get') as role_get, \
+            mock.patch('awx.api.views.ContentType.objects.get_for_model') as ct_get:
 
         role_mock = mock.MagicMock(spec=Role)
         content_type_mock = mock.MagicMock(spec=ContentType)
