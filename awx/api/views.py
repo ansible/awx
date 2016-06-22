@@ -1338,7 +1338,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
 
     def get_queryset(self):
         credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(Credential, 'read', None):
+        if not self.request.user.can_access(Credential, 'read', credential):
             raise PermissionDenied()
 
         content_type = ContentType.objects.get_for_model(self.model)
