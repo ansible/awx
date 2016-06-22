@@ -63,7 +63,6 @@ export default [
                 id: 'schedule-list-target',
                 url: url,
                 pageSize: 20,
-                cancelButton: true,
             });
         });
 
