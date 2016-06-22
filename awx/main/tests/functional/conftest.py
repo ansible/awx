@@ -29,6 +29,8 @@ from awx.main.models.jobs import JobTemplate
 from awx.main.models.inventory import (
     Group,
     Inventory,
+    InventoryUpdate,
+    InventorySource
 )
 from awx.main.models.organization import (
     Organization,
@@ -264,6 +266,15 @@ def hosts(group_factory):
 @pytest.fixture
 def group(inventory):
     return inventory.groups.create(name='single-group')
+
+@pytest.fixture
+def inventory_source(group, inventory):
+    return InventorySource.objects.create(name=group.name, group=group,
+                                          inventory=inventory, source='gce')
+
+@pytest.fixture
+def inventory_update(inventory_source):
+    return InventoryUpdate.objects.create(inventory_source=inventory_source)
 
 @pytest.fixture
 def host(group, inventory):
