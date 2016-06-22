@@ -1,25 +1,22 @@
 <div class="BreadCrumb InventoryManageBreadCrumbs">
 	<ol class="BreadCrumb-list">
 		<li class="BreadCrumb-item"><a ui-sref="inventories">Inventories</a></li>
-		<li href class="BreadCrumb-item">
-			<a href ng-if="!isRootState() || groups.length > 0" ng-click="goToInventory()">{{inventory.name}}</a>
-			<span ng-if="isRootState() && groups.length === 0">{{inventory.name}}</span>
+		<li class="BreadCrumb-item">
+			<a href ng-if="currentState !== 'inventoryManage' || groups.length > 0" ng-click="goToInventory()">{{inventory.name}}</a>
+			<span ng-if="currentState === 'inventoryManage' && groups.length === 0">{{inventory.name}}</span>
 		</li>
 		<!-- inside inventoryManage list view (last item is not clickable) -->
-		<span ng-if="isRootState()">
-            <li class="BreadCrumb-item"></li>
-			<li ng-repeat="group in groups | limitTo:(groups.length-1) track by $index" class="BreadCrumb-item">
-				<a href ng-click="goToGroup($index+1)">{{group.name}}</a>
-			</li>
-			<li ng-hide="groups.length == 0" class="BreadCrumb-item"><span>{{groups[groups.length-1].name}}</span></li>
-		</span>
+		<li ng-repeat="group in groups | limitTo:(groups.length-1) track by $index" class="BreadCrumb-item" ng-if="currentState === 'inventoryManage'">
+			<a href ng-click="goToGroup($index+1)">{{group.name}}</a>
+		</li>
+		<li ng-hide="groups.length == 0" class="BreadCrumb-item" ng-if="currentState === 'inventoryManage'">
+			<span>{{groups[groups.length-1].name}}</span>
+		</li>
 		<!-- inside inventoryManage.child like add/edit (last item is clickable)-->
-		<span ng-if="!isRootState()">
-			<li class="BreadCrumb-item"></li>
-			<li ng-repeat="group in groups track by $index" class="BreadCrumb-item">
-				<a href ng-click="goToGroup($index+1)">{{group.name}}</a>
-			</li>
-			<li class="BreadCrumb-item"></li>
+		<li ng-repeat="group in groups track by $index" class="BreadCrumb-item" ng-if="currentState !== 'inventoryManage'">
+			<a href ng-click="goToGroup($index+1)">{{group.name}}</a>
+		</li>
+		<li class="BreadCrumb-item" ng-if="currentState !== 'inventoryManage'"></li>
 		</span>
         <div class="InventoryManageBreadCrumb-ncy" ng-if="!licenseMissing" ncy-breadcrumb></div>
 	</ol>
