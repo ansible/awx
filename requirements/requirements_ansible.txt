@@ -12,6 +12,7 @@ decorator==4.0.6
 dogpile.core==0.4.1
 dogpile.cache==0.5.7
 funcsigs==0.4
+git+https://github.com/chrismeyersfsu/functools-total-ordering-monkeypatch.git@master#egg=functools-total-ordering-monkeypatch
 futures==3.0.4
 httplib2==0.9.2
 idna==2.0
@@ -75,6 +76,7 @@ simplejson==3.8.1
 six==1.9.0
 stevedore==1.10.0
 suds==0.4
+total-ordering==0.1.0
 unicodecsv==0.14.1
 warlock==1.2.0
 wrapt==1.10.6
