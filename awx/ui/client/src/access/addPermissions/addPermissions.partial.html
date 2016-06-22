@@ -72,7 +72,7 @@
                 <div class="AddPermissions-keyPane"
                     ng-show="showKeyPane">
                     <div class="AddPermissions-keyRow"
-                        ng-repeat="key in roleKey">
+                        ng-repeat="key in roleKey | filter:{name: '!Read'}">
                         <div class="AddPermissions-keyName">
                             {{ key.name }}
                         </div>
