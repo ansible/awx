@@ -23,12 +23,13 @@ class Command(BaseCommand):
             superuser = None
         with impersonate(superuser):
             o = Organization.objects.create(name='Default')
-            p = Project.objects.create(name='Demo Project',
-                                       scm_type='git',
-                                       scm_url='https://github.com/ansible/ansible-tower-samples',
-                                       scm_update_on_launch=True,
-                                       scm_update_cache_timeout=0,
-                                       organization=o)
+            p = Project(name='Demo Project',
+                        scm_type='git',
+                        scm_url='https://github.com/ansible/ansible-tower-samples',
+                        scm_update_on_launch=True,
+                        scm_update_cache_timeout=0,
+                        organization=o)
+            p.save(skip_update=True)
             c = Credential.objects.create(name='Demo Credential',
                                           username=superuser.username,
                                           created_by=superuser)

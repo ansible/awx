@@ -256,6 +256,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+        skip_update = bool(kwargs.pop('skip_update', False))
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = self.__class__.objects.get(pk=self.pk)
@@ -279,7 +280,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             if update_fields:
                 self.save(update_fields=update_fields)
         # If we just created a new project with SCM, start the initial update.
-        if new_instance and self.scm_type:
+        if new_instance and self.scm_type and not skip_update:
             self.update()
 
     def _get_current_status(self):
