@@ -39,7 +39,8 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
                     url = data.related.admins;
                     list.listTitle = listTitle;
                     list.basePath = url;
-
+                    list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+                    
                     $scope.orgRelatedUrls = data.related;
 
                     generator.inject(list, { mode: 'edit', scope: $scope, cancelButton: true });

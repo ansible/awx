@@ -38,6 +38,7 @@
                      url = data.related.users;
                      list.listTitle = listTitle;
                      list.basePath = url;
+                     list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
 
                      $scope.orgRelatedUrls = data.related;
 
