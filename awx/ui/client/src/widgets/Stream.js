@@ -22,206 +22,189 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     'RefreshHelper', listGenerator.name, 'StreamWidget',
 ])
 
-.factory('setStreamHeight', [
-    function () {
-        return function () {
-            // Try not to overlap footer. Because stream is positioned absolute, the parent
-            // doesn't resize correctly when stream is loaded.
-            var sheight = $('#stream-content').height(),
-                theight = parseInt($('#main-view').css('min-height').replace(/px/, '')),
-                height = (theight < sheight) ? sheight : theight;
-            $('#main-view').css({
-                "min-height": height
-            });
-        };
-    }
-])
-
-.factory('FixUrl', [
-    function () {
-        return function (u) {
-            return u.replace(/\/api\/v1\//, '/#/');
-        };
-    }
-])
-
-.factory('BuildUrl', [
-    function () {
-        return function (obj, inventory) {
+.factory('BuildAnchor', [ '$log',
+    // Returns a full <a href=''>resource_name</a> HTML string if link can be derived from supplied context
+    // returns name of resource if activity stream object doesn't contain enough data to build a UI url
+    // arguments are: a summary_field object, a resource type, an activity stream object
+    function ($log) {
+        return function (obj, resource, activity) {
             var url = '/#/';
-            switch (obj.base) {
-                case 'group':
-                    url += 'inventories/' + inventory.id + '/manage?group=' + obj.id;
-                    break;
-                case 'host':
-                    url += 'home/' + obj.base + 's/?id=' + obj.id;
-                    break;
-                case 'job':
-                    url += 'jobs/?id__int=' + obj.id;
-                    break;
-                case 'inventory':
-                    url += 'inventories/' + obj.id + '/';
-                    break;
-                case 'schedule':
-                    url = (obj.url) ? '/#' + obj.url : '';
-                    break;
-                default:
-                    url += obj.base + 's/' + obj.id + '/';
+            // try/except pattern asserts that:
+            // if we encounter a case where a UI url can't or shouldn't be generated, just supply the name of the resource
+            try {
+                switch (resource) {
+                    case 'group':
+                        if (activity.operation === 'create' || activity.operation === 'delete'){
+                            // the API formats the changes.inventory field as str 'myInventoryName-PrimaryKey'
+                            var inventory_id = _.last(activity.changes.inventory.split('-'));
+                            url += 'inventories/' + inventory_id + '/manage?group=' + activity.changes.id;
+                        }
+                        else {
+                            url += 'inventories/' + activity.summary_fields.inventory[0].id + '/manage?group=' + (activity.changes.id || activity.changes.object1_pk);
+                        }
+                        break;
+                    case 'host':
+                        url += 'home/hosts/' + obj.id;
+                        break;
+                    case 'job':
+                        url += 'jobs/?id=' + obj.id;
+                        break;
+                    case 'inventory':
+                        url += 'inventories/' + obj.id + '/';
+                        break;
+                    case 'schedule':
+                        // schedule urls depend on the resource they're associated with
+                        if (activity.summary_fields.job_template){
+                            url += 'job_templates/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
+                        }
+                        else if (activity.summary_fields.project){
+                            url += 'projects/' + activity.summary_fields.project.id + '/schedules/' + obj.id;
+                        }
+                        else if (activity.summary_fields.system_job_template){
+                            url += 'management_jobs/' + activity.summary_fields.system_job_template.id + '/schedules/edit/' + obj.id;
+                        }
+                        // urls for inventory sync schedules currently depend on having an inventory id and group id
+                        else {
+                            throw {name : 'NotImplementedError', message : 'activity.summary_fields to build this url not implemented yet'};
+                        }
+                        break;
+                    case 'notification_template':
+                        throw {name : 'NotImplementedError', message : 'activity.summary_fields to build this url not implemented yet'};
+                    case 'role':
+                        throw {name : 'NotImplementedError', message : 'role object management is not consolidated to a single UI view'};
+                    default:
+                        url += resource + 's/' + obj.id + '/';
+                }
+                return ' <a href=\"' + url + '\"> ' + (obj.name || obj.username) + ' </a> ';
             }
-            return url;
+            catch(err){
+                $log.debug(err);
+                return ' ' + (obj.name || obj.username || '') + ' ';
+            }
         };
     }
 ])
 
-.factory('BuildDescription', ['$filter', 'FixUrl', 'BuildUrl','$sce',
-    function ($filter, FixUrl, BuildUrl, $sce) {
+.factory('BuildDescription', ['BuildAnchor', '$log',
+    function (BuildAnchor, $log) {
         return function (activity) {
 
-            function stripDeleted(s) {
-                return s.replace(/^_deleted_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d+:\d+_/, '');
-            }
+            var pastTense = function(operation){
+                return (/e$/.test(activity.operation)) ? operation + 'd ' : operation + 'ed ';
+            };
+            // convenience method to see if dis+association operation involves 2 groups
+            // the group cases are slightly different because groups can be dis+associated into each other
+            var isGroupRelationship = function(activity){
+                return activity.object1 === 'group' && activity.object2 === 'group' && activity.summary_fields.group.length > 1;
+            };
 
-            var descr, descr_nolink, obj1, obj2, obj1_obj, obj2_obj, name, name_nolink;
-
-            descr = activity.operation;
-            descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
-            descr_nolink = descr;
-
-            // labels
-            obj1 = activity.object1;
-            obj2 = activity.object2;
-
-            // objects
-            obj1_obj = (activity.summary_fields[obj1]) ? activity.summary_fields[obj1][0] : null;
-            if (obj1 === obj2) {
-                obj2_obj = activity.summary_fields[obj1][1];
-            } else if (activity.summary_fields[obj2]) {
-                obj2_obj = activity.summary_fields[obj2][0];
-            } else {
-                obj2_obj = null;
-            }
-
-            if (obj1 === 'user' || obj2 === 'user') {
-                activity.summary_fields.user[0].name = activity.summary_fields.user[0].username;
-            }
-            // The block until line 221 is for associative/disassociative operations, such as adding/removing a user to a team or vise versa
-            if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
-                obj2_obj.base = obj2;
-                obj2_obj.name = $filter('sanitize')(obj2_obj.name);
-                descr += obj2 +
-                    " <a href=\"" + BuildUrl(obj2_obj) + "\">" +
-                    obj2_obj.name + '</a>';
-                if (activity.object_association === 'admins') {
-                    if (activity.operation === 'disassociate') {
-                        descr += ' from being an admin of ';
-                    } else {
-                        descr += ' as an admin of ';
-                    }
-                } else {
-                    if (activity.operation === 'disassociate') {
-                        descr += ' from ';
-                    } else {
-                        descr += ' to ';
-                    }
-                }
-                descr_nolink += obj2 + ' ' + obj2_obj.name;
-                if (activity.object_association === 'admins') {
-                    if (activity.operation === 'disassociate') {
-                        descr_nolink += ' from being an admin of ';
-                    } else {
-                        descr_nolink += ' as an admin of ';
-                    }
-                } else {
-                    if (activity.operation === 'disassociate') {
-                        descr_nolink += ' from ';
-                    } else {
-                        descr_nolink += ' to ';
-                    }
-                }
-            } else if (obj2) {
-                name = '';
-                if (obj2_obj && obj2_obj.name) {
-                    name = ' ' + stripDeleted(obj2_obj.name);
-                }
-                if (activity.object_association === 'admins') {
-                    if (activity.operation === 'disassociate') {
-                        descr += ' from being an admin of ';
-                    } else {
-                        descr += ' as an admin of ';
-                    }
-                } else {
-                    if (activity.operation === 'disassociate') {
-                        descr += ' from ';
-                    } else {
-                        descr += ' to ';
-                    }
-                }
-                descr_nolink += (obj2_obj && obj2_obj.name) ? obj2 + ' ' + obj2_obj.name : obj2 + ' ';
-                if (activity.object_association === 'admins') {
-                    if (activity.operation === 'disassociate') {
-                        descr_nolink += ' from being an admin of ';
-                    } else {
-                        descr_nolink += ' as an admin of ';
-                    }
-                } else {
-                    if (activity.operation === 'disassociate') {
-                        descr_nolink += ' from ';
-                    } else {
-                        descr_nolink += ' to ';
-                    }
-                }
-            }
-            if (obj1_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {
-                obj1_obj.base = obj1;
-                // Need to character escape the link names, as a malicious url or piece of html could be inserted here that could take the
-                // user to a unknown location.
-                obj1_obj.name = $filter('sanitize')(obj1_obj.name);
-                obj1_obj.name = $sce.getTrustedHtml(obj1_obj.name);
-                descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj, obj2_obj) + "\" >" + obj1_obj.name + '</a>';
-                descr_nolink += obj1 + ' ' + obj1_obj.name;
-            } else if (obj1) {
-                name = '';
-                name_nolink = '';
-                // find the name in changes, if needed
-                if (!(obj1_obj && obj1_obj.name) || obj1_obj && obj1_obj.name && /^_delete/.test(obj1_obj.name)) {
-                    if (activity.changes && activity.changes.name) {
-                        if (typeof activity.changes.name === 'string') {
-                            name = ' ' + activity.changes.name;
-                            name_nolink = name;
-                        } else if (typeof activity.changes.name === 'object' && Array.isArray(activity.changes.name)) {
-                            name = ' ' + activity.changes.name[0];
-                            name_nolink = name;
+            // Activity stream objects will outlive the resources they reference
+            // in that case, summary_fields will not be available - show generic error text instead
+            try {
+                activity.description = pastTense(activity.operation);
+                switch(activity.object_association){
+                    // explicit role dis+associations
+                    case 'role':
+                        // object1 field is resource targeted by the dis+association
+                        // object2 field is the resource the role is inherited from
+                        // summary_field.role[0] contains ref info about the role
+                        switch(activity.operation){
+                            // expected outcome: "disassociated <object2> role_name from <object1>"
+                            case 'disassociate':
+                                if (isGroupRelationship(activity)){
+                                    activity.description += BuildAnchor(activity.summary_fields.group[1], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                        ' from ' + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity);
+                                }
+                                else{
+                                    activity.description += BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                    ' from ' + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
+                                break;
+                            // expected outcome: "associated <object2> role_name to <object1>"
+                            case 'associate':
+                                if (isGroupRelationship(activity)){
+                                    activity.description += BuildAnchor(activity.summary_fields.group[1], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                        ' to ' + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity);
+                                }
+                                else{
+                                    activity.description += BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                    ' to ' + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
+                                break;
                         }
-                    /*} else if (obj1 === 'job' && obj1_obj && activity.changes && activity.changes.job_template) {
-                        // Hack for job activity where the template name is known
-                        if (activity.operation !== 'delete') {
-                            obj1_obj.base = obj1;
-                            name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.id + ' ' + activity.changes.job_template + '</a>';
-                            name_nolink = ' ' + obj1_obj.id + ' ' + activity.changes.job_template;
-                        } else {
-                            name = ' ' + obj1_obj.id + ' ' + activity.changes.job_template;
-                            name_nolink = name;
+                        break;
+                    // inherited role dis+associations (logic identical to case 'role')
+                    case 'parents':
+                        // object1 field is resource targeted by the dis+association
+                        // object2 field is the resource the role is inherited from
+                        // summary_field.role[0] contains ref info about the role
+                        switch(activity.operation){
+                            // expected outcome: "disassociated <object2> role_name from <object1>"
+                            case 'disassociate':
+                                if (isGroupRelationship(activity)){
+                                    activity.description += activity.object2 + BuildAnchor(activity.summary_fields.group[1], activity.object2, activity) +
+                                        'from ' + activity.object1 + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity);
+                                }
+                                else{
+                                    activity.description += BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                    ' from ' + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
+                                break;
+                            // expected outcome: "associated <object2> role_name to <object1>"
+                            case 'associate':
+                                if (isGroupRelationship(activity)){
+                                    activity.description += activity.object1 + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity) +
+                                        'to ' + activity.object2 + BuildAnchor(activity.summary_fields.group[1], activity.object2, activity);
+                                }
+                                else{
+                                    activity.description += BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) + activity.summary_fields.role[0].role_field +
+                                    ' to ' + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
+                                break;
                         }
-                    } else if (obj1 === 'job' && obj1_obj) {
-                        // Hack for job activity where template name not known
-                        if (activity.operation !== 'delete') {
-                            obj1_obj.base = obj1;
-                            name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.id + '</a>';
-                            name_nolink = ' ' + obj1_obj.id;
-                        } else {
-                            name = ' ' + obj1_obj.id;
-                            name_nolink = name;
-                        }*/
-                    }
-                } else if (obj1_obj && obj1_obj.name) {
-                    name = ' ' + stripDeleted(obj1_obj.name);
-                    name_nolink = name;
+                        break;
+                    // CRUD operations / resource on resource dis+associations
+                    default:
+                        switch(activity.operation){
+                            // expected outcome: "disassociated <object2> from <object1>"
+                            case 'disassociate' :
+                                if (isGroupRelationship(activity)){
+                                    activity.description += activity.object2 + BuildAnchor(activity.summary_fields.group[1], activity.object2, activity) +
+                                        'from ' + activity.object1 + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity);
+                                }
+                                else {
+                                    activity.description += activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity) +
+                                        'from ' + activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                }
+                                break;
+                            // expected outcome "associated <object2> to <object1>"
+                            case 'associate':
+                                // groups are the only resource that can be associated/disassociated into each other
+                                if (isGroupRelationship(activity)){
+                                    activity.description += activity.object1 + BuildAnchor(activity.summary_fields.group[0], activity.object1, activity) +
+                                        'to ' + activity.object2 + BuildAnchor(activity.summary_fields.group[1], activity.object2, activity);
+                                }
+                                else {
+                                    activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity) +
+                                        'to ' + activity.object2 + BuildAnchor(activity.summary_fields[activity.object2][0], activity.object2, activity);
+                                }
+                                break;
+                            case 'delete':
+                                activity.description += activity.object1 + BuildAnchor(activity.changes, activity.object1, activity);
+                                break;
+                            // equivalent to 'create' or 'update'
+                            // expected outcome: "operation <object1>"
+                            default:
+                                activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                break;
+                        }
+                        break;
                 }
-                descr += obj1 + name;
-                descr_nolink += obj1 + name_nolink;
             }
-            activity.description = descr;
-            activity.description_nolink = descr_nolink;
+            catch(err){
+                $log.debug(err);
+                activity.description = 'Event summary not available';
+            }
         };
     }
 ])
@@ -247,7 +230,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.changes = activity.changes;
                 scope.user = ((activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system') +
                      ' on ' + $filter('longDate')(activity.timestamp);
-                scope.operation = activity.description_nolink;
+                scope.operation = activity.description;
                 scope.header = "Event " + activity.id;
 
                 // Open the modal
@@ -267,11 +250,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
 .factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
     'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 'PaginateInit',
-    'generateList', 'FormatDate', 'BuildDescription', 'FixUrl', 'BuildUrl',
-    'ShowDetail', 'setStreamHeight',
+    'generateList', 'FormatDate', 'BuildDescription',
+    'ShowDetail',
     function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
         Wait, StreamList, SearchInit, PaginateInit, GenerateList, FormatDate,
-        BuildDescription, FixUrl, BuildUrl, ShowDetail, setStreamHeight) {
+        BuildDescription, ShowDetail) {
         return function (params) {
 
             var list = _.cloneDeep(StreamList),
@@ -418,82 +401,18 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.removeStreamPostRefresh();
             }
             scope.removeStreamPostRefresh = scope.$on('PostRefresh', function () {
-                var href, deleted, obj1, obj2;
                 scope.activities.forEach(function(activity, i) {
-                    var row = scope.activities[i],
-                        type, url;
-
+                    // build activity.user
                     if (scope.activities[i].summary_fields.actor) {
                         scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
                             scope.activities[i].summary_fields.actor.username + "</a>";
                     } else {
                         scope.activities[i].user = 'system';
                     }
-
-                    // Objects
-                    deleted = /^\_delete/;
-                    obj1 = scope.activities[i].object1;
-                    obj2 = scope.activities[i].object2;
-
-                    if ((obj1 === "schedule" || obj2 === "schedule") && activity.summary_fields.schedule) {
-                        if (activity.summary_fields.inventory_source) {
-                            type = 'inventory_source';
-                            url = '/home/groups/?inventory_source__id=' + row.summary_fields.inventory_source.id;
-                        }
-                        else if (activity.summary_fields.project) {
-                            type = 'project';
-                            url = '/projects/' + activity.summary_fields[type].id + '/schedules/?id__int=';
-                        }
-                        else if (activity.summary_fields.system_job_template) {
-                            type = 'system_job_template';
-                            url = '/system_job_templates/' + activity.summary_fields[type].id + '/schedules/?id__int=';
-                        }
-                        else if (activity.summary_fields.job_template) {
-                            type = 'job_template';
-                            url = '/job_templates/' + activity.summary_fields[type].id + '/schedules/?id__int=';
-                        }
-                        if (obj1 === 'schedule') {
-                            row.summary_fields.schedule[0].url = url + ((type === 'inventory_source') ? '' : row.summary_fields.schedule[0].id);
-                            row.summary_fields.schedule[0].type = type;
-                            row.summary_fields.schedule[0].type_id = activity.summary_fields[type].id;
-                            row.summary_fields.schedule[0].base = 'schedule';
-                        }
-                        if (obj2 === 'schedule') {
-                            row.summary_fields.schedule[1].url = url + ((type === 'inventory_source') ? '' : row.summary_fields.schedule[1].id);
-                            row.summary_fields.schedule[1].type = type;
-                            row.summary_fields.schedule[1].type_id = activity.summary_fields[type].id;
-                            row.summary_fields.schedule[1].base = 'schedule';
-                        }
-                    }
-
-                    if (obj1 && scope.activities[i].summary_fields[obj1] && scope.activities[i].summary_fields[obj1].name) {
-                        if (!deleted.test(scope.activities[i].summary_fields[obj1].name)) {
-                            href = BuildUrl(scope.activities[i].summary_fields[obj1]);
-                            scope.activities[i].objects = "<a href=\"" + href + "\">" + scope.activities[i].summary_fields[obj1].name + "</a>";
-                        } else {
-                            scope.activities[i].objects = scope.activities[i].summary_fields[obj1].name;
-                        }
-                    } else if (scope.activities[i].object1) {
-                        scope.activities[i].objects = scope.activities[i].object1;
-                    }
-                    if (obj2 && scope.activities[i].summary_fields[obj2] && scope.activities[i].summary_fields[obj2].name) {
-                        if (!deleted.test(scope.activities[i].summary_fields[obj2].name)) {
-                            href = BuildUrl(scope.activities[i].summary_fields[obj2]);
-                            scope.activities[i].objects += ", <a href=\"" + href + "\">" + scope.activities[i].summary_fields[obj2].name + "</a>";
-                        } else {
-                            scope.activities[i].objects += "," + scope.activities[i].summary_fields[obj2].name;
-                        }
-                    } else if (scope.activities[i].object2) {
-                        scope.activities[i].objects += ", " + scope.activities[i].object2;
-                    }
-
+                    // build description column / action text
                     BuildDescription(scope.activities[i]);
 
                 });
-                // Give ng-repeate a chance to show the data before adjusting the page size.
-                setTimeout(function () {
-                    setStreamHeight();
-                }, 500);
             });
 
             // Initialize search and paginate pieces and load data
