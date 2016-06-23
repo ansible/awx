@@ -1369,14 +1369,15 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        if obj.organization is None:
+            # only superusers are allowed to edit orphan notification templates
+            return False
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             org = get_object_or_400(Organization, pk=org_pk)
             if self.user not in org.admin_role:
                 return False
-        if obj.organization is not None:
-            return self.user in obj.organization.admin_role
-        return False
+        return self.user in obj.organization.admin_role
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
