@@ -110,6 +110,11 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                           master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                                       }
+                                      if (form.fields[fld].type === 'checkbox_group') {
+                                          for(var j=0; j<form.fields[fld].fields.length; j++) {
+                                              scope[form.fields[fld].fields[j].name] = data[form.fields[fld].fields[j].name];
+                                          }
+                                      }
                                   }
                                   Wait('stop');
                                   scope.url = data.url;
