@@ -75,3 +75,9 @@ def test_notification_template_access_org_user(notification_template, user):
     assert not access.can_read(notification_template)
     assert not access.can_change(notification_template, None)
     assert not access.can_delete(notification_template)
+
+@pytest.mark.django_db
+def test_notificaiton_template_orphan_access_org_admin(notification_template, organization, org_admin):
+    notification_template.organization = None
+    access = NotificationTemplateAccess(org_admin)
+    assert not access.can_change(notification_template, {'organization': organization.id})
