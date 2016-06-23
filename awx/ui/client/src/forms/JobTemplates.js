@@ -238,7 +238,8 @@ export default
                         awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
                         dataPlacement: 'right',
                         dataTitle: 'Become Privilege Escalation',
-                        dataContainer: "body"
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
                     }, {
                         name: 'allow_callbacks',
                         label: 'Allow Provisioning Callbacks',
@@ -251,7 +252,8 @@ export default
                             "using this job template.</p>",
                         dataPlacement: 'right',
                         dataTitle: 'Allow Provisioning Callbacks',
-                        dataContainer: "body"
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
                     }]
                 },
                 callback_url: {
