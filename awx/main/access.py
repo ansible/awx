@@ -439,7 +439,7 @@ class GroupAccess(BaseAccess):
     model = Group
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, 'read_role')
+        qs = Group.objects.filter(inventory__in=Inventory.accessible_objects(self.user, 'read_role'))
         qs = qs.select_related('created_by', 'modified_by', 'inventory')
         return qs.prefetch_related('parents', 'children', 'inventory_source').all()
 
