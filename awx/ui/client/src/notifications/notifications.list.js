@@ -3,6 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
+ /**
+  * This is the list definition for the notification templates list
+  * used in the related tabs
+  */
 
 export default function(){
     return {
@@ -52,6 +56,16 @@ export default function(){
                 dataPlacement: "right",
                 searchable: false,
                 nosort: true,
+            }
+        },
+        actions: {
+            add: {
+                label: 'Add Notification',
+                mode: 'all', // One of: edit, select, all
+                ngClick: 'addNotificationTemplate()',
+                awToolTip: 'Create a new notification template',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD NOTIFICATION TEMPLATE'
             }
         }
 

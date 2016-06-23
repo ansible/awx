@@ -3,8 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
-
-
+ /**
+  * This is the list definition for the notification templates list
+  * off of the settings page
+  */
 
 export default function(){
     return {
