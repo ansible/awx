@@ -10,7 +10,6 @@
         var generator = GenerateForm,
             form = HostForm;
         $scope.parseType = 'yaml';
-        $scope.extraVars = '---';
         $scope.formCancel = function(){
             $state.go('^');
         };
@@ -19,7 +18,7 @@
         };
         $scope.formSave = function(){
             var params = {
-                variables: $scope.extraVars === '---' || $scope.extraVars === '{}' ? null : $scope.extraVars,
+                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
                 description: $scope.description,
                 enabled: $scope.host.enabled,
@@ -43,7 +42,6 @@
             ParseTypeChange({
                 scope: $scope,
                 field_id: 'host_variables',
-                variable: 'extraVars',
             });
         };
         init();
