@@ -15,7 +15,9 @@ export default ['$scope', 'Refresh', 'tagSearchService',
 
         // shows/hide the search type dropdown
         $scope.toggleTypeDropdown = function() {
-            $scope.showTypeDropdown = !$scope.showTypeDropdown;
+            if ($scope.searchTypes.length > 1) {
+                $scope.showTypeDropdown = !$scope.showTypeDropdown;
+            }
         };
 
         // sets the search type dropdown and hides it
