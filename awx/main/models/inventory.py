@@ -513,25 +513,6 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this group.'),
     )
-    admin_role = ImplicitRoleField(
-        parent_role=['inventory.admin_role', 'parents.admin_role'],
-    )
-    update_role = ImplicitRoleField(
-        parent_role=['inventory.update_role', 'parents.update_role', 'admin_role'],
-    )
-    adhoc_role = ImplicitRoleField(
-        parent_role=['inventory.adhoc_role', 'parents.adhoc_role', 'admin_role'],
-    )
-    use_role = ImplicitRoleField(
-        parent_role=['inventory.use_role', 'parents.use_role', 'adhoc_role'],
-    )
-    read_role = ImplicitRoleField(parent_role=[
-        'inventory.read_role',
-        'parents.read_role',
-        'use_role',
-        'update_role',
-        'admin_role'
-    ])
 
     def __unicode__(self):
         return self.name

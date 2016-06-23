@@ -130,6 +130,7 @@ def test_inventory_auditor(inventory, permissions, user, team):
     assert u in inventory.read_role
     assert u not in inventory.admin_role
 
+
 @pytest.mark.django_db
 def test_inventory_updater(inventory, permissions, user, team):
     u = user('updater', False)
@@ -173,29 +174,6 @@ def test_inventory_executor(inventory, permissions, user, team):
     assert team.member_role.is_ancestor_of(inventory.update_role) is False
     assert team.member_role.is_ancestor_of(inventory.use_role)
 
-@pytest.mark.django_db
-def test_group_parent_admin(group_factory, permissions, user):
-    u = user('admin', False)
-    parent1 = group_factory('parent-1')
-    parent2 = group_factory('parent-2')
-    childA = group_factory('child-1')
-
-    parent1.admin_role.members.add(u)
-    assert u in parent1.admin_role
-    assert u not in parent2.admin_role
-    assert u not in childA.admin_role
-
-    childA.parents.add(parent1)
-    assert u in childA.admin_role
-
-    childA.parents.remove(parent1)
-    assert u not in childA.admin_role
-
-    parent2.children.add(childA)
-    assert u not in childA.admin_role
-
-    parent2.admin_role.members.add(u)
-    assert u in childA.admin_role
 
 @pytest.mark.django_db
 def test_access_admin(organization, inventory, user):
@@ -213,6 +191,7 @@ def test_access_admin(organization, inventory, user):
     assert access.can_admin(inventory, {'organization': organization.id})
     assert access.can_delete(inventory)
     assert access.can_run_ad_hoc_commands(inventory)
+
 
 @pytest.mark.django_db
 def test_access_auditor(organization, inventory, user):
@@ -234,42 +213,29 @@ def test_access_auditor(organization, inventory, user):
 
 
 @pytest.mark.django_db
-def test_host_access(organization, inventory, user, group_factory):
+def test_host_access(organization, inventory, group, user, group_factory):
     other_inventory = organization.inventories.create(name='other-inventory')
     inventory_admin = user('inventory_admin', False)
-    my_group = group_factory('my-group')
-    not_my_group = group_factory('not-my-group')
-    group_admin = user('group_admin', False)
 
     inventory_admin_access = HostAccess(inventory_admin)
-    group_admin_access = HostAccess(group_admin)
 
-    h1 = Host.objects.create(inventory=inventory, name='host1')
-    h2 = Host.objects.create(inventory=inventory, name='host2')
-    h1.groups.add(my_group)
-    h2.groups.add(not_my_group)
+    host = Host.objects.create(inventory=inventory, name='host1')
+    host.groups.add(group)
 
-    assert inventory_admin_access.can_read(h1) is False
-    assert group_admin_access.can_read(h1) is False
+    assert inventory_admin_access.can_read(host) is False
 
     inventory.admin_role.members.add(inventory_admin)
-    my_group.admin_role.members.add(group_admin)
 
-    assert inventory_admin_access.can_read(h1)
-    assert inventory_admin_access.can_read(h2)
-    assert group_admin_access.can_read(h1)
-    assert group_admin_access.can_read(h2) is False
+    assert inventory_admin_access.can_read(host)
 
-    my_group.hosts.remove(h1)
+    group.hosts.remove(host)
 
-    assert inventory_admin_access.can_read(h1)
-    assert group_admin_access.can_read(h1) is False
+    assert inventory_admin_access.can_read(host)
 
-    h1.inventory = other_inventory
-    h1.save()
+    host.inventory = other_inventory
+    host.save()
 
-    assert inventory_admin_access.can_read(h1) is False
-    assert group_admin_access.can_read(h1) is False
+    assert inventory_admin_access.can_read(host) is False
 
 
 
