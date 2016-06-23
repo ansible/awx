@@ -60,7 +60,7 @@ export default
                                 label: "Projects"
                             },
                             {
-                                url: "/#/projects?status=failed",
+                                url: "/#/projects?status=failed,canceled",
                                 number: scope.data.projects.failed,
                                 label: "Project Sync Failures",
                                 isFailureCount: true
