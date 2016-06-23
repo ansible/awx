@@ -403,6 +403,8 @@ def activity_stream_associate(sender, instance, **kwargs):
                 continue
             if isinstance(obj1, SystemJobTemplate) or isinstance(obj2_actual, SystemJobTemplate):
                 continue
+            if isinstance(obj1, SystemJob) or isinstance(obj2_actual, SystemJob):
+                continue
             activity_entry = ActivityStream(
                 changes=json.dumps(dict(object1=object1,
                                         object1_pk=obj1.pk,
