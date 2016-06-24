@@ -225,29 +225,36 @@ export default
                         text: 'Prompt on launch'
                     }
                 },
-                become_enabled: {
-                  label: 'Enable Privilege Escalation',
-                  type: 'checkbox',
-                  addRequired: false,
-                  editRequird: false,
-                  column: 2,
-                  awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
-                  dataPlacement: 'right',
-                  dataTitle: 'Become Privilege Escalation',
-                  dataContainer: "body"
-                },
-                allow_callbacks: {
-                    label: 'Allow Provisioning Callbacks',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    ngChange: "toggleCallback('host_config_key')",
-                    column: 2,
-                    awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
-                        "using this job template.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Allow Provisioning Callbacks',
-                    dataContainer: "body"
+                checkbox_group: {
+                    label: 'Options',
+                    type: 'checkbox_group',
+                    fields: [{
+                        name: 'become_enabled',
+                        label: 'Enable Privilege Escalation',
+                        type: 'checkbox',
+                        addRequired: false,
+                        editRequird: false,
+                        column: 2,
+                        awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
+                        dataPlacement: 'right',
+                        dataTitle: 'Become Privilege Escalation',
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
+                    }, {
+                        name: 'allow_callbacks',
+                        label: 'Allow Provisioning Callbacks',
+                        type: 'checkbox',
+                        addRequired: false,
+                        editRequird: false,
+                        ngChange: "toggleCallback('host_config_key')",
+                        column: 2,
+                        awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
+                            "using this job template.</p>",
+                        dataPlacement: 'right',
+                        dataTitle: 'Allow Provisioning Callbacks',
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
+                    }]
                 },
                 callback_url: {
                     label: 'Provisioning Callback URL',

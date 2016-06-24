@@ -482,7 +482,14 @@
                         if (form.fields[fld].type === 'select' &&
                             fld !== 'playbook') {
                             data[fld] = $scope[fld].value;
-                        } else {
+                        }
+                        else if(form.fields[fld].type === 'checkbox_group') {
+                            // Loop across the checkboxes
+                            for(var i=0; i<form.fields[fld].fields.length; i++) {
+                                data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
+                            }
+                        }
+                        else {
                             if (fld !== 'variables' &&
                                 fld !== 'survey') {
                                 data[fld] = $scope[fld];
