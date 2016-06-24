@@ -443,7 +443,7 @@ class Host(CommonModelNameNotUnique):
     # Use .job_events.all() to get events affecting this host.
 
 
-class Group(CommonModelNameNotUnique, ResourceMixin):
+class Group(CommonModelNameNotUnique):
     '''
     A group containing managed hosts.  A group or host may belong to multiple
     groups.

@@ -1870,25 +1870,6 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class GroupAccessList(ResourceAccessList):
-
-    model = User # needs to be User for AccessLists's
-    resource_model = Group
-    new_in_300 = True
-
-class GroupObjectRolesList(SubListAPIView):
-
-    model = Role
-    serializer_class = RoleSerializer
-    parent_model = Group
-    new_in_300 = True
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
-
-
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
     model = Group
