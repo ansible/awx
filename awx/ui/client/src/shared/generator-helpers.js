@@ -796,7 +796,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "<!-- Paginate Widget -->\n";
             html += `
 <div id=\"${iterator}-pagination\" class=\"List-pagination page-row\"
-    ng-hide=\"is_superuser && ${hideOnSuperuser}\ || ${iterator}.length < 1">
+    ng-hide=\"is_superuser && ${hideOnSuperuser}\ || ${set}.length < 1">
             `;
             html += "<div class=\"List-paginationPagerHolder\">";
             html += "<div class=\"List-paginationPager\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">";
