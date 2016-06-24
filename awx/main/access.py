@@ -384,12 +384,7 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         inv_qs = Inventory.accessible_objects(self.user, 'read_role')
-        group_qs = Group.accessible_objects(self.user, 'read_role').exclude(inventory__in=inv_qs)
-        if group_qs.count():
-            qs = self.model.objects.filter(Q(inventory__in=inv_qs) | Q(groups__in=group_qs))
-        else:
-            qs = self.model.objects.filter(inventory__in=inv_qs)
-
+        qs = self.model.objects.filter(inventory__in=inv_qs)
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'last_job__job_template',
                                'last_job_host_summary__job')
@@ -397,7 +392,7 @@ class HostAccess(BaseAccess):
         return qs
 
     def can_read(self, obj):
-        return obj and any(self.user in grp.read_role for grp in obj.groups.all()) or self.user in obj.inventory.read_role
+        return obj and self.user in obj.inventory.read_role
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
@@ -444,7 +439,7 @@ class GroupAccess(BaseAccess):
     model = Group
 
     def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, 'read_role')
+        qs = Group.objects.filter(inventory__in=Inventory.accessible_objects(self.user, 'read_role'))
         qs = qs.select_related('created_by', 'modified_by', 'inventory')
         return qs.prefetch_related('parents', 'children', 'inventory_source').all()
 
@@ -506,9 +501,9 @@ class InventorySourceAccess(BaseAccess):
 
     def can_read(self, obj):
         if obj and obj.group:
-            return self.user in obj.group.read_role
+            return self.user.can_access(Group, 'read', obj.group)
         elif obj and obj.inventory:
-            return self.user in obj.inventory.read_role
+            return self.user.can_access(Inventory, 'read', obj.inventory)
         else:
             return False
 
@@ -519,7 +514,7 @@ class InventorySourceAccess(BaseAccess):
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.group:
-            return self.user in obj.group.update_role
+            return self.user.can_access(Group, 'change', obj.group, None)
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
         else:
@@ -1480,7 +1475,7 @@ class ActivityStreamAccess(BaseAccess):
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
         credential_set = Credential.accessible_objects(self.user, 'read_role')
         organization_set = Organization.accessible_objects(self.user, 'read_role')
-        group_set = Group.accessible_objects(self.user, 'read_role')
+        group_set = Group.objects.filter(inventory__in=inventory_set)
         project_set = Project.accessible_objects(self.user, 'read_role')
         jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
         team_set = Team.accessible_objects(self.user, 'read_role')

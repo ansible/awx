@@ -285,10 +285,10 @@ class InventoryTest(BaseTest):
         got = self.get(inventory_scripts, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 1)
 
-        new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
-        self.post(inventory_scripts, data=new_failed_script, expect=403, auth=self.get_normal_credentials())
+        new_failed_script = dict(name="Should not fail", description="This test should not fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
+        self.post(inventory_scripts, data=new_failed_script, expect=201, auth=self.get_normal_credentials())
 
-        failed_no_shebang = dict(name="ShouldAlsoFail", descript="This test should also fail", script=TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG,
+        failed_no_shebang = dict(name="ShouldFail", descript="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG,
                                  organization=self.organizations[0].id)
         self.post(inventory_scripts, data=failed_no_shebang, expect=400, auth=self.get_super_credentials())
 
