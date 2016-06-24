@@ -401,7 +401,7 @@ class HostAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        if self.user not in inventory.update_role:
+        if self.user not in inventory.admin_role:
             return False
 
         # Check to see if we have enough licenses
@@ -415,7 +415,7 @@ class HostAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a host.')
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
-        return obj and self.user in obj.inventory.update_role
+        return obj and self.user in obj.inventory.admin_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -452,7 +452,7 @@ class GroupAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
-        return self.user in inventory.update_role
+        return self.user in inventory.admin_role
 
     def can_change(self, obj, data):
         # Prevent moving a group to a different inventory.
@@ -461,7 +461,7 @@ class GroupAccess(BaseAccess):
             raise PermissionDenied('Unable to change inventory on a group.')
         # Checks for admin or change permission on inventory, controls whether
         # the user can attach subgroups or edit variable data.
-        return obj and self.user in obj.inventory.update_role
+        return obj and self.user in obj.inventory.admin_role
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
