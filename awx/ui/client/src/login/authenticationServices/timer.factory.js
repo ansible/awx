@@ -110,6 +110,23 @@ export default
                 this.clearTimers();
                 $rootScope.expireTimer = $interval(function() {
                     var idle = that.isIdle();
+                    if (that.isExpired(true)) {
+                        if($('#idle-modal').is(':visible')){
+                            if($('#idle-modal').dialog('isOpen')){
+                                $('#idle-modal').dialog('close');
+                            }
+                        }
+                        that.expireSession('idle');
+                        $state.go('signOut');
+                        return;
+                    }
+                    if(Store('sessionTime') &&
+                        Store('sessionTime')[$rootScope.current_user.id] &&
+                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                            that.expireSession();
+                            $state.go('signOut');
+                            return;
+                    }
                     if(idle !== false){
                         if($('#idle-modal').is(':visible')){
                             $('#remaining_seconds').html(Math.round(idle));
@@ -152,20 +169,7 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                     }
-                    if (that.isExpired(true)) {
-                        if($('#idle-modal').dialog('isOpen')){
-                            $('#idle-modal').dialog('close');
-                        }
-                        that.expireSession('idle');
-                        $state.go('signOut');
-                    }
-                    if(Store('sessionTime') &&
-                        Store('sessionTime')[$rootScope.current_user.id] &&
-                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
-                            that.expireSession();
-                            $state.go('signOut');
 
-                    }
 
                 }, 1000);
 
