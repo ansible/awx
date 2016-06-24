@@ -2435,6 +2435,8 @@ class NotificationTemplateSerializer(BaseSerializer):
 
     def validate(self, attrs):
         from awx.api.views import NotificationTemplateDetail
+        if 'notification_type' not in attrs:
+            raise serializers.ValidationError('Missing required fields for Notification Configuration: notification_type')
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[attrs['notification_type']]
         missing_fields = []
         incorrect_type_fields = []

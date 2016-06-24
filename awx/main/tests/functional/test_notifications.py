@@ -104,3 +104,7 @@ def test_notification_template_merging(get, post, user, organization, project, n
     organization.notification_templates_any.add(notification_template)
     project.notification_templates_any.add(notification_template)
     assert len(project.notification_templates['any']) == 1
+
+@pytest.mark.django_db
+def test_notification_template_invalid_patch(patch, notification_template, organization, admin):
+    patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'organization': organization.id}, admin, expect=400)
