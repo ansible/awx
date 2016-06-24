@@ -11,6 +11,10 @@
         var list = InventoryHosts,
             view = generateList,
             pageSize = 20;
+        if($state.current.name === "inventoryManage.editHost") {
+            $scope.rowBeingEdited = $state.params.host_id;
+            $scope.listBeingEdited = "hosts";
+        }
         $scope.createHost = function(){
             $state.go('inventoryManage.addHost');
         };
@@ -62,6 +66,20 @@
         });
         $scope.$on('PostRefresh', ()=>{
             _.forEach($scope.hosts, (host) => SetStatus({scope: $scope, host: host}));
+        });
+        var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+             if (toState.name === "inventoryManage.editHost") {
+                 $scope.rowBeingEdited = toParams.host_id;
+                 $scope.listBeingEdited = "hosts";
+             }
+             else {
+                 delete $scope.rowBeingEdited;
+                 delete $scope.listBeingEdited;
+             }
+        });
+        // Remove the listener when the scope is destroyed to avoid a memory leak
+        $scope.$on('$destroy', function() {
+            cleanUpStateChangeListener();
         });
         var init = function(){
             list.basePath = hostsUrl;
