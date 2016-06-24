@@ -159,7 +159,7 @@ def machine_credential():
 
 @pytest.fixture
 def org_credential(organization, credential):
-    credential.owner_role.parents.add(organization.admin_role)
+    credential.admin_role.parents.add(organization.admin_role)
     return credential
 
 @pytest.fixture

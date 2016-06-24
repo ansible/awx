@@ -216,7 +216,7 @@ try:
                     sys.stdout.flush()
                     credential_id = ids['credential']
                     credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx))
-                    credential.owner_role.members.add(user)
+                    credential.admin_role.members.add(user)
                     credentials.append(credential)
                 user_idx += 1
             print('')
@@ -232,7 +232,7 @@ try:
                     sys.stdout.flush()
                     credential_id = ids['credential']
                     credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx))
-                    credential.owner_role.parents.add(team.member_role)
+                    credential.admin_role.parents.add(team.member_role)
                     credentials.append(credential)
                 team_idx += 1
             print('')

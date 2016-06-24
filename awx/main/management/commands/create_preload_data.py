@@ -33,7 +33,7 @@ class Command(BaseCommand):
             c = Credential.objects.create(name='Demo Credential',
                                           username=superuser.username,
                                           created_by=superuser)
-            c.owner_role.members.add(superuser)
+            c.admin_role.members.add(superuser)
             i = Inventory.objects.create(name='Demo Inventory',
                                          organization=o,
                                          created_by=superuser)

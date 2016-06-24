@@ -613,7 +613,7 @@ class CredentialAccess(BaseAccess):
             if self.user in obj.organization.admin_role:
                 return True
 
-        return self.user in obj.owner_role
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we

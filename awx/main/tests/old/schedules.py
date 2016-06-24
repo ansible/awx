@@ -62,7 +62,7 @@ class ScheduleTest(BaseTest):
         self.organizations[1].member_role.members.add(self.diff_org_user)
 
         self.cloud_source = Credential.objects.create(kind='awx', username='Dummy', password='Dummy')
-        self.cloud_source.owner_role.members.add(self.super_django_user)
+        self.cloud_source.admin_role.members.add(self.super_django_user)
 
         self.first_inventory = Inventory.objects.create(name='test_inventory', description='for org 0', organization=self.organizations[0])
         self.first_inventory.hosts.create(name='host_1')

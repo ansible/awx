@@ -1332,7 +1332,7 @@ class CredentialOwnerUsersList(SubListAPIView):
     model = User
     serializer_class = UserSerializer
     parent_model = Credential
-    relationship = 'owner_role.members'
+    relationship = 'admin_role.members'
     new_in_300 = True
 
 
@@ -1349,7 +1349,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
             raise PermissionDenied()
 
         content_type = ContentType.objects.get_for_model(self.model)
-        teams = [c.content_object.pk for c in credential.owner_role.parents.filter(content_type=content_type)]
+        teams = [c.content_object.pk for c in credential.admin_role.parents.filter(content_type=content_type)]
 
         return self.model.objects.filter(pk__in=teams)
 
@@ -1382,7 +1382,7 @@ class TeamCredentialsList(SubListCreateAPIView):
         self.check_parent_access(team)
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
-        team_creds = Credential.objects.filter(owner_role__parents=team.member_role)
+        team_creds = Credential.objects.filter(admin_role__parents=team.member_role)
         return team_creds & visible_creds
 
 

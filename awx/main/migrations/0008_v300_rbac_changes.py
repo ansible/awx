@@ -143,18 +143,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='credential',
-            name='owner_role',
+            name='admin_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_administrator'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='credential',
             name='use_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'owner_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='credential',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_auditor', b'use_role', b'owner_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_auditor', b'use_role', b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AddField(
             model_name='custominventoryscript',

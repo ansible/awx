@@ -205,9 +205,9 @@ def test_job_template_access_org_admin(jt_objects, rando):
     jt_objects.inventory.organization.admin_role.members.add(rando)
     # Assign organization permission in the same way the create view does
     organization = jt_objects.inventory.organization
-    jt_objects.credential.owner_role.parents.add(organization.admin_role)
-    jt_objects.cloud_credential.owner_role.parents.add(organization.admin_role)
-    jt_objects.network_credential.owner_role.parents.add(organization.admin_role)
+    jt_objects.credential.admin_role.parents.add(organization.admin_role)
+    jt_objects.cloud_credential.admin_role.parents.add(organization.admin_role)
+    jt_objects.network_credential.admin_role.parents.add(organization.admin_role)
 
     proj_pk = jt_objects.project.pk
     assert access.can_add(dict(inventory=jt_objects.inventory.pk, project=proj_pk))

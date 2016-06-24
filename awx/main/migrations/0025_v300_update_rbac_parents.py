@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='use_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'organization.admin_role', b'owner_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'organization.admin_role', b'admin_role'], to='main.Role', null=b'True'),
         ),
         migrations.AlterField(
             model_name='team',

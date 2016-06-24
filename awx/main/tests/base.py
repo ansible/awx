@@ -387,7 +387,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         user = opts['user']
         del opts['user']
         cred = Credential.objects.create(**opts)
-        cred.owner_role.members.add(user)
+        cred.admin_role.members.add(user)
         return cred
 
     def setup_instances(self):

@@ -164,7 +164,7 @@ def _discover_credentials(instances, cred, orgfunc):
                 cred.organization = None
                 cred.save()
 
-                cred.owner_role, cred.use_role = None, None
+                cred.admin_role, cred.use_role = None, None
 
                 for i in orgs[org]:
                     i.credential = cred
@@ -198,11 +198,11 @@ def migrate_credential(apps, schema_editor):
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at organization level".format(cred.name, cred.kind, cred.host)))
 
         if cred.deprecated_team is not None:
-            cred.deprecated_team.member_role.children.add(cred.owner_role)
+            cred.deprecated_team.member_role.children.add(cred.admin_role)
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host)))
         elif cred.deprecated_user is not None:
-            cred.owner_role.members.add(cred.deprecated_user)
+            cred.admin_role.members.add(cred.deprecated_user)
             cred.save()
             logger.info(smart_text(u"added Credential(name={}, kind={}, host={}) at user level".format(cred.name, cred.kind, cred.host, )))
         else:
