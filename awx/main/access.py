@@ -1598,6 +1598,10 @@ class RoleAccess(BaseAccess):
 
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship):
+        if relationship == 'members':
+            if not check_user_access(self.user, sub_obj.__class__, 'read', sub_obj):
+                return False
+
         if obj.object_id and \
            isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:
