@@ -127,8 +127,6 @@ group_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'group_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'group_ad_hoc_commands_list'),
-    url(r'^(?P<pk>[0-9]+)/access_list/$',               'group_access_list'),
-    url(r'^(?P<pk>[0-9]+)/object_roles/$',              'group_object_roles_list'),
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'group_single_fact_view'),
 )
 
