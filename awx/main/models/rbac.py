@@ -49,7 +49,7 @@ role_names = {
 role_descriptions = {
     'system_administrator' : 'Can manage all aspects of the system',
     'system_auditor'       : 'Can view all settings on the system',
-    'adhoc_role'           : 'May run ad hoc commands on an inventory or a group',
+    'adhoc_role'           : 'May run ad hoc commands on an inventory',
     'admin_role'           : 'Can manage all aspects of the %s',
     'auditor_role'         : 'Can view all settings for the %s',
     'execute_role'         : 'May run the job template',
