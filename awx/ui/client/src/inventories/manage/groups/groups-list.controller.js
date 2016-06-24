@@ -12,6 +12,10 @@
             view = generateList,
             pageSize = 20;
         $scope.inventory_id = $stateParams.inventory_id;
+        if($state.current.name === "inventoryManage.editGroup") {
+            $scope.rowBeingEdited = $state.params.group_id;
+            $scope.listBeingEdited = "groups";
+        }
         $scope.groupSelect = function(id){
             var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
             $state.go('inventoryManage', {inventory_id: $stateParams.inventory_id, group: group}, {reload: true});
@@ -151,6 +155,22 @@
         $scope.copyMoveGroup = function(id){
             $state.go('inventoryManage.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
         };
+
+        var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+             if (toState.name === "inventoryManage.editGroup") {
+                 $scope.rowBeingEdited = toParams.group_id;
+                 $scope.listBeingEdited = "groups";
+             }
+             else {
+                 delete $scope.rowBeingEdited;
+                 delete $scope.listBeingEdited;
+             }
+        });
+
+        // Remove the listener when the scope is destroyed to avoid a memory leak
+        $scope.$on('$destroy', function() {
+            cleanUpStateChangeListener();
+        });
 
         var init = function(){
             list.basePath = groupsUrl;
