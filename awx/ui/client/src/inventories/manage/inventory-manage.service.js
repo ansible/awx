@@ -47,7 +47,7 @@
                 return url;
             },
             childHostsUrl: function(id, failed){
-                var url = GetBasePath('groups') + id + '/hosts' +
+                var url = GetBasePath('groups') + id + '/all_hosts' +
                     (failed === 'true' ? '?has_active_failures=true' : '?');
                 return url;
             },
