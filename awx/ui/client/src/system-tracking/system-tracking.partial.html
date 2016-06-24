@@ -1,7 +1,7 @@
 <section class="SystemTrackingContainer Panel" ng-if="noModuleData">
     <section class="FactDataError SystemTrackingContainer-main">
         <p class="FactDataError-note--full">
-            To set up scan jobs, create a job template of type 'scan' that targets the "<a ui-sref="inventories.edit({inventory_id: inventory.id})">{{inventory.name}}</a>" inventory.
+            To set up scan jobs, create a <a ui-sref="inventoryJobTemplateAdd({inventory_id: inventory.id})">job template</a> of type 'scan' that targets the "<a ui-sref="inventories.edit({inventory_id: inventory.id})">{{inventory.name}}</a>" inventory.
         </p>
     </section>
 </section>
