@@ -326,7 +326,7 @@ export default
                     ngClick: 'addSurvey()',
                     ngShow: 'job_type.value !== "scan" && !survey_exists',
                     awFeature: 'surveys',
-                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job',
+                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top'
                 },
                 edit_survey: {
