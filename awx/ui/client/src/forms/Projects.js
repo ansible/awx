@@ -183,7 +183,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "scm_update_on_launch && projectSelected",
+                ngShow: "scm_update_on_launch && projectSelected && scm_type.value !== 'manual'",
                 spinner: true,
                 "default": '0',
                 addRequired: false,
