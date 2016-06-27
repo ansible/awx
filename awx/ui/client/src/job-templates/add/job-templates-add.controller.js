@@ -28,6 +28,7 @@
                 generator = GenerateForm,
                 master = {},
                 CloudCredentialList = {},
+                NetworkCredentialList = {},
                 selectPlaybook, checkSCMStatus,
                 callback,
                 base = $location.path().replace(/^\//, '').split('/')[0],
@@ -74,6 +75,13 @@
             CloudCredentialList.iterator = 'cloudcredential';
             CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
 
+            // Clone the CredentialList object for use with network_credential. Cloning
+            // and changing properties to avoid collision.
+            jQuery.extend(true, NetworkCredentialList, CredentialList);
+            NetworkCredentialList.name = 'networkcredentials';
+            NetworkCredentialList.iterator = 'networkcredential';
+            NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
+
             SurveyControllerInit({
                 scope: $scope,
                 parent_scope: $scope
@@ -91,6 +99,17 @@
                     list: CloudCredentialList,
                     field: 'cloud_credential',
                     hdr: 'Select Cloud Credential',
+                    input_type: 'radio'
+                });
+
+                LookUpInit({
+                    url: GetBasePath('credentials') + '?kind=net',
+                    scope: $scope,
+                    form: form,
+                    current_item: null,
+                    list: NetworkCredentialList,
+                    field: 'network_credential',
+                    hdr: 'Select Network Credential',
                     input_type: 'radio'
                 });
 
