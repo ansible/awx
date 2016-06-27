@@ -117,8 +117,8 @@ def test_notification_template_invalid_notification_type(patch, notification_tem
 def test_disallow_delete_when_notifications_pending(delete, user, notification_template):
     u = user('superuser', True)
     url = reverse('api:notification_template_detail', args=(notification_template.id,))
-    n = Notification.objects.create(notification_template=notification_template,
-                                    status='pending')
+    Notification.objects.create(notification_template=notification_template,
+                                status='pending')
     response = delete(url, user=u)
     assert response.status_code == 405
 
