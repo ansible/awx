@@ -212,7 +212,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         default='',
         help_text=_('Tenant identifier for this credential'),
     )
-    owner_role = ImplicitRoleField(
+    admin_role = ImplicitRoleField(
         parent_role=[
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
@@ -220,14 +220,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     use_role = ImplicitRoleField(
         parent_role=[
             'organization.admin_role',
-            'owner_role',
+            'admin_role',
         ]
     )
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'organization.auditor_role',
         'use_role',
-        'owner_role',
+        'admin_role',
     ])
 
     @property

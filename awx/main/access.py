@@ -170,8 +170,8 @@ class BaseAccess(object):
             return bool(self.can_change(obj, None) and
                         self.user.can_access(type(sub_obj), 'read', sub_obj))
 
-    def can_unattach(self, obj, sub_obj, relationship):
-        return self.can_change(obj, None)
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        return self.can_change(obj, data)
 
     def check_license(self, add_host=False, feature=None, check_expiration=True):
         reader = TaskSerializer()
@@ -613,7 +613,7 @@ class CredentialAccess(BaseAccess):
             if self.user in obj.organization.admin_role:
                 return True
 
-        return self.user in obj.owner_role
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
@@ -1590,10 +1590,14 @@ class RoleAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
-        return self.can_unattach(obj, sub_obj, relationship)
+        return self.can_unattach(obj, sub_obj, relationship, data, skip_sub_obj_read_check)
 
     @check_superuser
-    def can_unattach(self, obj, sub_obj, relationship):
+    def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
+        if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents']:
+            if not check_user_access(self.user, sub_obj.__class__, 'read', sub_obj):
+                return False
+
         if obj.object_id and \
            isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:

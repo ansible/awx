@@ -506,7 +506,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             u = kw['user']
             del kw['user']
             credential = Credential.objects.create(**kw)
-            credential.owner_role.members.add(u)
+            credential.admin_role.members.add(u)
             kwargs['credential'] = credential
         project = Project.objects.create(**kwargs)
         project_path = project.get_project_path(check_if_exists=False)
@@ -1418,7 +1418,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
         self.credential = Credential.objects.create(name='test-creds')
-        self.credential.owner_role.members.add(self.super_django_user)
+        self.credential.admin_role.members.add(self.super_django_user)
         self.project = self.create_project(
             name='my public git project over https',
             scm_type='git',
@@ -1454,7 +1454,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
         self.credential = Credential.objects.create(name='test-creds')
-        self.credential.owner_role.members.add(self.super_django_user)
+        self.credential.admin_role.members.add(self.super_django_user)
         self.project = self.create_project(
             name='my private git project over https',
             scm_type='git',

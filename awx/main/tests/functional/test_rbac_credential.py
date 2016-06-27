@@ -16,7 +16,7 @@ def test_credential_migration_user(credential, user, permissions):
 
     rbac.migrate_credential(apps, None)
 
-    assert u in credential.owner_role
+    assert u in credential.admin_role
 
 @pytest.mark.django_db
 def test_two_teams_same_cred_name(organization_factory):
@@ -28,8 +28,8 @@ def test_two_teams_same_cred_name(organization_factory):
 
     rbac.migrate_credential(apps, None)
 
-    assert objects.teams.team1.member_role in cred1.owner_role.parents.all()
-    assert objects.teams.team2.member_role in cred2.owner_role.parents.all()
+    assert objects.teams.team1.member_role in cred1.admin_role.parents.all()
+    assert objects.teams.team2.member_role in cred2.admin_role.parents.all()
 
 @pytest.mark.django_db
 def test_credential_use_role(credential, user, permissions):
@@ -46,14 +46,14 @@ def test_credential_migration_team_member(credential, team, user, permissions):
 
 
     # No permissions pre-migration (this happens automatically so we patch this)
-    team.admin_role.children.remove(credential.owner_role)
+    team.admin_role.children.remove(credential.admin_role)
     team.member_role.children.remove(credential.use_role)
-    assert u not in credential.owner_role
+    assert u not in credential.admin_role
 
     rbac.migrate_credential(apps, None)
 
     # Admin permissions post migration
-    assert u in credential.owner_role
+    assert u in credential.admin_role
 
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
@@ -104,7 +104,7 @@ def test_credential_access_admin(user, team, credential):
     # credential is now part of a team
     # that is part of an organization
     # that I am an admin for
-    credential.owner_role.parents.add(team.admin_role)
+    credential.admin_role.parents.add(team.admin_role)
     credential.save()
 
     cred = Credential.objects.create(kind='aws', name='test-cred')

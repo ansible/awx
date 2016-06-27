@@ -1643,11 +1643,11 @@ class CredentialSerializer(BaseSerializer):
             owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
         ))
 
-        parents = obj.owner_role.parents.exclude(object_id__isnull=True)
+        parents = obj.admin_role.parents.exclude(object_id__isnull=True)
         if parents.count() > 0:
             res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url()})
-        elif obj.owner_role.members.count() > 0:
-            user = obj.owner_role.members.first()
+        elif obj.admin_role.members.count() > 0:
+            user = obj.admin_role.members.first()
             res.update({'user': reverse('api:user_detail', args=(user.pk,))})
 
         return res
@@ -1656,7 +1656,7 @@ class CredentialSerializer(BaseSerializer):
         summary_dict = super(CredentialSerializer, self).get_summary_fields(obj)
         summary_dict['owners'] = []
 
-        for user in obj.owner_role.members.all():
+        for user in obj.admin_role.members.all():
             summary_dict['owners'].append({
                 'id': user.pk,
                 'type': 'user',
@@ -1665,7 +1665,7 @@ class CredentialSerializer(BaseSerializer):
                 'url': reverse('api:user_detail', args=(user.pk,)),
             })
 
-        for parent in obj.owner_role.parents.exclude(object_id__isnull=True).all():
+        for parent in obj.admin_role.parents.exclude(object_id__isnull=True).all():
             summary_dict['owners'].append({
                 'id': parent.content_object.pk,
                 'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
@@ -1719,9 +1719,9 @@ class CredentialSerializerCreate(CredentialSerializer):
         team = validated_data.pop('team', None)
         credential = super(CredentialSerializerCreate, self).create(validated_data)
         if user:
-            credential.owner_role.members.add(user)
+            credential.admin_role.members.add(user)
         if team:
-            credential.owner_role.parents.add(team.member_role)
+            credential.admin_role.parents.add(team.member_role)
         return credential
 
 

@@ -269,14 +269,14 @@ class BaseJobTestMixin(BaseTestMixin):
             password=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
-        self.cred_sue.owner_role.members.add(self.user_sue)
+        self.cred_sue.admin_role.members.add(self.user_sue)
 
         self.cred_sue_ask = Credential.objects.create(
             username='sue',
             password='ASK',
             created_by=self.user_sue,
         )
-        self.cred_sue_ask.owner_role.members.add(self.user_sue)
+        self.cred_sue_ask.admin_role.members.add(self.user_sue)
 
         self.cred_sue_ask_many = Credential.objects.create(
             username='sue',
@@ -288,7 +288,7 @@ class BaseJobTestMixin(BaseTestMixin):
             ssh_key_unlock='ASK',
             created_by=self.user_sue,
         )
-        self.cred_sue_ask_many.owner_role.members.add(self.user_sue)
+        self.cred_sue_ask_many.admin_role.members.add(self.user_sue)
 
         self.cred_bob = Credential.objects.create(
             username='bob',
@@ -384,7 +384,7 @@ class BaseJobTestMixin(BaseTestMixin):
             password='Heading0',
             created_by = self.user_sue,
         )
-        self.team_ops_north.member_role.children.add(self.cred_ops_north.owner_role)
+        self.team_ops_north.member_role.children.add(self.cred_ops_north.admin_role)
 
         self.cred_ops_test = Credential.objects.create(
             username='testers',

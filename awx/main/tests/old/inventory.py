@@ -1434,7 +1434,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='aws',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1521,7 +1521,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                security_token=source_token)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1543,7 +1543,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                security_token="BADTOKEN")
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
 
         # Set parent group name to one that might be created by the sync.
         group = self.group
@@ -1578,7 +1578,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='aws',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         group = self.group
         group.name = 'AWS Inventory'
         group.save()
@@ -1706,7 +1706,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='rax',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'DFW'
@@ -1759,7 +1759,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                host=source_host)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         inventory_source = self.update_inventory_source(self.group,
                                                         source='vmware', credential=credential)
         # Check first without instance_id set (to import by name only).
