@@ -137,7 +137,7 @@ class BaseModel(models.Model):
         errors = {}
         try:
             super(BaseModel, self).clean_fields(exclude)
-        except ValidationError, e:
+        except ValidationError as e:
             errors = e.update_error_dict(errors)
         for f in self._meta.fields:
             if f.name in exclude:
@@ -145,7 +145,7 @@ class BaseModel(models.Model):
             if hasattr(self, 'clean_%s' % f.name):
                 try:
                     setattr(self, f.name, getattr(self, 'clean_%s' % f.name)())
-                except ValidationError, e:
+                except ValidationError as e:
                     errors[f.name] = e.messages
         if errors:
             raise ValidationError(errors)

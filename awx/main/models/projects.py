@@ -115,7 +115,7 @@ class ProjectOptions(models.Model):
         try:
             scm_url = update_scm_url(self.scm_type, scm_url,
                                      check_special_cases=False)
-        except ValueError, e:
+        except ValueError as e:
             raise ValidationError((e.args or ('Invalid SCM URL.',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
@@ -142,7 +142,7 @@ class ProjectOptions(models.Model):
                 try:
                     update_scm_url(self.scm_type, self.scm_url, scm_username,
                                    scm_password)
-                except ValueError, e:
+                except ValueError as e:
                     raise ValidationError((e.args or ('Invalid credential.',))[0])
             except ValueError:
                 pass

@@ -1058,7 +1058,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 data = json.loads(response.content)
                 if data.get('status', '') not in ('new', 'pending', 'running'):
                     break
-            except Exception, e:
+            except Exception as e:
                 errors.append(e)
                 break
 

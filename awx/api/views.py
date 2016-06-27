@@ -277,7 +277,7 @@ class ApiV1ConfigView(APIView):
         for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
             try:
                 os.remove(fname)
-            except OSError, e:
+            except OSError as e:
                 if e.errno != errno.ENOENT:
                     has_error = e.errno
                     break
@@ -3449,7 +3449,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
                 return response
-            except Exception, e:
+            except Exception as e:
                 return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         elif request.accepted_renderer.format == 'txt':
             return Response(unified_job.result_stdout)

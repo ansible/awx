@@ -127,7 +127,7 @@ class ModelAccessPermission(permissions.BasePermission):
                      view.__class__.__name__, obj)
         try:
             response = self.check_permissions(request, view, obj)
-        except Exception, e:
+        except Exception as e:
             logger.debug('has_permission raised %r', e, exc_info=True)
             raise
         else:

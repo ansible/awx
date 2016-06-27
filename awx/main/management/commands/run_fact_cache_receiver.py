@@ -59,7 +59,7 @@ class FactCacheReceiver(object):
         except Fact.MultipleObjectsReturned:
             logger.warn('Database inconsistent. Multiple Hosts found for <hostname, inventory_id> <%s, %s>.' % (hostname, inventory_id))
             return None
-        except Exception, e:
+        except Exception as e:
             logger.error("Exception communicating with Fact Cache Database: %s" % str(e))
             return None
 

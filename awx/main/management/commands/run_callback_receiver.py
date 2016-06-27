@@ -173,7 +173,7 @@ class CallbackReceiver(object):
         # If for any reason there's a problem, just use 0.
         try:
             verbose = Job.objects.get(id=data['job_id']).verbosity
-        except Exception, e:
+        except Exception as e:
             verbose = 0
 
         # Convert the datetime for the job event's creation appropriately,
@@ -191,7 +191,7 @@ class CallbackReceiver(object):
 
         # Print the data to stdout if we're in DEBUG mode.
         if settings.DEBUG:
-            print data
+            print(data)
 
         # Sanity check: Don't honor keys that we don't recognize.
         for key in data.keys():
@@ -234,7 +234,7 @@ class CallbackReceiver(object):
         # If for any reason there's a problem, just use 0.
         try:
             verbose = AdHocCommand.objects.get(id=data['ad_hoc_command_id']).verbosity
-        except Exception, e:
+        except Exception as e:
             verbose = 0
 
         # Convert the datetime for the job event's creation appropriately,
@@ -252,7 +252,7 @@ class CallbackReceiver(object):
 
         # Print the data to stdout if we're in DEBUG mode.
         if settings.DEBUG:
-            print data
+            print(data)
 
         # Sanity check: Don't honor keys that we don't recognize.
         for key in data.keys():
@@ -288,7 +288,7 @@ class CallbackReceiver(object):
                 message = queue_actual.get(block=True, timeout=1)
             except QueueEmpty:
                 continue
-            except Exception, e:
+            except Exception as e:
                 logger.error("Exception on listen socket, restarting: " + str(e))
                 break
             self.process_job_event(message)

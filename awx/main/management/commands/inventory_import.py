@@ -78,7 +78,7 @@ class MemObject(object):
                 v = yaml.safe_load(file(path, 'r').read())
                 if hasattr(v, 'items'): # is a dict
                     all_vars.update(v)
-            except yaml.YAMLError, e:
+            except yaml.YAMLError as e:
                 if hasattr(e, 'problem_mark'):
                     logger.error('Invalid YAML in %s:%s col %s', path,
                                  e.problem_mark.line + 1,
@@ -1329,7 +1329,7 @@ class Command(NoArgsCommand):
                 self.logger.warning('Inventory import required %d queries '
                                     'taking %0.3fs', len(queries_this_import),
                                     sqltime)
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 status = 'canceled'
                 exc = e

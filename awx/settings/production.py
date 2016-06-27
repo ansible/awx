@@ -127,7 +127,7 @@ except IOError:
         try:
             e = None
             open(settings_file)
-        except IOError, e:
+        except IOError as e:
             pass
         if e and e.errno == errno.EACCES:
             SECRET_KEY = 'permission-denied'
