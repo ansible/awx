@@ -2301,7 +2301,6 @@ class JobTemplateSurveySpec(GenericAPIView):
         try:
             obj.survey_spec = json.dumps(request.data)
         except ValueError:
-            # TODO: Log
             return Response(dict(error="Invalid JSON when parsing survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
             return Response(dict(error="'name' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)

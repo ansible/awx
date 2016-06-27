@@ -142,8 +142,8 @@ def tower_periodic_scheduler(self):
         try:
             last_run = dateutil.parser.parse(fd.read())
             return last_run
-        except Exception:
-            #TODO: LOG
+        except Exception as exc:
+            logger.error("get_last_run failed: {}".format(exc))
             return None
 
     def write_last_run(last_run):
