@@ -2619,7 +2619,7 @@ class ActivityStreamSerializer(BaseSerializer):
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).distinct()
-            if allm2m.count() > 0:
+            if getattr(obj, fk).exists():
                 rel[fk] = []
                 for thisItem in allm2m:
                     rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
@@ -2634,7 +2634,7 @@ class ActivityStreamSerializer(BaseSerializer):
                 if not hasattr(obj, fk):
                     continue
                 allm2m = getattr(obj, fk).distinct()
-                if allm2m.count() > 0:
+                if getattr(obj, fk).exists():
                     summary_fields[fk] = []
                     for thisItem in allm2m:
                         if fk == 'job':

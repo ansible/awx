@@ -1466,7 +1466,8 @@ class ActivityStreamAccess(BaseAccess):
         qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
-                                 'permission', 'job_template', 'job')
+                                 'permission', 'job_template', 'job', 'ad_hoc_command',
+                                 'notification_template', 'notification', 'label', 'role')
         if self.user.is_superuser:
             return qs.all()
         if self.user in Role.singleton('system_auditor'):
@@ -1475,17 +1476,14 @@ class ActivityStreamAccess(BaseAccess):
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
         credential_set = Credential.accessible_objects(self.user, 'read_role')
         organization_set = Organization.accessible_objects(self.user, 'read_role')
+        admin_of_orgs = Organization.accessible_objects(self.user, 'admin_role')
         group_set = Group.objects.filter(inventory__in=inventory_set)
         project_set = Project.accessible_objects(self.user, 'read_role')
         jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
         team_set = Team.accessible_objects(self.user, 'read_role')
 
-        ad_hoc_results = qs.filter(
-            ad_hoc_command__inventory__in=inventory_set,
-            ad_hoc_command__credential__in=credential_set
-        )
-
-        global_results = qs.filter(
+        return qs.filter(
+            Q(ad_hoc_command__inventory__in=inventory_set) |
             Q(user__in=organization_set.values('member_role__members')) |
             Q(user=self.user) |
             Q(organization__in=organization_set) |
@@ -1500,13 +1498,11 @@ class ActivityStreamAccess(BaseAccess):
             Q(project_update__project__in=project_set) |
             Q(job_template__in=jt_set) |
             Q(job__job_template__in=jt_set) |
-            Q(notification_template__organization__admin_role__members__in=[self.user]) |
-            Q(notification__notification_template__organization__admin_role__members__in=[self.user]) |
+            Q(notification_template__organization__in=admin_of_orgs) |
+            Q(notification__notification_template__organization__in=admin_of_orgs) |
             Q(label__organization__in=organization_set) |
             Q(role__in=Role.visible_roles(self.user))
-        )
-
-        return (ad_hoc_results | global_results).distinct()
+        ).distinct()
 
     def can_add(self, data):
         return False
