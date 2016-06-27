@@ -20,7 +20,9 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 if ($scope.showTypeDropdown) {
                     $("body").append("<div class='TagSearch-clickToClose'></div>");
                     $(".TagSearch-clickToClose").on("click", function() {
-                        $scope.showTypeDropdown = false;
+                        $scope.$apply(function() {
+                            $scope.showTypeDropdown = false;
+                        });
                         $(".TagSearch-clickToClose").remove();
                     });
                 }
@@ -44,7 +46,9 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             if ($scope.showCurrentSearchDropdown) {
                 $("body").append("<div class='TagSearch-clickToClose'></div>");
                 $(".TagSearch-clickToClose").on("click", function() {
-                    $scope.showCurrentSearchDropdown = false;
+                    $scope.$apply(function() {
+                        $scope.showCurrentSearchDropdown = false;
+                    });
                     $(".TagSearch-clickToClose").remove();
                 });
             }
