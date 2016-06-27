@@ -63,11 +63,14 @@ def register_access(model_class, access_class):
 
 @property
 def user_admin_role(self):
-    return Role.objects.get(
+    role = Role.objects.get(
         content_type=ContentType.objects.get_for_model(User),
         object_id=self.id,
         role_field='admin_role'
     )
+    # Trick the user.admin_role so that the signal filtering for RBAC activity stream works as intended.
+    role.parents = [org.admin_role.pk for org in self.organizations]
+    return role
 
 def user_accessible_objects(user, role_name):
     return ResourceMixin._accessible_objects(User, user, role_name)

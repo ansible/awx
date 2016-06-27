@@ -166,11 +166,26 @@ def rbac_activity_stream(instance, sender, **kwargs):
                 return
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+                # don't record implicit creation / parents
+                if role.content_type is not None:
+
+                    parent = role.content_type.name + "." + role.role_field
+
+                    implicit_parents = getattr(instance.content_object.__class__, instance.role_field).field.parent_role
+                    if type(implicit_parents) != list:
+                        implicit_parents = [implicit_parents]
+
+                    for ip in implicit_parents:
+                        if '.' not in ip and 'singleton:' not in ip:
+                            ip = instance.content_type.name + "." + ip
+                        if parent == ip:
+                            return
             else:
                 role = instance
             instance = instance.content_object
         else:
             role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+
         activity_stream_associate(sender, instance, role=role, **kwargs)
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
