@@ -89,7 +89,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
     'source_script': ('name', 'description'),
-    'role': ('id', 'role_field')
+    'role': ('id', 'role_field'),
+    'notification_template': DEFAULT_SUMMARY_FIELDS,
 }
 
 
