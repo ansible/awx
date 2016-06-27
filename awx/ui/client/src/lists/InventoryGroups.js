@@ -135,11 +135,14 @@ export default
             launch: {
                 mode: 'all',
                 // $scope.$parent is governed by InventoryManageController,
-                ngShow: '$parent.groupsSelected || $parent.hostsSelected',
+                ngDisabled: '!$parent.groupsSelected && !$parent.hostsSelected',
                 ngClick: '$parent.setAdhocPattern()',
-                awToolTip: "Run a command on the selected inventory",
+                awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.",
+                dataTipWatch: "adhocCommandTooltip",
                 actionClass: 'btn List-buttonDefault',
-                buttonContent: 'RUN COMMANDS'
+                buttonContent: 'RUN COMMANDS',
+                showTipWhenDisabled: true,
+                tooltipInnerClass: "Tooltip-wide"
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
