@@ -221,6 +221,8 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
     parents_pks = getattr(instance, '_saved_parents_pks', [])
     hosts_pks = getattr(instance, '_saved_hosts_pks', [])
     children_pks = getattr(instance, '_saved_children_pks', [])
+    is_updating  = getattr(_inventory_updates, 'is_updating', False)
+
     with ignore_inventory_group_removal():
         with ignore_inventory_computed_fields():
             if parents_pks:
@@ -234,7 +236,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                                      child_group, parent_group)
                         parent_group.children.add(child_group)
                 inventory_pk = getattr(instance, '_saved_inventory_pk', None)
-                if inventory_pk:
+                if inventory_pk and not is_updating:
                     try:
                         inventory = Inventory.objects.get(pk=inventory_pk)
                         inventory.update_computed_fields()
