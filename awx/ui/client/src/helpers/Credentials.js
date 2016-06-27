@@ -181,6 +181,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      scope.ssh_key_unlock_confirm = null;
                      scope.become_username = null;
                      scope.become_password = null;
+                     scope.authorize = false;
+                     scope.authorize_password = null;
                  }
 
                  // Collapse or open help widget based on whether scm value is selected
