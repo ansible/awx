@@ -13,8 +13,8 @@
 export default
     {
 
-        addTitle: 'Add Question',
-        editTitle: 'Edit Question',
+        addTitle: 'Add Survey Prompt',
+        editTitle: 'Edit Survey Prompt',
         titleClass: 'Form-secondaryTitle',
         base: 'survey_question',
         name: 'survey_question',
@@ -24,7 +24,7 @@ export default
     fields: {
         question_name: {
             realName: 'question_text',
-            label: 'Name',
+            label: 'Prompt',
             type: 'text',
             addRequired: true,
             editRequired: true,
@@ -42,12 +42,12 @@ export default
             class: 'Form-formGroup--singleColumn'
         },
         variable: {
-            ealName: 'variable',
+            realName: 'variable',
             type: 'custom',
             control:'<label for="variable"><span class="Form-inputLabel prepend-asterisk"> ANSWER VARIABLE NAME</span>'+
-                '<a id="awp-variable" href="" popover-title="ANSWER VARIABLE NAME" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-separated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
-                'user_id<br>host_name<br>" '+
-                'data-placement="right" data-container="body" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
+                '<a id="awp-variable" href="" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-separated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
+                'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
+                'data-placement="right" data-container="body" popover-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
                 '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control Form-textInput ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
                 '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.required">Please enter an answer variable name.</div>'+
                 '<div class="error ng-hide" id="survey_question-variable-variable-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.variable">Please remove the illegal character from the survey question variable name.</div>'+
