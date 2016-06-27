@@ -62,7 +62,7 @@
             $scope.$parent.hostsSelected = selection.length > 0 ? true : false;
             $scope.$parent.hostsSelectedItems = selection.selectedItems;
             $scope.$parent.systemTrackingDisabled = selection.length > 0 && selection.length < 3 ? false : true;
-            $scope.$parent.systemTrackingTooltip = selection.length === 1 ? "Compare host facts over time" : "Compare hosts' facts";
+            $scope.$parent.systemTrackingTooltip = selection.length > 0 && selection.length < 3 ? "Compare host facts over time" : "Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts.";
         });
         $scope.$on('PostRefresh', ()=>{
             _.forEach($scope.hosts, (host) => SetStatus({scope: $scope, host: host}));

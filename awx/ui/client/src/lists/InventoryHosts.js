@@ -100,8 +100,9 @@ export default
                 dataPlacement: 'top',
                 awFeature: 'system_tracking',
                 actionClass: 'btn List-buttonDefault system-tracking',
-                ngShow: 'hostsSelected',
-                ngDisabled: 'systemTrackingDisabled'
+                ngDisabled: 'systemTrackingDisabled || !hostsSelected',
+                showTipWhenDisabled: true,
+                tooltipInnerClass: "Tooltip-wide"
             },
             refresh: {
                 mode: 'all',

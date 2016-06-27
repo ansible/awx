@@ -376,6 +376,18 @@ table, tbody {
     font-size: 13px;
 }
 
+.List-action--showTooltipOnDisabled {
+    display: inline-block;
+}
+
+.List-action--showTooltipOnDisabled .btn[disabled] {
+    pointer-events: none;
+}
+
+.List-action--showTooltipOnDisabled.disabled {
+    cursor: not-allowed;
+}
+
 @media (max-width: 991px) {
     .List-searchWidget + .List-searchWidget {
         margin-top: 20px;
