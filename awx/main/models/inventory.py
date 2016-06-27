@@ -524,7 +524,7 @@ class Group(CommonModelNameNotUnique):
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.tasks import update_inventory_computed_fields
-        from awx.main.signals import disable_activity_stream
+        from awx.main.signals import disable_activity_stream, activity_stream_delete
 
 
         def mark_actual():
@@ -582,7 +582,7 @@ class Group(CommonModelNameNotUnique):
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()
-
+            activity_stream_delete(None, self)
 
     def update_computed_fields(self):
         '''
