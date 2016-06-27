@@ -3487,6 +3487,15 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = NotificationTemplateSerializer
     new_in_300 = True
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'delete', obj):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if obj.notifications.filter(status='pending').exists():
+            return Response({"error": "Delete not allowed while there are pending notifications"},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return resp
+
 class NotificationTemplateTest(GenericAPIView):
 
     view_name = 'NotificationTemplate Test'

@@ -1,7 +1,7 @@
 import mock
 import pytest
 
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.inventory import Inventory, Group
 from awx.main.models.jobs import JobTemplate
 
@@ -112,3 +112,13 @@ def test_notification_template_simple_patch(patch, notification_template, admin)
 @pytest.mark.django_db
 def test_notification_template_invalid_notification_type(patch, notification_template, admin):
     patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'notification_type': 'invalid'}, admin, expect=400)
+
+@pytest.mark.django_db
+def test_disallow_delete_when_notifications_pending(delete, user, notification_template):
+    u = user('superuser', True)
+    url = reverse('api:notification_template_detail', args=(notification_template.id,))
+    n = Notification.objects.create(notification_template=notification_template,
+                                    status='pending')
+    response = delete(url, user=u)
+    assert response.status_code == 405
+
