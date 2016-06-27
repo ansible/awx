@@ -168,13 +168,15 @@ def rbac_activity_stream(instance, sender, **kwargs):
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents
                 if role.content_type is not None:
-
                     parent = role.content_type.name + "." + role.role_field
-
+                    # Get the list of implicit parents that were defined at the class level.
+                    # We have to take this list from the class property to avoid including parents
+                    # that may have been added since the creation of the ImplicitRoleField
                     implicit_parents = getattr(instance.content_object.__class__, instance.role_field).field.parent_role
                     if type(implicit_parents) != list:
                         implicit_parents = [implicit_parents]
-
+                    # Ignore any singleton parents we find. If the parent for the role
+                    # matches any of the implicit parents we find, skip recording the activity stream.
                     for ip in implicit_parents:
                         if '.' not in ip and 'singleton:' not in ip:
                             ip = instance.content_type.name + "." + ip
