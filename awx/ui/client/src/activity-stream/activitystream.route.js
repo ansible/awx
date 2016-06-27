@@ -17,6 +17,11 @@ export default {
     ncyBreadcrumb: {
         label: "ACTIVITY STREAM"
     },
+    onExit: function(){
+        $('#stream-detail-modal').modal('hide');
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+    },
     resolve: {
         features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',
         function(FeaturesService, ProcessErrors, $state, $rootScope) {
