@@ -73,6 +73,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
                  scope.hostPopOver = "<p>The host value</p>";
+                 scope.ssh_key_data_api_error = '';
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -296,10 +297,19 @@ angular.module('CredentialsHelper', ['Utilities'])
                      })
                      .error(function (data, status) {
                          Wait('stop');
-                         ProcessErrors(scope, data, status, form, {
-                             hdr: 'Error!',
-                             msg: 'Failed to create new Credential. POST status: ' + status
-                         });
+                         // TODO: hopefully this conditional error handling will to away in a future version of tower.  The reason why we cannot
+                         // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
+                         // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
+                         // error is never shown.  In the future, the API will hopefully either behave or respond differently.
+                         if(status && status === 400 && data && data.ssh_key_unlock && (scope.kind.value === 'gce' || scope.kind.value === 'azure')) {
+                             scope.ssh_key_data_api_error = "Encrypted credentials are not supported.";
+                         }
+                         else {
+                             ProcessErrors(scope, data, status, form, {
+                                 hdr: 'Error!',
+                                 msg: 'Failed to create new Credential. POST status: ' + status
+                             });
+                         }
                      });
                  } else {
                      url = GetBasePath('credentials') + scope.id + '/';
