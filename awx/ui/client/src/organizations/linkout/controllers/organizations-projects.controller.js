@@ -270,8 +270,8 @@ export default ['$scope', '$rootScope', '$location', '$log',
                         if (data.can_cancel) {
                             $scope.$emit('Cancel_Update', url);
                         } else {
-                            Alert('Cancel Not Allowed', 'Either you do not have access or the SCM update process completed. ' +
-                                'Click the <em>Refresh</em> button to view the latest status.', 'alert-info', null, null, null, null, true);
+                            Alert('Cancel Not Allowed', '<div>Either you do not have access or the SCM update process completed. ' +
+                                'Click the <em>Refresh</em> button to view the latest status.</div>', 'alert-info', null, null, null, null, true);
                         }
                     })
                     .error(function (data, status) {
@@ -294,8 +294,8 @@ export default ['$scope', '$rootScope', '$location', '$log',
                                         msg: 'Call to ' + data.related.current_update + ' failed. GET status: ' + status });
                                 });
                         } else {
-                            Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
-                                'button to view the latest status.', 'alert-info',undefined,undefined,undefined,undefined,true);
+                            Alert('Update Not Found', '<div>An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
+                                'button to view the latest status.</div>', 'alert-info',undefined,undefined,undefined,undefined,true);
                         }
                     })
                     .error(function (data, status) {

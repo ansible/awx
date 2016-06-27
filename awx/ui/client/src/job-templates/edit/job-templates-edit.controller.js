@@ -492,18 +492,20 @@ export default
                     data.related.callback) {
                     Alert('Callback URL',
 `
-<p>Host callbacks are enabled for this template. The callback URL is:</p>
-<p style=\"padding: 10px 0;\">
-    <strong>
-        ${$scope.callback_server_path}
-        ${data.related.callback}
-    </string>
-</p>
-<p>The host configuration key is:
-    <strong>
-        ${$filter('sanitize')(data.host_config_key)}
-    </string>
-</p>
+<div>
+    <p>Host callbacks are enabled for this template. The callback URL is:</p>
+    <p style=\"padding: 10px 0;\">
+        <strong>
+            ${$scope.callback_server_path}
+            ${data.related.callback}
+        </string>
+    </p>
+    <p>The host configuration key is:
+        <strong>
+            ${$filter('sanitize')(data.host_config_key)}
+        </string>
+    </p>
+</div>
 `,
                         'alert-info', saveCompleted, null, null,
                         null, true);

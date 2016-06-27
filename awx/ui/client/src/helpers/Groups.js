@@ -89,8 +89,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                      if (Empty(group.source)) {
                          // do nothing
                      } else if (Empty(group.status) || group.status === "never updated") {
-                         Alert('No Status Available', 'An inventory sync has not been performed for the selected group. Start the process by ' +
-                               'clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
+                         Alert('No Status Available', '<div>An inventory sync has not been performed for the selected group. Start the process by ' +
+                               'clicking the <i class="fa fa-refresh"></i> button.</div>', 'alert-info', null, null, null, null, true);
                      } else {
                          Wait('start');
                          Rest.setUrl(group.related.inventory_source);
@@ -1012,8 +1012,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' +
                                          'and then run an update.', 'alert-info');
                                } else if (sources_scope.status === 'updating') {
-                                   Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                                         $filter('sanitize')(sources_scope.summary_fields.group.name) + '</em>. Use the Refresh button to monitor the status.', 'alert-info', null, null, null, null, true);
+                                   Alert('Update in Progress', '<div>The inventory update process is currently running for group <em>' +
+                                         $filter('sanitize')(sources_scope.summary_fields.group.name) + '</em>. Use the Refresh button to monitor the status.</div>', 'alert-info', null, null, null, null, true);
                                } else {
                                    InventoryUpdate({
                                        scope: parent_scope,
