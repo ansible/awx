@@ -1753,8 +1753,6 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         parent = self.get_parent_object()
-        # TODO: flake8 warns, pending removal if unneeded
-        # parent_key = getattr(self, 'parent_key', None)
         relationship = getattr(parent, self.relationship)
         sub = get_object_or_400(self.model, pk=sub_id)
 
