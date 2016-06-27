@@ -2479,7 +2479,6 @@ class JobTemplateCallback(GenericAPIView):
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
-            # FIXME: Not entirely sure if this statement will ever be needed?
             if host.name != ansible_ssh_host and host.name in remote_hosts:
                 matches.add(host)
         if len(matches) == 1:
@@ -2549,17 +2548,14 @@ class JobTemplateCallback(GenericAPIView):
         # Check matching hosts.
         if not matching_hosts:
             data = dict(msg='No matching host could be found!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         elif len(matching_hosts) > 1:
             data = dict(msg='Multiple hosts matched the request!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
             data = dict(msg='Cannot start automatically, user input required!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = host.name
 
