@@ -1742,31 +1742,6 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
-        '''
-        Special case for disassociating a child group from the parent. If the
-        child group has no more parents, then automatically mark it inactive.
-        '''
-        sub_id = request.data.get('id', None)
-        if not sub_id:
-            data = dict(msg="'id' is required to disassociate.")
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-        parent = self.get_parent_object()
-        relationship = getattr(parent, self.relationship)
-        sub = get_object_or_400(self.model, pk=sub_id)
-
-        if not request.user.can_access(self.parent_model, 'unattach', parent,
-                                       sub, self.relationship, request.data):
-            raise PermissionDenied()
-
-        if sub.parents.exclude(pk=parent.pk).count() == 0:
-            sub.delete()
-        else:
-            relationship.remove(sub)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 class GroupPotentialChildrenList(SubListAPIView):
 
     model = Group
