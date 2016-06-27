@@ -579,6 +579,14 @@ export default
                             scope.cloud_credential_name = "";
                         }
 
+                        if (data.summary_fields.cloud_credential) {
+                                scope.network_credential_name = data.summary_fields.network_credential.name;
+                                scope.network_credential_url = data.related.network_credential
+                            .replace('api/v1', '#');
+                        } else {
+                            scope.network_credential_name = "";
+                        }
+
                         for (i=0; i < verbosity_options.length; i++) {
                             if (verbosity_options[i].value === data.verbosity) {
                                 scope.verbosity = verbosity_options[i].label;

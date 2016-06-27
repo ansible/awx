@@ -127,6 +127,13 @@
                         </div>
                     </div>
 
+                    <div class="form-group JobDetail-resultRow toggle-show" ng-show="network_credential_name">
+                        <label class="JobDetail-resultRowLabel col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Network Credential</label>
+                        <div class="JobDetail-resultRowText">
+                            <a href="{{ network_credential_url }}" aw-tool-tip="Edit the credential" data-placement="top">{{ network_credential_name }}</a>
+                        </div>
+                    </div>
+
                     <div class="form-group JobDetail-resultRow toggle-show" ng-show="job.forks">
                         <label class="JobDetail-resultRowLabel col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Forks</label>
                         <div class="JobDetail-resultRowText">{{ job.forks }}</div>

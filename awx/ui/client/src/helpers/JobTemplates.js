@@ -173,6 +173,25 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       input_type: "radio"
                                   });
 
+                                  var NetworkCredentialList = {};
+                                  // Clone the CredentialList object for use with network_credential. Cloning
+                                  // and changing properties to avoid collision.
+                                  jQuery.extend(true, NetworkCredentialList, CredentialList);
+                                  NetworkCredentialList.name = 'networkcredentials';
+                                  NetworkCredentialList.iterator = 'networkcredential';
+                                  NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
+
+                                  LookUpInit({
+                                      url: GetBasePath('credentials') + '?kind=net',
+                                      scope: scope,
+                                      form: form,
+                                      current_item: data.network_credential,
+                                      list: NetworkCredentialList,
+                                      field: 'network_credential',
+                                      hdr: 'Select Network Credential',
+                                      input_type: "radio"
+                                  });
+
                                   LookUpInit({
                                       scope: scope,
                                       form: form,

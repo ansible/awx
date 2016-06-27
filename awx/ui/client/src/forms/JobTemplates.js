@@ -154,6 +154,20 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
+                network_credential: {
+                    label: 'Network Credential',
+                    type: 'lookup',
+                    sourceModel: 'network_credential',
+                    sourceField: 'name',
+                    ngClick: 'lookUpNetworkcredential()',
+                    addRequired: false,
+                    editRequired: false,
+                    column: 1,
+                    awPopOver: "<p>Network credentials are used by Ansible networking modules to connect to and manage networking devices.</p>",
+                    dataTitle: 'Network Credential',
+                    dataPlacement: 'right',
+                    dataContainer: "body"
+                },
                 forks: {
                     label: 'Forks',
                     id: 'forks-number',
