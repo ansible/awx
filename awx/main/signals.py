@@ -167,7 +167,7 @@ def rbac_activity_stream(instance, sender, **kwargs):
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents
-                if role.content_type is not None:
+                if role is not None and role.content_type is not None:
                     parent = role.content_type.name + "." + role.role_field
                     # Get the list of implicit parents that were defined at the class level.
                     # We have to take this list from the class property to avoid including parents
