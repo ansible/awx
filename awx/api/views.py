@@ -1759,7 +1759,7 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         sub = get_object_or_400(self.model, pk=sub_id)
 
         if not request.user.can_access(self.parent_model, 'unattach', parent,
-                                       sub, self.relationship):
+                                       sub, self.relationship, request.data):
             raise PermissionDenied()
 
         if sub.parents.exclude(pk=parent.pk).count() == 0:
