@@ -3742,10 +3742,9 @@ class RoleParentsList(SubListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # XXX: This should be the intersection between the roles of the user
-        # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.parents.all()
+        return Role.filter_visible_roles(self.request.user, role.parents.all())
+
 
 class RoleChildrenList(SubListAPIView):
 
@@ -3757,10 +3756,8 @@ class RoleChildrenList(SubListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # XXX: This should be the intersection between the roles of the user
-        # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.children.all()
+        return Role.filter_visible_roles(self.request.user, role.children.all())
 
 
 
