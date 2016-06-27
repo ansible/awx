@@ -17,6 +17,13 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         $scope.toggleTypeDropdown = function() {
             if ($scope.searchTypes.length > 1) {
                 $scope.showTypeDropdown = !$scope.showTypeDropdown;
+                if ($scope.showTypeDropdown) {
+                    $("body").append("<div class='TagSearch-clickToClose'></div>");
+                    $(".TagSearch-clickToClose").on("click", function() {
+                        $scope.showTypeDropdown = false;
+                        $(".TagSearch-clickToClose").remove();
+                    });
+                }
             }
         };
 
@@ -24,6 +31,7 @@ export default ['$scope', 'Refresh', 'tagSearchService',
         $scope.setSearchType = function($event, type) {
             $scope.currentSearchType = type;
             $scope.showTypeDropdown = false;
+            $(".TagSearch-clickToClose").remove();
             $event.stopPropagation();
         };
 
@@ -33,7 +41,14 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             $scope
                 .showCurrentSearchDropdown = !$scope
                     .showCurrentSearchDropdown;
-        };
+            if ($scope.showCurrentSearchDropdown) {
+                $("body").append("<div class='TagSearch-clickToClose'></div>");
+                $(".TagSearch-clickToClose").on("click", function() {
+                    $scope.showCurrentSearchDropdown = false;
+                    $(".TagSearch-clickToClose").remove();
+                });
+            }
+};
 
         $scope.updateSearch = function(tags) {
             var iterator = $scope.iterator;
@@ -106,5 +121,6 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             $scope.newSearchTag = null;
             $scope.showTypeDropdown = false;
             $scope.showCurrentSearchDropdown = false;
+            $(".TagSearch-clickToClose").remove();
         };
     }];
