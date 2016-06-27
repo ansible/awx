@@ -45,7 +45,8 @@
             view.inject(list, {
                 mode: 'lookup',
                 id: 'copyMove-list',
-                scope: $scope
+                scope: $scope,
+                input_type: 'radio'
             });
             SearchInit({
                 scope: $scope,
