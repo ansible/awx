@@ -325,57 +325,10 @@ export default
                     scope.removePrepareSearch();
                 }
                 scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly, deferWaitStop, spinner) {
-                    //
-                    // Start building the search key/value pairs. This will process each search widget, if the
-                    // selected field is an object type (used on activity stream).
-                    //
+                    // Start the search spinner
                     if (spinner) {
                         Wait('start');
                     }
-                    scope[iterator + 'SearchParams'] = '';
-                    var i, modifier,
-                        widgets = (list.searchWidgets) ? list.searchWidgets : 1;
-
-                    scope[iterator + '_active_search'] = false;
-
-                    for (i = 1; i <= widgets; i++) {
-                        modifier = (i === 1) ? '' : i;
-                        if ($('#search-widget-container' + modifier)) {
-                            if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
-                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
-                                // Search field of object type
-                                if (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject !== 'all') {
-                                    // An object type is selected
-                                    scope[iterator + 'HideAllStartBtn' + modifier] = false;
-                                    scope[iterator + '_active_search'] = true;
-                                    if (scope[iterator + 'SearchValue' + modifier]) {
-                                        // A search value was entered
-                                        scope[iterator + 'ShowStartBtn' + modifier] = false;
-                                        if (list.fields[scope[iterator + 'SearchField' + modifier]].searchOnID) {
-                                            scope[iterator + 'SearchParams'] += '&' +
-                                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject +
-                                                '__id=' + scope[iterator + 'SearchValue' + modifier];
-                                        } else {
-                                            scope[iterator + 'SearchParams'] += '&' +
-                                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject +
-                                                ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject === 'user') ? '__username__icontains=' : '__name__icontains=' ) +
-                                                scope[iterator + 'SearchValue' + modifier];
-                                        }
-                                    } else {
-                                        // Search value is empty
-                                        scope[iterator + 'ShowStartBtn' + modifier] = true;
-                                        scope[iterator + 'SearchParams'] += '&' +
-                                            list.fields[scope[iterator + 'SearchField' + modifier]].searchField +
-                                            '=' + list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                                    }
-                                } else {
-                                    // Object Type set to All
-                                    scope[iterator + 'HideAllStartBtn' + modifier] = true;
-                                }
-                            }
-                        }
-                    }
-
                     e.stopPropagation();
                     scope.$emit('prepareSearch2', iterator, page, load, calcOnly, deferWaitStop);
 
@@ -505,7 +458,7 @@ export default
                         scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                     }
 
-                    if(scope[iterator + 'SearchValue' + modifier] && scope[iterator + 'SearchValue' + modifier] !== '') {
+                    if(scope[iterator + 'SearchFilters'] && scope[iterator + 'SearchFilters'].length > 0) {
                         scope[iterator + '_active_search'] = true;
                     }
                     else {
