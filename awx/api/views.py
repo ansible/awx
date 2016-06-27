@@ -3690,7 +3690,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
-class RoleTeamsList(ListAPIView):
+class RoleTeamsList(SubListCreateAttachDetachAPIView):
 
     model = Team
     serializer_class = TeamSerializer
@@ -3700,8 +3700,8 @@ class RoleTeamsList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # TODO: Check
-        role = get_object_or_404(Role, pk=self.kwargs['pk'])
+        role = self.get_parent_object()
+        self.check_parent_access(role)
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
