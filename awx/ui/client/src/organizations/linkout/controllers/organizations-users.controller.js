@@ -77,6 +77,7 @@
                          disassociate: true
                      }).success(function () {
                          $scope.search(list.iterator);
+                         $scope.$emit('ReloadOrgListView');
                      })
                      .error(function (data, status) {
                          ProcessErrors($scope, data, status, null, { hdr: 'Error!',

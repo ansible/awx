@@ -8,12 +8,12 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
     '$log', '$compile', 'Rest', 'PaginateInit',
     'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'generateList',
+    '$state', 'generateList', 'Refresh',
     function($stateParams, $scope, $rootScope, $location,
         $log, $compile, Rest, PaginateInit,
         SearchInit, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait,
-        $state, generateList) {
+        $state, generateList, Refresh) {
 
         ClearScope();
 
@@ -70,10 +70,20 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         };
 
         $scope.$on("ReloadOrgListView", function() {
+            var url = GetBasePath('organizations') + '?';
             if ($state.$current.self.name === "organizations" ||
                 $state.$current.self.name === "organizations.add") {
                 $scope.activeCard = null;
             }
+            if ($scope[list.iterator + 'SearchFilters']){
+               url = url + _.reduce($scope[list.iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+            }
+            Refresh({
+                scope: $scope,
+                set: list.name,
+                iterator: list.iterator,
+                url: url
+            });
         });
 
 

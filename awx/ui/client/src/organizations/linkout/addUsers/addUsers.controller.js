@@ -67,6 +67,7 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
                     Wait('stop');
                     $scope.$parent.search('user');
                     $scope.closeModal();
+                    $scope.$parent.$emit('ReloadOrgListView');
                 }, function (error) {
                     Wait('stop');
                     $rootScope.$broadcast("refreshList", listToClose);

@@ -40,7 +40,7 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
                     list.listTitle = listTitle;
                     list.basePath = url;
                     list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
-                    
+
                     $scope.orgRelatedUrls = data.related;
 
                     generator.inject(list, { mode: 'edit', scope: $scope, cancelButton: true });
@@ -78,6 +78,7 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
                         disassociate: true
                     }).success(function () {
                         $scope.search(list.iterator);
+                        $scope.$emit('ReloadOrgListView');
                     })
                     .error(function (data, status) {
                         ProcessErrors($scope, data, status, null, { hdr: 'Error!',
