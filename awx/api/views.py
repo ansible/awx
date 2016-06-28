@@ -3462,7 +3462,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
         if obj.notifications.filter(status='pending').exists():
             return Response({"error": "Delete not allowed while there are pending notifications"},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return resp
+        return super(NotificationTemplateDetail, self).delete(request, *args, **kwargs)
 
 class NotificationTemplateTest(GenericAPIView):
 
