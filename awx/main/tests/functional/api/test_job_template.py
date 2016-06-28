@@ -195,7 +195,7 @@ def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_cr
     """
     Organization admins without access to the 3 related resources:
     SHOULD NOT be able to copy JT
-    SHOULD NOT be able to edit that job template
+    SHOULD be able to edit that job template, for nonsensitive changes
     """
 
     # Attach credential to JT that org admin can not use
@@ -209,11 +209,13 @@ def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_cr
     serializer.context['request'] = request
     response = serializer.to_representation(jt_copy_edit)
     assert not response['summary_fields']['can_copy']
-    assert not response['summary_fields']['can_edit']
+    assert response['summary_fields']['can_edit']
 
 @pytest.mark.django_db
 def test_jt_admin_copy_edit(jt_copy_edit, rando):
-    "JT admins wihout access to associated resources SHOULD NOT be able to copy"
+    """
+    JT admins wihout access to associated resources SHOULD NOT be able to copy
+    SHOULD be able to make nonsensitive changes"""
 
     # random user given JT admin access only
     jt_copy_edit.admin_role.members.add(rando)
@@ -226,7 +228,7 @@ def test_jt_admin_copy_edit(jt_copy_edit, rando):
     serializer.context['request'] = request
     response = serializer.to_representation(jt_copy_edit)
     assert not response['summary_fields']['can_copy']
-    assert not response['summary_fields']['can_edit']
+    assert response['summary_fields']['can_edit']
 
 @pytest.mark.django_db
 def test_proj_jt_admin_copy_edit(jt_copy_edit, rando):

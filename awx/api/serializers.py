@@ -23,7 +23,6 @@ from django.db import models
 # from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
-from django.forms.models import model_to_dict
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -1849,9 +1848,8 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             d['can_copy'] = not validation_errors
             d['can_edit'] = True
         else:
-            jt_data = model_to_dict(obj)
-            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', jt_data)
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, jt_data)
+            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', {"reference_obj": obj})
+            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, {})
 
         d['recent_jobs'] = self._recent_jobs(obj)
         return d

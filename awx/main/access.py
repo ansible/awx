@@ -788,6 +788,9 @@ class JobTemplateAccess(BaseAccess):
         if not data or '_method' in data:  # So the browseable API will work?
             return True
 
+        # if reference_obj is provided, determine if it can be coppied
+        reference_obj = data.pop('reference_obj', None)
+
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
             self.check_license(feature='system_tracking')
 
@@ -797,51 +800,54 @@ class JobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
+        def get_value(Class, field):
+            if reference_obj:
+                return getattr(reference_obj, field, None)
+            else:
+                pk = get_pk_from_dict(data, field)
+                if pk:
+                    return get_object_or_400(Class, pk=pk)
+                else:
+                    return None
+
         # If a credential is provided, the user should have use access to it.
-        credential_pk = get_pk_from_dict(data, 'credential')
-        if credential_pk:
-            credential = get_object_or_400(Credential, pk=credential_pk)
+        credential = get_value(Credential, 'credential')
+        if credential:
             if self.user not in credential.use_role:
                 return False
 
         # If a cloud credential is provided, the user should have use access.
-        cloud_credential_pk = get_pk_from_dict(data, 'cloud_credential')
-        if cloud_credential_pk:
-            cloud_credential = get_object_or_400(Credential,
-                                                 pk=cloud_credential_pk)
+        cloud_credential = get_value(Credential, 'cloud_credential')
+        if cloud_credential:
             if self.user not in cloud_credential.use_role:
                 return False
 
         # If a network credential is provided, the user should have use access.
-        network_credential_pk = get_pk_from_dict(data, 'network_credential')
-        if network_credential_pk:
-            network_credential = get_object_or_400(Credential,
-                                                   pk=network_credential_pk)
+        network_credential = get_value(Credential, 'network_credential')
+        if network_credential:
             if self.user not in network_credential.use_role:
                 return False
 
         # If an inventory is provided, the user should have use access.
-        inventory_pk = get_pk_from_dict(data, 'inventory')
-        if inventory_pk:
-            inventory = get_object_or_400(Inventory, pk=inventory_pk)
+        inventory = get_value(Inventory, 'inventory')
+        if inventory:
             if self.user not in inventory.use_role:
                 return False
 
-        project_pk = get_pk_from_dict(data, 'project')
+        project = get_value(Project, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            if inventory_pk and inventory.organization:
+            if inventory:
                 org = inventory.organization
                 accessible = self.user in org.admin_role
             else:
                 accessible = False
-            if not project_pk and accessible:
+            if not project and accessible:
                 return True
             elif not accessible:
                 return False
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
-        if project_pk:
-            project = get_object_or_400(Project, pk=project_pk)
+        if project:
             return self.user in project.use_role
         else:
             return False
