@@ -318,9 +318,6 @@ class BaseSerializer(serializers.ModelSerializer):
                 summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
 
         # RBAC summary fields
-        request = self.context.get('request', None)
-        if request and isinstance(obj, ResourceMixin) and request.user.is_authenticated():
-            summary_fields['active_roles'] = obj.get_permissions(request.user)
         roles = {}
         for field in obj._meta.get_fields():
             if type(field) is ImplicitRoleField:
@@ -1524,7 +1521,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
-        ret['summary_fields']['active_roles'] = get_roles_on_resource(obj, user)
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
