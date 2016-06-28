@@ -3658,7 +3658,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
-class RoleTeamsList(SubListCreateAttachDetachAPIView):
+class RoleTeamsList(SubListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
