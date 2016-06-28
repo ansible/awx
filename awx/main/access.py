@@ -1425,7 +1425,7 @@ class LabelAccess(BaseAccess):
 
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
-        return self.user in org.read_role
+        return self.user in org.member_role
 
     @check_superuser
     def can_change(self, obj, data):
