@@ -13,6 +13,7 @@ export default
                 scope: false,
                 templateUrl: templateUrl('job-templates/labels/labelsList'),
                 link: function(scope, element, attrs) {
+                    scope.showDelete = attrs.showDelete === 'true';
                     scope.seeMoreInactive = true;
 
                     var getNext = function(data, arr, resolve) {
@@ -29,7 +30,7 @@ export default
 
                     scope.seeMore = function () {
                         var seeMoreResolve = $q.defer();
-                        Rest.setUrl(scope.job_template.related.labels);
+                        Rest.setUrl(scope[scope.$parent.list.iterator].related.labels);
                         Rest.get()
                             .success(function(data) {
                                 if (data.next) {
@@ -70,11 +71,13 @@ export default
                         });
                     };
 
-                    scope.$watch("job_template.summary_fields.labels.results", function() {
+                    scope.$watch(scope.$parent.list.iterator+".summary_fields.labels.results", function() {
                         // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
                         // array will get set initially and then never be updated as labels are removed
-                        scope.labels = scope.job_template.summary_fields.labels.results;
-                        scope.count = scope.job_template.summary_fields.labels.count;
+                        if (scope[scope.$parent.list.iterator].summary_fields.labels){
+                            scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results;
+                            scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
+                        }
                     });
                 }
             };

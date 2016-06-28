@@ -474,11 +474,12 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 </td>
                 `;
             } else if (field.type === 'labels') {
+                var showDelete = field.showDelete === undefined ? true : field.showDelete;
                 classList = (field.columnClass) ?
                     Attr(field, 'columnClass') : "";
                     html += `
 <td ${classList}>
-    <labels-list class=\"LabelList\">
+    <labels-list class=\"LabelList\" show-delete="${showDelete}">
     </labels-list>
 </td>
                     `;

@@ -44,7 +44,7 @@ export default
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-lg-3 col-md-3 col-sm-4 col-xs-6',
+                columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(all_job)",
                 defaultSearchField: true,
                 awToolTip: "{{ all_job.name | sanitize }}",
@@ -54,7 +54,7 @@ export default
                 label: 'Type',
                 ngBind: 'all_job.type_label',
                 link: false,
-                columnClass: "col-lg-3 col-md-3 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 hidden-md hidden-sm hidden-xs",
                 columnShow: "showJobType",
                 searchable: true,
                 searchType: 'select',
@@ -65,7 +65,7 @@ export default
                 noLink: true,
                 searchable: false,
                 filter: "longDate",
-                columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
+                columnClass: "col-lg-2 col-md-3 col-sm-3 hidden-xs",
                 key: true,
                 desc: true
             },
@@ -79,7 +79,10 @@ export default
             },
             labels: {
                 label: 'Labels',
-                searchOnly: true,
+                type: 'labels',
+                nosort: true,
+                showDelete: false,
+                columnClass: 'List-tableCell col-lg-4 col-md-4 hidden-sm hidden-xs',
                 searchType: 'related',
                 sourceModel: 'labels',
                 sourceField: 'name'

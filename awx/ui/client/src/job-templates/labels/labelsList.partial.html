@@ -1,9 +1,10 @@
 <div class="LabelList-tagContainer" ng-repeat="label in labels">
     <div class="LabelList-deleteContainer"
-        ng-click="deleteLabel(job_template.id, job_template.name, label.id, label.name)">
+        ng-click="deleteLabel(job_template.id, job_template.name, label.id, label.name)"
+        ng-show="showDelete">
         <i class="fa fa-times LabelList-tagDelete"></i>
     </div>
-    <div class="LabelList-tag LabelList-tag--deletable">
+    <div class="LabelList-tag" ng-class="{'LabelList-tag--deletable' : showDelete}">
         <span class="LabelList-name">{{ label.name }}</span>
     </div>
 </div>
