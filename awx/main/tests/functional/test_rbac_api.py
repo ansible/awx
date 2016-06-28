@@ -183,7 +183,7 @@ def test_get_teams_roles_list(get, team, organization, admin):
     assert response.status_code == 200
     roles = response.data
 
-    assert roles['count'] == 2
+    assert roles['count'] == 1
     assert roles['results'][0]['id'] == organization.admin_role.id or roles['results'][1]['id'] == organization.admin_role.id
 
 
