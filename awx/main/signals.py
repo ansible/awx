@@ -339,7 +339,6 @@ def activity_stream_create(sender, instance, created, **kwargs):
         # Skip recording any inventory source directly associated with a group.
         if isinstance(instance, InventorySource) and instance.group:
             return
-        # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
         changes = model_to_dict(instance, model_serializer_mapping)
         # Special case where Job survey password variables need to be hidden

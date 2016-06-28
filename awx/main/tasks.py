@@ -77,7 +77,7 @@ def celery_startup(conf=None, **kwargs):
         try:
             sch.update_computed_fields()
             sch.save()
-        except Exception, e:
+        except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 @task()
@@ -142,8 +142,8 @@ def tower_periodic_scheduler(self):
         try:
             last_run = dateutil.parser.parse(fd.read())
             return last_run
-        except Exception:
-            #TODO: LOG
+        except Exception as exc:
+            logger.error("get_last_run failed: {}".format(exc))
             return None
 
     def write_last_run(last_run):
@@ -1722,7 +1722,7 @@ class RunSystemJob(BaseTask):
                     args.extend(['--older_than', str(json_vars['older_than'])])
                 if 'granularity' in json_vars:
                     args.extend(['--granularity', str(json_vars['granularity'])])
-        except Exception, e:
+        except Exception as e:
             logger.error("Failed to parse system job: " + str(e))
         return args
 

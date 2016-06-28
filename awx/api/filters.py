@@ -58,7 +58,7 @@ class TypeFilterBackend(BaseFilterBackend):
                 else:
                     queryset = queryset.none()
             return queryset
-        except FieldError, e:
+        except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
 
@@ -139,7 +139,7 @@ class FieldLookupBackend(BaseFilterBackend):
         elif new_lookup.endswith('__regex') or new_lookup.endswith('__iregex'):
             try:
                 re.compile(value)
-            except re.error, e:
+            except re.error as e:
                 raise ValueError(e.args[0])
         else:
             value = self.value_to_python_for_field(field, value)
@@ -221,9 +221,9 @@ class FieldLookupBackend(BaseFilterBackend):
                     queryset = queryset.filter(q)
                 queryset = queryset.filter(*args).distinct()
             return queryset
-        except (FieldError, FieldDoesNotExist, ValueError), e:
+        except (FieldError, FieldDoesNotExist, ValueError) as e:
             raise ParseError(e.args[0])
-        except ValidationError, e:
+        except ValidationError as e:
             raise ParseError(e.messages)
 
 class OrderByBackend(BaseFilterBackend):
@@ -261,6 +261,6 @@ class OrderByBackend(BaseFilterBackend):
                             new_order_by.append(field)
                 queryset = queryset.order_by(*new_order_by)
             return queryset
-        except FieldError, e:
+        except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)

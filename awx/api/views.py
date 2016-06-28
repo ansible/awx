@@ -277,7 +277,7 @@ class ApiV1ConfigView(APIView):
         for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
             try:
                 os.remove(fname)
-            except OSError, e:
+            except OSError as e:
                 if e.errno != errno.ENOENT:
                     has_error = e.errno
                     break
@@ -1742,33 +1742,6 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
         parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
-        '''
-        Special case for disassociating a child group from the parent. If the
-        child group has no more parents, then automatically mark it inactive.
-        '''
-        sub_id = request.data.get('id', None)
-        if not sub_id:
-            data = dict(msg="'id' is required to disassociate.")
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-        parent = self.get_parent_object()
-        # TODO: flake8 warns, pending removal if unneeded
-        # parent_key = getattr(self, 'parent_key', None)
-        relationship = getattr(parent, self.relationship)
-        sub = get_object_or_400(self.model, pk=sub_id)
-
-        if not request.user.can_access(self.parent_model, 'unattach', parent,
-                                       sub, self.relationship, request.data):
-            raise PermissionDenied()
-
-        if sub.parents.exclude(pk=parent.pk).count() == 0:
-            sub.delete()
-        else:
-            relationship.remove(sub)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 class GroupPotentialChildrenList(SubListAPIView):
 
     model = Group
@@ -2328,7 +2301,6 @@ class JobTemplateSurveySpec(GenericAPIView):
         try:
             obj.survey_spec = json.dumps(request.data)
         except ValueError:
-            # TODO: Log
             return Response(dict(error="Invalid JSON when parsing survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
             return Response(dict(error="'name' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
@@ -2481,7 +2453,6 @@ class JobTemplateCallback(GenericAPIView):
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
-            # FIXME: Not entirely sure if this statement will ever be needed?
             if host.name != ansible_ssh_host and host.name in remote_hosts:
                 matches.add(host)
         if len(matches) == 1:
@@ -2551,17 +2522,14 @@ class JobTemplateCallback(GenericAPIView):
         # Check matching hosts.
         if not matching_hosts:
             data = dict(msg='No matching host could be found!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         elif len(matching_hosts) > 1:
             data = dict(msg='Multiple hosts matched the request!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
             data = dict(msg='Cannot start automatically, user input required!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = host.name
 
@@ -3451,7 +3419,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
                 return response
-            except Exception, e:
+            except Exception as e:
                 return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         elif request.accepted_renderer.format == 'txt':
             return Response(unified_job.result_stdout)
@@ -3690,7 +3658,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
-class RoleTeamsList(ListAPIView):
+class RoleTeamsList(SubListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
@@ -3700,8 +3668,8 @@ class RoleTeamsList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # TODO: Check
-        role = get_object_or_404(Role, pk=self.kwargs['pk'])
+        role = self.get_parent_object()
+        self.check_parent_access(role)
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
@@ -3742,10 +3710,9 @@ class RoleParentsList(SubListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # XXX: This should be the intersection between the roles of the user
-        # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.parents.all()
+        return Role.filter_visible_roles(self.request.user, role.parents.all())
+
 
 class RoleChildrenList(SubListAPIView):
 
@@ -3757,10 +3724,8 @@ class RoleChildrenList(SubListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        # XXX: This should be the intersection between the roles of the user
-        # and the roles that the requesting user has access to see
         role = Role.objects.get(pk=self.kwargs['pk'])
-        return role.children.all()
+        return Role.filter_visible_roles(self.request.user, role.children.all())
 
 
 

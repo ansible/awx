@@ -701,7 +701,7 @@ class Job(UnifiedJob, JobOptions):
                 return
             try:
                 extra_vars = json.loads(extra_data)
-            except Exception, e:
+            except Exception as e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
         evars = self.extra_vars_dict
         evars.update(extra_vars)
@@ -1316,7 +1316,7 @@ class SystemJob(UnifiedJob, SystemJobOptions):
                 return
             try:
                 extra_vars = json.loads(extra_data)
-            except Exception, e:
+            except Exception as e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
         evars = self.extra_vars_dict
         evars.update(extra_vars)

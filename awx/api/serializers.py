@@ -219,8 +219,8 @@ class BaseSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'name', 'description')
-        summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
-        summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
+        summary_fields = ()
+        summarizable_fields = ()
 
     # add the URL and related resources
     type           = serializers.SerializerMethodField()
@@ -668,11 +668,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
             return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
         else:
             return super(UnifiedJobStdoutSerializer, self).get_types()
-
-    # TODO: Needed?
-    #def to_representation(self, obj):
-    #    ret = super(UnifiedJobStdoutSerializer, self).to_representation(obj)
-    #    return ret.get('result_stdout', '')
 
 
 class UserSerializer(BaseSerializer):
@@ -1310,7 +1305,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     def validate_source_vars(self, value):
         # source_env must be blank, a valid JSON or YAML dict, or ...
-        # FIXME: support key=value pairs.
         try:
             json.loads((value or '').strip() or '{}')
             return value
@@ -1336,9 +1330,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                 try:
                     if source_script.organization != self.instance.inventory.organization:
                         errors['source_script'] = "The 'source_script' does not belong to the same organization as the inventory."
-                except Exception:
-                    # TODO: Log
+                except Exception as exc:
                     errors['source_script'] = "'source_script' doesn't exist."
+                    logger.error(str(exc))
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1610,8 +1604,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
 
 class CredentialSerializer(BaseSerializer):
-
-    # FIXME: may want to make some fields filtered based on user accessing
 
     class Meta:
         model = Credential
@@ -1887,7 +1879,6 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     def validate_extra_vars(self, value):
         # extra_vars must be blank, a valid JSON or YAML dict, or ...
-        # FIXME: support key=value pairs.
         try:
             json.loads((value or '').strip() or '{}')
             return value
@@ -2575,7 +2566,6 @@ class ScheduleSerializer(BaseSerializer):
         try:
             rrule.rrulestr(rrule_value)
         except Exception:
-            # TODO: Log
             raise serializers.ValidationError("rrule parsing failed validation.")
         return value
 
@@ -2610,7 +2600,6 @@ class ActivityStreamSerializer(BaseSerializer):
         try:
             return json.loads(obj.changes)
         except Exception:
-            # TODO: Log
             logger.warn("Error deserializing activity stream json changes")
         return {}
 
