@@ -867,7 +867,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         if not self.request.user.can_access(Team, 'read', team):
             raise PermissionDenied()
-        return Role.filter_visible_roles(self.request.user, team.member_role.children.all())
+        return Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
 
     def post(self, request, *args, **kwargs):
         # Forbid implicit role creation here
