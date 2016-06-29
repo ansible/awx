@@ -212,7 +212,7 @@ def handle_work_success(self, result, task_actual):
     elif task_actual['type'] == 'ad_hoc_command':
         instance = AdHocCommand.objects.get(id=task_actual['id'])
         instance_name = instance.module_name
-        notification_templates = [] # TODO: Ad-hoc commands need to notify someone
+        notification_templates = instance.notification_templates
         friendly_name = "AdHoc Command"
     elif task_actual['type'] == 'system_job':
         instance = SystemJob.objects.get(id=task_actual['id'])
