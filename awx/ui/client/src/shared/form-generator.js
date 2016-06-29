@@ -1487,6 +1487,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             "ng-show='is_system_auditor'>Auditor</span>";
                         html+= "<span class=\"Form-title--is_ldap_user\" "+
                             "ng-show='ldap_user'>LDAP</span>";
+                        html+= "<span class=\"Form-title--is_external_account\" "+
+                            "ng-show='external_account'>{{external_account}}</span>";
                     }
                     html += "</div>\n";
                     html += "<div class=\"Form-header--fields\">";
