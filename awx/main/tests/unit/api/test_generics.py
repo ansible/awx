@@ -138,7 +138,7 @@ class TestDeleteLastUnattachLabelMixin:
 
         view.unattach(mock_request, None, None)
 
-        super.unattach_validate.assert_called_with(mock_request, None, None)
+        super.unattach_validate.assert_called_with(mock_request)
         super.unattach_by_id.assert_called_with(mock_request, mock_sub_id)
         mock_label.is_detached.assert_called_with()
         mock_label.objects.get.assert_called_with(id=mock_sub_id)
@@ -154,7 +154,7 @@ class TestDeleteLastUnattachLabelMixin:
 
         res = view.unattach(mock_request, None, None)
 
-        super.unattach_validate.assert_called_with(mock_request, None, None)
+        super.unattach_validate.assert_called_with(mock_request)
         assert mock_response == res
 
 class TestParentMixin:
