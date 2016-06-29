@@ -56,10 +56,11 @@ export default
                             Rest.setUrl(url);
                             Rest.post({"disassociate": true, "id": labelId})
                                 .success(function () {
-                                    Wait('stop');
                                     scope.search("job_template");
+                                    Wait('stop');
                                 })
                                 .error(function (data, status) {
+                                    Wait('stop');
                                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                         msg: 'Could not disacssociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
                                 });
