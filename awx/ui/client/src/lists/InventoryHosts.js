@@ -95,7 +95,7 @@ export default
             system_tracking: {
                 buttonContent: 'System Tracking',
                 ngClick: 'systemTracking()',
-                awToolTip: "{{ systemTrackingTooltip }}",
+                awToolTip: "Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts.",
                 dataTipWatch: "systemTrackingTooltip",
                 dataPlacement: 'top',
                 awFeature: 'system_tracking',
