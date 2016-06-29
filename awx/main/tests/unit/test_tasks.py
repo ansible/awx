@@ -1,4 +1,5 @@
 import pytest
+from contextlib import contextmanager
 
 from awx.main.models import (
     UnifiedJob,
@@ -8,7 +9,17 @@ from awx.main.models import (
 from awx.main.tasks import (
     run_label_cleanup,
     send_notifications,
+    run_administrative_checks,
 )
+
+from awx.main.task_engine import TaskSerializer
+
+
+@contextmanager
+def apply_patches(_patches):
+    [p.start() for p in _patches]
+    yield
+    [p.stop() for p in _patches]
 
 def test_run_label_cleanup(mocker):
     qs = mocker.Mock(**{'count.return_value': 3, 'delete.return_value': None})
@@ -31,10 +42,15 @@ def test_send_notifications_job_id(mocker):
         assert UnifiedJob.objects.get.called_with(id=1)
 
 def test_send_notifications_list(mocker):
+    patches = list()
+
     mock_job = mocker.MagicMock(spec=UnifiedJob)
-    with mocker.patch('awx.main.models.UnifiedJob.objects.get', return_value=mock_job):
-        mock_notification = mocker.MagicMock(spec=Notification, subject="test")
-        with mocker.patch('awx.main.models.Notification.objects.get', return_value=mock_notification):
+    patches.append(mocker.patch('awx.main.models.UnifiedJob.objects.get', return_value=mock_job))
+
+    mock_notification = mocker.MagicMock(spec=Notification, subject="test")
+    patches.append(mocker.patch('awx.main.models.Notification.objects.get', return_value=mock_notification))
+
+    with apply_patches(patches):
             send_notifications([1,2], job_id=1)
             assert Notification.objects.get.call_count == 2
             assert mock_notification.status == "successful"
@@ -43,3 +59,20 @@ def test_send_notifications_list(mocker):
             assert mock_job.notifications.add.called
             assert mock_job.notifications.add.called_with(mock_notification)
 
+def test_run_admin_checks_usage(mocker):
+    patches = list()
+    patches.append(mocker.patch('awx.main.tasks.tower_settings'))
+    patches.append(mocker.patch('awx.main.tasks.User'))
+
+    mock_ts = mocker.Mock(spec=TaskSerializer)
+    mock_ts.from_database.return_value = {'instance_count': 100, 'current_instances': 91}
+    patches.append(mocker.patch('awx.main.tasks.TaskSerializer', return_value=mock_ts))
+
+    mock_sm = mocker.Mock()
+    patches.append(mocker.patch('awx.main.tasks.send_mail', wraps=mock_sm))
+
+    with apply_patches(patches):
+        run_administrative_checks()
+        assert mock_sm.called
+        assert '90%' in mock_sm.call_args_list[0][0][0]
+        assert 'expire' in mock_sm.call_args_list[1][0][0]
