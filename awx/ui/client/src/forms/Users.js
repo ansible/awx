@@ -46,7 +46,7 @@ export default
                     label: 'Username',
                     type: 'text',
                     awRequiredWhen: {
-                        reqExpression: "not_ldap_user && !external_account",
+                        reqExpression: "not_ldap_user && external_account === null",
                         init: true
                     },
                     autocomplete: false
