@@ -46,7 +46,7 @@ export default
                     label: 'Username',
                     type: 'text',
                     awRequiredWhen: {
-                        reqExpression: "not_ldap_user",
+                        reqExpression: "not_ldap_user && external_account === null",
                         init: true
                     },
                     autocomplete: false
@@ -69,7 +69,7 @@ export default
                     label: 'Password',
                     type: 'sensitive',
                     hasShowInputButton: true,
-                    ngShow: 'ldap_user == false && socialAuthUser === false',
+                    ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
                     addRequired: true,
                     editRequired: false,
                     ngChange: "clearPWConfirm('password_confirm')",
@@ -80,7 +80,7 @@ export default
                     label: 'Confirm Password',
                     type: 'sensitive',
                     hasShowInputButton: true,
-                    ngShow: 'ldap_user == false && socialAuthUser === false',
+                    ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
                     addRequired: true,
                     editRequired: false,
                     awPassMatch: true,
