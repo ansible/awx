@@ -7,7 +7,8 @@ export default
         'ProcessErrors',
         'Prompt',
         '$q',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q) {
+        '$filter',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter) {
             return {
                 restrict: 'E',
                 scope: false,
@@ -49,15 +50,17 @@ export default
                     scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
                         var action = function () {
                             $('#prompt-modal').modal('hide');
+                            scope.seeMoreInactive = true;
                             Wait('start');
                             var url = GetBasePath("job_templates") + templateId + "/labels/";
                             Rest.setUrl(url);
                             Rest.post({"disassociate": true, "id": labelId})
                                 .success(function () {
-                                    Wait('stop');
                                     scope.search("job_template");
+                                    Wait('stop');
                                 })
                                 .error(function (data, status) {
+                                    Wait('stop');
                                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                         msg: 'Could not disacssociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
                                 });
@@ -65,7 +68,7 @@ export default
 
                         Prompt({
                             hdr: 'Remove Label from ' + templateName,
-                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + labelName + '</span> label.</div>',
+                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(labelName) + '</span> label.</div>',
                             action: action,
                             actionText: 'REMOVE'
                         });

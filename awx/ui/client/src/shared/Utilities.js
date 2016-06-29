@@ -608,8 +608,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * ]
  * ```
  */
-.factory('CreateSelect2', [
-    function () {
+.factory('CreateSelect2', ['$filter',
+    function ($filter) {
         return function (params) {
 
             var element = params.element,
@@ -641,6 +641,9 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     containerCssClass: 'Form-dropDown',
                     width: '100%',
                     minimumResultsForSearch: Infinity,
+                    escapeMarkup: function(m) {
+                        return $filter('sanitize')(m);
+                    }
                 };
 
                 // multiple-choice directive calls select2 but needs to do so without this custom adapter
