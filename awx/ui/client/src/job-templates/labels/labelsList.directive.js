@@ -7,7 +7,8 @@ export default
         'ProcessErrors',
         'Prompt',
         '$q',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q) {
+        '$filter',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter) {
             return {
                 restrict: 'E',
                 scope: false,
@@ -65,7 +66,7 @@ export default
 
                         Prompt({
                             hdr: 'Remove Label from ' + templateName,
-                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + labelName + '</span> label.</div>',
+                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(labelName) + '</span> label.</div>',
                             action: action,
                             actionText: 'REMOVE'
                         });
