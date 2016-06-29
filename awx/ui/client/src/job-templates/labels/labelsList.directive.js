@@ -50,6 +50,7 @@ export default
                     scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
                         var action = function () {
                             $('#prompt-modal').modal('hide');
+                            scope.seeMoreInactive = true;
                             Wait('start');
                             var url = GetBasePath("job_templates") + templateId + "/labels/";
                             Rest.setUrl(url);
