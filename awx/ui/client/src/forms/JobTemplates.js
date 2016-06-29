@@ -116,6 +116,7 @@ export default
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    includePlaybookNotFoundError: true
                 },
                 credential: {
                     label: 'Machine Credential',

@@ -109,12 +109,15 @@ export default
                     Rest.get()
                         .success(function (data) {
                             $scope.playbook_options = [];
+                            var playbookNotFound = true;
                             for (var i = 0; i < data.length; i++) {
                                 $scope.playbook_options.push(data[i]);
                                 if (data[i] === $scope.playbook) {
                                     $scope.job_templates_form.playbook.$setValidity('required', true);
+                                    playbookNotFound = false;
                                 }
                             }
+                            $scope.playbookNotFound = playbookNotFound;
                             sync_playbook_select2();
                             if ($scope.playbook) {
                                 $scope.$emit('jobTemplateLoadFinished');
