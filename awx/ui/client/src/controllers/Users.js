@@ -334,6 +334,7 @@ export function UsersEdit($scope, $rootScope, $location,
             $scope.not_ldap_user = !$scope.ldap_user;
             master.ldap_user = $scope.ldap_user;
             $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
+            $scope.external_account = data.external_account;
 
             $scope.user_type = $scope.user_type_options[0];
             $scope.is_system_auditor = false;
