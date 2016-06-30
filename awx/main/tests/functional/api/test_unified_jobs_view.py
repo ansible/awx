@@ -60,7 +60,6 @@ def test_project_update_redaction_enabled(get, format, content_type, test_cases,
         job = test_data['project']
         response = get(reverse("api:project_update_stdout", args=(job.pk,)) + "?format=" + format, user=admin, expect=200, accept=content_type)
         assert content_type in response['CONTENT-TYPE']
-        print(response.data)
         assert response.data is not None
         content = response.data['content'] if format == 'json' else response.data
         assert test_data['uri'].username not in content
@@ -90,3 +89,5 @@ def test_options_fields_choices(instance, options, user):
     assert UnifiedJob.LAUNCH_TYPE_CHOICES == response.data['actions']['GET']['launch_type']['choices']
     assert 'choice' == response.data['actions']['GET']['status']['type']
     assert UnifiedJob.STATUS_CHOICES == response.data['actions']['GET']['status']['choices']
+
+
