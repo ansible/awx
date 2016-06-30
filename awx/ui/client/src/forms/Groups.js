@@ -324,7 +324,8 @@ export default
                     ngClick: 'formCancel()'
                 },
                 save: {
-                    ngClick: 'formSave()'
+                    ngClick: 'formSave()',
+                    ngDisabled: true
                 }
             },
 
