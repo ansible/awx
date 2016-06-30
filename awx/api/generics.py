@@ -26,7 +26,6 @@ from rest_framework import views
 
 # AWX
 from awx.main.models import *  # noqa
-from awx.main.models import Label
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
 
