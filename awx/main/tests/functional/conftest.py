@@ -293,17 +293,23 @@ def permissions():
                  'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
     }
 
-@pytest.fixture
-def post():
-    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+
+def _request(verb):
+    def rf(url, data_or_user=None, user=None, middleware=None, expect=None, **kwargs):
+        if type(data_or_user) is User and user is None:
+            user = data_or_user
+        elif 'data' not in kwargs:
+            kwargs['data'] = data_or_user
         if 'format' not in kwargs:
             kwargs['format'] = 'json'
-        request = APIRequestFactory().post(url, data, **kwargs)
+
+        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        request = getattr(APIRequestFactory(), verb)(url, **kwargs)
         if middleware:
             middleware.process_request(request)
         if user:
             force_authenticate(request, user=user)
+
         response = view(request, *view_args, **view_kwargs)
         if middleware:
             middleware.process_response(request, response)
@@ -311,134 +317,37 @@ def post():
             if response.status_code != expect:
                 print(response.data)
             assert response.status_code == expect
+        response.render()
         return response
     return rf
+
+@pytest.fixture
+def post():
+    return _request('post')
 
 @pytest.fixture
 def get():
-    def rf(url, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().get(url, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('get')
 
 @pytest.fixture
 def put():
-    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().put(url, data, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('put')
 
 @pytest.fixture
 def patch():
-    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().patch(url, data, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('patch')
 
 @pytest.fixture
 def delete():
-    def rf(url, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().delete(url, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('delete')
 
 @pytest.fixture
 def head():
-    def rf(url, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().head(url, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('head')
 
 @pytest.fixture
 def options():
-    def rf(url, data, user=None, middleware=None, expect=None, **kwargs):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
-        if 'format' not in kwargs:
-            kwargs['format'] = 'json'
-        request = APIRequestFactory().options(url, data, **kwargs)
-        if middleware:
-            middleware.process_request(request)
-        if user:
-            force_authenticate(request, user=user)
-        response = view(request, *view_args, **view_kwargs)
-        if middleware:
-            middleware.process_response(request, response)
-        if expect:
-            if response.status_code != expect:
-                print(response.data)
-            assert response.status_code == expect
-        return response
-    return rf
+    return _request('options')
 
 
 
