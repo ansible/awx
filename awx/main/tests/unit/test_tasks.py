@@ -51,21 +51,22 @@ def test_send_notifications_list(mocker):
     patches.append(mocker.patch('awx.main.models.Notification.objects.get', return_value=mock_notification))
 
     with apply_patches(patches):
-            send_notifications([1,2], job_id=1)
-            assert Notification.objects.get.call_count == 2
-            assert mock_notification.status == "successful"
-            assert mock_notification.save.called
+        send_notifications([1,2], job_id=1)
+        assert Notification.objects.get.call_count == 2
+        assert mock_notification.status == "successful"
+        assert mock_notification.save.called
 
-            assert mock_job.notifications.add.called
-            assert mock_job.notifications.add.called_with(mock_notification)
+        assert mock_job.notifications.add.called
+        assert mock_job.notifications.add.called_with(mock_notification)
 
-def test_run_admin_checks_usage(mocker):
+@pytest.mark.parametrize("current_instances,call_count", [(91, 2), (89,1)])
+def test_run_admin_checks_usage(mocker, current_instances, call_count):
     patches = list()
     patches.append(mocker.patch('awx.main.tasks.tower_settings'))
     patches.append(mocker.patch('awx.main.tasks.User'))
 
     mock_ts = mocker.Mock(spec=TaskSerializer)
-    mock_ts.from_database.return_value = {'instance_count': 100, 'current_instances': 91}
+    mock_ts.from_database.return_value = {'instance_count': 100, 'current_instances': current_instances}
     patches.append(mocker.patch('awx.main.tasks.TaskSerializer', return_value=mock_ts))
 
     mock_sm = mocker.Mock()
@@ -74,5 +75,7 @@ def test_run_admin_checks_usage(mocker):
     with apply_patches(patches):
         run_administrative_checks()
         assert mock_sm.called
-        assert '90%' in mock_sm.call_args_list[0][0][0]
-        assert 'expire' in mock_sm.call_args_list[1][0][0]
+        if call_count == 2:
+            assert '90%' in mock_sm.call_args_list[0][0][0]
+        else:
+            assert 'expire' in mock_sm.call_args_list[0][0][0]
