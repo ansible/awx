@@ -148,3 +148,16 @@ def test_delete_inventory_host(delete, host, alice, role_field, expected_status_
     if role_field:
         getattr(host.inventory, role_field).members.add(alice)
     delete(reverse('api:host_detail', args=(host.id,)), alice, expect=expected_status_code)
+
+@pytest.mark.parametrize("role_field,expected_status_code", [
+    (None, 403),
+    ('admin_role', 202),
+    ('update_role', 202),
+    ('adhoc_role', 403),
+    ('use_role', 403)
+])
+@pytest.mark.django_db
+def test_inventory_source_update(post, inventory_source, alice, role_field, expected_status_code):
+    if role_field:
+        getattr(inventory_source.group.inventory, role_field).members.add(alice)
+    post(reverse('api:inventory_source_update_view', args=(inventory_source.id,)), {}, alice, expect=expected_status_code)
