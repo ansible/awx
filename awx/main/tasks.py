@@ -46,6 +46,7 @@ from django.contrib.auth.models import User
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.models import UnifiedJob
 from awx.main.models.label import Label
 from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
