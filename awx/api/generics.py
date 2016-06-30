@@ -450,6 +450,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         else:
             return self.attach(request, *args, **kwargs)
 
+'''
+Models for which you want the last instance to be deleted from the database
+when the last disassociate is called should inherit from this class. Further, 
+the model should implement is_detached()
+'''
 class DeleteLastUnattachLabelMixin(object):
     def unattach(self, request, *args, **kwargs):
         (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
@@ -458,10 +463,10 @@ class DeleteLastUnattachLabelMixin(object):
 
         res = super(DeleteLastUnattachLabelMixin, self).unattach_by_id(request, sub_id)
 
-        label = Label.objects.get(id=sub_id)
+        obj = self.model.objects.get(id=sub_id)
 
-        if label.is_detached():
-            label.delete()
+        if obj.is_detached():
+            obj.delete()
 
         return res
 

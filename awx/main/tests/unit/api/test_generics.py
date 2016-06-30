@@ -123,28 +123,30 @@ class TestSubListCreateAttachDetachAPIView:
         view.unattach_by_id.assert_not_called()
 
 class TestDeleteLastUnattachLabelMixin:
-    @mock.patch('awx.api.generics.super')
+    @mock.patch('__builtin__.super')
     def test_unattach_ok(self, super, mocker):
         mock_request = mocker.MagicMock()
         mock_sub_id = mocker.MagicMock()
         super.return_value = super
         super.unattach_validate = mocker.MagicMock(return_value=(mock_sub_id, None))
         super.unattach_by_id = mocker.MagicMock()
-        mock_label = mocker.patch('awx.api.generics.Label')
-        mock_label.objects.get.return_value = mock_label
-        mock_label.is_detached.return_value = True
+
+        mock_model = mocker.MagicMock()
+        mock_model.objects.get.return_value = mock_model
+        mock_model.is_detached.return_value = True
 
         view = DeleteLastUnattachLabelMixin()
+        view.model = mock_model
 
         view.unattach(mock_request, None, None)
 
         super.unattach_validate.assert_called_with(mock_request)
         super.unattach_by_id.assert_called_with(mock_request, mock_sub_id)
-        mock_label.is_detached.assert_called_with()
-        mock_label.objects.get.assert_called_with(id=mock_sub_id)
-        mock_label.delete.assert_called_with()
+        mock_model.is_detached.assert_called_with()
+        mock_model.objects.get.assert_called_with(id=mock_sub_id)
+        mock_model.delete.assert_called_with()
 
-    @mock.patch('awx.api.generics.super')
+    @mock.patch('__builtin__.super')
     def test_unattach_fail(self, super, mocker):
         mock_request = mocker.MagicMock()
         mock_response = mocker.MagicMock()
