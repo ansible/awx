@@ -10,14 +10,14 @@ export default
         'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
         'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
         'LookUpInit', 'InitiatePlaybookRun', 'Wait', '$compile',
-        '$state',
+        '$state', '$filter',
 
         function(
             $scope, $rootScope, $location, $log,
             $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
             SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
             GetBasePath, JobTemplateForm, CredentialList, LookUpInit, InitiatePlaybookRun,
-            Wait, $compile, $state
+            Wait, $compile, $state, $filter
         ) {
 
             ClearScope();
@@ -92,7 +92,7 @@ export default
 
                 Prompt({
                     hdr: 'Delete',
-                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                     action: action,
                     actionText: 'DELETE'
                 });

@@ -429,8 +429,10 @@ export default
          * })
          *
          */
-        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find', '$location',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find, $location) {
+        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait',
+        'ProcessErrors', 'Prompt', 'Find', '$location', '$filter',
+        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find,
+            $location, $filter) {
             return function(params) {
 
                 var scope = params.scope,
@@ -474,7 +476,7 @@ export default
 
                 Prompt({
                     hdr: hdr,
-                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the schedule below?</div><div class="Prompt-bodyTarget">' + schedule.name + '</div>',
+                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the schedule below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(schedule.name) + '</div>',
                     action: action,
                     actionText: 'DELETE',
                     backdrop: false
