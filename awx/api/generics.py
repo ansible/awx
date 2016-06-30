@@ -452,7 +452,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
 class DeleteLastUnattachLabelMixin(object):
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request, *args, **kwargs)
+        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
         if res:
             return res
 
