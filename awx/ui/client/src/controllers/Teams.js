@@ -14,7 +14,7 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, $state, Refresh) {
+    SelectionInit, Wait, $state, Refresh, $filter) {
 
     ClearScope();
 
@@ -115,7 +115,7 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -126,7 +126,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    '$state', 'Refresh'
+    '$state', 'Refresh', '$filter'
 ];
 
 

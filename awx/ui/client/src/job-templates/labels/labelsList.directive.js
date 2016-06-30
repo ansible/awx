@@ -67,7 +67,7 @@ export default
                         };
 
                         Prompt({
-                            hdr: 'Remove Label from ' + templateName,
+                            hdr: 'Remove Label from <span class="Prompt-titleTarget">' + templateName + "</span>",
                             body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(labelName) + '</span> label.</div>',
                             action: action,
                             actionText: 'REMOVE'

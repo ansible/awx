@@ -8,12 +8,12 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
     '$log', '$compile', 'Rest', 'PaginateInit',
     'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'generateList', 'Refresh',
+    '$state', 'generateList', 'Refresh', '$filter',
     function($stateParams, $scope, $rootScope, $location,
         $log, $compile, Rest, PaginateInit,
         SearchInit, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait,
-        $state, generateList, Refresh) {
+        $state, generateList, Refresh, $filter) {
 
         ClearScope();
 
@@ -144,7 +144,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
 
             Prompt({
                 hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the organization below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the organization below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                 action: action,
                 actionText: 'DELETE'
             });

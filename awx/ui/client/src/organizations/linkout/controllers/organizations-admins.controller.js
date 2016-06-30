@@ -4,10 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generateList', '$compile',
-        'SearchInit', 'PaginateInit', 'Wait', 'Prompt', 'ProcessErrors', 'GetBasePath',
-        function($stateParams, $scope, UserList, Rest, $state, GenerateList, $compile,
-        SearchInit, PaginateInit, Wait, Prompt, ProcessErrors, GetBasePath) {
+export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
+        'generateList', '$compile', 'SearchInit', 'PaginateInit', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
+        function($stateParams, $scope, UserList, Rest, $state, GenerateList,
+        $compile, SearchInit, PaginateInit, Wait, Prompt, ProcessErrors,
+        GetBasePath, $filter) {
 
             var list,
                 url,
@@ -88,7 +90,7 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state', 'generat
 
                 Prompt({
                     hdr: 'Delete',
-                    body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the following administrator from this organization?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+                    body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the following administrator from this organization?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                     action: action,
                     actionText: 'DELETE'
                 });

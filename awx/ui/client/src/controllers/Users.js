@@ -34,7 +34,7 @@ function user_type_sync($scope) {
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, $state, Refresh) {
+    Wait, $state, Refresh, $filter) {
 
     ClearScope();
 
@@ -125,7 +125,7 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the user below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the user below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -136,7 +136,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
-    'Refresh'
+    'Refresh', '$filter'
 ];
 
 

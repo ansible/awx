@@ -5,9 +5,9 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
-     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData',
+     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter',
     function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
-     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData){
+     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter){
         var list = InventoryHosts,
             view = generateList,
             pageSize = 20;
@@ -27,7 +27,7 @@
             $state.go('inventoryManage.editHost', {host_id: id});
         };
         $scope.deleteHost = function(id, name){
-            var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + name + '</div>';
+            var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
             var action = function(){
                 delete $rootScope.promptActionBtnClass;
                 Wait('start');

@@ -260,7 +260,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the project below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the project below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });

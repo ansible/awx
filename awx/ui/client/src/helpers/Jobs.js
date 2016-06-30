@@ -215,8 +215,11 @@ export default
      *  Called from JobsList controller to load each section or list on the page
      *
      */
-    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate',
-        function($stateParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
+    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile',
+    'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit',
+    'JobsListUpdate',
+        function($stateParams, $location, $compile, SearchInit, PaginateInit,
+            GenerateList, JobsControllerInit, JobsListUpdate) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
@@ -277,8 +280,10 @@ export default
         };
     }])
 
-    .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Alert',
-    function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
+    .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait',
+    'ProcessErrors', 'Prompt', 'Alert', '$filter',
+    function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
+        $filter){
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -376,7 +381,7 @@ export default
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
                 var cancelBody = "<div class=\"Prompt-bodyQuery\">Submit the request to cancel?</div>";
-                var deleteBody = "<div class=\"Prompt-bodyQuery\">Are you sure you want to delete the job below?</div><div class=\"Prompt-bodyTarget\">#" + id + " " + job.name  + "</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">Are you sure you want to delete the job below?</div><div class=\"Prompt-bodyTarget\">#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
                 Prompt({
                     hdr: hdr,
                     body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
