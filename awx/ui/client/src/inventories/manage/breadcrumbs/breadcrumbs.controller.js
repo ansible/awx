@@ -13,6 +13,11 @@ export default
         });
         $scope.inventory = inventoryData;
         $scope.currentState = $state.current.name;
+        // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
+        // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
+        // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
+        // problem that this solves.
+        $scope.ncyBreadcrumbIgnore = true;
         // slices the group stack at $index to supply new group params to $state.go()
         $scope.goToGroup = function(index){
             var group = $stateParams.group.slice(0, index);
