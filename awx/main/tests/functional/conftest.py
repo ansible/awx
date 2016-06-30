@@ -125,6 +125,12 @@ def project_factory(organization):
     return factory
 
 @pytest.fixture
+def job_factory(job_template, admin):
+    def factory(job_template=job_template, initial_state='new', created_by=admin):
+        return job_template.create_job(created_by=created_by, status=initial_state)
+    return factory
+
+@pytest.fixture
 def team_factory(organization):
     def factory(name):
         try:
