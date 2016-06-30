@@ -1192,6 +1192,13 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
         content_type = ContentType.objects.get_for_model(User)
+
+        sys_admin = Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR)
+        sys_audit = Role.singleton(ROLE_SINGLETON_SYSTEM_AUDITOR)
+
+        if self.request.user in sys_admin or self.request.user in sys_audit:
+            return u.roles.all().exclude(content_type=content_type, object_id=u.id)
+
         return Role.filter_visible_roles(self.request.user, u.roles.all()) \
                    .exclude(content_type=content_type, object_id=u.id)
 
