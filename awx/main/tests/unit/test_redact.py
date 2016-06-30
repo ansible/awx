@@ -1,9 +1,8 @@
 import textwrap
-import re
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.tests.base import URI
+from awx.main.tests.URI import URI
 
 TEST_URIS = [
     URI('no host', scheme='https', username='myusername', password='mypass', host=None),
@@ -79,52 +78,21 @@ TEST_CLEARTEXT.append({
 })
 
 
-def check_found(string, substr, count=-1, description=None, word_boundary=False):
-    if word_boundary:
-        count_actual = len(re.findall(r'\b%s\b' % re.escape(substr), string))
-    else:
-        count_actual = string.count(substr)
-
-    msg = ''
-    if description:
-        msg = 'Test "%s".\n' % description
-    if count == -1:
-        assert count_actual > 0
-    else:
-        msg += 'Found %d occurances of "%s" instead of %d in: "%s"' % (count_actual, substr, count, string)
-        if count_actual != count:
-            raise Exception(msg)
-
-def check_not_found(string, substr, description=None, word_boundary=False):
-    if word_boundary:
-        count = len(re.findall(r'\b%s\b' % re.escape(substr), string))
-    else:
-        count = string.find(substr)
-        if count == -1:
-            count = 0
-
-    msg = ''
-    if description:
-        msg = 'Test "%s".\n' % description
-    msg += '"%s" found in: "%s"' % (substr, string)
-    if count != 0:
-        raise Exception(msg)
-
 
 # should redact sensitive usernames and passwords
 def test_uri_scm_simple_redacted():
     for uri in TEST_URIS:
         redacted_str = UriCleaner.remove_sensitive(str(uri))
         if uri.username:
-            check_not_found(redacted_str, uri.username, uri.description)
+            assert uri.username not in redacted_str
         if uri.password:
-            check_not_found(redacted_str, uri.password, uri.description)
+            assert uri.username not in redacted_str
 
 # should replace secret data with safe string, UriCleaner.REPLACE_STR
 def test_uri_scm_simple_replaced():
     for uri in TEST_URIS:
         redacted_str = UriCleaner.remove_sensitive(str(uri))
-        check_found(redacted_str, UriCleaner.REPLACE_STR, uri.get_secret_count())
+        assert redacted_str.count(UriCleaner.REPLACE_STR) == uri.get_secret_count()
 
 # should redact multiple uris in text
 def test_uri_scm_multiple():
@@ -136,9 +104,9 @@ def test_uri_scm_multiple():
 
     redacted_str = UriCleaner.remove_sensitive(str(uri))
     if uri.username:
-        check_not_found(redacted_str, uri.username, uri.description)
+        assert uri.username not in redacted_str
     if uri.password:
-        check_not_found(redacted_str, uri.password, uri.description)
+        assert uri.username not in redacted_str
 
 # should replace multiple secret data with safe string
 def test_uri_scm_multiple_replaced():
@@ -153,14 +121,14 @@ def test_uri_scm_multiple_replaced():
         find_count += uri.get_secret_count()
 
     redacted_str = UriCleaner.remove_sensitive(cleartext)
-    check_found(redacted_str, UriCleaner.REPLACE_STR, find_count)
+    assert redacted_str.count(UriCleaner.REPLACE_STR) == find_count
 
 # should redact and replace multiple secret data within a complex cleartext blob
 def test_uri_scm_cleartext_redact_and_replace():
     for test_data in TEST_CLEARTEXT:
         uri = test_data['uri']
         redacted_str = UriCleaner.remove_sensitive(test_data['text'])
-        check_not_found(redacted_str, uri.username, uri.description)
-        check_not_found(redacted_str, uri.password, uri.description)
+        assert uri.username not in redacted_str
+        assert uri.password not in redacted_str
         # Ensure the host didn't get redacted
-        check_found(redacted_str, uri.host, test_data['host_occurrences'], uri.description)
+        assert redacted_str.count(uri.host) == test_data['host_occurrences']
