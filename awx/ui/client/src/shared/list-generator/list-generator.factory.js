@@ -545,8 +545,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                                     innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
                                     innerTable += "class=\"List-actionButton ";
-                                    innerTable += (field_action === 'delete') ? "List-actionButton--delete" : "";
-                                    innerTable += (field_action === 'cancel') ? "cancel red-txt" : "";
+                                    innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
                                     innerTable += "\" ";
                                     // rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
                                     innerTable += (field_action === 'edit') ? "ng-class=\"[rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-editButton--selected' : '']\"" : "";
