@@ -61,7 +61,7 @@ export default
                 type: 'badgeCount',
                 ngHide: 'group.total_groups == 0',
                 noLink: true,
-                awToolTip: "{{group.name}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
+                awToolTip: "{{group.name | sanitize}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
                 searchable: false,
             },
             source: {
