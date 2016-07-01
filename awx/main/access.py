@@ -524,7 +524,12 @@ class InventorySourceAccess(BaseAccess):
             return False
 
     def can_start(self, obj):
-        return self.can_change(obj, {}) and obj.can_update
+        if obj and obj.group:
+            return obj.can_update and self.user in obj.group.inventory.update_role
+        elif obj and obj.inventory:
+            return obj.can_update and self.user in obj.inventory.update_role
+        return False
+
 
 class InventoryUpdateAccess(BaseAccess):
     '''
