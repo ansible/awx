@@ -22,11 +22,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     'RefreshHelper', listGenerator.name, 'StreamWidget',
 ])
 
-.factory('BuildAnchor', [ '$log',
+.factory('BuildAnchor', [ '$log', '$filter',
     // Returns a full <a href=''>resource_name</a> HTML string if link can be derived from supplied context
     // returns name of resource if activity stream object doesn't contain enough data to build a UI url
     // arguments are: a summary_field object, a resource type, an activity stream object
-    function ($log) {
+    function ($log, $filter) {
         return function (obj, resource, activity) {
             var url = '/#/';
             // try/except pattern asserts that:
@@ -75,11 +75,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     default:
                         url += resource + 's/' + obj.id + '/';
                 }
-                return ' <a href=\"' + url + '\"> ' + (obj.name || obj.username) + ' </a> ';
+                return ' <a href=\"' + url + '\"> ' + $filter('sanitize')(obj.name || obj.username) + ' </a> ';
             }
             catch(err){
                 $log.debug(err);
-                return ' ' + (obj.name || obj.username || '') + ' ';
+                return ' ' + $filter('sanitize')(obj.name || obj.username || '') + ' ';
             }
         };
     }
