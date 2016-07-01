@@ -207,7 +207,15 @@ def rebuild_graph(message):
     # Create and process dependencies for new tasks
     for task in new_tasks:
         logger.debug("Checking dependencies for: %s" % str(task))
-        task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks) # TODO: other 'new' tasks? Need to investigate this scenario
+        try:
+            task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks)
+        except Exception, e:
+            logger.error("Failed processing dependencies for {}: {}".format(task, e))
+            task.status = 'failed'
+            task.job_explanation += 'Task failed to generate dependencies: {}'.format(e)
+            task.save()
+            task.socketio_emit_status("failed")
+            continue
         logger.debug("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:
             # We recalculate the created time for the moment to ensure the
