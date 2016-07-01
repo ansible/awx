@@ -94,6 +94,14 @@ export default
                     'form@inventoryManage': {
                         templateUrl: templateUrl("scheduler/scheduler"),
                         controller: 'schedulerController'
+                    },
+                    // don't display groups and hosts lists to be
+                    // consistent with other scheduler views
+                    'groupsList@inventoryManage': {
+                        template: ''
+                    },
+                    'hostsList@inventoryManage': {
+                        template: '',
                     }
                 },
                 ncyBreadcrumb: {
