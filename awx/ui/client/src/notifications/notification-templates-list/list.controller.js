@@ -147,7 +147,7 @@ export default
             };
 
             scope.testNotification = function(){
-                var name = this.notification_template.name;
+                var name = $filter('sanitize')(this.notification_template.name);
                 Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
                 Rest.post({})
                     .then(function (data) {
