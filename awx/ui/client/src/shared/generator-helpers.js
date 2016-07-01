@@ -184,6 +184,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'copy':
                 icon = "fa-copy";
                 break;
+            case 'cancel':
+                icon = "fa-minus-circle";
+                break;
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);

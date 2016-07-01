@@ -343,6 +343,11 @@ export default
                     var i, modifier,
                         widgets = (list.searchWidgets) ? list.searchWidgets : 1;
 
+                    // Initialize SearchParams as an empty string if it's not defined.  If we don't do this and SearchParams === undefined
+                    // then 'undefined' will sneak into the string as we are concatenating and the request will never get sent since we
+                    // regex search for 'undefined' in the doSearch section of this process.
+                    scope[iterator + 'SearchParams'] = (!scope[iterator + 'SearchParams'] || scope[iterator + 'SearchParams'] === undefined) ? '' : scope[iterator + 'SearchParams'];
+
                     for (i = 1; i <= widgets; i++) {
                         modifier = (i === 1) ? '' : i;
                         scope[iterator + 'HoldInput' + modifier] = true;
