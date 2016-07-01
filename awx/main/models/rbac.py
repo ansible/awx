@@ -61,6 +61,24 @@ role_descriptions = {
 
 tls = threading.local() # thread local storage
 
+
+def check_singleton(func):
+    '''
+    check_singleton is a decorator that checks if a user given
+    to a `visible_roles` method is in either of our singleton roles (Admin, Auditor)
+    and if so, returns their full list of roles without filtering.
+    '''
+    def wrapper(*args, **kwargs):
+        sys_admin = Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR)
+        sys_audit = Role.singleton(ROLE_SINGLETON_SYSTEM_AUDITOR)
+        user = args[0]
+        if user in sys_admin or user in sys_audit:
+            if len(args) == 2:
+                return args[1]
+            return user.roles.all()
+        return func(*args, **kwargs)
+    return wrapper
+
 @contextlib.contextmanager
 def batch_role_ancestor_rebuilding(allow_nesting=False):
     '''
@@ -352,6 +370,7 @@ class Role(models.Model):
 
 
     @staticmethod
+    @check_singleton
     def visible_roles(user):
         sql_params = {
             'ancestors_table': Role.ancestors.through._meta.db_table,
@@ -372,6 +391,7 @@ class Role(models.Model):
         return qs
 
     @staticmethod
+    @check_singleton
     def filter_visible_roles(user, roles_qs):
         sql_params = {
             'ancestors_table': Role.ancestors.through._meta.db_table,
