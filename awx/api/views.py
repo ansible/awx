@@ -1192,6 +1192,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
         content_type = ContentType.objects.get_for_model(User)
+
         return Role.filter_visible_roles(self.request.user, u.roles.all()) \
                    .exclude(content_type=content_type, object_id=u.id)
 
