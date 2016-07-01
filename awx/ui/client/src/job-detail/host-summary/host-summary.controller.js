@@ -5,7 +5,7 @@
  *************************************************/
 
  export default
-    ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'jobSocket', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, jobSocket, DrawGraph){
+    ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, DrawGraph){
 
         var page_size = 200;
         $scope.loading = $scope.hosts.length > 0 ? false : true;
