@@ -521,4 +521,4 @@ class ResourceAccessList(ListAPIView):
         ancestors = set()
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
-        return self.request.user.get_queryset(User).filter(roles__in=list(ancestors)).distinct()
+        return User.objects.filter(roles__in=list(ancestors)).distinct()
