@@ -91,7 +91,7 @@ export default
                     results.push({
                         id: event.id,
                         status: status.status,
-                        status_text: _.head(status.status).toUpperCase() + _.tail(status.status),
+                        status_text: _.capitalize(status.status),
                         host_id: event.host,
                         task_id: event.parent,
                         name: event.event_data.host,
