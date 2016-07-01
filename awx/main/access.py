@@ -706,8 +706,9 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        qs = Organization.accessible_objects(self.user, 'admin_role')
-        return qs.exists()
+        organization_pk = get_pk_from_dict(data, 'organization')
+        org = get_object_or_400(Organization, pk=organization_pk)
+        return self.user in org.admin_role
 
     @check_superuser
     def can_change(self, obj, data):
