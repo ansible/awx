@@ -579,7 +579,7 @@ export default
                             scope.cloud_credential_name = "";
                         }
 
-                        if (data.summary_fields.cloud_credential) {
+                        if (data.summary_fields.network_credential) {
                                 scope.network_credential_name = data.summary_fields.network_credential.name;
                                 scope.network_credential_url = data.related.network_credential
                             .replace('api/v1', '#');
