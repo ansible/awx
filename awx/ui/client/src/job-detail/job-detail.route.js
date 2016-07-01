@@ -27,14 +27,6 @@ export default {
             } else {
                 return true;
             }
-        }],
-        jobSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-            var job_socket = Socket({
-                    scope: $rootScope,
-                    endpoint: "jobs"
-            });
-            job_socket.init();
-            return job_socket;
         }]
     },
     templateUrl: templateUrl('job-detail/job-detail'),
