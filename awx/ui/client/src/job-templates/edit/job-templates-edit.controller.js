@@ -201,22 +201,19 @@ export default
                             var msg;
                             switch (data.status) {
                             case 'failed':
-                                msg = "<div>The selected project has a <em>failed</em> status. Review the project's SCM settings" +
-                                    " and run an update before adding it to a template.</div>";
+                                msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
                                 break;
                             case 'never updated':
-                                msg = '<div>The selected project has a <em>never updated</em> status. You will need to run a successful' +
-                                    ' update in order to selected a playbook. Without a valid playbook you will not be able ' +
-                                    ' to save this template.</div>';
+                                msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
                                 break;
                             case 'missing':
-                                msg = '<div>The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
+                                msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
                                     ' the directory exists and file permissions are set correctly.</div>';
                                 break;
                             }
                             Wait('stop');
                             if (msg) {
-                                Alert('Warning', msg, 'alert-info', null, null, null, null, true);
+                                Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                             }
                         })
                         .error(function (data, status) {
