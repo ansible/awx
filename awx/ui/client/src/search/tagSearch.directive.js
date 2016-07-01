@@ -23,7 +23,7 @@ export default
                         .bind('keypress', function (e) {
                             var code = e.keyCode || e.which;
                             if (code === 13) {
-                                scope.addTag();
+                                scope.addTag(e);
                             }
                         });
                 }
