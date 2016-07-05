@@ -73,7 +73,7 @@ export default
                         add: {
                             ngClick: "addPermissionWithoutTeamTab",
                             label: 'Add',
-                            awToolTip: 'Add a permission',
+                            awToolTip: 'Add user to team',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD'
                         }
