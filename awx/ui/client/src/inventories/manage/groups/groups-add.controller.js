@@ -99,7 +99,7 @@
                 CredentialList.basePath = credentialBasePath;
                 LookUpInit({
                     scope: $scope,
-                    url: GetBasePath('credentials') + (source === '' ? '' : '?kind=' + source),
+                    url: credentialBasePath,
                     form: form,
                     list: CredentialList,
                     field: 'credential',
