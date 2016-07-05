@@ -674,7 +674,7 @@ class Job(UnifiedJob, JobOptions):
         data = super(Job, self).notification_data()
         all_hosts = {}
         for h in self.job_host_summaries.all():
-            all_hosts[h.host.name] = dict(failed=h.failed,
+            all_hosts[h.host_name] = dict(failed=h.failed,
                                           changed=h.changed,
                                           dark=h.dark,
                                           failures=h.failures,
