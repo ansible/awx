@@ -261,7 +261,7 @@ def handle_work_error(self, task_id, subtasks=None):
             elif each_task['type'] == 'ad_hoc_command':
                 instance = AdHocCommand.objects.get(id=each_task['id'])
                 instance_name = instance.module_name
-                notification_templates = []
+                notification_templates = instance.notification_templates
                 friendly_name = "AdHoc Command"
             elif each_task['type'] == 'system_job':
                 instance = SystemJob.objects.get(id=each_task['id'])
