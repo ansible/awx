@@ -159,8 +159,7 @@ def machine_credential():
 
 @pytest.fixture
 def org_credential(organization, credential):
-    credential.admin_role.parents.add(organization.admin_role)
-    return credential
+    return Credential.objects.create(kind='aws', name='test-cred', organization=organization)
 
 @pytest.fixture
 def inventory(organization):
