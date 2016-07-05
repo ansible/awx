@@ -92,20 +92,12 @@
                     input_type: "radio"
                 });
             }
-            else if (source.value === 'ec2'){
-                LookUpInit({
-                    scope: $scope,
-                    url: GetBasePath('credentials') + '?kind=aws',
-                    form: form,
-                    list: CredentialList,
-                    field: 'credential',
-                    input_type: "radio"
-                });
-            }
             else{
+                var credentialBasePath = (source.value === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source.value === '' ? '' : '?kind=' + (source.value));
+                CredentialList.basePath = credentialBasePath;
                 LookUpInit({
                     scope: $scope,
-                    url: GetBasePath('credentials') + (source.value === '' ? '' : '?kind=' + (source.value)),
+                    url: credentialBasePath,
                     form: form,
                     list: CredentialList,
                     field: 'credential',
@@ -260,27 +252,19 @@
             $scope = angular.extend($scope, groupData);
 
             // instantiate lookup fields
-            if (inventorySourceData.source !== 'custom' && inventorySourceData.source !== 'ec2'){
+            if (inventorySourceData.source !== 'custom'){
+                var credentialBasePath = (inventorySourceData.source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : '?kind=' + (inventorySourceData.source));
+                CredentialList.basePath = credentialBasePath;
                 LookUpInit({
                     scope: $scope,
-                    url: GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : '?kind=' + (inventorySourceData.source)),
+                    url: credentialBasePath,
                     form: form,
                     list: CredentialList,
                     field: 'credential',
                     input_type: "radio"
                 });
             }
-            else if (inventorySourceData.source === 'ec2'){
-                LookUpInit({
-                    scope: $scope,
-                    url: GetBasePath('credentials') + '?kind=aws',
-                    form: form,
-                    list: CredentialList,
-                    field: 'credential',
-                    input_type: "radio"
-                });
-            }
-            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
+            // equal to case 'custom'
             else{
                 $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
                 LookUpInit({

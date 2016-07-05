@@ -93,21 +93,13 @@
                     input_type: "radio"
                 });
             }
-            else if (source === 'ec2'){
-                LookUpInit({
-                    scope: $scope,
-                    url: GetBasePath('credentials') + '?kind=aws',
-                    form: form,
-                    list: CredentialList,
-                    field: 'credential',
-                    input_type: "radio"
-                });
-            }
-            // equal to case 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
+            // equal to case 'ec2' || 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack'
             else{
+                var credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+                CredentialList.basePath = credentialBasePath;
                 LookUpInit({
                     scope: $scope,
-                    url: GetBasePath('credentials') + (source === '' ? '' : '?kind=' + source),
+                    url: credentialBasePath,
                     form: form,
                     list: CredentialList,
                     field: 'credential',
