@@ -106,6 +106,18 @@ angular.module('AngularScheduler', ['underscore'])
             };
 
             scope.scheduleRepeatChange = function() {
+                // reset the week buttons and scope values to be empty
+                // when the schedule repeat is changed to week
+                if (scope.schedulerFrequency.name === "Week") {
+                    scope.weekDays = [];
+                    delete scope.weekDaySUClass;
+                    delete scope.weekDayMOClass;
+                    delete scope.weekDayTUClass;
+                    delete scope.weekDayWEClass;
+                    delete scope.weekDayTHClass;
+                    delete scope.weekDayFRClass;
+                    delete scope.weekDaySAClass;
+                }
                 if (scope.schedulerFrequency && scope.schedulerFrequency.value !== '' && scope.schedulerFrequency.value !== 'none') {
                     scope.schedulerInterval = 1;
                     scope.schedulerShowInterval = true;
