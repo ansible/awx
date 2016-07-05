@@ -616,7 +616,7 @@ class CredentialAccess(BaseAccess):
 
         # Check access to organizations
         organization_pk = get_pk_from_dict(data, 'organization')
-        if organization_pk != getattr(obj, 'organization_id', None):
+        if data and 'organization' in data and organization_pk != getattr(obj, 'organization_id', None):
             if organization_pk:
                 # admin permission to destination organization is mandatory
                 new_organization_obj = get_object_or_400(Organization, pk=organization_pk)

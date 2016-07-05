@@ -125,6 +125,8 @@ def test_org_credential_access_member(alice, org_credential, credential):
     assert access.can_change(org_credential, {
         'description': 'New description.',
         'organization': org_credential.organization.pk})
+    assert access.can_change(org_credential, {
+        'description': 'New description.'})
     assert access.can_change(credential, {
         'description': 'New description.',
         'organization': None})
