@@ -75,7 +75,7 @@ def check_singleton(func):
         if user in sys_admin or user in sys_audit:
             if len(args) == 2:
                 return args[1]
-            return user.roles.all()
+            return Roles.objects.all()
         return func(*args, **kwargs)
     return wrapper
 
