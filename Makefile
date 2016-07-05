@@ -21,6 +21,10 @@ CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
 CLIENT_TEST_DIR ?= build_test
 
+# Python packages to install only from source (not from binary wheels)
+# Comma separated list
+SRC_ONLY_PKGS ?= cffi
+
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -279,18 +283,18 @@ virtualenv_tower:
 requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
 	else \
-		pip install -r requirements/requirements_ansible.txt ; \
+	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
 	else \
-		pip install -r requirements/requirements.txt ; \
+	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
 	fi
 
 requirements_tower_dev:
