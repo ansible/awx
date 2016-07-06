@@ -117,7 +117,7 @@
             // reset fields
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
-            $scope.cloudCredentialRequired = source.value !== 'manual' && source.value !== 'custom' ? true : false;
+            $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
