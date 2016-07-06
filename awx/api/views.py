@@ -1040,7 +1040,7 @@ class ProjectActivityStreamList(SubListAPIView):
             return qs
         elif parent.credential is None:
             return qs.filter(project=parent)
-        return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
+        return qs.filter(Q(project=parent) | Q(credential=parent.credential))
 
 class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
 
