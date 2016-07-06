@@ -99,16 +99,18 @@
             }
         };
         $scope.search = function(){
-            $scope.searchActive = true;
-            Wait('start');
-            JobDetailService.getJobHostSummaries($stateParams.id, {
-                page_size: page_size,
-                host_name__icontains: $scope.searchTerm,
-            }).success(function(res){
-                $scope.hosts = res.results;
-                $scope.next = res.next;
-                Wait('stop');
-            });
+            if($scope.searchTerm && $scope.searchTerm !== '') {
+                $scope.searchActive = true;
+                Wait('start');
+                JobDetailService.getJobHostSummaries($stateParams.id, {
+                    page_size: page_size,
+                    host_name__icontains: $scope.searchTerm,
+                }).success(function(res){
+                    $scope.hosts = res.results;
+                    $scope.next = res.next;
+                    Wait('stop');
+                });
+            }
         };
         $scope.clearSearch = function(){
             $scope.searchActive = false;

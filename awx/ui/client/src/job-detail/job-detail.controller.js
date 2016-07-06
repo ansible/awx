@@ -156,6 +156,10 @@ export default
             scope.search_task_status = 'all';
             scope.search_host_status = 'all';
 
+            scope.search_play_name = '';
+            scope.search_task_name = '';
+            scope.search_host_name = '';
+
             scope.haltEventQueue = false;
             scope.processing = false;
             scope.lessStatus = false;
@@ -869,7 +873,7 @@ export default
                 else {
                     scope.searchHostsEnabled = true;
                 }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+                if ((!scope.liveEventProcessing || scope.pauseLiveEvents) && scope.selectedTask) {
                     scope.hostResultsLoading = true;
                     params = {
                         parent: scope.selectedTask,
@@ -888,6 +892,12 @@ export default
                 }
             };
 
+            scope.searchHostsKeyPress = function(e) {
+                if (e.keyCode === 13) {
+                    scope.searchHosts();
+                    e.stopPropagation();
+                }
+            };
 
             if (scope.removeDeleteFinished) {
                 scope.removeDeleteFinished();
