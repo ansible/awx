@@ -611,10 +611,20 @@ class CredentialAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if data is not None:
-            keys = data.keys()
-            if 'user' in keys or 'team' in keys or 'organization' in keys:
-                if not self.can_add(data):
+        if not obj:
+            return False
+
+        # Check access to organizations
+        organization_pk = get_pk_from_dict(data, 'organization')
+        if data and 'organization' in data and organization_pk != getattr(obj, 'organization_id', None):
+            if organization_pk:
+                # admin permission to destination organization is mandatory
+                new_organization_obj = get_object_or_400(Organization, pk=organization_pk)
+                if self.user not in new_organization_obj.admin_role:
+                    return False
+            # admin permission to existing organization is also mandatory
+            if obj.organization:
+                if self.user not in obj.organization.admin_role:
                     return False
 
         if obj.organization:

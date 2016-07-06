@@ -112,7 +112,47 @@ def test_credential_access_admin(user, team, credential):
     cred.save()
 
     # should have can_change access as org-admin
-    assert access.can_change(credential, {'user': u.pk})
+    assert access.can_change(credential, {'description': 'New description.'})
+
+@pytest.mark.django_db
+def test_org_credential_access_member(alice, org_credential, credential):
+    org_credential.admin_role.members.add(alice)
+    credential.admin_role.members.add(alice)
+
+    access = CredentialAccess(alice)
+
+    # Alice should be able to PATCH if organization is not changed
+    assert access.can_change(org_credential, {
+        'description': 'New description.',
+        'organization': org_credential.organization.pk})
+    assert access.can_change(org_credential, {
+        'description': 'New description.'})
+    assert access.can_change(credential, {
+        'description': 'New description.',
+        'organization': None})
+
+@pytest.mark.django_db
+def test_credential_access_org_permissions(
+        org_admin, org_member, organization, org_credential, credential):
+    credential.admin_role.members.add(org_admin)
+    credential.admin_role.members.add(org_member)
+    org_credential.admin_role.members.add(org_member)
+
+    access = CredentialAccess(org_admin)
+    member_access = CredentialAccess(org_member)
+
+    # Org admin can move their own credential into their org
+    assert access.can_change(credential, {'organization': organization.pk})
+    # Org member can not
+    assert not member_access.can_change(credential, {
+        'organization': organization.pk})
+
+    # Org admin can remove a credential from their org
+    assert access.can_change(org_credential, {'organization': None})
+    # Org member can not
+    assert not member_access.can_change(org_credential, {'organization': None})
+    assert not member_access.can_change(org_credential, {
+        'user': org_member.pk, 'organization': None})
 
 @pytest.mark.django_db
 def test_cred_job_template_xfail(user, deploy_jobtemplate):
