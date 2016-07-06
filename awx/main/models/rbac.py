@@ -75,7 +75,7 @@ def check_singleton(func):
         if user in sys_admin or user in sys_audit:
             if len(args) == 2:
                 return args[1]
-            return user.roles.all()
+            return Role.objects.all()
         return func(*args, **kwargs)
     return wrapper
 
@@ -382,9 +382,10 @@ class Role(models.Model):
         qs = Role.objects.extra(
             where = ['''
                     %(roles_table)s.id IN (
-                        SELECT descendent_id FROM %(ancestors_table)s WHERE ancestor_id IN (%(ids)s)
-                        UNION
-                        SELECT ancestor_id FROM %(ancestors_table)s WHERE descendent_id IN (%(ids)s)
+                        SELECT DISTINCT visible_roles_t2.ancestor_id
+                          FROM %(ancestors_table)s as visible_roles_t1
+                               LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                         WHERE visible_roles_t1.ancestor_id IN (%(ids)s)
                     )
                     ''' % sql_params]
         )
@@ -403,10 +404,11 @@ class Role(models.Model):
         qs = roles_qs.extra(
             where = ['''
                 EXISTS (
-                    SELECT 1 FROM
-                    %(ancestors_table)s
-                    WHERE (descendent_id = %(roles_table)s.id AND ancestor_id IN (%(ids)s))
-                       OR (ancestor_id = %(roles_table)s.id AND descendent_id IN (%(ids)s))
+                    SELECT 1
+                      FROM %(ancestors_table)s as visible_roles_t1
+                           LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                     WHERE visible_roles_t1.ancestor_id = %(roles_table)s.id
+                           AND visible_roles_t2.ancestor_id IN (%(ids)s)
                 ) ''' % sql_params]
         )
         return qs
