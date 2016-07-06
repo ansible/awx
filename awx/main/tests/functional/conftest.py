@@ -158,7 +158,7 @@ def machine_credential():
     return Credential.objects.create(name='machine-cred', kind='ssh', username='test_user', password='pas4word')
 
 @pytest.fixture
-def org_credential(organization, credential):
+def org_credential(organization):
     return Credential.objects.create(kind='aws', name='test-cred', organization=organization)
 
 @pytest.fixture
