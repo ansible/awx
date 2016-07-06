@@ -57,6 +57,28 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert inventory.admin_role.id not in role_hash
     assert team.member_role.id not in role_hash
 
+@pytest.mark.django_db
+def test_roles_visibility(get, organization, project, admin, alice, bob):
+    Role.singleton('system_auditor').members.add(alice)
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
+    organization.auditor_role.members.add(bob)
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+
+@pytest.mark.django_db
+def test_roles_filter_visibility(get, organization, project, admin, alice, bob):
+    Role.singleton('system_auditor').members.add(alice)
+    project.update_role.members.add(admin)
+
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
+    organization.auditor_role.members.add(bob)
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+    organization.auditor_role.members.remove(bob)
+    project.use_role.members.add(bob) # sibling role should still grant visibility
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
 
 @pytest.mark.django_db
 def test_cant_create_role(post, admin):
