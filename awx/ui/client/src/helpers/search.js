@@ -103,6 +103,7 @@ export default
                         }
                     }
 
+
                     scope[iterator + 'SearchType' + modifier] = 'icontains';
                     scope[iterator + 'SearchTypeLabel' + modifier] = 'Contains';
                     scope[iterator + 'SearchParams' + modifier] = '';
@@ -428,8 +429,7 @@ export default
                     }
 
                     if (sort_order) {
-                        scope[iterator + 'SearchParams'] += (scope[iterator + 'SearchParams']) ? '&' : '';
-                        scope[iterator + 'SearchParams'] += 'order_by=' + encodeURI(sort_order);
+                        scope[iterator + 'SearchParams'] = 'order_by=' + encodeURI(sort_order);
                     }
                     e.stopPropagation();
                     scope.$emit('doSearch', iterator, page, load, calcOnly, deferWaitStop);
@@ -475,6 +475,12 @@ export default
 
 
                 scope.sort = function (iterator, fld) {
+                    // resets any existing order_by parameters in $scope.current_url;
+                    var resetOrderBy = function(){
+                        var url = _.filter(scope.current_url.split('&'), (o) => !o.includes('order_by'));
+                        scope.current_url = url.join('&');
+                    };
+                    resetOrderBy();
                     // Reset sort icons back to 'icon-sort' on all columns
                     // except the one clicked.
                     $('.list-header').each(function () {
@@ -515,7 +521,6 @@ export default
 
                     scope[list.iterator + '_current_search_params'].sort_order = sort_order;
                     Store(iterator + '_current_search_params', scope[iterator + '_current_search_params']);
-
                     scope.search(list.iterator);
                 };
 
