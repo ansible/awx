@@ -1139,14 +1139,9 @@ export default
             	// where 5 is the ID we are trying to capture
                 var regex = /\/api\/v1\/schedules\/(\d+)\//;
                 var id = scope.job.related.schedule.match(regex)[1];
-                if (id) {
-                	// If we get an ID from the regular expression go ahead and open up the
-                	// modal via the EditSchedule service
-                    EditSchedule({
-                        scope: scope,
-                        id: parseInt(id),
-                        callback: 'SchedulesRefresh'
-                    });
+
+                if(scope.job.job_template && id) {
+                    $state.go('jobTemplateSchedules.edit', {id: scope.job.job_template, schedule_id: id});
                 }
             };
 
