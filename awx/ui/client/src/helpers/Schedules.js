@@ -576,7 +576,7 @@ export default
                 if (scope.removeSchedulesRefresh) {
                     scope.removeSchedulesRefresh();
                 }
-                scope.$on('SchedulesRefresh', function() {
+                scope.removeSchedulesRefresh = scope.$on('SchedulesRefresh', function() {
                     scope.search(iterator);
                 });
             };
