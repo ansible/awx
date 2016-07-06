@@ -429,7 +429,10 @@ export default
             Rest.setUrl('api/v1/labels');
             Wait("start");
             Rest.get()
-                .success(function () {
+                .success(function (data) {
+                    $scope.labelOptions = data.results
+                        .map((i) => ({label: i.name, value: i.id}));
+
                     var seeMoreResolve = $q.defer();
 
                     var getNext = function(data, arr, resolve) {
@@ -455,8 +458,6 @@ export default
                             }
 
                             seeMoreResolve.promise.then(function (labels) {
-                                $scope.labelOptions = labels
-                                    .map((i) => ({label: i.name, value: i.id}));
                                 $scope.$emit("choicesReady");
                                 var opts = labels
                                     .map(i => ({id: i.id + "",
