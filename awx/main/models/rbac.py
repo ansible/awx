@@ -382,10 +382,10 @@ class Role(models.Model):
         qs = Role.objects.extra(
             where = ['''
                     %(roles_table)s.id IN (
-                        SELECT t2.ancestor_id
-                          FROM %(ancestors_table)s as t1
-                               LEFT JOIN %(ancestors_table)s as t2 ON (t1.descendent_id = t2.descendent_id)
-                         WHERE t1.ancestor_id IN (%(ids)s)
+                        SELECT DISTINCT visible_roles_t2.ancestor_id
+                          FROM %(ancestors_table)s as visible_roles_t1
+                               LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                         WHERE visible_roles_t1.ancestor_id IN (%(ids)s)
                     )
                     ''' % sql_params]
         )
@@ -394,7 +394,24 @@ class Role(models.Model):
     @staticmethod
     @check_singleton
     def filter_visible_roles(user, roles_qs):
-        return roles_qs.filter(id__in=Role.visible_roles(user))
+        sql_params = {
+            'ancestors_table': Role.ancestors.through._meta.db_table,
+            'parents_table': Role.parents.through._meta.db_table,
+            'roles_table': Role._meta.db_table,
+            'ids': ','.join(str(x) for x in user.roles.all().values_list('id', flat=True))
+        }
+
+        qs = roles_qs.extra(
+            where = ['''
+                EXISTS (
+                    SELECT 1
+                      FROM %(ancestors_table)s as visible_roles_t1
+                           LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                     WHERE visible_roles_t1.ancestor_id = %(roles_table)s.id
+                           AND visible_roles_t2.ancestor_id IN (%(ids)s)
+                ) ''' % sql_params]
+        )
+        return qs
 
     @staticmethod
     def singleton(name):
