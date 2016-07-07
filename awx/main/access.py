@@ -722,6 +722,8 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
+        if not data or '_method' in data:
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         organization_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=organization_pk)
         return self.user in org.admin_role
