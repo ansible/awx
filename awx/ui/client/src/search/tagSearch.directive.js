@@ -10,7 +10,8 @@ export default
                   list: '@',
                   endpoint: '@',
                   set: '@',
-                  iterator: '@'
+                  iterator: '@',
+                  currentSearchFilters: '='
                 },
                 controller: tagSearchController,
                 templateUrl: templateUrl('search/tagSearch'),
@@ -22,7 +23,7 @@ export default
                         .bind('keypress', function (e) {
                             var code = e.keyCode || e.which;
                             if (code === 13) {
-                                scope.addTag();
+                                scope.addTag(e);
                             }
                         });
                 }

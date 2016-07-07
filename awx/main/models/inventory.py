@@ -309,7 +309,8 @@ class Inventory(CommonModel, ResourceMixin):
             else:
                 computed_fields.pop(field)
         if computed_fields:
-            iobj.save(update_fields=computed_fields.keys())
+            if len(computed_fields) > 0:
+                iobj.save(update_fields=computed_fields.keys())
         logger.debug("Finished updating inventory computed fields")
 
     @property
@@ -443,7 +444,7 @@ class Host(CommonModelNameNotUnique):
     # Use .job_events.all() to get events affecting this host.
 
 
-class Group(CommonModelNameNotUnique, ResourceMixin):
+class Group(CommonModelNameNotUnique):
     '''
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
@@ -513,25 +514,6 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this group.'),
     )
-    admin_role = ImplicitRoleField(
-        parent_role=['inventory.admin_role', 'parents.admin_role'],
-    )
-    update_role = ImplicitRoleField(
-        parent_role=['inventory.update_role', 'parents.update_role', 'admin_role'],
-    )
-    adhoc_role = ImplicitRoleField(
-        parent_role=['inventory.adhoc_role', 'parents.adhoc_role', 'admin_role'],
-    )
-    use_role = ImplicitRoleField(
-        parent_role=['inventory.use_role', 'parents.use_role', 'adhoc_role'],
-    )
-    read_role = ImplicitRoleField(parent_role=[
-        'inventory.read_role',
-        'parents.read_role',
-        'use_role',
-        'update_role',
-        'admin_role'
-    ])
 
     def __unicode__(self):
         return self.name
@@ -543,7 +525,7 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.tasks import update_inventory_computed_fields
-        from awx.main.signals import disable_activity_stream
+        from awx.main.signals import disable_activity_stream, activity_stream_delete
 
 
         def mark_actual():
@@ -601,7 +583,7 @@ class Group(CommonModelNameNotUnique, ResourceMixin):
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()
-
+            activity_stream_delete(None, self)
 
     def update_computed_fields(self):
         '''
@@ -728,7 +710,7 @@ class InventorySourceOptions(BaseModel):
         ('azure', _('Microsoft Azure Classic (deprecated)')),
         ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
-        ('foreman', _('Red Hat Satellite 6')),
+        ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
@@ -964,7 +946,7 @@ class InventorySourceOptions(BaseModel):
         return [('all', 'All')]
 
     @classmethod
-    def get_foreman_region_choices(self):
+    def get_satellite6_region_choices(self):
         """Red Hat Satellite 6 region choices (not implemented)"""
         return [('all', 'All')]
 
@@ -1184,14 +1166,21 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def notification_templates(self):
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates
-                                            .filter(organization_notification_templates_for_errors=self.inventory.organization))
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
         success_notification_templates = list(base_notification_templates
-                                              .filter(organization_notification_templates_for_success=self.inventory.organization))
+                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
         any_notification_templates = list(base_notification_templates
-                                          .filter(organization_notification_templates_for_any=self.inventory.organization))
-        return dict(error=error_notification_templates,
-                    success=success_notification_templates,
-                    any=any_notification_templates)
+                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
+        if self.inventory.organization is not None:
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates
+                                               .filter(organization_notification_templates_for_errors=self.inventory.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates
+                                                 .filter(organization_notification_templates_for_success=self.inventory.organization)))
+            any_notification_templates = set(any_notification_templates + list(base_notification_templates
+                                             .filter(organization_notification_templates_for_any=self.inventory.organization)))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
     def clean_source(self):
         source = self.source

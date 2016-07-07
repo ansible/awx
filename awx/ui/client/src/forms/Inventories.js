@@ -78,82 +78,6 @@ export default
             },
 
             related: {
-                scan_job_templates: {
-                    awToolTip: 'Please save before adding a scan job template',
-                    dataPlacement: 'top',
-                    basePath: 'inventories/:id/scan_job_templates',
-                    type: 'collection',
-                    title: 'Scan Job Templates',
-                    iterator: 'scan_job_template',
-                    index: false,
-                    open: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "addScanJob()",
-                            label: 'Add',
-                            awToolTip: 'Add a scan job template',
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
-                        }
-                    },
-
-                    fields: {
-                      smart_status: {
-                          label: 'Status',
-                          columnClass: 'List-tableCell',
-                          searchable: false,
-                          nosort: true,
-                          ngInclude: "'/static/partials/scan-job-template-smart-status.html'",
-                          type: 'template'
-                        },
-                        name: {
-                            key: true,
-                            label: 'Name',
-                            linkTo: '/#/inventories/{{inventory_id}}/job_templates/{{scan_job_template.id}}'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        submit: {
-                          label: 'Launch',
-                          ngClick: "launchScanJob()",
-                          awToolTip: 'Launch the scan job template',
-                          'class': 'btn btn-default'
-                        },
-                        schedule: {
-                            label: 'Schedule',
-                            ngClick: 'scheduleScanJob()',
-                            awToolTip: 'Schedule future job template runs',
-                            dataPlacement: 'top',
-                        },
-                        copy: {
-                            label: 'Copy',
-                            ngClick: "copyScanJobTemplate()",
-                            "class": 'btn-danger btn-xs',
-                            awToolTip: 'Copy template',
-                            dataPlacement: 'top',
-                            ngHide: 'job_template.summary_fields.can_copy === false'
-                        },
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "editScanJob()",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the scan job template',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "deleteScanJob()",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the scan job template'
-                        }
-                    }
-                },
                 permissions: {
                     awToolTip: 'Please save before assigning permissions',
                     dataPlacement: 'top',
@@ -185,13 +109,15 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            noSearch: true
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            noSearch: true
                         }
                     }
                 }
@@ -199,10 +125,6 @@ export default
 
             relatedSets: function(urls) {
                 return {
-                    scan_job_templates: {
-                        iterator: 'scan_job_template',
-                        url: urls.scan_job_templates
-                    },
                     permissions: {
                         iterator: 'permission',
                         url: urls.access_list

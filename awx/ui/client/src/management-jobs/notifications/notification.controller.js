@@ -19,11 +19,24 @@ export default
             var scope = $rootScope.$new(),
                 url = GetBasePath('notification_templates'),
                 defaultUrl = GetBasePath('system_job_templates'),
-                list = NotificationsList,
+                list,
                 view = GenerateList,
                 id = $stateParams.management_id;
 
+            list = _.cloneDeep(NotificationsList);
+            delete list.actions.add;
             list.listTitle = `${management_job.name} <div class="List-titleLockup"></div> Notifications`;
+            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+            list.searchRowActions = {
+                add: {
+                    label: 'Add Notification',
+                    mode: 'all', // One of: edit, select, all
+                    ngClick: 'addNotificationTemplate()',
+                    awToolTip: 'Create a new notification template',
+                    actionClass: 'btn List-buttonSubmit',
+                    buttonContent: '&#43; ADD NOTIFICATION TEMPLATE'
+                }
+            };
             view.inject( list, {
                 mode: 'edit',
                 cancelButton: true,

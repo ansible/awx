@@ -23,9 +23,9 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'CreateDialog', 'Authorization',
-        'Store', '$interval', '$location', '$q',
+        'Store', '$interval', '$state', '$q',
     function ($rootScope, $cookieStore, CreateDialog, Authorization,
-        Store, $interval, $location, $q) {
+        Store, $interval, $state, $q) {
         return {
 
             sessionTime: null,
@@ -62,7 +62,7 @@ export default
                     now = new Date().getTime()/1000,
                     diff = stime-now;
 
-                if(diff < 61){
+                if(diff < 60){
                     return diff;
                 }
                 else {
@@ -110,6 +110,23 @@ export default
                 this.clearTimers();
                 $rootScope.expireTimer = $interval(function() {
                     var idle = that.isIdle();
+                    if (that.isExpired(true)) {
+                        if($('#idle-modal').is(':visible')){
+                            if($('#idle-modal').dialog('isOpen')){
+                                $('#idle-modal').dialog('close');
+                            }
+                        }
+                        that.expireSession('idle');
+                        $state.go('signOut');
+                        return;
+                    }
+                    if(Store('sessionTime') &&
+                        Store('sessionTime')[$rootScope.current_user.id] &&
+                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
+                            that.expireSession();
+                            $state.go('signOut');
+                            return;
+                    }
                     if(idle !== false){
                         if($('#idle-modal').is(':visible')){
                             $('#remaining_seconds').html(Math.round(idle));
@@ -152,20 +169,7 @@ export default
                             $('#idle-modal').dialog('close');
                         }
                     }
-                    if (that.isExpired(true)) {
-                        if($('#idle-modal').dialog('isOpen')){
-                            $('#idle-modal').dialog('close');
-                        }
-                        that.expireSession('idle');
-                        $location.url('/login');
-                    }
-                    if(Store('sessionTime') &&
-                        Store('sessionTime')[$rootScope.current_user.id] &&
-                        Store('sessionTime')[$rootScope.current_user.id].loggedIn === false){
-                            that.expireSession();
-                            $location.url('/login');
 
-                    }
 
                 }, 1000);
 

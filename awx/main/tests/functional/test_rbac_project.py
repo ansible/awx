@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Role, Permission, Project, Organization, Credential, JobTemplate, Inventory
+from awx.main.access import ProjectAccess
 from django.apps import apps
 from awx.main.migrations import _old_access as old_access
 
@@ -209,3 +210,10 @@ def test_project_explicit_permission(user, team, project, organization):
     rbac.migrate_projects(apps, None)
 
     assert u in project.read_role
+
+@pytest.mark.django_db
+def test_create_project_foreign_org_admin(org_admin, organization, organization_factory):
+    """Org admins can only create projects in their own org."""
+    other_org = organization_factory('not-my-org').organization
+    access = ProjectAccess(org_admin)
+    assert not access.can_add({'organization': other_org.pk, 'name': 'new-project'})

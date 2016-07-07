@@ -17,26 +17,32 @@ export default {
     ncyBreadcrumb: {
         label: "ACTIVITY STREAM"
     },
+    onExit: function(){
+        $('#stream-detail-modal').modal('hide');
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+    },
     resolve: {
-        features: ['FeaturesService', 'ProcessErrors', '$state', function(FeaturesService, ProcessErrors, $state) {
-            FeaturesService.get()
-            .then(function(features) {
+        features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',
+        function(FeaturesService, ProcessErrors, $state, $rootScope) {
+            var features = FeaturesService.get();
+            if(features){
                 if(FeaturesService.featureEnabled('activity_streams')) {
-                    // Good to go - pass the features along to the controller.
                     return features;
                 }
                 else {
-                    // The activity stream feature isn't enabled.  Take the user
-                    // back to the dashboard
                     $state.go('dashboard');
                 }
-            })
-            .catch(function (response) {
-                ProcessErrors(null, response.data, response.status, null, {
-                    hdr: 'Error!',
-                    msg: 'Failed to get feature info. GET returned status: ' +
-                    response.status
-                });
+            }
+            $rootScope.featuresConfigured.promise.then(function(features){
+                if(features){
+                    if(FeaturesService.featureEnabled('activity_streams')) {
+                        return features;
+                    }
+                    else {
+                        $state.go('dashboard');
+                    }
+                }
             });
         }],
         subTitle:

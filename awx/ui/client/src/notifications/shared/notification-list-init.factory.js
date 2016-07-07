@@ -14,18 +14,31 @@
  *
  */
 
-export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
-    function(Wait, GetBasePath, ProcessErrors, Rest) {
+export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
+    '$state',
+    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state) {
     return function(params) {
         var scope = params.scope,
             url = params.url,
             id = params.id;
+
+        scope.addNotificationTemplate = function(){
+            $state.go('notifications.add');
+        };
 
         if (scope.relatednotificationsRemove) {
             scope.relatednotificationsRemove();
         }
         scope.relatednotificationsRemove = scope.$on('relatednotifications', function () {
                 var columns = ['/notification_templates_success/', '/notification_templates_error/'];
+
+                GetChoices({
+                    scope: scope,
+                    url: GetBasePath('notifications'),
+                    field: 'notification_type',
+                    variable: 'notification_type_options',
+                    callback: 'choicesReadyNotifierList'
+                });
 
                 _.map(columns, function(column){
                     var notifier_url = url + id + column;
@@ -50,6 +63,21 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to update notification ' + data.id + ' PUT returned: ' + status });
                         });
+                });
+
+                if (scope.removeChoicesHere) {
+                    scope.removeChoicesHere();
+                }
+                scope.removeChoicesHere = scope.$on('choicesReadyNotifierList', function () {
+                    if (scope.notifications) {
+                        scope.notifications.forEach(function(notification, i) {
+                            scope.notification_type_options.forEach(function(type) {
+                                if (type.value === notification.notification_type) {
+                                    scope.notifications[i].notification_type = type.label;
+                                }
+                            });
+                        });
+                    }
                 });
 
         });

@@ -109,6 +109,7 @@ export default
 
             related: {
                 organizations: {
+                    basePath: 'users/:id/organizations',
                     awToolTip: 'Please save before assigning to organizations',
                     dataPlacement: 'top',
                     type: 'collection',
@@ -131,6 +132,7 @@ export default
                     hideOnSuperuser: true
                 },
                 teams: {
+                    basePath: 'users/:id/teams',
                     awToolTip: 'Please save before assigning to teams',
                     dataPlacement: 'top',
                     type: 'collection',
@@ -138,7 +140,6 @@ export default
                     iterator: 'team',
                     open: false,
                     index: false,
-
                     actions: {},
 
                     fields: {
@@ -157,10 +158,11 @@ export default
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: 'Permissions',
+                    title: 'Granted permissions',
                     iterator: 'permission',
                     open: false,
                     index: false,
+                    emptyListText: 'No permissions have been granted',
                     fields: {
                         name: {
                             label: 'Name',

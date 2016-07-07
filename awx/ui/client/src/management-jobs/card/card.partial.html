@@ -1,3 +1,4 @@
+<div ui-view></div>
 <div class="tab-pane Panel" id="management_jobs">
 	<div class="List-title">
 	    <div class="List-titleText">
@@ -7,10 +8,9 @@
 	        {{ mgmtCards.length }}
 	    </span>
 	</div>
-	<div ui-view></div>
 	<div class="MgmtCards">
 		<div class="MgmtCards-card"
-			ng-repeat="card in mgmtCards track by card.id">
+			ng-repeat="card in mgmtCards track by card.id" ng-class="{'MgmtCards-card--selected': activeCard === card.id}">
 			<!-- Begin Card Header -->
 			<div class="MgmtCards-header">
 				<h3 class="MgmtCards-label"> {{ card.name }}</h3>
@@ -27,7 +27,7 @@
 					</button>
 					<button class="MgmtCards-actionItem List-actionButton"
 						ng-click='goToNotifications(card, card.id)'
-						data-placement="top" aw-tool-tip="Configure Notifications" data-original-title="" title="">
+						data-placement="top" aw-tool-tip="Configure Notifications" data-original-title="" title="" ng-class="{'List-editButton--selected': activeCard === card.id && cardAction === 'notifications'}">
 						<i class="MgmtCards-actionItemIcon fa fa-bell-o"></i>
 					</button>
 				</div>

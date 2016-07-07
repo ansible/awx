@@ -80,8 +80,13 @@ export default
                         return;
                     }
                     new_url += connect + 'page=' + page;
-                    new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
-                        '&page_size=' + scope[iterator + '_page_size'] : 'page_size=' + scope[iterator + 'PageSize'];
+                    if (scope[iterator + 'SearchFilters']){
+                         new_url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
+                    if (scope[iterator + 'SearchParams']){
+                        new_url += '&' + scope[iterator + 'SearchParams'];
+                    }
+                    new_url += '&page_size=' + scope[iterator + '_page_size'];
                     Wait('start');
                     RefreshRelated({ scope: scope, set: set, iterator: iterator, url: new_url });
                 };
@@ -144,8 +149,13 @@ export default
                         return;
                     }
                     new_url += connect + 'page=' + page;
-                    new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
-                        '&page_size=' + scope[iterator + '_page_size'] : '&page_size=' + scope[iterator + 'PageSize'];
+                    if (scope[iterator + 'SearchFilters']){
+                         new_url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
+                    if (scope[iterator + 'SearchParams']){
+                        new_url += '&' + scope[iterator + 'SearchParams'];
+                    }
+                    new_url += '&page_size=' + scope[iterator + '_page_size'];
                     Wait('start');
                     scope.getNewPage = true;
                     Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });

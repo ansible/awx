@@ -10,14 +10,14 @@ export default
         'GenerateForm', 'SearchInit' , 'PaginateInit',
         'LookUpInit', 'OrganizationList', 'notification_template',
         '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
-        '$rootScope', 'NotificationsTypeChange',
+        '$rootScope', 'NotificationsTypeChange', 'ParseTypeChange',
         function(
             Rest, Wait,
             NotificationsFormObject, ProcessErrors, GetBasePath,
             GenerateForm, SearchInit, PaginateInit,
             LookUpInit, OrganizationList, notification_template,
             $scope, $state, GetChoices, CreateSelect2, Empty,
-            $rootScope, NotificationsTypeChange
+            $rootScope, NotificationsTypeChange, ParseTypeChange
         ) {
             var generator = GenerateForm,
                 id = notification_template.id,
@@ -54,21 +54,36 @@ export default
                                     master[fld] = data[fld];
                                 }
 
-                                if(data.notification_configuration[fld]){
-                                    $scope[fld] = data.notification_configuration[fld];
-                                    master[fld] = data.notification_configuration[fld];
-
-                                    if(form.fields[fld].type === 'textarea'){
-                                        $scope[fld] = $scope[fld].toString().replace(',' , '\n');
+                                if(form.fields[fld].type === 'checkbox_group') {
+                                    // Loop across the group and put the child data on scope
+                                    for(var j=0; j<form.fields[fld].fields.length; j++) {
+                                        if(data.notification_configuration[form.fields[fld].fields[j].name]) {
+                                            $scope[form.fields[fld].fields[j].name] = data.notification_configuration[form.fields[fld].fields[j].name];
+                                            master[form.fields[fld].fields[j].name] = data.notification_configuration[form.fields[fld].fields[j].name];
+                                        }
                                     }
                                 }
+                                else {
+                                    if(data.notification_configuration[fld]){
+                                        $scope[fld] = data.notification_configuration[fld];
+                                        master[fld] = data.notification_configuration[fld];
 
-                                if (form.fields[fld].sourceModel && data.summary_fields &&
-                                    data.summary_fields[form.fields[fld].sourceModel]) {
-                                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                                        if(form.fields[fld].type === 'textarea'){
+                                            if (form.fields[fld].name === 'headers') {
+                                                $scope[fld] = JSON.stringify($scope[fld], null, 2);
+                                            } else {
+                                                $scope[fld] = $scope[fld].toString().replace(',' , '\n');
+                                            }
+                                        }
+                                    }
+
+                                    if (form.fields[fld].sourceModel && data.summary_fields &&
+                                        data.summary_fields[form.fields[fld].sourceModel]) {
+                                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                                    }
                                 }
                             }
                             data.notification_type = (Empty(data.notification_type)) ? '' : data.notification_type;
@@ -86,6 +101,18 @@ export default
                             });
                             NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                                 $scope[field[0]] = field[1];
+                            });
+                            $scope.notification_obj = data;
+
+                            $scope.parse_type = 'json';
+                            if (!$scope.headers) {
+                                $scope.headers = "{\n}";
+                            }
+                            ParseTypeChange({
+                                scope: $scope,
+                                parse_variable: 'parse_type',
+                                variable: 'headers',
+                                field_id: 'notification_template_headers',
                             });
                             Wait('stop');
                         })
@@ -111,16 +138,61 @@ export default
                 callback: 'choicesReady'
             });
 
+
+            $scope.$watch('headers', function validate_headers(str) {
+                try {
+                    let headers = JSON.parse(str);
+                    if (_.isObject(headers) && !_.isArray(headers)) {
+                        let valid = true;
+                        for (let k in headers) {
+                            if (_.isObject(headers[k])) {
+                                valid = false;
+                            }
+                            if (headers[k] === null) {
+                                valid = false;
+                            }
+                        }
+                        $scope.notification_template_form.headers.$setValidity('json', valid);
+                        return;
+                    }
+                } catch (err) {
+                }
+
+                $scope.notification_template_form.headers.$setValidity('json', false);
+            });
+
             $scope.typeChange = function () {
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
-                        $scope[fld] = null;
-                        $scope.notification_template_form[fld].$setPristine();
+                        if(form.fields[fld].type === 'checkbox_group' && form.fields[fld].fields) {
+                            // Need to loop across the groups fields to null them out
+                            for(var i=0; i<form.fields[fld].fields.length; i++) {
+                                // Pull the name out of the object (array of objects)
+                                var subFldName = form.fields[fld].fields[i].name;
+                                $scope[subFldName] = null;
+                                $scope.notification_template_form[subFldName].$setPristine();
+                            }
+                        }
+                        else {
+                            $scope[fld] = null;
+                            $scope.notification_template_form[fld].$setPristine();
+                        }
                     }
                 }
 
                 NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                     $scope[field[0]] = field[1];
+                });
+
+                $scope.parse_type = 'json';
+                if (!$scope.headers) {
+                    $scope.headers = "{\n}";
+                }
+                ParseTypeChange({
+                    scope: $scope,
+                    parse_variable: 'parse_type',
+                    variable: 'headers',
+                    field_id: 'notification_template_headers',
                 });
             };
 
@@ -139,24 +211,38 @@ export default
 
                 function processValue(value, i , field){
                     if(field.type === 'textarea'){
-                        $scope[i] = $scope[i].toString().split('\n');
+                        if (field.name === 'headers') {
+                            $scope[i] = JSON.parse($scope[i]);
+                        } else {
+                            $scope[i] = $scope[i].toString().split('\n');
+                        }
                     }
                     if(field.type === 'checkbox'){
                         $scope[i] = Boolean($scope[i]);
                     }
+                    if(field.type === 'number'){
+                        $scope[i] = Number($scope[i]);
+                    }
                     return $scope[i];
-
                 }
 
                 params.notification_configuration = _.object(Object.keys(form.fields)
                     .filter(i => (form.fields[i].ngShow &&  form.fields[i].ngShow.indexOf(v) > -1))
                     .map(i => [i, processValue($scope[i], i , form.fields[i])]));
 
+                delete params.notification_configuration.checkbox_group;
+
+                for(var j = 0; j < form.fields.checkbox_group.fields.length; j++) {
+                    if(form.fields.checkbox_group.fields[j].ngShow && form.fields.checkbox_group.fields[j].ngShow.indexOf(v) > -1) {
+                        params.notification_configuration[form.fields.checkbox_group.fields[j].name] = Boolean($scope[form.fields.checkbox_group.fields[j].name]);
+                    }
+                }
+
                 Wait('start');
                 Rest.setUrl(url+ id+'/');
                 Rest.put(params)
                 .success(function () {
-                    $state.go('notifications', {}, {reload: true});
+                    $state.go($state.current, null, {reload: true});
                     Wait('stop');
                 })
                 .error(function (data, status) {

@@ -127,7 +127,7 @@ class ModelAccessPermission(permissions.BasePermission):
                      view.__class__.__name__, obj)
         try:
             response = self.check_permissions(request, view, obj)
-        except Exception, e:
+        except Exception as e:
             logger.debug('has_permission raised %r', e, exc_info=True)
             raise
         else:
@@ -195,13 +195,10 @@ class ProjectUpdatePermission(ModelAccessPermission):
     '''
     Permission check used by ProjectUpdateView to determine who can update projects
     '''
-
-    def has_permission(self, request, view, obj=None):
-        if request.user.is_superuser:
-            return True
-
+    def check_get_permissions(self, request, view, obj=None):
         project = get_object_or_400(view.model, pk=view.kwargs['pk'])
-        if project and request.user in project.update_role:
-            return True
+        return check_user_access(request.user, view.model, 'read', project)
 
-        return False
+    def check_post_permissions(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'start', project)

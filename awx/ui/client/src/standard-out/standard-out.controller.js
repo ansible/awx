@@ -10,8 +10,9 @@
  * @description This controller's for the standard out page that can be displayed when a job runs
 */
 
-
-export function JobStdoutController ($rootScope, $scope, $state, $stateParams, ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName) {
+export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
+    ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
 
     ClearScope();
 
@@ -41,7 +42,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
     $scope.parseType = 'yaml';
 
-
     function getJobDetails() {
 
         // Go out and get the job details based on the job type.  jobType gets defined
@@ -68,6 +68,9 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                 $scope.limit = data.limit;
                 $scope.verbosity = data.verbosity;
                 $scope.job_tags = data.job_tags;
+                if (data.extra_vars) {
+                    $scope.variables = ParseVariableString(data.extra_vars);
+                }
 
                 // If we have a source then we have to go get the source choices from the server
                 if (!Empty(data.source)) {
@@ -104,7 +107,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                     LookUpName({
                         scope: $scope,
                         scope_var: 'credential',
-                        url: GetBasePath('credentials') + data.credential + '/'
+                        url: GetBasePath('credentials') + data.credential + '/',
+                        ignore_403: true
                     });
                 }
 
@@ -128,7 +132,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                     LookUpName({
                         scope: $scope,
                         scope_var: 'cloud_credential',
-                        url: GetBasePath('credentials') + data.cloud_credential + '/'
+                        url: GetBasePath('credentials') + data.cloud_credential + '/',
+                        ignore_403: true
                     });
                 }
 
@@ -137,6 +142,51 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
                         scope: $scope,
                         scope_var: 'inventory_source',
                         url: GetBasePath('inventory_sources') + data.inventory_source + '/'
+                    });
+                }
+
+                if (data.extra_vars) {
+                    ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
+                }
+
+                if ($scope.job.type === 'inventory_update' && !$scope.inv_manage_group_link) {
+
+                    var groupWatcher = $scope.$watch('group', function(group){
+                        if(group) {
+                            // The group's been set by the LookUpName call on inventory_source
+                            var ancestorGroupIds = [];
+
+                            // Remove the watcher
+                            groupWatcher();
+
+                            // Function that we'll call recursively to go out and get a groups parent(s)
+                            var getGroupParent = function(groupId) {
+                                Rest.setUrl(GetBasePath('base') + 'groups/?children__id=' + groupId);
+                                Rest.get()
+                                    .success(function(data) {
+                                        if(data.results && data.results.length > 0) {
+                                            ancestorGroupIds.push(data.results[0].id);
+                                            // Go get this groups first parent
+                                            getGroupParent(data.results[0].id);
+                                        }
+                                        else {
+                                            // We've run out of ancestors to traverse - lets build a link (note that $scope.inventory is
+                                            // set in the lookup-name factory just like $scope.group)
+                                            $scope.inv_manage_group_link = '/#/inventories/' + $scope.inventory + '/manage';
+                                            for(var i=ancestorGroupIds.length; i > 0; i--) {
+                                                $scope.inv_manage_group_link += (i === ancestorGroupIds.length ? '?' : '&') + 'group=' + ancestorGroupIds[i-1];
+                                            }
+                                        }
+                                    })
+                                    .error(function(data, status) {
+                                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                            msg: 'Failed to retrieve group parent(s): ' + groupId + '. GET returned: ' + status });
+                                    });
+                            };
+
+                            // Trigger the recursive chain of parent group gathering
+                            getGroupParent(group);
+                        }
                     });
                 }
 
@@ -155,6 +205,17 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
 
     }
 
+    if ($scope.removeDeleteFinished) {
+        $scope.removeDeleteFinished();
+    }
+    $scope.removeDeleteFinished = $scope.$on('DeleteFinished', function(e, action) {
+        Wait('stop');
+        if (action !== 'cancel') {
+            Wait('stop');
+            $state.go('jobs');
+        }
+    });
+
     // TODO: this is currently not used but is necessary for cases where sockets
     // are not available and a manual refresh trigger is needed.
     $scope.refresh = function(){
@@ -166,8 +227,34 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams, C
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
 
+    $scope.deleteJob = function() {
+        DeleteJob({
+            scope: $scope,
+            id: $scope.job.id,
+            job: $scope.job,
+            callback: 'DeleteFinished'
+        });
+    };
+
+    $scope.relaunchJob = function() {
+        var typeId, job = $scope.job;
+        if (job.type === 'inventory_update') {
+            typeId = job.inventory_source;
+        }
+        else if (job.type === 'project_update') {
+            typeId = job.project;
+        }
+        else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
+            typeId = job.id;
+        }
+        RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
+    };
+
     getJobDetails();
 
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$state', '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors', 'Empty', 'GetChoices', 'LookUpName'];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
+    '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
+    'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];

@@ -21,7 +21,7 @@ import './lists';
 import './widgets';
 import './help';
 import './filters';
-import {Home, HomeGroups} from './controllers/Home';
+import {Home} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
@@ -47,12 +47,12 @@ import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
-import adhoc from './adhoc/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import JobTemplates from './job-templates/main';
 import search from './search/main';
+import credentials from './credentials/main';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
 import OrganizationsList from './organizations/list/organizations-list.controller';
 import OrganizationsAdd from './organizations/add/organizations-add.controller';
@@ -67,9 +67,9 @@ import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import './shared/InventoryTree';
 import './shared/Socket';
 import './shared/features/main';
+import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
@@ -81,6 +81,7 @@ __deferLoadIfEnabled();
 
 var tower = angular.module('Tower', [
     //'ngAnimate',
+    'lrInfiniteScroll',
     'ngSanitize',
     'ngCookies',
     about.name,
@@ -99,7 +100,6 @@ var tower = angular.module('Tower', [
     dashboard.name,
     moment.name,
     templateUrl.name,
-    adhoc.name,
     login.name,
     activityStream.name,
     footer.name,
@@ -111,6 +111,8 @@ var tower = angular.module('Tower', [
     JobTemplates.name,
     portalMode.name,
     search.name,
+    config.name,
+    credentials.name,
     'ngToast',
     'templates',
     'Utilities',
@@ -169,10 +171,8 @@ var tower = angular.module('Tower', [
     'StreamWidget',
     'JobsHelper',
     'InventoryGroupsHelpDefinition',
-    'InventoryTree',
     'CredentialsHelper',
     'StreamListDefinition',
-    'HomeGroupListDefinition',
     'ActivityDetailDefinition',
     'VariablesHelper',
     'SchedulesListDefinition',
@@ -215,8 +215,10 @@ var tower = angular.module('Tower', [
             timeout: 4000
         });
     }])
-    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider', '$urlMatcherFactoryProvider',
-        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider, $urlMatcherFactoryProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
+    '$urlMatcherFactoryProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider,
+        $urlMatcherFactoryProvider) {
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -224,6 +226,7 @@ var tower = angular.module('Tower', [
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
             $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
+
             // $urlRouterProvider.otherwise("/home");
             $urlRouterProvider.otherwise(function($injector){
                   var $state = $injector.get("$state");
@@ -237,28 +240,21 @@ var tower = angular.module('Tower', [
                 controller: Home,
                 params: {licenseMissing: null},
                 data: {
-                    activityStream: true
+                    activityStream: true,
+                    refreshButton: true
                 },
                 ncyBreadcrumb: {
                     label: "DASHBOARD"
                 },
                 resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                        return $q.all({
-                            jobStatus: jobStatusGraphData.get("month", "all"),
-                            features: FeaturesService.get()
+                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
+                    function($q, jobStatusGraphData, $rootScope) {
+                        return $rootScope.featuresConfigured.promise.then(function () {
+                            return $q.all({
+                                jobStatus: jobStatusGraphData.get("month", "all"),
+                            });
                         });
                     }]
-                }
-            }).
-
-            state('dashboardGroups', {
-                url: '/home/groups?id&name&has_active_failures&status&source&has_external_source&inventory_source__id',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups,
-                ncyBreadcrumb: {
-                    parent: 'dashboard',
-                    label: "GROUPS"
                 }
             }).
 
@@ -272,7 +268,7 @@ var tower = angular.module('Tower', [
             }).
 
             state('projects', {
-                url: '/projects',
+                url: '/projects?{status}',
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: ProjectsList,
                 data: {
@@ -300,8 +296,13 @@ var tower = angular.module('Tower', [
                 controller: ProjectsEdit,
                 data: {
                     activityStreamId: 'id'
+                },
+                ncyBreadcrumb: {
+                    parent: 'projects',
+                    label: '{{name}}'
                 }
             }).
+
             state('projectOrganizations', {
                 url: '/projects/:project_id/organizations',
                 templateUrl: urlPrefix + 'partials/projects.html',
@@ -313,6 +314,7 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: OrganizationsAdd
             }).
+
             state('teams', {
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
@@ -343,6 +345,10 @@ var tower = angular.module('Tower', [
                 controller: TeamsEdit,
                 data: {
                     activityStreamId: 'team_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "teams",
+                    label: "{{team_obj.name}}"
                 }
             }).
 
@@ -427,7 +433,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: "credentials",
-                    label: "EDIT CREDENTIAL"
+                    label: "{{credential_obj.name}}"
                 }
             }).
 
@@ -461,6 +467,10 @@ var tower = angular.module('Tower', [
                 controller: UsersEdit,
                 data: {
                     activityStreamId: 'user_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "users",
+                    label: "{{user_obj.username}}"
                 }
             }).
 
@@ -506,13 +516,22 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait', 'ProcessErrors', '$state', 'GetBasePath',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait, ProcessErrors, $state, GetBasePath) {
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log',
+        'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
+        'ClearScope', 'Socket', 'LoadConfig', 'Store',
+        'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
+        'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+        'FeaturesService',
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
+            $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+            LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService) {
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
+            };
+            $rootScope.addPermissionWithoutTeamTab = function (scope) {
+                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
             };
 
             $rootScope.deletePermission = function (user, accessListEntry) {
@@ -577,11 +596,11 @@ var tower = angular.module('Tower', [
                 Prompt({
                     hdr: `Remove role`,
                     body: `
-<div class="Prompt-bodyQuery">
-    Confirm  the removal of the ${roleType}
-        <span class="Prompt-emphasis"> ${roleName} </span>
-    role associated with ${userName}.
-</div>
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with ${userName}.
+                        </div>
                     `,
                     action: action,
                     actionText: 'REMOVE'
@@ -607,11 +626,11 @@ var tower = angular.module('Tower', [
                 Prompt({
                     hdr: `Remove role`,
                     body: `
-<div class="Prompt-bodyQuery">
-    Confirm  the removal of the ${roleType}
-        <span class="Prompt-emphasis"> ${roleName} </span>
-    role associated with the ${teamName} team.
-</div>
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with the ${teamName} team.
+                        </div>
                     `,
                     action: action,
                     actionText: 'REMOVE'
@@ -737,7 +756,7 @@ var tower = angular.module('Tower', [
                         control_socket.on("limit_reached", function(data) {
                             $log.debug(data.reason);
                             $rootScope.sessionTimer.expireSession('session_limit');
-                            $location.url('/login');
+                            $state.go('signOut');
                         });
                     }
                     openSocket();
@@ -752,9 +771,7 @@ var tower = angular.module('Tower', [
 
 
                 $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
-                    if (next.name !== 'signOut'){
-                        CheckLicense.notify();
-                    }
+
                     $rootScope.$broadcast("closePermissionsModal");
                     $rootScope.$broadcast("closeUsersModal");
                     // this line removes the query params attached to a route
@@ -805,15 +822,15 @@ var tower = angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
+                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test(event);
+                        }
                     }
                     activateTab();
                 });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
-                    // catch license expiration notifications immediately after user logs in, redirect
-                    if (fromState.name === 'signIn'){
-                        CheckLicense.notify();
-                    }
 
                     if(fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')){
                         $rootScope.licenseMissing = toParams.licenseMissing;
@@ -849,19 +866,35 @@ var tower = angular.module('Tower', [
 
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
-                    $rootScope.sessionExpired = false;
-                    $cookieStore.put('sessionExpired', false);
                     $location.path('/login');
                 } else {
+                    var lastUser = $cookieStore.get('current_user'),
+                        timestammp = Store('sessionTime');
+                    if(lastUser && lastUser.id && timestammp && timestammp[lastUser.id]){
+                        var stime = timestammp[lastUser.id].time,
+                            now = new Date().getTime();
+                        if ((stime - now) <= 0) {
+                            $location.path('/login');
+                        }
+                    }
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                     // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
-                        Timer.init().then(function(timer){
-                            $rootScope.sessionTimer = timer;
-                            $rootScope.$emit('OpenSocket');
-                            pendoService.issuePendoIdentity();
-                            CheckLicense.notify();
+                        ConfigService.getConfig().then(function(){
+                            Timer.init().then(function(timer){
+                                $rootScope.sessionTimer = timer;
+                                $rootScope.$emit('OpenSocket');
+                                pendoService.issuePendoIdentity();
+                                CheckLicense.test();
+                                FeaturesService.get();
+                                if($location.$$path === "/home" && $state.current && $state.current.name === ""){
+                                    $state.go('dashboard');
+                                }
+                                else if($location.$$path === "/portal" && $state.current && $state.current.name === ""){
+                                    $state.go('portalMode');
+                                }
+                            });
                         });
                     }
                 }
@@ -896,7 +929,11 @@ var tower = angular.module('Tower', [
                 // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
-
+            if (!$rootScope.featuresConfigured) {
+                // create a promise that will resolve when features are loaded
+                $rootScope.featuresConfigured = $q.defer();
+            }
+            $rootScope.licenseMissing = true;
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
             // this, set the last path to /portal for instances where portal is visited for the first time.
             $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;

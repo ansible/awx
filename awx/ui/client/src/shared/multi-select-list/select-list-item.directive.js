@@ -33,8 +33,11 @@ export default
             template: '<input type="checkbox" data-multi-select-list-item ng-model="isSelected" ng-change="userInteractionSelect()">',
             link: function(scope, element, attrs, multiSelectList) {
 
-                scope.isSelected = false;
-                scope.decoratedItem = multiSelectList.registerItem(scope.item);
+                var initializeItem = function() {
+                    scope.decoratedItem = multiSelectList.registerItem(scope.item);
+                    scope.isSelected = scope.item.isSelected ? true : false;
+                    scope.decoratedItem.isSelected = scope.item.isSelected ? true : false;
+                };
 
                 scope.$watch('isSelected', function(value) {
                     if (value === true) {
@@ -44,8 +47,11 @@ export default
                     }
                 });
 
-                scope.$watch('decoratedItem.isSelected', function(value) {
-                    scope.isSelected = value;
+                scope.$watch('item', function() {
+                    // This is necessary for page changes where $scope.item gets updated via ng-repeat
+                    // but this link function never gets triggered (and scope.decoratedItem) never
+                    // gets updated.
+                    initializeItem();
                 });
 
                 scope.$on('$destroy', function() {
@@ -55,6 +61,8 @@ export default
                 scope.userInteractionSelect = function() {
                     scope.$emit("selectedOrDeselected", scope.decoratedItem);
                 };
+
+                initializeItem();
 
             }
         };

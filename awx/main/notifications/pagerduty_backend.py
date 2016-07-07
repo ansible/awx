@@ -42,6 +42,7 @@ class PagerDutyBackend(TowerBaseEmailBackend):
                                        description=m.subject,
                                        details=m.body,
                                        client=m.from_email)
+                sent_messages += 1
             except Exception as e:
                 logger.error(smart_text("Exception sending messages: {}".format(e)))
                 if not self.fail_silently:

@@ -7,16 +7,16 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$location' , '$compile',  'CreateDialog', 'GetBasePath' ,
+    [   'Wait', '$compile',  'CreateDialog', 'GetBasePath' ,
         'SearchInit' , 'PaginateInit', 'SchedulesList', 'Rest' ,
         'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
         '$scope', 'CreateSelect2',
-        function( Wait, $location, $compile, CreateDialog, GetBasePath,
+        function( Wait, $compile, CreateDialog, GetBasePath,
             SearchInit, PaginateInit, SchedulesList, Rest, ProcessErrors,
             managementJobsListObject, $rootScope, $state, $scope,
             CreateSelect2) {
 
-                var defaultUrl = GetBasePath('system_job_templates');
+                var defaultUrl = GetBasePath('system_job_templates') + "?order_by=name";
 
                 var getManagementJobs = function(){
                     Rest.setUrl(defaultUrl);
@@ -35,6 +35,11 @@ export default
                     parent_scope = scope;
                 scope.cleanupJob = true;
 
+                // This handles the case where the user refreshes the management job notifications page.
+                if($state.current.name === 'managementJobsList.notifications') {
+                    $scope.activeCard = parseInt($state.params.management_id);
+                    $scope.cardAction = "notifications";
+                }
 
                  // Cancel
                 scope.cancelConfigure = function () {
@@ -129,11 +134,11 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function() {
+                                        .success(function(data) {
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
                                             $("#configure-tower-dialog").dialog('close');
-                                            $location.path('/jobs/');
+                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
                                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -217,11 +222,11 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function() {
+                                        .success(function(data) {
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-tower-dialog").dialog('close');
-                                            $location.path('/jobs/');
+                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
                                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -263,5 +268,23 @@ export default
                 parent_scope.refreshJobs = function(){
                     scope.search(SchedulesList.iterator);
                 };
+
+                var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+                     if(toState.name === "managementJobsList") {
+                         // We are on the management job list view - nothing needs to be highlighted
+                         delete $scope.activeCard;
+                         delete $scope.cardAction;
+                     }
+                     else if(toState.name === "managementJobsList.notifications") {
+                         // We are on the notifications view - update the active card and the action
+                         $scope.activeCard = parseInt(toParams.management_id);
+                         $scope.cardAction = "notifications";
+                     }
+                });
+
+                // Remove the listener when the scope is destroyed to avoid a memory leak
+                $scope.$on('$destroy', function() {
+                    cleanUpStateChangeListener();
+                });
         }
     ];

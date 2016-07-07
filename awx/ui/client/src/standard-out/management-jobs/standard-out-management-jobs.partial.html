@@ -4,46 +4,52 @@
         <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
-                    RESULTS
+                    <div class="StandardOut-panelHeaderText">
+                        RESULTS
+                    </div>
+                    <div class="StandardOut-actions">
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                    </div>
                 </div>
                 <div class="StandardOut-details">
 
                     <div class="StandardOut-detailsRow" ng-show="job.name">
-                        <div class="StandardOut-detailsLabel">NAME</div>
-                        <div class="StandardOut-detailsContent">{{ job.name }}</div>
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">NAME</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ job.name }}</div>
                     </div>
 
                     <div class="StandardOut-detailsRow">
-                        <div class="StandardOut-detailsLabel">STATUS</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STATUS</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
                             <i class="fa icon-job-{{ job.status }}"></i>
                             <span class="StandardOut-statusText StandardOut--capitalize">{{ job.status }}</span>
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.started">
-                        <div class="StandardOut-detailsLabel">STARTED</div>
-                        <div class="StandardOut-detailsContent">
-                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STARTED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.started | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
-                        <div class="StandardOut-detailsLabel">FINISHED</div>
-                        <div class="StandardOut-detailsContent">
-                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">FINISHED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.finished | longDate }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
-                        <div class="StandardOut-detailsLabel">ELAPSED</div>
-                        <div class="StandardOut-detailsContent">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">ELAPSED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
                             {{ job.elapsed }} seconds
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.launch_type">
-                        <div class="StandardOut-detailsLabel">LAUNCH TYPE</div>
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">LAUNCH TYPE</div>
                         <div class="StandardOut-detailsContent StandardOut--capitalize">
                             {{ job.launch_type }}
                         </div>
@@ -53,7 +59,7 @@
                         <div class="StandardOut-detailsLabel">EXTRA VARS</div>
                     </div>
 
-                    <div ng-show="job.extra_vars">
+                    <div class="StandardOut-extraVarsContainer" ng-show="job.extra_vars">
                         <textarea rows="6" ng-model="variables" name="variables" class="StandardOut-extraVars" id="pre-formatted-variables"></textarea>
                     </div>
 
@@ -70,7 +76,7 @@
                         </button>
                     </div>
                 </div>
-                <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log>
+                <standard-out-log stdout-text="job.result_stdout"></standard-out-log>
             </div>
         </div>
     </div>

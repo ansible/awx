@@ -99,9 +99,9 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'getSearchHtml',
-        'Column', 'DropDown', 'NavigationLink', 'SelectIcon',
+        'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'ActionButton',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, getSearchHtml, Column, DropDown, NavigationLink,
-        SelectIcon) {
+        SelectIcon, ActionButton) {
             return {
 
                 setList: function (list) {
@@ -172,8 +172,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     // respond to changes to the edit indicator from
                     // the stateChangeStart event in app.js
                     this.scope.$on("EditIndicatorChange", function(e, list, id) {
-                        e.targetScope.listBeingEdited = list;
-                        e.targetScope.rowBeingEdited = id;
+                        if (list === "organizations") {
+                            e.targetScope.activeCard = parseInt(id);
+                        } else {
+                            e.targetScope.listBeingEdited = list;
+                            e.targetScope.rowBeingEdited = id;
+                        }
                     });
 
                     this.scope.$on("RemoveIndicator", function(e) {
@@ -363,10 +367,10 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += "<div class=\"List-well\">\n";
                     }
 
-                    // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                    html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">";
-                    html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
-                    html += "</div>";
+                    html += (list.searchRowActions) ? "<div class='row'><div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\">" : "";
+                    if (list.searchRowActions && !list.searchSize) {
+                        list.searchSize = 'col-lg-7 col-md-12 col-sm-12 col-xs-12';
+                    }
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         var tagSearch = getSearchHtml
                             .inject(getSearchHtml.getList(list),
@@ -381,11 +385,34 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
     ${tagSearch}
 </div>
                         `;
+                    }
+                    if(list.searchRowActions) {
+                        html += "</div><div class='col-lg-4 col-md-4 col-sm-4 col-xs-12'>";
+
+                        var actionButtons = "";
+                        Object.keys(list.searchRowActions || {})
+                            .forEach(act => {
+                                actionButtons += ActionButton(list.searchRowActions[act]);
+                            });
+                        html += `
+                            <div class=\"list-actions\">
+                                ${actionButtons}
+                            </div>
+                        `;
+                        html += "</div></div>";
+                    }
+
+                    if (options.showSearch=== undefined || options.showSearch === true) {
                         // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                         html += "<div class=\"row\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == true && " + list.name + ".length == 0\">\n";
                         html += "<div class=\"col-lg-12 List-searchNoResults\">No records matched your search.</div>\n";
                         html += "</div>\n";
                     }
+
+                    // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
+                    html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">";
+                    html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                    html += "</div>";
 
                     // Add a title and optionally a close button (used on Inventory->Groups)
                     if (options.mode !== 'lookup' && list.showTitle) {
@@ -439,6 +466,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     innerTable += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
                     innerTable += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                     innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
+                    innerTable += (list.trackBy) ? " track by " + list.trackBy : " track by $index";
                     innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                     innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                     innerTable += "\">\n";
@@ -459,7 +487,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                           "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
                       else { // its assumed that options.input_type = checkbox
-                          innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_" + list.iterator + "_{{" +
+                          innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                           list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                           "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                       }
@@ -517,10 +545,8 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                                     innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
                                     innerTable += "class=\"List-actionButton ";
-                                    innerTable += (field_action === 'delete') ? "List-actionButton--delete" : "";
-                                    innerTable += (field_action === 'cancel') ? "cancel red-txt" : "";
+                                    innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
                                     innerTable += "\" ";
-                                    // debugger;
                                     // rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
                                     innerTable += (field_action === 'edit') ? "ng-class=\"[rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-editButton--selected' : '']\"" : "";
                                     innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
@@ -619,7 +645,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += buildSelectAll().prop('outerHTML');
                     }
                     else if (options.mode === 'lookup') {
-                        html += "<th class=\"List-tableHeader List-staticColumn--smallStatus col-lg-1 col-md-1 col-sm-2 col-xs-2\"></th>";
+                        html += "<th class=\"List-tableHeader  select-column List-staticColumn--smallStatus\"></th>";
                     }
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&

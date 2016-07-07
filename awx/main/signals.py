@@ -164,10 +164,30 @@ def rbac_activity_stream(instance, sender, **kwargs):
         if hasattr(instance, 'content_type'):
             if instance.content_type in [None, user_type]:
                 return
-            role = instance
+            elif sender.__name__ == 'Role_parents':
+                role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+                # don't record implicit creation / parents
+                if role is not None and role.content_type is not None:
+                    parent = role.content_type.name + "." + role.role_field
+                    # Get the list of implicit parents that were defined at the class level.
+                    # We have to take this list from the class property to avoid including parents
+                    # that may have been added since the creation of the ImplicitRoleField
+                    implicit_parents = getattr(instance.content_object.__class__, instance.role_field).field.parent_role
+                    if type(implicit_parents) != list:
+                        implicit_parents = [implicit_parents]
+                    # Ignore any singleton parents we find. If the parent for the role
+                    # matches any of the implicit parents we find, skip recording the activity stream.
+                    for ip in implicit_parents:
+                        if '.' not in ip and 'singleton:' not in ip:
+                            ip = instance.content_type.name + "." + ip
+                        if parent == ip:
+                            return
+            else:
+                role = instance
             instance = instance.content_object
         else:
             role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+
         activity_stream_associate(sender, instance, role=role, **kwargs)
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
@@ -192,6 +212,7 @@ post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
@@ -217,6 +238,8 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
     parents_pks = getattr(instance, '_saved_parents_pks', [])
     hosts_pks = getattr(instance, '_saved_hosts_pks', [])
     children_pks = getattr(instance, '_saved_children_pks', [])
+    is_updating  = getattr(_inventory_updates, 'is_updating', False)
+
     with ignore_inventory_group_removal():
         with ignore_inventory_computed_fields():
             if parents_pks:
@@ -230,7 +253,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                                      child_group, parent_group)
                         parent_group.children.add(child_group)
                 inventory_pk = getattr(instance, '_saved_inventory_pk', None)
-                if inventory_pk:
+                if inventory_pk and not is_updating:
                     try:
                         inventory = Inventory.objects.get(pk=inventory_pk)
                         inventory.update_computed_fields()
@@ -316,12 +339,16 @@ def activity_stream_create(sender, instance, created, **kwargs):
         # Skip recording any inventory source directly associated with a group.
         if isinstance(instance, InventorySource) and instance.group:
             return
-        # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
+        changes = model_to_dict(instance, model_serializer_mapping)
+        # Special case where Job survey password variables need to be hidden
+        if type(instance) == Job:
+            if 'extra_vars' in changes:
+                changes['extra_vars'] = instance.display_extra_vars()
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
+            changes=json.dumps(changes))
         activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
@@ -379,17 +406,30 @@ def activity_stream_associate(sender, instance, **kwargs):
         obj1 = instance
         object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
+
         for entity_acted in kwargs['pk_set']:
             obj2 = kwargs['model']
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
-            object2 = camelcase_to_underscore(obj2.__name__)
+            if isinstance(obj2_actual, Role) and obj2_actual.content_object is not None:
+                obj2_actual = obj2_actual.content_object
+                object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)
+            else:
+                object2 = camelcase_to_underscore(obj2.__name__)
             # Skip recording any inventory source, or system job template changes here.
             if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
                 continue
             if isinstance(obj1, SystemJobTemplate) or isinstance(obj2_actual, SystemJobTemplate):
                 continue
+            if isinstance(obj1, SystemJob) or isinstance(obj2_actual, SystemJob):
+                continue
             activity_entry = ActivityStream(
+                changes=json.dumps(dict(object1=object1,
+                                        object1_pk=obj1.pk,
+                                        object2=object2,
+                                        object2_pk=obj2_id,
+                                        action=action,
+                                        relationship=obj_rel)),
                 operation=action,
                 object1=object1,
                 object2=object2,
@@ -409,7 +449,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 # If the m2m is from the User side we need to
                 # set the content_object of the Role for our entry.
                 if type(instance) == User and role.content_object is not None:
-                    getattr(activity_entry, role.content_type.name).add(role.content_object)
+                    getattr(activity_entry, role.content_type.name.replace(' ', '_')).add(role.content_object)
 
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel

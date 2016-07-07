@@ -1,23 +1,24 @@
 <div class="TagSearch row">
-    <div ng-class="listConfig.searchSize || 'col-lg-5 col-md-12 col-sm-12 col-xs-12'">
+    <div ng-class="listConfig.searchSize || 'col-lg-12 col-md-12 col-sm-12 col-xs-12'">
         <div class="TagSearch-bar">
             <div class="TagSearch-typeDropdown"
                 ng-click="toggleTypeDropdown()"
-                ng-class="{'is-open': showTypeDropdown}"
+                ng-class="{'is-open': showTypeDropdown, 'is-single': searchTypes.length === 1}"
                 ng-cloak>
                 <span class="TagSearch-typeDropdownName" ng-cloak>
                     {{ currentSearchType.label }}
                 </span>
-                <i class="TagSearch-selectDownIcon fa fa-angle-down"></i>
-            </div>
-            <div aw-click-off="showTypeDropdown" class="TagSearch-dropdownContainer
-                TagSearch-dropdownContainer--searchTypes"
-                ng-show="showTypeDropdown">
-                <div class="TagSearch-dropdownItem"
-                    ng-repeat="type in searchTypes track by $index"
-                    ng-class="{'is-selected': (currentSearchType.value === type.value)}"
-                    ng-click="setSearchType(type)">
-                    {{ type.label }}
+                <i class="TagSearch-selectDownIcon fa fa-angle-down"
+                    ng-hide="searchTypes.length === 1"></i>
+                <div class="TagSearch-dropdownContainer
+                    TagSearch-dropdownContainer--searchTypes"
+                    ng-show="showTypeDropdown">
+                    <div class="TagSearch-dropdownItem"
+                        ng-repeat="type in searchTypes track by $index"
+                        ng-class="{'is-selected': (currentSearchType.id === type.id)}"
+                        ng-click="setSearchType($event, type)">
+                        {{ type.label }}
+                    </div>
                 </div>
             </div>
             <div class="TagSearch-searchTermContainer"
@@ -28,7 +29,7 @@
                     placeholder="Search">
                 <div class="TagSearch-searchButton"
                     ng-disabled="!newSearchTag"
-                    ng-click="addTag()"
+                    ng-click="addTag($event)"
                     ng-show="currentSearchType.type === 'text'">
                     <i class="fa fa-search"></i>
                 </div>
@@ -42,23 +43,22 @@
                     <i class="TagSearch-selectDownIcon
                         fa fa-angle-down">
                     </i>
-                </div>
-                <div aw-click-off="showCurrentSearchDropdown"
-                    class="TagSearch-dropdownContainer
-                    TagSearch-dropdownContainer--typeOptions"
-                    ng-show="showCurrentSearchDropdown &&
-                        currentSearchType.type === 'select'">
-                    <div class="TagSearch-dropdownItem"
-                        ng-repeat="type in currentSearchType.typeOptions track by $index"
-                        ng-click="addTag(type)">
-                        {{ type.label }}
+                    <div class="TagSearch-dropdownContainer
+                        TagSearch-dropdownContainer--typeOptions"
+                        ng-show="showCurrentSearchDropdown &&
+                            currentSearchType.type === 'select'">
+                        <div class="TagSearch-dropdownItem"
+                            ng-repeat="type in currentSearchType.typeOptions track by $index"
+                            ng-click="addTag($event, type)">
+                            {{ type.label }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
+    <div class="col-lg-7 col-md-12 col-sm-12 col-xs-12">
         <div class="TagSearch-tagSection">
             <div class="TagSearch-flexContainer">
                 <div class="TagSearch-tagContainer"
@@ -69,7 +69,7 @@
                     </div>
                     <div class="TagSearch-tag TagSearch-tag--deletable"
                         <span class="TagSearch-name">
-                            {{ tag.name }}
+                            {{tag.label}}&nbsp;:&nbsp;{{ tag.name }}
                         </span>
                     </div>
                 </div>

@@ -93,15 +93,11 @@ table.ui-datepicker-calendar {
         background-color: @default-succ-disabled;
         border-color: @default-succ-disabled;
       }
-
-      &:first-of-type {
-        margin-right: 24px;
-      }
     }
 
     button.btn.btn-default {
       text-transform: uppercase;
-      border-color: @default-border;
+      border-color: @d7grey;
       color: @default-interface-txt;
     }
 
@@ -116,6 +112,11 @@ table.ui-datepicker-calendar {
       font-family: 'Open Sans', sans-serif;
     }
 
+}
+.ui-dialog-buttonpane > .ui-dialog-buttonset {
+    button {
+        margin-left: 20px;
+    }
 }
 
 .ui-dialog-buttonset {

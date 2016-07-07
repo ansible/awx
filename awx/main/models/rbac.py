@@ -40,7 +40,6 @@ role_names = {
     'auditor_role'         : 'Auditor',
     'execute_role'         : 'Execute',
     'member_role'          : 'Member',
-    'owner_role'           : 'Owner',
     'read_role'            : 'Read',
     'update_role'          : 'Update',
     'use_role'             : 'Use',
@@ -49,12 +48,11 @@ role_names = {
 role_descriptions = {
     'system_administrator' : 'Can manage all aspects of the system',
     'system_auditor'       : 'Can view all settings on the system',
-    'adhoc_role'           : 'May run ad hoc commands on an inventory or a group',
+    'adhoc_role'           : 'May run ad hoc commands on an inventory',
     'admin_role'           : 'Can manage all aspects of the %s',
     'auditor_role'         : 'Can view all settings for the %s',
     'execute_role'         : 'May run the job template',
     'member_role'          : 'User is a member of the %s',
-    'owner_role'           : 'Owns and can manage all aspects of this %s',
     'read_role'            : 'May view settings for the %s',
     'update_role'          : 'May update project or inventory or group using the configured source update system',
     'use_role'             : 'Can use the %s in a job template',
@@ -62,6 +60,24 @@ role_descriptions = {
 
 
 tls = threading.local() # thread local storage
+
+
+def check_singleton(func):
+    '''
+    check_singleton is a decorator that checks if a user given
+    to a `visible_roles` method is in either of our singleton roles (Admin, Auditor)
+    and if so, returns their full list of roles without filtering.
+    '''
+    def wrapper(*args, **kwargs):
+        sys_admin = Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR)
+        sys_audit = Role.singleton(ROLE_SINGLETON_SYSTEM_AUDITOR)
+        user = args[0]
+        if user in sys_admin or user in sys_audit:
+            if len(args) == 2:
+                return args[1]
+            return Role.objects.all()
+        return func(*args, **kwargs)
+    return wrapper
 
 @contextlib.contextmanager
 def batch_role_ancestor_rebuilding(allow_nesting=False):
@@ -354,6 +370,7 @@ class Role(models.Model):
 
 
     @staticmethod
+    @check_singleton
     def visible_roles(user):
         sql_params = {
             'ancestors_table': Role.ancestors.through._meta.db_table,
@@ -365,15 +382,17 @@ class Role(models.Model):
         qs = Role.objects.extra(
             where = ['''
                     %(roles_table)s.id IN (
-                        SELECT descendent_id FROM %(ancestors_table)s WHERE ancestor_id IN (%(ids)s)
-                        UNION
-                        SELECT ancestor_id FROM %(ancestors_table)s WHERE descendent_id IN (%(ids)s)
+                        SELECT DISTINCT visible_roles_t2.ancestor_id
+                          FROM %(ancestors_table)s as visible_roles_t1
+                               LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                         WHERE visible_roles_t1.ancestor_id IN (%(ids)s)
                     )
                     ''' % sql_params]
         )
         return qs
 
     @staticmethod
+    @check_singleton
     def filter_visible_roles(user, roles_qs):
         sql_params = {
             'ancestors_table': Role.ancestors.through._meta.db_table,
@@ -385,10 +404,11 @@ class Role(models.Model):
         qs = roles_qs.extra(
             where = ['''
                 EXISTS (
-                    SELECT 1 FROM
-                    %(ancestors_table)s
-                    WHERE (descendent_id = %(roles_table)s.id AND ancestor_id IN (%(ids)s))
-                       OR (ancestor_id = %(roles_table)s.id AND descendent_id IN (%(ids)s))
+                    SELECT 1
+                      FROM %(ancestors_table)s as visible_roles_t1
+                           LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
+                     WHERE visible_roles_t1.ancestor_id = %(roles_table)s.id
+                           AND visible_roles_t2.ancestor_id IN (%(ids)s)
                 ) ''' % sql_params]
         )
         return qs

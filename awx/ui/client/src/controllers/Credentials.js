@@ -14,7 +14,7 @@
 export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, GetChoices, Wait, $state) {
+    SelectionInit, GetChoices, Wait, $state, $filter) {
     ClearScope();
 
     Wait('start');
@@ -102,7 +102,11 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
+                    if (parseInt($state.params.credential_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -112,7 +116,7 @@ export function CredentialsList($scope, $rootScope, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the credential below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the credential below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -125,7 +129,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    '$state',
+    '$state', '$filter'
 ];
 
 
@@ -175,32 +179,39 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 
     $scope.canShareCredential = false;
 
-    if ($rootScope.current_user.is_superuser) {
-        $scope.canShareCredential = true;
-    } else {
-        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
-        Rest.get()
-            .success(function(data) {
-                $scope.canShareCredential = (data.count) ? true : false;
-            }).error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+    $rootScope.$watch('current_user', function(){
+        try {
+            if ($rootScope.current_user.is_superuser) {
+                $scope.canShareCredential = true;
+            } else {
+                Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+                Rest.get()
+                    .success(function(data) {
+                        $scope.canShareCredential = (data.count) ? true : false;
+                    }).error(function (data, status) {
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+                    });
+            }
+
+
+            var orgUrl = ($rootScope.current_user.is_superuser) ?
+                GetBasePath("organizations") :
+                $rootScope.current_user.url + "admin_of_organizations?";
+
+            // Create LookUpInit for organizations
+            LookUpInit({
+                scope: $scope,
+                url: orgUrl,
+                form: form,
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio',
+                autopopulateLookup: false
             });
-    }
-
-
-    var orgUrl = ($rootScope.current_user.is_superuser) ?
-        GetBasePath("organizations") :
-        $rootScope.current_user.url + "admin_of_organizations?";
-
-    // Create LookUpInit for organizations
-    LookUpInit({
-        scope: $scope,
-        url: orgUrl,
-        form: form,
-        list: OrganizationList,
-        field: 'organization',
-        input_type: 'radio',
-        autopopulateLookup: false
+        }
+        catch(err){
+            // $rootScope.current_user isn't available because a call to the config endpoint hasn't finished resolving yet
+        }
     });
 
     if (!Empty($stateParams.user_id)) {

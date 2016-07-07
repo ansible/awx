@@ -285,10 +285,10 @@ class InventoryTest(BaseTest):
         got = self.get(inventory_scripts, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 1)
 
-        new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
-        self.post(inventory_scripts, data=new_failed_script, expect=403, auth=self.get_normal_credentials())
+        new_failed_script = dict(name="Should not fail", description="This test should not fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
+        self.post(inventory_scripts, data=new_failed_script, expect=201, auth=self.get_normal_credentials())
 
-        failed_no_shebang = dict(name="ShouldAlsoFail", descript="This test should also fail", script=TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG,
+        failed_no_shebang = dict(name="ShouldFail", descript="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG,
                                  organization=self.organizations[0].id)
         self.post(inventory_scripts, data=failed_no_shebang, expect=400, auth=self.get_super_credentials())
 
@@ -1424,80 +1424,6 @@ class InventoryUpdatesTest(BaseTransactionTest):
             response = self.put(inv_src_url2, inv_src_data, expect=200)
             self.assertEqual(response['source_regions'], 'ORD,IAD')
 
-    def test_post_inventory_source_update(self):
-        creds_url = reverse('api:credential_list')
-        inv_src_url = reverse('api:inventory_source_detail',
-                              args=(self.group.inventory_source.pk,))
-        inv_src_update_url = reverse('api:inventory_source_update_view',
-                                     args=(self.group.inventory_source.pk,))
-        # Create a credential to use for this inventory source.
-        aws_cred_data = {
-            'name': 'AWS key that does not need to have valid info because we '
-                    'do not care if the update actually succeeds',
-            'kind': 'aws',
-            'user': self.super_django_user.pk,
-            'username': 'aws access key id goes here',
-            'password': 'aws secret access key goes here',
-        }
-        with self.current_user(self.super_django_user):
-            aws_cred_response = self.post(creds_url, aws_cred_data, expect=201)
-        aws_cred_id = aws_cred_response['id']
-        # Updaate the inventory source to use EC2.
-        inv_src_data = {
-            'source': 'ec2',
-            'credential': aws_cred_id,
-        }
-        with self.current_user(self.super_django_user):
-            self.put(inv_src_url, inv_src_data, expect=200)
-        # Read the inventory source, verify the update URL returns can_update.
-        with self.current_user(self.super_django_user):
-            self.get(inv_src_url, expect=200)
-            response = self.get(inv_src_update_url, expect=200)
-            self.assertTrue(response['can_update'])
-        # Now do the update.
-        with self.current_user(self.super_django_user):
-            self.post(inv_src_update_url, {}, expect=202)
-        # Normal user should be allowed as an org admin.
-        with self.current_user(self.normal_django_user):
-            self.get(inv_src_url, expect=200)
-            response = self.get(inv_src_update_url, expect=200)
-            self.assertTrue(response['can_update'])
-        with self.current_user(self.normal_django_user):
-            self.post(inv_src_update_url, {}, expect=202)
-        # Other user should be denied as only an org user.
-        with self.current_user(self.other_django_user):
-            self.get(inv_src_url, expect=403)
-            response = self.get(inv_src_update_url, expect=403)
-        with self.current_user(self.other_django_user):
-            self.post(inv_src_update_url, {}, expect=403)
-        # If given read permission to the inventory, other user should be able
-        # to see the inventory source and update view, but not start an update.
-        user_roles_list_url = reverse('api:user_roles_list', args=(self.other_django_user.pk,))
-        with self.current_user(self.super_django_user):
-            self.post(user_roles_list_url, {"id": self.inventory.read_role.id}, expect=204)
-        with self.current_user(self.other_django_user):
-            self.get(inv_src_url, expect=200)
-            response = self.get(inv_src_update_url, expect=200)
-        with self.current_user(self.other_django_user):
-            self.post(inv_src_update_url, {}, expect=403)
-        # Once given write permission, the normal user is able to update the
-        # inventory source.
-        with self.current_user(self.super_django_user):
-            self.post(user_roles_list_url, {"id": self.inventory.admin_role.id}, expect=204)
-        with self.current_user(self.other_django_user):
-            self.get(inv_src_url, expect=200)
-            response = self.get(inv_src_update_url, expect=200)
-            # FIXME: This is misleading, as an update would fail...
-            self.assertTrue(response['can_update'])
-        with self.current_user(self.other_django_user):
-            self.post(inv_src_update_url, {}, expect=202)
-        # Nobody user should be denied as well.
-        with self.current_user(self.nobody_django_user):
-            self.get(inv_src_url, expect=403)
-            response = self.get(inv_src_update_url, expect=403)
-        with self.current_user(self.nobody_django_user):
-            self.post(inv_src_update_url, {}, expect=403)
-
     def test_update_from_ec2(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
         source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')
@@ -1508,7 +1434,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='aws',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1595,7 +1521,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                security_token=source_token)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'ec2'
@@ -1617,7 +1543,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                security_token="BADTOKEN")
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
 
         # Set parent group name to one that might be created by the sync.
         group = self.group
@@ -1652,7 +1578,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='aws',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         group = self.group
         group.name = 'AWS Inventory'
         group.save()
@@ -1770,6 +1696,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertFalse(inventory_update.name.endswith(inventory_update.inventory_source.name), inventory_update.name)
 
     def test_update_from_rax(self):
+        self.skipTest('Skipping until we can resolve the CERTIFICATE_VERIFY_FAILED issue: #1706')
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
         source_password = getattr(settings, 'TEST_RACKSPACE_API_KEY', '')
         source_regions = getattr(settings, 'TEST_RACKSPACE_REGIONS', '')
@@ -1779,7 +1706,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         credential = Credential.objects.create(kind='rax',
                                                username=source_username,
                                                password=source_password)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         # Set parent group name to one that might be created by the sync.
         group = self.group
         group.name = 'DFW'
@@ -1832,7 +1759,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                username=source_username,
                                                password=source_password,
                                                host=source_host)
-        credential.owner_role.members.add(self.super_django_user)
+        credential.admin_role.members.add(self.super_django_user)
         inventory_source = self.update_inventory_source(self.group,
                                                         source='vmware', credential=credential)
         # Check first without instance_id set (to import by name only).

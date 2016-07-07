@@ -138,8 +138,10 @@
               <pre class="prettyprint"><span class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>{% autoescape off %}
 {% for key, val in response_headers.items %}<b>{{ key }}:</b> <span class="lit">{{ val|break_long_headers|urlize_quoted_links }}</span>
 {% endfor %}
-{# Original line below had content|urlize_quoted_links; for Ansible Tower disable automatic URL creation here. #}
-</span>{{ content }}</pre>{% endautoescape %}
+{# Original line below had the side effect of also escaping content: #}
+{#   </span>{{ content|urlize_quoted_links }}</pre>{% endautoescape %}   #}
+{# For Ansible Tower, disable automatic URL creation and move content outside of autoescape off block. #}
+{% endautoescape %}</span>{{ content }}</pre>
             </div>
           </div>
 

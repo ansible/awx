@@ -38,7 +38,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ('aws', _('Amazon Web Services')),
         ('rax', _('Rackspace')),
         ('vmware', _('VMware vCenter')),
-        ('foreman', _('Red Hat Satellite 6')),
+        ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure Classic (deprecated)')),
@@ -61,6 +61,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     class Meta:
         app_label = 'main'
         ordering = ('kind', 'name')
+        unique_together = (('organization', 'name', 'kind'),)
 
     deprecated_user = models.ForeignKey(
         'auth.User',
@@ -77,6 +78,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         blank=True,
         on_delete=models.CASCADE,
         related_name='deprecated_credentials',
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='credentials',
     )
     kind = models.CharField(
         max_length=32,
@@ -203,18 +212,22 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         default='',
         help_text=_('Tenant identifier for this credential'),
     )
-    owner_role = ImplicitRoleField(
+    admin_role = ImplicitRoleField(
         parent_role=[
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
         ],
     )
     use_role = ImplicitRoleField(
-        parent_role=['owner_role']
+        parent_role=[
+            'organization.admin_role',
+            'admin_role',
+        ]
     )
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'organization.auditor_role',
         'use_role',
-        'owner_role'
+        'admin_role',
     ])
 
     @property

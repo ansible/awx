@@ -15,13 +15,26 @@ export default ['$scope', 'Refresh', 'tagSearchService',
 
         // shows/hide the search type dropdown
         $scope.toggleTypeDropdown = function() {
-            $scope.showTypeDropdown = !$scope.showTypeDropdown;
+            if ($scope.searchTypes.length > 1) {
+                $scope.showTypeDropdown = !$scope.showTypeDropdown;
+                if ($scope.showTypeDropdown) {
+                    $("body").append("<div class='TagSearch-clickToClose'></div>");
+                    $(".TagSearch-clickToClose").on("click", function() {
+                        $scope.$apply(function() {
+                            $scope.showTypeDropdown = false;
+                        });
+                        $(".TagSearch-clickToClose").remove();
+                    });
+                }
+            }
         };
 
         // sets the search type dropdown and hides it
-        $scope.setSearchType = function(type) {
+        $scope.setSearchType = function($event, type) {
             $scope.currentSearchType = type;
             $scope.showTypeDropdown = false;
+            $(".TagSearch-clickToClose").remove();
+            $event.stopPropagation();
         };
 
         // if the current search type uses a list instead
@@ -30,19 +43,29 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             $scope
                 .showCurrentSearchDropdown = !$scope
                     .showCurrentSearchDropdown;
-        };
+            if ($scope.showCurrentSearchDropdown) {
+                $("body").append("<div class='TagSearch-clickToClose'></div>");
+                $(".TagSearch-clickToClose").on("click", function() {
+                    $scope.$apply(function() {
+                        $scope.showCurrentSearchDropdown = false;
+                    });
+                    $(".TagSearch-clickToClose").remove();
+                });
+            }
+};
 
         $scope.updateSearch = function(tags) {
             var iterator = $scope.iterator;
             var pageSize = $scope
                 .$parent[iterator + "_page_size"];
+            var searchParams = $scope
+                .$parent[iterator + "SearchParams"];
             var set = $scope.set;
             var listScope = $scope.$parent;
             var url = tagSearchService
-                .updateFilteredUrl($scope.endpoint, tags, pageSize);
+                .updateFilteredUrl($scope.endpoint, tags, pageSize, searchParams);
 
             $scope.$parent[iterator + "_active_search"] = true;
-
             Refresh({
                 scope: listScope,
                 set: set,
@@ -50,11 +73,17 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 url: url
             });
 
+            listScope.$on('PostRefresh', function() {
+                if (set === 'notifications') {
+                    $scope.$emit('relatednotifications');
+                }
+            });
+
             $scope.currentSearchFilters = tags;
         };
 
         // triggers a refilter of the list with the newTag
-        $scope.addTag = function(type) {
+        $scope.addTag = function($event, type) {
             var newTag = tagSearchService
                 .getTag($scope.currentSearchType,
                     $scope.newSearchTag,
@@ -69,10 +98,11 @@ export default ['$scope', 'Refresh', 'tagSearchService',
                 .getCurrentTags($scope
                     .currentSearchFilters);
 
-            if (!tagSearchService.isDuplicate(tags, newTag)) {
+            if (!tagSearchService.isDuplicate(tags, newTag) && !!newTag.name) {
                 tags.push(newTag);
                 $scope.updateSearch(tags);
             }
+            $event.stopPropagation();
         };
 
         // triggers a refilter of the list without the oldTag
@@ -95,5 +125,6 @@ export default ['$scope', 'Refresh', 'tagSearchService',
             $scope.newSearchTag = null;
             $scope.showTypeDropdown = false;
             $scope.showCurrentSearchDropdown = false;
+            $(".TagSearch-clickToClose").remove();
         };
     }];

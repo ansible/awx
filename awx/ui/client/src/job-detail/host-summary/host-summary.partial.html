@@ -1,19 +1,19 @@
 
 <div id="hosts-summary-section" class="section">
-    <div class="JobDetail-instructions"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
-    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0">
+    <div class="JobDetail-instructions" ng-hide="hosts.length == 0 && !searchTerm"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
+    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0 && !searchTerm">
         <div class="JobDetail-searchContainer form-group">
             <div class="search-name">
                 <form ng-submit="search()">
                 <input type="text" class="JobDetail-searchInput form-control List-searchInput" id="search_host_summary_name" ng-model="searchTerm" placeholder="Host Name" />
-                    <a class="List-searchInputIcon search-icon" ng-click="search()"><i class="fa fa-search"></i></a>
-
+                    <a class="List-searchInputIcon search-icon" ng-click="search()" ng-show="!searchActive"><i class="fa fa-search"></i></a>
+                    <a class="List-searchInputIcon search-icon" ng-show="searchActive" ng-click="clearSearch()"><i class="fa fa-times"></i></a>
                 </form>
             </div>
         </div>
         <div class="JobDetail-tableToggleContainer form-group">
             <div class="btn-group" >
-                <button 
+                <button
                 ng-click="setFilter('all')"
                 class="JobDetail-tableToggle btn btn-xs" ng-class="{'btn-default': filter === 'failed', 'btn-primary': filter === 'all'}">All</button>
                 <button ng-click="setFilter('failed')"
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="table-header" ng-hide="hosts.length == 0">
+    <div class="table-header" ng-hide="hosts.length == 0 && !searchTerm">
         <table class="table table-condensed">
             <thead>
                 <tr>
@@ -34,7 +34,7 @@
     </div>
 
     <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="getNextPage" scroll-threshold="10" time-threshold="500">
-        <table class="table">
+        <table class="table" ng-class="{'JobDetails-table--noResults': hosts.length === 0}">
             <tbody>
                 <tr class="List-tableRow" ng-repeat="host in hosts track by $index" id="{{ host.id }}" ng-class-even="'List-tableRow--evenRow'" ng-class-odd="'List-tableRow--oddRow'">
                     <td class="List-tableCell name col-lg-6 col-md-6 col-sm-6 col-xs-6">

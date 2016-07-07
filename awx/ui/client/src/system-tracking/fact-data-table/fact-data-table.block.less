@@ -35,7 +35,7 @@
     }
 
     &-headingRow {
-      background-color: @default-icon-hov;
+      background-color: @default-list-header-bg;
       border: none;
       padding: 8px 12px;
 
@@ -80,23 +80,15 @@
 
 .FactDataError {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    &-message {
-        font-size: 1.5em;
-        line-height: 1.5;
-        text-align: center;
-        width: 75%;
-        margin-bottom: 2em;
-    }
-
-    &-note {
-        &--full {
-            font-size: 22px;
-        }
-    }
+    width: 100%;
+    height: 200px;
+    border-radius: 5px;
+    border: 1px solid @list-no-items-bord;
+    background-color: @default-no-items-bord;
+    color: @list-no-items-txt;
+    text-transform: uppercase;
 }
 
 .FactDataGroup {

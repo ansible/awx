@@ -10,5 +10,8 @@ export default {
     name: 'inventoryJobTemplateAdd',
     url: '/inventories/:inventory_id/job_templates/add',
     templateUrl: templateUrl('job-templates/add/job-templates-add'),
-    controller: 'JobTemplatesAdd'
+    controller: 'JobTemplatesAdd',
+    ncyBreadcrumb: {
+        label: "Inventory Job Template Add"
+    },
 };

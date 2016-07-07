@@ -9,6 +9,7 @@ import time
 # Django
 from django.conf import settings
 from django.db import connection
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
@@ -25,7 +26,6 @@ from rest_framework import views
 
 # AWX
 from awx.main.models import *  # noqa
-from awx.main.models import Label
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
 
@@ -328,10 +328,11 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
 
         # Make a copy of the data provided (since it's readonly) in order to
         # inject additional data.
-        if hasattr(request.data, 'dict'):
-            data = request.data.dict()
+        if hasattr(request.data, 'copy'):
+            data = request.data.copy()
         else:
-            data = request.data
+            data = QueryDict('')
+            data.update(request.data)
 
         # add the parent key to the post data using the pk from the URL
         parent_key = getattr(self, 'parent_key', None)
@@ -359,6 +360,13 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
 class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
+
+    def get_description_context(self):
+        d = super(SubListCreateAttachDetachAPIView, self).get_description_context()
+        d.update({
+            "has_attach": True,
+        })
+        return d
 
     def attach(self, request, *args, **kwargs):
         created = False
@@ -416,7 +424,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         sub = get_object_or_400(self.model, pk=sub_id)
 
         if not request.user.can_access(self.parent_model, 'unattach', parent,
-                                       sub, self.relationship):
+                                       sub, self.relationship, request.data):
             raise PermissionDenied()
 
         if parent_key:
@@ -441,18 +449,23 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         else:
             return self.attach(request, *args, **kwargs)
 
+'''
+Models for which you want the last instance to be deleted from the database
+when the last disassociate is called should inherit from this class. Further, 
+the model should implement is_detached()
+'''
 class DeleteLastUnattachLabelMixin(object):
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request, *args, **kwargs)
+        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
         if res:
             return res
 
         res = super(DeleteLastUnattachLabelMixin, self).unattach_by_id(request, sub_id)
 
-        label = Label.objects.get(id=sub_id)
+        obj = self.model.objects.get(id=sub_id)
 
-        if label.is_detached():
-            label.delete()
+        if obj.is_detached():
+            obj.delete()
 
         return res
 

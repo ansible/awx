@@ -1,44 +1,86 @@
 @import "../shared/branding/colors.default.less";
-@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
+@import "../shared/layouts/one-plus-one.less";
 
 /** @define StandardOut */
+
+@breakpoint-md: 1180px;
+
+standard-out-log {
+    flex: 5;
+    display: flex;
+}
 
 .StandardOut-preContent{
     font-size: 12px;
     padding: 0 20px 0 20px;
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
+
 .StandardOut-container {
-    .OnePlusTwo-container;
+    .OnePlusOne-container(100%, @breakpoint-md);
+
+    &.fullscreen {
+        .StandardOut-rightPanel {
+            max-width: 100%;
+        }
+    }
 }
 
 .StandardOut-leftPanel {
-    .OnePlusTwo-left--panel(590px);
+    .OnePlusOne-panel--left(100%, @breakpoint-md);
+    max-width: 600px;
+    @media (max-width: @breakpoint-md - 1px) {
+        max-width: 100%;
+    }
 }
 
 .StandardOut-rightPanel {
-    .OnePlusTwo-right--panel(590px);
+    .OnePlusOne-panel--right(100%, @breakpoint-md);
+    max-width: 100%;
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
+
+    .Panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .StandardOut-consoleOutput {
+        height: 493px;
+    }
 }
 
 .StandardOut-panelHeader {
-    .OnePlusTwo-panelHeader
+    .OnePlusOne-panelHeader
 }
 
 .StandardOut-consoleOutput {
     margin-top: 25px;
-    min-height: 200px;
     background-color: @default-secondary-bg;
     border-radius: 5px;
-    max-height: 1600px;
+    min-height: 300px;
+    max-height: 100vh;
+    height: ~"calc(100vh - 245px)";
+    width: 100%;
+
     overflow: auto;
+    #pre-container {
+        overflow: visible !important;
+    }
 }
 
 .StandardOut-details {
-    .OnePlusTwo-left--details;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding-top: 25px;
 }
 
 .StandardOut-detailsRow {
-    .OnePlusTwo-left--detailsRow;
+    width: 100%;
+    display: flex;
+    margin: 0 -15px;
 }
 
 .StandardOut-detailsRow + .StandardOut-detailsRow {
@@ -46,15 +88,26 @@
 }
 
 .StandardOut-detailsRow--extraVars {
-    margin-bottom: 10px;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.StandardOut-extraVarsContainer {
+    width: 100%;
+    padding-right: 15px;
 }
 
 .StandardOut-detailsLabel {
-    .OnePlusTwo-left--detailsLabel;
+    text-transform: uppercase;
+    color: @default-interface-txt;
 }
 
 .StandardOut-detailsContent {
-    .OnePlusTwo-left--detailsContent;
+    width: 40%;
+    flex: 1 0 auto;
+    padding: 0px 29px;
+    text-transform: none;
+    word-wrap: break-word;
 }
 
 .StandardOut-statusText {
@@ -93,13 +146,17 @@
 }
 
 .StandardOut-actionButton:hover {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
 }
 
 .StandardOut-actionButton--active {
-    background-color: @list-actn-bg-hov !important;
+    background-color: @list-actn-bg-hov;
     color: @list-actn-icn-hov;
+
+    &:hover {
+        background-color: @default-link-hov;
+    }
 }
 
 .StandardOut-actionButton + a {

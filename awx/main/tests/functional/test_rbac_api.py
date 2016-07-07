@@ -57,6 +57,28 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert inventory.admin_role.id not in role_hash
     assert team.member_role.id not in role_hash
 
+@pytest.mark.django_db
+def test_roles_visibility(get, organization, project, admin, alice, bob):
+    Role.singleton('system_auditor').members.add(alice)
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
+    organization.auditor_role.members.add(bob)
+    assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+
+@pytest.mark.django_db
+def test_roles_filter_visibility(get, organization, project, admin, alice, bob):
+    Role.singleton('system_auditor').members.add(alice)
+    project.update_role.members.add(admin)
+
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
+    organization.auditor_role.members.add(bob)
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+    organization.auditor_role.members.remove(bob)
+    project.use_role.members.add(bob) # sibling role should still grant visibility
+    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
 
 @pytest.mark.django_db
 def test_cant_create_role(post, admin):
@@ -183,7 +205,7 @@ def test_get_teams_roles_list(get, team, organization, admin):
     assert response.status_code == 200
     roles = response.data
 
-    assert roles['count'] == 2
+    assert roles['count'] == 1
     assert roles['results'][0]['id'] == organization.admin_role.id or roles['results'][1]['id'] == organization.admin_role.id
 
 
@@ -406,26 +428,15 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'roles' in org['summary_fields']
+    assert 'object_roles' in org['summary_fields']
 
-    role_pk = org['summary_fields']['roles']['admin_role']['id']
+    role_pk = org['summary_fields']['object_roles']['admin_role']['id']
     role_url = reverse('api:role_detail', args=(role_pk,))
     org_role_response = get(role_url, admin)
 
     assert org_role_response.status_code == 200
     role = org_role_response.data
     assert role['related']['organization'] == url
-
-@pytest.mark.django_db
-def test_ensure_permissions_is_present(organization, get, user):
-    url = reverse('api:organization_detail', args=(organization.id,))
-    response = get(url, user('admin', True))
-    assert response.status_code == 200
-    org = response.data
-
-    assert 'summary_fields' in org
-    assert 'active_roles' in org['summary_fields']
-    assert 'read_role' in org['summary_fields']['active_roles']
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):
@@ -435,5 +446,5 @@ def test_ensure_role_summary_is_present(organization, get, user):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'roles' in org['summary_fields']
-    assert org['summary_fields']['roles']['admin_role']['id'] > 0
+    assert 'object_roles' in org['summary_fields']
+    assert org['summary_fields']['object_roles']['admin_role']['id'] > 0

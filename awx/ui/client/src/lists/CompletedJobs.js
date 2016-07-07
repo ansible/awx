@@ -20,6 +20,7 @@ export default
         index: false,
         hover: true,
         well: false,
+        emptyListText: 'No completed jobs',
 
         fields: {
             status: {
@@ -36,10 +37,10 @@ export default
                 searchType: 'select',
                 nosort: true,
                 searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
+                    { label: "Success", value: "successful" },
+                    { label: "Error", value: "error" },
+                    { label: "Failed", value: "failed" },
+                    { label: "Canceled", value: "canceled" }
                 ]
             },
             id: {
@@ -58,6 +59,15 @@ export default
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
             },
+            type: {
+                label: 'Type',
+                ngBind: 'completed_job.type_label',
+                link: false,
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
+                searchable: true,
+                searchType: 'select',
+                searchOptions: []    // populated via GetChoices() in controller
+            },
             finished: {
                 label: 'Finished',
                 noLink: true,
@@ -66,16 +76,6 @@ export default
                 columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
                 key: true,
                 desc: true
-            },
-            type: {
-                label: 'Type',
-                ngBind: 'completed_job.type_label',
-                link: false,
-                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                columnShow: "showJobType",
-                searchable: true,
-                searchType: 'select',
-                searchOptions: []    // populated via GetChoices() in controller
             },
             failed: {
                 label: 'Job failed?',

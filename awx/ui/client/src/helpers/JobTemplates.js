@@ -31,7 +31,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $stateParams.template_id,
+                          id = $stateParams.id,
                           relatedSets = {};
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
@@ -77,6 +77,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               Rest.get()
                               .success(function (data) {
                                   scope.job_template_obj = data;
+                                  scope.name = data.name;
                                   var fld, i;
                                   for (fld in form.fields) {
                                       if (fld !== 'variables' && fld !== 'survey' && data[fld] !== null && data[fld] !== undefined) {
@@ -108,6 +109,11 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                               data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                                           master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
+                                      }
+                                      if (form.fields[fld].type === 'checkbox_group') {
+                                          for(var j=0; j<form.fields[fld].fields.length; j++) {
+                                              scope[form.fields[fld].fields[j].name] = data[form.fields[fld].fields[j].name];
+                                          }
                                       }
                                   }
                                   Wait('stop');
@@ -167,6 +173,25 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       input_type: "radio"
                                   });
 
+                                  var NetworkCredentialList = {};
+                                  // Clone the CredentialList object for use with network_credential. Cloning
+                                  // and changing properties to avoid collision.
+                                  jQuery.extend(true, NetworkCredentialList, CredentialList);
+                                  NetworkCredentialList.name = 'networkcredentials';
+                                  NetworkCredentialList.iterator = 'networkcredential';
+                                  NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
+
+                                  LookUpInit({
+                                      url: GetBasePath('credentials') + '?kind=net',
+                                      scope: scope,
+                                      form: form,
+                                      current_item: data.network_credential,
+                                      list: NetworkCredentialList,
+                                      field: 'network_credential',
+                                      hdr: 'Select Network Credential',
+                                      input_type: "radio"
+                                  });
+
                                   LookUpInit({
                                       scope: scope,
                                       form: form,
@@ -177,8 +202,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   });
 
 
-                                  if(scope.project === "" && scope.playbook === ""){
-                                    scope.toggleScanInfo();
+                                  if (scope.project === "" && scope.playbook === "") {
+                                      scope.resetProjectToDefault();
                                   }
 
                                   RelatedSearchInit({
@@ -197,7 +222,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {
                                       hdr: 'Error!',
-                                      msg: 'Failed to retrieve job template: ' + $stateParams.template_id + '. GET status: ' + status
+                                      msg: 'Failed to retrieve job template: ' + $stateParams.id + '. GET status: ' + status
                                   });
                               });
                           };

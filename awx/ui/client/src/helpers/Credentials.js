@@ -39,7 +39,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -65,7 +64,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
-                 scope.key_hint= "paste or drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -75,6 +73,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
                  scope.hostPopOver = "<p>The host value</p>";
+                 scope.ssh_key_data_api_error = '';
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -101,7 +100,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.key_required = true;
                              scope.project_required = true;
                              scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
-                             scope.key_hint= "drag and drop a private key file on the field below";
                              scope.projectLabel = "Project";
                              scope.project_required = false;
                              scope.projectPopOver = "<p>The Project ID is the " +
@@ -114,13 +112,10 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.subscription_required = true;
                              scope.key_required = true;
                              scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
-                             scope.key_hint= "drag and drop a management certificate file on the field below";
                          break;
                          case 'azure_rm':
                              scope.usernameLabel = "Username";
                              scope.subscription_required = true;
-                             scope.username_required = true;
-                             scope.password_required = true;
                              scope.passwordLabel = 'Password';
                              scope.azure_rm_required = true;
                          break;
@@ -146,7 +141,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.hostPopOver = "<p>The host to authenticate with." +
                                  "<br />For example, https://openstack.business.com/v2.0/";
                          break;
-                         case 'foreman':
+                         case 'satellite6':
                             scope.username_required = true;
                             scope.password_required = true;
                             scope.passwordLabel = 'Password';
@@ -186,6 +181,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      scope.ssh_key_unlock_confirm = null;
                      scope.become_username = null;
                      scope.become_password = null;
+                     scope.authorize = false;
+                     scope.authorize_password = null;
                  }
 
                  // Collapse or open help widget based on whether scm value is selected
@@ -302,10 +299,19 @@ angular.module('CredentialsHelper', ['Utilities'])
                      })
                      .error(function (data, status) {
                          Wait('stop');
-                         ProcessErrors(scope, data, status, form, {
-                             hdr: 'Error!',
-                             msg: 'Failed to create new Credential. POST status: ' + status
-                         });
+                         // TODO: hopefully this conditional error handling will to away in a future version of tower.  The reason why we cannot
+                         // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
+                         // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
+                         // error is never shown.  In the future, the API will hopefully either behave or respond differently.
+                         if(status && status === 400 && data && data.ssh_key_unlock && (scope.kind.value === 'gce' || scope.kind.value === 'azure')) {
+                             scope.ssh_key_data_api_error = "Encrypted credentials are not supported.";
+                         }
+                         else {
+                             ProcessErrors(scope, data, status, form, {
+                                 hdr: 'Error!',
+                                 msg: 'Failed to create new Credential. POST status: ' + status
+                             });
+                         }
                      });
                  } else {
                      url = GetBasePath('credentials') + scope.id + '/';
@@ -313,14 +319,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                      Rest.put(data)
                      .success(function () {
                          Wait('stop');
-                         var base = $location.path().replace(/^\//, '').split('/')[0];
-                             if (base === 'credentials') {
-                             ReturnToCaller();
-                         }
-                         else {
-                             ReturnToCaller(1);
-                         }
-
+                         $state.go($state.current, {}, {reload: true});
                      })
                      .error(function (data, status) {
                          Wait('stop');

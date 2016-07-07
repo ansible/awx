@@ -14,19 +14,16 @@
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait',
-    'Find', 'LoadSchedulesScope', 'GetChoices', '$q',
+    'Find', 'LoadSchedulesScope', 'GetChoices', '$q', '$state',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices,
-    $q) {
+    $q, $state) {
+        var schedList = _.cloneDeep(SchedulesList);
 
         ClearScope();
 
-        $scope.schedulerStartDT = 'test';
-
         var base, id, url,parentObject, title;
-        $scope.schedulerStartDT = 'test';
-
 
         base = $location.path().replace(/^\//, '').split('/')[0];
         if (base === 'management_jobs') {
@@ -51,19 +48,21 @@ export default [
         }
         $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
             url += "schedules/";
-            SchedulesList.well = true;
+            schedList.well = true;
 
             // include name of item in listTitle
-            SchedulesList.listTitle = title ? title : parentObject.name;
-            SchedulesList.listTitle = `${SchedulesList.listTitle}<div class='List-titleLockup'></div>Schedules`;
+            let escaped_title =  $("<span>").text(title ? title : parentObject.name)[0].innerHTML;
+            schedList.listTitle = `${escaped_title}<div class='List-titleLockup'></div>Schedules`;
+
+            schedList.basePath = parentObject.url + "schedules";
 
             LoadSchedulesScope({
                 parent_scope: $scope,
                 scope: $scope,
-                list: SchedulesList,
+                list: schedList,
                 id: 'schedule-list-target',
                 url: url,
-                pageSize: 20
+                pageSize: 20,
             });
         });
 
@@ -101,6 +100,7 @@ export default [
                 Rest.get()
                     .success(function(data) {
                         parentObject = data;
+                        $scope.name = data.name;
                         $scope.$emit('ParentLoaded');
                     })
                     .error(function(data, status) {
@@ -112,6 +112,10 @@ export default [
 
         $scope.refreshJobs = function() {
             $scope.search(SchedulesList.iterator);
+        };
+
+        $scope.formCancel = function() {
+            $state.go('^', {}, {reload: true});
         };
 
         Wait('start');

@@ -25,35 +25,44 @@ def test_notification_template_get_queryset_orgadmin(notification_template, user
     assert access.get_queryset().count() == 1
 
 @pytest.mark.django_db
-def test_notification_template_access_superuser(notification_template, user, notification_template_factory):
-    access = NotificationTemplateAccess(user('admin', True))
-    assert access.can_read(notification_template)
-    assert access.can_change(notification_template, None)
-    assert access.can_delete(notification_template)
-    nf = notification_template_factory("test-orphaned")
+def test_notification_template_access_superuser(notification_template_factory):
+    nf_objects = notification_template_factory('test-orphaned', organization='test', superusers=['admin'])
+    admin = nf_objects.superusers.admin
+    nf = nf_objects.notification_template
+
+    access = NotificationTemplateAccess(admin)
+    assert access.can_read(nf)
+    assert access.can_change(nf, None)
+    assert access.can_delete(nf)
+
     nf.organization = None
     nf.save()
+
     assert access.can_read(nf)
     assert access.can_change(nf, None)
     assert access.can_delete(nf)
 
 @pytest.mark.django_db
-def test_notification_template_access_admin(notification_template, user, organization_factory, notification_template_factory):
-    adm = user('admin', False)
-    other_org = organization_factory('other')
-    present_org = organization_factory('present')
-    notification_template.organization.admin_role.members.add(adm)
-    present_org.admin_role.members.add(adm)
+def test_notification_template_access_admin(organization_factory, notification_template_factory):
+    other_objects = organization_factory('other')
+    present_objects = organization_factory('present',
+                                           users=['admin'],
+                                           notification_templates=['test-notification'],
+                                           roles=['present.admin_role:admin'])
 
-    access = NotificationTemplateAccess(user('admin', False))
+    notification_template = present_objects.notification_templates.test_notification
+    other_org = other_objects.organization
+    present_org = present_objects.organization
+    admin = present_objects.users.admin
+
+    access = NotificationTemplateAccess(admin)
     assert not access.can_change(notification_template, {'organization': other_org.id})
     assert access.can_read(notification_template)
     assert access.can_change(notification_template, None)
     assert access.can_change(notification_template, {'organization': present_org.id})
     assert access.can_delete(notification_template)
+
     nf = notification_template_factory("test-orphaned")
-    nf.organization = None
-    nf.save()
     assert not access.can_read(nf)
     assert not access.can_change(nf, None)
     assert not access.can_delete(nf)
@@ -66,3 +75,9 @@ def test_notification_template_access_org_user(notification_template, user):
     assert not access.can_read(notification_template)
     assert not access.can_change(notification_template, None)
     assert not access.can_delete(notification_template)
+
+@pytest.mark.django_db
+def test_notificaiton_template_orphan_access_org_admin(notification_template, organization, org_admin):
+    notification_template.organization = None
+    access = NotificationTemplateAccess(org_admin)
+    assert not access.can_change(notification_template, {'organization': organization.id})

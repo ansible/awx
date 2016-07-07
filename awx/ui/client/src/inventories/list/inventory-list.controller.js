@@ -17,7 +17,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
     Find, Empty, $state) {
 
     var list = InventoryList,
-        defaultUrl = GetBasePath('inventory'),
+        defaultUrl = GetBasePath('inventory') + ($stateParams.status === 'sync-failed' ? '?not__inventory_sources_with_failures=0' : ''),
         view = generateList,
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'inventories') ? 'edit' : 'select';
@@ -322,7 +322,11 @@ function InventoriesList($scope, $rootScope, $location, $log,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
+                    if (parseInt($state.params.inventory_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, null, { hdr: 'Error!',

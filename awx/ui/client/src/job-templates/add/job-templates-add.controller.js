@@ -28,6 +28,7 @@
                 generator = GenerateForm,
                 master = {},
                 CloudCredentialList = {},
+                NetworkCredentialList = {},
                 selectPlaybook, checkSCMStatus,
                 callback,
                 base = $location.path().replace(/^\//, '').split('/')[0],
@@ -72,6 +73,14 @@
             jQuery.extend(true, CloudCredentialList, CredentialList);
             CloudCredentialList.name = 'cloudcredentials';
             CloudCredentialList.iterator = 'cloudcredential';
+            CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
+
+            // Clone the CredentialList object for use with network_credential. Cloning
+            // and changing properties to avoid collision.
+            jQuery.extend(true, NetworkCredentialList, CredentialList);
+            NetworkCredentialList.name = 'networkcredentials';
+            NetworkCredentialList.iterator = 'networkcredential';
+            NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
 
             SurveyControllerInit({
                 scope: $scope,
@@ -90,6 +99,17 @@
                     list: CloudCredentialList,
                     field: 'cloud_credential',
                     hdr: 'Select Cloud Credential',
+                    input_type: 'radio'
+                });
+
+                LookUpInit({
+                    url: GetBasePath('credentials') + '?kind=net',
+                    scope: $scope,
+                    form: form,
+                    current_item: null,
+                    list: NetworkCredentialList,
+                    field: 'network_credential',
+                    hdr: 'Select Network Credential',
                     input_type: 'radio'
                 });
 
@@ -196,12 +216,20 @@
                     });
                 });
 
+            function sync_playbook_select2() {
+                CreateSelect2({
+                    element:'#playbook-select',
+                    multiple: false
+                });
+            }
+
             // Update playbook select whenever project value changes
             selectPlaybook = function (oldValue, newValue) {
                 var url;
                 if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
                     $scope.playbook_options = ['Default'];
                     $scope.playbook = 'Default';
+                    sync_playbook_select2();
                     Wait('stop');
                 }
                 else if (oldValue !== newValue) {
@@ -216,6 +244,7 @@
                                     opts.push(data[i]);
                                 }
                                 $scope.playbook_options = opts;
+                                sync_playbook_select2();
                                 Wait('stop');
                             })
                             .error(function (data, status) {
@@ -226,32 +255,37 @@
                 }
             };
 
-            $scope.jobTypeChange = function(){
-              if($scope.job_type){
-                if($scope.job_type.value === 'scan'){
-                    // If the job_type is 'scan' then we don't want the user to be
-                    // able to prompt for job type or inventory
-                    $scope.ask_job_type_on_launch = false;
-                    $scope.ask_inventory_on_launch = false;
-                    $scope.toggleScanInfo();
-                  }
-                  else if($scope.project_name === "Default"){
-                    $scope.project_name = null;
-                    $scope.playbook_options = [];
-                    // $scope.playbook = 'null';
-                    $scope.job_templates_form.playbook.$setPristine();
-                  }
-              }
+            let last_non_scan_project_name = null;
+            let last_non_scan_playbook = "";
+            let last_non_scan_playbook_options = [];
+            $scope.jobTypeChange = function() {
+                if ($scope.job_type) {
+                    if ($scope.job_type.value === 'scan') {
+                        if ($scope.project_name !== "Default") {
+                            last_non_scan_project_name = $scope.project_name;
+                            last_non_scan_playbook = $scope.playbook;
+                            last_non_scan_playbook_options = $scope.playbook_options;
+                        }
+                        // If the job_type is 'scan' then we don't want the user to be
+                        // able to prompt for job type or inventory
+                        $scope.ask_job_type_on_launch = false;
+                        $scope.ask_inventory_on_launch = false;
+                        $scope.resetProjectToDefault();
+                    }
+                    else if ($scope.project_name === "Default") {
+                        $scope.project_name = last_non_scan_project_name;
+                        $scope.playbook_options = last_non_scan_playbook_options;
+                        $scope.playbook = last_non_scan_playbook;
+                        $scope.job_templates_form.playbook.$setPristine();
+                    }
+                }
+                sync_playbook_select2();
             };
 
-            $scope.toggleScanInfo = function() {
+            $scope.resetProjectToDefault = function() {
                 $scope.project_name = 'Default';
-                if($scope.project === null){
-                  selectPlaybook();
-                }
-                else {
-                  $scope.project = null;
-                }
+                $scope.project = null;
+                selectPlaybook('force_load');
             };
 
             // Detect and alert user to potential SCM status issues
@@ -263,21 +297,18 @@
                             var msg;
                             switch (data.status) {
                             case 'failed':
-                                msg = "The selected project has a <em>failed</em> status. Review the project's SCM settings" +
-                                    " and run an update before adding it to a template.";
+                                msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
                                 break;
                             case 'never updated':
-                                msg = 'The selected project has a <em>never updated</em> status. You will need to run a successful' +
-                                    ' update in order to selected a playbook. Without a valid playbook you will not be able ' +
-                                    ' to save this template.';
+                                msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
                                 break;
                             case 'missing':
-                                msg = 'The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
-                                    ' the directory exists and file permissions are set correctly.';
+                                msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
+                                    ' the directory exists and file permissions are set correctly.</div>';
                                 break;
                             }
                             if (msg) {
-                                Alert('Warning', msg, 'alert-info', null, null, null, null, true);
+                                Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                             }
                         })
                         .error(function (data, status) {
@@ -319,7 +350,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {template_id: id}, {reload: true});
+                $state.go('jobTemplates.edit', {id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -330,20 +361,20 @@
                 if (data.related &&
                     data.related.callback) {
                     Alert('Callback URL',
-`
-<p>Host callbacks are enabled for this template. The callback URL is:</p>
-<p style=\"padding: 10px 0;\">
-    <strong>
-        ${$scope.callback_server_path}
-        ${data.related.callback}
-    </string>
-</p>
-<p>The host configuration key is:
-    <strong>
-        ${$filter('sanitize')(data.host_config_key)}
-    </string>
-</p>
-`,
+`<div>
+    <p>Host callbacks are enabled for this template. The callback URL is:</p>
+    <p style=\"padding: 10px 0;\">
+        <strong>
+            ${$scope.callback_server_path}
+            ${data.related.callback}
+        </string>
+    </p>
+    <p>The host configuration key is:
+        <strong>
+            ${$filter('sanitize')(data.host_config_key)}
+        </string>
+    </p>
+</div>`,
                         'alert-info', saveCompleted, null, null,
                         null, true);
                 }
@@ -467,7 +498,14 @@
                         if (form.fields[fld].type === 'select' &&
                             fld !== 'playbook') {
                             data[fld] = $scope[fld].value;
-                        } else {
+                        }
+                        else if(form.fields[fld].type === 'checkbox_group') {
+                            // Loop across the checkboxes
+                            for(var i=0; i<form.fields[fld].fields.length; i++) {
+                                data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
+                            }
+                        }
+                        else {
                             if (fld !== 'variables' &&
                                 fld !== 'survey') {
                                 data[fld] = $scope[fld];
@@ -498,8 +536,19 @@
                     data.survey_enabled = ($scope.survey_enabled &&
                         $scope.survey_exists) ? $scope.survey_enabled : false;
 
+                    // The idea here is that we want to find the new option elements that also have a label that exists in the dom
+                    $("#job_templates_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
+                        $("#job_templates_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
+                            if($(option).text() === $(label).attr('title')) {
+                                // Mark that the option has a label present so that we can filter by that down below
+                                $(option).attr('data-label-is-present', true);
+                            }
+                        });
+                    });
+
                     $scope.newLabels = $("#job_templates_labels > option")
                         .filter("[data-select2-tag=true]")
+                        .filter("[data-label-is-present=true]")
                         .map((i, val) => ({name: $(val).text()}));
 
                     Rest.setUrl(defaultUrl);

@@ -16,7 +16,6 @@ export default
         hover: true,
         well: true,
         listTitle: 'Jobs',
-        searchSize: 'col-lg-8 col-md-8 col-sm-12 col-xs-12',
         emptyListText: 'There are no jobs to display at this time',
 
         fields: {
@@ -38,8 +37,8 @@ export default
                 defaultSearchField: true,
                 linkTo: '/#/jobs/{{job.id}}'
             },
-            started: {
-                label: 'Started',
+            finished: {
+                label: 'Finished',
                 noLink: true,
                 searchable: false,
                 filter: "longDate",

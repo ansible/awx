@@ -78,7 +78,7 @@ class MemObject(object):
                 v = yaml.safe_load(file(path, 'r').read())
                 if hasattr(v, 'items'): # is a dict
                     all_vars.update(v)
-            except yaml.YAMLError, e:
+            except yaml.YAMLError as e:
                 if hasattr(e, 'problem_mark'):
                     logger.error('Invalid YAML in %s:%s col %s', path,
                                  e.problem_mark.line + 1,
@@ -362,7 +362,19 @@ class ExecutableJsonLoader(BaseLoader):
                     raise RuntimeError("proot is not installed but is configured for use")
                 kwargs = {'proot_temp_dir': self.source_dir} # TODO: Remove proot dir
                 cmd = wrap_args_with_proot(cmd, self.source_dir, **kwargs)
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # Use ansible venv if it's available and setup to use
+            env = dict(os.environ.items())
+            if settings.ANSIBLE_USE_VENV:
+                env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+                env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+                venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+                env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+                for python_ver in ["python2.7", "python2.6"]:
+                    if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                        env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                        break
+
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             stdout, stderr = proc.communicate()
             if proc.returncode != 0:
                 raise RuntimeError('%r failed (rc=%d) with output: %s' % (cmd, proc.returncode, stderr))
@@ -857,7 +869,7 @@ class Command(NoArgsCommand):
                 del_pks = del_host_pks[offset:(offset + self._batch_size)]
                 for db_host in db_hosts.filter(pk__in=del_pks):
                     group_host_count += 1
-                    if db_host not in db_group.hosts:
+                    if db_host not in db_group.hosts.all():
                         continue
                     db_group.hosts.remove(db_host)
                     self.logger.info('Host "%s" removed from group "%s"',
@@ -1317,7 +1329,7 @@ class Command(NoArgsCommand):
                 self.logger.warning('Inventory import required %d queries '
                                     'taking %0.3fs', len(queries_this_import),
                                     sqltime)
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 status = 'canceled'
                 exc = e

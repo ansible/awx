@@ -14,7 +14,7 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, $state, Refresh) {
+    SelectionInit, Wait, $state, Refresh, $filter) {
 
     ClearScope();
 
@@ -97,7 +97,11 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
                 .success(function () {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
-                    $scope.search(list.iterator);
+                    if (parseInt($state.params.team_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
+                    }
                 })
                 .error(function (data, status) {
                     Wait('stop');
@@ -111,7 +115,7 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -122,7 +126,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    '$state', 'Refresh'
+    '$state', 'Refresh', '$filter'
 ];
 
 
@@ -294,7 +298,7 @@ export function TeamsEdit($scope, $rootScope, $location,
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function(){
-                $state.go('teams', null, {reload: true});
+                $state.go($state.current, null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +

@@ -103,6 +103,7 @@ export default
                         }
                     }
 
+
                     scope[iterator + 'SearchType' + modifier] = 'icontains';
                     scope[iterator + 'SearchTypeLabel' + modifier] = 'Contains';
                     scope[iterator + 'SearchParams' + modifier] = '';
@@ -302,6 +303,9 @@ export default
                         url += connect + scope[iterator + 'ExtraParms'];
                     }
                     url = url.replace(/\&\&/g, '&').replace(/\?\&/,'?');
+                    if (scope[iterator + 'SearchFilters']){
+                        url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
                     if (calcOnly) {
                         scope.$emit('searchParamsReady', url);
                     }
@@ -322,57 +326,10 @@ export default
                     scope.removePrepareSearch();
                 }
                 scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly, deferWaitStop, spinner) {
-                    //
-                    // Start building the search key/value pairs. This will process each search widget, if the
-                    // selected field is an object type (used on activity stream).
-                    //
+                    // Start the search spinner
                     if (spinner) {
                         Wait('start');
                     }
-                    scope[iterator + 'SearchParams'] = '';
-                    var i, modifier,
-                        widgets = (list.searchWidgets) ? list.searchWidgets : 1;
-
-                    scope[iterator + '_active_search'] = false;
-
-                    for (i = 1; i <= widgets; i++) {
-                        modifier = (i === 1) ? '' : i;
-                        if ($('#search-widget-container' + modifier)) {
-                            if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
-                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
-                                // Search field of object type
-                                if (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject !== 'all') {
-                                    // An object type is selected
-                                    scope[iterator + 'HideAllStartBtn' + modifier] = false;
-                                    scope[iterator + '_active_search'] = true;
-                                    if (scope[iterator + 'SearchValue' + modifier]) {
-                                        // A search value was entered
-                                        scope[iterator + 'ShowStartBtn' + modifier] = false;
-                                        if (list.fields[scope[iterator + 'SearchField' + modifier]].searchOnID) {
-                                            scope[iterator + 'SearchParams'] += '&' +
-                                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject +
-                                                '__id=' + scope[iterator + 'SearchValue' + modifier];
-                                        } else {
-                                            scope[iterator + 'SearchParams'] += '&' +
-                                                list.fields[scope[iterator + 'SearchField' + modifier]].searchObject +
-                                                ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject === 'user') ? '__username__icontains=' : '__name__icontains=' ) +
-                                                scope[iterator + 'SearchValue' + modifier];
-                                        }
-                                    } else {
-                                        // Search value is empty
-                                        scope[iterator + 'ShowStartBtn' + modifier] = true;
-                                        scope[iterator + 'SearchParams'] += '&' +
-                                            list.fields[scope[iterator + 'SearchField' + modifier]].searchField +
-                                            '=' + list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                                    }
-                                } else {
-                                    // Object Type set to All
-                                    scope[iterator + 'HideAllStartBtn' + modifier] = true;
-                                }
-                            }
-                        }
-                    }
-
                     e.stopPropagation();
                     scope.$emit('prepareSearch2', iterator, page, load, calcOnly, deferWaitStop);
 
@@ -386,6 +343,11 @@ export default
                     // there's more than one.
                     var i, modifier,
                         widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+
+                    // Initialize SearchParams as an empty string if it's not defined.  If we don't do this and SearchParams === undefined
+                    // then 'undefined' will sneak into the string as we are concatenating and the request will never get sent since we
+                    // regex search for 'undefined' in the doSearch section of this process.
+                    scope[iterator + 'SearchParams'] = (!scope[iterator + 'SearchParams'] || scope[iterator + 'SearchParams'] === undefined) ? '' : scope[iterator + 'SearchParams'];
 
                     for (i = 1; i <= widgets; i++) {
                         modifier = (i === 1) ? '' : i;
@@ -467,8 +429,7 @@ export default
                     }
 
                     if (sort_order) {
-                        scope[iterator + 'SearchParams'] += (scope[iterator + 'SearchParams']) ? '&' : '';
-                        scope[iterator + 'SearchParams'] += 'order_by=' + encodeURI(sort_order);
+                        scope[iterator + 'SearchParams'] = 'order_by=' + encodeURI(sort_order);
                     }
                     e.stopPropagation();
                     scope.$emit('doSearch', iterator, page, load, calcOnly, deferWaitStop);
@@ -502,7 +463,7 @@ export default
                         scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                     }
 
-                    if(scope[iterator + 'SearchValue' + modifier] && scope[iterator + 'SearchValue' + modifier] !== '') {
+                    if(scope[iterator + 'SearchFilters'] && scope[iterator + 'SearchFilters'].length > 0) {
                         scope[iterator + '_active_search'] = true;
                     }
                     else {
@@ -514,6 +475,12 @@ export default
 
 
                 scope.sort = function (iterator, fld) {
+                    // resets any existing order_by parameters in $scope.current_url;
+                    var resetOrderBy = function(){
+                        var url = _.filter(scope.current_url.split('&'), (o) => !o.includes('order_by'));
+                        scope.current_url = url.join('&');
+                    };
+                    resetOrderBy();
                     // Reset sort icons back to 'icon-sort' on all columns
                     // except the one clicked.
                     $('.list-header').each(function () {
@@ -554,7 +521,6 @@ export default
 
                     scope[list.iterator + '_current_search_params'].sort_order = sort_order;
                     Store(iterator + '_current_search_params', scope[iterator + '_current_search_params']);
-
                     scope.search(list.iterator);
                 };
 

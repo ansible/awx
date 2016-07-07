@@ -6,12 +6,12 @@
 
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
-        'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', '$state',
+        'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' , 'ProcessErrors',
+        'Prompt', '$state', '$filter',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, $state
+            Rest, ProcessErrors, Prompt, $state, $filter
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -58,7 +58,11 @@ export default
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
-                            scope.search(list.iterator);
+                            if (parseInt($state.params.inventory_script_id) === id) {
+                                $state.go("^", null, {reload: true});
+                            } else {
+                                scope.search(list.iterator);
+                            }
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -66,7 +70,7 @@ export default
                         });
                 };
 
-                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory script below?</div><div class="Prompt-bodyTarget">' + name + '</div>';
+                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory script below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
                 Prompt({
                     hdr: 'Delete',
                     body: bodyHtml,

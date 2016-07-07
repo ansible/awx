@@ -45,6 +45,7 @@ export default
                     'default': '---',
                     dataTitle: 'Group Variables',
                     dataPlacement: 'right',
+                    parseTypeName: 'parseType',
                     awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the " +
                         "radio button to toggle between the two.</p>" +
@@ -61,23 +62,15 @@ export default
                     label: 'Source',
                     type: 'select',
                     ngOptions: 'source.label for source in source_type_options track by source.value',
-                    ngChange: 'sourceChange()',
+                    ngChange: 'sourceChange(source)',
                     addRequired: false,
-                    editRequired: false
-                },
-                source_path: {
-                    label: 'Script Path',
-                    ngShow: "source && source.value == 'file'",
-                    type: 'text',
-                    awRequiredWhen: {
-                        reqExpression: "sourcePathRequired",
-                        init: "false"
-                    }
+                    editRequired: false,
+                    ngModel: 'source'
                 },
                 credential: {
                     label: 'Cloud Credential',
                     type: 'lookup',
-                    ngShow: "source && source.value !== 'manual' && source.value !== 'custom'",
+                    ngShow: "source && source.value !== '' && source.value !== 'custom'",
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
@@ -142,12 +135,12 @@ export default
                         "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
                         "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
                         "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                        "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body'
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
-                    labelClass: 'prepend-asterisk',
                     type: 'lookup',
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'inventory_script',
@@ -157,7 +150,8 @@ export default
                     editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
                 },
-                extra_vars: {
+                custom_variables: {
+                    id: 'custom_variables',
                     label: 'Environment Variables', //"{{vars_label}}" ,
                     ngShow: "source && source.value=='custom' ",
                     type: 'textarea',
@@ -169,16 +163,20 @@ export default
                     parseTypeName: 'envParseType',
                     dataTitle: "Environment Variables",
                     dataPlacement: 'right',
-                    awPopOver:  "<p>Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver:  "<p>Provide environment variables to pass to the custom inventory script.</p>" +
+                        "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                        '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                        '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataContainer: 'body'
                 },
-                source_vars: {
+                ec2_variables: {
+                    id: 'ec2_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
-                    ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
+                    ngShow: "source && source.value == 'ec2'",
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     addRequired: false,
@@ -200,11 +198,11 @@ export default
                         '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataContainer: 'body'
                 },
-                inventory_variables: {
+                vmware_variables: {
+                    id: 'vmware_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
 
-                    ngShow: "source && (source.value == 'vmware' || " +
-                                        "source.value == 'openstack')",
+                    ngShow: "source && source.value == 'vmware'",
                     type: 'textarea',
                     addRequired: false,
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -226,16 +224,43 @@ export default
                         '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataContainer: 'body'
                 },
+                openstack_variables: {
+                    id: 'openstack_variables',
+                    label: 'Source Variables', //"{{vars_label}}" ,
+
+                    ngShow: "source && source.value == 'openstack'",
+                    type: 'textarea',
+                    addRequired: false,
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    editRequird: false,
+                    rows: 6,
+                    'default': '---',
+                    parseTypeName: 'envParseType',
+                    dataTitle: "Source Variables",
+                    dataPlacement: 'right',
+                    awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\" target=\"_blank\">" +
+                        "view openstack.yml in the Ansible github repo.</a></p>" +
+                        "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                        '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                        '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                    dataContainer: 'body'
+                },
                 checkbox_group: {
                     label: 'Update Options',
                     type: 'checkbox_group',
-                    ngShow: "source && (source.value !== 'manual' && source.value !== null)",
+                    ngShow: "source && (source.value !== '' && source.value !== null)",
+                    class: 'Form-checkbox--stacked',
 
                     fields: [{
                         name: 'overwrite',
                         label: 'Overwrite',
                         type: 'checkbox',
-                        ngShow: "source.value !== 'manual' && source.value !== null",
+                        ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>If checked, all child groups and hosts not found on the external source will be deleted from ' +
@@ -249,7 +274,7 @@ export default
                         name: 'overwrite_vars',
                         label: 'Overwrite Variables',
                         type: 'checkbox',
-                        ngShow: "source.value !== 'manual' && source.value !== null",
+                        ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
@@ -263,7 +288,7 @@ export default
                         name: 'update_on_launch',
                         label: 'Update on Launch',
                         type: 'checkbox',
-                        ngShow: "source.value !== 'manual' && source.value !== null",
+                        ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
@@ -280,7 +305,7 @@ export default
                     type: 'number',
                     integer: true,
                     min: 0,
-                    ngShow: "source && source.value !== 'manual' && update_on_launch",
+                    ngShow: "source && source.value !== '' && update_on_launch",
                     spinner: true,
                     "default": 0,
                     addRequired: false,
@@ -299,8 +324,9 @@ export default
                     ngClick: 'formCancel()'
                 },
                 save: {
-                    ngClick: 'saveGroup()'
-                }                
+                    ngClick: 'formSave()',
+                    ngDisabled: true
+                }
             },
 
             related: {
@@ -325,9 +351,9 @@ export default
 
                 for (itm in GroupFormObject.related) {
                     if (GroupFormObject.related[itm].include === "NotificationsList") {
-                        GroupFormObject.related[itm] = NotificationsList;
+                        GroupFormObject.related[itm] = angular.copy(NotificationsList);
                         GroupFormObject.related[itm].generateList = true;
-                        GroupFormObject.related[itm].disabled = "source === undefined";
+                        GroupFormObject.related[itm].disabled = "source === undefined || source.value === ''";
                     }
                 }
                 return GroupFormObject;

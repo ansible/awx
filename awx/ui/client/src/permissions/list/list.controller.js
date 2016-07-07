@@ -12,8 +12,15 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
-        function ($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, permissionsList, GenerateList, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
+    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest',
+    'Alert', 'permissionsList', 'generateList', 'Prompt', 'SearchInit',
+    'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels',
+    'permissionsSearchSelect', '$filter',
+        function ($scope, $rootScope, $location, $log, $stateParams, Rest,
+        Alert, permissionsList, GenerateList, Prompt, SearchInit, PaginateInit,
+        ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess,
+        Wait, fieldChoices, fieldLabels, permissionsSearchSelect, $filter) {
 
             ClearScope();
 
@@ -127,7 +134,7 @@ export default
                 if ($scope.PermissionAddAllowed) {
                     Prompt({
                         hdr: 'Delete',
-                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the permission below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the permission below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                         action: action,
                         actionText: 'DELETE'
                     });

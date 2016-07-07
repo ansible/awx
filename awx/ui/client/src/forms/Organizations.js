@@ -47,6 +47,7 @@ export default
 
             related: {
                 permissions: {
+                    basePath: 'organizations/:id/access_list/',
                     awToolTip: 'Please save before assigning permissions',
                     dataPlacement: 'top',
                     type: 'collection',
@@ -76,13 +77,15 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
                         }
                     }
                 },

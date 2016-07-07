@@ -3,6 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
+ /**
+  * This is the list definition for the notification templates list
+  * used in the related tabs
+  */
 
 export default function(){
     return {
@@ -14,13 +18,14 @@ export default function(){
         iterator: 'notification',
         index: false,
         hover: false,
-        basePath: 'notifications',
+        emptyListText: "This list is populated by notification templates added from the&nbsp;<a ui-sref='notifications.add'>Notifications</a>&nbsp;section",
+        basePath: 'notification_templates',
         fields: {
             name: {
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notifications/{{notifier.id}}',
+                linkTo: '/#/notification_templates/{{notifier.id}}',
             },
             notification_type: {
                 label: 'Type',
@@ -30,7 +35,7 @@ export default function(){
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             notification_templates_success: {
-                label: 'Successful',
+                label: 'Success',
                 flag: 'notification_templates_success',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_success\")",
@@ -41,7 +46,7 @@ export default function(){
                 nosort: true,
             },
             notification_templates_error: {
-                label: 'Failed',
+                label: 'Failure',
                 columnClass: 'NotifierList-lastColumn',
                 flag: 'notification_templates_error',
                 type: "toggle",
@@ -51,6 +56,16 @@ export default function(){
                 dataPlacement: "right",
                 searchable: false,
                 nosort: true,
+            }
+        },
+        actions: {
+            add: {
+                label: 'Add Notification',
+                mode: 'all', // One of: edit, select, all
+                ngClick: 'addNotificationTemplate()',
+                awToolTip: 'Create a new notification template',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD NOTIFICATION TEMPLATE'
             }
         }
 

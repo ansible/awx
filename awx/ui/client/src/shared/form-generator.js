@@ -682,7 +682,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<label class=\"";
                         html += (field.inline === undefined || field.inline === true) ? "checkbox-inline" : "";
                         html += (field.labelClass) ? " " + field.labelClass : "";
-                        html += "\">";
+                        html += "\"";
+                        html += (field.ngShow) ? " ng-show=\"" +field.ngShow + "\" " : "";
+                        html += ">";
                     }
 
                     html += "<input type=\"checkbox\" ";
@@ -714,13 +716,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 function label() {
                     var html = '';
                     if (field.label || field.labelBind) {
-                        html += "<label ";
-                        if (horizontal || field.labelClass) {
-                            html += "class=\"";
-                            html += (field.labelClass) ? field.labelClass : "";
-                            html += (horizontal) ? " " + getLabelWidth() : "";
-                            html += "\" ";
-                        }
+                        html += "<label class=\"";
+                        html += (field.labelClass) ? field.labelClass : "";
+                        html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
+                        html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
@@ -732,15 +731,23 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
                         // Variable editing
-                        if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
+                        if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars') {
                             html += "<div class=\"parse-selection\" id=\"" + form.name + "_" + fld + "_parse_type\">" +
                                 "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
+                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange('" + ((field.parseTypeName) ? field.parseTypeName : 'parseType') + "', '" + fld + "'" + ")\"> <span class=\"parse-label\">YAML</span>\n";
                             html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
+                            html += "\" value=\"json\" ng-change=\"parseTypeChange('" + ((field.parseTypeName) ? field.parseTypeName : 'parseType')+ "', '" + fld + "'" + ")\"> <span class=\"parse-label\">JSON</span>\n";
                             html += "</div>\n";
+                        }
+
+                        if (field.labelAction) {
+                            let action = field.labelAction;
+                            let href = action.href || "";
+                            let ngClick = action.ngClick || "";
+                            let cls = action["class"] || "";
+                            html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
                         html += "\n\t</label>\n";
                     }
@@ -763,9 +770,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 if (field.type === 'alertblock') {
                     html += "<div class=\"row\">\n";
                     html += "<div class=\"";
-                    html += (options.modal || options.id) ? "col-lg-12" : "col-lg-8 col-lg-offset-2";
+                    html += (options.modal || options.id) ? "col-lg-12" : "col-lg-12";
                     html += "\">\n";
-                    html += "<div class=\"alert";
+                    html += "<div class=\"Form-alertblock";
                     html += (field.closeable === undefined || field.closeable === true) ? " alert-dismissable" : "";
                     html += "\" ";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
@@ -787,7 +794,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
-                    if((field.excludeMode === undefined || field.excludeMode !== options.mode)) {
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock') {
 
 
                     html += "<div class='form-group Form-formGroup ";
@@ -1153,7 +1160,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                                 html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                    this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
+                                    this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.");
+                                if (field.includePlaybookNotFoundError) {
+                                    html += "  <span ng-show=\"playbookNotFound\">Playbook {{ job_template_obj.playbook }} not found for project.</span>\n";
+                                }
+                                html += "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
 
@@ -1514,7 +1525,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += `<div id="${itm}_tab"`+
                                 `class="Form-tab"`+
                                 `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"` +
-                                `ng-class="{'is-selected': ${itm}Selected, 'Form-tab--disabled' : ${this.form.related[itm].disabled }}">${(collection.title || collection.editTitle)} </div>`;
+                                `ng-class="{'is-selected': ${itm}Selected ` ;
+                            if(this.form.related[itm].disabled){
+                                html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
+                            }
+                            html +=  `}">${(collection.title || collection.editTitle)}</div>`;
                         }
                     }
                     else if(this.mode === "add"){
@@ -1612,7 +1627,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 currentSubForm = field.subForm;
                                 var subFormTitle = this.form.subFormTitles[field.subForm];
 
-                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined"> ';
+                                html += '<div class="Form-subForm '+ currentSubForm + '" ng-hide="'+ hasSubFormField + '.value === undefined || ' + field.hideSubForm + '"> ';
                                 html += '<span class="Form-subForm--title">'+ subFormTitle +'</span>';
                             }
                             else if (!field.subForm && currentSubForm !== undefined) {
@@ -1673,7 +1688,15 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 }
                                 if (btn === 'launch') {
                                     button.label = 'Launch';
-                                    button['class'] = 'btn-primary';
+                                    button['class'] = 'Form-launchButton';
+                                }
+                                if (btn === 'add_survey') {
+                                    button.label = 'Add Survey';
+                                    button['class'] = 'Form-surveyButton';
+                                }
+                                if (btn === 'edit_survey') {
+                                    button.label = 'Edit Survey';
+                                    button['class'] = 'Form-surveyButton';
                                 }
 
                                 // Build button HTML
@@ -1689,6 +1712,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 if (button.ngClick) {
                                     html += this.attr(button, 'ngClick');
                                 }
+                                if (button.awFeature) {
+                                    html += this.attr(button, 'awFeature');
+                                }
                                 if (button.ngDisabled) {
                                     ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
                                     if (btn !== 'reset') {
@@ -1701,6 +1727,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                         //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
                                         //html += "\" ";
                                     }
+                                }
+                                if(button.awToolTip) {
+                                    html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
                                 }
                                 html += ">";
                                 html += " " + button.label + "</button>\n";
@@ -1770,7 +1799,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     form = params.form,
                     itm = params.related,
                     collection = form.related[itm],
-                    act, fld, cnt, base, fAction;
+                    act, fld, cnt, base, fAction, width;
 
                 if (collection.instructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
@@ -1794,10 +1823,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     });
                 var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
 
+                if(actionButtons.length === 0 ){
+                    // The search bar should be full width if there are no
+                    // action buttons
+                    width = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+                }
+                else {
+                    width = "col-lg-8 col-md-8 col-sm-8 col-xs-12";
+                }
                 html += `
                     <div class=\"row\"
                         ng-show=\"${collection.hideSearchAndActions ? false : true}\">
-                        <div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\"
+                        <div class=\"${width}\"
                             ng-show=\"${collection.iterator}Loading == true ||
                                 ${collection.iterator}_active_search == true || (
                                     ${collection.iterator}Loading == false &&
@@ -1805,14 +1842,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     ${collection.iterator}_total_rows > 0) &&
                                     !(is_superuser && ${hideOnSuperuser})\">
                             ${tagSearch}
+                        </div>`;
+
+                if(actionButtons.length>0){
+                    html += `<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12 action_column\">
+                        <div class=\"list-actions\">
+                            ${actionButtons}
                         </div>
-                        <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\">
-                            <div class=\"list-actions\">
-                                ${actionButtons}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                    </div>`;
+                }
+                html += "</div>";
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
 
@@ -1830,7 +1869,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">PLEASE ADD ITEMS TO THIS LIST</div>";
+                var emptyListText = (collection.emptyListText) ? collection.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                html += '<div ng-hide="is_superuser">';
+                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">" + emptyListText + "</div>";
+                html += '</div>';
 
                 html += `
                     <div class=\"List-noItems\" ng-show=\"is_superuser\">
@@ -1850,36 +1892,39 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 `;
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
-                    html += "<th class=\"List-tableHeader list-header ";
-                    html += (collection.fields[fld].class) ? collection.fields[fld].class : "";
-                    html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
+                    if (!collection.fields[fld].searchOnly) {
 
-                    if (!collection.fields[fld].noSort) {
-                        html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
-                    } else {
-                        html += ">";
-                    }
+                        html += "<th class=\"List-tableHeader list-header ";
+                        html += (collection.fields[fld].columnClass) ? collection.fields[fld].columnClass : "";
+                        html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
 
-
-                    html += collection.fields[fld].label;
-
-                    if (!collection.fields[fld].noSort) {
-                        html += " <i class=\"";
-
-
-                        if (collection.fields[fld].key) {
-                            if (collection.fields[fld].desc) {
-                                html += "fa fa-sort-down";
-                            } else {
-                                html += "fa fa-sort-up";
-                            }
+                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
+                            html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
                         } else {
-                            html += "fa fa-sort";
+                            html += ">";
                         }
-                        html += "\"></i>";
-                    }
 
-                    html += "</a></th>\n";
+
+                        html += collection.fields[fld].label;
+
+                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
+                            html += " <i class=\"";
+
+
+                            if (collection.fields[fld].key) {
+                                if (collection.fields[fld].desc) {
+                                    html += "fa fa-sort-down";
+                                } else {
+                                    html += "fa fa-sort-up";
+                                }
+                            } else {
+                                html += "fa fa-sort";
+                            }
+                            html += "\"></i>";
+                        }
+
+                        html += "</a></th>\n";
+                    }
                 }
                 if (collection.fieldActions) {
                     html += "<th class=\"List-tableHeader List-tableHeader--actions\">Actions</th>\n";
@@ -1902,13 +1947,15 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 base = (collection.base) ? collection.base : itm;
                 base = base.replace(/^\//, '');
                 for (fld in collection.fields) {
-                    cnt++;
-                    html += Column({
-                        list: collection,
-                        fld: fld,
-                        options: options,
-                        base: base
-                    });
+                    if (!collection.fields[fld].searchOnly) {
+                        cnt++;
+                        html += Column({
+                            list: collection,
+                            fld: fld,
+                            options: options,
+                            base: base
+                        });
+                    }
                 }
 
                 // Row level actions
@@ -1917,6 +1964,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     for (act in collection.fieldActions) {
                         fAction = collection.fieldActions[act];
                         html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                        html += (fAction.awToolTip) ? 'aw-tool-tip="' + fAction.awToolTip + '"' : '';
+                        html += (fAction.dataPlacement) ? 'data-placement="' + fAction.dataPlacement + '"' : '';
                         html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                         html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
                         html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
@@ -1924,6 +1973,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += " class=\"List-actionButton ";
                         html += (act === 'delete') ? "List-actionButton--delete" : "";
                         html += "\"";
+
                         html += ">";
                         if (fAction.iconClass) {
                             html += "<i class=\"" + fAction.iconClass + "\"></i>";

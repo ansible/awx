@@ -283,7 +283,7 @@ class RunJobTest(BaseJobExecutionTest):
         user = opts['user']
         del opts['user']
         self.cloud_credential = Credential.objects.create(**opts)
-        self.cloud_credential.owner_role.members.add(user)
+        self.cloud_credential.admin_role.members.add(user)
         return self.cloud_credential
 
     def create_test_project(self, playbook_content, role_playbooks=None):

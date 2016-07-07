@@ -1,11 +1,18 @@
 <div id="portal-container-jobs" class="Panel">
-	<div class="btn-group PortalMode-filter">
-	    <button ng-class="{'btn-primary ': activeFilter == 'user',
-	    'btn-default' : activeFilter != 'user' }" 
-	    ng-click='filterUser()' class="btn btn-xs">My Jobs</button>
-	    <button ng-class="{'btn-primary' : activeFilter == 'all',
-	    'btn-default' : activeFilter != 'all'}" ng-click='filterAll()' class="btn btn-xs btn-default">All Jobs</button>
+	<div class="PortalMode-filterHolder">
+		<div class="btn-group PortalMode-filter">
+		    <button ng-class="{'btn-primary ': activeFilter == 'user',
+		    'btn-default' : activeFilter != 'user' }"
+		    ng-click='filterUser()' class="btn btn-xs">My Jobs</button>
+		    <button ng-class="{'btn-primary' : activeFilter == 'all',
+		    'btn-default' : activeFilter != 'all'}" ng-click='filterAll()' class="btn btn-xs btn-default">All Jobs</button>
+		</div>
+		<div class="PortalMode-refresh">
+			<button id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault" ng-click="refresh()" ng-show="socketStatus == 'error'">
+					<span>REFRESH</span>
+			</button>
+		</div>
 	</div>
-        <div id="portal-jobs" >
-        </div>
+    <div id="portal-jobs">
+    </div>
 </div>

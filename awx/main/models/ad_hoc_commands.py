@@ -156,6 +156,25 @@ class AdHocCommand(UnifiedJob):
             h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
             return '%d-%s' % (self.pk, h.hexdigest())
 
+    @property
+    def notification_templates(self):
+        all_inventory_sources = set()
+        for h in self.hosts.all():
+            for invsrc in h.inventory_sources.all():
+                all_inventory_sources.add(invsrc)
+        active_templates = dict(error=set(),
+                                success=set(),
+                                any=set())
+        for invsrc in all_inventory_sources:
+            notifications_dict = invsrc.notification_templates
+            for notification_type in active_templates.keys():
+                for templ in notifications_dict[notification_type]:
+                    active_templates[notification_type].add(templ)
+        active_templates['error'] = list(active_templates['error'])
+        active_templates['any'] = list(active_templates['any'])
+        active_templates['success'] = list(active_templates['success'])
+        return active_templates
+
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 

@@ -15,6 +15,7 @@
                  .success(function(data) {
                      if (scope_var === 'inventory_source') {
                          scope[scope_var + '_name'] = data.summary_fields.group.name;
+                         scope.inventory = data.inventory;
                      }
                      else if (!Empty(data.name)) {
                          scope[scope_var + '_name'] = data.name;
@@ -25,6 +26,9 @@
                      }
                  })
                  .error(function(data, status) {
+                     if (status === 403 && params.ignore_403) {
+                         return;
+                     }
                      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                          msg: 'Failed to retrieve ' + url + '. GET returned: ' + status });
                  });

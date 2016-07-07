@@ -5,26 +5,11 @@
  *************************************************/
 
  export default
-    ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'jobSocket', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, jobSocket, DrawGraph){
+    ['$scope', '$rootScope', '$stateParams', 'Wait', 'JobDetailService', 'DrawGraph', function($scope, $rootScope, $stateParams, Wait, JobDetailService, DrawGraph){
 
         var page_size = 200;
         $scope.loading = $scope.hosts.length > 0 ? false : true;
         $scope.filter = 'all';
-        $scope.search = null;
-
-        var init = function(){
-            Wait('start');
-            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size})
-            .success(function(res){
-                $scope.hosts = res.results;
-                $scope.next = res.next;
-                Wait('stop');
-            });
-            JobDetailService.getJob({id: $stateParams.id})
-            .success(function(res){
-                $scope.status = res.results[0].status;
-            });
-        };
 
         var buildGraph = function(hosts){
             //  status waterfall: unreachable > failed > changed > ok > skipped
@@ -48,22 +33,44 @@
             };
             return count;
         };
-        var socketListener = function(){
-            // emitted by the API in the same function used to persist host summary data
-            // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
-            jobSocket.on('summary_complete', function(data) {
-                // discard socket msgs we don't care about in this context
-                if (parseInt($stateParams.id) === data.unified_job_id){
-                    init();
-                }
+        var init = function(){
+            Wait('start');
+            JobDetailService.getJobHostSummaries($stateParams.id, {page_size: page_size, order_by: 'host_name'})
+            .success(function(res){
+                $scope.hosts = res.results;
+                $scope.next = res.next;
+                $scope.count = buildGraph(res.results);
+                Wait('stop');
+                DrawGraph({count: $scope.count, resize:true});
             });
-            // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
-            jobSocket.on('status_changed', function(data) {
-                if (parseInt($stateParams.id) === data.unified_job_id){
-                    $scope.status = data.status;
-                }
+            JobDetailService.getJob({id: $stateParams.id})
+            .success(function(res){
+                $scope.status = res.results[0].status;
             });
         };
+        if ($rootScope.removeJobStatusChange) {
+            $rootScope.removeJobStatusChange();
+        }
+        // emitted by the API in the same function used to persist host summary data
+        // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
+        $rootScope.removeJobStatusChange = $rootScope.$on('JobSummaryComplete', function(e, data) {
+            // discard socket msgs we don't care about in this context
+            if (parseInt($stateParams.id) === data.unified_job_id){
+                init();
+            }
+        });
+
+        // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
+        if ($rootScope.removeJobSummaryComplete) {
+            $rootScope.removeJobSummaryComplete();
+        }
+        $rootScope.removeJobSummaryComplete = $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+            if (parseInt($stateParams.id) === data.unified_job_id){
+                $scope.status = data.status;
+            }
+        });
+
+
         $scope.buildTooltip = function(n, status){
             var grammar = function(n, status){
                 var dict = {
@@ -92,22 +99,31 @@
             }
         };
         $scope.search = function(){
-            Wait('start');
-            JobDetailService.getJobHostSummaries($stateParams.id, {
-                page_size: page_size,
-                host_name__icontains: $scope.searchTerm,
-            }).success(function(res){
-                $scope.hosts = res.results;
-                $scope.next = res.next;
-                Wait('stop');
-            });
+            if($scope.searchTerm && $scope.searchTerm !== '') {
+                $scope.searchActive = true;
+                Wait('start');
+                JobDetailService.getJobHostSummaries($stateParams.id, {
+                    page_size: page_size,
+                    host_name__icontains: $scope.searchTerm,
+                }).success(function(res){
+                    $scope.hosts = res.results;
+                    $scope.next = res.next;
+                    Wait('stop');
+                });
+            }
+        };
+        $scope.clearSearch = function(){
+            $scope.searchActive = false;
+            $scope.searchTerm = null;
+            init();
         };
         $scope.setFilter = function(filter){
             $scope.filter = filter;
             var getAll = function(){
                 Wait('start');
                 JobDetailService.getJobHostSummaries($stateParams.id, {
-                    page_size: page_size
+                    page_size: page_size,
+                    order_by: 'host_name'
                 }).success(function(res){
                     Wait('stop');
                     $scope.hosts = res.results;
@@ -118,7 +134,8 @@
                 Wait('start');
                 JobDetailService.getJobHostSummaries($stateParams.id, {
                     page_size: page_size,
-                    failed: true
+                    failed: true,
+                    order_by: 'host_name'
                 }).success(function(res){
                     Wait('stop');
                     $scope.hosts = res.results;
@@ -128,10 +145,9 @@
             $scope.get = filter === 'all' ? getAll() : getFailed();
         };
 
-        $scope.$watchCollection('hosts', function(curr){
-            $scope.count = buildGraph(curr);
-            DrawGraph({count: $scope.count, resize:true});
-        });
-        socketListener();
+        init();
+        // calling the init routine twice will size the d3 chart correctly - no idea why
+        // instantiating the graph inside a setTimeout() SHOULD have the same effect, but it doesn't
+        // instantiating the graph further down the promise chain e.g. .then() or .finally() also does not work
         init();
     }];

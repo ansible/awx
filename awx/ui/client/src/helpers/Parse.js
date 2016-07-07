@@ -16,7 +16,8 @@
 
 export default
     angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
-        .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', function (Alert, AngularCodeMirror) {
+        .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror',
+        function (Alert, AngularCodeMirror) {
             return function (params) {
 
                 var scope = params.scope,
@@ -26,28 +27,18 @@ export default
                     onReady = params.onReady,
                     onChange = params.onChange;
 
-                function removeField() {
+                function removeField(fld) {
                     //set our model to the last change in CodeMirror and then destroy CodeMirror
-                    scope[fld] = scope.codeMirror.getValue();
-
-                    // codeMirror.destroy looks for anything with a CodeMirror class and destroys it, so if there are multiple codeMirror editor instances, it will delete them all,
-                    // // which was the case if launching a job from the job template form. I had to add a check to see if there were multiple instances and only remove the second one found on the modal.
-                    // if( $(".CodeMirror").length >1) {
-                    //     var self = scope.codeMirror;
-                    //     $('.CodeMirror:eq(1)').empty().remove();
-                    //     if (self.element) {
-                    //         self.element.show();
-                    //     }
-                    // }
-                    // else
-                    scope.codeMirror.destroy();
+                    scope[fld] = scope[fld + 'codeMirror'].getValue();
+                    $('#cm-' + fld + '-container > .CodeMirror').empty().remove();
                 }
 
-                function createField(onChange, onReady) {
+                function createField(onChange, onReady, fld) {
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
-                    scope.codeMirror = AngularCodeMirror();
-                    scope.codeMirror.addModes($AnsibleConfig.variable_edit_modes);
-                    scope.codeMirror.showTextArea({
+
+                    scope[fld + 'codeMirror'] = AngularCodeMirror();
+                    scope[fld + 'codeMirror'].addModes($AnsibleConfig.variable_edit_modes);
+                    scope[fld + 'codeMirror'].showTextArea({
                         scope: scope,
                         model: fld,
                         element: field_id,
@@ -59,16 +50,16 @@ export default
                 }
 
                 // Hide the textarea and show a CodeMirror editor
-                createField(onChange, onReady);
+                createField(onChange, onReady, fld);
 
 
                 // Toggle displayed variable string between JSON and YAML
-                scope.parseTypeChange = function() {
+                scope.parseTypeChange = function(model, fld) {
                     var json_obj;
-                    if (scope[pfld] === 'json') {
+                    if (scope[model] === 'json') {
                         // converting yaml to json
                         try {
-                            removeField();
+                            removeField(fld);
                             json_obj = jsyaml.load(scope[fld]);
                             if ($.isEmptyObject(json_obj)) {
                                 scope[fld] = "{}";
@@ -76,17 +67,17 @@ export default
                             else {
                                 scope[fld] = JSON.stringify(json_obj, null, " ");
                             }
-                            createField();
+                            createField(onReady, onChange, fld);
                         }
                         catch (e) {
                             Alert('Parse Error', 'Failed to parse valid YAML. ' + e.message);
-                            setTimeout( function() { scope.$apply( function() { scope[pfld] = 'yaml'; createField(); }); }, 500);
+                            setTimeout( function() { scope.$apply( function() { scope[model] = 'yaml'; createField(); }); }, 500);
                         }
                     }
                     else {
                         // convert json to yaml
                         try {
-                            removeField();
+                            removeField(fld);
                             json_obj = JSON.parse(scope[fld]);
                             if ($.isEmptyObject(json_obj)) {
                                 scope[fld] = '---';
@@ -94,11 +85,11 @@ export default
                             else {
                                 scope[fld] = jsyaml.safeDump(json_obj);
                             }
-                            createField();
+                            createField(onReady, onChange, fld);
                         }
                         catch (e) {
                             Alert('Parse Error', 'Failed to parse valid JSON. ' + e.message);
-                            setTimeout( function() { scope.$apply( function() { scope[pfld] = 'json'; createField(); }); }, 500 );
+                            setTimeout( function() { scope.$apply( function() { scope[model] = 'json'; createField(); }); }, 500 );
                         }
                     }
                 };

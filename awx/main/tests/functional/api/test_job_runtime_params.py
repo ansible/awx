@@ -70,7 +70,7 @@ def bad_scan_JT(job_template_prompts):
 # End of setup, tests start here
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, user, mocker):
+def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, admin_user, mocker):
     job_template = job_template_prompts(False)
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
@@ -78,8 +78,7 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, us
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                            runtime_data, user('admin', True))
-            assert response.status_code == 201
+                            runtime_data, admin_user, expect=201)
 
     # Check that job is serialized correctly
     job_id = response.data['job']
@@ -99,7 +98,7 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, us
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user, mocker):
+def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admin_user, mocker):
     job_template = job_template_prompts(True)
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
@@ -107,9 +106,8 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, user
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                            runtime_data, user('admin', True))
+                            runtime_data, admin_user, expect=201)
 
-    assert response.status_code == 201
     job_id = response.data['job']
     assert job_id == 968
 
@@ -134,51 +132,47 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                            runtime_data, rando)
+                            runtime_data, rando, expect=201)
 
-    assert response.status_code == 201
     job_id = response.data['job']
     assert job_id == 968
     mock_job.signal_start.assert_called_once_with(**runtime_data)
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, post, user):
+def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(True)
 
     response = post(
         reverse('api:job_template_launch', args=[job_template.pk]),
         dict(job_type='foobicate',  # foobicate is not a valid job type
-             inventory=87865, credential=48474), user('admin', True))
+             inventory=87865, credential=48474), admin_user, expect=400)
 
-    assert response.status_code == 400
     assert response.data['job_type'] == [u'"foobicate" is not a valid choice.']
     assert response.data['inventory'] == [u'Invalid pk "87865" - object does not exist.']
     assert response.data['credential'] == [u'Invalid pk "48474" - object does not exist.']
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_prompts, post, user):
+def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(True)
 
     response = post(
         reverse('api:job_template_launch', args=[job_template.pk]),
-        dict(extra_vars='{"unbalanced brackets":'), user('admin', True))
+        dict(extra_vars='{"unbalanced brackets":'), admin_user, expect=400)
 
-    assert response.status_code == 400
     assert response.data['extra_vars'] == ['Must be a valid JSON or YAML dictionary.']
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, user):
+def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, admin_user):
     deploy_jobtemplate.inventory = None
     deploy_jobtemplate.save()
 
     response = post(reverse('api:job_template_launch',
-                    args=[deploy_jobtemplate.pk]), {}, user('admin', True))
+                    args=[deploy_jobtemplate.pk]), {}, admin_user, expect=400)
 
-    assert response.status_code == 400
-    assert response.data['inventory'] == ['Job Template Inventory is missing or undefined.']
+    assert response.data['inventory'] == ["Job Template 'inventory' is missing or undefined."]
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -188,9 +182,8 @@ def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime
 
     # Assure that giving an inventory without access to the inventory blocks the launch
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    dict(inventory=runtime_data['inventory']), rando)
+                    dict(inventory=runtime_data['inventory']), rando, expect=403)
 
-    assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
 
 @pytest.mark.django_db
@@ -201,9 +194,8 @@ def test_job_launch_fails_without_credential_access(job_template_prompts, runtim
 
     # Assure that giving a credential without access blocks the launch
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    dict(credential=runtime_data['credential']), rando)
+                    dict(credential=runtime_data['credential']), rando, expect=403)
 
-    assert response.status_code == 403
     assert response.data['detail'] == u'You do not have permission to perform this action.'
 
 @pytest.mark.django_db
@@ -213,20 +205,19 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
 
     # Assure that changing the type of a scan job blocks the launch
     response = post(reverse('api:job_template_launch', args=[job_template.pk]),
-                    dict(job_type='scan'), admin_user)
+                    dict(job_type='scan'), admin_user, expect=400)
 
-    assert response.status_code == 400
     assert 'job_type' in response.data
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_block_scan_job_inv_change(mocker, bad_scan_JT, runtime_data, post, admin_user):
     # Assure that giving a new inventory for a scan job blocks the launch
-    with mocker.patch('awx.main.access.BaseAccess.check_license', return_value=True):
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
         response = post(reverse('api:job_template_launch', args=[bad_scan_JT.pk]),
-                        dict(inventory=runtime_data['inventory']), admin_user)
+                        dict(inventory=runtime_data['inventory']), admin_user,
+                        expect=400)
 
-    assert response.status_code == 400
     assert 'inventory' in response.data
 
 @pytest.mark.django_db
@@ -286,41 +277,23 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_launch_unprompted_vars_with_survey(mocker, job_template_prompts, post, user):
-    with mocker.patch('awx.main.access.BaseAccess.check_license', return_value=False):
-        job_template = job_template_prompts(False)
-        job_template.survey_enabled = True
-        job_template.survey_spec = {
-            "spec": [
-                {
-                    "index": 0,
-                    "question_name": "survey_var",
-                    "min": 0,
-                    "default": "",
-                    "max": 100,
-                    "question_description": "A survey question",
-                    "required": True,
-                    "variable": "survey_var",
-                    "choices": "",
-                    "type": "integer"
-                }
-            ],
-            "description": "",
-            "name": ""
-        }
-        job_template.save()
+def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
+    job_template = job_template_prompts(False)
+    job_template.survey_enabled = True
+    job_template.survey_spec = survey_spec_factory('survey_var')
+    job_template.save()
 
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
         mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
         with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
-            with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
+            with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 response = post(
                     reverse('api:job_template_launch', args=[job_template.pk]),
                     dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
-                    user('admin', True))
-                assert response.status_code == 201
+                    admin_user, expect=201)
 
-        job_id = response.data['job']
-        assert job_id == 968
+    job_id = response.data['job']
+    assert job_id == 968
 
-        # Check that the survey variable is accepted and the job variable isn't
-        mock_job.signal_start.assert_called_once_with(extra_vars={"survey_var": 4})
+    # Check that the survey variable is accepted and the job variable isn't
+    mock_job.signal_start.assert_called_once_with(extra_vars={"survey_var": 4})

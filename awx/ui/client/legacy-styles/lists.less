@@ -150,7 +150,6 @@ table, tbody {
 
 .List-header {
     display: flex;
-    align-items: center;
     min-height: 34px;
 }
 
@@ -204,7 +203,7 @@ table, tbody {
 }
 
 .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
-    margin-left: 10px;
+    margin-left: 20px;
 }
 
 .List-buttonSubmit {
@@ -375,6 +374,18 @@ table, tbody {
     color: #d7d7d7;
     display: block;
     font-size: 13px;
+}
+
+.List-action--showTooltipOnDisabled {
+    display: inline-block;
+}
+
+.List-action--showTooltipOnDisabled .btn[disabled] {
+    pointer-events: none;
+}
+
+.List-action--showTooltipOnDisabled.disabled {
+    cursor: not-allowed;
 }
 
 @media (max-width: 991px) {

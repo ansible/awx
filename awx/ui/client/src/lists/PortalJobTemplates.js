@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('PortalJobTemplatesListDefinition', [])
@@ -16,8 +16,7 @@ export default
         index: false,
         hover: true,
         well: true,
-        searchSize: 'col-lg-8 col-md-8 col-sm-12 col-xs-12',
-        emptyListText: 'There are no job templates to display at this time',    
+        emptyListText: 'There are no job templates to display at this time',
         fields: {
             name: {
                 key: true,

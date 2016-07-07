@@ -48,12 +48,18 @@ User.add_to_class('admin_role', user_admin_role)
 @property
 def user_get_organizations(user):
     return Organization.objects.filter(member_role__members=user)
+
 @property
 def user_get_admin_of_organizations(user):
     return Organization.objects.filter(admin_role__members=user)
 
+@property
+def user_get_auditor_of_organizations(user):
+    return Organization.objects.filter(auditor_role__members=user)
+
 User.add_to_class('organizations', user_get_organizations)
 User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
+User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 
 @property
 def user_is_system_auditor(user):

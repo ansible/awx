@@ -34,7 +34,7 @@ function user_type_sync($scope) {
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, $state, Refresh) {
+    Wait, $state, Refresh, $filter) {
 
     ClearScope();
 
@@ -111,7 +111,11 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    $scope.search(list.iterator);
+                    if (parseInt($state.params.user_id) === id) {
+                        $state.go("^", null, {reload: true});
+                    } else {
+                        $scope.search(list.iterator);
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -121,7 +125,7 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the user below?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the user below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -132,7 +136,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
-    'Refresh'
+    'Refresh', '$filter'
 ];
 
 
@@ -162,7 +166,7 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0]
+    $scope.user_type = user_type_options[0];
     $scope.$watch('user_type', user_type_sync($scope));
 
     CreateSelect2({
@@ -271,7 +275,7 @@ export function UsersEdit($scope, $rootScope, $location,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0]
+    $scope.user_type = user_type_options[0];
     $scope.$watch('user_type', user_type_sync($scope));
 
     var setScopeFields = function(data){
@@ -343,6 +347,8 @@ export function UsersEdit($scope, $rootScope, $location,
                 $scope.is_superuser = true;
             }
 
+            $scope.user_obj = data;
+
             CreateSelect2({
                 element: '#user_user_type',
                 multiple: false
@@ -386,7 +392,7 @@ export function UsersEdit($scope, $rootScope, $location,
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function(){
-                $state.go('users', null, {reload: true});
+                $state.go($state.current, null, {reload: true});
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +

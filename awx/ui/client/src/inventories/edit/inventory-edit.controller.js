@@ -15,7 +15,8 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit,
     PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
-    Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state) {
+    Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state,
+    $filter) {
 
     ClearScope();
 
@@ -132,7 +133,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
       Rest.put(data)
           .success(function () {
               Wait('stop');
-              $location.path('/inventories/');
+              $state.go($state.current, {}, {reload: true});
           })
           .error(function (data, status) {
               ProcessErrors($scope, data, status, form, { hdr: 'Error!',
@@ -312,7 +313,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + this.scan_job_template.name + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' +  $filter('sanitize')(this.scan_job_template.name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -328,5 +329,5 @@ export default ['$scope', '$rootScope', '$compile', '$location',
     'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString',
     'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt',
     'InitiatePlaybookRun', 'CreateDialog', 'deleteJobTemplate', '$state',
-    InventoriesEdit,
+    '$filter', InventoriesEdit,
 ];

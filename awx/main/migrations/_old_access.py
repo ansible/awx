@@ -880,7 +880,6 @@ class JobTemplateAccess(BaseAccess):
 
         team_ids = Team.objects.filter(deprecated_users__in=[self.user])
 
-        # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team_id__in=team_ids),
             permission_type__in=allowed_deploy,
@@ -1094,7 +1093,6 @@ class JobAccess(BaseAccess):
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
         team_ids = Team.objects.filter(deprecated_users__in=[self.user])
 
-        # TODO: I think the below queries can be combined
         deploy_permissions_ids = Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             permission_type__in=allowed_deploy,

@@ -147,8 +147,7 @@ def test_credential_detail(post, get, organization, org_admin):
     response = get(reverse('api:credential_detail', args=(response.data['id'],)), org_admin)
     assert response.status_code == 200
     summary_fields = response.data['summary_fields']
-    assert 'owners' in summary_fields
-    assert summary_fields['owners'][0]['id'] == organization.id
+    assert 'organization' in summary_fields
     related_fields = response.data['related']
     assert 'organization' in related_fields
 
@@ -217,13 +216,16 @@ def test_openstack_create_fail_required_fields(post, organization, admin):
 #
 
 @pytest.mark.django_db
-def test_create_credential_xfails(post, organization, team, admin):
+def test_create_credential_missing_user_team_org_xfail(post, admin):
     # Must specify one of user, team, or organization
     response = post(reverse('api:credential_list'), {
         'name': 'Some name',
         'username': 'someusername',
     }, admin)
     assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_create_credential_with_user_and_org_xfail(post, organization, admin):
     # Can only specify one of user, team, or organization
     response = post(reverse('api:credential_list'), {
         'name': 'Some name',
@@ -232,6 +234,9 @@ def test_create_credential_xfails(post, organization, team, admin):
         'organization': organization.id,
     }, admin)
     assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_create_credential_with_team_and_org_xfail(post, organization, team, admin):
     response = post(reverse('api:credential_list'), {
         'name': 'Some name',
         'username': 'someusername',
@@ -239,6 +244,9 @@ def test_create_credential_xfails(post, organization, team, admin):
         'team': team.id,
     }, admin)
     assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_create_credential_with_user_and_team_xfail(post, team, admin):
     response = post(reverse('api:credential_list'), {
         'name': 'Some name',
         'username': 'someusername',
@@ -246,7 +254,3 @@ def test_create_credential_xfails(post, organization, team, admin):
         'team': team.id,
     }, admin)
     assert response.status_code == 400
-
-
-
-

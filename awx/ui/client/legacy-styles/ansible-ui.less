@@ -80,6 +80,12 @@ a.red-txt:active {
     text-overflow: ellipsis;
 }
 
+.name-column {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 blockquote {
     font-size: 14px;
 }
@@ -195,6 +201,10 @@ i:active,
     span {
       padding: 3px;
     }
+}
+
+.IdleModal-remainingSeconds{
+    color: @default-err;
 }
 
 #configure-schedules-tab {
@@ -400,6 +410,10 @@ textarea.allowresize {
 /* TB tooltip overrides */
   .popover-content {
       width: 100%;
+
+      .table>tbody>tr>td {
+          border-top: 1px solid @b7grey;
+      }
   }
   h3.popover-title, .popover-content, .popover-content blockquote, .popover-content a {
       font-size: 12px;
@@ -473,6 +487,7 @@ textarea.allowresize {
 .tooltip-inner {
   padding: 10px;
   text-align:left;
+  max-width: 150px;
 }
 
 .alert {
@@ -922,7 +937,6 @@ select.page-size {
 */
 /* end */
 
-
 .greeting {
   padding-right: 22px;
 }
@@ -962,6 +976,10 @@ input[type="checkbox"].checkbox-no-label {
   .checkbox-inline, .radio-inline {
     margin-right: 10px;
   }
+
+  .checkbox-inline.stack-inline {
+      display: block;
+  }
 }
 
 .checkbox-options {
@@ -972,6 +990,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
     text-align: right;
+    margin-bottom: 20px;
 
     .fa-lg {
         vertical-align: -8%;
@@ -1076,6 +1095,12 @@ input[type="checkbox"].checkbox-no-label {
       display: inline-block;
     }
   }
+}
+
+.table.table-condensed.flyout {
+    thead>tr>th {
+        border: none;
+    }
 }
 
 
@@ -1966,7 +1991,6 @@ tr td button i {
   }
 
   .list-actions {
-      margin-bottom: 20px;
       text-align: left;
   }
 
@@ -1974,11 +1998,15 @@ tr td button i {
 
 .nvtooltip {
     border-radius: 4px;
-    padding: 10px;
+    padding: 3px 10px;
 }
 
 .nvtooltip td.value {
     padding-right: 0px;
+}
+
+.nvtooltip p {
+    padding: 3px 0px;
 }
 
 .nvd3 g.nv-groups path.nv-line {
@@ -2234,4 +2262,16 @@ a:hover {
 
 .dropdown-menu>li>a {
     padding: 3px 10px;
+}
+
+#scheduled-jobs-tab .List-header {
+    display: none;
+}
+
+.ui-widget {
+    font-family: 'Open Sans';
+}
+
+.modal-body .alert {
+    padding: 10px;
 }

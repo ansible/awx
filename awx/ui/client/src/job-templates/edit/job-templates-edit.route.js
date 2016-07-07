@@ -8,13 +8,14 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'jobTemplates.edit',
-    url: '/:template_id',
+    url: '/:id',
     templateUrl: templateUrl('job-templates/edit/job-templates-edit'),
     controller: 'JobTemplatesEdit',
     data: {
-        activityStreamId: 'template_id'
+        activityStreamId: 'id'
     },
-    params: {
-        copied: null
+    ncyBreadcrumb: {
+        parent: 'jobTemplates',
+        label: "{{name}}"
     }
 };

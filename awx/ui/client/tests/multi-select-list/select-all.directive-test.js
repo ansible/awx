@@ -1,4 +1,4 @@
-import '../support/node';
+/*import '../support/node';
 
 import {describeModule} from '../support/describe-module';
 import mod from 'shared/multi-select-list/main';
@@ -92,4 +92,4 @@ describeModule(mod.name)
 
 
     });
-});
+});*/

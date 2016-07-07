@@ -36,14 +36,13 @@
             <div id="survey_maker_question_form"></div>
         </div>
         <div class="SurveyMaker-separatorPanel">
-            <div class="SurveyMaker-contentSeparator">
-            </div>
+            <div class="SurveyMaker-contentSeparator"></div>
         </div>
         <div class="SurveyMaker-previewPanel">
             <div style="display: flex; flex-direction: column; width: 100%;">
                 <div class="SurveyMaker-panelHeader">PREVIEW</div>
                 <div class="SurveyMaker-panelBody">
-                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions">PLEASE ADD A QUESTION ON THE LEFT</div>
+                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions">PLEASE ADD A SURVEY PROMPT ON THE LEFT.</div>
                     <ul dnd-list="survey_questions" class="SurveyMaker-previewRows" dnd-drop="surveyQuestionDropped(index, item)">
                         <li ng-repeat="question in survey_questions" dnd-draggable="question" dnd-effect-allowed="move" class="SurveyMaker-previewRow">
                             <dnd-nodrag>

@@ -1,14 +1,14 @@
 <div class="License-container"
 	ng-class="{'License-container--missing': licenseMissing}">
-	<div class="License-details" ng-if="!licenseMissing">
+	<div class="License-details" ng-hide="licenseMissing">
 		<div class="Panel">
 			<div class="License-titleText">Details</div>
 			<div class="License-fields">
 				<div class="License-field">
 					<div class="License-field--label">License</div>
 					<div class="License-field--content">
-					<span ng-show='valid'><i class="fa fa-circle License-greenText"></i>Valid</span>
-					<span ng-show='invalid'><i class="fa fa-circle License-redText"></i>Invalid</span>
+					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i>Valid License</span>
+					<span class="License-redText" ng-show='!compliant'><i class="fa fa-circle License-redText"></i>Invalid License</span>
 					</div>
 				</div>
 				<div class="License-field">
@@ -31,7 +31,7 @@
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">License Key</div>
-					<div class="License-field--content">
+					<div class="License-field--content License-field--key">
 					{{license.license_info.license_key}}
 					</div>
 				</div>
@@ -43,7 +43,8 @@
 				</div>
 				<div class="License-field">
 					<div class="License-field--label">Time Remaining</div>
-					<div class="License-field--content">
+					<div class="License-field--content"
+						ng-class="{'License-redText': time.remaining=='0 Days'}">
 					{{time.remaining}}
 					</div>
 				</div>
@@ -74,6 +75,7 @@
 		<div class="Panel">
 			<div class="License-titleText">{{title}}</div>
 			<div class="License-body">
+				<div class="License-helperText" ng-if="licenseMissing">Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
 				<div class="AddPermissions-directions" ng-if="licenseMissing">
 					<span class="AddPermissions-directionNumber">
 						1

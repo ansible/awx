@@ -53,6 +53,9 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
 
         var options = Object
             .keys(list)
+            .filter(function(fieldType) {
+                return list[fieldType].noSearch !== true;
+            })
             .map(function(key, id) {
                 return that.buildType(list[key], key, id);
         });
@@ -122,7 +125,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
     };
 
     // returns the url with filter params
-    this.updateFilteredUrl = function(basePath, tags, pageSize) {
+    this.updateFilteredUrl = function(basePath, tags, pageSize, searchParams) {
         // remove the chain directive from all the urls that might have
         // been added previously
         tags = (tags || []).map(function(val) {
@@ -168,7 +171,8 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         return returnedUrl +
             (tags || []).map(function (t) {
                 return t.url;
-            }).join("&") + "&page_size=" + pageSize;
+            }).join("&") + "&page_size=" + pageSize +
+            ((searchParams) ? "&" + searchParams : "");
     };
 
     // given the field and input filters, create the tag object
@@ -177,6 +181,9 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (tag.type === "text") {
             tag.url = tag.value + "__icontains=" + textVal;
             tag.name = textVal;
+        } else if (selectVal.value && typeof selectVal.value === 'string' && selectVal.value.indexOf("=") > 0) {
+            tag.url = selectVal.value;
+            tag.name = selectVal.label;
         } else {
             tag.url = tag.value + "=" + selectVal.value;
             tag.name = selectVal.label;

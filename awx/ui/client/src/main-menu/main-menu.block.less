@@ -18,7 +18,7 @@
 }
 
 .MainMenu--licenseMissing{
-    justify-content: flex-end;
+    justify-content: space-between;
 }
 
 .MainMenu-logo,
@@ -35,6 +35,11 @@
     margin: 20px;
 }
 
+.MainMenu-logoImage--licenseMissing:hover{
+    cursor:default;
+    background-color: @default-bg!important;
+}
+
 .MainMenu-item {
     padding: 0 20px;
 }
@@ -49,11 +54,7 @@
 }
 
 .MainMenu-socket {
-    transition: background-color 0.2s, color 0.2s, border-bottom 0.1s, padding-top 0.1s;
-    color: @menu-link-icon;
-    background: url(assets/socket_background.png) @menu-bg;
-    background-size: 55px 52px;
-    background-repeat: no-repeat;
+    background-color: @default-bg;
     order: 0;
     flex: initial;
     padding-top: 0px;
@@ -190,6 +191,23 @@
 
     .MainMenu-item--notMobile {
         display: none;
+    }
+
+    .MainMenu-item--licenseMissing{
+        justify-content: space-between!important;
+        display:flex!important;
+        align-items: center!important;
+        flex: initial!important;
+        padding-top:0px;
+    }
+
+    .MainMenu-item--licenseMissing:hover{
+        padding-top:20px;
+        border-bottom: 5px solid @menu-link-btm-hov;
+    }
+
+    .MainMenu-itemImage--licenseMissing{
+        font-size: 20px!important;
     }
 
     .MainMenu {

@@ -42,26 +42,9 @@
                         (mm/dd/yyyy)
                     </span>
                 </label>
-                <div class="input-group Form-inputGroup">
-                    <input type="text"
-                        class="form-control input-sm
-                            Form-textInput"
-                        name="schedulerStartDt"
-                        id="schedulerStartDt"
-                        ng-model="schedulerStartDt"
-                        sch-date-picker
-                        placeholder="mm/dd/yyyy"
-                        required
-                        ng-change="scheduleTimeChange(processSchedulerEndDt)" >
-                        <span class="input-group-btn">
-                            <button
-                                class="btn btn-default btn-sm
-                                    Form-inputButton Form-lookupButton"
-                                type="button"
-                                ng-click="showCalendar('schedulerStartDt')">
-                                <i class="fa fa-calendar"></i>
-                            </button>
-                        </span>
+                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                    <scheduler-date-picker date="schedulerStartDt">
+                    </scheduler-date-picker>
                 </div>
                 <div class="error"
                     ng-show="scheduler_form_schedulerStartDt_error"
@@ -87,6 +70,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             ScheduleTime-input SpinnerInput"
+                        aw-spinner="schedulerStartHour"
                         ng-model="schedulerStartHour"
                         placeholder="HH24"
                         aw-min="0" min="0" aw-max="23"
@@ -101,6 +85,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartMinute"
                         ng-model="schedulerStartMinute"
                         placeholder="MM"
                         min="0" max="59" data-zero-pad="2"
@@ -115,6 +100,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartSecond"
                         ng-model="schedulerStartSecond"
                         placeholder="SS"
                         min="0" max="59" data-zero-pad="2"
@@ -167,7 +153,7 @@
                 <div class="form-group
                     RepeatFrequencyOptions-everyGroup
                     RepeatFrequencyOptions-formGroup"
-                    ng-if="schedulerShowInterval">
+                    ng-show="schedulerShowInterval">
                     <label class="Form-inputLabel
                         RepeatFrequencyOptions-everyLabel">
                         <span class="red-text">*</span>
@@ -178,7 +164,8 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner
                             SpinnerInput"
-                        ng-model="$parent.schedulerInterval"
+                        aw-spinner="schedulerInterval"
+                        ng-model="schedulerInterval"
                         min="1"
                         max="999"
                         ng-change="resetError('scheduler_interval_error')"
@@ -213,6 +200,7 @@
                         id="monthDay"
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner SpinnerInput"
+                        aw-spinner="$parent.monthDay"
                         ng-model="$parent.monthDay"
                         min="1" max="31"
                         ng-change="resetError('scheduler_monthDay_error')" >
@@ -291,6 +279,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-spinner
                                 SpinnerInput"
+                            aw-spinner="$parent.yearlyMonthDay"
                             ng-model="$parent.yearlyMonthDay"
                             min="1" max="31"
                             ng-change="resetError('scheduler_yearlyMonthDay_error')"
@@ -464,6 +453,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-spinner
                                 SpinnerInput"
+                            aw-spinner="$parent.schedulerOccurrenceCount"
                             ng-model="$parent.schedulerOccurrenceCount"
                             min="1" max="999"
                             on-change="resetError('scheduler_occurrenceCount_error')"
@@ -483,33 +473,16 @@
                             (mm/dd/yyyy)
                         </span>
                     </label>
-                    <div class="input-group Form-inputGroup">
-                        <input type="text"
-                            name="schedulerEndDt"
-                            id="schedulerEndDt"
-                            class="form-control input-sm
-                                Form-textInput"
-                            ng-model="$parent.schedulerEndDt"
-                            sch-date-picker
-                            data-min-today="true"
-                            placeholder="mm/dd/yyyy"
-                            ng-change="$parent.resetError('scheduler_endDt_error')">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default btn-sm
-                                Form-inputButton Form-lookupButton"
-                                type="button"
-                                ng-click="showCalendar('schedulerEndDt')"
-                            >
-                                <i class="fa fa-calendar"></i>
-                            </button>
-                        </span>
+                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                        <scheduler-date-picker date="$parent.schedulerEndDt">
+                        </scheduler-date-picker>
                     </div>
                     <div class="error"
                         ng-show="$parent.scheduler_endDt_error">
                         Please provide a valid date.
                     </div>
                 </div>
-                <div class="form-group SchedulerForm-formGroup" 
+                <div class="form-group SchedulerForm-formGroup"
                 ng-if="schedulerEnd && schedulerEnd.value == 'on'">
                     <label class="Form-inputLabel">
                         <span class="red-text">*</span>
@@ -529,6 +502,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 ScheduleTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndHour"
                             ng-model="$parent.schedulerEndHour"
                             placeholder="HH24"
                             aw-min="0" min="0" aw-max="23"
@@ -543,6 +517,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndMinute"
                             ng-model="$parent.schedulerEndMinute"
                             placeholder="MM"
                             min="0" max="59" data-zero-pad="2"
@@ -557,6 +532,7 @@
                             sch-spinner="scheduler_form"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
+                            aw-spinner="$parent.schedulerEndSecond"
                             ng-model="$parent.schedulerEndSecond"
                             placeholder="SS"
                             min="0" max="59" data-zero-pad="2"
@@ -583,9 +559,9 @@
         <div class="SchedulerFormDetail-container"
             ng-show="schedulerIsValid">
             <label class="SchedulerFormDetail-label">
-                Description
+                Schedule Description
             </label>
-            <div class="SchedulerFormDetail-nlp">
+            <div class="SchedulerFormDetail-nlp" ng-hide="rrule_nlp_description == 'Natural language description not available' ">
                 {{ rrule_nlp_description }}
             </div>
             <div class="SchedulerFormDetail-occurrenceHeader">
@@ -651,7 +627,7 @@
                 <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>"
                 data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
                     <i class="fa fa-question-circle"></i>
-                </a> 
+                </a>
 
                 <div class="parse-selection">
                     <input type="radio" ng-model="parseType" ng-change="parseTypeChange()" value="yaml"><span class="parse-label">YAML</span>
@@ -666,14 +642,13 @@
     </div>
             <div class="buttons Form-buttons">
                 <button type="button"
+                    class="btn btn-sm Form-cancelButton"
+                    id="project_cancel_btn"
+                    ng-click="formCancel()">Cancel</button>
+                <button type="button"
                     class="btn btn-sm Form-saveButton"
                     id="project_save_btn"
                     ng-click="saveSchedule()"
                     ng-disabled="!schedulerIsValid"> Save</button>
-                <button type="button"
-                    class="btn btn-sm Form-cancelButton"
-                    id="project_cancel_btn"
-                    ng-click="formCancel()">Cancel</button>
             </div>
     </div>
-</div>

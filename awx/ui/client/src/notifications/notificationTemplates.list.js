@@ -3,8 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
-
-
+ /**
+  * This is the list definition for the notification templates list
+  * off of the settings page
+  */
 
 export default function(){
     return {
@@ -25,9 +27,7 @@ export default function(){
                 excludeModal: true,
                 icons: [{
                     icon: "{{ 'icon-job-' + notification_template.status }}",
-                    awToolTip: "Click for recent notifications",
-                    awTipPlacement: "right",
-                    ngClick: "showSummary($event, notification_templates.id)",
+                    ngClick: "showSummary($event, notification_template.id)",
                     ngClass: ""
                 }]
             },
@@ -35,7 +35,7 @@ export default function(){
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notifications/{{notification_template.id}}'
+                linkTo: '/#/notification_templates/{{notification_template.id}}'
             },
             notification_type: {
                     label: 'Type',

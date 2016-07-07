@@ -78,25 +78,6 @@ def test_team_symantics(organization, team, alice):
     team.member_role.members.remove(alice)
     assert alice not in organization.auditor_role
 
-@pytest.mark.django_db
-def test_auto_m2m_adjustments(organization, inventory, group_factory, alice):
-    'Ensures the auto role reparenting is working correctly through m2m maps'
-    g1 = group_factory(name='g1')
-    g1.admin_role.members.add(alice)
-    assert alice in g1.admin_role
-    g2 = group_factory(name='g2')
-    assert alice not in g2.admin_role
-
-    g2.parents.add(g1)
-    assert alice in g2.admin_role
-    g2.parents.remove(g1)
-    assert alice not in g2.admin_role
-
-    g1.children.add(g2)
-    assert alice in g2.admin_role
-    g1.children.remove(g2)
-    assert alice not in g2.admin_role
-
 
 @pytest.mark.django_db
 def test_auto_field_adjustments(organization, inventory, team, alice):

@@ -216,8 +216,8 @@ function($compile, CreateDialog, Wait, ParseTypeChange) {
               $location.path('/projects');
             }
             if (scope.socketStatus === 'error') {
-              Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-              'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
+              Alert('Update Started', '<div>The request to start the SCM update process was submitted. ' +
+              'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.</div>', 'alert-info', null, null, null, null, true);
               if (scope.refresh) {
                 scope.refresh();
               }
@@ -281,8 +281,8 @@ function($compile, CreateDialog, Wait, ParseTypeChange) {
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
           Wait('stop');
           if (scope.socketStatus === 'error') {
-            Alert('Sync Started', 'The request to start the inventory sync process was submitted. ' +
-            'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info', null, null, null, null, true);
+            Alert('Sync Started', '<div>The request to start the inventory sync process was submitted. ' +
+            'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.</div>', 'alert-info', null, null, null, null, true);
             if (scope.refreshGroups) {
               // inventory detail page
               scope.refreshGroups();

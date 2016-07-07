@@ -13,6 +13,7 @@ export default
             return {
                 restrict: 'E',
                 scope: {
+                    allSelected: '='
                 },
                 template: "<div class='addPermissionsList-inner'></div>",
                 link: function(scope, element, attrs, ctrl) {
@@ -49,6 +50,23 @@ export default
 
                         PaginateInit({ scope: scope,
                             list: list, url: url, pageSize: 5 });
+
+                        if (scope.removePostRefresh) {
+                            scope.removePostRefresh();
+                        }
+                        scope.removePostRefresh = scope.$on('PostRefresh', function () {
+                            if(scope.allSelected && scope.allSelected.length > 0) {
+                                // We need to check to see if any of the selected items are now in our list!
+                                for(var i=0; i<scope.allSelected.length; i++) {
+                                    for(var j=0; j<scope[set].length; j++) {
+                                        if(scope.allSelected[i].id === scope[set][j].id && scope.allSelected[i].type === scope[set][j].type) {
+                                            // If so, let's go ahead and mark it as selected so that select-list-item knows to check the box
+                                            scope[set][j].isSelected = true;
+                                        }
+                                    }
+                                }
+                            }
+                        });
 
                         scope.search(list.iterator);
                     });
