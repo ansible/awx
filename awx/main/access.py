@@ -1087,7 +1087,7 @@ class AdHocCommandAccess(BaseAccess):
             return qs.all()
 
         credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
-        inventory_qs = Inventory.accessible_objects(self.user, 'adhoc_role')
+        inventory_qs = Inventory.accessible_objects(self.user, 'read_role')
 
         return qs.filter(credential_id__in=credential_ids,
                          inventory__in=inventory_qs)
