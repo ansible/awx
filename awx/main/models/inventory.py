@@ -309,8 +309,7 @@ class Inventory(CommonModel, ResourceMixin):
             else:
                 computed_fields.pop(field)
         if computed_fields:
-            if len(computed_fields) > 0:
-                iobj.save(update_fields=computed_fields.keys())
+            iobj.save(update_fields=computed_fields.keys())
         logger.debug("Finished updating inventory computed fields")
 
     @property
