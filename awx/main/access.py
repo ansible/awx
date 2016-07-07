@@ -224,7 +224,8 @@ class UserAccess(BaseAccess):
         if self.user.is_superuser:
             return User.objects.all()
 
-        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.exists():
+        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+            (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
             return User.objects.all()
 
         return (
