@@ -2188,8 +2188,9 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(JobTemplate, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete job template.")
-        for pu in obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']):
-            pu.cancel()
+        if obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']).exists():
+            return Response({"error": "Delete not allowed while there are jobs running"},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
 
 
