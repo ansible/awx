@@ -20,30 +20,18 @@ export default
                 name: 'managementJobSchedules',
                 route: '/management_jobs/:id/schedules',
                 templateUrl: templateUrl('scheduler/scheduler'),
-                controller: 'managementJobController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobsList',
-                    label: 'SCHEDULES'
-                }
+                controller: 'managementJobController'
             });
             $stateExtender.addState({
                 name: 'managementJobSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
-                controller: 'managementJobAddController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobSchedules',
-                    label: 'CREATE SCHEDULED JOB'
-                }
+                controller: 'managementJobAddController'
             });
             $stateExtender.addState({
                 name: 'managementJobSchedules.edit',
                 route: '/edit/:schedule_id',
                 templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
-                controller: 'managementJobEditController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobSchedules',
-                    label: 'EDIT SCHEDULED JOB'
-                }
+                controller: 'managementJobEditController'
             });
         }]);

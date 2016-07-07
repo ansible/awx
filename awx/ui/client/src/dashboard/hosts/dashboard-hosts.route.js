@@ -22,6 +22,9 @@ var dashboardHostsList =  {
         label: "HOSTS"
     },
     resolve: {
+        features: ['FeaturesService', function(FeaturesService) {
+            return FeaturesService.get();
+        }],
         hosts: ['Rest', 'GetBasePath', '$stateParams', function(Rest, GetBasePath, $stateParams){
             var defaultUrl = GetBasePath('hosts') + '?page_size=10' + ($stateParams['active-failures'] ? '&has_active_failures=true' : '' );
             Rest.setUrl(defaultUrl);

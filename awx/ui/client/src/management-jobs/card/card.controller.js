@@ -7,11 +7,11 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$compile',  'CreateDialog', 'GetBasePath' ,
+    [   'Wait', '$location' , '$compile',  'CreateDialog', 'GetBasePath' ,
         'SearchInit' , 'PaginateInit', 'SchedulesList', 'Rest' ,
         'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
         '$scope', 'CreateSelect2',
-        function( Wait, $compile, CreateDialog, GetBasePath,
+        function( Wait, $location, $compile, CreateDialog, GetBasePath,
             SearchInit, PaginateInit, SchedulesList, Rest, ProcessErrors,
             managementJobsListObject, $rootScope, $state, $scope,
             CreateSelect2) {
@@ -129,11 +129,11 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .success(function() {
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
                                             $("#configure-tower-dialog").dialog('close');
-                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
+                                            $location.path('/jobs/');
                                         })
                                         .error(function(data, status) {
                                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -217,11 +217,11 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .success(function() {
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-tower-dialog").dialog('close');
-                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
+                                            $location.path('/jobs/');
                                         })
                                         .error(function(data, status) {
                                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',

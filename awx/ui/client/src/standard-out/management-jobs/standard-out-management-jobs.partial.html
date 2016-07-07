@@ -4,13 +4,7 @@
         <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
             <div class="Panel">
                 <div class="StandardOut-panelHeader">
-                    <div class="StandardOut-panelHeaderText">
-                        RESULTS
-                    </div>
-                    <div class="StandardOut-actions">
-                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
-                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
-                    </div>
+                    RESULTS
                 </div>
                 <div class="StandardOut-details">
 
@@ -30,14 +24,14 @@
                     <div class="StandardOut-detailsRow" ng-show="job.started">
                         <div class="StandardOut-detailsLabel">STARTED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.started | longDate }}
+                            {{ job.started | date:'MM/dd/yy HH:mm:ss' }}
                         </div>
                     </div>
 
                     <div class="StandardOut-detailsRow" ng-show="job.finished">
                         <div class="StandardOut-detailsLabel">FINISHED</div>
                         <div class="StandardOut-detailsContent">
-                            {{ job.finished | longDate }}
+                            {{ job.finished | date:'MM/dd/yy HH:mm:ss' }}
                         </div>
                     </div>
 
@@ -76,7 +70,7 @@
                         </button>
                     </div>
                 </div>
-                <standard-out-log stdout-text="job.result_stdout"></standard-out-log>
+                <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log>
             </div>
         </div>
     </div>

@@ -167,7 +167,7 @@
                 <div class="form-group
                     RepeatFrequencyOptions-everyGroup
                     RepeatFrequencyOptions-formGroup"
-                    ng-show="schedulerShowInterval">
+                    ng-if="schedulerShowInterval">
                     <label class="Form-inputLabel
                         RepeatFrequencyOptions-everyLabel">
                         <span class="red-text">*</span>
@@ -178,7 +178,7 @@
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner
                             SpinnerInput"
-                        ng-model="schedulerInterval"
+                        ng-model="$parent.schedulerInterval"
                         min="1"
                         max="999"
                         ng-change="resetError('scheduler_interval_error')"
@@ -509,7 +509,7 @@
                         Please provide a valid date.
                     </div>
                 </div>
-                <div class="form-group SchedulerForm-formGroup"
+                <div class="form-group SchedulerForm-formGroup" 
                 ng-if="schedulerEnd && schedulerEnd.value == 'on'">
                     <label class="Form-inputLabel">
                         <span class="red-text">*</span>
@@ -583,9 +583,9 @@
         <div class="SchedulerFormDetail-container"
             ng-show="schedulerIsValid">
             <label class="SchedulerFormDetail-label">
-                Schedule Description
+                Description
             </label>
-            <div class="SchedulerFormDetail-nlp" ng-hide="rrule_nlp_description == 'Natural language description not available' ">
+            <div class="SchedulerFormDetail-nlp">
                 {{ rrule_nlp_description }}
             </div>
             <div class="SchedulerFormDetail-occurrenceHeader">
@@ -651,7 +651,7 @@
                 <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>"
                 data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
                     <i class="fa fa-question-circle"></i>
-                </a>
+                </a> 
 
                 <div class="parse-selection">
                     <input type="radio" ng-model="parseType" ng-change="parseTypeChange()" value="yaml"><span class="parse-label">YAML</span>

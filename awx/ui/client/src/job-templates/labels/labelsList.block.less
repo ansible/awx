@@ -7,8 +7,7 @@
     align-items: flex-start;
 }
 
-.LabelList-tagContainer,
-.LabelList-seeMore {
+.LabelList-tagContainer {
     display: flex;
     max-width: 100%;
 }
@@ -17,10 +16,11 @@
     border-radius: 5px;
     padding: 2px 10px;
     margin: 4px 0px;
+    border: 1px solid @d7grey;
     font-size: 12px;
-    color: @default-bg;
+    color: @default-interface-txt;
     text-transform: uppercase;
-    background-color: @default-link;
+    background-color: @default-bg;
     margin-right: 5px;
     max-width: 100%;
     white-space: nowrap;
@@ -28,36 +28,23 @@
     overflow: hidden;
 }
 
-.LabelList-seeMore {
-    color: @default-link;
-    margin: 4px 0px;
-    text-transform: uppercase;
-    padding: 2px 0px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 11px;
-}
-
-.LabelList-seeMore:hover {
-    color: @default-link-hov;
-}
-
 .LabelList-tag--deletable {
     margin-right: 0px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
     border-right: 0;
-    max-width: ~"calc(100% - 23px)";
-    margin-right: 5px;
+    max-wdith: ~"calc(100% - 23px)";
 }
 
 .LabelList-deleteContainer {
-    background-color: @default-link;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-    color: @default-bg;
+    border: 1px solid @d7grey;
+    border-left-color: @default-bg;
+    background-color: @default-bg;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
     padding: 0 5px;
     margin: 4px 0px;
+    margin-right: 5px;
     align-items: center;
     display: flex;
     cursor: pointer;
@@ -65,7 +52,7 @@
 
 .LabelList-tagDelete {
     font-size: 13px;
-    color: @default-bg;
+    color: @default-icon;
 }
 
 .LabelList-name {

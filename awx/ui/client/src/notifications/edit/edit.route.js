@@ -43,6 +43,6 @@ export default {
     },
     ncyBreadcrumb: {
         parent: 'notifications',
-        label: '{{notification_obj.name}}'
+        label: 'Edit Notification Template'
     }
 };

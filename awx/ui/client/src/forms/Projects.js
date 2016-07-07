@@ -48,6 +48,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
+                awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
+                    'the project is created you can add additional organizations.</p><p>Only super users and organization administrators are allowed ' +
+                    'to make changes to projects. Associating one or more organizations to a project determins which organizations admins have ' +
+                    'access to modify the project.',
                 dataTitle: 'Organization',
                 dataContainer: 'body',
                 dataPlacement: 'right'
@@ -60,10 +64,11 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngChange: 'scmChange()',
                 addRequired: true,
                 editRequired: true,
-                hasSubForm: true,
+                hasSubForm: true
             },
             missing_path_alert: {
                 type: 'alertblock',
+                "class": 'alert-info',
                 ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.  ' +
                     'Either that directory is empty, or all of the contents are already assigned to other projects.  ' +
@@ -74,7 +79,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             base_dir: {
                 label: 'Project Base Path',
                 type: 'text',
-                class: 'Form-textUneditable',
+                //"class": 'col-lg-6',
                 showonly: true,
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
@@ -110,12 +115,30 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     init: false
                 },
                 subForm: 'sourceSubForm',
-                hideSubForm: "scm_type.value === 'manual'",
-                awPopOverWatch: "urlPopover",
-                awPopOver: "set in controllers/projects",
-                dataTitle: 'SCM URL',
-                dataContainer: 'body',
-                dataPlacement: 'right'
+                helpCollapse: [{
+                    hdr: 'GIT URLs',
+                    content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                        '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
+                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
+                        'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
+                        'SSH. GIT read only protocol (git://) does not use username or password information.',
+                    show: "scm_type.value == 'git'"
+                }, {
+                    hdr: 'SVN URLs',
+                    content: '<p>Example URLs for Subversion SCM include:</p>' +
+                        '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
+                        '<li>svn+ssh://servername.example.com/path</li></ul>',
+                    show: "scm_type.value == 'svn'"
+                }, {
+                    hdr: 'Mercurial URLs',
+                    content: '<p>Example URLs for Mercurial SCM include:</p>' +
+                        '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
+                        '<li>ssh://server.example.com/path</li></ul>' +
+                        '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
+                        'Do not put the username and key in the URL. ' +
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.',
+                    show: "scm_type.value == 'hg'"
+                }],
             },
             scm_branch: {
                 labelBind: "scmBranchLabel",
@@ -151,7 +174,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Clean',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options'
                 }, {
                     name: 'scm_delete_on_update',
                     label: 'Delete on Update',
@@ -163,7 +186,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Delete',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options'
                 }, {
                     name: 'scm_update_on_launch',
                     label: 'Update on Launch',
@@ -174,7 +197,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Update',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options'
                 }]
             },
             scm_update_cache_timeout: {
@@ -239,20 +262,18 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         label: 'Role',
                         type: 'role',
                         noSort: true,
-                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                        noSearch: true
+                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                     },
                     team_roles: {
                         label: 'Team Roles',
                         type: 'team_roles',
                         noSort: true,
-                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                        noSearch: true
+                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                     }
                 }
             },
             notifications: {
-                include: "NotificationsList",
+                include: "NotificationsList"
             }
         },
 

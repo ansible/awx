@@ -66,7 +66,7 @@ export default
             };
 
             $scope.editJobTemplate = function (id) {
-                $state.transitionTo('jobTemplates.edit', {id: id});
+                $state.transitionTo('jobTemplates.edit', {template_id: id});
             };
 
             $scope.deleteJobTemplate = function (id, name) {
@@ -78,9 +78,6 @@ export default
                     Rest.destroy()
                         .success(function () {
                             $scope.search(list.iterator);
-                            if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $state.go('^');
-                            }
                         })
                         .error(function (data) {
                             Wait('stop');

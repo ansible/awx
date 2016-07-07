@@ -5,7 +5,7 @@
  *************************************************/
 
  import {hostEventModal, hostEventDetails,
-  hostEventJson, hostEventStdout, hostEventStderr} from './host-event.route';
+  hostEventJson, hostEventStdout} from './host-event.route';
  import controller from './host-event.controller';
 
  export default
@@ -17,5 +17,4 @@
  			$stateExtender.addState(hostEventDetails);
  			$stateExtender.addState(hostEventJson);
  			$stateExtender.addState(hostEventStdout);
- 			$stateExtender.addState(hostEventStderr);
  		}]);

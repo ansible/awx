@@ -59,7 +59,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 callback = params.callback,
                 beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
-                resizable = (params.resizable === undefined) ? false : params.resizable,
+                resizable = (params.resizable === undefined) ? true : params.resizable,
                 draggable = (params.draggable === undefined) ? true : params.draggable,
                 dialogClass = params.dialogClass,
                 forms = _.chain([params.form]).flatten().compact().value(),

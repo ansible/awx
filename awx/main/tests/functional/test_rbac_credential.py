@@ -118,9 +118,6 @@ def test_cred_job_template(user, team, deploy_jobtemplate):
 
     access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
-
-    cred.refresh_from_db()
-
     assert access.can_change(cred, {'organization': org.pk})
 
     org.admin_role.members.remove(a)
@@ -138,8 +135,6 @@ def test_cred_multi_job_template_single_org_xfail(user, deploy_jobtemplate):
 
     access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
-    cred.refresh_from_db()
-
     assert not access.can_change(cred, {'organization': org.pk})
 
 @pytest.mark.django_db
@@ -154,8 +149,6 @@ def test_cred_multi_job_template_single_org(user, team, deploy_jobtemplate):
 
     access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
-    cred.refresh_from_db()
-
     assert access.can_change(cred, {'organization': org.pk})
 
     org.admin_role.members.remove(a)
@@ -187,7 +180,6 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
 
     for jt in jts:
         jt.refresh_from_db()
-    credential.refresh_from_db()
 
     assert jts[0].credential != jts[1].credential
     assert access.can_change(jts[0].credential, {'organization': org.pk})

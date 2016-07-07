@@ -43,7 +43,7 @@ export default {
         ]
     },
     ncyBreadcrumb: {
-        parent: 'managementJobsList',
-        label: 'NOTIFICATIONS'
-    }
+        parent: 'setup',
+        label: 'MANAGEMENT JOBS'
+    },
 };

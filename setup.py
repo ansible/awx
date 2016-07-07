@@ -7,6 +7,7 @@ import os
 import datetime
 import glob
 import sys
+import shutil
 from setuptools import setup
 
 from awx import __version__
@@ -22,10 +23,13 @@ homedir = "/var/lib/awx"
 bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
 docdir = "/usr/share/doc/ansible-tower"
+munin_plugin_path = "/etc/munin/plugins/"
+munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
     webconfig  = "/etc/apache2/conf.d"
+    shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
     # debian/<package>.links will create symlinks to support both versions
@@ -33,6 +37,7 @@ if os.path.exists("/etc/debian_version"):
 else:
     sysinit = "/etc/rc.d/init.d"
     webconfig  = "/etc/httpd/conf.d"
+    shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"
 
@@ -115,9 +120,22 @@ setup(
         ("%s" % homedir,        ["config/wsgi.py",
                                  "awx/static/favicon.ico"]),
         ("%s" % webconfig,      ["config/awx-httpd-80.conf",
-                                 "config/awx-httpd-443.conf"]),
+                                 "config/awx-httpd-443.conf",
+                                 "config/awx-munin.conf"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
+        ("%s" % munin_plugin_path, ["tools/munin_monitors/tower_jobs",
+                                    "tools/munin_monitors/callbackr_alive",
+                                    "tools/munin_monitors/celery_alive",
+                                    "tools/munin_monitors/postgres_alive",
+                                    "tools/munin_monitors/redis_alive",
+                                    "tools/munin_monitors/socketio_alive",
+                                    "tools/munin_monitors/taskmanager_alive",
+                                    "tools/munin_monitors/mongo_conn",
+                                    "tools/munin_monitors/mongo_docs",
+                                    "tools/munin_monitors/mongo_mem",
+                                    "tools/munin_monitors/mongo_ops"]),
+        ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
                          "tools/scripts/tower-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),

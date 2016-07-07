@@ -318,15 +318,10 @@ def activity_stream_create(sender, instance, created, **kwargs):
             return
         # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
-        changes = model_to_dict(instance, model_serializer_mapping)
-        # Special case where Job survey password variables need to be hidden
-        if type(instance) == Job:
-            if 'extra_vars' in changes:
-                changes['extra_vars'] = instance.display_extra_vars()
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=json.dumps(changes))
+            changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
         activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
@@ -384,16 +379,11 @@ def activity_stream_associate(sender, instance, **kwargs):
         obj1 = instance
         object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
-
         for entity_acted in kwargs['pk_set']:
             obj2 = kwargs['model']
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
-            if isinstance(obj2_actual, Role) and obj2_actual.content_object is not None:
-                obj2_actual = obj2_actual.content_object
-                object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)
-            else:
-                object2 = camelcase_to_underscore(obj2.__name__)
+            object2 = camelcase_to_underscore(obj2.__name__)
             # Skip recording any inventory source, or system job template changes here.
             if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
                 continue
@@ -419,7 +409,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 # If the m2m is from the User side we need to
                 # set the content_object of the Role for our entry.
                 if type(instance) == User and role.content_object is not None:
-                    getattr(activity_entry, role.content_type.name.replace(' ', '_')).add(role.content_object)
+                    getattr(activity_entry, role.content_type.name).add(role.content_object)
 
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel

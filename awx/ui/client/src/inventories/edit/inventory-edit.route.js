@@ -16,7 +16,11 @@ export default {
         activityStreamId: 'inventory_id'
     },
     ncyBreadcrumb: {
-        parent: 'inventories',
-        label: "{{inventory_obj.name}}"
+        label: "INVENTORY EDIT"
+    },
+    resolve: {
+        features: ['FeaturesService', function(FeaturesService) {
+            return FeaturesService.get();
+        }]
     }
 };

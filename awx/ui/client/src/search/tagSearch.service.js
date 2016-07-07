@@ -53,9 +53,6 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
 
         var options = Object
             .keys(list)
-            .filter(function(fieldType) {
-                return list[fieldType].noSearch !== true;
-            })
             .map(function(key, id) {
                 return that.buildType(list[key], key, id);
         });
@@ -180,9 +177,6 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (tag.type === "text") {
             tag.url = tag.value + "__icontains=" + textVal;
             tag.name = textVal;
-        } else if (selectVal.value && typeof selectVal.value === 'string' && selectVal.value.indexOf("=") > 0) {
-            tag.url = selectVal.value;
-            tag.name = selectVal.label;
         } else {
             tag.url = tag.value + "=" + selectVal.value;
             tag.name = selectVal.label;

@@ -107,33 +107,12 @@ export default
                     Rest.post(job_launch_data)
                     .success(function(data) {
                         Wait('stop');
-                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
+                        var job = data.job || data.system_job;
                         if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
-
-                            var goToJobDetails = function(state) {
-                                $state.go(state, {id: job}, {reload:true});
-                            };
-
-                            if(_.has(data, 'job')) {
-                                goToJobDetails('jobDetail');
-                            }
-                            else if(_.has(data, 'ad_hoc_command')) {
-                                goToJobDetails('adHocJobStdout');
-                            }
-                            else if(_.has(data, 'system_job')) {
-                                goToJobDetails('managementJobStdout');
-                            }
-                            else if(_.has(data, 'project_update')) {
-                                goToJobDetails('scmUpdateStdout');
-                            }
-                            else if(_.has(data, 'inventory_update')) {
-                                goToJobDetails('inventorySyncStdout');
-                            }
+                            $state.go('jobDetail', {id: job}, {reload: true});
                         }
-                        if(scope.clearDialog) {
-                            scope.clearDialog();
-                        }
+                        scope.clearDialog();
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',

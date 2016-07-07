@@ -31,7 +31,7 @@ export default ['Rest', 'ProcessErrors', 'generateList',
 
             var parent_scope = params.scope,
                 form = params.form,
-                list = _.cloneDeep(params.list),
+                list = params.list,
                 field = params.field,
                 instructions = params.instructions,
                 postAction = params.postAction,
@@ -132,7 +132,6 @@ export default ['Rest', 'ProcessErrors', 'generateList',
                 master[field] = scope[field];
                 master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
                     scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
-                    list.searchSize = 'col-lg-12 col-md-12 col-sm-12 col-xs-12';
                 GenerateList.inject(list, {
                     mode: 'lookup',
                     id: 'LookupModal-dialog',

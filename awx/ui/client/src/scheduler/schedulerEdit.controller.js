@@ -49,13 +49,13 @@ export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$
     };
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
-    if ($state.current.name !== 'managementJobSchedules.add' && $state.current.name !== 'managementJobSchedules.edit'){
+    if ($state.current.name !== ('managementJobSchedules.add' || 'managementJobSchedules.edit')){
         $scope.$on('ScheduleFound', function(){
-            ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
+            ParseTypeChange({ 
+                scope: $scope, 
+                variable: 'extraVars', 
                 parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars'
+                field_id: 'SchedulerForm-extraVars' 
             });
         });
     }

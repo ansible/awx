@@ -11,17 +11,22 @@
 */
 
 export default
-    [   '$location', '$rootScope', '$filter', '$scope', '$compile', '$state', '$stateParams', '$log', 'ClearScope',
-        'GetBasePath', 'Wait', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed', 'JobIsFinished',
-        'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'InitiatePlaybookRun', 'LoadPlays', 'LoadTasks',
-        'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule',
-        'ParseTypeChange', 'JobDetailService',
+    [   '$location', '$rootScope', '$filter', '$scope', '$compile',
+        '$stateParams', '$log', 'ClearScope', 'GetBasePath', 'Wait',
+        'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed',
+        'JobIsFinished',  'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'InitiatePlaybookRun',
+        'LoadPlays', 'LoadTasks', 'HostsEdit',
+        'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels',
+        'EditSchedule', 'ParseTypeChange', 'JobDetailService',
         function(
-            $location, $rootScope, $filter, $scope, $compile, $state, $stateParams, $log, ClearScope,
-            GetBasePath, Wait, ProcessErrors, SelectPlay, SelectTask, GetElapsed, JobIsFinished,
-            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, InitiatePlaybookRun, LoadPlays, LoadTasks,
-            ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule,
-            ParseTypeChange, JobDetailService
+            $location, $rootScope, $filter, $scope, $compile, $stateParams,
+            $log, ClearScope, GetBasePath, Wait, ProcessErrors,
+            SelectPlay, SelectTask, GetElapsed,
+            JobIsFinished,
+            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob,
+            InitiatePlaybookRun, LoadPlays, LoadTasks,
+            HostsEdit, ParseVariableString, GetChoices, fieldChoices,
+            fieldLabels, EditSchedule, ParseTypeChange, JobDetailService
         ) {
             ClearScope();
 
@@ -160,14 +165,8 @@ export default
             scope.processing = false;
             scope.lessStatus = false;
             scope.lessDetail = false;
-            // pops the event summary panel open if we're in the host summary child state
-            //scope.lessEvents = ($state.current.name === 'jobDetail.host-summary' || $state.current.name === 'jobDetail.host-events') ? false : true;
-            if ($state.current.name === 'jobDetail.host-summary' ){
-                scope.lessEvents = false;
-            }
-            else{
-                scope.lessEvents = true;
-            }
+            scope.lessEvents = true;
+
             scope.jobData = {};
             scope.jobData.hostSummaries = {};
 
@@ -206,11 +205,6 @@ export default
                         DigestEvent({ scope: scope, event: data });
                     }
                     UpdateDOM({ scope: scope });
-                });
-                // Unbind $rootScope socket event binding(s) so that they don't get triggered
-                // in another instance of this controller
-                scope.$on('$destroy', function() {
-                    $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
                 });
             }
             openSocket();
@@ -678,9 +672,21 @@ export default
 
                 scope.lessStatus = false; // close the view more status option
 
-
+                // Detail table height adjusting. First, put page height back to 'normal'.
+                $('#plays-table-detail').height(80);
+                //$('#plays-table-detail').mCustomScrollbar("update");
+                // $('#tasks-table-detail').height(120);
+                //$('#tasks-table-detail').mCustomScrollbar("update");
+                $('#hosts-table-detail').height(150);
+                //$('#hosts-table-detail').mCustomScrollbar("update");
                 height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
                     $('#job-detail-container').outerHeight() - 20;
+                if (height > 15) {
+                    // there's a bunch of white space at the bottom, let's use it
+                    $('#plays-table-detail').height(80 + (height * 0.10));
+                    $('#tasks-table-detail').height(120 + (height * 0.20));
+                    $('#hosts-table-detail').height(150 + (height * 0.10));
+                }
                 scope.$emit('RefreshCompleted');
             };
 
@@ -769,41 +775,12 @@ export default
                 }
             };
 
-            scope.filterTaskStatus = function() {
-                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
             scope.filterPlayStatus = function() {
                 scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
                 if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
                     LoadPlays({
                         scope: scope
                     });
-                }
-            };
-
-            scope.filterHostStatus = function(){
-                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents){
-                    if (scope.selectedTask !== null && scope.selectedPlay !== null){
-                        var params = {
-                            parent: scope.selectedTask,
-                            page_size: scope.hostResultsMaxRows,
-                            order: 'host_name,counter',
-                        };
-                        if (scope.search_host_status === 'failed'){
-                            params.failed = true;
-                        }
-                        JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                            scope.hostResults = JobDetailService.processHostEvents(res.results);
-                            scope.hostResultsLoading = false;
-                        });
-                    }
                 }
             };
 

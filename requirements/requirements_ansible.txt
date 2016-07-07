@@ -3,7 +3,7 @@ apache-libcloud==0.20.1
 appdirs==1.4.0
 azure==2.0.0rc2
 Babel==2.2.0
-boto==2.40.0
+boto==2.34.0
 cliff==1.15.0
 cmd2==0.6.8
 cryptography==1.3.2
@@ -61,7 +61,7 @@ python-openstackclient==2.0.0
 python-swiftclient==2.7.0
 python-troveclient==1.4.0
 pytz==2015.7
-pywinrm[kerberos]==0.2.0
+pywinrm==0.1.1
 PyYAML==3.11
 pyzmq==14.5.0
 rackspace-auth-openstack==1.3

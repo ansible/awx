@@ -5,19 +5,14 @@
  *************************************************/
 
 import {templateUrl} from '../../shared/template-url/template-url.factory';
-import OrganizationsAdmins from './controllers/organizations-admins.controller';
-import OrganizationsInventories from './controllers/organizations-inventories.controller';
-import OrganizationsJobTemplates from './controllers/organizations-job-templates.controller';
-import OrganizationsProjects from './controllers/organizations-projects.controller';
-import OrganizationsTeams from './controllers/organizations-teams.controller';
-import OrganizationsUsers from './controllers/organizations-users.controller';
+import OrganizationsLinkout from './organizations-linkout.controller';
 
 export default [
     {
         name: 'organizations.users',
         route: '/:organization_id/users',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsUsers,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -25,9 +20,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "USERS"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -39,7 +34,7 @@ export default [
         name: 'organizations.teams',
         route: '/:organization_id/teams',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsTeams,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -47,9 +42,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "TEAMS"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -61,7 +56,7 @@ export default [
         name: 'organizations.inventories',
         route: '/:organization_id/inventories',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsInventories,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -69,9 +64,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "INVENTORIES"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -83,7 +78,7 @@ export default [
         name: 'organizations.projects',
         route: '/:organization_id/projects',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsProjects,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -91,9 +86,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "PROJECTS"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -105,7 +100,7 @@ export default [
         name: 'organizations.job_templates',
         route: '/:organization_id/job_templates',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsJobTemplates,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -113,9 +108,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "JOB TEMPLATES"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {
@@ -127,7 +122,7 @@ export default [
         name: 'organizations.admins',
         route: '/:organization_id/admins',
         templateUrl: templateUrl('organizations/linkout/organizations-linkout'),
-        controller: OrganizationsAdmins,
+        controller: OrganizationsLinkout,
         data: {
             activityStream: true,
             activityStreamTarget: 'organization'
@@ -135,9 +130,9 @@ export default [
         ncyBreadcrumb: {
             parent: function($scope) {
                 $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
+                return "setup";
             },
-            label: "ADMINS"
+            label: "ORGANIZATIONS"
         },
         resolve: {
             features: ['FeaturesService', function(FeaturesService) {

@@ -1,28 +1,21 @@
 /*************************************************
- * Copyright (c) 2016 Ansible, Inc.
+ * Copyright (c) 2015 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
 
 import route from './inventory-manage.route';
-import InventoryManageService from './inventory-manage.service';
-import HostManageService from './hosts/hosts.service';
-import GroupManageService from './groups/groups.service';
-import hosts from './hosts/main';
-import groups from './groups/main';
-import adhoc from './adhoc/main';
-import copyMove from './copy-move/main';
+
+import manageHosts from './manage-hosts/main';
+import manageGroups from './manage-groups/main';
+import copy from './copy/main';
 
 export default
 angular.module('inventoryManage', [
-        hosts.name,
-        groups.name,
-        copyMove.name,
-        adhoc.name
+        manageHosts.name,
+        manageGroups.name,
+        copy.name,
     ])
-	.service('InventoryManageService', InventoryManageService)
-    .service('HostManageService', HostManageService)
-    .service('GroupManageService', GroupManageService)
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(route);
     }]);

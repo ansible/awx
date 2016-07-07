@@ -31,7 +31,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $stateParams.id,
+                          id = $stateParams.template_id,
                           relatedSets = {};
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
@@ -77,7 +77,6 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               Rest.get()
                               .success(function (data) {
                                   scope.job_template_obj = data;
-                                  scope.name = data.name;
                                   var fld, i;
                                   for (fld in form.fields) {
                                       if (fld !== 'variables' && fld !== 'survey' && data[fld] !== null && data[fld] !== undefined) {
@@ -178,8 +177,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   });
 
 
-                                  if (scope.project === "" && scope.playbook === "") {
-                                      scope.resetProjectToDefault();
+                                  if(scope.project === "" && scope.playbook === ""){
+                                    scope.toggleScanInfo();
                                   }
 
                                   RelatedSearchInit({
@@ -198,7 +197,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {
                                       hdr: 'Error!',
-                                      msg: 'Failed to retrieve job template: ' + $stateParams.id + '. GET status: ' + status
+                                      msg: 'Failed to retrieve job template: ' + $stateParams.template_id + '. GET status: ' + status
                                   });
                               });
                           };

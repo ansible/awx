@@ -2,13 +2,13 @@
 
     <section class="FactDataError SystemTrackingContainer-main">
         <p class="FactDataError-note--full">
-            To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Job Templates."
+            To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates."
         </p>
     </section>
 </section>
 <section class="SystemTrackingContainer Panel" ng-hide="noModuleData">
     <div class="row">
-        <div class="Form-title ng-binding col-md-3">SYSTEM TRACKING <div class="List-titleLockup"></div>{{inventory.name}}</div>
+        <div class="Form-title ng-binding col-md-3">SYSTEM TRACKING | {{inventory.name}}</div>
         <div class="FactModulePickers row col-md-8 col-md-offset-1">
             <div class="row">
                 <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--left col-md-6">
@@ -58,7 +58,7 @@
             The two fact scans were identical for this module.
         </p>
         <p class="FactDataError-note" ng-switch-default>
-            We were not able to find any facts collected for this inventory or module. To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Job Templates."
+            We were not able to find any facts collected for this inventory or module. To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates."
         </p>
     </section>
     <fact-data-table ng-if="!error" left-hostname="leftHostname" right-hostname="rightHostname" left-scan-date="leftScanDate" right-scan-date="rightScanDate" left-data-no-scans="leftDataNoScans" right-data-no-scans="rightDataNoScans" is-nested-display="isNestedDisplay"

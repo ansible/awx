@@ -19,83 +19,52 @@ export default
                 name: 'jobTemplateSchedules',
                 route: '/job_templates/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
-                ncyBreadcrumb: {
-                    parent: 'jobTemplates.edit',
-                    label: 'SCHEDULES'
-                }
+                controller: 'schedulerController'
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
-                ncyBreadcrumb: {
-                    parent: 'jobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
-                }
+                controller: 'schedulerAddController'
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
-                ncyBreadcrumb: {
-                    parent: 'jobTemplateSchedules',
-                    label: '{{schedule_obj.name}}'
-                }
+                controller: 'schedulerEditController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules',
                 route: '/projects/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
-                ncyBreadcrumb: {
-                    parent: 'projects.edit',
-                    label: 'SCHEDULES'
-                }
+                controller: 'schedulerController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
-                ncyBreadcrumb: {
-                    parent: 'projectSchedules',
-                    label: 'CREATE SCHEDULE'
-                }
+                controller: 'schedulerAddController'
             });
             $stateExtender.addState({
                 name: 'projectSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
-                ncyBreadcrumb: {
-                    parent: 'projectSchedules',
-                    label: '{{schedule_obj.name}}'
-                }
+                controller: 'schedulerEditController'
             });
             $stateExtender.addState({
-                name: 'inventoryManage.schedules',
-                route: '/schedules/:id',
-                views: {
-                    'form@inventoryManage': {
-                        templateUrl: templateUrl("scheduler/scheduler"),
-                        controller: 'schedulerController'
-                    }
-                },
-                ncyBreadcrumb: {
-                    label: "{{name}} SCHEDULES"
-                },
+                name: 'inventoryManageSchedules',
+                route: '/inventory/:inventory_id/manage/:id/schedules',
+                templateUrl: templateUrl("scheduler/scheduler"),
+                controller: 'schedulerController'
             });
             $stateExtender.addState({
-                name: 'inventoryManage.schedules.add',
+                name: 'inventoryManageSchedules.add',
                 route: '/add',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
                 controller: 'schedulerAddController'
             });
             $stateExtender.addState({
-                name: 'inventoryManage.schedules.edit',
+                name: 'inventoryManageSchedules.edit',
                 route: '/:schedule_id',
                 templateUrl: templateUrl("scheduler/schedulerForm"),
                 controller: 'schedulerEditController'

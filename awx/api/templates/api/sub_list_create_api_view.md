@@ -12,7 +12,7 @@ fields to create a new {{ model_verbose_name }} associated with this
 
 {% block post_create %}{% endblock %}
 
-{% if has_attach|default:False %}
+{% if view.attach %}
 {% if parent_key %}
 # Remove {{ parent_model_verbose_name|title }} {{ model_verbose_name_plural|title }}:
 

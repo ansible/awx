@@ -8,7 +8,7 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'jobDetail.host-events',
-    url: '/host-events/{hostName:any}?:filter',
+    url: '/host-events/:hostName?:filter',
     controller: 'HostEventsController',
     params: {
         page_size: 10

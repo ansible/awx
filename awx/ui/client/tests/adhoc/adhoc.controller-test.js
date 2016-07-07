@@ -1,6 +1,6 @@
 import '../support/node';
 
-import adhocModule from 'inventories/manage/adhoc/main';
+import adhocModule from 'adhoc/main';
 import RestStub from '../support/rest-stub';
 
 describe("adhoc.controller", function() {

@@ -22,33 +22,14 @@ export default
         multiSelect: true,
 
         fields: {
-            active_failures: {
-                label: '',
-                iconOnly: true,
-                searchable: false,
-                nosort: true,
-                // do not remove this ng-click directive
-                // the list generator case to handle fields without ng-click
-                // cannot handle the aw-* directives
-                ngClick: 'noop()',
-                awPopOver: "{{ host.job_status_html }}",
-                dataTitle: "{{ host.job_status_title }}",
-                awToolTip: "{{ host.badgeToolTip }}",
-                dataPlacement: 'top',
-                icon: "{{ 'fa icon-job-' + host.active_failures }}",
-                id: 'active-failures-action',
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 key: true,
                 label: 'Hosts',
-                searchLabel: 'Name',
                 ngClick: "editHost(host.id)",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",
-                dataType: "host",
-                class: 'InventoryManage-breakWord'
+                dataType: "host"
             },
             enabled: {
                 label: 'Disabled?',
@@ -69,9 +50,20 @@ export default
         fieldActions: {
 
             columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+            label: false,
+
+            active_failures: {
+                awPopOver: "{{ host.job_status_html }}",
+                dataTitle: "{{ host.job_status_title }}",
+                awToolTip: "{{ host.badgeToolTip }}",
+                awTipPlacement: 'top',
+                dataPlacement: 'left',
+                iconClass: "{{ 'fa icon-job-' + host.active_failures }}",
+                id: 'active-failutes-action'
+            },
             copy: {
                 mode: 'all',
-                ngClick: "copyMoveHost(host.id)",
+                ngClick: "copyHost(host.id)",
                 awToolTip: 'Copy or move host to another group',
                 dataPlacement: "top"
             },
@@ -93,15 +85,15 @@ export default
 
         actions: {
             system_tracking: {
-                buttonContent: 'System Tracking',
-                ngClick: 'systemTracking()',
+                label: 'System Tracking',
+                ngClick: 'systemTracking()', //'editInventoryProperties(inventory.id)',
                 awToolTip: "{{ systemTrackingTooltip }}",
                 dataTipWatch: "systemTrackingTooltip",
                 dataPlacement: 'top',
                 awFeature: 'system_tracking',
+                ngDisabled: 'systemTrackingDisabled',
                 actionClass: 'btn List-buttonDefault system-tracking',
-                ngShow: 'hostsSelected',
-                ngDisabled: 'systemTrackingDisabled'
+                ngShow: 'hostsSelected'
             },
             refresh: {
                 mode: 'all',
@@ -116,7 +108,7 @@ export default
                 ngClick: "createHost()",
                 awToolTip: "Create a new host",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD HOST'
+                buttonContent: '&#43; ADD'
             }
         }
 

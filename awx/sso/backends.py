@@ -6,7 +6,6 @@ import logging
 
 # Django
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 
 # django-auth-ldap
@@ -105,18 +104,6 @@ class RADIUSBackend(BaseRADIUSBackend):
             return None
         return super(RADIUSBackend, self).get_user(user_id)
 
-    def get_django_user(self, username, password=None):
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = User(username=username)
-
-        if password is not None:
-            user.set_unusable_password()
-            user.save()
-
-        return user
-
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
     '''
@@ -176,7 +163,7 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
+def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
     '''
     Hepler function to update m2m relationship based on LDAP group membership.
     '''
@@ -220,7 +207,7 @@ def on_populate_user(sender, **kwargs):
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
         org, created = Organization.objects.get_or_create(name=org_name)
-        remove = bool(org_opts.get('remove', True))
+        remove = bool(org_opts.get('remove', False))
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
         _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
@@ -238,7 +225,7 @@ def on_populate_user(sender, **kwargs):
         org, created = Organization.objects.get_or_create(name=team_opts['organization'])
         team, created = Team.objects.get_or_create(name=team_name, organization=org)
         users_opts = team_opts.get('users', None)
-        remove = bool(team_opts.get('remove', True))
+        remove = bool(team_opts.get('remove', False))
         _update_m2m_from_groups(user, ldap_user, team.member_role.users, users_opts,
                                 remove)
 

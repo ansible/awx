@@ -10,14 +10,14 @@ export default
         'GenerateForm', 'SearchInit' , 'PaginateInit',
         'LookUpInit', 'OrganizationList', 'notification_template',
         '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
-        '$rootScope', 'NotificationsTypeChange', 'ParseTypeChange',
+        '$rootScope', 'NotificationsTypeChange',
         function(
             Rest, Wait,
             NotificationsFormObject, ProcessErrors, GetBasePath,
             GenerateForm, SearchInit, PaginateInit,
             LookUpInit, OrganizationList, notification_template,
             $scope, $state, GetChoices, CreateSelect2, Empty,
-            $rootScope, NotificationsTypeChange, ParseTypeChange
+            $rootScope, NotificationsTypeChange
         ) {
             var generator = GenerateForm,
                 id = notification_template.id,
@@ -59,11 +59,7 @@ export default
                                     master[fld] = data.notification_configuration[fld];
 
                                     if(form.fields[fld].type === 'textarea'){
-                                        if (form.fields[fld].name === 'headers') {
-                                            $scope[fld] = JSON.stringify($scope[fld], null, 2);
-                                        } else {
-                                            $scope[fld] = $scope[fld].toString().replace(',' , '\n');
-                                        }
+                                        $scope[fld] = $scope[fld].toString().replace(',' , '\n');
                                     }
                                 }
 
@@ -91,18 +87,6 @@ export default
                             NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                                 $scope[field[0]] = field[1];
                             });
-                            $scope.notification_obj = data;
-
-                            $scope.parse_type = 'json';
-                            if (!$scope.headers) {
-                                $scope.headers = "{\n}";
-                            }
-                            ParseTypeChange({
-                                scope: $scope,
-                                parse_variable: 'parse_type',
-                                variable: 'headers',
-                                field_id: 'notification_template_headers',
-                            });
                             Wait('stop');
                         })
                         .error(function (data, status) {
@@ -127,29 +111,6 @@ export default
                 callback: 'choicesReady'
             });
 
-
-            $scope.$watch('headers', function validate_headers(str) {
-                try {
-                    let headers = JSON.parse(str);
-                    if (_.isObject(headers) && !_.isArray(headers)) {
-                        let valid = true;
-                        for (let k in headers) {
-                            if (_.isObject(headers[k])) {
-                                valid = false;
-                            }
-                            if (headers[k] === null) {
-                                valid = false;
-                            }
-                        }
-                        $scope.notification_template_form.headers.$setValidity('json', valid);
-                        return;
-                    }
-                } catch (err) {
-                }
-
-                $scope.notification_template_form.headers.$setValidity('json', false);
-            });
-
             $scope.typeChange = function () {
                 for(var fld in form.fields){
                     if(form.fields[fld] && form.fields[fld].subForm){
@@ -160,17 +121,6 @@ export default
 
                 NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
                     $scope[field[0]] = field[1];
-                });
-
-                $scope.parse_type = 'json';
-                if (!$scope.headers) {
-                    $scope.headers = "{\n}";
-                }
-                ParseTypeChange({
-                    scope: $scope,
-                    parse_variable: 'parse_type',
-                    variable: 'headers',
-                    field_id: 'notification_template_headers',
                 });
             };
 
@@ -189,19 +139,13 @@ export default
 
                 function processValue(value, i , field){
                     if(field.type === 'textarea'){
-                        if (field.name === 'headers') {
-                            $scope[i] = JSON.parse($scope[i]);
-                        } else {
-                            $scope[i] = $scope[i].toString().split('\n');
-                        }
+                        $scope[i] = $scope[i].toString().split('\n');
                     }
                     if(field.type === 'checkbox'){
                         $scope[i] = Boolean($scope[i]);
                     }
-                    if(field.type === 'number'){
-                        $scope[i] = Number($scope[i]);
-                    }
                     return $scope[i];
+
                 }
 
                 params.notification_configuration = _.object(Object.keys(form.fields)

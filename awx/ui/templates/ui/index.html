@@ -40,13 +40,13 @@
     <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu></main-menu>
-  <bread-crumb ng-if="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-if="includesCurrentState('inventoryManage')"></div>
+  <bread-crumb></bread-crumb>
   <toast></toast>
 
     <div class="container-fluid" id="content-container">
       <div class="row">
           <div class="col-lg-12">
-              <div ui-view id="main-view" ng-if="configReady"></div>
+              <div ui-view id="main-view"></div>
           </div>
       </div>
 
@@ -109,8 +109,8 @@
               <div class="Modal-body" ng-bind-html="promptBody" id="prompt-body">
               </div>
               <div class="Modal-footer">
-                  <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
                   <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Modal-footerButton" ng-bind="promptActionText"></a>
+                  <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->

@@ -74,14 +74,8 @@ export default
             },
             inventory_sources_with_failures: {
                 label: 'Sync failures?',
-                searchType: 'select',
-                searchOptions: [{
-                    label: 'Yes',
-                    value: 'inventory_sources_with_failures__gt=0'
-                }, {
-                    label: 'No',
-                    value: 'inventory_sources_with_failures__lte=0'
-                }],
+                searchType: 'gtzero',
+                searchValue: 'true',
                 searchOnly: true
             }
         },
@@ -102,7 +96,7 @@ export default
 
             edit: {
                 label: 'Edit',
-                ngClick: 'editInventory(inventory.id)',
+                ngClick: 'editInventory(inventory.id)', //'editInventoryProperties(inventory.id)',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
             },

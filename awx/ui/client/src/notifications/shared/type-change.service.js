@@ -21,7 +21,6 @@ function () {
             obj.port_required = false;
             obj.password_required = false;
             obj.channel_required = false;
-            obj.room_required = false;
             switch (type) {
                 case 'email':
                     obj.portLabel = ' Port';
@@ -40,7 +39,7 @@ function () {
                 case 'hipchat':
                     obj.tokenLabel = ' Token';
                     obj.hipchat_required = true;
-                    obj.room_required = true;
+                    obj.channel_required = true;
                     obj.token_required = true;
                     break;
                 case 'twilio':

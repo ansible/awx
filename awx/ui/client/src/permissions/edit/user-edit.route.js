@@ -10,5 +10,10 @@ export default {
     name: 'userPermissionsEdit',
     route: '/users/:user_id/permissions/:permission_id',
     templateUrl: templateUrl('permissions/shared/user-permissions'),
-    controller: 'permissionsEditController'
+    controller: 'permissionsEditController',
+    resolve: {
+        features: ['FeaturesService', function(FeaturesService) {
+            return FeaturesService.get();
+        }]
+    }
 };

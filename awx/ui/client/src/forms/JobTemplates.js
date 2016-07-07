@@ -81,11 +81,6 @@ export default
                 },
                 project: {
                     label: 'Project',
-                    labelAction: {
-                        label: 'RESET',
-                        ngClick: 'resetProjectToDefault()',
-                        'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
-                    },
                     type: 'lookup',
                     sourceModel: 'project',
                     sourceField: 'name',
@@ -104,7 +99,6 @@ export default
                     label: 'Playbook',
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "job_type.value === 'scan' && project_name === 'Default'",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
@@ -115,6 +109,12 @@ export default
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
                     dataContainer: "body",
+                },
+                default_scan: {
+                  type: 'custom',
+                  column: 1,
+                  ngShow: 'job_type.value === "scan" && project_name !== "Default"',
+                  control: '<a href="" ng-click="toggleScanInfo()">Reset to default project and playbook</a>'
                 },
                 credential: {
                     label: 'Machine Credential',
@@ -224,6 +224,41 @@ export default
                         text: 'Prompt on launch'
                     }
                 },
+                labels: {
+                    label: 'Labels',
+                    type: 'select',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    addRequired: false,
+                    editRequired: false,
+                    dataTitle: 'Labels',
+                    dataPlacement: 'right',
+                    awPopOver: 'You can add labels to a job template to aid in filtering',
+                    dataContainer: 'body'
+                },
+                variables: {
+                    label: 'Extra Variables',
+                    type: 'textarea',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    rows: 6,
+                    addRequired: false,
+                    editRequired: false,
+                    "default": "---",
+                    column: 2,
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
+                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    dataTitle: 'Extra Variables',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: 'Prompt on launch'
+                    }
+                },
                 become_enabled: {
                   label: 'Enable Privilege Escalation',
                   type: 'checkbox',
@@ -275,57 +310,16 @@ export default
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
                 },
-                labels: {
-                    label: 'Labels',
-                    type: 'select',
-                    class: 'Form-formGroup--fullWidth',
-                    ngOptions: 'label.label for label in labelOptions track by label.value',
-                    multiSelect: true,
-                    addRequired: false,
-                    editRequired: false,
-                    dataTitle: 'Labels',
-                    dataPlacement: 'right',
-                    awPopOver: 'You can add labels to a job template to aid in filtering',
-                    dataContainer: 'body'
-                },
-                variables: {
-                    label: 'Extra Variables',
-                    type: 'textarea',
-                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    rows: 6,
-                    addRequired: false,
-                    editRequired: false,
-                    "default": "---",
+                survey: {
+                    type: 'custom',
                     column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
-                    dataTitle: 'Extra Variables',
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    subCheckbox: {
-                        variable: 'ask_variables_on_launch',
-                        text: 'Prompt on launch'
-                    }
+                    ngHide: "job_type.value === 'scan'" ,
+                    control: '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_create_survey_btn" ng-show="!survey_exists" ng-click="addSurvey()">ADD SURVEY</button>'+
+                            '<button type="button" class="btn btn-sm Form-surveyButton" id="job_templates_edit_survey_btn" ng-show="survey_exists" ng-click="editSurvey()">EDIT SURVEY</button>'
                 }
             },
 
             buttons: { //for now always generates <button> tags
-                add_survey: {
-                    ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists',
-                    awFeature: 'surveys',
-                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job',
-                    dataPlacement: 'top'
-                },
-                edit_survey: {
-                    ngClick: 'editSurvey()',
-                    awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists'
-                },
                 cancel: {
                     ngClick: 'formCancel()'
                 },
@@ -370,15 +364,13 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
                 },

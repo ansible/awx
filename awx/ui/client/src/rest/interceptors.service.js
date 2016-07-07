@@ -16,17 +16,15 @@
             return {
                 response: function(config) {
                     if(config.headers('auth-token-timeout') !== null){
-                        $rootScope.loginConfig.promise.then(function () {
-                            $AnsibleConfig.session_timeout = Number(config.headers('auth-token-timeout'));
-                        });
+                        $AnsibleConfig.session_timeout = Number(config.headers('auth-token-timeout'));
                     }
                     return config;
                 },
                 responseError: function(rejection){
                     if(rejection && rejection.data && rejection.data.detail && rejection.data.detail === "Maximum per-user sessions reached"){
                         $rootScope.sessionTimer.expireSession('session_limit');
-                        var state = $injector.get('$state');
-                        state.go('signOut');
+                        var location = $injector.get('$location');
+                        location.url('/login');
                         return $q.reject(rejection);
                     }
                     return $q.reject(rejection);

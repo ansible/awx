@@ -8,12 +8,12 @@ export default
     [   '$rootScope','Wait', 'generateList', 'NotificationTemplatesList',
         'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' ,
         'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
-        'ngToast', '$compile', '$filter', '$location',
+        'ngToast', '$compile', '$filter',
         function(
             $rootScope,Wait, GenerateList, NotificationTemplatesList,
             GetBasePath, SearchInit, PaginateInit, Rest,
             ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
-            $compile, $filter, $location) {
+            $compile, $filter) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('notification_templates'),
                 list = NotificationTemplatesList,
@@ -31,8 +31,7 @@ export default
                         scope.notification_type_options.forEach(function(type) {
                             if (type.value === notification_template.notification_type) {
                                 scope.notification_templates[i].notification_type = type.label;
-                                var recent_notifications = notification_template.summary_fields.recent_notifications;
-                                scope.notification_templates[i].status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
+                                scope.notification_templates[i].status = notification_template.summary_fields.recent_notifications[0].status;
                             }
                         });
                     });
@@ -183,9 +182,6 @@ export default
                     Rest.destroy()
                         .success(function () {
                             scope.search(list.iterator);
-                            if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $state.go('^');
-                            }
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',

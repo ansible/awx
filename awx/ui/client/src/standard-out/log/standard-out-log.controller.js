@@ -8,6 +8,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
     function ($log, $rootScope, $scope, $state, $stateParams, ProcessErrors, Rest, Wait) {
 
         var api_complete = false,
+            stdout_url,
             current_range,
             loaded_sections = [],
             event_queue = 0,
@@ -21,18 +22,13 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         // Open up a socket for events depending on the type of job
         function openSockets() {
             if ($state.current.name === 'jobDetail') {
-               $log.debug("socket watching on job_events-" + job_id);
-               $rootScope.event_socket.on("job_events-" + job_id, function() {
-                   $log.debug("socket fired on job_events-" + job_id);
-                   if (api_complete) {
-                       event_queue++;
-                   }
-               });
-               // Unbind $rootScope socket event binding(s) so that they don't get triggered
-               // in another instance of this controller
-               $scope.$on('$destroy', function() {
-                   $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
-               });
+                   $log.debug("socket watching on job_events-" + job_id);
+                   $rootScope.event_socket.on("job_events-" + job_id, function() {
+                       $log.debug("socket fired on job_events-" + job_id);
+                       if (api_complete) {
+                           event_queue++;
+                       }
+                   });
             }
             if ($state.current.name === 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
@@ -42,12 +38,8 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                         event_queue++;
                     }
                 });
-                // Unbind $rootScope socket event binding(s) so that they don't get triggered
-                // in another instance of this controller
-                $scope.$on('$destroy', function() {
-                    $rootScope.adhoc_event_socket.removeAllListeners("ad_hoc_command_events-" + job_id);
-                });
             }
+            // TODO: do we need to add socket listeners for scmUpdateStdout, inventorySyncStdout, managementJobStdout?
         }
 
         openSockets();
@@ -94,19 +86,8 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
             }
         });
 
-        // stdoutText optionall gets passed through in the directive declaration.
-        $scope.$watch('stdoutText', function(newVal, oldVal) {
-            if(newVal && newVal !== oldVal) {
-                $('#pre-container-content').html(newVal);
-            }
-        });
-
         function loadStdout() {
-            if (!$scope.stdoutEndpoint) {
-                return;
-            }
-
-            Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=0&end_line=' + page_size);
+            Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=-' + page_size);
             Rest.get()
                 .success(function(data) {
                     Wait('stop');
@@ -134,10 +115,6 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         }
 
         function getNextSection() {
-            if (!$scope.stdoutEndpoint) {
-                return;
-            }
-
             // get the next range of data from the API
             var start = loaded_sections[loaded_sections.length - 1].end, url;
             url = $scope.stdoutEndpoint + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
@@ -168,17 +145,38 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                 });
         }
 
-        // lrInfiniteScroll handler
-        // grabs the next stdout section
-        $scope.stdOutGetNextSection = function(){
-            if (current_range.absolute_end > current_range.end){
-                var url = $scope.stdoutEndpoint + '?format=json&start_line=' + current_range.end +
-                    '&end_line=' + (current_range.end + page_size);
+        $scope.stdOutScrollToTop = function() {
+            // scroll up or back in time toward the beginning of the file
+            var start, end, url;
+            if (loaded_sections.length > 0 && loaded_sections[0].start > 0) {
+                start = (loaded_sections[0].start - page_size > 0) ? loaded_sections[0].start - page_size : 0;
+                end = loaded_sections[0].start - 1;
+            }
+            else if (loaded_sections.length === 0) {
+                start = 0;
+                end = page_size;
+            }
+            if (start !== undefined  && end !== undefined) {
+                $('#stdoutMoreRowsTop').fadeIn();
+                url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + end;
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function(data){
-                        $('#pre-container-content').append(data.content);
+                    .success( function(data) {
+                        //var currentPos = $('#pre-container').scrollTop();
+                        var newSH, oldSH = $('#pre-container').prop('scrollHeight'),
+                            st = $('#pre-container').scrollTop();
+
+                        $('#pre-container-content').prepend(data.content);
+
+                        newSH = $('#pre-container').prop('scrollHeight');
+                        $('#pre-container').scrollTop(newSH - oldSH + st);
+
+                        loaded_sections.unshift({
+                            start: (data.range.start < 0) ? 0 : data.range.start,
+                            end: data.range.end
+                        });
                         current_range = data.range;
+                        $('#stdoutMoreRowsTop').fadeOut(400);
                     })
                     .error(function(data, status) {
                         ProcessErrors($scope, data, status, null, { hdr: 'Error!',

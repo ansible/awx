@@ -49,8 +49,8 @@ export default
                     sourceModel: 'organization',
                     sourceField: 'name',
                     ngClick: 'lookUpOrganization()',
-                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>",
-                    dataTitle: 'Organization ',
+                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  organization admins and system administrators can assign an organization so that roles can be assigned to users and teams in that organization.</p>",
+                    dataTitle: 'Required ',
                     dataPlacement: 'bottom',
                     dataContainer: "body"
                 },
@@ -246,7 +246,7 @@ export default
                     rows: 10,
                     awPopOver: "SSH key description",
                     awPopOverWatch:   "key_description",
-                    dataTitle: 'Private Key',
+                    dataTitle: 'Help',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: "credentialSubForm"
@@ -310,6 +310,10 @@ export default
                 client:{
                     type: 'text',
                     label: 'Client ID',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
@@ -318,12 +322,20 @@ export default
                     hasShowInputButton: true,
                     autocomplete: false,
                     label: 'Client Secret',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
                 tenant: {
                     type: 'text',
-                    label: 'Tenant ID',
+                    label: 'Tenent ID',
+                    awRequiredWhen: {
+                        reqExpression: "azure_rm_required",
+                        init: false
+                    },
                     subForm: 'credentialSubForm',
                     ngShow: "kind.value === 'azure_rm'"
                 },
@@ -436,15 +448,13 @@ export default
                             label: 'Role',
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
                 }

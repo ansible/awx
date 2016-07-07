@@ -12,28 +12,28 @@ export default
         name: 'schedules',
         iterator: 'schedule',
         editTitle: 'Scheduled Jobs',
+        index: true,
         hover: true,
         well: false,
-        emptyListText: 'No schedules exist',
 
         fields: {
-            enabled: {
+            status: {
                 label: '',
-                columnClass: 'List-staticColumn--toggle',
-                type: 'toggle',
+                columnClass: 'List-staticColumn--smallStatus',
+                awToolTip: "{{ schedule.status_tip }}",
+                awTipPlacement: "right",
+                icon: 'icon-job-{{ schedule.status }}',
+                iconOnly: true,
                 ngClick: "toggleSchedule($event, schedule.id)",
                 searchable: false,
-                nosort: true,
-                awToolTip: "{{ schedule.play_tip }}",
-                dataTipWatch: "schedule.play_tip",
-                dataPlacement: 'top'
+                nosort: true
             },
             name: {
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
-                ngClick: "editSchedule(schedule)",
+                ngClick: "editSchedule(schedule.id)",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataPlacement: "top",
                 defaultSearchField: true
@@ -50,9 +50,9 @@ export default
                 searchable: true,
                 searchType: 'select',
                 searchOptions: [
-                    { value: 'inventory source', label: 'Inventory Sync' },
-                    { value: 'job template', label: 'Playbook Run' },
-                    { value: 'project', label: 'SCM Update' }
+                    { value: 'inventory source', name: 'Inventory Sync' },
+                    { value: 'job template', name: 'Playbook Run' },
+                    { value: 'project', name: 'SCM Update' }
                 ]
             },
             next_run: {
@@ -62,7 +62,7 @@ export default
                 columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
                 filter: "longDate",
                 key: true
-            }
+            },
         },
 
         actions: { },
@@ -70,9 +70,18 @@ export default
         fieldActions: {
 
             columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
+
+            "play": {
+                mode: "all",
+                ngClick: "toggleSchedule($event, schedule.id)",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
+                dataPlacement: 'top'
+            },
             "edit": {
                 mode: "all",
-                ngClick: "editSchedule(schedule)",
+                ngClick: "editSchedule(schedule.id)",
                 awToolTip: "Edit the schedule",
                 dataPlacement: "top"
             },

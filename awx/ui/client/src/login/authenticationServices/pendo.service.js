@@ -7,9 +7,9 @@
 
 export default
    [ '$rootScope', '$pendolytics', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
-        'ConfigService', '$log',
+        'Store', '$log',
    function ($rootScope, $pendolytics, Rest, GetBasePath, ProcessErrors, $q,
-        ConfigService, $log) {
+        Store, $log) {
        return {
             setPendoOptions: function (config) {
                 var tower_version = config.version.split('-')[0],
@@ -93,7 +93,7 @@ export default
             },
 
             getConfig: function () {
-                var config = ConfigService.get(),
+                var config = Store('license'),
                 deferred = $q.defer();
                 if(_.isEmpty(config)){
                     var url = GetBasePath('config');

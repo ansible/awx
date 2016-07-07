@@ -86,11 +86,7 @@ class Migration(migrations.Migration):
             name='credential',
             unique_together=set([]),
         ),
-        migrations.AddField(
-            model_name='credential',
-            name='organization',
-            field=models.ForeignKey(related_name='credentials', default=None, blank=True, to='main.Organization', null=True),
-        ),
+
 
         #
         # New RBAC models and fields

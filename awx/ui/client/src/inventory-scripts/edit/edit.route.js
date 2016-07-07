@@ -12,10 +12,6 @@ export default {
     templateUrl: templateUrl('inventory-scripts/edit/edit'),
     controller: 'inventoryScriptsEditController',
     params: {inventory_script: null},
-    ncyBreadcrumb: {
-        parent: 'inventoryScripts',
-        label: "{{inventory_script_obj.name}}"
-    },
     resolve: {
         inventory_script:
         [   '$state',

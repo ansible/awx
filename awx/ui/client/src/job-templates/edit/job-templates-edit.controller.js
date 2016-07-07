@@ -41,7 +41,7 @@ export default
                 form = JobTemplateForm(),
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
-                id = $stateParams.id,
+                id = $stateParams.template_id,
                 relatedSets = {},
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
@@ -76,20 +76,6 @@ export default
             $scope.playbook = null;
             generator.reset();
 
-            function sync_playbook_select2() {
-                CreateSelect2({
-                    element:'#playbook-select',
-                    multiple: false
-                });
-            }
-
-            function sync_verbosity_select2() {
-                CreateSelect2({
-                    element:'#job_templates_verbosity',
-                    multiple: false
-                });
-            }
-
             getPlaybooks = function (project) {
                 var url;
                 if ($scope.playbook) {
@@ -99,7 +85,6 @@ export default
                 if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
                     $scope.playbook_options = ['Default'];
                     $scope.playbook = 'Default';
-                    sync_playbook_select2();
                     Wait('stop');
                 }
                 else if (!Empty(project)) {
@@ -108,14 +93,14 @@ export default
                     Rest.setUrl(url);
                     Rest.get()
                         .success(function (data) {
+                            var i;
                             $scope.playbook_options = [];
-                            for (var i = 0; i < data.length; i++) {
+                            for (i = 0; i < data.length; i++) {
                                 $scope.playbook_options.push(data[i]);
                                 if (data[i] === $scope.playbook) {
                                     $scope.job_templates_form.playbook.$setValidity('required', true);
                                 }
                             }
-                            sync_playbook_select2();
                             if ($scope.playbook) {
                                 $scope.$emit('jobTemplateLoadFinished');
                             } else {
@@ -123,7 +108,7 @@ export default
                             }
                         })
                         .error(function (ret,status_code) {
-                            if (status_code === 403) {
+                            if (status_code == 403) {
                                 /* user doesn't have access to see the project, no big deal. */
                             } else {
                                 Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
@@ -137,31 +122,23 @@ export default
                 }
             };
 
-            let last_non_scan_project_name = null;
-            let last_non_scan_playbook = "";
-            let last_non_scan_playbook_options = [];
-            $scope.jobTypeChange = function() {
-                if ($scope.job_type) {
-                    if ($scope.job_type.value === 'scan') {
-                        if ($scope.project_name !== "Default") {
-                            last_non_scan_project_name = $scope.project_name;
-                            last_non_scan_playbook = $scope.playbook;
-                            last_non_scan_playbook_options = $scope.playbook_options;
-                        }
-                        // If the job_type is 'scan' then we don't want the user to be
-                        // able to prompt for job type or inventory
-                        $scope.ask_job_type_on_launch = false;
-                        $scope.ask_inventory_on_launch = false;
-                        $scope.resetProjectToDefault();
-                    }
-                    else if ($scope.project_name === "Default") {
-                        $scope.project_name = last_non_scan_project_name;
-                        $scope.playbook_options = last_non_scan_playbook_options;
-                        $scope.playbook = last_non_scan_playbook;
-                        $scope.job_templates_form.playbook.$setPristine();
-                    }
-                }
-                sync_playbook_select2();
+            $scope.jobTypeChange = function(){
+              if($scope.job_type){
+                if($scope.job_type.value === 'scan'){
+                    // If the job_type is 'scan' then we don't want the user to be
+                    // able to prompt for job type or inventory
+                    $scope.ask_job_type_on_launch = false;
+                    $scope.ask_inventory_on_launch = false;
+                    $scope.toggleScanInfo();
+                  }
+                  else if($scope.project_name === "Default"){
+                    $scope.project_name = null;
+                    $scope.playbook_options = [];
+                    // $scope.playbook = 'null';
+                    $scope.job_templates_form.playbook.$setPristine();
+                  }
+
+              }
             };
 
             $scope.toggleNotification = function(event, notifier_id, column) {
@@ -182,10 +159,14 @@ export default
                 });
             };
 
-            $scope.resetProjectToDefault = function() {
+            $scope.toggleScanInfo = function() {
                 $scope.project_name = 'Default';
-                $scope.project = null;
-                getPlaybooks();
+                if($scope.project === null){
+                  getPlaybooks();
+                }
+                else {
+                  $scope.project = null;
+                }
             };
 
             // Detect and alert user to potential SCM status issues
@@ -217,7 +198,7 @@ export default
                             }
                         })
                         .error(function (data, status) {
-                            if (status === 403) {
+                            if (status == 403) {
                                 /* User doesn't have read access to the project, no problem. */
                             } else {
                                 ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
@@ -250,8 +231,6 @@ export default
                 }
             });
 
-            // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
-            $scope.$watch('verbosity', sync_verbosity_select2);
 
 
             // Turn off 'Wait' after both cloud credential and playbook list come back
@@ -309,7 +288,6 @@ export default
                 jQuery.extend(true, CloudCredentialList, CredentialList);
                 CloudCredentialList.name = 'cloudcredentials';
                 CloudCredentialList.iterator = 'cloudcredential';
-                CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
                 LookUpInit({
                     url: GetBasePath('credentials') + '?cloud=true',
                     scope: $scope,
@@ -415,7 +393,6 @@ export default
                 variable: 'verbosity_options',
                 callback: 'choicesReady'
             });
-            sync_verbosity_select2();
 
             // setup job type options lookup
             GetChoices({
@@ -429,47 +406,29 @@ export default
             Rest.setUrl('api/v1/labels');
             Wait("start");
             Rest.get()
-                .success(function () {
-                    var seeMoreResolve = $q.defer();
-
-                    var getNext = function(data, arr, resolve) {
-                        Rest.setUrl(data.next);
-                        Rest.get()
-                            .success(function (data) {
-                                if (data.next) {
-                                    getNext(data, arr.concat(data.results), resolve);
-                                } else {
-                                    resolve.resolve(arr.concat(data.results));
-                                }
-                            });
-                    };
-
-                    Rest.setUrl(defaultUrl + $state.params.id +
+                .success(function (data) {
+                    $scope.labelOptions = data.results
+                        .map((i) => ({label: i.name, value: i.id}));
+                    $scope.$emit("choicesReady");
+                    Rest.setUrl(defaultUrl + $state.params.template_id +
                          "/labels");
                     Rest.get()
                         .success(function(data) {
-                            if (data.next) {
-                                getNext(data, data.results, seeMoreResolve);
-                            } else {
-                                seeMoreResolve.resolve(data.results);
-                            }
-
-                            seeMoreResolve.promise.then(function (labels) {
-                                $scope.labelOptions = labels
-                                    .map((i) => ({label: i.name, value: i.id}));
-                                $scope.$emit("choicesReady");
-                                var opts = labels
-                                    .map(i => ({id: i.id + "",
-                                        test: i.name}));
-                                CreateSelect2({
-                                    element:'#job_templates_labels',
-                                    multiple: true,
-                                    addNew: true,
-                                    opts: opts
-                                });
-                                Wait("stop");
+                            var opts = data.results
+                                .map(i => ({id: i.id + "",
+                                    test: i.name}));
+                            CreateSelect2({
+                                element:'#job_templates_labels',
+                                multiple: true,
+                                addNew: true,
+                                opts: opts
                             });
+                            Wait("stop");
                         });
+                    CreateSelect2({
+                        element:'#job_templates_verbosity',
+                        multiple: false
+                    });
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, {
@@ -634,7 +593,7 @@ export default
                         .filter("[data-select2-tag=true]")
                         .map((i, val) => ({name: $(val).text()}));
 
-                    Rest.setUrl(defaultUrl + $state.params.id);
+                    Rest.setUrl(defaultUrl + $state.params.template_id);
                     Rest.put(data)
                         .success(function (data) {
                             $scope.$emit('templateSaveSuccess', data);
@@ -653,7 +612,7 @@ export default
             $scope.formCancel = function () {
                 // the form was just copied in the previous state, it's safe to destroy on cancel
                 if ($state.params.copied){
-                    var defaultUrl = GetBasePath('job_templates') + $state.params.id;
+                    var defaultUrl = GetBasePath('job_templates') + $state.params.template_id;
                     Rest.setUrl(defaultUrl);
                     Rest.destroy()
                         .success(function(){
@@ -672,7 +631,7 @@ export default
             // Related set: Add button
             $scope.add = function (set) {
                 $rootScope.flashMessage = null;
-                $location.path('/' + base + '/' + $stateParams.id + '/' + set);
+                $location.path('/' + base + '/' + $stateParams.template_id + '/' + set);
             };
 
             // Related set: Edit button

@@ -7,10 +7,8 @@
 export default
     ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
     'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService',
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
-        ProcessErrors, CheckLicense, moment, $window, ConfigService,
-        FeaturesService, pendoService){
+        ProcessErrors, CheckLicense, moment, $window){
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -48,27 +46,21 @@ export default
 			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
 				.success(function(){
 					reset();
-                    ConfigService.delete();
-                    ConfigService.getConfig().then(function(){
-                        delete($rootScope.features);
-                        FeaturesService.get();
-                        pendoService.issuePendoIdentity();
-                        if($rootScope.licenseMissing === true){
-                            $state.go('dashboard', {
-    							licenseMissing: false
-    						});
-    					}
-    					else{
-                            init();
-    						$scope.success = true;
-    						$rootScope.licenseMissing = false;
-    						// for animation purposes
-    						var successTimeout = setTimeout(function(){
-    							$scope.success = false;
-    							clearTimeout(successTimeout);
-    						}, 4000);
-    					}
-                    });
+					init();
+					if($rootScope.licenseMissing === true){
+						$state.go('dashboard', {
+							licenseMissing: false
+						});
+					}
+					else{
+						$scope.success = true;
+						$rootScope.licenseMissing = false;
+						// for animation purposes
+						var successTimeout = setTimeout(function(){
+							$scope.success = false;
+							clearTimeout(successTimeout);
+						}, 4000);
+					}
 			});
 		};
 	 	var calcDaysRemaining = function(seconds){
@@ -85,14 +77,14 @@ export default
             days = parseInt(days);
             return moment().add(days, 'days').calendar();
         };
-
         var init = function(){
             $scope.fileName = "No file selected.";
             $scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
             Wait('start');
-            ConfigService.getConfig().then(function(config){
-                $scope.license = config;
-                $scope.license.version = config.version.split('-')[0];
+            CheckLicense.get()
+            .then(function(res){
+                $scope.license = res.data;
+                $scope.license.version = res.data.version.split('-')[0];
                 $scope.time = {};
                 $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
                 $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);

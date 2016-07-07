@@ -3,24 +3,47 @@
  *
  * All Rights Reserved
  *************************************************/
-
+ 
 
 
 
 export default
     angular.module('GroupListDefinition', [])
-    .value('CopyMoveGroupList', {
+    .value('GroupList', {
 
-        name: 'groups',
-        iterator: 'group',
+        name: 'copy_groups',
+        iterator: 'copy_group',
         selectTitle: 'Copy Groups',
+        editTitle: 'Groups',
         index: false,
         well: false,
-        emptyListText: 'PLEASE CREATE ADDITIONAL GROUPS / HOSTS TO PERFORM THIS ACTION',
+
         fields: {
             name: {
                 key: true,
-                label: 'Target Group Name'
+                label: 'Name'
+            }
+        },
+
+        actions: { },
+
+        fieldActions: {
+            edit: {
+                label: 'Edit',
+                ngClick: "editGroup(group.id)",
+                icon: 'icon-edit',
+                "class": 'btn-xs',
+                awToolTip: 'Edit group',
+                dataPlacement: 'top'
+            },
+
+            "delete": {
+                label: 'Delete',
+                ngClick: "deleteGroup(group.id, group.name)",
+                icon: 'icon-trash',
+                "class": 'btn-xs',
+                awToolTip: 'Delete group',
+                dataPlacement: 'top'
             }
         }
     });

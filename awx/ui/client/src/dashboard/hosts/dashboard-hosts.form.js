@@ -50,7 +50,7 @@ export default function(){
                 type: 'textarea',
                 editRequired: false,
                 rows: 6,
-                class: 'modal-input-xlarge Form-textArea Form-formGroup--fullWidth',
+                class: 'modal-input-xlarge Form-textArea',
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
                 dataContainer: 'body',
@@ -71,7 +71,7 @@ export default function(){
             save: {
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: "host_form.$invalid"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-            }
+            }            
         }
     };
 }

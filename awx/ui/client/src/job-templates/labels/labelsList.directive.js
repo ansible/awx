@@ -6,50 +6,14 @@ export default
         'GetBasePath',
         'ProcessErrors',
         'Prompt',
-        '$q',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q) {
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt) {
             return {
                 restrict: 'E',
                 scope: false,
                 templateUrl: templateUrl('job-templates/labels/labelsList'),
                 link: function(scope, element, attrs) {
-                    scope.seeMoreInactive = true;
-
                     scope.labels = scope.
-                        job_template.summary_fields.labels.results;
-
-                    scope.count = scope.
-                        job_template.summary_fields.labels.count;
-
-                    var getNext = function(data, arr, resolve) {
-                        Rest.setUrl(data.next);
-                        Rest.get()
-                            .success(function (data) {
-                                if (data.next) {
-                                    getNext(data, arr.concat(data.results), resolve);
-                                } else {
-                                    resolve.resolve(arr.concat(data.results));
-                                }
-                            });
-                    };
-
-                    scope.seeMore = function () {
-                        var seeMoreResolve = $q.defer();
-                        Rest.setUrl(scope.job_template.related.labels);
-                        Rest.get()
-                            .success(function(data) {
-                                if (data.next) {
-                                    getNext(data, data.results, seeMoreResolve);
-                                } else {
-                                    seeMoreResolve.resolve(data.results);
-                                }
-                            });
-
-                        seeMoreResolve.promise.then(function (labels) {
-                            scope.labels = labels;
-                            scope.seeMoreInactive = false;
-                        });
-                    };
+                        job_template.summary_fields.labels;
 
                     scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
                         var action = function () {

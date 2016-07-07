@@ -9,7 +9,7 @@ import InventoriesList from './inventory-list.controller';
 
 export default {
     name: 'inventories',
-    route: '/inventories?{status}',
+    route: '/inventories',
     templateUrl: templateUrl('inventories/inventories'),
     controller: InventoriesList,
     data: {

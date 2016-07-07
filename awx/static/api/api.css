@@ -37,13 +37,13 @@ body .navbar {
   border-color: #E8E8E8;
 }
 body .navbar .navbar-brand {
-  color: #707070;
+  color: #848992;
   padding: 0;
   font-size: 14px;
 }
 body .navbar .navbar-brand:focus,
 body .navbar .navbar-brand:hover {
-  color: #707070;
+  color: #848992;
 }
 body .navbar .navbar-brand img {
   display: inline-block;
@@ -60,7 +60,7 @@ body .navbar .navbar-brand > span {
 body .navbar .navbar-title {
   float: left;
   height: 50px;
-  color: #707070;
+  color: #848992;
   padding: 0;
   font-size: 14px;
   display: none;
@@ -74,19 +74,19 @@ body.show-title .navbar .navbar-title {
   display: inline-block;
 }
 body .navbar .navbar-nav > li > a {
-  color: #707070;
+  color: #848992;
   display: flex;
   justify-content: center;
 }
 body .navbar .navbar-nav > li > a:focus,
 body .navbar .navbar-nav > li > a:hover {
-  color: #707070;
+  color: #848992;
 }
 body .navbar .navbar-nav > li > a > span.glyphicon {
   font-size: 20px;
   padding-right: 5px;
   padding-left: 5px;
-  color: #848992;
+  color: #B7B7B7;
 }
 
 body .page-header {
@@ -110,7 +110,7 @@ body .description .hide-description span.glyphicon {
   font-size: 20px;
 }
 body .description .hide-description:hover span.glyphicon {
-  color: #848992;
+  color: #B7B7B7;
 }
 body ul.breadcrumb,
 body .description,
@@ -167,7 +167,7 @@ body .form-actions button {
 body .form-horizontal .control-label {
   text-transform: uppercase;
   font-weight: normal;
-  color: #707070;
+  color: #848992;
 }
 body textarea.form-control {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
@@ -182,22 +182,22 @@ body .description pre {
 }
 
 body .tooltip.bottom .tooltip-arrow {
-  border-bottom-color: #707070;
+  border-bottom-color: #848992;
 }
 body .tooltip.top .tooltip-arrow {
-  border-top-color: #707070;
+  border-top-color: #848992;
 }
 body .tooltip.left .tooltip-arrow {
-  border-left-color: #707070;
+  border-left-color: #848992;
 }
 body .tooltip.right .tooltip-arrow {
-  border-right-color: #707070;
+  border-right-color: #848992;
 }
 body .tooltip.in {
   opacity: 1;
 }
 body .tooltip-inner {
-  background-color: #707070;
+  background-color: #848992;
 }
 
 body .btn {
@@ -205,7 +205,7 @@ body .btn {
 }
 .btn-primary {
   background-color: #FFFFFF;
-  color: #707070;
+  color: #848992;
   border: 1px solid #E8E8E8;
 }
 .btn-primary:hover,
@@ -224,14 +224,14 @@ body .btn {
 .open>.dropdown-toggle.btn-primary:hover,
 .open>.dropdown-toggle.btn-primary {
   background-color: #FAFAFA;
-  color: #707070;
+  color: #848992;
   border: 1px solid #E8E8E8;
 }
 
 body .tab-content .btn-primary {
-  background-color: #5cb85c;
+  background-color: #3CB878;
   color: #FFFFFF;
-  border: 1px solid #5cb85c;
+  border: 1px solid #3CB878;
 }
 body .tab-content .btn-primary:hover,
 body .tab-content .btn-primary.focus,
@@ -244,9 +244,9 @@ body .tab-content .btn-primary.active:hover,
 body .tab-content .btn-primary:active.focus,
 body .tab-content .btn-primary:active:focus,
 body .tab-content .btn-primary:active:hover {
-  background-color: #449d44;
+  background-color: #60D66F;
   color: #FFFFFF;
-  border: 1px solid #449d44;
+  border: 1px solid #60D66F;
 }
 
 .btn-danger {
@@ -265,8 +265,8 @@ body .tab-content .btn-primary:active:hover {
 .btn-danger:active.focus,
 .btn-danger:active:focus,
 .btn-danger:active:hover {
-  background-color: #c9302c;
-  border-color: #c9302c;
+  background-color: #F0AD4E;
+  border-color: #F0AD4E;
 }
 
 body .wrapper {
@@ -283,7 +283,7 @@ body #footer {
   overflow: hidden;
   margin-bottom: 0;
   height: 40px;
-  color: #707070;
+  color: #848992;
 }
 body #footer .footer-logo {
   text-align: left;
@@ -302,7 +302,7 @@ body #footer .footer-copyright {
   padding-top: 10px;
 }
 body #footer .footer-copyright a {
-  color: #707070;
+  color: #848992;
 }
 
 @media screen and (min-width: 768px) {
@@ -329,7 +329,7 @@ body #footer .footer-copyright a {
     border-color: #E8E8E8;
   }
   body .navbar .navbar-toggle .icon-bar {
-    background-color: #848992;
+    background-color: #B7B7B7;
   }
   body .navbar .tooltip {
     visibility: hidden;

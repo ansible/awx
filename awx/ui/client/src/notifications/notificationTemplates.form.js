@@ -141,23 +141,7 @@ export default function() {
                     reqExpression: "channel_required",
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'slack'",
-                subForm: 'typeSubForm'
-            },
-            rooms: {
-                label: 'Destination Channels',
-                type: 'textarea',
-                rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n',
-                dataTitle: 'Destination Channels',
-                dataPlacement: 'right',
-                dataContainer: "body",
-                awRequiredWhen: {
-                    reqExpression: "room_required",
-                    init: "false"
-                },
-                ngShow: "notification_type.value == 'hipchat'",
+                ngShow: "notification_type.value == 'slack' || notification_type.value == 'hipchat'",
                 subForm: 'typeSubForm'
             },
             token: {
@@ -259,9 +243,8 @@ export default function() {
                 subForm: 'typeSubForm'
             },
             api_url: {
-                label: 'API URL',
+                label: 'API URL (e.g: https://mycompany.hiptchat.com)',
                 type: 'text',
-                placeholder: 'https://mycompany.hipchat.com',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
@@ -281,7 +264,11 @@ export default function() {
             },
             notify: {
                 label: 'Notify Channel',
-                type: 'checkbox',
+                type: 'text',
+                awRequiredWhen: {
+                    reqExpression: "hipchat_required",
+                    init: "false"
+                },
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm'
             },
@@ -297,20 +284,11 @@ export default function() {
             },
             headers: {
                 label: 'HTTP Headers',
-                type: 'textarea',
-                rows: 5,
-                'class': 'Form-formGroup--fullWidth',
+                type: 'text',
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
-                awPopOver: '<p>Specify HTTP Headers in JSON format</p>' +
-                           '<p>For example:<br><pre>\n' +
-                           '{\n' +
-                           '  "X-Auth-Token": "828jf0",\n' +
-                           '  "X-Ansible": "Is great!"\n' +
-                           '}\n' +
-                           '</pre></p>',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm'
             },

@@ -112,9 +112,6 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
             Rest.destroy()
                 .success(function () {
                     $scope.search(list.iterator);
-                    if (new RegExp('/' + id + '$').test($location.$$url)) {
-                        $state.go('^');
-                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -165,7 +162,7 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0];
+    $scope.user_type = user_type_options[0]
     $scope.$watch('user_type', user_type_sync($scope));
 
     CreateSelect2({
@@ -274,7 +271,7 @@ export function UsersEdit($scope, $rootScope, $location,
     generator.reset();
 
     $scope.user_type_options = user_type_options;
-    $scope.user_type = user_type_options[0];
+    $scope.user_type = user_type_options[0]
     $scope.$watch('user_type', user_type_sync($scope));
 
     var setScopeFields = function(data){
@@ -345,8 +342,6 @@ export function UsersEdit($scope, $rootScope, $location,
                 $scope.user_type = $scope.user_type_options[2];
                 $scope.is_superuser = true;
             }
-
-            $scope.user_obj = data;
 
             CreateSelect2({
                 element: '#user_user_type',

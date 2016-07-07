@@ -19,6 +19,6 @@ export default {
     },
     ncyBreadcrumb: {
         parent: "organizations",
-        label: "{{organization_name}}"
+        label: "{{name}}"
     }
 };

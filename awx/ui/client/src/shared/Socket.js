@@ -211,15 +211,7 @@ angular.module('SocketIO', ['Utilities'])
                 },
                 getUrl: function() {
                     return url;
-                },
-                removeAllListeners: function (eventName) {
-                    var self = this;
-                    if(self){
-                      if(self.socket){
-                        self.socket.removeAllListeners(eventName);
-                      }
-                    }
-                },
+                }
             };
         };
     }]);

@@ -20,7 +20,7 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest',
+        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest', 
         'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
         function(SchedulerInit, $rootScope, Wait, Rest, ProcessErrors,
             GetBasePath, SchedulePost, $state) {
@@ -88,6 +88,24 @@ export default
                     }
                 }
 
+                if (scope.removeDialogReady) {
+                    scope.removeDialogReady();
+                }
+                scope.removeDialogReady = scope.$on('DialogReady', function() {
+                    $('#scheduler-modal-dialog').dialog('open');
+                    $('#schedulerName').focus();
+                    setTimeout(function() {
+                        scope.$apply(function() {
+                            scheduler.setRRule(schedule.rrule);
+                            scheduler.setName(schedule.name);
+                            if(scope.isFactCleanup || scope.cleanupJob){
+                                setGranularity();
+                            }
+
+                        });
+                    }, 300);
+                });
+
                 if (scope.removeScheduleFound) {
                     scope.removeScheduleFound();
                 }
@@ -108,12 +126,6 @@ export default
                         $rootScope.$broadcast("ScheduleFormCreated", scope);
                     });
                     scope.showRRuleDetail = false;
-
-                    scheduler.setRRule(schedule.rrule);
-                    scheduler.setName(schedule.name);
-                    if(scope.isFactCleanup || scope.cleanupJob){
-                        setGranularity();
-                    }
                 });
 
 
@@ -155,8 +167,6 @@ export default
                             scope.cleanupJob = true;
                         }
 
-                        scope.schedule_obj = data;
-
                         scope.$emit('ScheduleFound');
                     })
                     .error(function(data,status){
@@ -166,7 +176,7 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams',
+        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams', 
         'SchedulerInit', 'Wait', 'GetBasePath', 'Empty', 'SchedulePost', '$state', 'Rest', 'ProcessErrors',
         function($location, $rootScope, $stateParams, SchedulerInit,
             Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
@@ -175,13 +185,16 @@ export default
                 var scope = params.scope,
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
-                    url = params.url || null,
+                    url,
                     scheduler;
 
-                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories') {
+                if (!Empty($stateParams.template_id)) {
+                    url = GetBasePath(base) + $stateParams.template_id + '/schedules/';
+                }
+                else if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventory') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
-                else if(base === "inventories"){
+                else if(base === "inventory"){
                     if (!params.url){
                         url = GetBasePath('groups') + $stateParams.id + '/';
                         Rest.setUrl(url);
@@ -241,21 +254,7 @@ export default
                 Wait('start');
                 $('#form-container').empty();
                 scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-                if(scope.schedulerUTCTime) {
-                    // The UTC time is already set
-                    scope.processSchedulerEndDt();
-                }
-                else {
-                    // We need to wait for it to be set by angular-scheduler because the following function depends
-                    // on it
-                    var schedulerUTCTimeWatcher = scope.$watch('schedulerUTCTime', function(newVal) {
-                        if(newVal) {
-                            // Remove the watcher
-                            schedulerUTCTimeWatcher();
-                            scope.processSchedulerEndDt();
-                        }
-                    });
-                }
+                scope.processSchedulerEndDt();
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
                 scheduler.clear();
@@ -274,6 +273,7 @@ export default
                     }
                     $state.go("^");
                 });
+
                 scope.saveSchedule = function() {
                     SchedulePost({
                         scope: scope,
@@ -295,7 +295,8 @@ export default
         }])
 
         .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait',
-            function(Rest, ProcessErrors, RRuleToAPI, Wait) {
+            'ToJSON',
+            function(Rest, ProcessErrors, RRuleToAPI, Wait, ToJSON) {
             return function(params) {
                 var scope = params.scope,
                     url = params.url,
@@ -325,8 +326,8 @@ export default
                         schedule.extra_data = JSON.stringify(extra_vars);
                     }
                     else if(scope.extraVars){
-                        schedule.extra_data = scope.parseType === 'yaml' ?
-                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;
+                        schedule.extra_data = scope.parseType === 'yaml' ? 
+                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;  
                     }
                     Rest.setUrl(url);
                     if (mode === 'add') {
@@ -429,8 +430,8 @@ export default
          * })
          *
          */
-        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find', '$location',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find, $location) {
+        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find',
+        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find) {
             return function(params) {
 
                 var scope = params.scope,
@@ -456,9 +457,6 @@ export default
                         .success(function () {
                             $('#prompt-modal').modal('hide');
                             scope.$emit(callback, id);
-                            if (new RegExp('/' + id + '$').test($location.$$url)) {
-                                $location.url($location.url().replace(/[/][0-9]+$/, "")); // go to list view
-                            }
                         })
                         .error(function (data, status) {
                             try {
@@ -530,36 +528,14 @@ export default
                 };
 
                 scope.editSchedule = function(id) {
-                    if ($state.includes('inventoryManage')){
-                        $state.go('inventoryManage.schedules.edit', {schedule_id: id});
-                    }
-                    else if ($state.current.name === 'jobs'){
-                        // id === schedule object in this case
-                        var stateDictionary = {
-                            // type: stateName
-                            job: 'jobTemplateSchedules.edit',
-                            system_job: 'managementJobSchedules.edit',
-                            project_update: 'projectSchedules.edit',
-                        };
-                        $state.go(stateDictionary[id.type], {schedule_id: id.id, id: id.summary_fields.unified_job_template.id});
-                    }
-                    else{
-                        var base = $state.current.name.split(".")[0];
-                        $state.go(base + ".edit", {schedule_id: id});
-                    }
+                    var base = $state.current.name.split(".")[0];
+                    $state.go(base + ".edit", {schedule_id: id});
                 };
 
                 scope.addSchedule = function() {
-                    if ($state.includes('inventoryManage')){
-                        scope.schedule_url = parent_scope.current_url.split('?')[0];
-                        ParamPass.set(scope.schedule_url);
-                        $state.go('inventoryManage.schedules.add');
-                    }
-                    else{
-                        var base = $state.current.name.split(".")[0];
-                        ParamPass.set(scope.schedule_url);
-                        $state.go(base + ".add");
-                    }
+                    var base = $state.current.name.split(".")[0];
+                    ParamPass.set(scope.schedule_url);
+                    $state.go(base + ".add");
                 };
 
                 scope.refreshSchedules = function() {
@@ -651,7 +627,7 @@ export default
                     id = params.id,
                     url = params.url,
                     searchSize = params.searchSize,
-                    pageSize = params.pageSize || 10,
+                    pageSize = params.pageSize || 5,
                     spinner = (params.spinner === undefined) ? true : params.spinner;
 
 

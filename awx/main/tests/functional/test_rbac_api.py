@@ -406,9 +406,9 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'object_roles' in org['summary_fields']
+    assert 'roles' in org['summary_fields']
 
-    role_pk = org['summary_fields']['object_roles']['admin_role']['id']
+    role_pk = org['summary_fields']['roles']['admin_role']['id']
     role_url = reverse('api:role_detail', args=(role_pk,))
     org_role_response = get(role_url, admin)
 
@@ -435,5 +435,5 @@ def test_ensure_role_summary_is_present(organization, get, user):
     org = response.data
 
     assert 'summary_fields' in org
-    assert 'object_roles' in org['summary_fields']
-    assert org['summary_fields']['object_roles']['admin_role']['id'] > 0
+    assert 'roles' in org['summary_fields']
+    assert org['summary_fields']['roles']['admin_role']['id'] > 0

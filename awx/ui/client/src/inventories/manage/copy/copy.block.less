@@ -1,0 +1,30 @@
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
+#Inventory-copyMovePanel {
+    .List-searchRow {
+        width: 50%;
+    }
+
+    .ui-dialog-buttonpane.ui-widget-content {
+      border: none;
+      text-align: right;
+      margin-top: 15px;
+    }
+
+    .Form-header {
+        width: 50%;
+        margin-top: -20px;
+    }
+
+    .Form-saveButton {
+        &:disabled {
+            border-color: @default-icon-hov;
+        }
+    }
+}
+
+.copyMove-directive--copyMoveChoices {
+    float: right;
+    width: 25%;
+    text-align: right;
+}

@@ -173,26 +173,12 @@
 }
 
 .Form-formGroup--fullWidth {
-    max-width: none !important;
-    width: 100% !important;
+    max-width: none;
 }
 
 .Form-formGroup--checkbox{
     display: flex;
-    align-items: flex-start;
-}
-
-.Form-checkbox--stacked {
-    label {
-        display: block;
-    }
-}
-
-.Form-textUneditable {
-    .Form-textInput {
-        border: none;
-        padding: 0;
-    }
+    align-items: flex-end;
 }
 
 .Form-subForm {
@@ -234,12 +220,14 @@
 }
 
 .Form-textArea{
+    background-color: @field-secondary-bg!important;
+    background-color: @field-secondary-bg!important;
     border-radius: 5px;
     color: @field-input-text;
 }
 
 .Form-textInput{
-    height: 30px;
+    height: 30px!important;
     background-color: @field-secondary-bg!important;
     border-radius: 5px;
     border:1px solid @field-border;
@@ -252,19 +240,6 @@
 
 .Form-monospace{
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace!important;
-}
-
-.Form-alertblock {
-    margin: 20px 0;
-    font-size: 12px;
-    width: 100%;
-    padding: 15px;
-    padding-top: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid @login-notice-border;
-    background-color: @login-notice-bg;
-    color: @login-notice-text;
 }
 
 .ui-spinner{
@@ -307,7 +282,7 @@
 }
 
 .Form-dropDown {
-    min-height: 30px !important;
+    height: 30px !important;
     border-radius: 5px !important;
     border:1px solid @field-border!important;
     color: @field-input-text!important;
@@ -349,12 +324,6 @@
 
 .select2-dropdown{
     border:1px solid @field-border;
-
-}
-
-.select2-container--open .select2-dropdown--below {
-    margin-top: -1px;
-    border-top: 1px solid @field-border;
 }
 
 .Form-dropDown:focus{
@@ -458,10 +427,6 @@ input[type='radio']:checked:before {
   outline:none;
 }
 
-.Form-inputLabelContainer {
-    width: 100%;
-    display: block !important;
-}
 .Form-inputLabel{
     text-transform: uppercase;
     color: @default-interface-txt;
@@ -469,16 +434,6 @@ input[type='radio']:checked:before {
     font-size: small;
     padding-right:5px;
     width: 100%;
-    .noselect;
-}
-
-.Form-labelAction {
-    text-transform: uppercase;
-    font-weight: normal;
-    font-size: 0.8em;
-    padding-left:5px;
-    float: right;
-    margin-top: 3px;
     .noselect;
 }
 
@@ -539,6 +494,7 @@ input[type='radio']:checked:before {
 
 .Form-surveyButton {
     background-color: @default-link;
+    margin-right: 20px;
     color: @default-bg;
     text-transform: uppercase;
     padding-left:15px;
@@ -581,9 +537,4 @@ input[type='radio']:checked:before {
         width: 50%;
         padding-right: 50px;
     }
-}
-
-.action_column {
-    float: right;
-    margin-bottom: 20px;
 }

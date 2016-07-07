@@ -44,7 +44,7 @@ def prevent_inactive_login(backend, details, user=None, *args, **kwargs):
         raise AuthInactive(backend)
 
 
-def _update_m2m_from_expression(user, rel, expr, remove=True):
+def _update_m2m_from_expression(user, rel, expr, remove=False):
     '''
     Helper function to update m2m relationship based on user matching one or
     more expressions.
@@ -95,7 +95,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
                 continue
 
         # Update org admins from expression(s).
-        remove = bool(org_opts.get('remove', True))
+        remove = bool(org_opts.get('remove', False))
         admins_expr = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
         _update_m2m_from_expression(user, org.admin_role.members, admins_expr, remove_admins)
@@ -133,5 +133,5 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
         # Update team members from expression(s).
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]
         users_expr = team_opts.get('users', None)
-        remove = bool(team_opts.get('remove', True))
+        remove = bool(team_opts.get('remove', False))
         _update_m2m_from_expression(user, team.member_role.members, users_expr, remove)

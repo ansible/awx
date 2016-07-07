@@ -20,7 +20,8 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
     var jobs_scope, scheduled_scope,
         choicesCount = 0,
         listCount = 0,
-        api_complete = false;
+        api_complete = false,
+        max_rows;
 
     $scope.jobsSelected = true;
 
@@ -67,6 +68,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             list: AllJobsList,
             id: 'active-jobs',
             url: GetBasePath('unified_jobs') + '?status__in=pending,waiting,running,completed,failed,successful,error,canceled',
+            pageSize: max_rows,
             searchParams: search_params,
             spinner: false
         });
@@ -79,7 +81,8 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             list: ScheduledJobsList,
             id: 'scheduled-jobs-tab',
             searchSize: 'col-lg-4 col-md-4 col-sm-4 col-xs-12',
-            url: GetBasePath('schedules') + '?next_run__isnull=false'
+            url: GetBasePath('schedules') + '?next_run__isnull=false',
+            pageSize: max_rows
         });
 
         $scope.refreshJobs = function() {
@@ -118,6 +121,10 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
                 scheduled_scope.search('schedule');
             }
         });
+
+        $(window).resize(_.debounce(function() {
+            resizeContainers();
+        }, 500));
     });
 
     if ($scope.removeChoicesReady) {
@@ -126,6 +133,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         choicesCount++;
         if (choicesCount === 2) {
+            setHeight();
             $scope.$emit('buildJobsList');
         }
     });
@@ -147,6 +155,46 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         variable: 'type_choices',
         callback: 'choicesReady'
     });
+
+    // Set the height of each container and calc max number of rows containers can hold
+    function setHeight() {
+        var docw = $(window).width(),
+            //doch = $(window).height(),
+            available_height,
+            search_row, page_row, height, header, row_height;
+        $log.debug('docw: ' + docw);
+
+        // customize the container height and # of rows based on available viewport height
+        available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
+        if (docw < 1350) {
+            available_height = (available_height < 800) ? 800 : available_height;
+        } else {
+            available_height = (available_height < 550) ? 550 : available_height;
+        }
+        $log.debug('available_height: ' + available_height);
+        $('.jobs-list-container').each(function() {
+            $(this).height(Math.floor(available_height));
+        });
+        search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
+        page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
+        header = Math.max($('#active_jobs_table thead').height(), 24);
+        height = Math.floor(available_height ) - header - page_row - search_row - 30;
+        row_height = 44;
+
+        max_rows = Math.floor(height / row_height);
+        max_rows = (max_rows < 5) ? 5 : max_rows;
+
+        $log.debug('max_rows: ' + max_rows);
+    }
+
+    // Set container height and return the number of allowed rows
+    function resizeContainers() {
+        setHeight();
+        jobs_scope[AllJobsList.iterator + '_page_size'] = max_rows;
+        jobs_scope.changePageSize(AllJobsList.name, AllJobsList.iterator);
+        scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
+        scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator);
+    }
 }
 
 JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$stateParams',

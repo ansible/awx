@@ -119,6 +119,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                          case 'azure_rm':
                              scope.usernameLabel = "Username";
                              scope.subscription_required = true;
+                             scope.username_required = true;
+                             scope.password_required = true;
                              scope.passwordLabel = 'Password';
                              scope.azure_rm_required = true;
                          break;

@@ -78,14 +78,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         related_name='deprecated_credentials',
     )
-    organization = models.ForeignKey(
-        'Organization',
-        null=True,
-        default=None,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='credentials',
-    )
     kind = models.CharField(
         max_length=32,
         choices=KIND_CHOICES,
@@ -217,10 +209,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ],
     )
     use_role = ImplicitRoleField(
-        parent_role=[
-            'organization.admin_role',
-            'owner_role',
-        ]
+        parent_role=['owner_role']
     )
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,

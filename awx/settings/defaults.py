@@ -540,7 +540,6 @@ EC2_REGION_NAMES = {
     'ap-southeast-1': 'Asia Pacific (Singapore)',
     'ap-southeast-2': 'Asia Pacific (Sydney)',
     'ap-northeast-1': 'Asia Pacific (Tokyo)',
-    'ap-northeast-2': 'Asia Pacific (Seoul)',
     'sa-east-1': 'South America (Sao Paulo)',
     'us-gov-west-1': 'US West (GovCloud)',
     'cn-north-1': 'China (Beijing)',

@@ -11,6 +11,11 @@ export default {
     route: '/add',
     templateUrl: templateUrl('notifications/add/add'),
     controller: 'notificationsAddController',
+    resolve: {
+        features: ['FeaturesService', function(FeaturesService) {
+            return FeaturesService.get();
+        }]
+    },
     ncyBreadcrumb: {
         parent: 'notifications',
         label: 'Create Notification Template'

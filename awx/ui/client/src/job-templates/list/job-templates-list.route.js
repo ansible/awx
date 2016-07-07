@@ -17,5 +17,10 @@ export default {
     },
     ncyBreadcrumb: {
         label: "JOB TEMPLATES"
+    },
+    resolve: {
+        features: ['FeaturesService', function(FeaturesService) {
+            return FeaturesService.get();
+        }]
     }
 };

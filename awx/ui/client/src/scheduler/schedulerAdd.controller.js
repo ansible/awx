@@ -19,7 +19,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
             day = $filter('schZeroPad')(dt.getDate(), 2);
         $scope.$parent.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
     };
-
+    
     // initial end @ midnight values
     $scope.schedulerEndHour = "00";
     $scope.schedulerEndMinute = "00";
@@ -102,7 +102,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
                 field_id: 'SchedulerForm-extraVars'
             });
     }
-    else if ($state.current.name === 'inventoryManage.schedules.add'){
+    else if ($state.current.name === 'inventoryManageSchedules.add'){
         $scope.extraVars = '---';
         $scope.parseType = 'yaml';
         ParseTypeChange({
@@ -112,6 +112,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
                 field_id: 'SchedulerForm-extraVars'
             });
     }
+
     AddSchedule({
         scope: $scope,
         callback: 'SchedulesRefresh',

@@ -13,7 +13,7 @@ export default {
     controller: 'managementJobsCardController',
     data: {
         activityStream: true,
-        activityStreamTarget: 'job'
+        activityStreamTarget: 'management_job'
     },
     ncyBreadcrumb: {
         parent: 'setup',

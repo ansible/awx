@@ -51,7 +51,7 @@ export default
                 '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control Form-textInput ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
                 '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.required">Please enter an answer variable name.</div>'+
                 '<div class="error ng-hide" id="survey_question-variable-variable-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.variable">Please remove the illegal character from the survey question variable name.</div>'+
-                '<div class="error ng-hide" id="survey_question-variable-duplicate-error" ng-show="duplicate">This question variable is already in use.  Please enter a different variable name.</div>' +
+                '<div class="error ng-hide" id=survey_question-variable-duplicate-error" ng-show="duplicate">This question variable is already in use.  Please enter a different variable name.</div>' +
                 '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
                 '</div>',
             addRequired: true,
@@ -205,9 +205,9 @@ export default
                 '<label for="default"><span class="Form-inputLabel">Default Answer</span></label>'+
                 '<div>'+
                 '<input type="text" ng-model="default" name="default" id="default" class="form-control Form-textInput">'+
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="invalidChoice">Please enter an answer from the choices listed.</div>' +
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="invalidChoice">Please enter an answer from the choices listed.</div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                 '<div class="error api-error ng-binding" id="survey_question-default-api-error" ng-bind="default_api_error"></div>'+
                 '</div>'+
                 '</div>',
@@ -222,7 +222,7 @@ export default
                 '<label for="default_multiselect"><span class="Form-inputLabel">Default Answer</span></label>'+
                 '<div>'+
                 '<textarea rows="3" ng-model="default_multiselect" name="default_multiselect" class="form-control Form-textArea ng-pristine ng-valid" id="default_multiselect" aw-watch=""></textarea>'+
-                '<div class="error ng-hide" id="survey_question-default_multiselect-duplicate-error" ng-show="invalidChoice">Please enter an answer/answers from the choices listed.</div>' +
+                '<div class="error ng-hide" id=survey_question-default_multiselect-duplicate-error" ng-show="invalidChoice">Please enter an answer/answers from the choices listed.</div>' +
                 '<div class="error api-error ng-binding" id="survey_question-default_multiselect-api-error" ng-bind="default_multiselect_api_error"></div>'+
                 '</div>'+
                 '</div>',
@@ -263,8 +263,8 @@ export default
                 '<label for="default_textarea"><span class="Form-inputLabel">Default Answer</span></label>'+
                 '<div>'+
                 '<textarea rows="3" ng-model="default_textarea" name="default_textarea" class="form-control Form-textArea ng-valid ng-dirty" id="default_textarea"></textarea>'+
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                 '<div class="error api-error ng-binding" id="survey_question-default_textarea-api-error" ng-bind="default_textarea_api_error"></div>'+
                 '</div>'+
                 '</div>',
@@ -280,12 +280,12 @@ export default
                 '<div>'+
                 '<div class="input-group">'+
                 '<span class="input-group-btn">'+
-                '<button class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">SHOW</button>'+
+                '<button class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">Show</button>'+
                 '</span>'+
-                '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput" autocomplete="false">'+
+                '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput ng-pristine ng-valid-api-error ng-invalid" autocomplete="false">'+
                 '</div>'+
-                '<div class="error ng-hide" id="survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
-                '<div class="error ng-hide" id="survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
+                '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
+                '<div class="error ng-hide" id=survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                 '<div class="error api-error ng-binding" id="survey_question-default-password-api-error" ng-bind="default_api_error"></div>'+
                 '</div>'+
                 '</div>',
