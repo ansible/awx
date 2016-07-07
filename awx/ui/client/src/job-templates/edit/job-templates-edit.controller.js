@@ -512,16 +512,33 @@ export default
                 }
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
+                var associatedLabelsDefer = $q.defer();
+
+                var getNext = function(data, arr, resolve) {
+                    Rest.setUrl(data.next);
+                    Rest.get()
+                        .success(function (data) {
+                            if (data.next) {
+                                getNext(data, arr.concat(data.results), resolve);
+                            } else {
+                                resolve.resolve(arr.concat(data.results));
+                            }
+                        });
+                };
 
                 Rest.setUrl(data.related.labels);
 
-                var currentLabels = Rest.get()
-                    .then(function(data) {
-                        return data.data.results
-                            .map(val => val.id);
+                Rest.get()
+                    .success(function(data) {
+                        if (data.next) {
+                            getNext(data, data.results, associatedLabelsDefer);
+                        } else {
+                            associatedLabelsDefer.resolve(data.results);
+                        }
                     });
 
-                currentLabels.then(function (current) {
+                associatedLabelsDefer.promise.then(function (current) {
+                    current = current.map(data => data.id);
                     var labelsToAdd = $scope.labels
                         .map(val => val.value);
                     var labelsToDisassociate = current
