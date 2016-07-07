@@ -7,13 +7,13 @@
 export default ['$scope', '$filter',
     function ($scope, $filter) {
 
-        var recentJobs = $scope.jobs;
-
         function isFailureState(status) {
             return status === 'failed' || status === 'error' || status === 'canceled';
         }
 
-        var sparkData =
+        function init(){
+            var recentJobs = $scope.jobs;
+            var sparkData =
             _.sortBy(recentJobs.map(function(job) {
 
                 var data = {};
@@ -36,7 +36,12 @@ export default ['$scope', '$filter',
                 return data;
             }), "sortDate").reverse();
 
-        $scope.sparkArray = sparkData;
+            $scope.sparkArray = sparkData;
+        }
+        $scope.$watchCollection('jobs', function(){
+            init();
+        });
+
 }];
 
 //
