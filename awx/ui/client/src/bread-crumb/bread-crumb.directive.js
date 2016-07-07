@@ -6,7 +6,7 @@ export default
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
             link: function(scope) {
 
-                var streamConfig = {};
+                var streamConfig = {}, originalRoute;
 
                 scope.showActivityStreamButton = false;
                 scope.showRefreshButton = false;
@@ -30,7 +30,7 @@ export default
                                     stateGoParams.id = $state.params[streamConfig.activityStreamId];
                                 }
                             }
-
+                            originalRoute = $state.current;
                             $state.go('activityStream', stateGoParams);
                         }
                         // The user is navigating away from the activity stream - take them back from whence they came
@@ -38,7 +38,10 @@ export default
                             // Pull the previous state out of local storage
                             var previousState = Store('previous_state');
 
-                            if(previousState && !Empty(previousState.name)) {
+                            if(originalRoute) {
+                                $state.go(originalRoute.name, originalRoute.fromParams);
+                            }
+                            else if(previousState && !Empty(previousState.name)) {
                                 $state.go(previousState.name, previousState.fromParams);
                             }
                             else {
