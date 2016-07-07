@@ -9,6 +9,6 @@
     <div class="RoleList-tag"
         ng-class="{'RoleList-tag--deletable': entry.explicit}">
         <span class="RoleList-name">{{ entry.name }}</span>
-        <i ng-show='entry.team_id' class="fa fa-users" ng-attr-title='{{entry.team_name}}'></i>
+        <i ng-show='entry.team_id' class="fa fa-users" aw-tool-tip='{{entry.team_name}}' aw-tip-placement='bottom'></i>
     </div>
 </div>
