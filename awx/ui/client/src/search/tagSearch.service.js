@@ -25,7 +25,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
             typeOptions = field.searchOptions || [];
         } else if (field.searchType === 'boolean') {
             type = 'select';
-            typeOptions = [{label: "Yes", value: true},
+            typeOptions = field.typeOptions || [{label: "Yes", value: true},
                 {label: "No", value: false}];
         } else {
             type = 'text';
