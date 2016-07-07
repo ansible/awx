@@ -165,26 +165,26 @@ def test_update_organization(get, put, organization, alice, bob):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization(delete, organization, admin):
     delete(reverse('api:organization_detail', args=(organization.id,)), user=admin, expect=204)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization2(delete, organization, alice):
     organization.admin_role.members.add(alice)
     delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=204)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail1(delete, organization, alice):
     organization.member_role.members.add(alice)
     delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=403)
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail2(delete, organization):
     delete(reverse('api:organization_detail', args=(organization.id,)), user=None, expect=401)
