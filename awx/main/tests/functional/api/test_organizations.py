@@ -3,6 +3,8 @@
 
 # Python
 import pytest
+import mock
+
 
 # Django
 from django.core.urlresolvers import reverse
@@ -97,6 +99,7 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_create_organization(post, admin, alice):
     new_org = {
         'name': 'new org',
@@ -108,6 +111,7 @@ def test_create_organization(post, admin, alice):
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_create_organization_xfail(post, alice):
     new_org = {
         'name': 'new org',
@@ -161,22 +165,26 @@ def test_update_organization(get, put, organization, alice, bob):
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_delete_organization(delete, organization, admin):
     delete(reverse('api:organization_detail', args=(organization.id,)), user=admin, expect=204)
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_delete_organization2(delete, organization, alice):
     organization.admin_role.members.add(alice)
     delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=204)
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_delete_organization_xfail1(delete, organization, alice):
     organization.member_role.members.add(alice)
     delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=403)
 
 
 @pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
 def test_delete_organization_xfail2(delete, organization):
     delete(reverse('api:organization_detail', args=(organization.id,)), user=None, expect=401)
