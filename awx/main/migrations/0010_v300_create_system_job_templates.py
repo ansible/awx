@@ -24,7 +24,7 @@ def create_system_job_templates(apps, schema_editor):
         job_type='cleanup_jobs',
         defaults=dict(
             name='Cleanup Job Details',
-            description='Remove job history older than X days',
+            description='Remove job history',
             created=now_dt,
             modified=now_dt,
             polymorphic_ctype=sjt_ct,
@@ -51,7 +51,7 @@ def create_system_job_templates(apps, schema_editor):
         job_type='cleanup_activitystream',
         defaults=dict(
             name='Cleanup Activity Stream',
-            description='Remove activity stream history older than X days',
+            description='Remove activity stream history',
             created=now_dt,
             modified=now_dt,
             polymorphic_ctype=sjt_ct,
