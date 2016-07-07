@@ -52,17 +52,16 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
 
     };
 
-
     $scope.filterUser = function(){
         $scope.activeFilter = 'user';
         defaultUrl = GetBasePath('jobs') + '?created_by=' + $rootScope.current_user.id;
-        init();
+        init(true);
     };
 
     $scope.filterAll = function(){
         $scope.activeFilter = 'all';
         defaultUrl = GetBasePath('jobs');
-        init();
+        init(true);
     };
 
     $scope.refresh = function(){
