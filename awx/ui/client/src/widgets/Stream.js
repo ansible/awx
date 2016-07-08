@@ -28,7 +28,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     // arguments are: a summary_field object, a resource type, an activity stream object
     function ($log, $filter) {
         return function (obj, resource, activity) {
-            console.log(obj, resource)
             var url = '/#/';
             // try/except pattern asserts that:
             // if we encounter a case where a UI url can't or shouldn't be generated, just supply the name of the resource
