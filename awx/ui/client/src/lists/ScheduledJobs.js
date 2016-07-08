@@ -45,7 +45,7 @@ export default
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
-                searchField: 'unified_job_template__polymorphic_ctype__name',
+                searchField: 'unified_job_template__name',
                 searchLable: 'Type',
                 searchable: true,
                 searchType: 'select',
