@@ -4,6 +4,8 @@
 # Python
 from __future__ import absolute_import
 import json
+import os
+import unittest2 as unittest
 
 # Django
 from django.core.urlresolvers import reverse
@@ -15,6 +17,7 @@ from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobRelaunchTest',]
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobRelaunchTest(BaseJobTestMixin, BaseLiveServerTest):
 
     def test_job_relaunch(self):

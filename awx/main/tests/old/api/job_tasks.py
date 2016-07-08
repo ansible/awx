@@ -1,6 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import os
+import unittest2 as unittest
+
 from django.conf import settings
 from django.test import LiveServerTestCase
 from django.test.utils import override_settings
@@ -8,6 +11,7 @@ from django.test.utils import override_settings
 from awx.main.tests.job_base import BaseJobTestMixin
 
 
+@unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local')
