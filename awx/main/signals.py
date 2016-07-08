@@ -159,7 +159,7 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
     # Only if we are associating/disassociating
-    if kwargs['action'] in ['post_add', 'pre_remove']:
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
         # Only if this isn't for the User.admin_role
         if hasattr(instance, 'content_type'):
             if instance.content_type in [None, user_type]:
@@ -396,7 +396,7 @@ def activity_stream_delete(sender, instance, **kwargs):
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    if kwargs['action'] in ['post_add', 'pre_remove']:
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
         if kwargs['action'] == 'pre_add':
             action = 'associate'
         elif kwargs['action'] == 'pre_remove':
