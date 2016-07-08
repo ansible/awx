@@ -7,8 +7,10 @@
             class="fa fa-times RoleList-tagDelete"></i>
     </div>
     <div class="RoleList-tag"
-        ng-class="{'RoleList-tag--deletable': entry.explicit}">
+        ng-class="{'RoleList-tag--deletable': entry.explicit,
+            'RoleList-tag--team': entry.team_id}"
+        aw-tool-tip='{{entry.team_name}}' aw-tip-placement='bottom'>
         <span class="RoleList-name">{{ entry.name }}</span>
-        <i ng-show='entry.team_id' class="fa fa-users" aw-tool-tip='{{entry.team_name}}' aw-tip-placement='bottom'></i>
+        <i ng-show='entry.team_id' class="fa fa-users"></i>
     </div>
 </div>
