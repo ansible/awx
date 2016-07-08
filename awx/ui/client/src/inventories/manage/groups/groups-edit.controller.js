@@ -247,7 +247,7 @@
                 {inventory_script: inventorySourceData.source_script}
                 );
             if (inventorySourceData.credential){
-                GroupManageService.getCredential(inventorySourceData.credential).then(res => $scope.credential_name = res.data.name);
+                $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
             $scope = angular.extend($scope, groupData);
 
