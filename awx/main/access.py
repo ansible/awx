@@ -589,8 +589,9 @@ class CredentialAccess(BaseAccess):
     def can_read(self, obj):
         return self.user in obj.read_role
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
+        if not data:  # So the browseable API will work
             return True
         user_pk = get_pk_from_dict(data, 'user')
         if user_pk:
@@ -660,6 +661,8 @@ class TeamAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         if self.user in org.admin_role:
@@ -722,7 +725,7 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        if not data or '_method' in data:
+        if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
         organization_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=organization_pk)
@@ -804,7 +807,7 @@ class JobTemplateAccess(BaseAccess):
         given action as well as the 'create' deploy permission.
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         # if reference_obj is provided, determine if it can be coppied
@@ -994,7 +997,7 @@ class JobAccess(BaseAccess):
             Q(project__organization__in=org_access_qs)).distinct()
 
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
         if not self.user.is_superuser:
             return False
@@ -1096,7 +1099,7 @@ class AdHocCommandAccess(BaseAccess):
                          inventory__in=inventory_qs)
 
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         self.check_license()
@@ -1445,7 +1448,7 @@ class LabelAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         org_pk = get_pk_from_dict(data, 'organization')
@@ -1552,6 +1555,8 @@ class CustomInventoryScriptAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         return self.user in org.admin_role
