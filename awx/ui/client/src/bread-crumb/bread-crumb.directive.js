@@ -36,13 +36,9 @@ export default
                         // The user is navigating away from the activity stream - take them back from whence they came
                         else {
                             // Pull the previous state out of local storage
-                            var previousState = Store('previous_state');
 
                             if(originalRoute) {
                                 $state.go(originalRoute.name, originalRoute.fromParams);
-                            }
-                            else if(previousState && !Empty(previousState.name)) {
-                                $state.go(previousState.name, previousState.fromParams);
                             }
                             else {
                                 // If for some reason something went wrong (like local storage was wiped, etc) take the
