@@ -1075,10 +1075,7 @@ class AdHocCommandAccess(BaseAccess):
     '''
     I can only see/run ad hoc commands when:
     - I am a superuser.
-    - I am an org admin and have permission to read the credential.
-    - I am a normal user with a user/team permission that has at least read
-      permission on the inventory and the run_ad_hoc_commands flag set, and I
-      can read the credential.
+    - I have read access to the inventory
     '''
     model = AdHocCommand
 
@@ -1089,11 +1086,8 @@ class AdHocCommandAccess(BaseAccess):
         if self.user.is_superuser:
             return qs.all()
 
-        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
         inventory_qs = Inventory.accessible_objects(self.user, 'read_role')
-
-        return qs.filter(credential_id__in=credential_ids,
-                         inventory__in=inventory_qs)
+        return qs.filter(inventory__in=inventory_qs)
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
@@ -1101,11 +1095,11 @@ class AdHocCommandAccess(BaseAccess):
 
         self.check_license()
 
-        # If a credential is provided, the user should have read access to it.
+        # If a credential is provided, the user should have use access to it.
         credential_pk = get_pk_from_dict(data, 'credential')
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
-            if self.user not in credential.read_role:
+            if self.user not in credential.use_role:
                 return False
 
         # Check that the user has the run ad hoc command permission on the
