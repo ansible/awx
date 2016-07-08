@@ -128,12 +128,14 @@ export default
             // This gets things started - goes out and hits the launch endpoint (based on launch/relaunch) and
             // prepares the form fields, defauts, etc.
             $scope.init = function() {
-
                 $scope.forms = {};
                 $scope.passwords = {};
 
-                var base = $location.path().replace(/^\//, '').split('/')[0],
-                    isRelaunch = !(base === 'job_templates' || base === 'portal' || base === 'inventories' || base === 'home');
+                var base = $state.current.name,
+                    // As of 3.0, the only place the user can relaunch a
+                    // playbook is on jobTemplates.edit (completed_jobs tab),
+                    // jobs, and jobDetails $states. 
+                    isRelaunch = !(base === 'jobTemplates' || base === 'portalMode' || base === 'dashboard');
 
                 if (!isRelaunch) {
                     launch_url = GetBasePath('job_templates') + $scope.submitJobId + '/launch/';
