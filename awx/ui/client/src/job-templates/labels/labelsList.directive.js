@@ -74,12 +74,16 @@ export default
                         });
                     };
 
-                    scope.$watch(scope.$parent.list.iterator+".summary_fields.labels.results", function() {
+                    scope.$watchCollection(scope.$parent.list.iterator, function() {
                         // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
                         // array will get set initially and then never be updated as labels are removed
                         if (scope[scope.$parent.list.iterator].summary_fields.labels){
                             scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results;
                             scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
+                        }
+                        else{
+                            scope.labels = null;
+                            scope.count = null;
                         }
                     });
                 }
