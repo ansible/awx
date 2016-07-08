@@ -1960,7 +1960,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 // Row level actions
                 if (collection.fieldActions) {
-                    html += "<td class=\"List-tableCell List-actionButtonCell actions\">";
+                    html += "<td class=\"List-actionsContainer\"><div class=\"List-tableCell List-actionButtonCell actions\">";
                     for (act in collection.fieldActions) {
                         fAction = collection.fieldActions[act];
                         html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
@@ -1986,7 +1986,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
                         html += "</button>";
                     }
-                    html += "</td>";
+                    html += "</div></td>";
                     html += "</tr>\n";
                 }
 
