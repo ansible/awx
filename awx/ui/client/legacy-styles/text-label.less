@@ -1,7 +1,17 @@
-@import "src/shared/text-label.less";
+@import "src/shared/branding/colors.default.less";
 
 .host-disabled-label {
   &:after {
-    .include-text-label(#676767; white; "disabled");
+    display: inline-block;
+    content: "disabled";
+    border-radius: 3px;
+    color: @default-icon;
+    text-transform: uppercase;
+    font-size: .7em;
+    font-style: normal;
+    margin-left: 0.5em;
+    padding: 0.35em;
+    padding-bottom: 0.2em;
+    line-height: 1.1;
   }
 }
