@@ -139,7 +139,7 @@ class BaseAccess(object):
         self.user = user
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         else:
             return self.model.objects.none()
@@ -221,7 +221,7 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return User.objects.all()
 
         if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
@@ -718,7 +718,7 @@ class ProjectAccess(BaseAccess):
     model = Project
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('modified_by', 'credential', 'current_job', 'last_job').all()
@@ -752,7 +752,7 @@ class ProjectUpdateAccess(BaseAccess):
     model = ProjectUpdate
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
@@ -788,7 +788,7 @@ class JobTemplateAccess(BaseAccess):
     model = JobTemplate
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             qs = self.model.objects.all()
         else:
             qs = self.model.accessible_objects(self.user, 'read_role')
@@ -979,7 +979,7 @@ class JobAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'cloud_credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         qs_jt = qs.filter(
@@ -1086,7 +1086,7 @@ class AdHocCommandAccess(BaseAccess):
         qs = self.model.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'credential')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         inventory_qs = Inventory.accessible_objects(self.user, 'read_role')
@@ -1147,7 +1147,7 @@ class AdHocCommandEventAccess(BaseAccess):
         qs = self.model.objects.distinct()
         qs = qs.select_related('ad_hoc_command', 'host')
 
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         host_qs = self.user.get_queryset(Host)
@@ -1173,7 +1173,7 @@ class JobHostSummaryAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects
         qs = qs.select_related('job', 'job__job_template', 'host')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
@@ -1205,7 +1205,7 @@ class JobEventAccess(BaseAccess):
                         event_data__icontains='"ansible_job_id": "',
                         event_data__contains='"module_name": "async_status"')
 
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         job_qs = self.user.get_queryset(Job)
@@ -1318,7 +1318,7 @@ class ScheduleAccess(BaseAccess):
         qs = self.model.objects.all()
         qs = qs.select_related('created_by', 'modified_by')
         qs = qs.prefetch_related('unified_job_template')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         job_template_qs = self.user.get_queryset(JobTemplate)
         inventory_source_qs = self.user.get_queryset(InventorySource)
@@ -1369,7 +1369,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs
         return self.model.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role').all())
 
@@ -1413,7 +1413,7 @@ class NotificationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs
         return self.model.objects.filter(notification_template__organization__in=Organization.accessible_objects(self.user, 'admin_role'))
 
@@ -1430,7 +1430,7 @@ class LabelAccess(BaseAccess):
     model = Label
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         return self.model.objects.filter(
             organization__in=Organization.accessible_objects(self.user, 'read_role')
@@ -1493,9 +1493,7 @@ class ActivityStreamAccess(BaseAccess):
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
                                  'permission', 'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role')
-        if self.user.is_superuser:
-            return qs.all()
-        if self.user in Role.singleton('system_auditor'):
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
@@ -1543,7 +1541,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     model = CustomInventoryScript
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.distinct().all()
         return self.model.accessible_objects(self.user, 'read_role').all()
 
@@ -1599,7 +1597,7 @@ class RoleAccess(BaseAccess):
     def can_read(self, obj):
         if not obj:
             return False
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return True
 
         if obj.object_id:
