@@ -78,11 +78,11 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name === 'jobTemplateSchedules.add'){
         $scope.parseType = 'yaml';
+        // grab any existing extra_vars from parent job_template
         var defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
         Rest.setUrl(defaultUrl);
         Rest.get().then(function(res){
-            // sanitize
-            var data = JSON.parse(JSON.stringify(res.data.extra_vars));
+            var data = res.data.extra_vars;
             $scope.extraVars = data === '' ? '---' :  data;
             ParseTypeChange({
                 scope: $scope,
