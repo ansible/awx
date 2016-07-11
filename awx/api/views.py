@@ -1401,7 +1401,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         user_visible = Credential.accessible_objects(self.request.user, 'read_role').all()
         org_set = Credential.accessible_objects(organization.admin_role, 'read_role').all()
 
-        if self.request.user.is_superuser:
+        if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set
 
         return org_set & user_visible
@@ -2591,7 +2591,7 @@ class SystemJobTemplateList(ListAPIView):
     serializer_class = SystemJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
@@ -3321,7 +3321,7 @@ class SystemJobList(ListCreateAPIView):
     serializer_class = SystemJobListSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
@@ -3625,8 +3625,6 @@ class RoleList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Role.objects.all()
         return Role.visible_roles(self.request.user)
 
 
