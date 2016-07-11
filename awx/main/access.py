@@ -1373,7 +1373,6 @@ class NotificationTemplateAccess(BaseAccess):
             return qs
         return self.model.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role').all())
 
-    @check_superuser
     def can_read(self, obj):
         if self.user.is_superuser or self.user.is_system_auditor:
             return True
