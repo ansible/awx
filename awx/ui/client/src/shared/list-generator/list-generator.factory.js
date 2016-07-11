@@ -524,7 +524,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         // Row level actions
 
-                        innerTable += "<td class=\"List-actionButtonCell List-tableCell\">";
+                        innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
 
                         for (field_action in list.fieldActions) {
                             if (field_action !== 'columnClass') {
@@ -573,7 +573,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                 }
                             }
                         }
-                        innerTable += "</td>\n";
+                        innerTable += "</div></td>\n";
                     }
 
                     innerTable += "</tr>\n";

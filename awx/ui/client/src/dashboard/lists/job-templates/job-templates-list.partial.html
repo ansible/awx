@@ -32,13 +32,15 @@
               <td class="DashboardList-activityCell">
                   <aw-smart-status jobs="job_template.recent_jobs"></aw-smart-status>
               </td>
-              <td class="List-actionButtonCell">
-                  <button class="List-actionButton" ng-click="launchJobTemplate(job_template.id)">
-                      <i class="icon-launch"></i>
-                  </button>
-                  <button class="List-actionButton" ng-click="editJobTemplate(job_template.id)">
-                      <i class="fa fa-pencil"></i>
-                  </button>
+              <td class="List-actionsContainer">
+                  <div class="List-actionButtonCell">
+                      <button class="List-actionButton" ng-click="launchJobTemplate(job_template.id)">
+                          <i class="icon-launch"></i>
+                      </button>
+                      <button class="List-actionButton" ng-click="editJobTemplate(job_template.id)">
+                          <i class="fa fa-pencil"></i>
+                      </button>
+                  </div>
                </td>
            </tr>
         </table>
