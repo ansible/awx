@@ -9,7 +9,7 @@
     <div class="RoleList-tag"
         ng-class="{'RoleList-tag--deletable': entry.explicit,
             'RoleList-tag--team': entry.team_id}"
-        aw-tool-tip='{{entry.team_name}}' aw-tip-placement='bottom'>
+        aw-tool-tip='{{entry.team_name | sanitize}}' aw-tip-placement='bottom'>
         <span class="RoleList-name">{{ entry.name }}</span>
         <i ng-show='entry.team_id' class="fa fa-users"></i>
     </div>
