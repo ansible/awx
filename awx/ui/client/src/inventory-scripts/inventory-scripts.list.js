@@ -55,7 +55,7 @@ export default function(){
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
-                awToolTip: 'Edit credential',
+                awToolTip: 'Edit inventory script',
                 dataPlacement: 'top'
             },
             "delete": {
@@ -63,7 +63,7 @@ export default function(){
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',
-                awToolTip: 'Delete credential',
+                awToolTip: 'Delete inventory script',
                 dataPlacement: 'top'
             }
         }
