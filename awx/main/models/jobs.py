@@ -684,7 +684,7 @@ class Job(UnifiedJob, JobOptions):
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
                          playbook=self.playbook,
-                         credential=self.credential.name,
+                         credential=self.credential.name if self.credential else None,
                          limit=self.limit,
                          extra_vars=self.extra_vars,
                          hosts=all_hosts))
