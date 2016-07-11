@@ -36,6 +36,7 @@ export default
                             mustUpdateValue = false;
                             scope.dateValueMoment = moment(newValue, ['MM/DD/YYYY'], moment.locale());
                             scope.dateValue = scope.dateValueMoment.format('L');
+                            element.find(".DatePicker").systemTrackingDP('update', scope.dateValue);
                         }
                     }, true);
 
@@ -54,7 +55,7 @@ export default
 
                     element.find(".DatePicker").addClass("input-prepend date");
                     element.find(".DatePicker").find(".DatePicker-icon").addClass("add-on");
-                    $(".date").systemTrackingDP({
+                    element.find(".DatePicker").systemTrackingDP({
                         autoclose: true,
                         language: localeKey,
                         format: dateFormat
