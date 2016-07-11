@@ -45,14 +45,17 @@ export default
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
-                searchField: 'unified_job_template__name',
-                searchLable: 'Type',
+                searchField: 'unified_job_template__polymorphic_ctype__model',
+                filterBySearchField: true,
+                searchLabel: 'Type',
                 searchable: true,
                 searchType: 'select',
                 searchOptions: [
-                    { value: 'inventory source', label: 'Inventory Sync' },
-                    { value: 'job template', label: 'Playbook Run' },
-                    { value: 'project', label: 'SCM Update' }
+                    { value: 'inventorysource', label: 'Inventory Sync' },
+                    { value: 'jobtemplate', label: 'Playbook Run' },
+                    { value: 'project', label: 'SCM Update' },
+                    { value: 'systemjobtemplate', label: 'Management Job'}
+
                 ]
             },
             next_run: {

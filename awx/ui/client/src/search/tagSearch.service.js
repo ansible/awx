@@ -6,7 +6,10 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         var obj = {};
         // build the value (key)
         var value;
-        if (field.sourceModel && field.sourceField) {
+        if (field.searchField && field.filterBySearchField === true){
+            value = field.searchField;
+        }
+        else if (field.sourceModel && field.sourceField) {
             value = field.sourceModel + '__' + field.sourceField;
             obj.related = true;
         } else if (typeof(field.key) === String) {
