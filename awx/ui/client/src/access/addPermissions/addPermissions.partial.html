@@ -106,15 +106,15 @@
             <div class="AddPermissions-footer">
                 <div class="buttons Form-buttons AddPermissions-buttons">
                     <button type="button"
+                        class="btn btn-sm Form-cancelButton"
+                        ng-click="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
                         ng-disabled="userRoleForm.$invalid || !allSelected || !allSelected.length">
                         Save
-                    </button>
-                    <button type="button"
-                        class="btn btn-sm Form-cancelButton"
-                        ng-click="closeModal()">
-                        Cancel
                     </button>
                 </div>
             </div>
