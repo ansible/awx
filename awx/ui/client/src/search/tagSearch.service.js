@@ -6,7 +6,12 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         var obj = {};
         // build the value (key)
         var value;
-        if (field.sourceModel && field.sourceField) {
+        console.log(field)
+        if (field.searchField && field.filterBySearchField === true){
+            value = field.searchField;
+        }
+        else if (field.sourceModel && field.sourceField) {
+            console.log('condition met 2')
             value = field.sourceModel + '__' + field.sourceField;
             obj.related = true;
         } else if (typeof(field.key) === String) {
