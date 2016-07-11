@@ -599,7 +599,7 @@ class BaseTask(Task):
                                 else:
                                     child_procs = main_proc.get_children(recursive=True)
                                 for child_proc in child_procs:
-                                    os.kill(child_proc.pid, signal.SIGTERM)
+                                    os.kill(child_proc.pid, signal.SIGKILL)
                             except TypeError:
                                 os.kill(child.pid, signal.SIGKILL)
                     else:
