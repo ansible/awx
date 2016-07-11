@@ -43,6 +43,7 @@ export default
                 searchable: false,
                 filter: "longDate",
                 key: true,
+                desc: true,
                 columnClass: "col-lg-4 col-md-4 col-sm-3"
             }
         },
