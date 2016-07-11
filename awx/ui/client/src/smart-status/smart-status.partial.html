@@ -1,8 +1,8 @@
 <div class="SmartStatus-container">
     <div ng-repeat="job in sparkArray track by $index" class='SmartStatus-iconContainer'>
         <a href="#/jobs/{{ job.jobId }}"
-             aw-tool-tip="
-             JOB ID: {{job.jobId}} <br>STATUS: {{job.smartStatus}} <br>FINISHED: {{job.finished}}"
+             aw-tool-tip="{{job.status_tip}}"
+             data-tip-watch="job.status_tip"
              aw-tip-placement="left"
              data-original-title=""
              data-trigger="hover"

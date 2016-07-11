@@ -32,6 +32,7 @@ export default ['$scope', '$filter',
                 data.jobId = job.id;
                 data.sortDate = job.finished || "running" + data.jobId;
                 data.finished = $filter('longDate')(job.finished) || job.status+"";
+                data.status_tip = "JOB ID: " + data.jobId + "<br>STATUS: " + data.smartStatus + "<br>FINISHED: " + data.finished;
 
                 return data;
             }), "sortDate").reverse();
