@@ -7,7 +7,7 @@
 export function PortalModeJobsController($scope, $rootScope, GetBasePath, GenerateList, PortalJobsList, SearchInit,
     PaginateInit){
 
-    var list = PortalJobsList,
+    var list = _.cloneDeep(PortalJobsList),
     view = GenerateList,
     // show user jobs by default
     defaultUrl = GetBasePath('jobs') + '?created_by=' + $rootScope.current_user.id,
@@ -24,6 +24,11 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
     $scope.activeFilter = 'user';
 
     var init = function(sort){
+        // We need to explicitly set the lists base path so that tag searching will keep the '?created_by'
+        // query param when it's present.  If we don't do this, then tag search will just grab the base
+        // path for this list (/api/v1/jobs) and lose the created_by filter
+        list.basePath = defaultUrl;
+
         view.inject(list, {
             id: 'portal-jobs',
             mode: 'edit',
