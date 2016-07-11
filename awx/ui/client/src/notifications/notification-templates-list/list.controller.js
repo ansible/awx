@@ -148,7 +148,7 @@ export default
 
             scope.testNotification = function(){
                 var name = $filter('sanitize')(this.notification_template.name),
-                pending_count = 10;
+                pending_retries = 10;
 
                 Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
                 Rest.post({})
@@ -191,8 +191,8 @@ export default
                                 });
                                 Wait('stop');
                             }
-                            else if(res && res.data && res.data.status && res.data.status === "pending" && pending_count>0){
-                                pending_count--;
+                            else if(res && res.data && res.data.status && res.data.status === "pending" && pending_retries>0){
+                                pending_retries--;
                                 retrieveStatus(id);
                             }
                             else {
