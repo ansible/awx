@@ -24,7 +24,7 @@
               Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or when syncing inventories or projects.
             </p>
         </a>
-        <a ui-sref="managementJobsList" class="SetupItem" ng-if="user_is_superuser">
+        <a ui-sref="managementJobsList" class="SetupItem" ng-if="user_is_superuser || user_is_system_auditor">
             <h4 class="SetupItem-title">Management Jobs</h4>
             <p class="SetupItem-description">
                 Manage the cleanup of old job history, activity streams, data marked for deletion, and system tracking info.
@@ -37,7 +37,7 @@
             </p>
         </a>
         <a ui-sref="notifications" class="SetupItem"
-            ng-if="orgAdmin">
+            ng-if="orgAdmin || user_is_system_auditor || user_is_superuser">
             <h4 class="SetupItem-title">Notifications</h4>
             <p class="SetupItem-description">
             Create templates for sending notifications with Email, HipChat, Slack, and SMS.
