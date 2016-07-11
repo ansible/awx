@@ -87,6 +87,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
+    'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
@@ -2621,7 +2622,11 @@ class ActivityStreamSerializer(BaseSerializer):
             if getattr(obj, fk).exists():
                 rel[fk] = []
                 for thisItem in allm2m:
-                    rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+                    if fk == 'custom_inventory_script':
+                        rel[fk].append(reverse('api:inventory_script_detail', args=(thisItem.id,)))
+                    else:
+                        rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url()
         return rel
