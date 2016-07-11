@@ -230,7 +230,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
         data.results.forEach( function(row) {
             if (row.related.last_update) {
                 html += "<tr>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
+                html += `<td><a href="" ng-click="viewJob('${row.related.last_update}')" aw-tool-tip="${row.status.charAt(0).toUpperCase() + row.status.slice(1)}. Click for details" aw-tip-placement="top"><i class="SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></a></td>`;
                 html += "<td>" + ($filter('longDate')(row.last_updated)).replace(/ /,'<br />') + "</td>";
                 html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
                 html += "</tr>\n";

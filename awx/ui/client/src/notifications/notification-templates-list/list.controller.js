@@ -131,7 +131,7 @@ export default
 
                             recent_notifications.forEach(function(row) {
                                 html += "<tr>\n";
-                                html += "<td><i class=\"fa icon-job-" + row.status + "\"></i></td>\n";
+                                html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
                                 html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
                                 html += "</tr>\n";
                             });
