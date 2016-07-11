@@ -1926,12 +1926,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
         # fields not provided in data from the job template.
-        if not self.instance and isinstance(data, dict) and 'job_template' in data:
+        if not self.instance and isinstance(data, dict) and data.get('job_template', False):
             try:
                 job_template = JobTemplate.objects.get(pk=data['job_template'])
             except JobTemplate.DoesNotExist:
-                self._errors = {'job_template': 'Invalid job template.'}
-                return
+                raise serializers.ValidationError({'job_template': 'Invalid job template.'})
             data.setdefault('name', job_template.name)
             data.setdefault('description', job_template.description)
             data.setdefault('job_type', job_template.job_type)
@@ -2694,8 +2693,7 @@ class TowerSettingsSerializer(BaseSerializer):
 
     def to_internal_value(self, data):
         if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
-            self._errors = {'key': 'Key {0} is not a valid settings key.'.format(data['key'])}
-            return
+            raise serializers.ValidationError({'key': ['Key {0} is not a valid settings key.'.format(data['key'])]})
         ret = super(TowerSettingsSerializer, self).to_internal_value(data)
         manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
         ret['description'] = manifest_val['description']
