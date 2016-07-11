@@ -23,7 +23,8 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
     $scope.iterator = list.iterator;
     $scope.activeFilter = 'user';
 
-    var init = function(sort){
+    var init = function(url){
+        defaultUrl = url ? url : defaultUrl;
         view.inject(list, {
             id: 'portal-jobs',
             mode: 'edit',
@@ -44,31 +45,26 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
             url: defaultUrl,
             pageSize: pageSize
         });
-        $scope.search (list.iterator);
-        if(sort) {
-            // hack to default to descending sort order
-            $scope.sort('job','finished');
-        }
-
+        $scope.search(list.iterator);
     };
 
     $scope.filterUser = function(){
         $scope.activeFilter = 'user';
         defaultUrl = GetBasePath('jobs') + '?created_by=' + $rootScope.current_user.id;
-        init(true);
+        init(defaultUrl);
     };
 
     $scope.filterAll = function(){
         $scope.activeFilter = 'all';
         defaultUrl = GetBasePath('jobs');
-        init(true);
+        init(defaultUrl);
     };
 
     $scope.refresh = function(){
         $scope.search(list.iterator);
     };
 
-    init(true);
+    init();
 }
 
 PortalModeJobsController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobsList', 'SearchInit',
