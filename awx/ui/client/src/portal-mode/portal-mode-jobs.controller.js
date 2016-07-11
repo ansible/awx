@@ -7,7 +7,7 @@
 export function PortalModeJobsController($scope, $rootScope, GetBasePath, GenerateList, PortalJobsList, SearchInit,
     PaginateInit){
 
-    var list = PortalJobsList,
+    var list = _.cloneDeep(PortalJobsList),
     view = GenerateList,
     // show user jobs by default
     defaultUrl = GetBasePath('jobs') + '?created_by=' + $rootScope.current_user.id,
