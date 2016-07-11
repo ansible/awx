@@ -6,8 +6,8 @@
 
 export default
 	['$scope', '$state', '$stateParams', 'PageRangeSetup', 'GetBasePath', 'DashboardHostsList',
-	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts',
-	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts){
+	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts', '$rootScope',
+	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts, $rootScope){
 		var setJobStatus = function(){
 			_.forEach($scope.hosts, function(value){
 				SetStatus({
@@ -38,6 +38,20 @@ export default
         	});
         	setJobStatus();
 		});
+		var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+             if (toState.name === "dashboardHosts.edit") {
+                 $scope.rowBeingEdited = toParams.id;
+                 $scope.listBeingEdited = "hosts";
+             }
+             else {
+                 delete $scope.rowBeingEdited;
+                 delete $scope.listBeingEdited;
+             }
+        });
+        // Remove the listener when the scope is destroyed to avoid a memory leak
+        $scope.$on('$destroy', function() {
+            cleanUpStateChangeListener();
+        });
 		var init = function(){
 			$scope.list = list;
 			$scope.host_active_search = false;
@@ -59,6 +73,10 @@ export default
                 iterator: list.iterator
             });
 			$scope.hostLoading = false;
+			if($state.current.name === "dashboardHosts.edit") {
+	            $scope.rowBeingEdited = $state.params.id;
+	            $scope.listBeingEdited = "hosts";
+	        }
 		};
 		init();
 	}];
