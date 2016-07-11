@@ -1375,6 +1375,8 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_read(self, obj):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return True
         if obj.organization is not None:
             return self.user in obj.organization.admin_role
         return False
