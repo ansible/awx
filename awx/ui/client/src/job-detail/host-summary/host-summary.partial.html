@@ -1,7 +1,7 @@
 
 <div id="hosts-summary-section" class="section">
-    <div class="JobDetail-instructions" ng-hide="hosts.length == 0 && !searchTerm"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
-    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0 && !searchTerm">
+    <div class="JobDetail-instructions" ng-hide="hosts.length == 0 && !searchTerm && !searchActive"><span class="badge">4</span> Please select a host below to view a summary of all associated tasks.</div>
+    <div class="JobDetail-searchHeaderRow" ng-hide="hosts.length == 0 && !searchTerm && !searchActive">
         <div class="JobDetail-searchContainer form-group">
             <div class="search-name">
                 <form ng-submit="search()">
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="table-header" ng-hide="hosts.length == 0 && !searchTerm">
+    <div class="table-header" ng-hide="hosts.length == 0 && !searchTerm && !searchActive">
         <table class="table table-condensed">
             <thead>
                 <tr>
