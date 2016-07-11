@@ -521,11 +521,12 @@ var tower = angular.module('Tower', [
         'ClearScope', 'Socket', 'LoadConfig', 'Store',
         'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
         'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService',
+        'FeaturesService', '$filter',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
             $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
             LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
-            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService) {
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
+            $filter) {
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
@@ -563,7 +564,7 @@ var tower = angular.module('Tower', [
                 if (accessListEntry.team_id) {
                     Prompt({
                         hdr: `Team access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${entry.team_name}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
                             action: action,
                         actionText: 'REMOVE TEAM ACCESS'
                     });
