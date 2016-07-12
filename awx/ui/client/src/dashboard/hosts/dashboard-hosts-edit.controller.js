@@ -22,7 +22,7 @@
  		$scope.formSave = function(){
  			var host = {
  				id: $scope.host.id,
- 				variables: $scope.extraVars === '---' || $scope.extraVars === '{}' ? null : $scope.extraVars,
+ 				variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
  				name: $scope.name,
  				description: $scope.description,
  				enabled: $scope.host.enabled
@@ -34,15 +34,14 @@
  		};
  		var init = function(){
  			$scope.host = host;
- 			$scope.extraVars = host.variables === '' ? '---' : host.variables;
  			generator.inject(form, {mode: 'edit', related: false, scope: $scope});
-     		$scope.extraVars = $scope.host.variables === '' ? '---' : $scope.host.variables;
     		$scope.name = host.name;
  			$scope.description = host.description;
+ 			$scope.variables = host.variables === '' ? '---' : host.variables;
         	ParseTypeChange({
         		scope: $scope,
         		field_id: 'host_variables',
-        		variable: 'extraVars',
+        		variable: 'variables',
         	});
  		};
 
