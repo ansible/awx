@@ -49,6 +49,7 @@ export default
                 ngClick: "viewJobDetails(all_job)",
                 defaultSearchField: true,
                 awToolTip: "{{ all_job.name | sanitize }}",
+                dataTipWatch: 'all_job.name',
                 dataPlacement: 'top'
             },
             type: {

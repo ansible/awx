@@ -35,6 +35,7 @@ export default
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule)",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
+                dataTipWatch: 'schedule.nameTip',
                 dataPlacement: "top",
                 defaultSearchField: true
             },
