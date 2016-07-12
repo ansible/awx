@@ -3651,10 +3651,10 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return role.members.all()
 
     def post(self, request, *args, **kwargs):
-        # Forbid implicit role creation here
+        # Forbid implicit user creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg="User 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
