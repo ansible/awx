@@ -202,7 +202,7 @@ def notification(notification_template):
                                        status='successful',
                                        notifications_sent=1,
                                        notification_type='email',
-                                       recipients='admin@admin.com',
+                                       recipients='admin@redhat.com',
                                        subject='email subject')
 
 @pytest.fixture
