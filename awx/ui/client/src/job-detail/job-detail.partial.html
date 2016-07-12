@@ -164,7 +164,7 @@
             <!--- end of results-->
 
             <!--beginning of details-->
-            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
+            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
                 <div class="JobDetail-panelHeader">
                     <div class="JobDetail-expandContainer">
                         <a class="JobDetail-panelHeaderText" ng-show="lessDetail" href="" ng-click="toggleLessDetail()">
@@ -379,7 +379,7 @@
             <!--end of details-->
 
             <!--beginning of events summary-->
-            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
+            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
                     <div class="JobDetail-panelHeader">
                         <div class="JobDetail-expandContainer">
                             <a class="JobDetail-panelHeaderText" ng-show="lessEvents" ui-sref="jobDetail.host-summary" ng-click="toggleLessEvents()">

@@ -429,7 +429,6 @@ export default
                     order_by: 'id'
                 };
 
-                if (scope.job && scope.job.summary_fields && scope.job.summary_fields.unified_job_template && scope.job.summary_fields.unified_job_template.unified_job_type === 'job'){
                     JobDetailService.getJobPlays(scope.job.id, params)
                     .success( function(data) {
                         scope.next_plays = data.next;
@@ -515,7 +514,6 @@ export default
                         }
                         scope.$emit('LoadTasks', events_url);
                     });
-                }
             });
 
 
