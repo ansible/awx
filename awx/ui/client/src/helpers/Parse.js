@@ -71,7 +71,7 @@ export default
                         }
                         catch (e) {
                             Alert('Parse Error', 'Failed to parse valid YAML. ' + e.message);
-                            setTimeout( function() { scope.$apply( function() { scope[model] = 'yaml'; createField(); }); }, 500);
+                            setTimeout( function() { scope.$apply( function() { scope[model] = 'yaml'; createField(onReady, onChange, fld); }); }, 500);
                         }
                     }
                     else {
@@ -89,7 +89,7 @@ export default
                         }
                         catch (e) {
                             Alert('Parse Error', 'Failed to parse valid JSON. ' + e.message);
-                            setTimeout( function() { scope.$apply( function() { scope[model] = 'json'; createField(); }); }, 500 );
+                            setTimeout( function() { scope.$apply( function() { scope[model] = 'json'; createField(onReady, onChange, fld); }); }, 500 );
                         }
                     }
                 };
