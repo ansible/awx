@@ -323,6 +323,7 @@ model_serializer_mapping = {
     Host: HostSerializer,
     Group: GroupSerializer,
     InventorySource: InventorySourceSerializer,
+    CustomInventoryScript: CustomInventoryScriptSerializer,
     Credential: CredentialSerializer,
     Team: TeamSerializer,
     Project: ProjectSerializer,
