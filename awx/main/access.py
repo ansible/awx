@@ -1573,10 +1573,6 @@ class CustomInventoryScriptAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_admin(obj)
 
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
-
 
 class TowerSettingsAccess(BaseAccess):
     '''
