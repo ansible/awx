@@ -32,6 +32,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // try/except pattern asserts that:
             // if we encounter a case where a UI url can't or shouldn't be generated, just supply the name of the resource
             try {
+                // catch-all case to avoid generating urls if a resource has been deleted
+                // if a resource still exists, it'll be serialized in the activity's summary_fields
+                if (!activity.summary_fields[resource]){
+                    throw {name : 'ResourceDeleted', message: 'The referenced resource no longer exists'};
+                }
                 switch (resource) {
                     case 'custom_inventory_script':
                         url += 'inventory_scripts/' + obj.id + '/';
