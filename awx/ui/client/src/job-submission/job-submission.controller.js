@@ -131,13 +131,11 @@ export default
                 $scope.forms = {};
                 $scope.passwords = {};
 
-                var base = $state.current.name,
-                    // As of 3.0, the only place the user can relaunch a
-                    // playbook is on jobTemplates.edit (completed_jobs tab),
-                    // jobs, and jobDetails $states. 
-                    isRelaunch = !(base === 'jobTemplates' || base === 'portalMode' || base === 'dashboard');
+                // As of 3.0, the only place the user can relaunch a
+                // playbook is on jobTemplates.edit (completed_jobs tab),
+                // jobs, and jobDetails $states.
 
-                if (!isRelaunch) {
+                if (!$scope.submitJobRelaunch) {
                     launch_url = GetBasePath('job_templates') + $scope.submitJobId + '/launch/';
                 }
                 else {
@@ -189,7 +187,7 @@ export default
                         updateRequiredPasswords();
                     }
 
-                    if( (isRelaunch && !$scope.password_needed) || (!isRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                    if( ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
                         // The job can be launched if
                         // a) It's a relaunch and no passwords are needed
                         // or
@@ -217,7 +215,7 @@ export default
                             $scope.openLaunchModal();
                         };
 
-                        if(isRelaunch) {
+                        if($scope.submitJobRelaunch) {
                             // Go out and get some of the job details like inv, cred, name
                             Rest.setUrl(GetBasePath('jobs') + $scope.submitJobId);
                             Rest.get()

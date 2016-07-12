@@ -13,13 +13,13 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile', '$state', '$stateParams', '$log', 'ClearScope',
         'GetBasePath', 'Wait', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed', 'JobIsFinished',
-        'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'InitiatePlaybookRun', 'LoadPlays', 'LoadTasks',
+        'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'RelaunchPlaybook', 'LoadPlays', 'LoadTasks',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule',
         'ParseTypeChange', 'JobDetailService',
         function(
             $location, $rootScope, $filter, $scope, $compile, $state, $stateParams, $log, ClearScope,
             GetBasePath, Wait, ProcessErrors, SelectPlay, SelectTask, GetElapsed, JobIsFinished,
-            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, InitiatePlaybookRun, LoadPlays, LoadTasks,
+            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, RelaunchPlaybook, LoadPlays, LoadTasks,
             ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule,
             ParseTypeChange, JobDetailService
         ) {
@@ -920,7 +920,7 @@ export default
             };
 
             scope.relaunchJob = function() {
-                InitiatePlaybookRun({
+                RelaunchPlaybook({
                     scope: scope,
                     id: scope.job.id
                 });
