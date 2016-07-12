@@ -162,6 +162,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       input_type: "radio"
                                   });
 
+                                  CredentialList.basePath = GetBasePath('credentials') + '?kind=ssh';
+
                                   LookUpInit({
                                       url: GetBasePath('credentials') + '?kind=ssh',
                                       scope: scope,
