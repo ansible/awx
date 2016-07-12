@@ -1,6 +1,9 @@
 import pytest
 
-from awx.main.access import NotificationTemplateAccess
+from awx.main.access import (
+    NotificationTemplateAccess,
+    NotificationAccess
+)
 
 @pytest.mark.django_db
 def test_notification_template_get_queryset_orgmember(notification_template, user):
@@ -86,3 +89,15 @@ def test_notificaiton_template_orphan_access_org_admin(notification_template, or
     notification_template.organization = None
     access = NotificationTemplateAccess(org_admin)
     assert not access.can_change(notification_template, {'organization': organization.id})
+
+@pytest.mark.django_db
+def test_notification_access_org_admin(notification, org_admin):
+    access = NotificationAccess(org_admin)
+    assert access.get_queryset().count() == 1
+    assert access.can_read(notification)
+
+@pytest.mark.django_db
+def test_notification_access_org_auditor(notification, org_auditor):
+    access = NotificationAccess(org_auditor)
+    assert access.get_queryset().count() == 1
+    assert access.can_read(notification)

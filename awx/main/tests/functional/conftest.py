@@ -38,7 +38,10 @@ from awx.main.models.organization import (
     Team,
 )
 
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    Notification
+)
 
 '''
 Disable all django model signals.
@@ -192,6 +195,15 @@ def notification_template(organization):
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
                                                                                headers={"Test": "Header"}))
+
+@pytest.fixture
+def notification(notification_template):
+    return Notification.objects.create(notification_template=notification_template,
+                                       status='successful',
+                                       notifications_sent=1,
+                                       notification_type='email',
+                                       recipients='admin@admin.com',
+                                       subject='email subject')
 
 @pytest.fixture
 def job_with_secret_key(job_with_secret_key_factory):
