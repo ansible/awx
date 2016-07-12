@@ -331,6 +331,7 @@ export default
                     var credential_url = GetBasePath('credentials') + '?kind=ssh';
 
                     var credList = _.cloneDeep(CredentialList);
+                    credList.basePath = GetBasePath('credentials') + '?kind=ssh';
                     credList.fields.description.searchable = false;
                     credList.fields.kind.searchable = false;
 
