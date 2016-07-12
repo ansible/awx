@@ -25,6 +25,11 @@ def test_notification_template_get_queryset_orgadmin(notification_template, user
     assert access.get_queryset().count() == 1
 
 @pytest.mark.django_db
+def test_notification_template_get_queryset_org_auditor(notification_template, org_auditor):
+    access = NotificationTemplateAccess(org_auditor)
+    assert access.get_queryset().count() == 1
+
+@pytest.mark.django_db
 def test_notification_template_access_superuser(notification_template_factory):
     nf_objects = notification_template_factory('test-orphaned', organization='test', superusers=['admin'])
     admin = nf_objects.superusers.admin
