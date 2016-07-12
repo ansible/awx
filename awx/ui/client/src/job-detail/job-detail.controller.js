@@ -841,7 +841,7 @@ export default
             };
 
             scope.searchTasks = function() {
-                var params;
+                var params = {};
                 if (scope.search_task_name) {
                     scope.searchTasksEnabled = false;
                 }
@@ -866,7 +866,7 @@ export default
             };
 
             scope.searchHosts = function() {
-                var params;
+                var params = {};
                 if (scope.search_host_name) {
                     scope.searchHostsEnabled = false;
                 }
