@@ -9,10 +9,11 @@ export default
             return function (params) {
                 var scope = params.scope.$new(),
                 id = params.id,
+                relaunch = params.relaunch || false,
                 system_job = params.system_job || false;
                 scope.job_template_id = id;
 
-                var el = $compile( "<submit-job data-submit-job-id=" + id + " data-submit-job-system=" + system_job + "></submit-job>" )( scope );
+                var el = $compile( "<submit-job data-submit-job-id=" + id + " data-submit-job-system=" + system_job + " data-submit-job-relaunch=" + relaunch + "></submit-job>" )( scope );
                 $('#content-container').remove('submit-job').append( el );
             };
         }
