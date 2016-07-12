@@ -134,7 +134,7 @@ export default
                 var base = $state.current.name,
                     // As of 3.0, the only place the user can relaunch a
                     // playbook is on jobTemplates.edit (completed_jobs tab),
-                    // jobs, and jobDetails $states. 
+                    // jobs, and jobDetails $states.
                     isRelaunch = !(base === 'jobTemplates' || base === 'portalMode' || base === 'dashboard');
 
                 if (!isRelaunch) {
@@ -333,6 +333,7 @@ export default
                     var credential_url = GetBasePath('credentials') + '?kind=ssh';
 
                     var credList = _.cloneDeep(CredentialList);
+                    credList.basePath = GetBasePath('credentials') + '?kind=ssh';
                     credList.fields.description.searchable = false;
                     credList.fields.kind.searchable = false;
 
