@@ -93,7 +93,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         'Organization',
         blank=False,
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='teams',
     )
     deprecated_projects = models.ManyToManyField(
