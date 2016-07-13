@@ -12,6 +12,9 @@
         var generator = GenerateForm,
             form = GroupForm();
 
+        // remove "type" field from search options
+        CredentialList.fields.kind.noSearch = true;
+
         $scope.formCancel = function(){
             $state.go('^');
         };

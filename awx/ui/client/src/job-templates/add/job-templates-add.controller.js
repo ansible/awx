@@ -34,6 +34,9 @@
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 context = (base === 'job_templates') ? 'job_template' : 'inv';
 
+            // remove "type" field from search options
+            CredentialList.fields.kind.noSearch = true;
+
             CallbackHelpInit({ scope: $scope });
             $scope.can_edit = true;
             generator.inject(form, { mode: 'add', related: false, scope: $scope });
@@ -81,6 +84,7 @@
             NetworkCredentialList.name = 'networkcredentials';
             NetworkCredentialList.iterator = 'networkcredential';
             NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
+
 
             SurveyControllerInit({
                 scope: $scope,

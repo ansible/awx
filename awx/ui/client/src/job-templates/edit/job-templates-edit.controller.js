@@ -46,6 +46,8 @@ export default
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
 
+            // remove "type" field from search options
+            CredentialList.fields.kind.noSearch = true;
 
             CallbackHelpInit({ scope: $scope });
 

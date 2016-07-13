@@ -163,6 +163,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   });
 
                                   CredentialList.basePath = GetBasePath('credentials') + '?kind=ssh';
+                                  // remove "type" field from search options
+                                  CredentialList.fields.kind.noSearch = true;
 
                                   LookUpInit({
                                       url: GetBasePath('credentials') + '?kind=ssh',
