@@ -45,6 +45,7 @@ export default
             owners: {
                 label: 'Owners',
                 type: 'owners',
+                searchable: false,
                 nosort: true,
                 excludeModal: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'
