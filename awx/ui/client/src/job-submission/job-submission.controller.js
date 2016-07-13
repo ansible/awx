@@ -537,8 +537,9 @@ export default
                 // It shares the same scope with this directive and will
                 // pull the new value of parseType out to determine which
                 // direction to convert the extra vars
+
                 $scope.parseType = $scope.other_prompt_data.parseType;
-                $scope.parseTypeChange();
+                $scope.parseTypeChange('parseType', 'jobLaunchVariables');
             };
 
         }
