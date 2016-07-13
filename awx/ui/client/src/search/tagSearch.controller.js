@@ -1,17 +1,19 @@
-export default ['$scope', 'Refresh', 'tagSearchService',
-    function($scope, Refresh, tagSearchService) {
+export default ['$scope', 'Refresh', 'tagSearchService', '$stateParams',
+    function($scope, Refresh, tagSearchService, $stateParams) {
         // JSONify passed field elements that can be searched
         $scope.list = angular.fromJson($scope.list);
         // Access config lines from list spec
         $scope.listConfig = $scope.$parent.list;
         // Grab options for the left-dropdown of the searchbar
-        tagSearchService.getSearchTypes($scope.list, $scope.endpoint)
-            .then(function(searchTypes) {
-                $scope.searchTypes = searchTypes;
+        if($stateParams.id !== "null"){
+            tagSearchService.getSearchTypes($scope.list, $scope.endpoint)
+                .then(function(searchTypes) {
+                    $scope.searchTypes = searchTypes;
 
-                // currently selected option of the left-dropdown
-                $scope.currentSearchType = $scope.searchTypes[0];
-            });
+                    // currently selected option of the left-dropdown
+                    $scope.currentSearchType = $scope.searchTypes[0];
+                });
+        }
 
         // shows/hide the search type dropdown
         $scope.toggleTypeDropdown = function() {
