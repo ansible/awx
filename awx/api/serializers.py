@@ -2429,16 +2429,8 @@ class NotificationTemplateSerializer(BaseSerializer):
             notification_type = self.instance.notification_type
         else:
             notification_type = None
-        if 'organization' in attrs:
-            organization = attrs['organization']
-        elif self.instance:
-            organization = self.instance.organization
-        else:
-            organization = None
         if not notification_type:
             raise serializers.ValidationError('Missing required fields for Notification Configuration: notification_type')
-        if not organization:
-            raise serializers.ValidationError("Missing 'organization' from required fields")
 
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
         missing_fields = []
