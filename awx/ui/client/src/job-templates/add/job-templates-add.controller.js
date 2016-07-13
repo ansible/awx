@@ -375,7 +375,7 @@
         </string>
     </p>
 </div>`,
-                        'alert-info', saveCompleted, null, null,
+                        'alert-danger', saveCompleted, null, null,
                         null, true);
                 }
                 var orgDefer = $q.defer();
