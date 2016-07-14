@@ -39,6 +39,13 @@ export default
             }
             catch(err){return;}
         },
+        processsEventTip: function(event, status){
+            try{
+                var string = `Event ID: ${ event.id }<br>Status: ${ _.capitalize(status.status)}. Click for details`;
+                return typeof item === 'object' ? JSON.stringify(string) : string;
+            }
+            catch(err){return;}
+        },
         // Generate a helper class for job_event statuses
         // the stack for which status to display is
         // unreachable > failed > changed > ok
@@ -88,6 +95,7 @@ export default
                     var status = self.processEventStatus(event);
                     var msg = self.processEventMsg(event);
                     var item = self.processEventItem(event);
+                    var tip = self.processsEventTip(event, status);
                     results.push({
                         id: event.id,
                         status: status.status,
@@ -96,6 +104,7 @@ export default
                         task_id: event.parent,
                         name: event.event_data.host,
                         created: event.created,
+                        tip: typeof tip === 'undefined' ? undefined : tip,
                         msg: typeof msg === 'undefined' ? undefined : msg,
                         item: typeof item === 'undefined' ? undefined : item
                     });

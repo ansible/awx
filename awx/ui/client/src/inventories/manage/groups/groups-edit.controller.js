@@ -13,6 +13,11 @@
         GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData){
         var generator = GenerateForm,
             form = GroupForm();
+
+        // remove "type" field from search options
+        CredentialList = _.cloneDeep(CredentialList);
+        CredentialList.fields.kind.noSearch = true;
+
         $scope.formCancel = function(){
             $state.go('^');
         };
@@ -117,7 +122,7 @@
             // reset fields
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
-            $scope.cloudCredentialRequired = source.value !== 'manual' && source.value !== 'custom' ? true : false;
+            $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
@@ -247,7 +252,7 @@
                 {inventory_script: inventorySourceData.source_script}
                 );
             if (inventorySourceData.credential){
-                GroupManageService.getCredential(inventorySourceData.credential).then(res => $scope.credential_name = res.data.name);
+                $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
             $scope = angular.extend($scope, groupData);
 

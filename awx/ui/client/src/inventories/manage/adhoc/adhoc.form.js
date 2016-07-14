@@ -44,7 +44,7 @@ export default function() {
                 autocomplete: false
             },
             limit: {
-                label: 'Host Pattern',
+                label: 'Limit',
                 type: 'text',
                 addRequired: false,
                 awPopOver: '<p>The pattern used to target hosts in the ' +
@@ -54,7 +54,7 @@ export default function() {
                     '<a id=\"adhoc_form_hostpatterns_doc_link\"' +
                     'href=\"http://docs.ansible.com/intro_patterns.html\" ' +
                     'target=\"_blank\">here</a>.</p>',
-                dataTitle: 'Host Pattern',
+                dataTitle: 'Limit',
                 dataPlacement: 'right',
                 dataContainer: 'body'
             },
@@ -98,7 +98,7 @@ export default function() {
                 addRequired: true,
                 awPopOver:'<p>These are the verbosity levels for standard ' +
                     'out of the command run that are supported.',
-                dataTitle: 'Module',
+                dataTitle: 'Verbosity',
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 "default": 1

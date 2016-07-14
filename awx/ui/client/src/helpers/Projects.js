@@ -70,8 +70,11 @@ export default
                         result = 'Success! Click for details';
                         break;
                     case 'failed':
-                    case 'missing':
                         result = 'Failed. Click for details';
+                        break;
+                    case 'missing':
+                        result = 'Missing. Click for details';
+                        break;
                 }
                 return result;
             };

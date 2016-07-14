@@ -255,6 +255,16 @@ var tower = angular.module('Tower', [
                             });
                         });
                     }]
+                },
+                onExit: function(){
+                    // close the job launch modal
+                    // using an onExit event to handle cases where the user navs away using the url bar / back and not modal "X"
+                    // Destroy the dialog
+                    if($("#job-launch-modal").hasClass('ui-dialog-content')) {
+                        $('#job-launch-modal').dialog('destroy');
+                    }
+                    // Remove the directive from the page (if it's there)
+                    $('#content-container').find('submit-job').remove();
                 }
             }).
 
@@ -264,6 +274,16 @@ var tower = angular.module('Tower', [
                 controller: JobsListController,
                 ncyBreadcrumb: {
                     label: "JOBS"
+                },
+                onExit: function(){
+                    // close the job launch modal
+                    // using an onExit event to handle cases where the user navs away using the url bar / back and not modal "X"
+                    // Destroy the dialog
+                    if($("#job-launch-modal").hasClass('ui-dialog-content')) {
+                        $('#job-launch-modal').dialog('destroy');
+                    }
+                    // Remove the directive from the page (if it's there)
+                    $('#content-container').find('submit-job').remove();
                 }
             }).
 
@@ -521,11 +541,12 @@ var tower = angular.module('Tower', [
         'ClearScope', 'Socket', 'LoadConfig', 'Store',
         'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
         'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService',
+        'FeaturesService', '$filter',
         function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
             $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
             LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
-            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService) {
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
+            $filter) {
             var sock;
             $rootScope.addPermission = function (scope) {
                 $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
@@ -563,7 +584,7 @@ var tower = angular.module('Tower', [
                 if (accessListEntry.team_id) {
                     Prompt({
                         hdr: `Team access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${entry.team_name}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
                             action: action,
                         actionText: 'REMOVE TEAM ACCESS'
                     });
@@ -859,6 +880,7 @@ var tower = angular.module('Tower', [
                         $rootScope.$broadcast("EditIndicatorChange", list, id);
                     } else if ($rootScope.addedAnItem) {
                         delete $rootScope.addedAnItem;
+                        $rootScope.$broadcast("RemoveIndicator");
                     } else {
                         $rootScope.$broadcast("RemoveIndicator");
                     }
@@ -879,6 +901,7 @@ var tower = angular.module('Tower', [
                     }
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
+                    $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
                     // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
                         ConfigService.getConfig().then(function(){

@@ -54,6 +54,10 @@ export default
                 label: 'Disabled?',
                 searchSingleValue: true,
                 searchType: 'boolean',
+                typeOptions: [
+                    {label: "Yes", value: false},
+                    {label: "No", value: true}
+                ],
                 searchValue: 'false',
                 searchOnly: true
             },

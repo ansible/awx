@@ -131,7 +131,7 @@ export default
 
                             recent_notifications.forEach(function(row) {
                                 html += "<tr>\n";
-                                html += "<td><i class=\"fa icon-job-" + row.status + "\"></i></td>\n";
+                                html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
                                 html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
                                 html += "</tr>\n";
                             });
@@ -147,7 +147,9 @@ export default
             };
 
             scope.testNotification = function(){
-                var name = $filter('sanitize')(this.notification_template.name);
+                var name = $filter('sanitize')(this.notification_template.name),
+                pending_retries = 10;
+
                 Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
                 Rest.post({})
                     .then(function (data) {
@@ -156,31 +158,7 @@ export default
                             // Using a setTimeout here to wait for the
                             // notification to be processed and for a status
                             // to be returned from the API.
-                            setTimeout(function(){
-                                var id = data.data.notification,
-                                url = GetBasePath('notifications') + id;
-                                Rest.setUrl(url);
-                                Rest.get()
-                                .then(function (res) {
-                                    Wait('stop');
-                                    if(res && res.data && res.data.status && res.data.status === "successful"){
-                                        scope.search(list.iterator);
-                                        ngToast.success({
-                                            content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
-                                        });
-                                    }
-                                    else if(res && res.data && res.data.status && res.data.status === "failed"){
-                                        scope.search(list.iterator);
-                                        ngToast.danger({
-                                            content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
-                                        });
-                                    }
-                                    else {
-                                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                            msg: 'Call to ' + url + ' failed. Notification returned status: ' + status });
-                                    }
-                                });
-                            } , 5000);
+                            retrieveStatus(data.data.notification);
                     }
                     else {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -192,6 +170,40 @@ export default
                         content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
                      });
                 });
+
+                function retrieveStatus(id){
+                    setTimeout(function(){
+                        var url = GetBasePath('notifications') + id;
+                        Rest.setUrl(url);
+                        Rest.get()
+                        .then(function (res) {
+                            if(res && res.data && res.data.status && res.data.status === "successful"){
+                                scope.search(list.iterator);
+                                ngToast.success({
+                                    content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
+                                });
+                                Wait('stop');
+                            }
+                            else if(res && res.data && res.data.status && res.data.status === "failed"){
+                                scope.search(list.iterator);
+                                ngToast.danger({
+                                    content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
+                                });
+                                Wait('stop');
+                            }
+                            else if(res && res.data && res.data.status && res.data.status === "pending" && pending_retries>0){
+                                pending_retries--;
+                                retrieveStatus(id);
+                            }
+                            else {
+                                Wait('stop');
+                                ProcessErrors(scope, null, status, null, { hdr: 'Error!',
+                                    msg: 'Call to test notifications failed.' });
+                            }
+
+                        });
+                    } , 5000);
+                }
             };
 
             scope.addNotification = function(){

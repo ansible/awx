@@ -137,6 +137,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
                     $rootScope.sessionTimer = timer;
                     $rootScope.$emit('OpenSocket');
                     $rootScope.user_is_superuser = data.results[0].is_superuser;
+                    $rootScope.user_is_system_auditor = data.results[0].is_system_auditor;
                     scope.$emit('AuthorizationGetLicense');
                 });
             })

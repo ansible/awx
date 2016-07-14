@@ -87,6 +87,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
+    'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
@@ -916,6 +917,19 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             res['last_update'] = reverse('api:project_update_detail',
                                          args=(obj.last_update.pk,))
         return res
+
+    def validate(self, attrs):
+        organization = None
+        if 'organization' in attrs:
+            organization = attrs['organization']
+        elif self.instance:
+            organization = self.instance.organization
+
+        view = self.context.get('view', None)
+        if not organization and not view.request.user.is_superuser:
+            # Only allow super users to create orgless projects
+            raise serializers.ValidationError('Organization is missing')
+        return super(ProjectSerializer, self).validate(attrs)
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
@@ -1926,12 +1940,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
         # fields not provided in data from the job template.
-        if not self.instance and isinstance(data, dict) and 'job_template' in data:
+        if not self.instance and isinstance(data, dict) and data.get('job_template', False):
             try:
                 job_template = JobTemplate.objects.get(pk=data['job_template'])
             except JobTemplate.DoesNotExist:
-                self._errors = {'job_template': 'Invalid job template.'}
-                return
+                raise serializers.ValidationError({'job_template': 'Invalid job template.'})
             data.setdefault('name', job_template.name)
             data.setdefault('description', job_template.description)
             data.setdefault('job_type', job_template.job_type)
@@ -2427,14 +2440,10 @@ class NotificationTemplateSerializer(BaseSerializer):
             notification_type = attrs['notification_type']
         elif self.instance:
             notification_type = self.instance.notification_type
-        if 'organization' in attrs:
-            organization = attrs['organization']
-        elif self.instance:
-            organization = self.instance.organization
+        else:
+            notification_type = None
         if not notification_type:
             raise serializers.ValidationError('Missing required fields for Notification Configuration: notification_type')
-        if not organization:
-            raise serializers.ValidationError("Missing 'organization' from required fields")
 
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
         missing_fields = []
@@ -2621,7 +2630,11 @@ class ActivityStreamSerializer(BaseSerializer):
             if getattr(obj, fk).exists():
                 rel[fk] = []
                 for thisItem in allm2m:
-                    rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+                    if fk == 'custom_inventory_script':
+                        rel[fk].append(reverse('api:inventory_script_detail', args=(thisItem.id,)))
+                    else:
+                        rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url()
         return rel
@@ -2694,8 +2707,7 @@ class TowerSettingsSerializer(BaseSerializer):
 
     def to_internal_value(self, data):
         if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
-            self._errors = {'key': 'Key {0} is not a valid settings key.'.format(data['key'])}
-            return
+            raise serializers.ValidationError({'key': ['Key {0} is not a valid settings key.'.format(data['key'])]})
         ret = super(TowerSettingsSerializer, self).to_internal_value(data)
         manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
         ret['description'] = manifest_val['description']

@@ -25,6 +25,7 @@ DATABASES = {
         'NAME': 'awx-dev',
         'USER': 'awx-dev',
         'PASSWORD': 'AWXsome1',
+        'ATOMIC_REQUESTS': True,
         'HOST': 'postgres',
         'PORT': '',
     }

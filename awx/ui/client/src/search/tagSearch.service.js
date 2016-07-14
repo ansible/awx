@@ -6,7 +6,10 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         var obj = {};
         // build the value (key)
         var value;
-        if (field.sourceModel && field.sourceField) {
+        if (field.searchField && field.filterBySearchField === true){
+            value = field.searchField;
+        }
+        else if (field.sourceModel && field.sourceField) {
             value = field.sourceModel + '__' + field.sourceField;
             obj.related = true;
         } else if (typeof(field.key) === String) {
@@ -25,7 +28,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
             typeOptions = field.searchOptions || [];
         } else if (field.searchType === 'boolean') {
             type = 'select';
-            typeOptions = [{label: "Yes", value: true},
+            typeOptions = field.typeOptions || [{label: "Yes", value: true},
                 {label: "No", value: false}];
         } else {
             type = 'text';
@@ -81,41 +84,45 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
 
         if (needsRequest.length) {
             // make the options request to reutrn the typeOptions
-            Rest.setUrl(needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath);
-            Rest.options()
-                .success(function (data) {
-                    try {
-                        var options = data.actions.GET;
-                        needsRequest = needsRequest
-                        .map(function (option) {
-                            option.typeOptions = options[option
-                                .value]
-                                    .choices
-                                    .map(function(i) {
-                                        return {
-                                            value: i[0],
-                                            label: i[1]
-                                        };
-                                    });
-                            return option;
-                        });
-                    }
-                    catch(err){
-                        if (!basePath){
-                            $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
+            var url = needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath;
+            if(url.indexOf('null') === 0 ){
+                Rest.setUrl(url);
+                Rest.options()
+                    .success(function (data) {
+                        try {
+                            var options = data.actions.GET;
+                            needsRequest = needsRequest
+                            .map(function (option) {
+                                option.typeOptions = options[option
+                                    .value]
+                                        .choices
+                                        .map(function(i) {
+                                            return {
+                                                value: i[0],
+                                                label: i[1]
+                                            };
+                                        });
+                                return option;
+                            });
                         }
-                        else { $log.error(err); }
-                    }
-                    Wait("stop");
-                    defer.resolve(joinOptions());
-                })
-                .error(function (data, status) {
-                    Wait("stop");
-                    defer.reject("options request failed");
-                    ProcessErrors(null, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Getting type options failed'});
-                });
+                        catch(err){
+                            if (!basePath){
+                                $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
+                            }
+                            else { $log.error(err); }
+                        }
+                        Wait("stop");
+                        defer.resolve(joinOptions());
+                    })
+                    .error(function (data, status) {
+                        Wait("stop");
+                        defer.reject("options request failed");
+                        ProcessErrors(null, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Getting type options failed'});
+                    });
+            }
+
         } else {
             Wait("stop");
             defer.resolve(joinOptions());
@@ -179,7 +186,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
     this.getTag = function(field, textVal, selectVal) {
         var tag = _.clone(field);
         if (tag.type === "text") {
-            tag.url = tag.value + "__icontains=" + textVal;
+            tag.url = tag.value + "__icontains=" + encodeURIComponent(textVal);
             tag.name = textVal;
         } else if (selectVal.value && typeof selectVal.value === 'string' && selectVal.value.indexOf("=") > 0) {
             tag.url = selectVal.value;

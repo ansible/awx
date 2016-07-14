@@ -122,7 +122,7 @@ def test_get_inventory_ad_hoc_command_list(admin, alice, post_adhoc, get, invent
 
     inv1.adhoc_role.members.add(alice)
     res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv1.id,)), alice, expect=200)
-    assert res.data['count'] == 0
+    assert res.data['count'] == 1
 
     machine_credential.use_role.members.add(alice)
     res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv1.id,)), alice, expect=200)

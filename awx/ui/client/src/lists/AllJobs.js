@@ -21,7 +21,8 @@ export default
                 label: '',
                 searchLabel: 'Status',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
-                awToolTip: "Job {{ all_job.status }}. Click for details.",
+                dataTipWatch: 'all_job.status_tip',
+                awToolTip: "{{ all_job.status_tip }}",
                 awTipPlacement: "right",
                 dataTitle: "{{ all_job.status_popover_title }}",
                 icon: 'icon-job-{{ all_job.status }}',
@@ -48,6 +49,7 @@ export default
                 ngClick: "viewJobDetails(all_job)",
                 defaultSearchField: true,
                 awToolTip: "{{ all_job.name | sanitize }}",
+                dataTipWatch: 'all_job.name',
                 dataPlacement: 'top'
             },
             type: {

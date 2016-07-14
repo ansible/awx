@@ -231,6 +231,12 @@ export default
                 search_params = params.searchParams,
                 spinner = (params.spinner === undefined) ? true : params.spinner, key;
 
+            var buildTooltips = function(data){
+                data.forEach((val) => {
+                    val.status_tip = 'Job ' + val.status + ". Click for details.";
+                });
+            };
+
             GenerateList.inject(list, {
                 mode: 'edit',
                 id: id,
@@ -260,6 +266,7 @@ export default
             scope.$on('PostRefresh', function(){
                 JobsControllerInit({ scope: scope, parent_scope: parent_scope });
                 JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
+                buildTooltips(scope.jobs);
                 parent_scope.$emit('listLoaded');
             });
 
@@ -443,7 +450,7 @@ export default
         return function(params) {
             var scope = params.scope,
                 id = params.id;
-            InitiatePlaybookRun({ scope: scope, id: id });
+            InitiatePlaybookRun({ scope: scope, id: id, relaunch: true });
         };
     }])
 

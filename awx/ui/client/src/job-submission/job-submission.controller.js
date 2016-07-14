@@ -128,14 +128,14 @@ export default
             // This gets things started - goes out and hits the launch endpoint (based on launch/relaunch) and
             // prepares the form fields, defauts, etc.
             $scope.init = function() {
-
                 $scope.forms = {};
                 $scope.passwords = {};
 
-                var base = $location.path().replace(/^\//, '').split('/')[0],
-                    isRelaunch = !(base === 'job_templates' || base === 'portal' || base === 'inventories' || base === 'home');
+                // As of 3.0, the only place the user can relaunch a
+                // playbook is on jobTemplates.edit (completed_jobs tab),
+                // jobs, and jobDetails $states.
 
-                if (!isRelaunch) {
+                if (!$scope.submitJobRelaunch) {
                     launch_url = GetBasePath('job_templates') + $scope.submitJobId + '/launch/';
                 }
                 else {
@@ -187,7 +187,7 @@ export default
                         updateRequiredPasswords();
                     }
 
-                    if( (isRelaunch && !$scope.password_needed) || (!isRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                    if( ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
                         // The job can be launched if
                         // a) It's a relaunch and no passwords are needed
                         // or
@@ -215,7 +215,7 @@ export default
                             $scope.openLaunchModal();
                         };
 
-                        if(isRelaunch) {
+                        if($scope.submitJobRelaunch) {
                             // Go out and get some of the job details like inv, cred, name
                             Rest.setUrl(GetBasePath('jobs') + $scope.submitJobId);
                             Rest.get()
@@ -331,6 +331,7 @@ export default
                     var credential_url = GetBasePath('credentials') + '?kind=ssh';
 
                     var credList = _.cloneDeep(CredentialList);
+                    credList.basePath = GetBasePath('credentials') + '?kind=ssh';
                     credList.fields.description.searchable = false;
                     credList.fields.kind.searchable = false;
 
@@ -536,8 +537,9 @@ export default
                 // It shares the same scope with this directive and will
                 // pull the new value of parseType out to determine which
                 // direction to convert the extra vars
+
                 $scope.parseType = $scope.other_prompt_data.parseType;
-                $scope.parseTypeChange();
+                $scope.parseTypeChange('parseType', 'jobLaunchVariables');
             };
 
         }

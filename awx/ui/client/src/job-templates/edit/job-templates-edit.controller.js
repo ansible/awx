@@ -46,6 +46,9 @@ export default
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
 
+            // remove "type" field from search options
+            CredentialList = _.cloneDeep(CredentialList);
+            CredentialList.fields.kind.noSearch = true;
 
             CallbackHelpInit({ scope: $scope });
 
@@ -347,20 +350,13 @@ export default
 
                 ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
-                if (related_cloud_credential) {
-                    Rest.setUrl(related_cloud_credential);
-                    Rest.get()
-                        .success(function (data) {
-                            $scope.$emit('cloudCredentialReady', data.name);
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors($scope, data, status, null, {hdr: 'Error!',
-                                msg: 'Failed to related cloud credential. GET returned status: ' + status });
-                        });
+                if($scope.job_template_obj.summary_fields.cloud_credential && related_cloud_credential) {
+                    $scope.$emit('cloudCredentialReady', $scope.job_template_obj.summary_fields.cloud_credential.name);
                 } else {
                     // No existing cloud credential
                     $scope.$emit('cloudCredentialReady', null);
                 }
+
             });
 
             Wait('start');
@@ -446,31 +442,40 @@ export default
                                 }
                             });
                     };
+                    if($state.params.id !== "null"){
+                        Rest.setUrl(defaultUrl + $state.params.id +
+                             "/labels");
+                        Rest.get()
+                            .success(function(data) {
+                                if (data.next) {
+                                    getNext(data, data.results, seeMoreResolve);
+                                } else {
+                                    seeMoreResolve.resolve(data.results);
+                                }
 
-                    Rest.setUrl(defaultUrl + $state.params.id +
-                         "/labels");
-                    Rest.get()
-                        .success(function(data) {
-                            if (data.next) {
-                                getNext(data, data.results, seeMoreResolve);
-                            } else {
-                                seeMoreResolve.resolve(data.results);
-                            }
-
-                            seeMoreResolve.promise.then(function (labels) {
-                                $scope.$emit("choicesReady");
-                                var opts = labels
-                                    .map(i => ({id: i.id + "",
-                                        test: i.name}));
-                                CreateSelect2({
-                                    element:'#job_templates_labels',
-                                    multiple: true,
-                                    addNew: true,
-                                    opts: opts
+                                seeMoreResolve.promise.then(function (labels) {
+                                    $scope.$emit("choicesReady");
+                                    var opts = labels
+                                        .map(i => ({id: i.id + "",
+                                            test: i.name}));
+                                    CreateSelect2({
+                                        element:'#job_templates_labels',
+                                        multiple: true,
+                                        addNew: true,
+                                        opts: opts
+                                    });
+                                    Wait("stop");
                                 });
-                                Wait("stop");
+                            }).error(function(){
+                                // job template id is null in this case
+                                $scope.$emit("choicesReady");
                             });
-                        });
+                    }
+                    else {
+                        // job template doesn't exist
+                        $scope.$emit("choicesReady");
+                    }
+
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, {

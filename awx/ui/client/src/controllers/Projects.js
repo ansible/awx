@@ -391,6 +391,10 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
         defaultUrl = GetBasePath('projects'),
         master = {};
 
+    // remove "type" field from search options
+    CredentialList = _.cloneDeep(CredentialList);
+    CredentialList.fields.kind.noSearch = true;
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
 
@@ -566,6 +570,11 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         master = {}, i,
         id = $stateParams.id,
         relatedSets = {};
+
+    // remove "type" field from search options
+    CredentialList = _.cloneDeep(CredentialList);
+    CredentialList.fields.kind.noSearch = true;
+
 
     SchedulesList.well = false;
     generator.inject(form, {

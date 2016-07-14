@@ -630,8 +630,8 @@
                 </a>
 
                 <div class="parse-selection">
-                    <input type="radio" ng-model="parseType" ng-change="parseTypeChange()" value="yaml"><span class="parse-label">YAML</span>
-                    <input type="radio"  ng-model="parseType" ng-change="parseTypeChange()" value="json"> <span class="parse-label">JSON</span>
+                    <input type="radio" ng-model="parseType" ng-change="parseTypeChange('parseType', 'extraVars')" value="yaml"><span class="parse-label">YAML</span>
+                    <input type="radio"  ng-model="parseType" ng-change="parseTypeChange('parseType', 'extraVars')" value="json"> <span class="parse-label">JSON</span>
                 </div>
 
             </label>

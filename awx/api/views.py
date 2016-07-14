@@ -958,6 +958,7 @@ class ProjectList(ListCreateAPIView):
             'admin_role',
             'use_role',
             'update_role',
+            'read_role',
         )
         return projects_qs
 
@@ -1401,7 +1402,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         user_visible = Credential.accessible_objects(self.request.user, 'read_role').all()
         org_set = Credential.accessible_objects(organization.admin_role, 'read_role').all()
 
-        if self.request.user.is_superuser:
+        if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set
 
         return org_set & user_visible
@@ -1487,7 +1488,7 @@ class InventoryList(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role')
+        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
         return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
@@ -2188,9 +2189,6 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(JobTemplate, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete job template.")
-        if obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']).exists():
-            return Response({"error": "Delete not allowed while there are jobs running"},
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
 
 
@@ -2591,7 +2589,7 @@ class SystemJobTemplateList(ListAPIView):
     serializer_class = SystemJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
@@ -3321,7 +3319,7 @@ class SystemJobList(ListCreateAPIView):
     serializer_class = SystemJobListSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
@@ -3625,8 +3623,6 @@ class RoleList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Role.objects.all()
         return Role.visible_roles(self.request.user)
 
 
@@ -3652,10 +3648,10 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return role.members.all()
 
     def post(self, request, *args, **kwargs):
-        # Forbid implicit role creation here
+        # Forbid implicit user creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg="User 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 

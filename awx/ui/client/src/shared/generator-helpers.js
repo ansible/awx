@@ -137,10 +137,10 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'run':
             case 'rerun':
             case 'submit':
-                icon = 'fa-rocket';
+                icon = 'icon-launch';
                 break;
             case 'launch':
-                icon = 'fa-rocket';
+                icon = 'icon-launch';
                 break;
             case 'stream':
                 icon = 'fa-clock-o';

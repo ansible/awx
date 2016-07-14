@@ -656,7 +656,7 @@ class TeamAccess(BaseAccess):
             raise PermissionDenied('Unable to change organization on a team')
         if self.user.is_superuser:
             return True
-        if self.user in obj.organization.deprecated_admins.all():
+        if obj.organization and self.user in obj.organization.deprecated_admins.all():
             return True
         return False
 

@@ -15,7 +15,7 @@
                         </a>
                     </div>
                     <div class="JobDetail-actions">
-                        <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title=""><i class="fa fa-rocket"></i> </button>
+                        <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title=""><i class="icon-launch"></i> </button>
                         <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job_status.status == 'running' || job_status.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
                         <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job_status.status == 'running' || job_status.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
                     </div>
@@ -164,7 +164,7 @@
             <!--- end of results-->
 
             <!--beginning of details-->
-            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
+            <div id="job-detail-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
                 <div class="JobDetail-panelHeader">
                     <div class="JobDetail-expandContainer">
                         <a class="JobDetail-panelHeaderText" ng-show="lessDetail" href="" ng-click="toggleLessDetail()">
@@ -354,7 +354,7 @@
                                 <tbody>
                                     <tr class="List-tableRow cursor-pointer" ng-class-odd="'List-tableRow--oddRow'" ng-class-even="'List-tableRow--evenRow'" ng-repeat="result in results = (hostResults) track by $index">
                                         <td class="List-tableCell col-lg-4 col-md-3 col-sm-3 col-xs-3 status-column">
-                                        <a ui-sref="jobDetail.host-event.details({eventId: result.id, taskId: selectedTask})" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="JobDetail-statusIcon fa icon-job-{{ result.status }}"></i><span ng-show="result.status_text != 'Unreachable'">{{ result.name }}</span><i ng-show="result.status_text == 'Unreachable'" class="JobDetail-statusIcon fa icon-job-unreachable"></i><span ng-show="result.status_text == 'Unreachable'">{{ result.name }}</span></a>
+                                        <a ui-sref="jobDetail.host-event.details({eventId: result.id, taskId: selectedTask})" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-tip-watch="result.tip" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="JobDetail-statusIcon fa icon-job-{{ result.status }}"></i><span ng-show="result.status_text != 'Unreachable'">{{ result.name }}</span><i ng-show="result.status_text == 'Unreachable'" class="JobDetail-statusIcon fa icon-job-unreachable"></i><span ng-show="result.status_text == 'Unreachable'">{{ result.name }}</span></a>
                                         </td>
                                         <td class="List-tableCell col-lg-3 col-md-4 col-sm-3 col-xs-3 item-column">{{ result.item }}</td>
                                         <td class="List-tableCell col-lg-3 col-md-4 col-sm-3 col-xs-3">{{ result.msg }}</td>
@@ -379,7 +379,7 @@
             <!--end of details-->
 
             <!--beginning of events summary-->
-            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen && job.summary_fields.unified_job_template.unified_job_type == 'job'">
+            <div id="events-summary-panel" class="JobDetail-resultsContainer Panel" ng-show="!stdoutFullScreen">
                     <div class="JobDetail-panelHeader">
                         <div class="JobDetail-expandContainer">
                             <a class="JobDetail-panelHeaderText" ng-show="lessEvents" ui-sref="jobDetail.host-summary" ng-click="toggleLessEvents()">

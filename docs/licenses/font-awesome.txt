@@ -1,0 +1,13 @@
+Font License
+
+Applies to all desktop and webfont files in the following directory: font-awesome/fonts/.
+License: SIL OFL 1.1
+URL: http://scripts.sil.org/OFL
+
+
+
+Code License
+
+Applies to all CSS and LESS files in the following directories: font-awesome/css/, font-awesome/less/, and font-awesome/scss/.
+License: MIT License
+URL: http://opensource.org/licenses/mit-license.html

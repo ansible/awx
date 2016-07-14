@@ -25,6 +25,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                       return function(params) {
 
                           var scope = params.scope,
+                          CredentialList = _.cloneDeep(CredentialList),
                           defaultUrl = GetBasePath('job_templates'),
                           // generator = GenerateForm,
                           form = JobTemplateForm(),
@@ -161,6 +162,10 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       field: 'inventory',
                                       input_type: "radio"
                                   });
+
+                                  CredentialList.basePath = GetBasePath('credentials') + '?kind=ssh';
+                                  // remove "type" field from search options
+                                  CredentialList.fields.kind.noSearch = true;
 
                                   LookUpInit({
                                       url: GetBasePath('credentials') + '?kind=ssh',

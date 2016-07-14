@@ -32,7 +32,15 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // try/except pattern asserts that:
             // if we encounter a case where a UI url can't or shouldn't be generated, just supply the name of the resource
             try {
+                // catch-all case to avoid generating urls if a resource has been deleted
+                // if a resource still exists, it'll be serialized in the activity's summary_fields
+                if (!activity.summary_fields[resource]){
+                    throw {name : 'ResourceDeleted', message: 'The referenced resource no longer exists'};
+                }
                 switch (resource) {
+                    case 'custom_inventory_script':
+                        url += 'inventory_scripts/' + obj.id + '/';
+                        break;
                     case 'group':
                         if (activity.operation === 'create' || activity.operation === 'delete'){
                             // the API formats the changes.inventory field as str 'myInventoryName-PrimaryKey'
@@ -47,7 +55,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         url += 'home/hosts/' + obj.id;
                         break;
                     case 'job':
-                        url += 'jobs/?id=' + obj.id;
+                        url += 'jobs/' + obj.id;
                         break;
                     case 'inventory':
                         url += 'inventories/' + obj.id + '/';
@@ -192,10 +200,12 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                             case 'delete':
                                 activity.description += activity.object1 + BuildAnchor(activity.changes, activity.object1, activity);
                                 break;
-                            // equivalent to 'create' or 'update'
                             // expected outcome: "operation <object1>"
-                            default:
+                            case 'update':
                                 activity.description += activity.object1 + BuildAnchor(activity.summary_fields[activity.object1][0], activity.object1, activity);
+                                break;
+                            case 'create':
+                                activity.description += activity.object1 + BuildAnchor(activity.changes, activity.object1, activity);
                                 break;
                         }
                         break;

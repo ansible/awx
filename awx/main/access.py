@@ -12,11 +12,12 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError, PermissionDenied
+from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
@@ -139,7 +140,7 @@ class BaseAccess(object):
         self.user = user
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         else:
             return self.model.objects.none()
@@ -221,7 +222,7 @@ class UserAccess(BaseAccess):
     model = User
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return User.objects.all()
 
         if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
@@ -310,7 +311,16 @@ class OrganizationAccess(BaseAccess):
 
     def can_delete(self, obj):
         self.check_license(feature='multiple_organizations', check_expiration=False)
-        return self.can_change(obj, None)
+        is_change_possible = self.can_change(obj, None)
+        if not is_change_possible:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
+        active_jobs.extend(ProjectUpdate.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class InventoryAccess(BaseAccess):
     '''
@@ -373,7 +383,15 @@ class InventoryAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        return self.can_admin(obj, None)
+        is_can_admin = self.can_admin(obj, None)
+        if not is_can_admin:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+        return True
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
@@ -486,7 +504,14 @@ class GroupAccess(BaseAccess):
         return True
 
     def can_delete(self, obj):
-        return obj and self.user in obj.inventory.admin_role
+        is_delete_allowed = bool(obj and self.user in obj.inventory.admin_role)
+        if not is_delete_allowed:
+            return False
+        active_jobs = []
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class InventorySourceAccess(BaseAccess):
     '''
@@ -589,8 +614,9 @@ class CredentialAccess(BaseAccess):
     def can_read(self, obj):
         return self.user in obj.read_role
 
+    @check_superuser
     def can_add(self, data):
-        if self.user.is_superuser:
+        if not data:  # So the browseable API will work
             return True
         user_pk = get_pk_from_dict(data, 'user')
         if user_pk:
@@ -660,6 +686,8 @@ class TeamAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         if self.user in org.admin_role:
@@ -715,13 +743,15 @@ class ProjectAccess(BaseAccess):
     model = Project
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('modified_by', 'credential', 'current_job', 'last_job').all()
 
     @check_superuser
     def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         organization_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=organization_pk)
         return self.user in org.admin_role
@@ -731,7 +761,15 @@ class ProjectAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        is_change_allowed = self.can_change(obj, None)
+        if not is_change_allowed:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(project=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend(ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
     @check_superuser
     def can_start(self, obj):
@@ -747,7 +785,7 @@ class ProjectUpdateAccess(BaseAccess):
     model = ProjectUpdate
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         qs = ProjectUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'project')
@@ -783,7 +821,7 @@ class JobTemplateAccess(BaseAccess):
     model = JobTemplate
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             qs = self.model.objects.all()
         else:
             qs = self.model.accessible_objects(self.user, 'read_role')
@@ -802,7 +840,7 @@ class JobTemplateAccess(BaseAccess):
         given action as well as the 'create' deploy permission.
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         # if reference_obj is provided, determine if it can be coppied
@@ -953,7 +991,13 @@ class JobTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_delete(self, obj):
-        return self.user in obj.admin_role
+        is_delete_allowed = self.user in obj.admin_role
+        if not is_delete_allowed:
+            return False
+        active_jobs = obj.jobs.filter(status__in=ACTIVE_STATES)
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class JobAccess(BaseAccess):
     '''
@@ -974,7 +1018,7 @@ class JobAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'cloud_credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         qs_jt = qs.filter(
@@ -992,7 +1036,7 @@ class JobAccess(BaseAccess):
             Q(project__organization__in=org_access_qs)).distinct()
 
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
         if not self.user.is_superuser:
             return False
@@ -1073,10 +1117,7 @@ class AdHocCommandAccess(BaseAccess):
     '''
     I can only see/run ad hoc commands when:
     - I am a superuser.
-    - I am an org admin and have permission to read the credential.
-    - I am a normal user with a user/team permission that has at least read
-      permission on the inventory and the run_ad_hoc_commands flag set, and I
-      can read the credential.
+    - I have read access to the inventory
     '''
     model = AdHocCommand
 
@@ -1084,26 +1125,23 @@ class AdHocCommandAccess(BaseAccess):
         qs = self.model.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'credential')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
-        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
         inventory_qs = Inventory.accessible_objects(self.user, 'read_role')
-
-        return qs.filter(credential_id__in=credential_ids,
-                         inventory__in=inventory_qs)
+        return qs.filter(inventory__in=inventory_qs)
 
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         self.check_license()
 
-        # If a credential is provided, the user should have read access to it.
+        # If a credential is provided, the user should have use access to it.
         credential_pk = get_pk_from_dict(data, 'credential')
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
-            if self.user not in credential.read_role:
+            if self.user not in credential.use_role:
                 return False
 
         # Check that the user has the run ad hoc command permission on the
@@ -1148,7 +1186,7 @@ class AdHocCommandEventAccess(BaseAccess):
         qs = self.model.objects.distinct()
         qs = qs.select_related('ad_hoc_command', 'host')
 
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         host_qs = self.user.get_queryset(Host)
@@ -1174,7 +1212,7 @@ class JobHostSummaryAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects
         qs = qs.select_related('job', 'job__job_template', 'host')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
@@ -1206,7 +1244,7 @@ class JobEventAccess(BaseAccess):
                         event_data__icontains='"ansible_job_id": "',
                         event_data__contains='"module_name": "async_status"')
 
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         job_qs = self.user.get_queryset(Job)
@@ -1319,7 +1357,7 @@ class ScheduleAccess(BaseAccess):
         qs = self.model.objects.all()
         qs = qs.select_related('created_by', 'modified_by')
         qs = qs.prefetch_related('unified_job_template')
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
         job_template_qs = self.user.get_queryset(JobTemplate)
         inventory_source_qs = self.user.get_queryset(InventorySource)
@@ -1370,14 +1408,19 @@ class NotificationTemplateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs
-        return self.model.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role').all())
+        return self.model.objects.filter(
+            Q(organization__in=self.user.admin_of_organizations) |
+            Q(organization__in=self.user.auditor_of_organizations)
+        ).distinct()
 
-    @check_superuser
     def can_read(self, obj):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return True
         if obj.organization is not None:
-            return self.user in obj.organization.admin_role
+            if self.user in obj.organization.admin_role or self.user in obj.organization.auditor_role:
+                return True
         return False
 
     @check_superuser
@@ -1414,9 +1457,12 @@ class NotificationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs
-        return self.model.objects.filter(notification_template__organization__in=Organization.accessible_objects(self.user, 'admin_role'))
+        return self.model.objects.filter(
+            Q(notification_template__organization__in=self.user.admin_of_organizations) |
+            Q(notification_template__organization__in=self.user.auditor_of_organizations)
+        ).distinct()
 
     def can_read(self, obj):
         return self.user.can_access(NotificationTemplate, 'read', obj.notification_template)
@@ -1431,7 +1477,7 @@ class LabelAccess(BaseAccess):
     model = Label
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
         return self.model.objects.filter(
             organization__in=Organization.accessible_objects(self.user, 'read_role')
@@ -1443,7 +1489,7 @@ class LabelAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        if not data or '_method' in data:  # So the browseable API will work?
+        if not data:  # So the browseable API will work
             return True
 
         org_pk = get_pk_from_dict(data, 'organization')
@@ -1494,9 +1540,7 @@ class ActivityStreamAccess(BaseAccess):
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
                                  'permission', 'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role')
-        if self.user.is_superuser:
-            return qs.all()
-        if self.user in Role.singleton('system_auditor'):
+        if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
@@ -1544,18 +1588,20 @@ class CustomInventoryScriptAccess(BaseAccess):
     model = CustomInventoryScript
 
     def get_queryset(self):
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.distinct().all()
         return self.model.accessible_objects(self.user, 'read_role').all()
 
     @check_superuser
     def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
         org_pk = get_pk_from_dict(data, 'organization')
         org = get_object_or_400(Organization, pk=org_pk)
         return self.user in org.admin_role
 
     @check_superuser
-    def can_admin(self, obj):
+    def can_admin(self, obj, data=None):
         return self.user in obj.admin_role
 
     @check_superuser
@@ -1565,10 +1611,6 @@ class CustomInventoryScriptAccess(BaseAccess):
     @check_superuser
     def can_delete(self, obj):
         return self.can_admin(obj)
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
 
 
 class TowerSettingsAccess(BaseAccess):
@@ -1598,7 +1640,7 @@ class RoleAccess(BaseAccess):
     def can_read(self, obj):
         if not obj:
             return False
-        if self.user.is_superuser:
+        if self.user.is_superuser or self.user.is_system_auditor:
             return True
 
         if obj.object_id:

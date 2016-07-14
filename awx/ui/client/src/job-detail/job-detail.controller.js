@@ -13,13 +13,13 @@
 export default
     [   '$location', '$rootScope', '$filter', '$scope', '$compile', '$state', '$stateParams', '$log', 'ClearScope',
         'GetBasePath', 'Wait', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'GetElapsed', 'JobIsFinished',
-        'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'InitiatePlaybookRun', 'LoadPlays', 'LoadTasks',
+        'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'DeleteJob', 'RelaunchPlaybook', 'LoadPlays', 'LoadTasks',
         'ParseVariableString', 'GetChoices', 'fieldChoices', 'fieldLabels', 'EditSchedule',
         'ParseTypeChange', 'JobDetailService',
         function(
             $location, $rootScope, $filter, $scope, $compile, $state, $stateParams, $log, ClearScope,
             GetBasePath, Wait, ProcessErrors, SelectPlay, SelectTask, GetElapsed, JobIsFinished,
-            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, InitiatePlaybookRun, LoadPlays, LoadTasks,
+            SetTaskStyles, DigestEvent, UpdateDOM, DeleteJob, RelaunchPlaybook, LoadPlays, LoadTasks,
             ParseVariableString, GetChoices, fieldChoices, fieldLabels, EditSchedule,
             ParseTypeChange, JobDetailService
         ) {
@@ -428,7 +428,7 @@ export default
                 var params = {
                     order_by: 'id'
                 };
-                if (scope.job.summary_fields.unified_job_template.unified_job_type === 'job'){
+
                     JobDetailService.getJobPlays(scope.job.id, params)
                     .success( function(data) {
                         scope.next_plays = data.next;
@@ -514,7 +514,6 @@ export default
                         }
                         scope.$emit('LoadTasks', events_url);
                     });
-                }
             });
 
 
@@ -841,7 +840,7 @@ export default
             };
 
             scope.searchTasks = function() {
-                var params;
+                var params = {};
                 if (scope.search_task_name) {
                     scope.searchTasksEnabled = false;
                 }
@@ -866,7 +865,7 @@ export default
             };
 
             scope.searchHosts = function() {
-                var params;
+                var params = {};
                 if (scope.search_host_name) {
                     scope.searchHostsEnabled = false;
                 }
@@ -920,7 +919,7 @@ export default
             };
 
             scope.relaunchJob = function() {
-                InitiatePlaybookRun({
+                RelaunchPlaybook({
                     scope: scope,
                     id: scope.job.id
                 });

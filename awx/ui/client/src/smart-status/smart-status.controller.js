@@ -7,13 +7,13 @@
 export default ['$scope', '$filter',
     function ($scope, $filter) {
 
-        var recentJobs = $scope.jobs;
-
         function isFailureState(status) {
             return status === 'failed' || status === 'error' || status === 'canceled';
         }
 
-        var sparkData =
+        function init(){
+            var recentJobs = $scope.jobs;
+            var sparkData =
             _.sortBy(recentJobs.map(function(job) {
 
                 var data = {};
@@ -32,11 +32,17 @@ export default ['$scope', '$filter',
                 data.jobId = job.id;
                 data.sortDate = job.finished || "running" + data.jobId;
                 data.finished = $filter('longDate')(job.finished) || job.status+"";
+                data.status_tip = "JOB ID: " + data.jobId + "<br>STATUS: " + data.smartStatus + "<br>FINISHED: " + data.finished;
 
                 return data;
             }), "sortDate").reverse();
 
-        $scope.sparkArray = sparkData;
+            $scope.sparkArray = sparkData;
+        }
+        $scope.$watchCollection('jobs', function(){
+            init();
+        });
+
 }];
 
 //
