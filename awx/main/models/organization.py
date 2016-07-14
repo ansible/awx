@@ -92,7 +92,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
     organization = models.ForeignKey(
         'Organization',
         blank=False,
-        null=True,
+        null=False,
         on_delete=models.CASCADE,
         related_name='teams',
     )
