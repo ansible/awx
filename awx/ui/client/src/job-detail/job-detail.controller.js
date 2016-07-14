@@ -641,7 +641,7 @@ export default
                                return true;
                            });
                         //scope.setSearchAll('host');
-                        ParseTypeChange({ scope: scope, field_id: 'pre-formatted-variables' });
+                        ParseTypeChange({ scope: scope, field_id: 'pre-formatted-variables', readOnly: true });
                         scope.$emit('LoadPlays', data.related.job_events);
                     })
                     .error(function(data, status) {
