@@ -347,7 +347,7 @@ export default
 
                 ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
-                if(related_cloud_credential) {
+                if($scope.job_template_obj.summary_fields.cloud_credential.name && related_cloud_credential) {
                     $scope.$emit('cloudCredentialReady', $scope.job_template_obj.summary_fields.cloud_credential.name);
                 } else {
                     // No existing cloud credential
