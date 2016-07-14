@@ -92,8 +92,8 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
     organization = models.ForeignKey(
         'Organization',
         blank=False,
-        null=True,
-        on_delete=models.SET_NULL,
+        null=False,
+        on_delete=models.CASCADE,
         related_name='teams',
     )
     deprecated_projects = models.ManyToManyField(
