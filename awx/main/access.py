@@ -12,11 +12,12 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError, PermissionDenied
+from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 
 # AWX
 from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
 from awx.api.license import LicenseForbids
 from awx.main.task_engine import TaskSerializer
@@ -310,7 +311,16 @@ class OrganizationAccess(BaseAccess):
 
     def can_delete(self, obj):
         self.check_license(feature='multiple_organizations', check_expiration=False)
-        return self.can_change(obj, None)
+        is_change_possible = self.can_change(obj, None)
+        if not is_change_possible:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
+        active_jobs.extend(ProjectUpdate.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class InventoryAccess(BaseAccess):
     '''
@@ -373,7 +383,15 @@ class InventoryAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        return self.can_admin(obj, None)
+        is_can_admin = self.can_admin(obj, None)
+        if not is_can_admin:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+        return True
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
@@ -486,7 +504,14 @@ class GroupAccess(BaseAccess):
         return True
 
     def can_delete(self, obj):
-        return obj and self.user in obj.inventory.admin_role
+        is_delete_allowed = bool(obj and self.user in obj.inventory.admin_role)
+        if not is_delete_allowed:
+            return False
+        active_jobs = []
+        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class InventorySourceAccess(BaseAccess):
     '''
@@ -736,7 +761,15 @@ class ProjectAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        is_change_allowed = self.can_change(obj, None)
+        if not is_change_allowed:
+            return False
+        active_jobs = []
+        active_jobs.extend(Job.objects.filter(project=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend(ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES))
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
     @check_superuser
     def can_start(self, obj):
@@ -958,7 +991,13 @@ class JobTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_delete(self, obj):
-        return self.user in obj.admin_role
+        is_delete_allowed = self.user in obj.admin_role
+        if not is_delete_allowed:
+            return False
+        active_jobs = obj.jobs.filter(status__in=ACTIVE_STATES)
+        if len(active_jobs) > 0:
+            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+        return True
 
 class JobAccess(BaseAccess):
     '''
