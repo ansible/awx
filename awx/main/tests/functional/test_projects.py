@@ -114,3 +114,11 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando,
     assert result.status_code == expected_status_code
     if expected_status_code == 201:
         assert Project.objects.filter(name='Project', organization=organization).exists()
+
+@pytest.mark.django_db()
+def test_create_project_null_organization(post, organization, admin):
+    post(reverse('api:project_list'), { 'name': 't', 'organization': None}, admin, expect=201)
+
+@pytest.mark.django_db()
+def test_create_project_null_organization_xfail(post, organization, org_admin):
+    post(reverse('api:project_list'), { 'name': 't', 'organization': None}, org_admin, expect=400)
