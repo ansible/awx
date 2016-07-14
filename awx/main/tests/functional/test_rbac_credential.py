@@ -28,8 +28,10 @@ def test_two_teams_same_cred_name(organization_factory):
 
     rbac.migrate_credential(apps, None)
 
-    assert objects.teams.team1.member_role in cred1.admin_role.parents.all()
-    assert objects.teams.team2.member_role in cred2.admin_role.parents.all()
+    assert objects.teams.team1.admin_role in cred1.admin_role.parents.all()
+    assert objects.teams.team2.admin_role in cred2.admin_role.parents.all()
+    assert objects.teams.team1.member_role in cred1.use_role.parents.all()
+    assert objects.teams.team2.member_role in cred2.use_role.parents.all()
 
 @pytest.mark.django_db
 def test_credential_use_role(credential, user, permissions):
@@ -53,7 +55,7 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     rbac.migrate_credential(apps, None)
 
     # Admin permissions post migration
-    assert u in credential.admin_role
+    assert u in credential.use_role
 
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
