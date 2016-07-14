@@ -25,6 +25,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                       return function(params) {
 
                           var scope = params.scope,
+                          CredentialList = _.cloneDeep(CredentialList),
                           defaultUrl = GetBasePath('job_templates'),
                           // generator = GenerateForm,
                           form = JobTemplateForm(),
