@@ -761,7 +761,7 @@ class ProjectAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        is_change_allowed =  self.can_change(obj, None)
+        is_change_allowed = self.can_change(obj, None)
         if not is_change_allowed:
             return False
         active_jobs = []
