@@ -358,11 +358,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
 
     $scope.editSchedules = function(id) {
         var project = Find({ list: $scope.projects, key: 'id', val: id });
-        if (project.scm_type === "Manual" || Empty(project.scm_type)) {
-            // Nothing to do
-        }
-        else {
-            $location.path('/projects/' + id + '/schedules');
+        if (!(project.scm_type === "Manual" || Empty(project.scm_type)) && !(project.status === 'updating' || project.status === 'running' || project.status === 'pending')) {
+            $state.go('projectSchedules', {id: id});
         }
     };
 }
