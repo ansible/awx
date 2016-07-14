@@ -122,3 +122,11 @@ def test_create_project_null_organization(post, organization, admin):
 @pytest.mark.django_db()
 def test_create_project_null_organization_xfail(post, organization, org_admin):
     post(reverse('api:project_list'), { 'name': 't', 'organization': None}, org_admin, expect=400)
+
+@pytest.mark.django_db()
+def test_patch_project_null_organization(patch, organization, project, admin):
+    patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': organization.id}, admin, expect=200)
+
+@pytest.mark.django_db()
+def test_patch_project_null_organization_xfail(patch, project, org_admin):
+    patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': None}, org_admin, expect=400)
