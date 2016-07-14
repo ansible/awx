@@ -349,20 +349,13 @@ export default
 
                 ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
-                if (related_cloud_credential) {
-                    Rest.setUrl(related_cloud_credential);
-                    Rest.get()
-                        .success(function (data) {
-                            $scope.$emit('cloudCredentialReady', data.name);
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors($scope, data, status, null, {hdr: 'Error!',
-                                msg: 'Failed to related cloud credential. GET returned status: ' + status });
-                        });
+                if($scope.job_template_obj.summary_fields.cloud_credential.name && related_cloud_credential) {
+                    $scope.$emit('cloudCredentialReady', $scope.job_template_obj.summary_fields.cloud_credential.name);
                 } else {
                     // No existing cloud credential
                     $scope.$emit('cloudCredentialReady', null);
                 }
+
             });
 
             Wait('start');
