@@ -39,6 +39,7 @@ __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
+ACTIVE_STATES = CAN_CANCEL
 
 
 class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
