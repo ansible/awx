@@ -84,41 +84,45 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
 
         if (needsRequest.length) {
             // make the options request to reutrn the typeOptions
-            Rest.setUrl(needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath);
-            Rest.options()
-                .success(function (data) {
-                    try {
-                        var options = data.actions.GET;
-                        needsRequest = needsRequest
-                        .map(function (option) {
-                            option.typeOptions = options[option
-                                .value]
-                                    .choices
-                                    .map(function(i) {
-                                        return {
-                                            value: i[0],
-                                            label: i[1]
-                                        };
-                                    });
-                            return option;
-                        });
-                    }
-                    catch(err){
-                        if (!basePath){
-                            $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
+            var url = needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath;
+            if(url.indexOf('null') === 0 ){
+                Rest.setUrl(url);
+                Rest.options()
+                    .success(function (data) {
+                        try {
+                            var options = data.actions.GET;
+                            needsRequest = needsRequest
+                            .map(function (option) {
+                                option.typeOptions = options[option
+                                    .value]
+                                        .choices
+                                        .map(function(i) {
+                                            return {
+                                                value: i[0],
+                                                label: i[1]
+                                            };
+                                        });
+                                return option;
+                            });
                         }
-                        else { $log.error(err); }
-                    }
-                    Wait("stop");
-                    defer.resolve(joinOptions());
-                })
-                .error(function (data, status) {
-                    Wait("stop");
-                    defer.reject("options request failed");
-                    ProcessErrors(null, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Getting type options failed'});
-                });
+                        catch(err){
+                            if (!basePath){
+                                $log.error('Cannot retrieve OPTIONS because the basePath parameter is not set on the list with the following fieldset: \n', list);
+                            }
+                            else { $log.error(err); }
+                        }
+                        Wait("stop");
+                        defer.resolve(joinOptions());
+                    })
+                    .error(function (data, status) {
+                        Wait("stop");
+                        defer.reject("options request failed");
+                        ProcessErrors(null, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Getting type options failed'});
+                    });
+            }
+
         } else {
             Wait("stop");
             defer.resolve(joinOptions());

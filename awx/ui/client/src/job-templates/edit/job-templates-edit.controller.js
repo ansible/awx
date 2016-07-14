@@ -441,31 +441,40 @@ export default
                                 }
                             });
                     };
+                    if($state.params.id !== "null"){
+                        Rest.setUrl(defaultUrl + $state.params.id +
+                             "/labels");
+                        Rest.get()
+                            .success(function(data) {
+                                if (data.next) {
+                                    getNext(data, data.results, seeMoreResolve);
+                                } else {
+                                    seeMoreResolve.resolve(data.results);
+                                }
 
-                    Rest.setUrl(defaultUrl + $state.params.id +
-                         "/labels");
-                    Rest.get()
-                        .success(function(data) {
-                            if (data.next) {
-                                getNext(data, data.results, seeMoreResolve);
-                            } else {
-                                seeMoreResolve.resolve(data.results);
-                            }
-
-                            seeMoreResolve.promise.then(function (labels) {
-                                $scope.$emit("choicesReady");
-                                var opts = labels
-                                    .map(i => ({id: i.id + "",
-                                        test: i.name}));
-                                CreateSelect2({
-                                    element:'#job_templates_labels',
-                                    multiple: true,
-                                    addNew: true,
-                                    opts: opts
+                                seeMoreResolve.promise.then(function (labels) {
+                                    $scope.$emit("choicesReady");
+                                    var opts = labels
+                                        .map(i => ({id: i.id + "",
+                                            test: i.name}));
+                                    CreateSelect2({
+                                        element:'#job_templates_labels',
+                                        multiple: true,
+                                        addNew: true,
+                                        opts: opts
+                                    });
+                                    Wait("stop");
                                 });
-                                Wait("stop");
+                            }).error(function(){
+                                // job template id is null in this case
+                                $scope.$emit("choicesReady");
                             });
-                        });
+                    }
+                    else {
+                        // job template doesn't exist 
+                        $scope.$emit("choicesReady");
+                    }
+
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, {
