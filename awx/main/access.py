@@ -1556,7 +1556,7 @@ class CustomInventoryScriptAccess(BaseAccess):
         return self.user in org.admin_role
 
     @check_superuser
-    def can_admin(self, obj):
+    def can_admin(self, obj, data=None):
         return self.user in obj.admin_role
 
     @check_superuser
