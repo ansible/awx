@@ -39,6 +39,12 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
         }
     });
 
+    // Unbind $rootScope socket event binding(s) so that they don't get triggered
+    // in another instance of this controller
+    $scope.$on('$destroy', function() {
+        $scope.removeJobStatusChange();
+    });
+
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
     $scope.parseType = 'yaml';
 
