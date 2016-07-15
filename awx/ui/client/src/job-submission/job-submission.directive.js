@@ -89,6 +89,12 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                 }
             };
 
+            scope.$on("$stateChangeStart", function() {
+                scope.$evalAsync(function( scope ) {
+                    scope.clearDialog();
+                });
+            });
+
             scope.init();
 
         }
