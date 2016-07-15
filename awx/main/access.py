@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
+from rest_framework.exceptions import ParseError, PermissionDenied, APIException
 
 # AWX
 from awx.main.utils import * # noqa
@@ -25,7 +25,7 @@ from awx.main.conf import tower_settings
 
 __all__ = ['get_user_queryset', 'check_user_access',
            'user_accessible_objects',
-           'user_admin_role',]
+           'user_admin_role', 'StateConflict',]
 
 PERMISSION_TYPES = [
     PERM_INVENTORY_ADMIN,
@@ -57,6 +57,9 @@ access_registry = {
     # ...
 }
 
+class StateConflict(APIException):
+    status_code = 409
+    default_detail = 'Object state is not correct'
 
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
@@ -315,11 +318,15 @@ class OrganizationAccess(BaseAccess):
         if not is_change_possible:
             return False
         active_jobs = []
-        active_jobs.extend(Job.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
-        active_jobs.extend(ProjectUpdate.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES))
-        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend([dict(type="job", id=o.id)
+                            for o in Job.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="project_update", id=o.id)
+                            for o in ProjectUpdate.objects.filter(project__in=obj.projects.all(), status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="inventory_update", id=o.id)
+                            for o in InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
         return True
 
 class InventoryAccess(BaseAccess):
@@ -387,10 +394,13 @@ class InventoryAccess(BaseAccess):
         if not is_can_admin:
             return False
         active_jobs = []
-        active_jobs.extend(Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES))
-        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend([dict(type="job", id=o.id)
+                           for o in Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="inventory_update", id=o.id)
+                            for o in InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
         return True
 
     def can_run_ad_hoc_commands(self, obj):
@@ -508,9 +518,11 @@ class GroupAccess(BaseAccess):
         if not is_delete_allowed:
             return False
         active_jobs = []
-        active_jobs.extend(InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES))
+        active_jobs.extend([dict(type="inventory_update", id=o.id)
+                            for o in InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise ValidationError("Delete not allowed while there are jobs running. Number of jobs {}".format(len(active_jobs)))
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
         return True
 
 class InventorySourceAccess(BaseAccess):
@@ -765,10 +777,13 @@ class ProjectAccess(BaseAccess):
         if not is_change_allowed:
             return False
         active_jobs = []
-        active_jobs.extend(Job.objects.filter(project=obj, status__in=ACTIVE_STATES))
-        active_jobs.extend(ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES))
+        active_jobs.extend([dict(type="job", id=o.id)
+                            for o in Job.objects.filter(project=obj, status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="project_update", id=o.id)
+                            for o in ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
         return True
 
     @check_superuser
@@ -989,14 +1004,15 @@ class JobTemplateAccess(BaseAccess):
 
         return True
 
-    @check_superuser
     def can_delete(self, obj):
         is_delete_allowed = self.user in obj.admin_role
         if not is_delete_allowed:
             return False
-        active_jobs = obj.jobs.filter(status__in=ACTIVE_STATES)
+        active_jobs = [dict(type="job", id=o.id)
+                       for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
-            raise ValidationError("Delete not allowed while there are jobs running.  Number of jobs {}".format(len(active_jobs)))
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
         return True
 
 class JobAccess(BaseAccess):

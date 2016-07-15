@@ -2184,14 +2184,6 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
 
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(JobTemplate, 'delete', obj)
-        if not can_delete:
-            raise PermissionDenied("Cannot delete job template.")
-        return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
-
-
 class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     model = JobTemplate
