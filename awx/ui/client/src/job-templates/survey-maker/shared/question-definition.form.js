@@ -280,7 +280,7 @@ export default
                 '<div>'+
                 '<div class="input-group">'+
                 '<span class="input-group-btn">'+
-                '<button class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">SHOW</button>'+
+                '<button type="button" class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-original-title="" title="">SHOW</button>'+
                 '</span>'+
                 '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput" autocomplete="false">'+
                 '</div>'+

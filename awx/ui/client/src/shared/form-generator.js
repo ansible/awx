@@ -922,7 +922,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button class='btn btn-default show_input_button Form-passwordButton' ";
+                            html += "<button type='button' class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
                             html += "tabindex='-1' ";
