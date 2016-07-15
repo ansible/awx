@@ -344,6 +344,6 @@ def test_disallow_template_delete_on_running_job(job_template_factory, delete, a
                                    project='p',
                                    inventory='i',
                                    organization='o')
-    j = objects.job_template.create_unified_job()
+    objects.job_template.create_unified_job()
     delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
     assert delete_response.status_code == 409
