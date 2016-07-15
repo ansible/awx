@@ -201,7 +201,7 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
         rel.remove(user)
 
 
-@receiver(populate_user)
+@receiver(populate_user, dispatch_uid='populate-ldap-user')
 def on_populate_user(sender, **kwargs):
     '''
     Handle signal from LDAP backend to populate the user object.  Update user
