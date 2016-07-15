@@ -1,14 +1,31 @@
 # Python
 import pytest
 import mock
+from mock import PropertyMock
 import json
 
 # AWX
-from awx.api.serializers import JobTemplateSerializer, JobSerializer, JobOptionsSerializer
-from awx.main.models import Label, Job
+from awx.api.serializers import (
+    JobTemplateSerializer,
+    JobSerializer,
+    JobOptionsSerializer,
+    CustomInventoryScriptSerializer,
+)
+from awx.main.models import (
+    Label,
+    Job,
+    CustomInventoryScript,
+    User,
+)
 
 #DRF
+from rest_framework.request import Request
 from rest_framework import serializers
+from rest_framework.test import (
+    APIRequestFactory,
+    force_authenticate,
+)
+
 
 def mock_JT_resource_data():
     return ({}, [])
@@ -189,3 +206,30 @@ class TestJobTemplateSerializerValidation(object):
         for ev in self.bad_extra_vars:
             with pytest.raises(serializers.ValidationError):
                 serializer.validate_extra_vars(ev)
+
+class TestCustomInventoryScriptSerializer(object):
+
+    @pytest.mark.parametrize("superuser,sysaudit,admin_role,value",
+                             ((True, False, False, '#!/python'),
+                              (False, True, False, '#!/python'),
+                              (False, False, True, '#!/python'),
+                              (False, False, False, None)))
+    def test_to_representation_orphan(self, superuser, sysaudit, admin_role, value):
+        with mock.patch.object(CustomInventoryScriptSerializer, 'get_summary_fields', return_value={}):
+                User.add_to_class('is_system_auditor', sysaudit)
+                user = User(username="root", is_superuser=superuser)
+                roles = [user] if admin_role else []
+
+                with mock.patch('awx.main.models.CustomInventoryScript.admin_role', new_callable=PropertyMock, return_value=roles):
+                    cis = CustomInventoryScript(pk=1, script='#!/python')
+                    serializer = CustomInventoryScriptSerializer()
+
+                    factory = APIRequestFactory()
+                    wsgi_request = factory.post("/inventory_script/1", {'id':1}, format="json")
+                    force_authenticate(wsgi_request, user)
+
+                    request = Request(wsgi_request)
+                    serializer.context['request'] = request
+
+                    representation = serializer.to_representation(cis)
+                    assert representation['script'] == value
