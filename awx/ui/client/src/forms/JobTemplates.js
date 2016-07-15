@@ -281,7 +281,7 @@ export default
                     column: 2,
                     awPopOver: "callback_help",
                     awPopOverWatch: "callback_help",
-                    dataPlacement: 'right',
+                    dataPlacement: 'top',
                     dataTitle: 'Provisioning Callback URL',
                     dataContainer: "body"
                 },
