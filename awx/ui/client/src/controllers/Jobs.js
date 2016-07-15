@@ -85,9 +85,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         });
 
         $scope.refreshJobs = function() {
-            jobs_scope.search('queued_job');
-            jobs_scope.search('running_job');
-            jobs_scope.search('completed_job');
+            jobs_scope.search('all_job');
             scheduled_scope.search('schedule');
         };
 
