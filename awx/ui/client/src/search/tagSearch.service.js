@@ -85,7 +85,7 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         if (needsRequest.length) {
             // make the options request to reutrn the typeOptions
             var url = needsRequest[0].basePath ? GetBasePath(needsRequest[0].basePath) : basePath;
-            if(url.indexOf('null') === 0 ){
+            if(url.indexOf('null') === -1 ){
                 Rest.setUrl(url);
                 Rest.options()
                     .success(function (data) {
