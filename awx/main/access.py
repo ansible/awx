@@ -1005,7 +1005,7 @@ class JobTemplateAccess(BaseAccess):
         return True
 
     def can_delete(self, obj):
-        is_delete_allowed = self.user in obj.admin_role
+        is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
         if not is_delete_allowed:
             return False
         active_jobs = [dict(type="job", id=o.id)
