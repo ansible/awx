@@ -47,6 +47,13 @@ export default
                         });
                     };
 
+                    scope.seeLess = function() {
+                        // Trim the labels array back down to 10 items
+                        scope.labels = scope.labels.slice(0, 10);
+                        // Re-set the seeMoreInteractive flag so that the "See More" will be displayed
+                        scope.seeMoreInactive = true;
+                    };
+
                     scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
                         var action = function () {
                             $('#prompt-modal').modal('hide');
