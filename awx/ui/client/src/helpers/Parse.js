@@ -25,7 +25,8 @@ export default
                     fld = (params.variable) ? params.variable : 'variables',
                     pfld = (params.parse_variable) ? params.parse_variable : 'parseType',
                     onReady = params.onReady,
-                    onChange = params.onChange;
+                    onChange = params.onChange,
+                    readOnly = params.readOnly;
 
                 function removeField(fld) {
                     //set our model to the last change in CodeMirror and then destroy CodeMirror
@@ -35,8 +36,7 @@ export default
 
                 function createField(onChange, onReady, fld) {
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
-
-                    scope[fld + 'codeMirror'] = AngularCodeMirror();
+                    scope[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
                     scope[fld + 'codeMirror'].addModes($AnsibleConfig.variable_edit_modes);
                     scope[fld + 'codeMirror'].showTextArea({
                         scope: scope,
