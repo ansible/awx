@@ -176,7 +176,7 @@
                         <div ng-if="question.type === 'password'">
                             <div class="input-group">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default show_input_button JobSubmission-passwordButton" id="survey_question_{{$index}}_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#survey_question_' + $index)" data-original-title="" title="">Show</button>
+                                    <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="survey_question_{{$index}}_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#survey_question_' + $index)" data-original-title="" title="">Show</button>
                                 </span>
                                 <input id="survey_question_{{$index}}" type="password" ng-model="question.model" name="survey_question_{{$index}}" ng-required="question.required" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" autocomplete="false">
                             </div>
