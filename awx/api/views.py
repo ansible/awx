@@ -201,7 +201,7 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser or request.user.is_system_auditor)
         if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
             license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
 
@@ -225,7 +225,10 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, 'admin_role').exists():
+        if request.user.is_superuser \
+                or request.user.is_system_auditor \
+                or Organization.accessible_objects(request.user, 'admin_role').exists() \
+                or Organization.accessible_objects(request.user, 'auditor_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
