@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError, PermissionDenied, APIException
+from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 
 # AWX
 from awx.main.utils import * # noqa
@@ -57,9 +57,8 @@ access_registry = {
     # ...
 }
 
-class StateConflict(APIException):
+class StateConflict(ValidationError):
     status_code = 409
-    default_detail = 'Object state is not correct'
 
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
