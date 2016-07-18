@@ -107,11 +107,6 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    subCheckbox: {
-                        variable: 'secret_key_ask',
-                        text: 'Ask at runtime?',
-                        ngChange: 'ask(\'secret_key\', \'undefined\')'
-                    },
                     clear: false,
                     hasShowInputButton: true,
                     apiField: 'password',
