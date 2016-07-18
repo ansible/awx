@@ -20,7 +20,8 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
     var jobs_scope, scheduled_scope,
         choicesCount = 0,
         listCount = 0,
-        api_complete = false;
+        api_complete = false,
+        scheduledJobsList = _.cloneDeep(ScheduledJobsList);
 
     $scope.jobsSelected = true;
 
@@ -73,13 +74,14 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
 
 
         scheduled_scope = $scope.$new(true);
+        scheduledJobsList.basePath = GetBasePath('schedules') + '?next_run__isnull=false';
         LoadSchedulesScope({
             parent_scope: $scope,
             scope: scheduled_scope,
-            list: ScheduledJobsList,
+            list: scheduledJobsList,
             id: 'scheduled-jobs-tab',
             searchSize: 'col-lg-4 col-md-4 col-sm-4 col-xs-12',
-            url: GetBasePath('schedules') + '?next_run__isnull=false'
+            url: scheduledJobsList.basePath
         });
 
         $scope.refreshJobs = function() {
