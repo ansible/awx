@@ -43,13 +43,12 @@ angular.module('AngularCodeMirrorModule', [])
                         model = params.model,
                         mode = params.mode,
                         onReady = params.onReady,
-                        onChange = params.onChange,
                         height = 0;
 
                     self.element = $(element);
-
+                    
                     // We don't want to touch the original textarea. Angular likely has a model and other listeners
-                    // attached to it. In prior iterations attaching CodeMirror to it seemed to go bad, so we'll insert a
+                    // attached to it. In prior iterations attaching CodeMirror to it seemed to go bad, so we'll insert a 
                     // <div> under it, hide the textarea and let CodeMirror attach to the <div>.
                     if ($('#cm-' + model + '-container').length > 0) {
                         $('#cm-' + model + '-container').empty();
@@ -57,18 +56,19 @@ angular.module('AngularCodeMirrorModule', [])
                     else {
                         self.element.after("<div id=\"cm-" + model + "-container\"></div>");
                     }
-
+                    
                     // Calc the height of the text area- our CodeMirror should match.
                     height += self.element.attr('rows') * parseInt($(self.element).css('line-height').replace(/px/,''),10);
                     height += parseInt(self.element.css('padding-top').replace(/px|%/,''),10) +
                         parseInt(self.element.css('padding-bottom').replace(/px|%/,''),10);
                     height += 2;  //for the border
+                    
                     // hide
                     self.element.hide();
 
                     // Initialize CodeMirror
                     self.modes[mode].value = scope[model];
-
+                    
                     // if readOnly is passed to AngularCodeMirror, set the
                     // options for all modes to be readOnly
                     if (readOnly) {
@@ -76,6 +76,7 @@ angular.module('AngularCodeMirrorModule', [])
                             self.modes[val].readOnly = true;
                         });
                     }
+                    
                     self.myCodeMirror = CodeMirror(document.getElementById('cm-' + model + '-container'), self.modes[mode]);
 
                     // Adjust the height
@@ -92,14 +93,7 @@ angular.module('AngularCodeMirrorModule', [])
 
                     // Update the model on change
                     self.myCodeMirror.on('change', function() {
-                        setTimeout(function() {
-                            scope.$apply(function(){
-                                scope[model] = self.myCodeMirror.getValue();
-                                if (onChange) {
-                                    onChange();
-                                }
-                            });
-                        }, 500);
+                        setTimeout(function() { scope.$apply(function(){ scope[model] = self.myCodeMirror.getValue(); }); }, 500);
                     });
                 };
                
